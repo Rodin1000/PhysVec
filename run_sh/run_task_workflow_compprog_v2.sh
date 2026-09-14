@@ -1,10 +1,10 @@
 #!/bin/bash
 # task_workflow_compprog_v2: author + (unittest + integtest + postprocess + coderepair) loop
 set -e
-export CUDA_VISIBLE_DEVICES=7
+export CUDA_VISIBLE_DEVICES=6
 
 # --- set tags ---
-tag1="BATCH5_10000token_13_1_13"  # author_format_judge
+tag1="TESTAPI"  # author_format_judge
 
 # --- set parameters ---
 topic="dmrg"
@@ -14,7 +14,7 @@ isall="false"
 task_list="task_dmrg_3_2"
 
 # Model parameters (author step)
-model_author="gpt-5.1-2025-11-13"
+model_author="gemini-2.5-flash-nothinking"
 model_author_judge="gemini-3-flash-preview"
 model_step_author_role_planner="$model_author"
 model_step_author_role_coder="$model_author"
