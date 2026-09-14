@@ -1,0 +1,51 @@
+[... end of page 752 ...]
+minimizedwithrespecttoallotherdegreesoffreedom. Theeffectiveforceontheclimbingimage
+doesnotincludeanyspringforceandthedensityofimagesthenbecomesdifferentoneithersideoftheclimbing
+image. Aslongasthetangentestimateisaccurateenoughtheclimbingimagewillconvergerigorouslytothepoint
+ofhighestenergyalongthepath. AnillustrationofhowtheclimbingimageNEBmethodworksisshowninFig.
+7.22forasimpletwo-dimensionalenergyfunction.
+730 Chapter7. DetailedDocumentation
+
+--- Page 753 ---
+ORCAManual,Release6.0.0
+Fig. 7.22: Illustration of how the CI-NEB method works on a two-dimensional Müller-Brown energy surface,
+𝐸(𝑥,𝑦).[539]Thecalculationisstartedfromalinearinterpolationbetweenthereactant(R)andproduct(P)energy
+minima,using𝑀 = 10. Theimagesaredisplacedintheorthogonaldirectiontothepath(redcurves),untilthey
+converge to the minimum energy path (white dashed curve). The climbing image accurately locates the higher
+energyfirstordersaddlepointalongthepath(denotedbySP).Theoptimizationprofileisshownasaninset. In
+suchaplottheinterpolatedenergyalongthepathisplottedasafunctionofdisplacement,foreach(orselected)
+optimizationstep. ThefigureistakenfromRef. [3]
+It can be useful to start the climbing image after the magnitude of the atomic forces perpendicular to the path
+drops below a given user supplied threshold (keyword: tol_turn_on_ci). Then, the highest energy image along
+thecurrentpathisconvertedtoaclimbingimage. Itisusuallymostefficienttoinitiatetheclimbingimageearly
+onorevenfromthestartoftheNEBcalculation. ThisapplieswhenusingtheVPOoptimizationmethod. ForL-
+BFGSitisrecommendedtostartCI-NEBwhenthepathhaspartiallyconvergedtotheMEP,e.g.,around0.01-0.02
+Eh/Bohr. IftherearetwoormoremaximaintheenergyalongtheMEPitispossiblethattheimagenearthehighest
+maximumisnotchosenastheclimbingimageatanearlystageoftheNEBcalculation. Then,lateronthechoice
+of the climbing image can be switched automatically. Also, for barrierless reactions, the climbing image is not
+turnedon. Theatomcoordinatesoftheclimbingimage(inaCI-NEBcalculation)orthehighestenergyimage(in
+anNEBcalculation)arewrittentofiles‘_NEB-CI_converged.xyz’and‘_NEB-HEI_converged.xyz’,respectively,
+whenacalculationhassuccessfullycompleted.
+TheconvergenceofaCI-NEBcalculationcaneitherbegaugedbymonitoringtheforcesonallimagesoronlyon
+the climbing image, (keyword: convtype). The latter option may be used when the objective of the calculation
+is to locate the highest energy saddle point connecting the reactant and product states and can save significant
+computationaleffort. Togaugeforconvergenceontheclimbingimage,boththeroot-mean-squareandmagnitude
+ofthemaximum(Cartesian)componentoftheatomforcearemonitored,i.e. max(|Fci|),RMS(Fci). Whengauging
+theconvergenceofallimagesinaCI-NEBcalculationitistypicallyacceptabletoconvergetheregularimagesmore
+looselythantheclimbingimage. Bydefault,thetolerancefortheregularimagesisafactorof10largerthanthatof
+theclimbingimage. Thisscalingofthetolerancesisaparameterthatcanbesetbytheuser(keyword: tol_scale).
+Typicallyforanacceptableconvergencetothesaddlepoint,thetolerancethresholdforthemaximummagnitude
+7.29. NudgedElasticBandMethod 731
+
+[... start of page 754 ...]
+ORCAManual,Release6.0.0
+ofanatomicforcecomponentoftheclimbingimagecanbesetto5·10−4Eh/Bohr.
+7.29.4 Generation of the initial path
+One of the most important aspects of any NEB or CI-NEB calculation is the generation of the initial path
+between the reactant and product energy minima (keyword: interpolation. The recommended method is
+the image-dependent pair potential (IDPP) method [806]. An alternative and simpler method is linear inter-
+polation in Cartesian coordinates. In either case, the user should always inspect the initial path (see file:
+basename_initial_path_trj.xyz)tomakecertainthatitisacceptable.
+By default, the endpoint structures are scanned for covalently linked fragments. If two fragments are detected
+in either of the endpoint structures, the structure is automatically prepared such that the distance between the
+fragmentsis

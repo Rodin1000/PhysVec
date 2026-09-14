@@ -1,0 +1,61 @@
+[... end of page 382 ...]
+rs
+• CMAPterms(cross-termsforbackbone,currentlynotused)
+Individualparameters,likee.g. atomiccharge,equilibriumbondlengthandforceconstant,...,canbeconveniently
+modifieddirectlywithintheORCAForcefieldFile.
+360 Chapter6. RunningTypicalCalculations
+
+--- Page 383 ---
+ORCAManual,Release6.0.0
+HowtogeneratetheORCAForcefieldFile
+TheeasiestwaytogenerateaORCAFF.prmsfileiscurrentlytoconvertfrompsf(proteinstructurefile)files. Psf
+filesarespecifictotheCHARMMforcefieldanditsapplicationviaNAMD.Psffilesforaspecificproteinsystem
+caneasilybegeneratedbythepopularmolecularvisualizationprogramVMDanditsextensionQwikMD,butalso
+with other extensions in the VMD program (e.g. psfgen or fftk). The psf file contains information on the atom
+types and on the bonded interactions of all atoms. It does, however, not contain the parameters that belong to
+theseinteractions. Theseparameteresarestoredinspecificfiles,oftenendingwithprm,butalsoparorstr. The
+CHARMMparameterfilescomewithVMDinstallation,canbedirectlydownloaded,orcanbegeneratedwiththe
+VMDextensionfftk(forcefieldtoolkit).
+Once a ORCAFF.prms file is available, it can be manipulated, i.e. split up into several parts for individual
+molecules,newORCAFF.prmsfilescanbegeneratedfornon-standardmolecules,andindividualORCAFF.prms
+filescanbemerged,asdescribedinthefollowing:
+ConversionfrompsforprmtopfilestoORCAFF.prms: convff
+Theorca_mmmodulecanconvertpsfandprmfiles(CHARMM),prmtopfiles(AMBER)orxmlfiles(openforce
+fieldfromtheopenfftoolkit,compatibletoAMBER)totheORCAFFfilewiththe-convffflag. Inputoptionsare:
+orca_mm -convff <optional:-verbose> <FFInput> <PSFFILE> <PRMFILE(S)>
+Keywords:
+<FFInput> = -CHARMM
+<FFInput> = -AMBER
+<FFInput> = -OPENMM
+For CHARMM topologies, when a psf file is available for a system with standard residues, prepared by e.g.
+QwikMD,psfgenorothervmdtools,theconversionneedsthepsfplustheprmfilesasinput:
+CHARMM example:
+orca_mm -convff -CHARMM 1C1E.psf par_all36_prot.prm toppar_water_ions_namd.str
+ORCAcanalsoconvertAmbertopologiestotheORCAFFfile. Here,onlytheprmtopfileisrequired:
+AMBER example:
+orca_mm -convff -AMBER complex.prmtop
+ORCAcanalsoconvertxmlfilesfromtheopenfftoolkit(AMBERcompatible)totheORCAFFfile. Here,only
+thexmlfileisrequired:
+OPENFF example:
+orca_mm -convff -OPENMM complex.xml
+Divideaforcefieldfile: splitff
+IfaORCAFF.prmsfileshouldbesubdividedintoseveralfiles,e.g. ifthepsffilestemsfromQWikMDwithnon-
+standardmoleculesincluded,e.g. aligand. Inthatcasefirsttheparametersoftheligandaresplitfromtheremaining
+system,nexttheligandneedstobeprotonated,thenasimpleORCAFF.prmsfileisgeneratedviaorca_mm’smakeff
+option,andfinallytheligand’snewORCAFF.prmsfileisaddedtothemainsystemsfileviatheabovedescribed
+mergeffoption. Notethatthefilecanonlybesplitintofilesfornonbondedfragments.
+Inputoptions:
+orca_mm -splitff <optional:-verbose> <ORCAFFFILE> <A1> <optional:A2> ...
+Keywords:
+(continuesonnextpage)
+6.15. ORCAMMModule 361
+
+[... start of page 384 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+<ORCAFFFILE> = ORCA forcefield file.
+<A1> = Atom number of first atom of fragment that should belong
+to a new ORCA forcefield file
+<A2> = Atom number of first atom of fragment that should belong
+to a new ORCA forcefield file
+... = More split atoms

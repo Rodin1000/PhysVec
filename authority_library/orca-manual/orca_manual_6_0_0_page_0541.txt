@@ -1,0 +1,60 @@
+[... end of page 540 ...]
+ # initial trust radius
+AlphaMin 0.1 # lower bound of gradient scaling parameter
+AlphaMax 1000. # upper bound of gradient scaling parameter
+Randomize true # add white noise to Davidson start vectors
+PseudoRand false # use pseudo random numbers for comparibility
+MaxNoise 1.e-2 # maximum random number magnitude
+OrbUpdate Taylor # orbital update algorithm (TAYLOR or CAYLEY)
+InactiveMOs Canonical # CANONICAL or NOTSET
+Precond Diag # DIAG, FULL, or NONE
+PreconMaxRed 250 # maximum dimension of FULL Hessian for preconditioning
+(continuesonnextpage)
+518 Chapter7. DetailedDocumentation
+
+--- Page 541 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+end
+OBS.: ThemaximumnumberofmacroiterationsisdefinedbyMAXITERunderthe%SCFblock.
+7.7.8 Finite Temperature HF/KS-DFT
+AfinitetemperaturecanbeusedtoapplyaFermi-likeoccupationnumbersmearingovertheorbitalsofthesystem,
+whichmaysometimeshelptogetconvergenceoftheSCFequationsinnearhopelesscases. Throughthesmearing,
+theelectronsaredistributedaccordingtoFermistatisticsamongtheavailableorbitals. The“chemicalpotential”is
+foundthroughtheconditionthatthetotalnumberofelectronsremainscorrect. Gradientscanbecomputedinthe
+presenceofoccupationnumbersmearing.
+%scf SmearTemp 5000 # (cid:96)(cid:96)temperature'' in Kelvin
+end
+Note:
+• FinitetemperatureSCF(fractionaloccupationnumbersorFODanalysis,seesectionsFractionalOccupation
+Numbers and Fractional Occupation Number Weighted Electron Density (FOD), respectively) cannot be
+usedtogetherwiththeCNVRicoorSOSCFmethods.
+FractionalOccupationNumbers
+Onlyaverybasicimplementationoffractionaloccupationnumbersispresentlyprovided. Itismeanttodealwith
+orbitally degenerate states in the UHF/UKS method. Mainly it was implemented to avoid symmetry breaking
+in DFT calculations on orbitally degenerate molecules and atoms. The program checks the orbital energies of
+theinitialguessorbitals, findsdegeneratesetsandaveragestheoccupationnumbersamongthem. Currentlythe
+criterionfordegenerateorbitalsis10−3Eh. Thefractionaloccupationnumberoptionisinvokedby:
+%scf
+FracOcc true
+end
+Clearly,thepoweroffractionaloccupationnumbersgoesfarbeyondwhatispresentlyimplementedintheprogram
+andfuturereleaseswilllikelymakemoreuseofthem. Theprogramprintsawarningwheneveritusesfractional
+occupationnumbers. Thefractionallyoccupiedorbitalsshouldbecheckedtoensuretheyareactuallytheintended
+ones.
+Note:
+• UsingGuessMode = CMatrixwillcauseproblemsbecausetherearenoorbitalenergiesfortheinitialguess
+orbitals. Theprogramwillthenaverageoverallorbitals—whichmakesnosenseatall.
+7.7. SCFConvergence 519
+
+[... start of page 542 ...]
+ORCAManual,Release6.0.0
+FractionalOccupationNumberWeightedElectronDensity(FOD)
+ManyapproximateQCmethodsdonotyieldreliableresultsforsystemswithsignificantstaticelectroncorrelation
+(SEC) but it is often difficult to predict if the system in question suffers from SEC or not. Existing scalar SEC
+diagnostics (e.g., the 𝑇 diagnostic) do not provide any information where the SEC is located in the molecule.
+1
+Furthermore,oftenquiteexpensivecalculationshavetobeperformedfirst(e.g.,CCSD)inordertojudgethereli-
+abilityoftheresultsbasedonasinglenumber. MolecularsystemswithstrongSEC(e.g.covalentbond-breaking,
+biradicals, open-shell transition metal complexes) are usual

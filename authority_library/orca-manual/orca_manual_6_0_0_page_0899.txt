@@ -1,0 +1,116 @@
+[... end of page 898 ...]
+ity
+Tr(𝜌𝑡)
+𝜌 =𝜌𝑡 + 𝜌𝑠 , (7.251)
+𝑎𝑏 𝑎𝑏 Tr(𝜌𝑠) 𝑎𝑏
+inwhich,thecontribution𝜌𝑡,fromthefirstorder𝑇 amplitudes,isgivenby
+2
+𝜌𝑡 𝑎𝑏 = ∑︁ 𝑡𝑎 𝑤 𝑐 𝑘 (1) (︁ 2𝑡𝑏 𝑤 𝑐 𝑘 (1) −𝑡𝑐 𝑤 𝑏 𝑘 (1) )︁ + ∑︁ 𝑡𝑎 𝑖′ 𝑐 𝑤 (1) (︁ 2𝑡𝑏 𝑖′ 𝑐 𝑤 (1) −𝑡𝑐 𝑖′ 𝑏 𝑤 (1) )︁ , (7.252)
+𝑘,𝑤,𝑐 𝑖′,𝑤,𝑐
+andthecontribution𝜌𝑠,fromthefirstorder𝑆 amplitudes,isgivenby
+2
+𝜌𝑠 𝑎𝑏 = ∑︁ 𝑠𝑎 𝑖′ 𝑤 𝑘 (1) (︁ 2𝑠𝑏 𝑖′ 𝑤 𝑘 (1) −𝑠𝑏 𝑘 𝑤 𝑖′ (1) )︁ + ∑︁ 𝑠𝑎 𝑥 𝑤 𝑖′ (1) (︁ 2𝑠𝑏 𝑥 𝑤 𝑖′ (1) −𝑠𝑏 𝑖′ 𝑤 𝑥 (1) )︁ . (7.253)
+𝑖′,𝑘,𝑤 𝑖′,𝑤,𝑥
+876 Chapter7. DetailedDocumentation
+
+--- Page 899 ---
+ORCAManual,Release6.0.0
+Diagonalizationofthecoreorbitalselectiondensity𝐷 andthevirtualorbitalselectiondensity𝜌 thenyields
+𝑖′𝑗′ 𝑎𝑏
+tworespectivesetsofeigenvalues{𝜆 }and{𝜆 }. Wehavefounditusefultocomputetheratios,
+𝑖′ 𝑎
+∑︀𝑛e
+c
+x
+o
+c
+re
+luded
+𝜆
+ℛcore =
+∑︀
+𝑖′
+𝑛
+=
+co
+0
+re 𝜆
+𝑖′ ×100%, (7.254)
+𝑖′=0 𝑖′
+ℛvirt = ∑︀
+∑︀
+𝑛 𝑎=
+𝑛
+e v x ir
+v
+c 0 t l
+i
+u
+rt
+ded
+𝜆
+𝜆 𝑎 ×100%, (7.255)
+𝑎=0 𝑎
+ofthesumoftheexcludedeigenvaluestothesumoveralleigenvalues. Theorbitalselectioninthecoreandvirtual
+subspacesisthenbaseduponthevaluesoftheseratios,aswillbediscussedbelow.
+TheorbitalselectionprocedureisactivatedbyaddingthekeywordOrbitalSelectiontothefirstlineofinput,
+e.g.
+! MR-EOM def2-TZVPP VeryTightSCF OrbitalSelection
+TherearetwothresholdparametersCoreThreshandVirtualThresh,whichareusedtodeterminewhichinactive
+coreandvirtualorbitalsaretobediscardedintheorbitalselectionprocedure, respectively. Namely, allinactive
+core orbitals for which ℛcore < CoreThresh (i.e. ℛcore as defined in Eq. (7.254)) are discarded and all virtual
+orbitalssatisfyingtheconditionℛvirt <VirtualThresh(i.e.ℛvirt asdefinedinEq.(7.255))arediscarded. The
+defaultvaluesofthesethresholdsareCoreThresh = 0.0(nocoreorbitalselection)andVirtualThresh = 1.0.
+However,thevaluesoftheseparameterscaneasilybechangedbyredefiningtheminthe%mdciblock:
+%mdci
+CoreThresh 1.0
+VirtualThresh 1.0
+end
+Letusconsiderthecalculationoftheprevioussection(AProjection/SingularPTSchemetoOvercomeConvergence
+IssuesintheTAmplitudeIterations)onferrocene,withtheorbitalselectionprocedureactivated(usingthedefault
+thresholds):
+!MR-EOM def2-SVP OrbitalSelection
+%casscf
+nel 6
+norb 5
+mult 1,3
+nroots 5,6
+end
+%mdci
+DoSingularPT true
+SingularPTThresh 0.05
+MaxIter 50
+end
+%mrci
+newblock 1 *
+nroots 18
+refs cas(6,5) end
+end
+newblock 3 *
+nroots 10
+refs cas(6,5) end
+end
+end
+* xyz 0 1
+Fe 0.000000 0.000000 0.000000
+C 0.000000 1.220080 1.650626
+(continuesonnextpage)
+7.43. MultireferenceEquationofMotionCoupled-Cluster(MR-EOM-CC)Theory 877
+
+[... start of page 900 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+C -1.160365 0.377025 1.650626
+C -0.717145 -0.987065 1.650626
+C 0.717145 -0.987065 1.650626
+C 1.160365 0.377025 1.650626
+C 0.000000 1.220080 -1.650626
+C 1.160365 0.377025 -1.650626
+C 0.717145 -0.987065 -1.650626
+C -0.717145 -0.987065 -1.650626
+C -1.160365 0.377025 -1.650626
+H 0.000000 2.306051 1.635648
+H -2.193184 0.712609 1.635648
+H -1.355463 -1.865634 1.635648
+H 1.355463 -1.865634 1.635648
+H 2.193

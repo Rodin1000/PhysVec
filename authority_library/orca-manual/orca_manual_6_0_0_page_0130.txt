@@ -1,0 +1,80 @@
+[... end of page 129 ...]
+MP2. Toturnthisoption
+off just use !NORI in the simple input (which also turns off the RIJCOSX approximation) or %mp2 RI false
+end. MoreinformationcanbefoundintherelevantsectionsregardingRI-MP2.
+Finally,DLPNO-MP2canbeusedasacomponentofdouble-hybriddensityfunctionals. Inthatcase,a“DLPNO-”
+prefixneedstobeaddedtothefunctionalname,forexampleDLPNO-B2GP-PLYPorDLPNO-DSD-PBEP86. Please
+refertotherelevantmanualsectionsformoreinformationontheDLPNO-MP2method.
+Foreachfunctional,parameterscanbespecifiedexplicitlyintheinputfile,e.g. forRI-DSD-PBEB95withD3BJ:
+! D3BJ
+%method
+Method DFT
+DoMP2 True
+Exchange X_PBE
+Correlation C_B95
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 107
+
+--- Page 130 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+LDAOpt C_PWLDA # specific for B95
+ScalDFX 0.34
+ScalHFX 0.66
+ScalGGAC 0.55
+ScalLDAC 0.55 # must be equal to ScalGGAC
+ScalMP2C 1.00 # for all DSD-DFs
+D3S6 0.61
+D3S8 0
+D3A1 0 # for all DSD-DFs
+D3A2 6.2
+end
+%mp2
+DoSCS True
+RI True
+PS 0.46
+PT 0.09
+end
+InthisversionofORCA,double-hybridDFTisavailableforsinglepoints,geometryoptimizations[619],dipole
+momentsandotherfirstorderproperties,magneticsecondorderproperties(chemicalshifts,g-tensors),aswellas
+fornumericalpolarizabilitiesandfrequencies.
+Therearealsodouble-hybridfunctionals,suchasXYG3and𝜔B97M(2),whichmustbeappliedtoorbitalscon-
+verged with a different functional. This can be accomplished with a two-step calculation using MORead and
+MaxIter=1. Note that because the orbitals are not obtained self-consistently, only single point energies can be
+computedinthisway,i.e. nodensity,gradient,orproperties! Forexample,the𝜔B97M(2)functionalmustbeused
+with𝜔B97M-Vorbitals,[557]whichcanbedonewiththefollowinginput:
+*xyz 0 1
+H 0.0 0.0 0.0
+F 0.0 0.0 0.9
+*
+%compound
+Variable EwB97MV, EwB97M2; # Output variables
+# Step 1: wB97M-V calculation to obtain the orbitals
+New_Step
+! wB97M-V SCNL def2-TZVP
+Step_End
+# Step 2: single iteration with the wB97M(2) functional
+# + MP2 correlation to get the final energy
+Read_MOs 1
+New_Step
+! wB97M(2) SCNL NoFrozenCore def2-TZVP def2-TZVP/C
+%scf
+MaxIter 1
+IgnoreConv 1 # prevent the "not converged" error
+end
+Step_End
+Read EwB97MV = DFT_Total_En[1]; # wB97M-V energy
+Read EwB97M2 = MP2_Total_Energy[2]; # wB97M(2) energy
+End
+108 Chapter6. RunningTypicalCalculations
+
+[... start of page 131 ...]
+ORCAManual,Release6.0.0
+DFTCalculationswithAtom-pairwiseDispersionCorrection
+ItiswellknownthatmanyDFTfunctionalsdonotincludedispersionforces. Itispossibletouseasimpleatom-
+pairwisecorrectiontoaccountforthemajorpartsofthiscontributiontotheenergy[131,321,324,326]. Wehave
+adoptedthecodeandmethoddevelopedbyStefanGrimmeinthisORCAversion. Themethodisparameterizedfor
+manyestablishedfunctionals(e.g. BLYP,BP86,PBE,TPSS,B3LYP,B2PLYP).7 Forthe2010modeltheBecke-
+Johnsondampingversion(! D3BJ)isthedefaultandwillautomaticallybeinvokedbythesimplekeyword! D3.
+Thechargedependentatom-pairwisedispersioncorrection(keyword! D4)isusingtheD4(EEQ)-ATMdispersion
+model[132],otherD4versions,usingtight-bindi

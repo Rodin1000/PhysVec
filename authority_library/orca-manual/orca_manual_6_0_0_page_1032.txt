@@ -1,0 +1,69 @@
+[... end of page 1031 ...]
+the%cpcmblockinput. Theavailableoptionsareasfollows
+%cpcm epsilon 80.0 # Dielectric constant
+refrac 1.0 # Refractive index
+rsolv 1.3 # Solvent probe radius
+rmin 0.5 # Minimal GEPOL sphere radius
+pmin 0.1 # Minimal distance between two surface points
+(continuesonnextpage)
+7.53. ImplicitSolvationModels 1009
+
+--- Page 1032 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+fepstype cpcm # Epsilon function type: cpcm, cosmo
+xfeps 0.0 # X parameter for the feps scaling function
+surfacetype vdw_gaussian # Cavity surface: gepol_ses, gepol_sas
+vdw_gaussian, gepol_ses_gaussian
+ndiv 5 # Maximum depth for recursive sphere generation
+num_leb 302 # Lebedev points for the Gaussian charge scheme
+radius[N] 1.3 # Atomic radius for atomic number N in Angstrom
+AtomRadii(N,1.4) # Atomic radius for the Nth atom in Angstrom
+scale_gauss 1.2 # Scaling factor for the atomic radii in the
+Gaussian charge scheme
+cut_area 0.0 # Cutoff for the area of a surface segment in a.u.
+Only valid for the Gaussian charge scheme
+cut_swf 1e-7 # Cutoff for the switching function
+Only valid for the Gaussian charge scheme
+thresh_h 5.0 # Threshold for the charge density on a hydrogen
+atom in charges/Å^2 (isodensity scheme)
+thresh_noth 5.0 # Threshold for the charge density on non-hydrogen
+atoms in charges/Å^2 (isodensity scheme)
+CPCMccm 0 # Coupled-cluster/C-PCM scheme
+cds_cpcm 0 # Use of the GVDW_nel or GSES_nel scheme
+end
+Regardingtheparametersshownabove,someofthemcanbejustusedwithinagiventypeofcavitysurfaceand
+chargescheme,asitismentionedinsubsectionsUseoftheGaussianChargeScheme,andUseofthePointCharge
+Scheme. ORCA supports two types of solvation charge schemes: (i) the point charge scheme, (ii) the Gaussian
+chargescheme. ThedefaultsolvationschemefromORCA5.0onistheGaussianchargeschemewithavdW-type
+cavity (”surfacetype vdw_gaussian”). Older ORCA versions considered “surfacetype gepol_ses” and
+thepointchargeschemeasdefaults. So,ifonewantstoreproducetheresultsobtainedwithORCAversionsolder
+thanORCA5.0,pleaseusethetag“surfacetype gepol_ses”inthe“%cpcm”block.
+The different charge schemes are described in the subsections Use of the Gaussian Charge Scheme, and Use of
+thePointChargeScheme. TheavailabilityoftheanalyticalgradientandHessianforthedifferentcombinationsof
+chargeschemeandsurfaceisshowninTableTable7.30.
+Table 7.30: Available type of gradients and Hessians within the C-PCM in ORCA. The tag “YES” means that
+the feature is implemented, and “NO” that it isn’t. For clarity, we denote by “*” the default scheme in ORCA
+(surfacetype vdw_gaussian).
+surfacetype Chargetype Gradient Hessian
+Analytical Numerical Analytical Numerical
+gepol_ses Point Yes Yes Yes Yes
+gepol_sas Point Yes Yes Yes Yes
+vdw_gaussian^* Gaussian Yes Yes Yes Yes
+gepol_ses_gaussian Gaussian No Yes No Yes
+Note: IftheuserwantstoturnofftheC-PCM,onehastowritethefollowingtaginthesimpleinput:
+! NOCPCM
+This is needed, for instance, in the context of concatenated calculations using the $new_job feature, where the
+previouscalculationinvolvedsolvation,butonewantstoturnitoffforthenextone.
+1010 Chapter7. DetailedDocumentation
+
+[... start of page 1033 ...]
+ORCAManual,Release6.0.0
+UseoftheGaussianChargeScheme
+TheGaussianchargeschemeavoidstheCoulombsingularitypresentinconventionalpointchargesurfaceelement
+models. Thisapproach,whenappliedtogetherwithaswitchingfunction,resultsinasmoothsolvationpotential
+and, more importantly, on smooth derivatives of this quantity with respect to external perturbations. Then, it is
+highly recommended to adopt this approach within the C-PCM. The Gaussian charge scheme can be used with
+twotypesofsolutecavitysurfaces: (1)ascaledvdWsurface,(2)asolvent-excludedsurface(SES).Toassignthe
+radii for the different atoms we follow the scheme proposed in ref. [494]. That is, we use Bondi radii [114] for
+allelements,exceptforhydrogenwhereweadopt1.1Å.For16

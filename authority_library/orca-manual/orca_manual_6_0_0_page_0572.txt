@@ -1,0 +1,92 @@
+[... end of page 571 ...]
+PNO
+keyword. Conversely,alessaccuratebutfastercalculationcanbeperformedwiththe! LoosePNOkeyword.
+FormoredetailsrefertotableTable7.17.
+• FittingdomainsaredeterminedbymeansoforbitalMullikenpopulationswithathreshold𝑇CutMKN =10−3.
+Thisthresholdresultsinanerrorcontributionthatistypicallyaboutanorderofmagnitudesmallerthanthe
+overalltotalenergydeviationfromRI-MP2.
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 549
+
+--- Page 572 ---
+ORCAManual,Release6.0.0
+• PriortoperformingthelocalMP2calculation,pairsoflocalizedmolecularorbitals𝑖𝑗areprescreenedusing
+anMP2energyestimatewithadipoleapproximation,andthedifferentialoverlapintegralbetweenorbitals
+𝑖and𝑗. Thisprocedurehasbeenchosenconservativelyandleadstominimalerrors.
+• Residual evaluation can be accelerated significantly by neglecting terms with associated Fock matrix ele-
+ments𝐹
+𝑖𝑘
+and𝐹
+𝑘𝑗
+below𝐹Cut =10−5. Errorsresultingfromthisapproximationaretypicallybelow1𝜇E
+h
+andthusnegligible.
+• SparsityoftheMOandPAOcoefficientmatricesinatomicorbitalbasisisexploitedtoaccelerateintegral
+transformationsforlargesystems. Truncationofthecoefficientsiscontrolledbyaparameter𝑇CutC . Neglect
+ofthesecoefficientshastobeperformedverycarefullyinordertoavoiduncontrollableerrors. Thethreshold
+hasbeenchosensoastomaketheerrorsessentiallyvanish.
+• By default, core orbitals are frozen in the MP2 module. However, if core orbitals are subject to an MP2
+treatment, it is necessary to use a tighter PNO cutoff for pairs involving at least one core orbital. For this
+purposecoreorbitalsandvalenceorbitalsarelocalizedseparately. Thecutoffforpairsinvolvingcoreorbitals
+is given by 𝑇CutPNO × 𝑇ScalePNO_Core , where 𝑇ScalePNO_Core = 10−2 by default. For more details refer to
+sectionIncluding(semi)coreorbitalsinthecorrelationtreatment.
+TheUHF-DLPNO-MP2implementationdifferssomewhatfromtheRHFcase,particularlyregardingconstruction
+ofPNOs,asdescribedbelow.
+• AseparatesetofPAOs𝜇˜′ and𝜇˜′ isobtainedforeachspincase.
+𝛼 𝛽
+• For𝛼𝛽 pairs,separatepairdomainsofPAOsneedtobedeterminedforeachspincase. Forexample,the𝛼
+pairdomain[𝑖 𝑗 ] istheunionofthedomains[𝑖 ] and[𝑗 ] . Thelatterdomain[𝑗 ] isdeterminedby
+𝛼 𝛽 𝛼 𝛼 𝛼 𝛽 𝛼 𝛽 𝛼
+evaluatingthespatialdifferentialoverlapbetween𝑗 and𝛼-spinPAOs𝜇˜′ .
+𝛽 𝛼
+• OnesetofPNOsisneededforeachsame-spinpair. Opposite-spinpairsrequireasetof𝛼-PNOsandaset
+of𝛽-PNOs. IntotalthisresultsinfourtypesofPNOsets.
+• Semicanonicalamplitudesareobtainedasfollows,where𝑖,𝑗arespinorbitalsand𝜇˜𝜈˜arenonredundantspin
+PAOs.
+⟨𝑖𝑗||𝜇˜𝜈˜⟩
+𝑇𝑖𝑗 =−
+𝜇˜𝜈˜ 𝜀 +𝜀 −𝐹 −𝐹
+𝜇˜ 𝜈˜ 𝑖𝑖 𝑗𝑗
+Inthesame-spincase⟨𝑖 𝑗 ||𝜇˜ 𝜈˜ ⟩ = ⟨𝑖𝑗|𝜇˜𝜈˜⟩−⟨𝑖𝑗|𝜈˜𝜇˜⟩,whileintheopposite-spincase⟨𝑖 𝑗 ||𝜇˜ 𝜈˜ ⟩ =
+𝛼 𝛼 𝛼 𝛼 𝛼 𝛽 𝛼 𝛽
+⟨𝑖𝑗|𝜇˜𝜈˜⟩.
+• Foropposite-spinpairs,𝛼-PNOsand𝛽-PNOsareobtainedfromdiagonalisationofT𝑖𝑗T𝑖𝑗† andT𝑖𝑗†T𝑖𝑗,
+respectively. Forsame-spinpairsthepairdensityissymmetricandonlyonesetofPNOsisneeded. PNOs
+arediscardedwhenevertheabsolutevalueoftheirnaturaloccupationnumberisbelowthethreshold𝑇CutPNO .
+• Thefollowingresidualequationsneedtobesolvedforthecases𝑅𝑖𝛼𝑗𝛼,𝑅 𝑖𝛽𝑗𝛽 and𝑅 𝑖𝛼𝑗𝛽:
+𝑎˜𝛼 ˜𝑏𝛼 𝑎˜𝛽 ˜𝑏𝛽 𝑎˜𝛼 ˜𝑏𝛽
+𝑅𝑖𝜎𝑗𝜏 = ⟨ 𝑖𝑗 ⃒ ⃒ ⃒ ⃒𝑎˜˜𝑏 ⟩ + (︀ 𝜀 +𝜀 −𝐹 −𝐹 )︀ 𝑇𝑖𝑗
+𝑎˜𝜎 ˜𝑏𝜏 ⃒⃒ 𝑎˜ ˜𝑏 𝑖𝑖 𝑗𝑗 𝑎˜˜𝑏
+∑︁ ∑︁ ∑︁ ∑︁
+− 𝐹 𝑆𝑖𝑗,𝑘𝑗𝑇𝑘𝑗𝑆𝑘𝑗,𝑖𝑗 − 𝐹 𝑆𝑖𝑗,𝑖𝑘𝑇𝑖𝑘𝑆𝑖𝑘,𝑖𝑗 =0
+𝑖𝑘 𝑎˜𝑐˜ 𝑐˜𝑑˜ 𝑑˜˜𝑏 𝑘𝑗 𝑎˜𝑐˜ 𝑐˜𝑑˜ 𝑑˜˜𝑏
+𝑘𝜎̸=𝑖𝜎𝑐˜𝜎𝑑˜
+𝜏
+𝑘𝜏̸=𝑗𝜏𝑐˜𝜎𝑑˜
+𝜏
+• Most approximations are consistent between the RHF and UHF schemes, with the exception of the PNO
+truncation. Thismeansthatresultswouldmatchforclosed-shellmoleculeswith𝑇CutPNO =0(providedboth
+Hartree-Focksolutionsareidentical),butthisisnottruewheneverthePNOspaceistruncated. Therefore,
+UHF-DLPNO-MP2energiesshouldonlybecomparedtootherUHF-DLPNO-MP2energies,evenforclosed-
+shellspecies.
+• We found that it is necessary to use tighter PNO thresholds for UHF-DLPNO-MP2. With NormalPNO
+settingsthedefaultvalueis𝑇CutPNO =10−9. ForanoverviewofaccuracysettingsrefertotableTable7.17.
+AsintheRHFimplementation,thePNOcutoffforpairsinvolvingcoreorbitalsisscaledwith𝑇ScalePNO_Core .
+Table7.17: AccuracysettingsforDLPNO-MP2.
+550 Chapter7. DetailedDocumentation
+
+[... start of page 573 ...]
+ORCAManual,Release6.0.0
+Setting 𝑇 𝑇 (RHF) 𝑇 (UHF)
+CutDO CutPNO CutPNO
+LoosePNO 2×10−2 10−7 10−8
+NormalPNO 1×10−2 10−8 10−9
+TightPNO 5×10−3 10−9 10−10
+OptionsspecifictoDLPNO-MP2arelistedbelow.
+%mp2 DLPNO false # Do DLPNO-MP2 (also requires RI true)
+TolE 1e-6 # Energy convergence threshold. Default: TolE of SCF
+TolR 5e-6 # Residual convergence threshold. Default: 5 * TolE
+MaxPNOIter 100 # Maximum number of residual iterations
+MaxLocIter 128 # Maximum number of iterations for orbital localization
+LocMet AHFB # Localization method
+# options: FB, PM, IAOIBO, IAOBOYS, NEWBOYS, AHFB
+LocTol 1e-6 # Localization c

@@ -1,0 +1,81 @@
+[... end of page 556 ...]
+tiplicity
+STABPerform true # default false
+STABRestartUHFifUnstable true # restart the UHF-SCF if unstable
+STABNRoots 3 # number of eigenpairs sought
+STABMaxDim 3 # Davidson expansion space = MaxDim * NRoots
+STABMaxIter 100 # maximum number of Davidson iterations
+STABNGuess 4096 # size of initial guess matrix: 4096 x 4096
+STABDTol 0.0001 # convergence criterion from iteration to iteration
+STABRTol 0.0001 # convergence criterion max residual norm
+STABlambda +0.5 # mixing parameter
+STABORBWIN -1, -1, -1, -1, -1, -1, -1, -1 # defines the donor / acceptor spaces
+# 4 parameters for RHF
+# 8 paramters for UHF (4 alpha, 4 beta)
+(continuesonnextpage)
+534 Chapter7. DetailedDocumentation
+
+--- Page 557 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# orbital window, -1 refers to automatic determination
+STABEWIN -5.0, 5.0 # lower and upper cutoff in Eh for automatic freezing
+#---------------------------------------------------------------------------------
+# alternative specification using a sub-block:
+stab
+NRoots 3
+MaxDim 3 # etc.
+end
+end
+* xyz 0 1
+h 0.0 0.0 0.0
+h 0.0 0.0 1.4
+*
+ThedeterminationoftheelectronicHessianisstructurallycomparabletotheTDHF/CIS/TDDFTprocedure. Thus,
+manyoptionsareverysimilarandtheuserisencouragedtoreadthesectiononTDDFT(SectionExcitedStatesvia
+RPA,CIS,TD-DFTandSF-TDA)toclarifysomeoftheoptionsgivenhere. Sinceoneisusuallyonlyinterested
+inthequalitativedetermination“stableornot?”,threerootsshouldbesufficienttofindthelowesteigenvalue. By
+thesamephilosophy,StabMaxDim,StabMaxIter,StabNGuessandtheconvergencecriteriawerechosen. The
+parameter StabLambda refers to the 𝜆 of equation 37 of reference [778], which determines the mixing of the
+originalSCFsolutionandtheneworbitalstoyieldanewguess. Choosingthisvalueisnottrivial,sincepositive
+andnegativevaluescanleadtodifferentnewsolutions(atleastinprinciple). TheconvergenceoftheensuingSCF
+dependsonit,aswell,sinceallSCFproceduresrequireasufficientlygoodguesstoconvergeinadecentnumber
+ofiterations(orevenatall).
+Theorbitalwindowandtheenergywindowcanbespecified. NotethattheStabEWINwillbeoverriddenbythe
+appropriate StabORBWIN values. The automatic determination is also influenced by the %method FrozenCore
+settings. Tests have shown that significant curtailing of the actual orbital window can drastically influence the
+resultstothepointofqualitativefailure.
+Currentlimitationsonthemethodare:
+• Onlysingle-point-likecalculationsaresupported. Forgeometryoptimizationsetc.,onemustusetheguess
+MOReadfeatureChoiceofInitialGuessandRestartofSCFCalculationstoemploytheguessobtainedhere.
+Likewise,onemustextractageometryandrunaseparatecalculationifoneisinterestedintheSCFstability.
+• AsforTDDFT,NORI,RIJONX,andRIJCOSXaresupported. RI-JKisnotsupported.
+• Other,moreadvancedfeatureslikefinite-temperaturecalculationsandrelativisticcalculations(besideECPs)
+arenotpossibleatthistime.
+Overall,theuseriscautionedagainstusingthestabilityanalysisblindlywithoutcriticallyevaluatingtheresultin
+termsofenergydifferenceandbyinvestigatingtheorbitals(bytheprintoutorbyplotting). Itsusefulnesscannot
+bedenied,butitiscertainlynotblack-box.
+AnSCFstabilityanalysiswithdefaultsettingscanberequestedviaSTABILITY,SCFSTABILITY,SCFSTABor
+STABonthesimpleinputline.
+7.12 Frozen Core Options
+Thefrozencore(FC)approximationisusuallyappliedincorrelatedcalculationandconsistsinneglectingcorre-
+lationeffectsforelectronsinthelow-lyingcoreorbitals. TheFCapproximationandthenumberofcoreelectrons
+perelementcanbeadjustedinthe%methodblock. Thedefaultnumberofcoreelectronsperelementislistedin
+Table7.16.
+Table7.16: Defaultvaluesfornumberoffrozencoreelectrons.
+7.12. FrozenCoreOptions 535
+
+[... start of page 558 ...]
+ORCAManual,Release6.0.0
+H He
+0 0
+Li Be B C N O F Ne
+0 0 2 2 2 2 2 2
+Na Mg Al Si P S Cl Ar
+2 2 10 10 10 10 10 10
+K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr
+10 10 10 10 10 10 10 10 10 10 10 10 18 18 18 18 18 18
+Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe
+18 18 28 28 28 28 28 28 28 28 28 28 36 36 36 36 36 36
+Cs Ba Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn
+36 36 46 46 46 46 46 46 46 46 46 46 68 68 68 68 6

@@ -1,0 +1,76 @@
+[... end of page 427 ...]
+3/𝑘𝐵𝑇)
+(6.26)
+𝑎𝑣 1+𝑒−(Δ𝐸1,2/𝑘𝐵𝑇)+𝑒−(Δ𝐸1,3/𝑘𝐵𝑇)
+where∆𝐸 istheenergydifferencebetweenthefirstandsecondstates,andsoon.
+1,2
+Aftercompletionofeachcalculation,theratesforthethreetripletswere8.91s−1,0.55s−1,and284s−1. Using
+(6.26),thefinalcalculatedrateisabout98s−1,whilethebestexperimentalvalueis102s−1 (at77K)[591],with
+about40%derivingfromtheHTeffect.
+6.18. ExcitedStateDynamics 405
+
+--- Page 428 ---
+ORCAManual,Release6.0.0
+Fig.6.65: Theexperimental(dashedred)andtheoretical(solidblack,displacedbyabout2800cm−1)phosphores-
+cencespectraforbiacetyl,inethanolat298K.
+OBS:Asubtletyariseswhenthefinalstateisnotasingletstate,forexampleinradicalphosphorescence(doublet
+ground state) or singlet oxygen phosphorescence (triplet ground state). In this case the most rigorous treatment
+would be to sum over the final states but average over the initial states. For example, with quartet-to-doublet
+phosphorescenceonegets
+𝑘𝑝ℎ𝑜𝑠𝑝 =
+𝑘
+1→1
++𝑘
+2→1
+𝑒−(Δ𝐸1,2/𝑘𝐵𝑇)+𝑘
+3→1
+𝑒−(Δ𝐸1,3/𝑘𝐵𝑇)+𝑘
+4→1
+𝑒−(Δ𝐸1,4/𝑘𝐵𝑇)
+𝑎𝑣 1+𝑒−(Δ𝐸1,2/𝑘𝐵𝑇)+𝑒−(Δ𝐸1,3/𝑘𝐵𝑇)+𝑒−(Δ𝐸1,4/𝑘𝐵𝑇)
++
+𝑘
+1→2
++𝑘
+2→2
+𝑒−(Δ𝐸1,2/𝑘𝐵𝑇)+𝑘
+3→2
+𝑒−(Δ𝐸1,3/𝑘𝐵𝑇)+𝑘
+4→2
+𝑒−(Δ𝐸1,4/𝑘𝐵𝑇)
+1+𝑒−(Δ𝐸1,2/𝑘𝐵𝑇)+𝑒−(Δ𝐸1,3/𝑘𝐵𝑇)+𝑒−(Δ𝐸1,4/𝑘𝐵𝑇)
+where𝑘 isthephosphorescencerateconstantfromthesecondsubleveloftheinitialquartettothefirstsublevel
+2→1
+ofthefinaldoublet,etc. NotethattheBoltzmannfactorsofthefinalstatedonotentertheexpression. Unfortunately,
+sinceU-TDDFTisspincontaminatedandunsuitableforcalculatingSOCMEs,theSOCMEsinthiscasehastobe
+calculatedbymoreadvancedmethods,suchasDFT/ROCISormultireferencemethods.
+6.18.4 Intersystem Crossing Rates (unpublished)
+GeneralAspects
+Yet another application of the path integral approach is to compute intersystem crossing rates, or non-radiative
+transition rates between states of different multiplicities. This can be calculated if one has two geometries, two
+Hessians,andtherelevantspin-orbitcouplingmatrixelements.
+The input is similar to those discussed above. Here ESD(ISC) should be used on the main input to indicate an
+InterSystemCrossingcalculation,andtheHessiansshouldbeprovidedbyISCISHESSIANandISCFSHESSIAN
+fortheinitialandfinalstates,respectively. Pleasenotethatthegeometryusedintheinputfileshouldcorrespondto
+thatoftheFINALstate,specifiedthroughtheISCFSHESSIANflag. Therelevantmatrixelementscanbecomputed
+usinganymethodavailableinORCAandinputtedasSOCMERe,Imunder%ESDwhereReandImrepresentits
+realandimaginaryparts(inatomicunits!).
+406 Chapter6. RunningTypicalCalculations
+
+[... start of page 429 ...]
+ORCAManual,Release6.0.0
+As a simple example, one could compute the excited singlet and ground triplet geometries and Hessians for an-
+thraceneusingTD-DFT.Then,computethespin-orbitcoupling(SOC)matrixelementsforaspecifictripletspin-
+sublevel using the same method (see the details below), potentially employing methods like CASSCF, MRCI,
+STEOM-CCSD, or another theoretical level. Finally, obtain the intersystem crossing (ISC) rates using an input
+suchas:
+!ESD(ISC) NOITER
+%ESD
+ISCISHESSIAN "ANT_S1.hess"
+ISCFSHESSIAN "ANT_T1.hess"
+DELE 11548
+SOCME 0.0, 2.33e-5
+END
+* XYZFILE 0 1 ANT_T1.xyz
+TheSOCMEsbetweenasingletstateandatripletstateconsistofthreecomplexnumbers, notjustone, because
+thetripletstatehasthreesublevels. IftheuserusestheS

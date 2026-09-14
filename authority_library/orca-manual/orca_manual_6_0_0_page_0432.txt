@@ -1,0 +1,68 @@
+[... end of page 431 ...]
+k-Condon calculation should yield good results. This is typically applicable to
+moleculeswithheavyatoms,wherevibroniccouplingislesssignificant.
+OBS2.: AlwaysconsiderthatthereareactuallyTHREEtripletspin-sublevels,andtransitionsfromthesingletto
+allofthemshouldbeincluded.
+6.18. ExcitedStateDynamics 409
+
+--- Page 432 ---
+ORCAManual,Release6.0.0
+OBS3.: ISCratesareextremelysensitivetoenergydifferences. Exercisecautionwhencalculatingthem. Ifamore
+accurateexcitedstatemethodisavailable,itshouldbeconsideredforprediction.
+6.18.5 Internal Conversion Rates (unpublished)
+TheESDmodulecanalsocalculateinternalconversion(IC)ratesfromanexcitedstatetothegroundstateatthe
+TDDFTandTDAlevels. ApartfromthegroundstateandexcitedstateHessians,theonlyadditionalquantitythat
+needstobecalculatedisthenonadiabaticcouplingmatrixelements(NACMEs).
+Theinputfileissimple:
+Herethe𝑆 geometry,aswellasthe𝑆 and𝑆 Hessianfiles,wereobtainedattheB3LYP-D3/def2-SVPlevelof
+0 0 1
+theory. NotethattheNACMEcalculationusesfullTDDFTandalsoincludestheelectron-translationfactor(ETF),
+whicharetherecommendedpracticesingeneral. The“iroot1”specifiesthattheinitialstateis𝑆 ;thefinalstate
+1
+isalways𝑆 andthiscannotbechanged.
+0
+ThecomputedICrateconstantisgivenneartheendoftheoutputfile:
+***Everything is set, now computing the correlation function***
+Homogeneous linewidth is: 50.00 cm-1
+Inhomogeneous linewidth is: 250.00 cm-1
+Number of points: 32768
+Maximum time: 157.86 fs
+Temperature used: 298.15 K
+Z value: 4.924300e-66
+Cutoff for the correlation function: 1.00e-12
+Adiabatic energy difference: 16699.89 cm-1
+0-0 energy difference: 16382.09 cm-1
+Calculating correlation function: ...done
+Last element of the correlation function: -0.000000,-0.000000
+The calculated internal conversion rate constant is 3.823146e+08 s-1
+Total run time: 0 hours 2 minutes 50 seconds
+****ORCA ESD FINISHED WITHOUT ERROR****
+Formoreaccurateresults,onemayaddexplicitsolvationshells,sinceimplicitsolvationmodelsonlydescribethe
+electrostaticanddispersiveeffectsofthesolventonthesolute,butcannotprovidetheextravibrationaldegreesof
+freedomthatcanhelpdissipatingtheexcitationenergy. Conversely,byusinganimplicitsolventonealsomisses
+theeffectofthesolventviscosityoninhibitingtheinternalconversion,whichisparticularlyimportantwhenone
+wantstocompareagainstexperimentsconductedatlowtemperatures.
+6.18.6 Resonant Raman Spectrum
+GeneralAspects
+UsingatheoreticalframeworksimilartowhatwaspublishedforAbsorptionandFluorescence,wehavealsodevel-
+opedamethodtocomputeresonantRamanspectraformolecules[197]. Inthisimplementation,onecanemploy
+allthemethodstoobtaintheexcitedstatepotentialenergysurfaces(PES)mentionedearlierusingHESSFLAG,
+andincludeDuschinskyrotationsandevenconsidertheHerzberg-Tellereffectontopofit. Thiscalculationcan
+beinitiatedbyusingESD(RR)orESD(RRAMAN)onthefirstinputline. Itisimportanttonotethatbydefault,
+we calculate the “Scattering Factor” or “Raman Activity,” as described by D. A. Long [533] (see Sec. General
+AspectsoftheTheoryformoreinformation).
+Whenusingthismodule,thelaserenergycanbecontrolledbytheLASEREflag. Ifnolaserenergyisspecified,the
+0-0energydifferenceisusedbydefault. YoucanselectmultipleenergiesbyusingLASERE10000,15000,20000,
+etc.,andifmultipleenergiesarespecified,aseriesoffilesnamedBASENAME.spectrum.LASEREwillbesaved.
+Additionally,itispossibletospecifyseveralstatesofinterestusingtheSTATESflag,butnotbothsimultaneously.
+410 Chapter6. RunningTypicalCalculations
+
+[... start of page 433 ...]
+ORCAManual,Release6.0.0
+Asanexample,let’spredicttheresonantRamanspectrumofthephenoxylradical. Youneedatleastagroundstate
+geometryandHessian,andthenyoucaninitiatetheESDcalculationusing:
+!PBE0 DEF2-SVP TIGHTSCF ESD(RR)
+%TDDFT
+NROOTS 5
+IROOT 3
+END

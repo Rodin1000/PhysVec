@@ -1,0 +1,77 @@
+You are an expert in numerical calculations of quantum many-body physics.
+Your task here is to generate the integration test environment code for a specific level of integration. The environment consists of two parts:
+1. Run code: The reconstructed run function for this specific level.
+2. Entrypoint code: The main function and entry point that organizes the run function and provides test input values.
+
+Note: The element functions needed for this level will be provided separately and should NOT be included in your output.
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. **LEVEL_GUIDELINE**: A dictionary containing information about this integration level. The dict has keys:
+   - "level-i": Specifies what level it is. The value describes the reconstruction details.
+   - "element_functions": A List[str], containing all the names of element functions needed for this level.
+2. **RUN_FUNCTION_CONTENT**: The target 'run' function from the repository.
+   - You need to reconstruct this run function to the level specified by the level_guideline.
+3. **MAIN_CONTENT**: The entry point ('main' function) from the repository.
+   - This main function tells you the code parameter formats for reference.
+
+-------------------------------------------------------------------------------------------------------
+[Generation Rules]:
+You MUST follow instructions below:
+1. **RUN CODE**: You reconstruct the run function based on the LEVEL_GUIDELINE and RUN_FUNCTION_CONTENT.
+   - You devide the original RUN_FUNCTION_CONTENT in two parts: KEEP_PART and NON_KEEP_PART. KEEP_PART is the codes that included in the LEVEL_GUIDELINE, while NON_KEEP_PART is the codes that NOT in LEVEL_GUIDELINE.
+      - **CRITICAL**: You MUST STRICTLY FOLLOW the LEVEL_GUIDELINE.  
+      - The package import part, ALL the comments before the function definition are NOT for this devision, you MUST ALWAYS keey them. 
+      - The input parameters SHOULD also be devided into KEEP_PART and NON_KEEP_PART, depending on whether they are actually used/called in the following. 
+   - For KEEP_PART, you are FORBIDDEN to change its content. You DO NOT modefy them. 
+   - For NON_KEEP_PART, you are REQUIRED to delete them from the run function. 
+   - You MUST remove any function parameters that are NOT used in the function body. 
+   - You may adjust the output of the generated RUN CODE in order to be compatible with the remaining KEEP_PART. 
+
+2. **ENTRYPOINT CODE**: You define a 'main' function as the entry-point of this integration test.
+   - You learn how to define input parameters from the input MAIN_CONTENT.
+   - You SHOULD NOT copy the input parameters directly from the input MAIN_CONTENT. You have to simplify the calculation, since the generated integration code is ONLY to check the integrability and executability of the functions.
+     - e.g. lattice size L <= 6, other calculation parameters as small as possible.
+   - In this main function generated here, you only call explicitly the run function defined in the run_code (you MUST adapt to the modefied run_code, rather than the original RUN_FUNCTION_CONTENT).
+   - You are STRICTLY FORBIDDEN to explicitly call the element-functions which are called already in the run function, even the input MAIN_CONTENT has done so.
+   - You MUST add the entry point (e.g., `if __name__ == "__main__": main()` for Python, or `main()` for Julia).
+
+3. You are FORBIDDEN to define any NEW functions in the generated code explicitly. 
+
+4. The code_type of the generated code MUST be the SAME as that of the input codes.
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+Your output MUST consist of three parts:
+
+1. **JSON block**: A JSON object in ```json and ``` with metadata only:
+   - "topic": A brief summary of the input level_guideline (fewer than 100 words).
+   - "code_type": Either "python" or "julia" (lowercase string).
+   Do NOT put run_code or entrypoint_code in the JSON.
+
+2. **RUNCODE block**: The reconstructed run function code inside <RUNCODE> and </RUNCODE>.
+
+3. **ENTRYPOINT block**: The entry point definition (main function and entry point) inside <ENTRYPOINT> and </ENTRYPOINT>.
+
+**CRITICAL:** Use </RUNCODE> and </ENTRYPOINT> to close each block, NOT the opening tags again.
+
+Example:
+```json
+{
+"topic": "Reconstruct the run function at level-1 for integration testing",
+"code_type": "python"
+}
+```
+
+<RUNCODE>
+...reconstructed run function code...
+</RUNCODE>
+
+<ENTRYPOINT>
+...main function and entry point...
+</ENTRYPOINT>
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST have a valid JSON block, <RUNCODE>...</RUNCODE>, and <ENTRYPOINT>...</ENTRYPOINT>. Even if you fail to generate complete code, KEEP this format.
+

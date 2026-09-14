@@ -1,0 +1,92 @@
+[... end of page 354 ...]
+{ shift }
+end
+NMRchemicalshiftsarealsoimplementedincombinationwithimplicitsolventmodels,hencetheNMRkeyword
+canbecombinedwiththeCPCMinputblock. Notethatforcalculationsincludingimplicitsolvent,itishighlyrec-
+ommendedtoalsooptimizethegeometriesusingthesamemodel. Regardless,explicitsolvent–soluteinteractions
+observableinNMR(e.g. H-bonds),cannotbemodelledwithsuchamodel: solventmoleculesmustbeincluded
+explicitlyinthecalculation.
+332 Chapter6. RunningTypicalCalculations
+
+--- Page 355 ---
+ORCAManual,Release6.0.0
+6.12.8 NMR Spin-Spin Coupling Constants
+Theindirectspin-spincouplingconstantsobservedinNMRspectraofmoleculesinsolutionconsistoffourcon-
+tributions: Thediamagneticspinorbitterm:
+𝐻ˆ =
+1∑︁(𝑀⃗
+𝑘
+×⃗𝑟
+𝑖𝑘
+)(𝑀⃗
+𝑙
+×⃗𝑟
+𝑖𝑙
+)
+(6.9)
+𝐷𝑆𝑂 2 𝑟3 𝑟3
+𝑖𝑘𝑙 𝑖𝑘 𝑖𝑙
+Theparamagneticspinorbitterm:
+𝐻ˆ =
+∑︁𝑀⃗
+𝑘
+⃗𝑙
+𝑖𝑘 (6.10)
+𝑃𝑆𝑂 𝑟3
+𝑖𝑘 𝑖𝑘
+TheFermicontactterm:
+𝐻ˆ = 8𝜋 ∑︁ 𝛿(𝑟 −𝑟 )m (6.11)
+𝐹𝐶 3 𝑖 𝑘 𝑘
+𝑖𝑘
+Andthespindipoleterm:
+𝐻ˆ = ∑︁ m𝑇 3r 𝑖𝑘 r 𝑖 𝑇 𝑘 −𝑟 𝑖 2 𝑘 s (6.12)
+𝑆𝐷 𝑘 𝑟5 𝑖
+𝑖𝑘 𝑖𝑘
+WhiletheFermicontacttermisusuallythemostsignificant,allcontributionscanbecomputedattheHFandDFT
+level of theoryusing ORCA. For this purpose, the keyword ssall has to beinvoked in the eprnmrinput block,
+whileeachofthefourtermscanberequestedusingssdso,sspso,ssfc,andsssd,respectively. Forexample:
+! PBE0 pcJ-1
+*xyz 0 1
+O 0.00000 0.00000 0.11779
+H 0.00000 0.75545 -0.47116
+H 0.00000 -0.75545 -0.47116
+*
+%eprnmr
+Nuclei = all O { ssall }
+Nuclei = all H { ssfc, sssd }
+end
+ResultswillbegiveninHz. Notethatthedefaultisotopesusedmightnotbetheonesdesiredforthecalculation
+ofNMRproperties,soitisrecommendedtodefinethecorrespondingisotopesusingtheistflag. Itispossible
+toalsoprintthereducedcouplingconstants𝐾 (inunitsof1019·T·J−2),whichareindependentofthenuclear
+isotopes,usingtheflagPrintReducedCoupling=True.
+TheCP-SCFequationsmustbesolvedforoneofthenucleiineachpairandarethebottleneckofthecomputation.
+Therefore,spin-spincouplingconstantsarecalculatedonlybetweennucleiwithinacertaindistanceofeachother
+(5Ångstrombydefault). ThelattercanbechangedusingtheSpinSpinRThreshkeyword.
+Ifmulitplenuclidesarerequested,itisalsopossibletoselectonlycertainelementpairs(e.g. onlyC–HandH–H,
+withoutC–C)usingtheSpinSpinElemPairskeyword. Analogously,theSpinSpinAtomPairskeywordselects
+theactualpairsofnucleitoconsider. Theunionofthelattertwooptionsisusedtoreducetheselectionmadeusing
+theNucleiinput,afterwhichSpinSpinRThreshisapplied.
+Hereisanotherexampleillustratingtheseadditionaloptions:
+! B3LYP EPR-II
+* xyz 0 1
+C -1.226922 0.247095 -0.000000
+C -0.013548 -0.546773 0.000000
+(continuesonnextpage)
+6.12. CalculationofProperties 333
+
+[... start of page 356 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H -2.092804 -0.413336 0.000000
+H -1.249625 0.875419 -0.889165
+H -1.249625 0.875419 0.889165
+O 1.099618 0.302262 -0.000000
+H 0.009152 -1.175097 0.889165
+H 0.009152 -1.175097 -0.889165
+H 1.892077 -0.216216 0.000000
+*
+%eprnmr
+nuclei = all C { ssall, ist = 13 };
+nuclei = all H { ssall, ist = 1 };
+nuclei = all O { ssall, ist = 17 };
+PrintReducedC

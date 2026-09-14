@@ -1,0 +1,66 @@
+[... end of page 508 ...]
+mplicit solvation, solvent water,
+! CPCMX(water) # use CPCMX for implicit solvation, solvent water,
+# they can also be defined in the xtb block
+%xtb
+XTBINPUTSTRING "argument 1" # string passed on to XTB call
+XTBINPUTSTRING2 "keyword 2" # string passed on to XTB call
+ETemp 0 # electronic temperature, value for --etemp
+(continuesonnextpage)
+486 Chapter7. DetailedDocumentation
+
+--- Page 509 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+DOALPB false # use implicit solvation, ALPB
+ALPBSOLVENT "" # ALPB solvent, no default, string for --alpb
+DODDCOSMO false # use implicit solvation, ddCOSMO
+DDCOSMOSOLVENT "" # ddCOSMO solvent, no default, string for --cosmo
+DOCPCMX false # use implicit solvation, CPCMX
+CPCMXSOLVENT "" # CPCMX solvent, no default, string for --cpcmx
+EPSILON 3.5 # Dielectric constant (only for ddCOSMO)
+ACCURACY 1 # accuracy, value for --acc, default is ORCA's accuracy x 1.e6
+MAXCORE 1024 # memory in MB reserved for XTB calculation,
+# default is ORCA's maxcore
+NPROCS 1 # number of processors for running XTB",
+# default is ORCA's PAL command
+end
+Note:
+• Ifjobsarerunoverseveralnodes,thenumberofcoresusedbytheXTBtoolmightbelowerthanrequested
+viathepalkeyword.
+7.5 Choice of Basis Set
+A fair number of reasonable basis sets is hardwired in the program as will be described in the next section. In
+addition, whole basis sets can be read from a file, basis sets can be assigned for all atoms of a given type or, at
+thehighestresolution,basissetscanbeassignedtoindividualatomswhichisconvenientifdifferentpartsofthe
+moleculearetobetreatedatdifferentlevelsofaccuracy. MosthardwiredbasissetswereobtainedfromtheEMSL
+library[251]andtheinputformatinORCAiscloselyrelatedtothe“GAMESS-US”format.
+Note: AsofORCAversion4.0,thebasissethandlinghasbeensignificantlymodified!
+Pleasecheckyourbasissetsverycarefully!
+7.5.1 Built-in Basis Sets
+The basis set is specified in the block %BASIS. Note that there are three distinguished slots for auxiliary basis
+sets(AuxJ,AuxCandAuxJK)tobeusedwithRIapproximation. Whichauxiliarybasisslotisusedintheactual
+programdependsonthecontext. TheAuxJandAuxJKslotsareusedinthecontextofFockmatrixconstruction,
+whereastheAuxCslotisusedforallotherintegralgenerationstepse.g. inpost-HartreeFockmethods. Assigning
+theauxiliarybasiswiththesimpleinput,takescareoftheindividualslots. However,inspecificcasestheymust
+besetexplicitlyintheblockinput. Forexample,a“/JK”basismaybeassignedtoAuxJinthisway.
+Note: AsofORCA4.0,thebasissetnamehastobeputinquotationmarks,andthebasissetnameidentifiersare
+thesameasinthesimpleinput!
+%basis
+Basis "Def2-TZVP" # The orbital expansion basis set
+AuxJ "Def2/J" # RI-J auxiliary basis set
+AuxJK "Def2/JK" # RI-JK auxiliary basis set
+AuxC "Def2-TZVP/C" # Auxiliary basis set for correlated
+# calcualtions, e.g. RI-MP2
+CABS "cc-pVDZ-F12-OptRI" # complementary auxiliary basis set
+(continuesonnextpage)
+7.5. ChoiceofBasisSet 487
+
+[... start of page 510 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# for F12 calculations
+DecontractBas false # if chosen "true" the program will
+# decontract the orbital basis set
+DecontractAuxJ false # if "true" - decontract the AuxJ basis set
+DecontractAuxJK false # if "true" - decontract the AuxJK basis set
+DecontractAuxC

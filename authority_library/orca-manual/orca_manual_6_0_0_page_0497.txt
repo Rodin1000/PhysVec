@@ -1,0 +1,83 @@
+[... end of page 496 ...]
+ledensityfunctionals. Notethatduetotechnicalreasons,self-consistentcal-
+culationsarenotpossiblewiththeHartree-Fockmethod.
+Forexample,wecanusetheB3LYPhybridfunctionalwiththeself-consistentDFT-NLvariantbythefollowing
+input:
+! B3LYP SCNL
+! def2-TZVP def2/JK RIJK
+*xyz 0 1
+Ar 0.0 0.0 0.0
+Ar 0.0 0.0 3.76
+*
+474 Chapter7. DetailedDocumentation
+
+--- Page 497 ---
+ORCAManual,Release6.0.0
+TheoutputisthesameasanormalSCFcalculation,butafterconvergence,alinewithNL Energy, E(C,NL)is
+printedunder“DFT components”,asitwasforthepost-SCFDFT-NLvariant.
+• Analytic gradients are already available, thus geometry optimizations with numerical frequencies can be
+computedusingthesefunctionals.
+• TD-DFTcalculationsarenotyetavailable.
+• AnycalculationthatrequiressecondderivativesoftheNLfunctionalisnotyetpossible. Theseareneeded
+forrealtypeperturbationsintheCP-SCFsolutions, e.g. foranalyticHessians, dipolepolarizabilities, and
+double-hybridgradients.
+• Strictly imaginary perturbations such as NMR shielding and EPR g-tensors (both also with GIAOs), and
+hyperfinecouplingsareavailable.
+DFTandHFCalculationswiththeGeometricalCounterpoiseCorrection: gCP
+ThecentralideaofthegCPcorrection[476]istoaddasemi-empiricalcorrection∆𝐸gCP totheenergiesofmolec-
+ular systems that removes artificial overbinding effects from BSSE (see section Counterpoise Correction). gCP
+uses atomic corrections and therefore also has the ability to correct for intramolecular BSSE. The parametriza-
+tion is constructed such that it approximates the Boys and Bernadi counterpoise (CP) correction ∆𝐸 in the
+𝐶𝑃
+intermolecularcase. Thatis,
+∆𝐸
+𝐶𝑃
+≈∆𝐸gCP (7.39)
+wheree.g. foracomplexationreaction𝐴+𝐵 →𝐶,ourcorrectionisgivenby
+∆𝐸gCP =𝐸gCP(𝐶)−𝐸gCP(𝐴)−𝐸gCP(𝐵) (7.40)
+Inpractice,𝐸gCP canbesimplyaddedtotheHF/DFTenergy
+𝐸total =𝐸HF/DFT+𝐸gCP (7.41)
+whichisdoneautomaticallyinORCA(theFINAL SINGLE POINT ENERGYincludesthegCPcorrection).
+ThecentralequationofthegCPcorrectionoverallatoms𝑁 reads:
+𝑁 𝑁
+𝐸gCP =𝜎· ∑︁∑︁ 𝑒 m
+𝑎
+iss ·𝑓dec(𝑅
+𝑎𝑏
+) (7.42)
+𝑎 𝑏̸=𝑎
+wheretheenergy𝑒miss isameasureoftheincompletenessofthechosentargetbasisset(whichistypicallysmall)
+𝑎
+and𝑓dec(𝑅
+𝑎𝑏
+)isadecayfunctionthatdependsontheinteratomicdistance𝑅
+𝑎𝑏
+. Thescalingfactor𝜎 isoneof4
+parametersneededforeverymethod/basis setcombination. Moredetailsonthiscanbefoundintheoriginal
+gCPpaper[476].
+Analytical gradients with gCP are available for geometry optimization. Due to its semi-empirical nature, the
+correctioniscalculatedwithinseconds,evenforverylargesystems.
+The gCP correction can be invoked by using the !GCP(level) keyword, where level is a compound of the
+method(HForDFT)andthebasis setkeyword. SeeTable7.7fortheavailablebasissetsandthecorresponding
+keywords. Forexample,gCPcanbeinvokedinaB3LYPcalculationwiththedef2-SV(P)basissetusingtheinput:
+! B3LYP def2-SV(P) GCP(DFT/SV(P))
+*xyzfile 0 1 example.xyz
+Table7.7: Overviewofparametrizedbasissets. Thelevelkeywordin!GCP(level)isacompoundofHForDFT
+andthebasis setkeyword. Validinputsare,forexample:!GCP(HF/MINIS),!GCP(DFT/LANL),!GCP(HF/TZ),
+!GCP(DFT/631GD),...
+7.4. ChoiceofComputationalModel 475
+
+[... start of page 498 ...]
+ORCAManual,Release6.0.0
+parametrizedbasisset HF DFT basis set
+MINIS yes yes MINIS
+SV yes yes SV
+6-31G(d) yes yes 631GD
+6-31G(d)+LANL2DZ(Sc-Zn) no yes LANL
+def2-SV(P) no yes SV(P)
+def2-SV(P/h,c) no yes SVXorSV(P/H,C)
+def2-SVP yes yes SVP
+def2-TZVP yes yes TZ
+At all print levels, warnings from the gCP program are printed. Using the default print level, the only addi-
+tionaloutputisthefinalgCPcorrectionbeforeFINAL SINGLE POINT ENERGY.Using!LargePrintor%output
+Print[P_gCP] 2 endstatesthegCPlevel,the4parametersmentionedabove,andthecomputedcor

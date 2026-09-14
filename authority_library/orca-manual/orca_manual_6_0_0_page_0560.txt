@@ -1,0 +1,69 @@
+[... end of page 559 ...]
+. A bin-sort then leads to the AO operator 𝐾𝑖𝑗(𝜇,𝜈) =
+(𝑖𝜇|𝑗𝜈)in(11|22)integralnotation. TheseintegralsarethenusedtomakethefinalK𝑖𝑗(a,b)(a,b=virtualMOs)
+andtheEMP2pairenergycontributions. Inmanycases,andinparticularforlargermolecules,thisalgorithmis
+muchmoreefficientthanthememorybasedalgorithm. Itdepends,however,muchmoreheavilyontheI/Osystem
+of the computer that you use. It is important, that the program uses the flags CFLOAT, UCFLOAT, CDOUBLE or
+UCDOUBLEinordertostoretheunsortedandsortedAOexchangeintegrals. Whichflagisusedwillinfluencethe
+performanceoftheprogramandtosomeextenttheaccuracyoftheresult(floatbasedsingleprecisionresultsare
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 537
+
+--- Page 560 ---
+ORCAManual,Release6.0.0
+usuallyveryslightlylessaccurate;𝜇Eh-rangedeviationsfromthedoubleprecisionresult1). Finally,gradientsare
+presentlyonlyavailableforthememorybasedalgorithmsinceinthiscaseamuchlargersetofintegralsisrequired.
+The ! MP2 command does the following: (a) it changes the Method to HFGTO and (b) it sets the flag DoMP2 to
+true. The program will then first carry out a Hartree-Fock SCF calculation and then estimate the correlation
+energybyMP2theory. RHF,UHFandhigh-spinROHFreferencewavefunctionsarepermissibleandthetypeof
+MP2 calculation to be carried out (for high-spin ROHF the gradients are not available) is automatically chosen
+basedonthevalueof HFTyp. IftheSCFiscarriedoutconventionally,theMP2calculationwillalsobedoneina
+conventionalschemeunlesstheuserforcesthecalculationtobedirect. For SCFMode=DirecttheMP2energy
+evaluationwillbefullyintheintegraldirectmode.
+ThefollowingvariablescanbeadjustedintheblockforconventionalMP2calculations:
+%mp2
+EMin -1.5 # orbital energy cutoff that defines the
+# frozen core in Eh
+EMax 1.0e3 # orbital energy cutoff that defines the
+# neglected virtual orbitals in Eh
+EWin EMin,EMax # the same, but accessed as array
+# (respects settings in %method block!)
+MaxCore 256 # maximum amount of memory (in MB) to be
+# used for integral buffering
+ForceDirect false # Force the calculation to be integral
+# direct
+RI false # use the RI approximation
+F12 false # apply F12 correction
+Q1Opt # For non-RI calculations a flag how to perform
+# the first quarter transformation
+# 1 - use double precision buffers
+# (default for gradient runs)
+# 2 - use single precision buffers. This reduces
+# the memory usage in the bottleneck step by
+# a factor of two. If several passes are re-
+# quired, the number of passes is reduced by
+# a factor of two.
+# -1 - Use a disk based algorithm. This respects
+# the flags UCFLOAT,CFLOAT,UCDOUBLE and
+# CDOUBLE. (but BE CAREFUL with FLOAT)
+# (default for energy runs)
+PrintLevel 2 # How much output to produce. PrintLevel 3 produces
+# also pair correlation energies and other info.
+DoSCS false # use spin-component scaling
+Ps 1.2 # scaling factor for ab pairs
+Pt 0.333 # scaling factor for aa and bb pairs
+Density none # no density construction
+unrelaxed # only "unrelaxed densities"
+relaxed # full relaxed densities
+NatOrbs false # calculate natural orbitals
+1However,sometimes,andinparticularwhentransitionmetalsandcoreorbitalsareinvolvedwehavemetunpleasantlylargeerrors.So–
+becarefulanddoublecheckwhenusingfloats!
+538 Chapter7. DetailedDocumentation
+
+[... start of page 561 ...]
+ORCAManual,Release6.0.0
+7.13.2 RI-MP2
+TheRI-MP2moduleisofastraightforwardnature. Theprogramfirsttransformsthethree-indexintegrals(𝑖𝑎|𝑃˜),
+where“𝑖”isaoccupied,“𝑎”isavirtualMOand“𝑃˜”isanauxiliarybasisfunctionthatisorthogonalizedagainst
+theCoulombmetric. Theseintegralsarestoredondisk,whichisnotcritical,evenifthebasishasseveralthousand
+functions. Theintegraltransformationisparallelizedandhasnospecificallylargecorememoryrequirements.
+In the next step, the integrals are read ordered with respect to the occupied l

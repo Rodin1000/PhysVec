@@ -1,0 +1,92 @@
+Your task is to generate executable and practical codes to reproduce results of a research paper, according to given informaiton. 
+During this process, you should strive to ensure that the code faithfully represents the task requirements while maintaining its executability. You should not provide a incomplete code. 
+You are requested to use MCP tools to look up into local library for related information. 
+
+-----------------------------------------------------------------------------------------------
+[Output format (CRITICAL)]:
+At the very end of the conversation, you MUST return the final result. Your output MUST consist of two parts:
+
+1. **JSON block**: A JSON object (valid for json.loads()) enclosed in ```json and ```. The dictionary MUST contain ONLY metadata:
+   - "subplot_name": The subplot name specified in Plan_info.
+   - "code_type": The lowercase string "orca" (or "orca input file that can be executed directly").
+   Do NOT put code_content in the JSON. Do NOT use markdown code fences (``` or ```orca) for the code—only <CODE> and </CODE> work.
+
+2. **Code block**: The full source code inside XML-style fences: <CODE> and </CODE>. Put the code directly between these tags; no JSON escaping.
+
+**CRITICAL:** You MUST NOT include this prompt itself (including the example below) anywhere in your output. This prevents the example from being mistakenly extracted as generated code.
+
+**CRITICAL:** Use real newline characters (actual line breaks) between lines in the code block. Do NOT use the two-character sequence backslash-n (\n) to represent newlines—ORCA requires actual line breaks in the input file. Each line of the ORCA input (e.g. ! line, %block, * xyz coordinates) must be on its own line.
+
+**CRITICAL:** Use <CODE> to start and </CODE> to end the code block. Do NOT use <CODE> again as the closing tag. Without <CODE> and </CODE>, the parser will FAIL and your code will not be saved.
+
+Example output (format only; do not copy into your output):
+```json
+{
+  "subplot_name": "example_figure",
+  "code_type": "orca"
+}
+```
+
+<CODE>
+...code content here...
+</CODE>
+
+You MAY think step-by-step using internal reasoning, but the final output must be one single ORCA input file for the most important step.
+
+-----------------------------------------------------------------------------------------------
+[inputs]:
+You will receive:
+
+(1) plan (PLAN_INFO)
+    A detailed plan describing available information for reproducing the calculations:
+    - intended calculation step to run now
+    - theoretical methods/models
+    - constraints/approximations/expectations
+    - figure/table/subplot identifier(s) to reproduce
+    When present, also use:
+    - **scientific_problem**: type of calculation (e.g. ground-state DFT, TDDFT UV-Vis, XAS K-edge, CASSCF+NEVPT2, ZORA+SOC). Use this for file-level and per-block comments.
+    - **elements_used**: list of chemical elements (e.g. ["Cu","C","F"]). Use this in the "Elements used" comment and in block descriptions where relevant.
+
+(2) summary of the calculation setup
+    A concise description of:
+    - computation type (opt, freq, SP, excited states, etc.)
+    - level of theory, basis set, solvation, approximations
+    - known numerical settings (SCF thresholds, grids, integration, etc.)
+
+----------------------------------------------------------------------------------------------
+[MCP usage]:
+Before code generation process, please use MCP to get more related information/guides. 
+1. You may use MCP server: 'filesystem' to get information from local libraries. Please follow the searching strategy below:
+    - IMPORTANT: The summary file is in the reference project ("libs"), NOT necessarily in the filesystem-mcp working directory.
+   - First call filesystem-mcp `get_reference_projects` and confirm reference "libs" exists
+   - Then call filesystem-mcp `list_reference_directory(reference_name="libs")` to list available files
+   - Use filesystem-mcp `read_reference_file(reference_name="libs", file_path="<summary json relative path>")` to read the summary JSON
+        - file_path MUST be the exact RELATIVE path returned by list_reference_directory (no `..\\`, no absolute paths)
+    - Tool arguments must be a JSON object, not a JSON string. Never wrap the arguments object in quotes.
+
+
+-----------------------------------------------------------------------------------------------
+[Instructions]
+1. Read Plan_info to understand the task requirements and all parameter values.
+2. Use Plan_info.scientific_problem and Plan_info.elements_used when present: ensure the generated ORCA input follows the **exact block structure** required by Code_generation_rules.
+3. Read Query_summary to understand how to use the required packages.
+4. STRICTLY follow Code_generation_rules to structure the code (including the different code blocks/segments defined in the inputs). Output the required structure from the start:
+   - **First block only:** First line #Tags_keywords, then # Scientific problem:, then # Elements used:, then optional purpose/provenance, then exactly one ! keyword line (all keywords on that single line; do NOT add a second ! line).
+   - **Block order:** Place all %... input blocks (e.g. %pal, %maxcore, %basis, %method, %scf) **before** the geometry block. Do NOT put any % block after the geometry block (no input blocks at the end of the file).
+   - **Before each %... block:** #Tags_inputblocks_<name> (e.g. #Tags_inputblocks_pal, #Tags_inputblocks_maxcore, #Tags_inputblocks_basis, #Tags_inputblocks_method), then purpose and provenance comments, then the %... block. This applies to every % block without exception, including %method.
+   - **Before * xyz:** #Tags_geometryblocks, then purpose, then provenance, then * xyz Charge Mult and only coordinate lines (element x y z) until *; **no # lines inside * xyz ... ***.
+   - **Keywords/basis:** Do NOT use def2-TZVP(-f) (use def2-TZVP). Do NOT use ZORA-def2-SVP in the basis; use def2-SVP and enable ZORA via keyword or %rel.
+5. **Geometry block format:** Place #Tags_geometryblocks, then purpose and provenance comments, then * xyz with full coordinates. Do NOT put any # comment lines between * xyz and the closing * — only coordinate lines (element x y z) are allowed there. *** xyzfile * is NOT allowed** for geometry in this workflow; you MUST use inline * xyz ... * with the full coordinate list.
+6. Generate complete, executable code that reproduces the target properties as instructed by the user requests.
+7. Ensure ALL parameter values are explicitly specified in the DFT software input file.
+8. **Geometry from retrieval (STRICT):** If the Query_summary contains a retrieved structure and an instruction to use it in the ORCA geometry block:
+   - You MUST put the structure **inline only**: * xyz <charge> <mult>\n<exact coordinate lines from the summary>\n* (one line per atom: element x y z). Copy the coordinates verbatim; do not abbreviate or use "... (other atoms)" or any placeholder.
+   - *** xyzfile * is NOT allowed.** Do not use * xyzfile ... * under any circumstance when a structure is from retrieval. The generated input must contain the full XYZ coordinates inline.
+   - If the summary includes full XYZ coordinates, use them exactly. If the summary only gave a filename, the retrieval/summary step must be fixed to include full coordinates—do not fall back to xyzfile; request or assume the coordinates are to be inlined.
+   - Do NOT leave a placeholder for geometry. Do NOT use any .xyz filename (e.g. S3A_W_core.xyz, S3AW_core.xyz) in the geometry block.
+9. **No parallelization (resource limit):** Generate code for single-core (serial) execution only. Do NOT add any parallel/compute settings (e.g. do NOT use %pal with nprocs greater than 1). If you need a %pal block for compatibility, use exactly one process (e.g. %pal nprocs 1 end). Do not generate MPI, multi-thread, or multi-process options.
+
+**CRITICAL:** You MUST STRICTLY FOLLOW the code generation rules.
+
+**REMINDER:** Your final answer MUST contain <CODE> and </CODE> with the full ORCA input between them. The parser extracts code only from these tags.
+

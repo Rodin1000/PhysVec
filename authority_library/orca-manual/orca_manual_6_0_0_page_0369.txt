@@ -1,0 +1,78 @@
+[... end of page 368 ...]
+ser-definedcentersafterconvergingthehigh-spinwavefunction. With
+thismethodarbitraryspintopologiesshouldbeaccessible. Theuseissimple:
+#
+# Example of a broken symmetry calculation using the "FlipSpin" feature
+#
+! B3LYP DEF2-SVP TightSCF
+%scf
+FlipSpin 1
+# Flip spin is a vector and you can give a list of atoms
+# on which you want to have the spin flipped. For example
+# FlipSpin 17,38,56
+# REMEMBER: counting starts at atom 0!
+(continuesonnextpage)
+346 Chapter6. RunningTypicalCalculations
+
+--- Page 369 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+FinalMs 0
+# The desired Ms value of the broken symmetry determinant.
+# This value MUST be given since the program cannot determine it by itself.
+end
+* xyz 0 3
+Li 0 0 0
+Li 0 0 4
+*
+Finally, you may attempt to break the symmetry by using the SCF stability analysis feature (see Section SCF
+StabilityAnalysis). ThegroundspinstatecanbeobtainedbydiagonalizingtheabovespinHamiltonianthrough
+ORCA-ECAutility(seeorca_eca).
+ApproximateSpinProjectionMethod
+Theapproximatespinprojection(AP)method,proposedbyYamaguchiandco-workers,isatechniquetoremove
+thespincontaminationfromexchangecouplingconstants.[736,895,896]Inthisscheme,theenergyofasystem
+isgivenby
+𝐸 =𝛼𝐸 −(𝛼−1)𝐸 (6.21)
+AP BS HS
+Theparameter𝛼iscalculatedas
+𝑆HS(︀ 𝑆HS+1 )︀ −𝑆BS(︀ 𝑆BS+1 )︀
+𝛼= 𝑍 𝑍 (6.22)
+⟨Sˆ2⟩HS−⟨Sˆ2⟩BS
+Here, 𝑆BS is the 𝑧-component of the total spin for the BS state (𝑆BS = (𝑁 −𝑁 )/2). Alternatively, one can
+𝑍 𝑍 𝛼 𝛽
+adoptNoodleman’sscheme,[637]where𝛼iscalculatedasfollows
+𝑆HS(︀ 𝑆HS+1 )︀ −𝑆BS(︀ 𝑆BS+1 )︀
+𝛼= 𝑍 𝑍 (6.23)
+(𝑆HS)2
+orRuiz’sscheme,[732]with𝛼equalto
+𝑆HS(︀ 𝑆HS+1 )︀ −𝑆BS(︀ 𝑆BS+1 )︀
+𝛼= 𝑍 𝑍 (6.24)
+𝑆HS(𝑆HS+1)
+TheAPmethodisrequestedviathetagAPMethodinthe%scfblock:
+%scf BrokenSym NA,NB
+APMethod 3 # 1 = Noodleman
+# 2 = Ruiz
+# 3 = Yamaguchi
+end
+ThedefaultisAPMethod 0,whichcorrespondstoanormalBScalculation. Yamaguchi’sAPmethodisavailable
+forsinglepointenergycalculationsandgeometryoptimizations. Ifwerunageometryoptimizationinthecontext
+ofYamaguchi’sAPmethod,then,thegradientofequation(6.21)w.r.tanucleardisplacement𝑋 readsas
+𝜕𝐸 𝜕𝐸 𝜕𝐸 𝜕𝛼
+AP =𝛼 BS −(𝛼−1) HS + (𝐸 −𝐸 ) (6.25)
+𝜕𝑋 𝜕𝑋 𝜕𝑋 𝜕𝑋 BS HS
+Thelasttermcontainsthederivative 𝜕𝛼. ORCAusestheformalismproposedbySaitoandThiel,whichinvolves
+𝜕𝑋
+solvingtheCP-SCFequationsineachgeometryoptimizationcycle.[737]Thecostofsuchacalculationishigher
+thanusingNoodleman’sorRuiz’sschemes,where 𝜕𝛼 =0.
+𝜕𝑋
+6.12. CalculationofProperties 347
+
+[... start of page 370 ...]
+ORCAManual,Release6.0.0
+6.13 Local Energy Decomposition
+“LocalEnergyDecomposition”(LED)analysis[33,105,766]isatoolforobtaininginsightsintothenatureofin-
+termolecularinteractionsbydecomposingtheDLPNO-CCSD(T)energyintophysicallymeaningfulcontributions.
+Forinstance,thisapproachcanbeusedtodecomposetheDLPNO-CCSD(T)interactionenergybetweenapairof
+interacting fragments, as detailed in Section Local Energy Decomposition. A useful comparison of this scheme
+withalternativewaysofdecomposinginteractionenergiesisreportedinRef.[27,28,29].
+6.13.1 Close

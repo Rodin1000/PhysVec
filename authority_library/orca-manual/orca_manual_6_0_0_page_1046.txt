@@ -1,0 +1,98 @@
+[... end of page 1045 ...]
+0.00 MB
+-> Final InCoreLevel ... 5
+Wavefunction type
+-----------------
+Correlation treatment ... CCSD
+Single excitations ... ON
+Orbital optimization ... OFF
+Calculation of Lambda equations ... ON
+Calculation of Brueckner orbitals ... OFF
+Perturbative triple excitations ... OFF
+CPCM scheme ... PTE(S)
+Calculation of F12 correction ... OFF
+Inthefollowingsubsections,wedescribethedifferentCCSD/C-PCMapproachesavailableinORCAandhowto
+usethem.
+7.53. ImplicitSolvationModels 1023
+
+--- Page 1046 ---
+ORCAManual,Release6.0.0
+PTEscheme
+Inthe“perturbationtheoryenergy”(PTE)scheme,thelasttermineq(7.332)isequaltozero(thistermdoesnot
+dependonΛand𝑇),
+ℒ(Λ,𝑇)=𝐸 +⟨𝜓 |(1+Λ)e−𝑇𝐻 e𝑇|𝜓 ⟩+Q ·V¯ (Λ,𝑇) (7.333)
+0 0 0𝑁 0 0 𝑁
+ThepotentialV¯ canbewrittenasfollows:
+𝑁
+∑︁ ∑︁ ∑︁
+V¯ (Λ,𝑇)=⟨𝜓 |(1+Λ)e−𝑇 v {𝑝+𝑞}e𝑇|𝜓 ⟩= v ⟨𝜓 |(1+Λ)e−𝑇{𝑝+𝑞}e𝑇|𝜓 ⟩= v Γ
+𝑁 0 𝑝𝑞 0 𝑝𝑞 0 0 𝑝𝑞 𝑝𝑞
+𝑝𝑞 𝑝𝑞 𝑝𝑞
+(7.334)
+wherewehaveusedthatV = ∑︀ v {𝑝+𝑞}(second-quantizedformofanormalorderedoperator),withv
+𝑁 𝑝𝑞 𝑝𝑞 𝑝𝑞
+thecomponentsofthesolutepotentialintheMObasis. ThematrixΓistheCCSDrelaxedone-electrondensity
+matrix. Then,thecontributiontotheequationsforthe𝑇 amplitudescomesfromthederivativeofV¯ (Λ,𝑇)with
+𝑁
+respecttotheΛamplitudes(Q doesnotdependontheLagrangemultipliers). Inthiscontext, theHamiltonian
+0
+𝐻 contains a term that depends on the elements of the Fock matrix (∑︀ 𝑓 {𝑝+𝑞}) and that has the same
+0𝑁 𝑝𝑞 𝑝𝑞
+functionalformasV . AstheFockmatrixisupdatedinthereferencecalculationwithaC-PCMtermthatreads
+𝑁
+as(inAObasis)𝐹CPCM =Q ·V ,thenthetermQ ·V¯ (Λ,𝑇)isaddedimplicitlytoeq(7.333).
+𝜇𝜈 0 𝜇𝜈 0 𝑁
+Oncethe𝑇 amplitudesareobtained,thetotalenergy,𝐸,iscalculatedas
+∑︁ 1∑︁ (︁ )︁
+𝐸 =𝐸 0 +⟨𝜓 0 |e−𝑇(𝐻 0𝑁 +Q 0 ·V 𝑁 )e𝑇|𝜓 0 ⟩=𝐸 0 + 𝐹 𝑖𝑎 𝑡𝑖 𝑎 + 4 ⟨𝑖𝑗||𝑎𝑏⟩ 𝑡𝑖 𝑎 𝑗 𝑏 +2𝑡𝑖 𝑎 𝑡𝑗 𝑏 (7.335)
+𝑖𝑎 𝑖𝑗𝑎𝑏
+Then,theC-PCMcontributiontotheCCenergywithinthePTEschemeoccursthroughtheterm 1Q ·V in𝐸
+2 0 0 0
+andimplicitlythroughtheFockmatrixelements𝐹 (𝐹 =𝐹0 +Q ·v ).
+𝑖𝑎 𝑖𝑎 𝑖𝑎 0 𝑖𝑎
+The PTE scheme corresponds to “CPCMccm 0”, and is implemented for canonical-CCSD (RHF and UHF) and
+DLPNO-CCSD(RHFandUHF).Forinstance,foraDLPNO-CCSDcalculation(closed-shellreference)ofasystem
+solvatedbywaterusingthePTEscheme,theinputfilelookslike:
+! DLPNO-CCSD cc-pVTZ cc-PVTZ/C TightSCF CPCM(Water)
+%cpcm
+CPCMccm 0
+end
+* xyzfile 0 1 water.xyz
+PTE(S)scheme
+Inthisscheme(wherethe“S”standsforsingles),thelasttermineq(7.332)dependsonthe𝑇 amplitudes,butnot
+ontheΛamplitudes,
+1
+ℒ(Λ,𝑇)=𝐸 +⟨𝜓 |(1+Λ)e−𝑇𝐻 e𝑇|𝜓 ⟩+Q ·V¯ (Λ,𝑇)+ Q¯ (𝑇)·V¯ (𝑇) (7.336)
+0 0 0𝑁 0 0 𝑁 2 𝑁 𝑁
+Again, in the same way as for the PTE scheme, the C-PCM contribution to the equations for the 𝑇 amplitudes
+comesfromthetermQ ·V¯ (Λ,𝑇)ineq (7.336),whichisimplictlyaddedtotheFockmatrixelementsinthe
+0 𝑁
+MObasis. Thelasttermineq (7.336)doesnotdependontheΛamplitudesandthendoesnotcontributetothe
+equationsforthe𝑇 amplitudes. However,thistermdependsonthe𝑇 amplitudesthroughtheelements𝛾 ofthe
+𝑎𝑖
+densitymatrixΓ,
+𝛾 𝑎𝑖 =𝑡𝑖 𝑎 + ∑︁(︀ 𝑡𝑖 𝑎 𝑚 𝑒 −𝑡𝑖 𝑒 𝑡𝑚 𝑎 )︀ 𝜆𝑒 𝑚 − 1 2 ∑︁ 𝜆𝑒 𝑚 𝑓 𝑛 (︀ 𝑡𝑖 𝑒 𝑛 𝑓 𝑡𝑚 𝑎 +𝑡𝑚 𝑎𝑓 𝑛𝑡𝑖 𝑒 )︀ (7.337)
+𝑚𝑒 𝑚𝑛𝑒𝑓
+andthenitcontributestothefinalenergy𝐸 inthefollowingway:
+(︃ )︃ (︃ )︃
+1 1 ∑︁ ∑︁
+Q¯ (𝑇)·V¯ (𝑇)= 𝑡𝑖q · 𝑡𝑖v (7.338)
+2 𝑁 𝑁 2 𝑎 𝑎𝑖 𝑎 𝑎𝑖
+𝑎𝑖 𝑎𝑖
+1024 Chapter7. DetailedDocumentation
+
+[... start of page 1047 ...]
+ORCAManual,Release6.0.0
+Thatgivesthefinalequationforthetotalenergyofoursystem,
+(︃ )︃ (︃ )︃
+1 ∑︁ ∑︁
+𝐸 =𝐸 +⟨𝜓 |e−𝑇(𝐻 +Q ·V )e𝑇|𝜓 ⟩+ 𝑡𝑖q · 𝑡𝑖v =
+0 0 0𝑁 0 𝑁 0 2 𝑎 𝑎𝑖 𝑎 𝑎𝑖
+𝑎𝑖 𝑎𝑖 (7.339)
+(︃ )︃ (︃ )︃
+∑︁ 1∑︁ (︁ )︁ 1 ∑︁ ∑︁
+=𝐸 + 𝐹 𝑡𝑖 + ⟨𝑖𝑗||𝑎𝑏⟩ 𝑡𝑖𝑗 +2𝑡𝑖𝑡𝑗 + 𝑡𝑖q · 𝑡𝑖v
+0 𝑖𝑎 𝑎 4 𝑎𝑏 𝑎 𝑏 2 𝑎 𝑎𝑖 𝑎 𝑎𝑖
+𝑖𝑎 𝑖𝑗𝑎𝑏 𝑎𝑖 𝑎𝑖
+Therefore, the CC energy for a solvated system within the PTE(S) scheme involves three C-PCM contributions:
+(1)theterm 1Q ·V includedin𝐸 ,(2)theterm∑︀ Q ·v 𝑡𝑖 thatoccursimplicitlyth

@@ -1,0 +1,75 @@
+[... end of page 115 ...]
+CCSDthereisalsoa
+thirdvariant(LPNO3-CCSD,alsointheopen-shellversion)whichavoidsneglectingthedressingoftheexternalexchangeoperator.However,
+theresultsdonotdiffersignificantlyfromvariant1butthecalculationswillbecomemoreexpensive.Thusitisnotrecommendtousevariant
+3.Variant2isnotavailableintheopen-shellversion.
+6.1. SinglePointEnergiesandGradients 93
+
+--- Page 116 ---
+ORCAManual,Release6.0.0
+thecanonicalresultveryclosely. Infact,oneshouldnotviewtheLPNOmethodsasnewmodelchemistry-they
+are designed to reproduce the canonical results, including BSSE. This is different from the domain based local
+correlationmethodsthatdoconstituteanewmodelchemistrywithpropertiesthataredifferentfromtheoriginal
+methods.
+In some situations, it may be appropriate to adapt the accuracy of the calculation. Sensible defaults have been
+determinedfromextensivebenchmarkcalculationsandareaccessibleviaLoosePNO,NormalPNOandTightPNO
+keywordsinthesimpleinputline.[522]
+ThesekeywordsrepresenttherecommendedwaytocontroltheaccuracyofDLPNOcalculationsasfollows. Man-
+ualchangingofthresholdsbeyondthesespecifyingthesekeywordsisusuallydiscouraged.
+# Tight settings for increased accuracy, e.g. when investigating
+# weak interactions or conformational equilibria
+! cc-pVTZ cc-pVTZ/C DLPNO-CCSD(T) TightPNO TightSCF
+# OR: Default settings (no need to give NormalPNO explicitly)
+# Useful for general thermochemistry
+! cc-pVTZ cc-pVTZ/C DLPNO-CCSD(T) NormalPNO TightSCF
+# OR: Loose settings for rapid estimates
+! cc-pVTZ cc-pVTZ/C DLPNO-CCSD(T) LoosePNO TightSCF
+%maxcore 2000
+* xyz 0 1
+... (coordinates)
+*
+SinceORCA4.0, thelinear-scalingDLPNOimplementationdescribedinreference[720]isthedefaultDLPNO
+algorithm. However, forcomparison, thefirstDLPNOimplementationfromreferences[719]and[721]canstill
+becalledbyusingtheDLPNO2013prefixinsteadoftheDLPNO-prefix.
+# DLPNO-CCSD(T) calculation using the 2013 implementation
+! cc-pVTZ cc-pVTZ/C DLPNO2013-CCSD(T)
+# DLPNO-CCSD(T) calculation using the linear-scaling implementation
+! cc-pVTZ cc-pVTZ/C DLPNO-CCSD(T)
+* xyz 0 1
+... (coordinates)
+*
+Until ORCA 4.0, the “semi-canonical” approximation is used in the perturbative triples correction for DLPNO-
+CCSD.Itwasfoundthatthe“semi-canonical”approximationisaverygoodapproximationformostsystems. How-
+ever,the“semi-canonical”approximationcanintroducelargeerrorsinrarecases(particularlywhentheHOMO-
+LUMOgapissmall),whereastheDLPNO-CCSDisstillveryaccurate. Toimprovetheaccuracyofperturbative
+triplescorrection,since4.1,animprovedperturbativetriplescorrectionforDLPNO-CCSDisavailable,DLPNO-
+CCSD(T1)[341]. In DLPNO-CCSD(T1), the triples amplitudes are computed iteratively, which can reproduce
+moreaccuratelythecanonical(T)energies.
+It is necessary to clarify the nomenclature used in ORCA input files. The keyword to invoke “semi-canonical”
+perturbativetriplescorrectionapproximationisDLPNO-CCSD(T).While,thekeywordofimprovediterativeap-
+proximationisDLPNO-CCSD(T1). However,inourrecentpaper[341],the“semi-canonical”perturbativetriples
+correction approximation is named DLPNO-CCSD(T0), whereas the improved iterative one is called DLPNO-
+CCSD(T).Thus,thenamesusedinourpaperaredifferentfromthoseinORCAinputfiles. Anexampleinputfile
+toperformimprovediterativeperturbativetriplescorrectionforDLPNO-CCSDisgivenbelow,
+# DLPNO-CCSD(T1) calculation using the iterative triples correction
+! cc-pVTZ cc-pVTZ/C DLPNO-CCSD(T1)
+%mdci
+(continuesonnextpage)
+94 Chapter6. RunningTypicalCalculations
+
+[... start of page 117 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+TNOSCALES 10.0 #TNO truncation scale for strong triples, TNOSCALES*TCutTNO.
+Default setting is 10.0
+TNOSCALEW 100.0 #TNO truncation scale for weak triples, TNOSCALEW*TCutTNO
+Default setting is 100.0
+TriTolE 1e-4 #(T) energy convergence tolerance
+Default setting is 1e-4
+%end
+* xyz 0 1
+... (coordinates)
+*
+SinceORCA4.2,theimprovediterativeperturbativetriplescorrectionforopen-shellDLPNO-CCSDisavailable
+aswell. Thekeywordofopen-shellDLPNO-CCSD(T)isthesameasthatoftheclosed-shellcase.
+SinceORCA4.0,thehigh-spinopen-shellversionoftheDLP

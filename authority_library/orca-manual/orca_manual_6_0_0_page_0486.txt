@@ -1,0 +1,92 @@
+[... end of page 485 ...]
+silybecomeverylarge. MatrixinversionisanO(N3)processsuchthatforlargemolecules,thissteptakessomerealtime. However,in
+ORCA,thisisonlydoneonceduringthecalculation,whereasotherprogramsthatconstrainthefittoalsoexactlyreproducethenumberof
+electronsperformasimilarprocesseachiteration.StartingfromORCA2.2.09,theCholeskydecompositionisusedinfavorofmatrixinversion,
+removinganybottleneckconcerningthesolutionofthelinearequationsystem.
+5ThisalgorithmwasdescribedbyKendallandFrüchtl[440].
+7.4. ChoiceofComputationalModel 463
+
+--- Page 486 ---
+ORCAManual,Release6.0.0
+Alternatively,theRImethodcanbeusedfortheCoulombtermandthestandardtreatmentfortheexchangeterm.
+This method is called RIJONX since the exchange term should tend towards linear scaling for large molecules.
+ThisfeaturecanbeusedforHartree-FockandhybridDFTcalculationsbyusing:
+%method
+RI on # do use the RI approximation
+RIFlags 1 # ...but treat exchange exactly
+end
+# Equivalently, use the following simple keyword:
+! RIJONX
+# Remember to assign an auxiliary basis set!
+TherequirementsfortheauxiliarybasisarethesameasforthenormalRI-Jmethod.
+UsingtheRIApproximationforHartree-FockandHybridDFT(RIJCOSX)
+Note: ThisisthedefaultforhybridDFT!Canbeturnedoffbyusing!NOCOSX.
+Theaimofthisapproximationistoefficientlycomputetheelementsofexchange-typematrices6:
+∑︁
+𝐾 𝜇𝜈 = 𝑃 𝜅𝜏 (𝜇𝜅|𝜈𝜏) (7.15)
+𝜅𝜏
+wherePissomekindofdensity-typematrix(notnecessarilysymmetric)andthetwo-electronintegralsaredefined
+overthebasisset{𝜙}by:
+∫︁
+(𝜇𝜅|𝜈𝜏)= 𝜇(r )𝜅(r )𝜈(r )𝜏(r )𝑟−1𝑑r 𝑑r (7.16)
+1 1 2 2 12 1 2
+Theapproximationpursuedherecanbewrittenasfollows:
+∑︁ ∑︁ ∑︁
+𝐾 𝜇𝜈 ≈ 𝑋 𝜇𝑔 𝐴 𝜐𝜏 (r 𝑔 ) 𝑃 𝜅𝜏 𝑋 𝜅𝑔 (7.17)
+𝑔 𝜏 𝜅
+Here,theindex𝑔referstogridpointsr and:
+𝑔
+𝑋 =𝑤1/2𝜅(r ) (7.18)
+𝜅𝑔 𝑔 𝑔
+∫︁ 𝜈(r)𝜏(r)
+𝐴 (r )= 𝑑r (7.19)
+𝜐𝜏 𝑔 |r−r |
+𝑔
+where 𝑤 denotes the grid weights. Thus, the first integration is carried out numerically and the second one
+𝑔
+analytically. NotethatthisdestroystheHermitiancharacterofthetwo-electronintegrals.
+Equation(7.17)isperhapsbestevaluatedinthreesteps:
+𝐹 =(PX) (7.20)
+𝜏𝑔 𝜏𝑔
+∑︁
+𝐺 𝜈𝑔 = 𝐴 𝜈𝜏 (r 𝑔 )𝐹 𝜏𝑔 (7.21)
+𝜏
+𝐾 =(XG+) (7.22)
+𝜇𝜈 𝜇𝜈
+As such, the equations are very similar to the pseudo-spectral method extensively developed and discussed by
+Friesnerandco-workerssincethemid1980sandcommerciallyavailableintheJaguarquantumchemistrypackage.
+Themaindifferenceatthispointisthatinsteadof𝑋 thereappearsaleast-squarefittingoperator𝑄 inFriesner’s
+𝜅𝑔 𝜅𝑔
+formulation. NotethatananalogueofthefittingprocedurehasalsobeenimplementedinORCAand—incontrast
+toFriesner’spseudo-spectralmethod—doesnotneedspeciallyoptimizedgrids. Thebasicideaistoremovethe
+griderrorswithinthebasissetby“fitting”thenumericaloverlaptotheanalyticalone. Duetoitsnature,overlap
+fittingissupposedtoworkbetterwithlargerbasissets.
+6Thetheoryofthisapproachtogetherwithallevaluationsandimplementationdetailsisdescribedin[383,623].Referencestoearlierwork
+canalsobefoundthere.
+464 Chapter7. DetailedDocumentation
+
+[... start of page 487 ...]
+ORCAManual,Release6.0.0
+TheRIJCOSXgradient
+Giventheexchangematrix,theexchangeenergyisgivenby(asumoverspincasesisleftouthereforsimplicity):
+1∑︁
+𝐸X =
+2
+𝑃
+𝜇𝜈
+𝐾
+𝜇𝜈
+(P) (7.23)
+𝜇𝜈
+PrevioustoORCA6,thegradientoftheCOSXcontributiontotheenergywastakenasanapproximation:
+𝜕𝐸
+𝑋 ≈2
+∑︁∑︁𝜕𝐹
+𝜇𝑔𝐺 (7.24)
+𝜕𝜆 𝜕𝜆 𝜈𝑔
+𝑔 𝜇𝜈
+with
+𝜕𝐹 𝜇𝑔 =𝑤1/2 ∑︁ 𝑃 𝜕𝑋 𝜇𝑔 (7.25)
+𝜕𝜆 𝑔 𝜅𝜇 𝜕𝜆
+𝜅
+aspublishedintheoriginalimplementationpaper[6

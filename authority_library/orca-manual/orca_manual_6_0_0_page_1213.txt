@@ -1,0 +1,97 @@
+[... end of page 1212 ...]
+Field[j] - E_Field;
+write2String(FFieldStringPlusMinus, " %lf, %lf, %lf",
+FField[0], FField[1], FField[2]);
+#
+# --------------------- (-+) ------------------------------
+for k from 0 to 2 Do
+FField[k] = 0.0;
+EndFor
+FField[i] = FField[i] - E_Field;
+FField[j] = FField[j] + E_Field;
+write2String(FFieldStringMinusPlus, " %lf, %lf, %lf",
+FField[0], FField[1], FField[2]);
+(continuesonnextpage)
+1190 Chapter7. DetailedDocumentation
+
+--- Page 1213 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+#
+# --------------------- (--) ------------------------------
+for k from 0 to 2 Do
+FField[k] = 0.0;
+EndFor
+FField[i] = FField[i] - E_Field;
+FField[j] = FField[j] - E_Field;
+write2String(FFieldStringMinusMinus, " %lf, %lf, %lf",
+FField[0], FField[1], FField[2]);
+# ----------------------------------------
+# Perform the calculations.
+# The plus_plus (++) one
+# ----------------------------------------
+ReadMOs(1);
+New_Step
+!&{method} &{basis} &{restOfInput}
+%SCF
+EField = &{FFieldStringPlusPlus}
+End
+&{blocksInput}
+Step_End
+EPlusPlus.readProperty(propertyName=enPropName);
+# ----------------------------------------
+# The plus_minus (+-) one
+# ----------------------------------------
+ReadMOs(1);
+New_Step
+!&{method} &{basis} &{restOfInput}
+%SCF
+EField = &{FFieldStringPlusMinus}
+End
+&{blocksInput}
+Step_End
+EPlusMinus.readProperty(propertyName=enPropName);
+# ----------------------------------------
+# The minus_plus (-+) one
+# ----------------------------------------
+ReadMOs(1);
+New_Step
+!&{method} &{basis} &{restOfInput}
+%SCF
+EField = &{FFieldStringMinusPlus}
+End
+&{blocksInput}
+Step_End
+EMinusPlus.readProperty(propertyName=enPropName);
+# ----------------------------------------
+# And the minus_minus (--) one
+# ----------------------------------------
+ReadMOs(1);
+New_Step
+!&{method} &{basis} &{restOfInput}
+%SCF
+EField = &{FFieldStringMinusMinus}
+End
+&{blocksInput}
+Step_End
+EMinusMinus.readProperty(propertyName=enPropName);
+a[i][j] = -(EPlusPlus-EPlusMinus-EMinusPlus+EMinusMinus)/(4*E_Field*E_Field);
+(continuesonnextpage)
+7.60. CompoundExamples 1191
+
+[... start of page 1214 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+EndFor
+EndFor
+# -----------------------------------------
+# Diagonalize
+# -----------------------------------------
+a.Diagonalize(aEigenValues, aEigenVectors);
+# -----------------------------------------
+# Do some printing
+# -----------------------------------------
+print( "\n\n");
+print( " -------------------------------------------------------\n");
+print( " COMPOUND \n");
+print( " Numerical calculation of dipole polarizability\n

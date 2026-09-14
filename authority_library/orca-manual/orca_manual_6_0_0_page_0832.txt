@@ -1,0 +1,88 @@
+[... end of page 831 ...]
+ively
+becomefaster(untilrestart). Turningofftherootwiseconvergencecheckispossible,butnotrecommended. Inthis
+case,themaximumofallresidualsquarenormsischeckedforconvergence,andalliterationswilltakeroughlythe
+sameamountoftimesincenovectorsareremovedinanyiteration. However,thisprocedurecanbenumerically
+unstable,sincetheresidualsofsomerootsmightbecomeveryclosetozero,andtryingtogeneratenewvectors,
+whichareorthogonaltothese,mayleadtonumericaldisaster. Inshort,therecommendeddefaultishavingboth
+CheckEachRootandRootHomingsettotrue. If CheckEachRootisfalse,thenRootHomingshouldalsobeset
+tofalse,asitmaycauseproblemsif NDavistoosmall. TheconvergencethresholdoftheresidualinDavidson’s
+method can be larger than that for the ground state CC residual threshold in order to obtain converged results.
+Namely,avalueof DTolof1e-5isalmostalwaysenoughtogetwellconvergedenergies.
+7.33. ExcitedStatesviaEOM-CCSD 809
+
+--- Page 832 ---
+ORCAManual,Release6.0.0
+AtthispointitisworthdiscussingtheroleofthekeywordNDav. ThiskeyworddeterminesatwhatpointtheDavid-
+sonalgorithmshouldberestarted. Ifitischosentoosmall,itmaycauseslowconvergence. Ifthisvalueistoolarge,
+thismayresultinoverwhelmingdemandsonmemory/diskspacerequirements. Thedefaultvalue(20)ischosen
+withthehopethatno,ormaybeonerestartwillberequired. Itshouldonlybechangedifcomputationalresources
+demandit. However,thetreatmentofcoreionizationorcoreexcitationprocessesoftenrequiresalargevalueof
+NDav. At restart, Ritz vectors are copied as new trial vectors for all roots, which will then be orthonormalized,
+whilenewvectorswillonlybegeneratedforthenon-convergedroots. Thismeansthatthestepaftertherebuilding
+oftheexpansionspacewillbe1-2timesasexpensiveasoneoftheinitialsteps.
+New directions (trial vectors) are generated from the preconditioned residual vectors. If no preconditioning is
+applied(thepreconditioneristakentobeaunitmatrix),onefallsbacktotheLanczosalgorithm,whichisinferior
+to the Davidson algorithm. This happens if the keyword DoLanczos is true. This is not recommended, as the
+LanczosalgorithmconvergesseveraltimesslowerthanDavidson’s,andistherefordebuggingmainly. Theoriginal
+Davidsonpreconditioneristheinverseofadiagonalmatrixwhichcontainsthedifferenceofthediagonalelements
+oftheHamiltonianandthecurrentapproximationtotheeigenvaluebelongingtothegivenroot. Letusconsider
+the closed-shell RHF implementation for simplicity. If 𝑅 and 𝑅 are elements of the singles and doubles
+𝑖𝑎 𝑖𝑗𝑎𝑏
+amplitudes,respectively,thentheupdatedvectors(𝑇 ,𝑇 )havetheform
+𝑖𝑎 𝑖𝑗𝑎𝑏
+𝑅
+𝑇 = 𝑖𝑎
+𝑖𝑎 𝐷 +ℰ
+𝑖𝑎 𝑅
+forsingles,and
+𝑅
+𝑇 = 𝑖𝑎
+𝑖𝑗𝑎𝑏 𝐷 +ℰ
+𝑖𝑗𝑎𝑏 𝑅
+fordoubles. Here,𝐷 and𝐷 arerelatedto,andpossiblyapproximationsof,therespectivediagonalHamil-
+𝑖𝑎 𝑖𝑗𝑎𝑏
+tonianelements. ThesimplestapproximationisjusttoconstructthesefromdiagonalFockmatrixelements(i.e.
+orbitalenergies)as𝐷 =𝜀 −𝜀 and𝐷 =𝜀 +𝜀 −𝜀 −𝜀 . Aslightlybetterpreconditioningcanbeobtained
+𝑖𝑎 𝑎 𝑖 𝑖𝑗𝑎𝑏 𝑎 𝑏 𝑖 𝑗
+asfollows. Forsingles,taketheexactCISdiagonalelements,𝐷 = 𝜀 −𝜀 +𝑔 ,wherethelasttermisthe
+𝑖𝑎 𝑎 𝑖 𝑖𝑖𝑎𝑎
+respectiveantisymmetrizedintegral;andconstructthedoublesas𝐷 =𝐷 +𝐷 . Thisisthedefault,andcan
+𝑖𝑗𝑎𝑏 𝑖𝑎 𝑗𝑏
+bechangedbacktothesimpleFockmatrixguessbysettingUseCISUpdatetofalse.
+Following the preconditioning step, the resulting vectors are orthogonalized to the previous set of trial vectors,
+andorthonormalizedamongthemselves. Since,thetrialvectorsdonotchangeoncetheyaregenerated(unlessa
+restartoccurs),onlythenewelementsoftheoverlapmatrixneedtobegeneratedfortheorthonormalization. The
+numericalthresholdfortheinversion(andotherdivisionsteps)iscontrolledbytheparameter OTol. Finally,the
+amountofprintedinformationcanbecontrolledviathePrintLevelkeyword. Ifnotgivenorequalto2,onlybasic
+iteration information will be printed. If set to 3, detailed iteration information will be printed (recommended if
+timingresultsforindividualstepsarerequired),while4orhighertriggersadditional(andveryverbose)information
+fromothersubroutinesaswell.
+The default solver is a multi-root Davidson procedure. The single-root solver can be initiated by setting
+DoRootwiseandFollowCIStotrue. Thelatterismorestablewhenalargenumberofrootsarerequested.
+7.33.7 Properties in the RHF EOM implementation
+TheonlypropertythatcanbecalculatedwiththecurrentRHFEOMimplementationisthetransitionmoment. Itis
+calculatedasaCI-likeexpectationvalue,asproposedbyStantonandBartlett. Therightandlefttransitiondensity
+aredefinedas
+𝜌𝐺𝑟→𝐸𝑥 =⟨𝜑 |(1+Λ)[𝑒−𝑇{𝑝+𝑞−}𝑒𝑇,𝑅]|𝜑 ⟩
+𝑝𝑞 0 0
+𝜌𝐸𝑥→𝐺𝑟 =⟨𝜑 |𝐿𝑒−𝑇{𝑝+𝑞−}𝑒𝑇|𝜑 ⟩
+𝑝𝑞 0 0
+Intheaboveequation,Λcorrespondstothegroundstateleftvector,whichneedstosolvedonceand𝐿istheleft
+vector,whichneedstobesolvedseparatelyforeachroot. Oncetherightandleftvectorshavebeenobtained,the
+leftandrighttransitiondensitiesareconstructedandtheoscillatorstrengthiscalculatedusingfollowingformula
+2
+𝑓 = 𝜀|𝜇 𝜌𝐸𝑥→𝐺𝑟||𝜇 𝜌𝐺𝑟→𝐸𝑥|
+3 𝑝𝑞 𝑝𝑞 𝑝𝑞 𝑝𝑞
+810 Chapter7. DetailedDocumentation
+
+[... start of page 833 ...]
+ORCAManual,Release6.0.0
+Theoscillatorstrength,calculatedbydefault,employsalinearapproximationforΛ. The𝐿vectorsare,ontheother
+hand, calculatedasageneralinverseofthecorresponding𝑅vectors. Thisapproximationrequiresnoadditional
+effort over the energy calculation and gives similar accuracy as that of the exact oscillator strength calculation,
+which is at least twice the cost of the energy calculation. Exact EOM-CC transition moments can, however, be
+calculatedbysettingDoLeftandDoTDMtotrue. Pleasenotethattransitionmomentshavenotyetbeenimplemented
+fortheUHFEOM-CCSDapproach.
+7.33.8 Some tips and tricks for EOM-CC calculation
+• The COSX approximation gives significant savings in terms of memory use, disk space us

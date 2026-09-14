@@ -1,0 +1,59 @@
+[... end of page 675 ...]
+ RIJK in CASSCF
+! def2-svp def2/JK RIJK
+# Commented out: Alternative definition via %basis block
+#%basis
+#auxJK "def2/JK" # or "AutoAux"
+#end
+The described methodology allows the computation of systems with up to 2000 basis functions. Even larger
+molecules are accessible in the framework of DLPNO-NEVPT2 described in the next subsection. Several ex-
+amplescanbefoundintheCASSCFtutorial.
+7.19. N-ElectronValenceStatePertubationTheory 653
+
+--- Page 676 ---
+ORCAManual,Release6.0.0
+7.19.2 Beyond the RI approximation: DLPNO-NEVPT2
+Forsystemswithmorethan80atoms,werecommendtherecentlydevelopedDLPNO-NEVPT2.[344]Itisasuc-
+cessful combination of DLPNO strategy with the FIC-NEVPT2 method. As its single reference counterparts,
+DLPNO-NEVPT2 recovers 99.9% of the FIC-NEVPT2 correlation energies even for large system. The input
+structureissimilartotheparentingFIC-NEVPT2method. BelowyoufindaninputexamplefortheFe(II)-complex
+depictedinFig.7.6,wheretheactivespaceconsistsofthemetal-3dorbitals. Theexampletakesabout9hour(in-
+cluding3hourforoneCASSCFiteration)using8cores(2.60GHzIntelE5-2670CPU)forthecalculationtofinish.
+AdetaileddescriptionoftheDLPNO-NEVPT2methodologycanbefoundinourarticle.[344].
+# DLPNO-NEVPT2 calculation for quintet state of FeC72N2H100
+!PAL8 def2-TZVP def2/JK
+!moread noiter
+%moinp "FeC72N2H100.gbw-CASSCF"
+%MaxCore 8000
+%casscf
+nel 6
+norb 5
+mult 5
+TrafoStep RI # RI approximation is mandatory for DLPNO-NEVPT2
+PTMethod DLPNO_NEVPT2
+# detailed settings (optional)
+PTSettings
+TCutPNO 1e-8 # most important parameter controlling the accuracy (default 1e-8)
+MaxIter 20 # maximum for residual iterations
+MaxDIIS 7 # DIIS dimension
+end
+end
+*xyz 0 5 FeC72N2H100.xyz
+JustlikeRI-NEVPT2,thecalculationsrequiresanauxiliarybasis. Theaux-basisshouldbeof/Cor/JKtype(more
+accurate). AsidefromthepaperofGuoetal,[344]aconcisereportoftheaccuracycanbefoundintheCASSCF
+tutorial,wherewecomputeexchangecouplingparameters. Notethatinthesnippetabove,wehaverepeatedsome
+ofthedefaultsettingintheNEVPTsub-block. Thisisnotmandatoryandshouldbeavoidedtokeeptheinputas
+simpleaspossible.
+As mentioned earlier, the CASSCF step can be accelerated with the RIJK or RIJCOSX approximation. Both
+options are equally valid for the DLPNO-NEVPT2. The RIJK variant typically produces more accurate results
+thanRIJCOSX.Theinputfileisalmostthesameasbefore,exceptforthekeywordline:
+# The combination of RIJK with DLPNO-NEVPT2
+!PAL8 def2-TZVP def2/JK conv RIJK
+654 Chapter7. DetailedDocumentation
+
+[... start of page 677 ...]
+ORCAManual,Release6.0.0
+Fig.7.6: StructureoftheFeC N H
+72 2 100
+7.19.3 Explicitly correlated NEVPT2: NEVPT2-F12 and DLPNO-NEVPT2-F12
+Likeinthesingle-referenceMP2theory,theNEVPT2correlationenergyconvergesslowlywiththebasisset. As

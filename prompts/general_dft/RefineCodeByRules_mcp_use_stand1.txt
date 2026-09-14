@@ -1,0 +1,88 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is to refine code by reading rules and modifying the code file to strictly comply with all requirements in the rules.
+
+**PURPOSE: Read the code file, read the rules file from the rules subdirectory, and iteratively modify the code using edit_file until it strictly complies with all rules, or until the maximum iteration limit is reached.**
+
+--------------------------------------------------------------------------
+[Input:]
+1. CODE_FILE: {code_file} (filename of the code file to refine, e.g., "code_LLM.py" or "code_LLM.jl")
+2. FILE_EXT: {file_ext} (file extension: "py" or "jl")
+3. MAX_ITER: {max_iter} (maximum number of refinement iterations)
+   **CRITICAL: This is a HARD LIMIT. Each iteration = Read code → Read rules → Analyze compliance → Modify code. After {max_iter} iterations, you MUST stop even if not fully compliant.**
+
+Note: The filesystem-mcp working directory is set to the directory containing the code file. The rules file is located in the "rules" subdirectory within this working directory.
+
+-----------------------------------------------------------------------------
+[Instruction:]
+1. **Read the code file (MANDATORY - first step):**
+   - Use filesystem-mcp `read_file(file_path="{code_file}")` to read the current code
+   - **CRITICAL: file_path MUST be ONLY "{code_file}" (no directories, no `..\\`, no absolute paths)**
+   - Understand the current code structure, functions, and implementation
+
+2. **Read the rules file from rules subdirectory (MANDATORY - second step):**
+   - Use filesystem-mcp `list_directory` to list files in the "rules" subdirectory
+   - Identify the rules file (typically "GenerateCodeByPlan_mcp_use_Query_rules_stand1.txt")
+   - Use filesystem-mcp `read_file(file_path="rules/<rules_filename>")` to read the rules
+   - **CRITICAL: file_path must be a relative path like "rules/GenerateCodeByPlan_mcp_use_Query_rules_stand1.txt" (no `..\\`, no absolute paths)**
+   - Understand ALL requirements and constraints specified in the rules
+
+3. **Iterative refinement workflow (repeat up to {max_iter} times):**
+   
+   **Step 1: Analyze code compliance with rules**
+   - Compare the current code against ALL requirements in the rules file
+   - Identify any violations, missing requirements, or style inconsistencies
+   - Create a clear list of issues that need to be fixed
+   
+   **Step 2: Determine next action**
+   - **CRITICAL: If you have already completed {max_iter} iterations, you MUST stop immediately.**
+   
+   - **If code fully complies with ALL rules:**
+     * Stop the refinement process - task complete
+     * Do NOT make any further changes to the code
+   
+   - **If code does NOT fully comply:**
+     * **If iteration count < {max_iter}:** Proceed to Step 3 to fix the code
+     * **If iteration count >= {max_iter}:** Stop immediately (maximum iterations reached)
+   
+   **Step 3: Fix the code (only if not compliant and iterations < {max_iter})**
+   - **First: Read the current code file again**
+     * Use filesystem-mcp `read_file(file_path="{code_file}")` to get the current code
+     * **CRITICAL: file_path MUST be ONLY "{code_file}" (no directories, no `..\\`, no absolute paths)**
+   
+   - **Second: Create a modification plan**
+     * Based on the rules requirements and identified issues, create a clear plan for what needs to be changed
+     * Identify specific sections, functions, or lines that need modification
+     * Plan the exact changes needed to ensure full compliance with ALL rules
+   
+   - **Third: Apply fixes using edit_file**
+     * Use filesystem-mcp `edit_file` tool to modify the code file
+     * Parameter: `file_path` should be "{code_file}" (just the filename)
+     * **CRITICAL: file_path MUST be ONLY "{code_file}" (no directories, no `..\\`, no absolute paths)**
+     * Parameter: `edits` should be a list of edit operations, each containing:
+       * `old_text`: Exact text to find and replace (must match exactly, case-sensitive, whitespace-sensitive)
+       * `new_text`: Replacement text that complies with the rules
+     * **CRITICAL: The old_text must match EXACTLY (including whitespace, indentation, case)**
+     * Make precise edits to ensure the code strictly complies with ALL rules requirements
+   
+   - After editing, return to Step 1 to analyze compliance again
+
+4. **CRITICAL - How to call tools:**
+   - You have REAL MCP tools available - when you call them, they EXECUTE and return results
+   - DO NOT write "Action:", "Thought:", "Observation:" - this is NOT ReAct format
+   - DO NOT describe what you will do - DIRECTLY call the tools
+   - DO NOT simulate tool calls - tools will actually run
+   - Wait for tool execution to complete before proceeding
+
+5. **Workflow sequence (MANDATORY):**
+   Step 1: Use filesystem-mcp read_file(file_path="{code_file}") to read the code file
+   Step 2: Use filesystem-mcp list_directory to list files in "rules" subdirectory
+   Step 3: Use filesystem-mcp read_file(file_path="rules/<rules_filename>") to read the rules file
+   Step 4: Analyze code compliance with ALL rules requirements
+   Step 5: If not compliant and iterations < {max_iter}, use filesystem-mcp read_file to get current code
+   Step 6: Create a modification plan based on rules requirements
+   Step 7: Use filesystem-mcp edit_file to modify the code file according to the plan
+   Step 8: Repeat from Step 4 until fully compliant OR max_iter reached
+
+**Start executing the workflow NOW. Read the code, read the rules, and refine the code to strictly comply with all rules.**
+

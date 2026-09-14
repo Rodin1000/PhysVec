@@ -1,0 +1,91 @@
+[... end of page 135 ...]
+---------------------------------
+$new_job
+! RHF MP2 TZVPP VeryTightSCF XYZFile PModel
+%id "monomer_1"
+* xyz 0 1
+O 7.439917 6.726792 7.762120
+H 7.025510 6.226170 8.467436
+H 8.274883 6.280259 7.609894
+*
+$new_job
+! RHF MP2 TZVPP VeryTightSCF XYZFile PModel
+%id "monomer_1"
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 113
+
+--- Page 136 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+* xyz 0 1
+O 5.752050 6.489306 5.407671
+H 6.313507 6.644667 6.176902
+H 5.522285 7.367132 5.103852
+*
+# --------------------------------------------
+# Now the calculation of the monomer at the
+# dimer geometry but with the dimer basis set
+# --------------------------------------------
+$new_job
+! RHF MP2 TZVPP VeryTightSCF XYZFile PModel
+%id "monomer_2"
+* xyz 0 1
+O 7.439917 6.726792 7.762120
+O : 5.752050 6.489306 5.407671
+H 7.025510 6.226170 8.467436
+H 8.274883 6.280259 7.609894
+H : 6.313507 6.644667 6.176902
+H : 5.522285 7.367132 5.103852
+*
+$new_job
+! RHF MP2 TZVPP VeryTightSCF XYZFile PModel
+%id "monomer_2"
+* xyz 0 1
+O : 7.439917 6.726792 7.762120
+O 5.752050 6.489306 5.407671
+H : 7.025510 6.226170 8.467436
+H : 8.274883 6.280259 7.609894
+H 6.313507 6.644667 6.176902
+H 5.522285 7.367132 5.103852
+*
+Youobtaintheenergies:
+Monomer : -152.647062118 Eh
+Dimer : -152.655623625 Eh -5.372 kcal/mol
+Monomer at dimer geometry: -152.647006948 Eh 0.035 kcal/mol
+Same with AB Basis set : -152.648364970 Eh -0.818 kcal/mol
+Thus, the corrected interaction energy is:
+-5.372 kcal/mol - (-0.818-0.035)=-4.52 kcal/mol
+It is also possible to set entire fragments as ghost atoms using the GhostFrags keyword as shown below. See
+sectionFragmentSpecificationfordifferentwaysofdefiningfragments.
+! MP2 TZVPP VeryTightSCF XYZFile PModel
+* xyz 0 1
+O 7.439917 6.726792 7.762120
+O 5.752050 6.489306 5.407671
+H 7.025510 6.226170 8.467436
+H 8.274883 6.280259 7.609894
+H 6.313507 6.644667 6.176902
+H 5.522285 7.367132 5.103852
+*
+%geom
+GhostFrags {1} end # space-separated list and X:Y ranges accepted
+fragments
+1 {0 2 3} end
+2 {1 4 5} end
+(continuesonnextpage)
+114 Chapter6. RunningTypicalCalculations
+
+[... start of page 137 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+end
+Starting from ORCA 6.0, we support geometry optimizations with the counterpoise correction, us-
+ing analytic gradients. This opens up the way of obtaining accurate non-covalent complex ge-
+ometries (instead of just interaction energies) using modest basis sets. To use this functional-
+ity, one should NOT simply add !Opt to the above input files, but should instead use the dedi-
+cated compound script BSSEOptimization.cmp available in the ORCA Compound Script repository
+(https://github.com/ORCAQuantumChemistry/CompoundScripts/blob/main/GeometryOptimization/BSSEOptimization.cmp).
+Detailedusagearedescribedinthecommentsofthecompoundscript.
+6.1.7 Complete Active Space Self-Consistent Field Method
+Introduction
+Therearesev

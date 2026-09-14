@@ -1,0 +1,95 @@
+[... end of page 754 ...]
+ed to
+obtain𝑑𝜅 . Thefirstinterpolatesthedistancebetweentheendpointstructureinwhichtheatomsarebondedand
+𝐴𝐵,𝑖
+𝑡 ,thesecondinterpolatesthedistancebetween𝑡 andtheendpointstructureinwhichthebondisbroken.
+𝑏𝑜𝑛𝑑 𝑏𝑜𝑛𝑑
+Thetwolineardistanceinterpolationsarejoinedatthepathposition𝑃 defaultedto0.5,correspondingtothe
+𝑗𝑜𝑖𝑛
+midpointonthepathbetweentheendpointimages. Iftheatomsarebondedintheinitialstructurebutnotinthe
+finalstructure,theinterpolationis
+⎧ ⎨𝑑𝑖𝑛𝑖𝑡𝑖𝑎𝑙+ 𝑃𝑖 (𝑡𝑏𝑜𝑛𝑑−𝑑𝑖 𝐴 𝑛 𝐵 𝑖𝑡𝑖𝑎𝑙) , if𝑃 <𝑃
+𝑑𝜅 = 𝐴𝐵 𝑃𝑗𝑜𝑖𝑛 𝑖 𝑗𝑜𝑖𝑛
+𝐴𝐵,𝑖
+⎩𝑑𝑓𝑖𝑛𝑎𝑙−
+(1−𝑃𝑖)(𝑑𝑓
+𝐴
+𝑖
+𝐵
+𝑛𝑎𝑙−𝑡𝑏𝑜𝑛𝑑 )
+, if𝑃 ≥𝑃 .
+𝐴𝐵 (1.0−𝑃𝑗𝑜𝑖𝑛) 𝑖 𝑗𝑜𝑖𝑛
+Iftheatomsarebondedinthefinalstructurebutnotintheinitialstructure,theinterpolationis
+⎧ ⎨𝑑𝑖𝑛𝑖𝑡𝑖𝑎𝑙− 𝑃𝑖 (𝑑𝑖 𝐴 𝑛 𝐵 𝑖𝑡𝑖𝑎𝑙−𝑡𝑏𝑜𝑛𝑑 ) , if𝑃 <1−𝑃
+𝑑𝜅 = 𝐴𝐵 1−𝑃𝑗𝑜𝑖𝑛 𝑖 𝑗𝑜𝑖𝑛
+𝐴𝐵,𝑖
+⎩𝑑𝑓𝑖𝑛𝑎𝑙+
+(1−𝑃𝑖)(𝑡𝑏𝑜𝑛𝑑−𝑑𝑓
+𝐴
+𝑖
+𝐵
+𝑛𝑎𝑙)
+, if𝑃 ≥1−𝑃 .
+𝐴𝐵 𝑃𝑗𝑜𝑖𝑛 𝑖 𝑗𝑜𝑖𝑛
+732 Chapter7. DetailedDocumentation
+
+--- Page 755 ---
+ORCAManual,Release6.0.0
+Thisbilinearinterpolationleadstoaslowerincreaseoftheatomdistanceinthebondedregioncomparedtothe
+non-bondedregioninmostcases,emphesizingthebondbreakingprocessandthustheregionwheretheenergyis
+changedmostbyachangeinthebonddistance. Ifthechangeinthebonddistanceinthenon-bondedregionisslower
+thanthechangeinthebondedregion,theimplementationfallsbacktotheregularlineardistanceinterpolation.
+Inchallengingcases,eventheIDPPNEBcalculationstartingfromalinearinterpolationoftheCartesiancoordi-
+natesbetweentheendpointstructuresmaynotprovideareasonableinitialpath. Thismayhappenwhenthelinear
+interpolationpathhasatomscomeveryclosetoeachotherinintermediateimages,whichleadstobondbreaking
+even after NEB optimization using the IDPP objective function. In such cases, a reasonable initial path can of-
+tenbeobtainedbyavoidingthelinearinterpolationbysequentiallyaddingimagestothepathstartingfromboth
+endpointstructuresinstead. ThismethodisreferredtoassequentialIDPP(S-IDPP).[764]Thetwosetsofimages
+closetoeachendpointstructureareseparatedbyalargerdistancethantheimagesineachsetbychoosingasmaller
+springconstantthanbetweentheimagesineachsetwhereequalspringconstantsareused. Theimagesclosestto
+thecenterareconvergedinanNEBcalculationandanimageaddedatanappropriatedistancefromtheconverged
+imagebetweenthetwoimagesclosesttothecenter. Thisprocessisrepeateduntiltherequestedamountofimages
+hasbeenadded. Thetangentoftheimagesclosesttothecenterfollowstheimprovedtangentdefinitionandalways
+treats them as extrema on the path, i.e. an average of the normalized distance vectors to the adjacent images is
+used. ThenumberofimagesusedtoformtheS-IDPPinitialpathcanbedifferentfromthenumberofimagesused
+inthesubsequentNEBcalculationinvolvingelectronicstructurecalculations. Itcanbebenficialtouseaneven
+number of images in the S-IDPP computation since no image is placed at the center of the initial path then and
+movingtotherequestedoddnumberofimagesinanadditionalIDPPNEBcalculationafterwards. Thisoptionis
+usedbydefault, butcanbedeactivated. Forsystemsinvolvingveryheavyrotationsoflargegroups, themethod
+becomesmorerobustwhentwicetheamountofimagesisusedintheS-IDPPcalculation. Halftheimagesarethen
+removedautomaticallyforthesubsequentNEBcalculationinvolvingelectronicstructurecalculations. Thisoption
+isavailable,butnotusedbydefault.
+Theusermayhaveapreconceivednotionofthesaddlepointconfigurationorhaveanestimateofthepathfrom
+acalculationcarriedoutatalowerleveloftheory. Theinitialpathcanbegeneratedinsuchawayastoinclude
+anintermediateconfigurationasoneoftheimagesusingthe‘NEB_TS_XYZFile’keyword. Sincethisimagewill
+beoptimizedalongwiththeotherintermediateimagesduringtheNEBcalculationtheguessdoesnothavetobe
+accurate.
+Ifinspectionoftheinitialpathrevealsproblems,e.g.,unnecessarybondbreaking,itisoftenagoodideatoinsert
+areasonableconfigurationintotheinitialinterpolationtoavoidsuchproblems. Moreover,ifanNEBcalculation
+is unable to converge to the MEP (or saddle point) with the given maximum number of iterations, the user can
+restartthecalculationfromthe‘allxyz’file(seefile: basename_MEP.allxyz)whichiswrittentothediskaftereach
+iterationduringtheoptimization. Note,whenstartinganNEBcalculationfromanoutputfromapreviousCI-NEB
+calculationandvice-versathebandmayrequireafewiterationstoadjustthedistributionofimagestoachievethe
+desireddistribution,dependingontheselectedspringtypeandthechoiceofNEBmethod.
+IfthesystemcanbemodeledreasonablywellusingtheGFN-xTBmethod,anotherpossiblechoiceisthegeneration
+of an initial path on XTB level (keywords ‘XTB0’, ‘XTB1’ or ‘XTB2’ for GFN0-xTB[698] GFN-xTB[332] or
+GFN2-xTB[70]). InthiscasetheinitialpathonIDPPlevelisrefinedusinganNEBcalculationonthechosenXTB
+level. IfthisNEBrunissuccessful, theentireMEPonXTBlevelisusedastheinitialpath. IftheNEBrunon
+XTBlevelisnotsuccessful,theinitialpathonIDPPlevelisusedinstead.
+Another keyword that makes use of the XTB method is the ‘XTBTS’ keyword (‘XTB0TS’, ‘XTB1TS’ or
+‘XTB2TS’). In this case the initial path on IDPP level is refined using an NEB-CI calculation on XTB level.
+IftheNEB-CIrunissuccessful,theresultingCIstructureischosenasTSguessstructure,andthefinalinitialpath
+isgeneratedusinganIDPPpathfromreactanttoTSguessandfromTSguesstoproduct. IftheNEB-CIrunon
+XTBlevelisnotsuccessful,theinitialpathonIDPPlevelisusedinstead.
+7.29. NudgedElasticBandMethod 733
+
+[... start of page 756 ...]
+ORCAManual,Release6.0.0
+7.29.5 Removal of translational and rotational degrees of freedom
+ForNEBandCI-NEBcalculationsofmolecularsystemsitisimportanttoprojectoutthesix(orfiveinthecase
+oflinearmolecules)degreesoffreedomcorrespondingtotheglobalrotationandtranslationofthesystem. This
+canbedoneeitheratthestartofacalculationorforeachoptimizationstep(keyword: quatern). Forthelatter,the
+center-of-geometry of each image is translated to origin and a rotational matrix is constructed using the quater-
+nionapproach[576]tominimizetheroot-mean-squaredeviationbetweenanytwoadjacentimages. Dependingon
+whetherafixedcenterisused(keyword: fix_center),theimagesareeitherkeptinthatplaceortransferredbackto
+theiroriginalposition. Thisprocedureisrepeatedforanypairofadjacentimagesineachstep

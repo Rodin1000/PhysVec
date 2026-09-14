@@ -1,0 +1,82 @@
+[... end of page 690 ...]
+trons
+in82orbitals),
+• Accuraciesinenergydifferencesortotalenergiesofabout1kcal/mol.
+Ifanythesecalculationsinterestyou,thenyoumightwanttotryaDMRGcalculationwithBLOCK!
+7.22.1 Technical capabilities
+Currently,BLOCKimplementsthefollowing
+• AnefficientDMRGalgorithmforquantumchemistryHamiltonians
+• Fullspin-adaptation(SU(2)symmetry)andAbelianpoint-groupsymmetries
+• State-averagedexcitedstates
+Notethatthestandaloneversionof BLOCKmayprovidemorecapabilitiesthanareavailablethroughtheexternal
+interface. SeetheBLOCKwebsitefordetails[155].
+668 Chapter7. DetailedDocumentation
+
+--- Page 691 ---
+ORCAManual,Release6.0.0
+7.22.2 How to cite
+Wewouldappreciateifyoucitethefollowingpapersinpublicationsresultingfromtheuseof BLOCK:
+• G.K.-L.ChanandM.Head-Gordon,J.Chem. Phys. 116,4462(2002),
+• G.K.-L.Chan,J.Chem. Phys. 120,3172(2004),
+• D.Ghosh,J.Hachmann,T.Yanai,andG.K.-L.Chan,J.Chem. Phys.,128,144117(2008),
+• S.SharmaandG.K-.L.Chan,J.Chem. Phys. 136,124121(2012).
+Inaddition,usefulDMRGreferencesrelevanttoquantumchemistrycanbefoundinthereviewbelowbyChanand
+Sharma.
+• G.K-.L.ChanandS.Sharma,Ann. Rev. Phys. Chem. 62,465(2011),
+7.22.3 Overview of BLOCK input and calculations
+WithinORCA,theBLOCKprogramisaccessedaspartoftheCASSCFmodule. BLOCKcanberunintwomodes:
+CASCImode(noorbitaloptimization)orCASSCFmode. ToenableCASCImode,setmaxiter 1.
+%casscf
+maxiter 1 # remove if doing CASSCF
+CIStep DMRGCI
+...
+end
+ForsmallmoleculeCASCIitmaybepossibletocorrelateallorbitals. Ingeneral,similartoastandardCASSCF
+calculation, it is necessary to select a sensible active space to correlate. (See Section Orbital optimization on
+CASSCF).Thisistheresponsibilityoftheuser.
+7.22.4 Standard commands
+Oncetheorbitalstocorrelatehavebeenchosen,andthewavefunctionsymmetriesandquantumnumbersarespeci-
+fied,theaccuracyoftheDMRGcalculationisgovernedbytwoparameters: themaximumnumberofrenormalized
+states𝑀;and,theorderandlocalizationoftheorbitals.
+The most important parameter in the DMRG calculation is 𝑀, the number of renormalized states. This defines
+themaximumsizeofthewave-functionexpansion,whichis𝑂(𝑀2)inlengthintherenormalizedbasis. As𝑀 is
+increased,theDMRGenergyconvergestotheexact(FCIorCASCI)limit.
+TheDMRGmapsorbitalsontoa1Dlattice, thusthebestresultsareachievedifstronglyinteractingorbitalsare
+placednexttoeachother. Forthisreason,theDMRGenergyisnotgenerallyinvarianttoorbitalrotationswithinthe
+activespace,andorbitalrotationandorderingcanimprovetheDMRGenergyforagiven𝑀. As𝑀 isincreased,
+theDMRGenergybecomeslessandlesssensitivetotheorbitalorderingandlocalization.
+Tominimizethenumberofwavefunctionoptimizationsteps,itisoftenadvantageoustoperformDMRGcalcula-
+tionsatsmall𝑀,thenincrease𝑀 tothefinalmaximumvalue. Thissequenceofoptimizationsisgovernedbythe
+sweepschedule,whichspecifieshowmanyoptimizationsteps(sweeps)toperformateachintermediatevalueof
+𝑀.
+The above may seem to make running a DMRG calculation more complicated than a usual quantum chemistry
+calculation, however, BLOCK provides a setof default settings which eliminate theneed to specify the above pa-
+rametersbyhand. WehighlyrecommendthatyoufirstlearntousetheBLOCKprogramwiththesedefaultsettings.
+Inthedefaultmode,theorbitalsareorderedautomatically(Fiedlervectormethod[58,72,259,260])andadefault
+sweepscheduleisset.
+AnexampleofadefaultCASCIcalculationontheC~2~moleculecorrelatingallelectronsinaVTZbasis,isgiven
+here:
+7.22. DensityMatrixRenormalizationGroup 669
+
+[... start of page 692 ...]
+ORCAManual,Release6.0.0
+!cc-pvtz pal4
+%MaxCore 16000
+%casscf
+nel 8
+norb 58
+nroots 1
+mult 1
+maxiter 1
+CIStep DMRGCI
+DMRG
+maxM 5000
+end
+end
+* xyz 0 1
+C 0 0 -0.621265
+C 0 0 0.621265
+*
+Once you are familiar with the default mode, we recommend exploring the localization of orbitals. In general,
+DMRG benefits from the use of localized orbitals, and these should be used unless the high-symmetry of the
+molecu

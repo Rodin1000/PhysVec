@@ -1,0 +1,75 @@
+[... end of page 765 ...]
+nctionals as explained below. The TD-DFT module of ORCA is also extensively used for the
+calculationofX-rayabsorptionspectraattheK-edgeofagivenelement.
+7.30.1 General Features
+Themoduleisinvokedwiththeblock:
+%cis end
+# or equivalently
+%tddft end
+There are a variety of options. The most important one is the number of excited states that you want to have
+calculated:
+%cis NRoots 10 end
+Theconvergencetolerancesaregivenby:
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 743
+
+--- Page 766 ---
+ORCAManual,Release6.0.0
+%cis
+...
+ETol 1e-6
+RTol 1e-6
+end
+The variable ETol gives the required convergence of the energies of the excited states (in Eh) and RTol is the
+required convergence on the norm of the residual vectors. Under normal ciorcumstances the calculations need
+about5-10iterationstoconvergetothedefaultconvergencetolerances.
+Once converged, the program prints the wave function composition. To keep the printing concise, coefficients
+smallerthan0.01areomitted. ThethresholdcanbeadjustedwiththekeywordTPrint.
+%cis
+...
+TPrint 0.0001 # cut-off for the wave function printing, default= 0.01
+end
+Ifclosed-shellreferencesareusedtheprogramcancalculatethesingletandspin-adaptedtripletexcitedstatesat
+thesametimebyusing:
+%cis
+...
+triplets true
+end
+Thisisavailableforallcombinationsofmethods,includinganalyticgradients,andfordouble-hybrids.
+Inordertocontroltheorbitalsthatshouldbetakenintoaccountinthecalculationtwomechanismsareavailable.
+Thefirstmechanismisthedefaultmechanismandconsistsofspecifyingandorbitalenergywindowwithinwhich
+allsingleexcitationswillbeconsidered:
+%cis
+...
+EWin -3,3 # (orbital energy window in Eh)
+end
+Thus,thedefaultistokeepcoreorbitalsfrozenandtoneglectveryhighlyingvirtualorbitalswhichisasensible
+approximation. However,youmaywanttoconsidertoincludeallvirtualorbitalsbychoosingforexampleEWin
+-3,10000. Thesecondmechanismistoexplicitlygiveanorbitalenergywindowforeachoperator,i.e.
+%cis
+...
+OrbWin[0] = 2,-1,-1,14 # orbital window for spin-up MOs
+OrbWin[1] = 2,-1,-1,16 # orbital window for spin-down MOs
+end
+The“-1“‘sintheaboveexamplemeanthattheHOMOandLUMOforthespin-.upandspin-downorbitalswillbe
+automaticallydeterminedbytheprogram. Inotherwords,intheaboveexample,onlythefollowingexcitationsare
+includedintheTDDFTcalculation:
+• Excitations from any occupied alpha orbital whose index is between 2 (inclusive) and that of the alpha
+HOMO(inclusive),toanyvirtualalphaorbitalwhoseindexisbetweenthatofalphaLUMO(inclusive)and
+14(inclusive)
+• Excitationsfromanyoccupiedbetaorbitalwhoseindexisbetween2(inclusive)andthatofthebetaHOMO
+(inclusive),toanyvirtualbetaorbitalwhoseindexisbetweenthatofbetaLUMO(inclusive)and16(inclu-
+sive)
+Forcalculationsbasedonarestrictedreference,OrbWin[1]willbeignored.
+InusingtheCIS/TD-DFTmodulefivedifferenttypesofcalculationsshouldbedistinguished:
+• Semiempiricalmethods
+744 Chapter7. DetailedDocumentation
+
+[... start of page 767 ...]
+ORCAManual,Release6.0.0
+• Hartree-Fockcalculations
+• DFTcalculationswithoutHFexchange(non-hybridfunctionals)
+• DFTcalculationswithHFexchange(hybridfunctionals)
+• DFTcalculationswithHFexchangeandMP2correlation(double-hybridfunctionals)
+7.30.2 Semiempirical Methods
+ThesemiempiricalINDO/Smethodisverysuitabletocalculateabsorptionspectraofmediumsizedtolargeorganic
+andinorganicmolecules. IthasbeenparameterizedbythelateM.C.Zernerforopticalspectros

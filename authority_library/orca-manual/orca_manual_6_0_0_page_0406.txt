@@ -1,0 +1,62 @@
+[... end of page 405 ...]
+likewiththeothermultiscalemethods(QMMM,QM/QM2,QM/QM2/MM)theMMregionisonlytreatedasa
+perturbationtotheQMregion. The(bondedandnonbonded)MM-MMinteractionisnotcomputed-sinceitwould
+not affect the QM-MM interaction - and thus the active region (optimizations, frequencies, ...) in CRYSTAL-
+QMMMcalculationsshouldberestrictedtoatomsoftheQMregion.
+6.16. ORCAMultiscaleImplementation 383
+
+--- Page 406 ---
+ORCAManual,Release6.0.0
+PreparingCRYSTAL-QMMMCalculations
+The input structures and input files for the CRYSTAL-QMMM calculations can be prepared with the
+orca_crystalprepmodule(seesectionorca_crystalprep).
+MOL-CRYSTAL-QMMM
+ConceptuallyweuseanadditiveQM/MMcalculation,inwhichtheQMregioninteractswiththeMMregiononly
+vianonbondedinteractions. Lennard-JonesinteractionbetweenQMandMMregioniscomputedusingvander
+WaalsparametersfromtheUFFforcefield. ThechargeconvergencetreatmentbetweenQMandMMregionstarts
+withzerochargesontheMMatoms,andisiterateduntilconvergenceoftheQMatomic(CHELPG)andMMpoint
+chargesisachieved.
+TheMOL-CRYSTAL-QMMMmethodexpectsasstructuralinputasupercellthatconsistsofrepeating,identical
+molecularsubunits,i.e. theatomorderingofthemoleculesshouldalwaysbethesame,andonemolecularsubunit
+shouldfollowthenextone. TheminimuminputnecessaryforaMOL-CRYSTAL-QMMMrunlooksasfollows.
+%qmmm
+NUnitCellAtoms 16 # provide the number of atoms per molecular subunit
+QMAtoms {160:175} end # QM atoms, should be in central part of the supercell.
+# Must be at least one complete molecular subunit.
+end
+Note:
+• Formolecularcrystalsitisassumedthattheentiresupercellconsistsofrepeatingunitswhicheachhavezero
+charge. QMregionsshouldconsistofoneormultipleofsuchcharge-neutralunits.
+ExtendingtheQMRegion
+ORCA can extend the QM region (which we call QM core region, defined by the original QMAtoms input) by
+oneormultiplelayersofmolecularsubunitsusingtheHFLayerskeyword. IftheHFLayerskeywordisused,the
+molecularsubunitsofthedefinednumberoflayersaroundtheQMcoreregionisaddedtotheQMregion. The
+layersofmolecularsubunitsaroundtheQMcoreregionaredetectedviadistancecriteria.
+%qmmm
+HFLayers 0 # default 0
+HFLayerGTO "LANL2DZ" # default. Use this basis set for the HFLayer atoms
+HFLayerECP "HayWadt" # default. Use these ECPs for the HFLayer atoms.
+Conv_Charge_UseQMCoreOnly true # only use the QM core region for the charge
+# convergence scheme
+end
+TheHFLayercanbeseenasabufferregionbetweenthemolecularsubunitofinterest(originalQMatoms)andthe
+surroundingsubunits. ThedifferentpossiblereasonsforHFLayersareasfollows:
+• ForDLPNOcalculationswithHFLayers,theDLPNOmultilevelfeatureisautomaticallyswitchedon. The
+moleculesoftheHFlayerformanownfragmentwhichistreatedonHFlevelonly,i.e. thesemoleculesare
+notincludedinthePost-HFtreatment.
+• TheHFLayerscanalsobeusedfornon-DLPNOcalculations. Insuchcases,theHFLayermoleculesarein
+thesamewayincludedintheQMcalculationastheotherQMmolecules. Buttheirdefinitionisaconvenient
+waytochooseadifferentbasisset(andECPs)forthosemolecules.
+• ItcanbeassumedthattheQMchargescomputedfortheQMcoreregionaremorerealisticthanthecharges
+of the HFLayer atoms near the MM atomic charges. Thus, using only the QM atomic charges of the QM
+coreregionrepresentmorerealisticchargesforthechargeconvergencescheme.
+384 Chapter6. RunningTypicalCalculations
+
+[... start of page 407 ...]
+ORCAManual,Release6.0.0
+Note:
+• ThetermHFLayersmightbemisleading. Strictlyspeaking,onlyforMOL-CRYSTAL-QMMMcalculations
+withDLPNOmethods(e.g. DLPNO-CCSD(T),DLPNO-MP2, DLPNO-B2PLYP)theHFlayeratomsare
+treatedonHFlevel. Forothermethods(e.g. DFT)theHFlayeratomsaretreatedwiththesameelectronic
+structuremethodastheQMcoreregionatoms.
+• If necessary, the atoms of the HFLayer can be defined by the user. Make sure that complete molecular

@@ -1,0 +1,78 @@
+[... end of page 199 ...]
+amplewetakethestructurewithhighestenergyoftheabove
+relaxedsurfacescan):
+! B3LYP SV(P) TightSCF SlowConv OptTS
+# performs a TS optimization with the EF-algorithm
+# Transition state: H-atom abstraction from CH4 to OH-radical
+%geom
+Calc_Hess true # calculation of the exact Hessian
+# before the first optimization step
+end
+(continuesonnextpage)
+6.3. GeometryOptimizations,SurfaceScans,TransitionStates,MECPs,ConicalIntersection1s7,7
+IRC,NEB
+
+--- Page 200 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+* int 0 2
+C 0 0 0 0.000000 0.000 0.000
+H 1 0 0 1.285714 0.000 0.000
+H 1 2 0 1.100174 107.375 0.000
+H 1 2 3 1.100975 103.353 119.612
+H 1 2 3 1.100756 105.481 238.889
+O 2 1 3 1.244156 169.257 17.024
+H 6 2 1 0.980342 100.836 10.515
+*
+Note:
+• You need a good guess of the TS structure. Relaxed surface scans can help in almost all cases (see also
+exampleabove).
+• ForTSoptimization(incontrasttogeometryoptimization)anexactHessian,aHybridHessianoramodifi-
+cationofselectedsecondderivativesisnecessary.
+• AnalyticHessianevaluationisavailableforHFandSCFmethods,includingtheRIandRIJCOSXapproxi-
+mationsandcanonicalMP2.
+• Checktheeigenmodesoftheoptimizedstructurefortheeigenmodewithasingleimaginaryfrequency. You
+canalsovisualizethiseigenmodewithorca_pltvib(sectionAnimationofVibrationalModes)oranyother
+visualizationprogramthatreadsORCAoutputfiles.
+• If the Hessian is calculated during the TS optimization, it is stored as basename.001.hess, if it is recal-
+culated several times, then the subsequently calculated Hessians are stored as basename.002.hess, base-
+name.003.hess,...
+• IfyouareusingtheHybridHessian,thenyouhavetocheckcarefullyatthebeginningoftheTSoptimization
+(afterthefirstthreetofivecycles)whetherthealgorithmisfollowingthecorrectmode(seeTIPbelow). If
+thisisnotthecaseyoucanusethesameHybridHessianagainviatheinhessreadkeywordandtrytotarget
+adifferentmode(viatheTS_Modekeyword,seebelow).
+IntheexampleabovetheTSmodeisoflocalnature. Insuchacaseyoucandirectlycombinetherelaxedsurface
+scanwiththeTSoptimizationwiththe
+! ScanTS
+command,asusedinthefollowingexample:
+! B3LYP SV(P) TightSCF SlowConv
+! ScanTS # perform a relaxed surface scan and TS optimization
+# in one calculation
+%geom scan B 1 0 = 2.0, 1.0, 15 end end
+* int 0 2
+C 0 0 0 0.000000 0.000 0.000
+H 1 0 0 1.999962 0.000 0.000
+H 1 2 0 1.095870 100.445 0.000
+H 1 2 3 1.095971 90.180 119.467
+H 1 2 3 1.095530 95.161 238.880
+O 2 1 3 0.984205 164.404 27.073
+H 6 2 1 0.972562 103.807 10.843
+*
+Note:
+• Thealgorithmperformstherelaxedsurfacescan,abortstheScanafterthemaximumissurmounted,chooses
+theoptimizedstructurewithhighestenergy,calculatesthesecondderivativeofthescannedcoordinateand
+178 Chapter6. RunningTypicalCalculations
+
+[... start of page 201 ...]
+ORCAManual,Release6.0.0
+finallyperformsaTSoptimization.
+• Ifyoudonotwantthescantobeabortedafterthehighestpointhasbeenreachedbutbecarriedoutupto
+thelastpoint,thenyouhavetotype:
+%geom
+fullScan true # do not abort the scan with !ScanTS
+end
+Astransitionstatefinderweimplementedthequasi-NewtonlikeHessianmodefollowingalgorithm.[67,241,365,
+389,399,513,761,762,763]Thisalgorithmmaximizestheenergywithrespecttoone(usuallythelowest)eigen-
+modeandminimizeswithrespecttotheremaining3𝑁 −7(6)eigenmodesoftheHessian.
+Tip:
+• Youcancheckatanearlystageiftheoptimizationwillleadtot

@@ -1,0 +1,79 @@
+[... end of page 1033 ...]
+dditionalGEPOLspherespreventthesolventtofillthespacebetweenexplicitsolventmoleculesorbetweenthose
+moleculesandthesolute. TheradiusofthesolventspherethatrollsoverthesolutevdW-typesurfacetogenerate
+theSESiscontrolledbytheparameter“rsolv”. Thisradiushasadefaultvalueof1.30Å,buttheusercanchange
+itbyspecifyinganothervaluefor“rsolv”inthe%cpcmblock. TheminimumradiusforanaddedGEPOLsphere
+iscontrolledby“rmin”.
+NeithertheanalyticalgradientnortheanalyticalHessianareavailableforthisstrategy. Theyshouldbecomputed
+numerically. DuetotheinterdependencybetweenGEPOLspheresandtheatomspresentinoursystem,theanalyt-
+icalgradientcomputedusingtheSESdoesnotconvergeassmoothascomparedtothatusingthevdW-typecavity
+7.53. ImplicitSolvationModels 1011
+
+--- Page 1034 ---
+ORCAManual,Release6.0.0
+(seeref. [287])andcanleadtowrongminima. TheHessianisaffectedinthesameway. Then,ORCA6.0does
+notsupportanymoretheanalyticalgradient/Hessianforsuchsurfacetopreventinaccurateresults.
+UseofthePointChargeScheme
+Withinthisscheme,thesolvationchargesaretreatedaspunctualandnoswitchingfunctionisusedtoaccept/discard
+chargesintheintersectionbetweenthespheresthatformthesolutecavity. Thesetwofactsleadtoadiscontinuous
+potential energy surface (numerical instabilities in the SCF energy and its derivatives). Then, the point charge
+scheme is not recommended within the C-PCM. If the user still wants to use this charge scheme it can be used
+togetherwithtwodifferenttypeofsurfacesforthesolutecavity: (1)theSES,and(2)theSAS.
+• Solvent-excludedsurface
+In the same way as for the Gaussian charge scheme with the SES, this surface is generated for the point charge
+scheme through the GEPOL algorithm. However, while for the case of surfacetype gepol_ses_gaussian,
+thesurfaceisdiscretizedusingLebedev-typegrids,inthepointchargescheme,thesurfaceisdividedinspherical
+triangles called “tesserae”. The level of tesselation is controlled by the tag ndiv. The radii used for the solute
+atomsinordertoconstructtheGEPOLcavityarethoseoptimizedfortheCOSMO-RSmodel[445]forH,C,N,O,
+F,S,Cl,Br,andI,whilefortherestofelementsscaledBondiradiiareused.
+InordertousethepointchargeschemewiththeSES,weshouldaddthefollowingtaginthe%cpcmblock:
+%cpcm
+surfacetype gepol_ses
+end
+• Solvent-accessiblesurface
+Here,thesurfaceofthesolutecavityisgeneratedbyfollowingthecenterofaspherewithradius“rsolv”(repre-
+sentingthesolventmolecule)rollingoverthesurfaceofthevdWsurfaceofthesolute. Thediscretizationofthe
+resultingsurfaceisdoneviatesserae,asdonefortheSES.Inordertousethepointchargeschemetogetherwith
+theSAS,oneshouldaddthefollowingtaginthe%cpcmblock:
+%cpcm
+surfacetype gepol_sas
+end
+• Howtocircumventthenumericalinstabilitiesinthepointchargescheme
+Numericalinstabilitiesareimplicitinthepointchargeschemeduetothe“punctual”natureofthechargesandto
+thefactthatnoswitchingfunctionisconsideredintheintersectionbetweenthespheresthatformthesolutecavity.
+Atthesametime,thereisnowaytopredict,inadvanceiftherewillbediscontinuitiesintheSCFenergyand/or
+initsderivatives. However,iftheuserstillwantstousethischargescheme,nomatterwithwhichtypeofsurface
+(SESorSAS),therearetwothingsthatonecantrytominimizetheaforementionedproblems:
+• Changendiv: Theparameter“ndiv”controlsthenumberoftrianglespersphereinthesolutecavity. By
+changingthenumberoftriangles,italsochangesthenumberoftrianglesintheintersectionbetweenspheres
+and,then,thiscansolvethosesituationswheretwopointchargesgettooclosemakingtheelements𝐴 in
+𝑖𝑗
+eq(7.315)todiverge(andthesolvationchargestosuddenlyhaveverylargevalues). However,thisstrategy
+canbeasolutionforaparticularcase,butwillneverensurethatforthesamesystemwithanothergeometry
+thediscontinuitiesintheSCFenergydonotshow(asitdoesnotpreventpointchargestobetooclosefrom
+eachother).
+• Increase pmin : This parameter removes those charges that are at a distance lower than pmin from each
+other. The default value for pmin is of 0.1 a.u. (≈ 0.0529 Å). Then, by incrasing pmin one removes all
+pairsofchargesthataretooclosefromeachotherintheintersectionbetweenthespheres. Note: Becareful
+whenincreasingpmin. AlthoughthispreventssuddenjumpsintheSCFenergy,itcanleadto“biasing”the
+solute-solventinteraction,asoneisremovingasignificantnumberofchargesthatrepresenttheeffectofthe
+solvent.
+1012 Chapter7. DetailedDocumentation
+
+[... start of page 1035 ...]
+ORCAManual,Release6.0.0
+CalculationofthefreeenergyofsolvationwithintheC-PCM
+Thesolvationfreeenergy,∆𝐺 ,isdefinedasthefreeenergyoftransferofasolutefromthegasphasetothe
+𝑠𝑜𝑙𝑣
+condensedphase. Thisquantitycanbewrittenas(seeeq27inref. [287])
+∆𝐺 =𝐸 (𝑅⃗ ,𝑅⃗ )+∆𝐺 +∆𝐺 +∆𝐺 (7.317)
+𝑠𝑜𝑙𝑣 𝑠𝑜𝑙𝑣 𝑙 𝑣 𝑒𝑙 𝑐𝑎𝑣 𝑑𝑖𝑠𝑝
+The first term, 𝐸 (𝑅⃗ ,𝑅⃗ ), corresponds to the difference between the liquid-phase expectation value of the
+𝑠𝑜𝑙𝑣 𝑣 𝑙
+gas-phaseHamiltonian,𝐸(𝑅⃗ ),andthegas-phasepotentialenergysurface𝐸(𝑅⃗ )
+𝑙 𝑣
+𝐸 (𝑅⃗ ,𝑅⃗ )=𝐸(𝑅⃗ )−𝐸(𝑅⃗ )
+𝑠𝑜𝑙𝑣 𝑣 𝑙 𝑙 𝑣
+The second term in eq (7.317) accounts for the electronic-polarization contribution to ∆𝐺 and is calculated
+𝑠𝑜𝑙𝑣
+fromthechargesspreadovert

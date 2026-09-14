@@ -1,0 +1,73 @@
+[... end of page 109 ...]
+320
+CCSD(T) - MDCI energy with basis cc-pVDZ: -0.000118824
+Estimated CBS total energy : -76.377568621
+whichislessthan2mEhfromthebasissetlimit. Finallyitwasshown[519]thatinsteadofextrapolatingthecheap
+method,M,usingcardinalnumbers𝑋 and𝑋+1itisbettertousecardinalnumbers𝑋+1and𝑋+2.
+𝐸(CCSD(T);𝐶𝐵𝑆) ≈𝐸(CCSD(T);𝑋)+𝐸(M;𝐶𝐵𝑆)(𝑋+1,𝑋+2)−𝐸(M;𝑋) (6.6)
+corr corr corr corr
+ThiscanbedoneusingtheExtrapolateEP3(bas,[method,method-details]) keyword:
+6.1. SinglePointEnergiesandGradients 87
+
+--- Page 110 ---
+ORCAManual,Release6.0.0
+! ExtrapolateEP3(CC) TightSCF Conv Bohrs
+andthecorrespondingoutputwouldbe:
+Alpha : 5.460 (SCF Extrapolation)
+Beta : 3.050 (correlation extrapolation)
+SCF energy with basis cc-pVDZ: -76.026430944
+SCF energy with basis cc-pVTZ: -76.056728252
+SCF energy with basis cc-pVQZ: -76.064381269
+Extrapolated CBS SCF energy : -76.066687152 (-0.002305884)
+MDCI energy with basis cc-pVDZ: -0.214429497
+MDCI energy with basis cc-pVTZ: -0.275299699
+MDCI energy with basis cc-pVQZ: -0.295229871
+Extrapolated CBS correlation energy : -0.309417951 (-0.014188080)
+CCSD(T) correlation energy with basis cc-pVDZ: -0.214548319
+CCSD(T) - MDCI energy with basis cc-pVDZ: -0.000118822
+Estimated CBS total energy : -76.376223926
+For the ExtrapolateEP2, and ExtrapolateEP3 keywords the default cheap method is the DLPNO-CCSD(T) with
+theNormalPNOthresholds. TherealsoavailableoptionswithMP2,andDLPNO-CCSD(T)withLoosePNOand
+TightPNOsettings.
+ExplicitlyCorrelatedMP2andCCSD(T)Calculations
+Aphysicallyperhapssomewhatmoresatisfyingalternativetobasissetextrapolationisthetheoryofexplicitcor-
+relation. InthismethodtermsareaddedtothewavefunctionAnsatzthatcontaintheinterelectroniccoordinates
+explicitly(hencethename“explicitcorrelation”). Initiallythesetermswerelinearintheinterelectronicdistances
+(“R12-methods”). However, it has later been found that better results can be obtained by using other functions,
+suchasanexponential,oftheinterelectronicdistance(“F12-methods”). Thesemethodsareknowntoyieldnear
+basissetlimitresultsforcorrelationenergiesinconjunctionwithmuchsmallerorbitalbasissets.
+Inapplyingthesemethodsseveralpointsareimportant:
+• Specialorbitalbasissetsareatleastadvantageous. Thedevelopmentofsuchbasissetsisstillinitsinfancy.
+For a restricted range of elements the basis sets cc-pV𝑛Z-F12 are available (where 𝑛 = D, T, Q) and are
+recommended. Note,thatotherthantheirnamessuggest,theseareafairbitlargerthanregulardouble,triple
+orquadruple-zetabasissets
+• Inadditiontoanorbitalbasisset,anear-completeauxiliarybasissetmustbespecified. Thisistheso-called
+“CABS”basis. Forthethreebasissetsmentionedabovethesearecalledcc-pV𝑛Z-F12-CABS.Ifyouhave
+elementsthatarenotcoveredyouareonyourowntosupplyaCABSbasisset. CABSbasissetscanberead
+intoORCAinawayanalogoustoRIauxiliarybasissets(replace“AUX”by“CABS”intheinput). There
+areautomatictoolsforbuildingaCABSbasisfromanarbitraryorbitalbasis,e.g. AutoCABS[779]
+• iftheRIapproximationisusedinconjunctionwithF12,athirdbasissetisrequired-thiscanbetheregular
+auxiliary“/C”basis,butwerecommendtosteponelevelupintheauxiliarybasisset(e.g. useacc-pVTZ/C
+fittingbasisinconjunctionwithcc-pVDZ-F12)
+• ItisperfectlyfeasibletouseRIJCOSXorRI-JKatthesametime. Inthiscase,youshouldprovideafourth
+basissetfortheCoulombfitting
+• RHFandUHFareavailable,ROHFnot. (Although,onecandoaROHFlikecalculationbyusingQROs)
+• Gradientsarenotavailable
+DoingexplicitlycorrelatedMP2calculationsisstraightforward. Forexamplelookatthefollowingcalculationon
+thewatermoleculeatagivengeometry:
+88 Chapter6. RunningTypicalCalculations
+
+[... start of page 111 ...]
+ORCAManual,Release6.0.0
+#
+! F12-MP2 cc-pVDZ-F12 cc-pVDZ-F12-CABS VeryTightSCF PModel
+* xyz 0 1
+O 0.000000000000 0.000000000000 0.369372944000
+H 0.783975899000 0.000000000000 -0.184686472000
+H -0.783975899000 0.000000000000 -0.184686472000
+*
+andsimilarlyinconjunctionwiththeRIapproximation:
+#
+! F12-RI-MP2 cc-pVDZ-F12 cc-pVDZ-F12-CABS cc-pVTZ/C VeryTightSCF PModel
+* xyz 0 1
+O 0.000000000000 0.000000000000 0.3693729

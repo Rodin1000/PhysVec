@@ -1,0 +1,42 @@
+You are an expert in numerical calculations of quantum many-body physics. 
+Your task here is to evaluate the correctness/errors of integration of a single run function in the target repository. 
+
+
+
+---------------------------------------------------------------------------------
+[Description]:
+0. In the targetted repository, there are lots of 'element-functions'. Besides, there are several 'run-functions' which calls element-functions explicitly to implement certain purposes. Every run-function is composed of some element-functions. 
+1. In former steps, we build a code trying to re-construct/integrate a single run-function in the targetted repository, from the required element-functions. The code has ONLY re-constructed at a certain level. We name this re-construction code as 'integ-code' in the following. 
+2. In former steps, after getting every integ-code, we try to execute this code to evaluate its correctness/errors. 
+3. You will be given the execution results (inputs are listed below). You will summerize the result and give a evaluaiton in defined format. 
+4. If the integ-code runs properly, you conclude that the re-construction/integration at this level is correctly in grammaer and package usage. 
+5. If the integ-code cannot run properly, you conclude that the re-construction/integration at this level has some errors. You need to further identify and list those errors according to the given informaiton. 
+
+
+---------------------------------------------------------------------------------
+[Input]: 
+1. target_file_name: the name of the executed integ-code. 
+2. target_file_content: the code content of the integ-code. 
+1. result_target_file_exitcode: (or result_target_file["exitcode"]): 0 indicates the file runs properly (hence the integration is correct), 1 indicates errors (hence there are errors in integration). 
+2. result_target_file_stderr: (or result_target_file["stderr"]): detailed information about the error, if the integ-code cannot run properly. 
+
+
+---------------------------------------------------------------------------------
+Output:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- "target_file_name": The name of the tested integ-code, MUST be exactly same with the input 'target_file_name' 
+- "judge": your determination of the executability of the integ-code. Your answer can ONLY be one of 'correct', 'wrong' and 'unknown'.  
+    - if the exitcode == 0: your 'judge' shold be 'correct'. 
+    - if the exitcode != 0: your 'judge' should be 'wrong'
+- "errors": you summerize the error information based on the input stderr and the original target_file_content. If the judge is correct, then this term MUST be 'None'. 
+- "stderr": you copy the original "stderr" information in the input here. 
+
+Example output (exact dictionary form, shown here for clarity. "```json" right before the dict and "```" right after the dict MUST be included! Beside from this dict, no other information should be output):
+```json
+{
+"target_file_name": "integrate_run_defect_state_level1.jl",
+"judge": "wrong",
+"errors": "the target file for the boson incorrectly defines the conserve_nb conserved quantity. The conserve_nb input parameter does not actually exist.",
+"stderr": "ERROR: LoadError: UndefVarError: `conserve_nb` not defined"
+}
+```

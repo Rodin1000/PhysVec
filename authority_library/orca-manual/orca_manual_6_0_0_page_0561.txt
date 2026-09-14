@@ -1,0 +1,118 @@
+[... end of page 560 ...]
+relation energies and other info.
+DoSCS false # use spin-component scaling
+Ps 1.2 # scaling factor for ab pairs
+Pt 0.333 # scaling factor for aa and bb pairs
+Density none # no density construction
+unrelaxed # only "unrelaxed densities"
+relaxed # full relaxed densities
+NatOrbs false # calculate natural orbitals
+1However,sometimes,andinparticularwhentransitionmetalsandcoreorbitalsareinvolvedwehavemetunpleasantlylargeerrors.So–
+becarefulanddoublecheckwhenusingfloats!
+538 Chapter7. DetailedDocumentation
+
+--- Page 561 ---
+ORCAManual,Release6.0.0
+7.13.2 RI-MP2
+TheRI-MP2moduleisofastraightforwardnature. Theprogramfirsttransformsthethree-indexintegrals(𝑖𝑎|𝑃˜),
+where“𝑖”isaoccupied,“𝑎”isavirtualMOand“𝑃˜”isanauxiliarybasisfunctionthatisorthogonalizedagainst
+theCoulombmetric. Theseintegralsarestoredondisk,whichisnotcritical,evenifthebasishasseveralthousand
+functions. Theintegraltransformationisparallelizedandhasnospecificallylargecorememoryrequirements.
+In the next step, the integrals are read ordered with respect to the occupied labels and the exchange operators
+𝐾𝑖𝑗(𝑎,𝑏) = (𝑖𝑎|𝑗𝑏) = ∑︀NAux (𝑖𝑎|𝑃˜)(𝑃˜|𝑗𝑏) are formed in the rate limiting O(N5) step. This step is done with
+𝑃˜
+high efficiency by a large matrix multiplication and parallelizes well. From the exchange operators, the MP2
+amplitudesandtheMP2energyisformed. Theprogrammildlybenefitsfromlargecorememory(%maxcore)as
+thisminimizesthenumberofbatchesandhencereadsthroughtheintegrallist.
+TheRI-MP2gradientisalsoavailable. Here,allnecessaryintermediatesaremadeonthefly.
+IntheRIapproximation,oneintroducesanauxiliaryfittingbasis𝜂 (r)andthenapproximatesthetwo-electron
+𝑃
+integralsintheCoulombmetricas:
+∑︁
+(𝑝𝑞|𝑟𝑠)≈ (𝑝𝑞|𝑃)𝑉 𝑃 − 𝑄 1(𝑄|𝑟𝑠) (7.50)
+𝑃𝑄
+where𝑉 =(𝑃|𝑄)isatwo-indexelectron-electronrepulsionintegral. AsfirstdiscussedbyWeigendandHäser,
+𝑃𝑄
+theclosed-shellcaseRI-MP2gradienttakestheform:
+𝐸 R 𝑥 I-MP2 =2
+∑︁ (𝜇𝜈|𝑃)(𝑥)∑︁
+𝑐 𝜇𝑖 Γ𝑃 𝑖𝜈 +
+∑︁
+𝑉 𝑅 𝑥 𝑆
+(︁
+V−1/2𝛾V−1/2
+)︁
++⟨DF𝑥⟩ (7.51)
+𝑅𝑆
+𝜇𝜈𝑃 𝑖 𝑅𝑆
+TheF-matrixderivativetermsarepreciselyhandledasinthenon-RIcaseandneednotbediscussedanyfurther.
+Γ𝑃 isathree-indextwo-particle“density”:
+𝑖𝑎
+Γ𝑃 𝑖𝑎 = ∑︁ (1+𝛿 𝑖𝑗 )𝑡˜𝑖 𝑎 𝑗 𝑏 𝑉 𝑃 − 𝑄 1/2(𝑄|𝑗𝑏) (7.52)
+𝑗𝑏𝑄
+WhichispartiallytransformedtotheAObasisby:
+∑︁
+Γ𝑃 𝑖𝜈 = 𝑐 𝜈𝑎 Γ𝑃 𝑖𝑎 (7.53)
+𝑎
+Thetwo-indexanalogueisgivenby:
+𝛾 𝑃𝑄 = ∑︁ Γ𝑄 𝑖𝑎 (𝑖𝑎|𝑅)𝑉 𝑅 − 𝑃 1/2 (7.54)
+𝑖𝑎𝑅
+TheRIcontributiontotheLagrangianisparticularlyconvenienttocalculate:
+⎡ ⎤
+𝐿𝑅 𝑎𝑖 𝐼 = ∑︁ 𝑐 𝜇𝑎⎣2 ∑︁ Γ𝑃 𝑖𝜈 (𝜇𝜈|𝑄)𝑉 𝑃 − 𝑄 1/2 ⎦ (7.55)
+𝜇 𝑃𝑄𝜈
+In a similar way, the remaining contributions to the energy weighted density matrix can be obtained efficiently.
+Note,however,thattheresponseoperatorandsolutionoftheCP-SCFequationsstillproceedviatraditionalfour-
+indexintegralssincetheSCFoperatorwasbuiltinthisway. Thus,whilethederivativesofthethree-indexintegrals
+are readily and efficiently calculated, one still has the separable contribution to the gradient, which requires the
+derivativesofthefour-indexintegrals.
+The RI-MP2 energy and gradient calculations can be drastically accelerated by employing the RIJCOSX or the
+RIJDXapproximation.
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 539
+
+[... start of page 562 ...]
+ORCAManual,Release6.0.0
+7.13.3 “Double-Hybrid” Density Functional Theory
+Aslightlymoregeneralformismetinthedouble-hybridDFTgradient. Thetheoryisbrieflydescribedbelow.
+TheenergyexpressionforperturbativelyandgradientcorrectedhybridfunctionalsasproposedbyGrimmeis:
+𝐸 =𝑉
+𝑁𝑁
++ ⟨︀ Ph+⟩︀ + 1
+2
+∫︁ ∫︁ 𝜌
+|
+(
+r
+r 1 )
+−
+𝜌
+r
+(r
+|
+2 ) 𝑑r
+1
+𝑑r
+2
+− 1
+2
+𝑎
+𝑥
+∑︁ 𝑃
+𝜇
+𝜎
+𝜅
+𝑃
+𝜈
+𝜎
+𝜏
+(𝜇𝜈|𝜅𝜏)+𝑐DF𝐸XC[𝜌
+𝛼
+,𝜌
+𝛽
+]+𝑐PT𝐸PT
+1 2
+𝜇𝜈𝜅𝜏𝜎
+𝐸 =𝐸SCF+𝑐PT𝐸PT (7.56)
+Here𝑉 isthenuclearrepulsionenergyandℎ isamatrixelementoftheusualone-electronoperatorwhich
+𝑁𝑁 𝜇𝜈
+containsthekineticenergyandelectron-nuclear

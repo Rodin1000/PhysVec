@@ -1,0 +1,69 @@
+[... end of page 939 ...]
+tparameterinthe$sdnc blockarefixedto
+zerointhefit. Thus,the$el_states blockcontainsaninitialguessonthetransitionenergies,transitionelectric
+7.44. SimulationandFitofVibronicStructureinElectronicSpectra,ResonanceRaman 917
+ExcitationProfilesandSpectrawiththeorca_asaProgram
+
+--- Page 940 ---
+ORCAManual,Release6.0.0
+dipolemomentsandlinewidthparametersfor2states:
+$el_states
+2
+1 21100.00 100.00 100.00 1.0000 0.0000 0.0000
+2 24000.00 100.00 1000.00 1.0000 0.0000 0.0000
+The initial value of the adiabatic minima separation energy for the first state was approximated by the energy
+corresponding to the first vibronic peak in the absorption spectrum (21100 cm−1). The transition energies and
+linewidthparametersarevariedindependentlyasindicatedinthe$el_states_cblock. Sinceweallowtofitonly
+bandshapes, but not the overall intensities of the spectra, only relative absolute values of the transition electric
+dipole moments of two bands are important. Therefore it is reasonable to fix all components of the transition
+momentforthefirststateandvaryonly𝑀 componentforthesecondone:
+𝑥
+$el_states_c
+2
+1 1 1 1 0 0 0
+2 2 2 2 2 0 0
+Since we assume the absorption by both states and emission only from the first one, it is necessary to include
+Booleanarrays$abs_booland$fl_boolwhichspecifystateswhichwillbeincludedinthetreatmentoftheabsorp-
+tionandfluorescencespectra,respectively:
+$abs_bool
+2
+1 1 # 1 indicates that the corresponding state will be included in the calculation of
+2 1 # absorption
+$fl_bool
+2
+1 1
+2 0 # 0 indicates that the corresponding state will be excluded from the calculation
+# of emission spectrum
+Weneedalsotovarythevalueofvibrationalfrequencyofthemodewhichdeterminesseparationofvibrational
+peaksinthespectra. Thisisdoneviatheconstraintblock$vib_freq_gs_c:
+$vib_freq_gs_c
+1
+1 1
+NotethatitismeaninglesstoincludeintothetreatmenttheStokesshiftforthesecondstatewhichgiverisetothe
+backgroundsignalintheabsorptionsincethecorrespondingemissionisnotpresent. Therefore𝜆forthesecond
+stateisfixedtozeroasindicatedinthe$ss blockanditsconstraintcounterpart$ss_c:
+$ss
+2
+1 100.000000 # initialization of the Stokes shift for the 1st electronic state
+2 0.000000
+$ss_c
+2
+1 1 # the Stokes shift for the 1st electronic state will be varied in the fit
+2 0 # the Stokes shift for the 2nd electronic state will be fixed in the fit
+The fit run of orca_asa on file example009.inp will converge upon approximately 700 function evaluations
+(forMWADRelTol=1e-4). Thefileexample009.001.inpwillcontainthefittedeffectivevaluesofthevibrational
+frequency and dimensionless displacement: 𝜔 = 1404cm−1, ∆ = 1.35. One can notice that the fit is rather
+poorinthelow-andhigh-energyedgesoftheabsorptionandfluorescencespectra,respectively(Fig.7.57). The
+sourceofthisdiscrepancyisthesingle-modeapproximationwhichwasemployedhere. Thequalityofthefitcan
+besignificantlyimprovedassumingseveralmodeswithnon-zerodisplacementparameters. Notethatinsuchacase
+918 Chapter7. DetailedDocumentation
+
+[... start of page 941 ...]
+ORCAManual,Release6.0.0
+theproperguessonthenumberofactivemodesandcorrespondingdimensionlessdisplacementscanbededuced
+fromquantumchemicalcalculations.
+7.44.4 Quantum-Chemically Assisted Simulations and Fits of Optical Band-
+shapes and Resonance Raman Intensities
+Inthissectionwefinallyconnectthespectrasimulationalgorithmstoactualquantumchemicalcalculationsand
+outlineadetailedapproachfortheanalysisofabsorption, fluorescenceandresonanceRamanspectrawithinthe
+IMDHOmodel. Ourpro

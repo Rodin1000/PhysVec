@@ -1,0 +1,159 @@
+Your task is to generate executable and practical codes to reproduce results of a research paper, according to given informaiton. 
+During this process, you should strive to ensure that the code faithfully represents the task requirements while maintaining its executability. You should not provide a incomplete code. 
+You are requested to use MCP tools to look up into local library for related information. 
+
+-----------------------------------------------------------------------------------------------
+[Input]:
+You will be given a task plan, whose name may be 'Plan_text_info', ...
+The task plan aims to instruct you to reproduce a subplot, which may contain several items (curves, lines, ...). 
+The task plan file contains information of a single subplot in research paper. It typically contains:
+- "subplot_name": The user defined subplot that you will focus on. May be Fig. 1(c), Fig. 1(a)-inset, ...Insets should be regarded as seperate subplots. If you cannot find such subplot in the paper, this term is 'Subplot not found', and all items below is 'None'. 
+- "User_requests": User's additional instructions for generating the subplot. Including specifying several items, specifying numerical methods, ...
+
+-----------------------------------------------------------------------------------------------
+[Coding language]: 
+
+1. python
+    - in python, 'def xxx ...' is the way you define a function. 
+2. julia
+    - in julia, 'function xxx ... end' is the way you define a function. 
+
+you are NOT ALLOWED to use other languages. 
+
+----------------------------------------------------------------------------------------------
+[MCP usage]:
+Before code generation process, please use MCP to get more related information/guides. 
+1. You may use MCP server: 'filesystem' to get information from local libraries (such as 'Human_code_library'). Please follow the searching strategy below:
+    - You only use 'reference projects' related tools. You are NOT allowed to look into the project directory or other files that are not included in the reference projects. You are NOT allowed to write, append, move, edit, delete or move files. 
+    - Tool arguments must be a JSON object, not a JSON string. Never wrap the arguments object in quotes.
+
+-----------------------------------------------------------------------------------------------
+[Recommended packages]:
+1. For neural network wavefunction (e.g. RBM ansatz, FFN ansatz,...) or variational methods (e.g. VMC, TDVP,...), you choose python + NetKet first. 
+
+Packages you may need to demonstrate results:
+1. matplotlib
+
+
+-----------------------------------------------------------------------------------------------
+[Instructions]:
+You will generate a code file (py, julia, ) realizing the task plan. 
+The code should be consist of a set of functions. You MUST STRICTLY FOLLOW instructions bellow. 
+
+[NetKet usage]:
+1. Each function MUST be written in the following format: (You MUST STRICTLY FOLLOW the format)
+    # Input dependency: ...(you add the elements needed as input, from user or other functions. For each element, you take the format: "name"[brief description, data format (if you are sure, this term SHOULD be 'unknown')])
+    # Output results: ...(you add the output variables of this function)
+    function .....(you define the funciton here):
+        - function name MUST be in form of "tag_case"
+        - you MUST append type annotations (::T, e.g., ::Int, ::Float64) to function INPUT parameters.
+            * Common data formats/types for NetKet:
+            g (graph structure for a lattice system): netket.graph.Lattice;
+            hi (Hilbert space for a system): netket.hilbert.Spin (only if it is a spin system);
+            ha (Hamiltonian): netket.operator.LocalOperatorJax;
+            ma (a variational wavefunction): netket.models.RBMSymm (only if it is created by RBMSymm method);
+            ... 
+
+2. You MUST avoid monolithic functions. You decompose logic into smaller units as possible as you can (as funcitons with different tags listed below).
+
+3. The whole reprodecution process of the specified subplot/table is called a 'task'. 
+    - Commonly, in a subplot from the research paper, there may be several elements, such as curves, lines, point sets...Each of them (e.g. a curve) is called an 'item'. 
+
+4. Common "tag" choices for NetKet usage: You MUST NOT combine multiple tags for one function, e.g. "hilbert_hamiltonian_" is FORBIDDEN.
+    - "hilbert": to define the lattice type along with its Hilbert space for the targetted model, realizing the "phy_model" in the task plan. e.g. spin 1/2 chain, ...
+        - you implement nk.graph.xxx and nk.hilbert.xxx (from NetKet) in this 'hilbert' function. 
+        - Output results: the graph object 'g' and the hilbert space object 'hi'. 
+    - "hamiltonian": to define the Hamiltonian of the model, realizing the "phy_model" in the task plan. .
+        - you implement netket.(nk.)operator.xxx to create a Hamiltonian. 
+        - Input dependency: results from 'hilbert' function;
+        - Output results: the hamiltonian object 'ha'. 
+    - "statemodel": to define the variational state format (model). 
+        - Output results: the model object 'ma';
+        - Example: the function that contains nk.models.RBMSymm, nk.models.RBM,.... 
+    - "observable": to define the observables that needed in the research, accoding to the "dependent" term in the task plan. If there are multiple observables (dependent variables) in one task, each observable should correspond to a measure function. You DO NOT do calculations in this funciton, you are FORBIDDEN to call former functions like 'hilbert', 'hamiltonian', 'effector',...
+        - Example: the function that defines the correlation operator as "Cdag_i C_j"
+    - "compset": to define the sampler, optimizer, and the variational quantum state used later. 
+        - Input dependency: hilbert space object 'hi', graph object 'g', model object 'ma', 
+        - Output results: sampler object 'sa', optimizer object 'op', variational quantum state object 'vs'. 
+    - "effector": to define and execute the main calculation, e.g. VMC_SR,...
+        - You first define a netket driver object 'driv', then use driv.run(...) method to execute the calculation;
+        - Input dependency: hamiltonian objecct 'ha', optimizer object 'op', variational quantum state object 'vs', ...
+        - Output results: a netket driver object 'driv';
+    
+    [Above 6 tags: hilbert, hamiltonian, statemodel, obserble, compset, effector are NAMED AS 'element functions']
+    
+    - "run": to define a funciton that implement calculation for a given set of inputs. You call 'hilbert'/'hamiltonian'/'observable'/'effector/statemodel/compset' tagged functions. 
+        - You are FORBIDDEN to define explicitly Hilbert space, Hamiltonian, observables, NetKet drivers in this function. For independent calculations (e.g. extract results from state_1 and state_2), you should define different 'run' functions (run_state_1, run_state_2)
+        - You are STRICTLY FORBIDDEN to use other 'run' functions in the definition. You construct the function ONLY by 'element functions'. 
+            - Example: in 'run_excited_state' definition, you should NOT use 'run_ground_state' directly (instead, you use 'hilbert'/'hamiltonian'/... functions to calculate the ground state).
+        - You MUST implement a complete calculation procedure (from constructing Hilbert space, hamiltonian, variational state model and obserbles to calculating the wanted state by effector, and output the wanted quantities) for a SINGLE parameter set. 
+        - You are ALLOWED to define multiple 'run' functions according to your need. 
+    - "item": to define a function that generates data needed for an item in this task. You call 'run' tagged functions directly here. 
+        - You are FORBIDDEN to call explicitly hilbert/hamiltonian/statemodel/compset/observable/effector functions, you ONLY explicitly call 'run' functions to scan parameters. 
+        - You are ALLOWED to define different 'item' functions for different items needed in the task. 
+        - You are STRICTLY FORBIDDEN to include specific parameter values in 'item' functions. 
+        - Example: the function that calculate a correlation-interaction dependency in the targetted figure; 
+    - "plot": to define a function that demonstrate given data. 
+        - If your task is to reproduce a figure, plot function MUST be included. 
+        - You are ALLOWED to define multiple 'plot' functions. 
+    - "main": to define a function that serves as the entry point. 
+        - You are FORBIDDEN to call explicitly hilbert/hamiltonian/observable/statemodel/compset/effector, and run functions. You call 'item' funcitons and 'plot' functions DIRECTLY and EXPLICITLY to fullfill the reproduction task. 
+        - You MUST include specific parameter values in the 'main' definition. 
+        - You are FORBIDDEN to define GLOBAL parameters. 
+    
+    You are FORBIDDEN to define functions with other tags. 
+    For element functions = {hilbert, hamiltonian, observable, statemodel, compset, effector}, here are some ADDITIONAL requests that you MUST FOLLOW:
+        - The element functions aim to implement a SIINGLE function/step in the whole calculation procedure.  
+        - ALL tags in 'element functions' MUST be created. 
+        - You are FORBIDDEN to absorb some 'element function' definitions into other element function definitions. 
+            - Example: if you want to calculate the ground state for some specific state model/ansatz, you SHOULD define SEPERATELY a 'statemodel' function and a 'effector' function. You are FORBIDDEN to create EXPLICITLY the wanted state model/ansatz directly in the 'effector' definition. 
+        - In any element function definition, you are STRICTLY FORBIDDEN to call any other element function explicitly. Instead, you define the required preceding variables as the input parameters of the function.
+            - Example: if you want to calculate the ground state, in the 'effector' definition, you DO NOT call 'hamiltonian' function to construct the required system Hamiltonian, instead you define 'H' as an input parameter of the 'effector' function. 
+        - Every parameter used in each function definition MUST be included in the input parameters of this function. You are FORBIDDEN to use global parameters. 
+
+5. Common "case" choices for ITensors/ITensorMPS usage:
+    - "BoseHubbard1D"
+    - "XXZchain"
+    - "groundstate"
+    - "correlation"
+    ...
+
+
+----------------------------------------------------------------------------
+[Other coding requests]: 
+
+[NetKet usage]
+1. You choose to execute the whole code on CPU, by setting: 'os.environ["JAX_PLATFORM_NAME"] = "cpu"'. 
+
+2. Results from different data_sets and tasks are plot in a single figure. 
+
+3. The code you generate MUST contain only ASCII characters. Do not use any Unicode letters, symbols, or punctuation.
+    - Forbidden examples (non-exhaustive): Greek letters (ψ, Δ, ω, φ, μ, λ), math/logic symbols (÷, ≤, ≥, ≠, ∈, →, ←), typographic quotes (“ ” ‘ ’), primes (′), ellipsis (…), nonbreaking/zero‑width spaces, and any other non-ASCII characters.
+    - Use ASCII equivalents instead, for example: ψ → psi, φ → phi, ω → omega, μ → mu, λ → lambda, Δ → Delta, a ÷ b → div(a, b), ≤ → <=, ≥ → >=, ≠ → !=, ∈ → in. Use straight quotes " ' and plain ASCII punctuation only.
+
+4. You MUST NOT include specific values in function definitions. All concrete parameter values enter in 'main', when you call model functions (such as 'site', 'hamiltonian'...)
+    - for VMC calculations, it is often needed to set n_samples, n_iter,... You MUST set them in the 'main' function explicitly, and SHOULD NOT include specific values in 'effector' funciton definition. 
+    - in 'main' function, you MUST choose values according to the target research paper. You choose values according to your own preferences ONLY WHEN the original paper does NOT provide related parameter values. 
+
+
+-----------------------------------------------------------------------------------------------------
+[Output format]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- "subplot_name": the subplot name specified in task plan
+- "code_type": either "python" or "julia" (lowercase string)
+- "code_content": the full source code as a string (plain source, do not include ``` fences)
+
+You MUST NOT inlcude this prompt itself (including the example below) in your output, in order to avoid the case that the example code itself is extracted as your generated code. 
+
+Example output (exact dictionary form, shown here for clarity. You MUST add a "```json" right before the dict and "```" right after the dict! (not shown here) Beside from this dict, NO other information should be output(e.g. this prompt itself should NOT be included in your final response)):
+{
+"subplot_name": "1D_Bose_Hubbard_model",
+"code_type": "python",
+"code_content": "import numpy as np\nimport matplotlib.pyplot as plt\n\ndef Task_1():\n    x = np.linspace(0, 2*np.pi, 200)\n    y = np.sin(x)\n    return x, y\n\ndef main():\n    x, y = Task_1()\n    plt.plot(x, y)\n    plt.show()\n\nif __name__ == \"__main__\":\n    main()"
+}
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'. Even you fail to generate a complete code_content, you must KEEP this output format. 
+
+2. If the code_type is 'julia', you MAKE SURE that in the code you use 'function' rather that 'def' to define all functions. 

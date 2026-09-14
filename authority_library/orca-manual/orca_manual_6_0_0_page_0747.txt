@@ -1,0 +1,63 @@
+[... end of page 746 ...]
+nreadtheHessian,diagonalizeitandapplyyourscalingfactor. Whateverscalingfactorwas
+used in the actual input that generated the Hessian is irrelevant since the Hessian is re-diagonalized. To avoid
+confusion,werecommendthatifthegoalistoplaywiththescalingfactor,thentoleavethescalingfactorinthe
+inputat1.0. Nothingbadhappensifyoudon’tthough.
+724 Chapter7. DetailedDocumentation
+
+--- Page 747 ---
+ORCAManual,Release6.0.0
+7.27.1 Restarting Numerical Frequency calculations
+Torestartanumericalfrequenciescalculation,use:
+%FREQ
+restart true
+END
+andORCAwilllookforbasename.res.{}filesinthesamefolderwherethecalculationisbeingrun,checkforwhat
+alreadyhasbeendoneandrestartwhereitisneeded.
+7.28 Intrinsic Reaction Coordinate
+TheIntrinsicReactionCoordinate(IRC)methodfindsapathconnectingatransitionstate(TS)withitsdownhill-
+nearest intermediates. The implementation in ORCA follows the method suggested by Morokuma and cowork-
+ers.[412]
+TheIRCmethodfollowsthegradientofthenuclearcoordinates. AsthegradientisnegligibleataTS,firstaninitial
+displacementfromtheTSstructurehastobecarriedout,basedontheeigenmodesoftheHessian,inordertoget
+toaregionwithnonnegligiblegradient. Fortheinitialdisplacementtheeigenvectoroftheeigenmodewithlowest
+frequency(hessMode=0)isnormalizedandthenscaledbyScale_Displ_SD(whichbydefaultischosensuchthat
+anenergychangeofInit_Displ_DEcanbeexpected). Twoinitialdisplacements,forwardandbackward,aretaken
+byaddingtheresultingdisplacementvector(multipliedwith+1and-1,respectively)totheinitialstructure. Ifthe
+userrequeststhedownhilldirection(e.g. fromapreviousunconvergedIRCrun),itisassumedthatthegradientis
+nonzeroandthusnoinitialdisplacementiscarriedout.
+AftertheinitialdisplacementtheiterationsoftheIRCmethodbegin. Eachiterationconsistsoftwomainsteps,
+whicheachconsistagainofmultipleSPandgradientruns:
+1. Initialsteepestdescent(SD)step:
+1. Thegradient(grad0)ofthestartinggeometry(G0)isnormalized,scaledbyScale_Displ_SD,andthe
+resultingdisplacementvector(SD1)isappliedtoG0.
+2. Optional(ifSD_ParabolicFitistrue): IfSD1increasestheenergy, alinearsearchistakenalongthe
+directionofthedisplacementvector:
+1. ThedisplacementvectorSD1isscaledby0.5(SD2=0.5xSD1)andagainaddedtoG0.
+2. Aparabolicfitforfindingthedisplacementvector(SD3)whichleadstominimalenergyiscarried
+outusingthethreeSPenergies(G0,geometryafterSD1andafterSD2step). SD3hasthesame
+directionasSD1andSD2,butcanhaveadifferentlength.
+3. ThekeywordInterpolate_onlycontrolswhetherthelengthofSD3hastobeinbetween0andand
+thelengthofSD1. Ifthatisthecase,themaximumlengthisdeterminedbySD1,theminimum
+lengthiszero.
+3. AttheresultinggeometryG1(G0+SD1orG0+SD3)thegradientiscalculated(grad1).
+2. Optional(ifDo_SD_Corristrue): Correctiontothesteepestdescentstep:
+1. Basedongrad0andgrad1avectoriscomputedwhichrepresentsacorrectiontothefirstSD(SD1or
+SD3)step. ThiscorrectionbringsthegeometryclosertotheIRC.
+2. Thisvectorisnormalized, scaledbyScale_Displ_SD_CorrtimesthelengthofSD1orSD3, andthe
+resultingdisplacementvector(SDC1)isappliedtoG1.
+3. Optional(ifSD_Corr_ParabolicFitistrue):
+1. IftheenergyincreasesafterapplyingstepSDC1,SDC1isscaledby0.5(SDC2=0.5xSD1),if
+theenergydecreases,SDC1isscaledby2(SDC2=2xSD1). SDC2isthenaddedtoG1.
+7.28. IntrinsicReactionCoordinate 725
+
+[... start of page 748 ...]
+ORCAManual,Release6.0.0
+2. Aparabolicfitforfindingthedisplacementvector(SDC3)whichleadstominimalenergyiscarried
+outusingthethreeSPenergies(G1, geometryafterSDC1andafterSDC2step). SDC3hasthe
+samedirectionasSDC1andSDC2,butcanhaveadifferentlength.
+3. ThekeywordInterpolate_onlycontrolswhetherthelengthofSDC3hastobeinbetween0andand
+thelengthofSDC1. Ifthatisthecase,themaximumlengthisdeterminedbySDC1,theminimum
+lengthiszero.
+4. AttheresultinggeometryG2(G1+SDC1orG1+SDC3)thegradientiscalculated(grad2).
+3. Thegradientatthenewgeometryischeck

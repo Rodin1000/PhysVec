@@ -1,0 +1,79 @@
+[... end of page 144 ...]
+he program cycles between CI-vector optimization and orbital optimization steps
+(so-calledunfoldedtwo-stepprocedure). After3iterations,theprogramswitchestotheNewton-Raphsonsolver
+whichthenconvergesveryrapidly. OrbitaloptimizationwiththeNewton-Raphsonsolverislimitedtosmallersized
+molecules, astheprogramproduceslengthyintegralsandHessianfiles. Inthemajorityofsituationsthedefault
+converger(SuperCI(PT))isthepreferredchoice.[459]
+122 Chapter6. RunningTypicalCalculations
+
+--- Page 145 ---
+ORCAManual,Release6.0.0
+AtomicValenceActiveSpace
+Verygoodstartingorbitalsthataretargetedtoaspecificuser-givenactivespacecanbegeneratedwiththeAtomic
+Valence Active Space (AVAS) procedure. [750, 751] The general idea is that the user provides a set of atomic
+orbitals(AO)ofaminimalbasissetthataresufficienttoqualitativelyrepresentthefinalCASSCFactiveorbitals.
+Typicalexamplesare
+• p
+z
+orbitalsofa𝜋systemchromophoreinamolecule
+• fivevalence(or10double-shell)dorbitalsofatransition-metal(TM)atominamolecule
+• sevenvalence(or14double-shell)forbitalsofalanthanideoractinideatominamolecule
+Then, by the help of linear algebra (singular-value decomposition) AVAS rotates the starting molecular orbitals
+(MOs)suchthattheyhavemaximumoverlapwiththetargetAOs. WiththoserotatedMOsthathaveasufficiently
+large singular value (> 0.4 (default)) are considered as active orbitals. In that manner, AVAS can automatically
+determineanactivespace,i.e. thenumberofactiveorbitalsandelectrons,thatisnowspecifiedbythetargetAOs.
+Asafirstexample,wenowconsiderCuCl−inaminimalactivespace
+4
+! cc-pvtz TightSCF Def2/JK PModel NoIter
+! AVAS(Valence-D)
+%maxcore 3000
+%paras
+cucl = 2.291
+end
+* int -1 1
+Cu 0 0 0 0.0 0.0 0.0
+Cl 1 0 0 {cucl} 0.0 0.0
+Cl 1 2 0 {cucl} 90.0 0.0
+Cl 1 3 2 {cucl} 90.0 180.
+Cl 1 4 3 {cucl} 90.0 180.
+*
+Thekeyword! AVAS(Valence-D) seeksforalltransition-metalatomsinthemoleculeandinsertsasinglemin-
+imaldbasisfunctionforeachTMatom. Allfivecomponent𝑀 ofthebasisfunctionarethenconsidered. The
+𝐿
+AVASprocedureprintssingular/eigenvaluesfortheoccupiedandvirtualorbitalspaceandeasilyfindsthedesired
+minimalactivespaceCAS(9,5).
+-------------------------------------------------
+INITIAL GUESS: Atomic Valence Active space (AVAS)
+-------------------------------------------------
+AVAS threshold : 0.400000
+AVAS minimal basis set : MINAO
+AVAS list : Shell | 3 2 0> at atom 0 (system 0)
+\\\\\: Shell | 3 2 1> at atom 0 (system 0)\\\\\: Shell | 3 2 -1> at atom 0 (system 0)\\\\\:␣
+Shell | 3 2 2> at atom 0 (system 0)\\\\\: Shell | 3 2 -2> at atom 0 (system 0)
+˓→
+AVAS P matrix eig. val ( Occupied) : 0.966698
+AVAS P matrix eig. val ( Occupied) : 0.974913
+AVAS P matrix eig. val ( Occupied) : 0.977443
+AVAS P matrix eig. val ( Occupied) : 0.977443
+AVAS P matrix eig. val ( Occupied) : 0.985233
+AVAS P matrix eig. val ( Virtual) : (0.032829)
+AVAS P matrix eig. val ( Virtual) : (0.024687)
+AVAS P matrix eig. val ( Virtual) : (0.022047)
+AVAS P matrix eig. val ( Virtual) : (0.022047)
+AVAS P matrix eig. val ( Virtual) : (0.014546)
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 123
+
+[... start of page 146 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+AVAS electrons : 9
+AVAS orbitals : 5
+ThefiveinitialactiveorbitalsafterbeingprocessedbyAVASindeedlooklikethedesiredCud-orbitals.
+(a)σ𝑜 1 =0.977 (b)σ𝑜 3 =0.975 (c)σ𝑜 0 =0.985
+(d)σ𝑜
+4
+=0.967 (e)σ𝑜
+2
+=0.977
+Fig.6.

@@ -1,0 +1,90 @@
+[... end of page 413 ...]
+.250000 0.711280 -1
+...
+-1.387000 -2.946000 5.106000 2.500000 0.125520 -1
+# number of special pairs
+22
+# atom1 atom2 factor
+34 32 0.000000
+35 39 0.500000
+40 31 0.000000
+41 30 0.500000
+41 32 0.500000
+36 31 0.500000
+40 32 0.500000
+40 39 0.500000
+34 31 0.000000
+35 30 0.500000
+34 11 0.500000
+34 38 0.500000
+41 31 0.000000
+37 31 0.500000
+(continuesonnextpage)
+6.17. QM/MMviaInterfacestoORCA 391
+
+--- Page 414 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+34 33 0.500000
+34 39 0.000000
+40 30 0.500000
+41 39 0.500000
+34 30 0.000000
+35 31 0.000000
+34 42 0.500000
+35 32 0.500000
+The second number on the first line refers to the type of combination rule used to calculate the Lennard-Jones
+interaction. Itis0ifageometricaverageisused(OPLSforcefield),or1fortheLorentz-Berthelotrules(AMBER
+forcefield). Theidonthelastcolumnis-1forMMatomsandisequaltotheatomnumberfortheQMatoms. In
+thiscasethehydrogenlinkatomisatom0. Thelastblockofthefileiscomposedofatompairsandaspecialfactor
+bywhichtheirLennard-Jonesinteractionisscaled. Ingeneralthisfactorisequalto1, butforatomsoneortwo
+bondsapartiszero,whileforatomsthreebondsapartdependsonthetypeofforcefield,andinthiscaseis0.5.
+After successful completion of the ORCA optimization run, the information will be relayed back the pDynamo
+library,whichwillreportthetotalQM/MMenergyofthesystem. AtthispointthetypeQM/MMofcalculationis
+limitedonlybythecapabilitiesofthepDynamolibrary,whicharequiteextensive.
+6.17.3 ORCA and NAMD
+Since version 2.12, NAMD is able to perform hybrid QM/MM calculations. A more detailed explanation of all
+availablekeywords,settingupthecalculationandinformationontutorialsandontheupcominggraphicinterface
+toVMDareavailableontheNAMDwebsite.
+SimilartoothercalculationswithNAMD,theQM/MMisusingapdbfiletocontroltheactiveregions. Anexample
+is shown below, where the sidechain of a histidine protonated at N𝜖 is chosen to be the QM region. Either the
+occupancycolumnortheb-factorcolumnofthefileareusedtoindicatewhichatomareincludedinaQMarea
+and which are treated by the forcefield. In the other column, atoms which are connecting the QM area and the
+MMpartareindicatedsimilarly. Toclarifywhichcolumnisusedforwhichpurpose,thekeywordsqmColumnand
+qmBondColumnhavetobedefinedintheNAMDinput.
+...
+ATOM 1737 CA HSE P 117 14.762 47.946 31.597 1.00 0.00 PROT C
+ATOM 1738 HA HSE P 117 14.751 47.579 32.616 0.00 0.00 PROT H
+ATOM 1739 CB HSE P 117 14.129 49.300 31.501 1.00 1.00 PROT C
+ATOM 1740 HB1 HSE P 117 14.407 49.738 30.518 0.00 1.00 PROT H
+ATOM 1741 HB2 HSE P 117 13.024 49.194 31.509 0.00 1.00 PROT H
+ATOM 1742 ND1 HSE P 117 13.899 51.381 32.779 0.00 1.00 PROT N
+ATOM 1743 CG HSE P 117 14.572 50.261 32.582 0.00 1.00 PROT C
+ATOM 1744 CE1 HSE P 117 14.615 52.043 33.669 0.00 1.00 PROT C
+ATOM 1745 HE1 HSE P 117 14.356 53.029 34.064 0.00 1.00 PROT H
+ATOM 1746 NE2 HSE P 117 15.678 51.318 33.982 0.00 1.00 PROT N
+ATOM 1747 HE2 HSE P 117 16.369 51.641 34.627 0.00 1.00 PROT H
+ATOM 1748 CD2 HSE P 117 15.706 50.183 33.335 0.00 1.00 PROT C
+ATOM 1749 HD2 HSE P 117 16.451 49.401 33.388 0.00 1.00 PROT H
+ATOM 1750 C HSE P 117 13.916 47.000 30.775 0.00 0.00 PROT C
+ATOM 1751 O HSE P 117 12.965 46.452 31.334 0.00 0.00 PROT O
+...
+NOTES:
+• IfonewantstoincludemorethanoneQMregion,integersbiggerthan1canbeusedtodefinethedifferent
+regions.
+• Charge groups cannot be split when selecting QM and MM region. The reason is that non-integer partial
+chargesmayoccurifachargegroupissplit. SincetheQMpartialchargesareupdatedineveryQMiteration,
+thismayleadtoachangeinthetotalchargeofthesystemoverthecourseoftheMDsimulation.
+392 Chapter6. RunningTypicalCalculations
+
+[... start of page 415 ...]
+ORCAManual,Release6.0.0
+• The occupancy and b-factor columns are used for several declarations in NAMD. If two of these come
+togetherinonesimulation,thekeywordqmParamPDBisusedtodefinewhichpdbfilecontainstheinformation
+aboutQMatomsandbonds.
+• TosimplifytheselectionofQMatomsandwritingthepdbfileasetofscriptsisplannedtobeincludedin
+futurereleasesofNAMD.
+Torunthecalculation, thekeyword qmForces onmustbeset. ToselectORCA qmSoftware "orca"mustbe
+specifiedandthepathtotheexecutablesmustbegiventoqmExecPath,aswellasadirectorywherethecalculation
+iscarriedout(qmBaseDir). TopassthemethodandspecificationsfromNAMDtoORCAqmConfigLineisused.
+These lines will be copi

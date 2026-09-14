@@ -1,0 +1,49 @@
+Your task is to analyze one or more target DFT input **blocks** and select the most appropriate ORCA verifier input file(s) from the available CodeVerifier library files to be used as **templates** for unit-test inputs.
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. TARGET_code_blocks: One or multiple DFT input blocks (as plain text strings) that have been **previously generated in the repo** and now need to be verified/tested.  
+   - Each block is a fragment of an ORCA input file (e.g. a `keywords` line, a `%cpcm` block, or a `* xyz` geometry block).
+   - Each block belongs to a **named block type / section** (for example: `keywords`, `geometryblocks`, `inputblocks_method`, `inputblocks_cpcm`, etc.).
+   - Later steps will **substitute each TARGET_code_block into a verifier ORCA input file at the block with the same name/type**, so that the final file is a runnable unit-test input.
+   - **If a target block has no block of the same name/type in the selected verifier file**, the pipeline will **insert that block in the middle** of the verifier input file, with **blank lines separating it from blocks above and below**.
+2. AVAILABLE_LIBRARY_FILES: A list of available ORCA verifier input file names (with extensions, e.g. `["XAS_ligand_Rel_keywords.inp", "XAS_ligand_Rel_geometry.inp"]`) in the CodeVerifier library directory.  
+   - Each of these files is a **complete, runnable ORCA input** that serves as a verifier template.
+
+-------------------------------------------------------------------------------------------------------
+[Instructions]:
+1. Analyze the TARGET_code_blocks to understand, for **each block**:
+   - The block **category / role** in an ORCA input file (e.g. keywords line, main input block, solvation block, geometry block, auxiliary basis block, etc.), **and its block name / label** as used in the repo (e.g. `keywords_none`, `inputblocks_cpcm`, `geometryblocks_none`).
+   - The **physical / chemical system** and calculation type it belongs to (e.g. Cu K-edge XAS ligand complex with relativistic treatment, simple gas-phase DFT, solvation with CPCM, etc.).
+   - Any **special requirements** (relativistic treatment, COSMO/CPCM/SMD solvation, auxiliary basis sets, ECPs, etc.).
+
+2. Review the AVAILABLE_LIBRARY_FILES list and select one or more verifier ORCA input files that are compatible with the target blocks:
+   - These selected verifier inputs will be used as **hosts/templates**: later, the TARGET_code_blocks will be **directly substituted** into the **blocks with the same name/type** inside these verifier inputs to form runnable unit-test inputs.
+   - **IMPORTANT**: Since ORCA inputs are already complete and runnable, the integration is a **simple substitution** process. There is NO need for entry point generation or complex integration logic. The selected verifier file content will remain unchanged except for the specific same-name block replacement.
+   - For each TARGET_code_block, you should only consider verifier files that **already contain a block of the same category / logical name**, so that a direct “same-name block” substitution is possible (e.g. repo `inputblocks_cpcm` → verifier block that plays the `inputblocks_cpcm` role).
+   - You MUST select verifier inputs whose **physical system type and calculation setup** are compatible with the target blocks.
+     - **Example**: If TARGET_code_blocks contain `%cpcm` or `%smd` solvation blocks or keywords, select verifier files that already use compatible CPCM/SMD/COSMO settings.
+     - **Example**: If TARGET_code_blocks contain settings related to XAS calculations on Cu–ligand complexes with relativistic effects, select verifier files that already implement Cu XAS ligand relativistic inputs.
+   - You may (and often should) select **multiple** verifier files if needed so that, together, they can host **all** target blocks (e.g. one template for `keywords`, one for `geometry`, one for `inputblocks`), always respecting the “same-name / same-role” substitution principle.
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- "selected_files": A list of selected verifier ORCA input file names (with extensions, e.g., ["XAS_ligand_Rel_keywords.inp", "XAS_ligand_Rel_geometry.inp"]).  
+  If multiple files are needed to cover all TARGET_code_blocks, include **all** of them. If one template is sufficient, return a list with a single element.
+  **NOTE**: You are only selecting file names. The actual file contents will NOT be modified by this prompt. The substitution of TARGET_code_blocks into these verifier files will be handled by subsequent steps using simple same-name block replacement.
+
+Your entire response MUST consist only of a single JSON object inside a ```json ... ``` block, with no explanatory text, prefixes, or suffixes before or after. This ensures reliable parsing.
+
+Example output ("```json" right before the dict and "```" right after the dict MUST be included! Beside from this dict, no other information should be output):
+```json
+{
+"selected_files": ["XAS_ligand_Rel_keywords.inp", "XAS_ligand_Rel_geometry.inp"]
+}
+```
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'. Even you fail to select files, you must KEEP this output format.
+2. The "selected_files" field MUST be a list of strings, where each string is a file name with extension.
+3. Your entire response must be only that JSON object inside the code block; no text before or after.

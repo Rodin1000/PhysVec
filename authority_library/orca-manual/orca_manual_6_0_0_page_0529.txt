@@ -1,0 +1,74 @@
+[... end of page 528 ...]
+lguesstohisorherneeds.
+Theinitialguessisalsocontrolledviathe%scfblockandthevariablesGuess,MOInpandGuessMode.
+%scf
+Guess HCore # One electron matrix
+Hueckel # Extended H\"uckel guess
+PAtom # Polarized atomic densities
+PModel # Model potential
+MORead # Restart from an earlier calc.
+MOInp "Name.gbw" # orbitals used for MORead
+GuessMode FMatrix # FMatrix projection
+CMatrix # Corresponding orbital projection
+AutoStart true # try to use the orbitals from the existing
+# GBW file of the same name (if possible)
+# (default)
+false # don't use orbitals from existing GBW file
+end
+506 Chapter7. DetailedDocumentation
+
+--- Page 529 ---
+ORCAManual,Release6.0.0
+7.6.1 AutoStart feature
+OlderversionsofORCAalwayscreatedanewGBWfileatthebeginningoftherunnomatterwhetherafileof
+the same name existed or perhaps contained orbitals. Now, in the case of single-point calculations the program
+automatically checks if a .gbw file of the same name exists. If yes, the program checks if it contains orbitals
+andallothernecessaryinformationforarestart. Ifyes,thevariableGuessissettoMORead. Theexisting.gbw
+fileisrenamedtoBaseName.gesandMOInpissettothisfilename. IftheAutoStartfeatureisnotdesired,set
+AutoStart false in the %scf block or give the keyword !NoAutoStart in the simple input line. Note that
+AutoStartisignoredforgeometryoptimizations: inthiscase,usingpreviouslyconvergedorbitalscontainedin
+a.gbwfile(ofadifferentname)canbeachievedviaMOReadandMOInp.
+7.6.2 One Electron Matrix Guess
+Thesimplestguessistodiagonalizetheoneelectronmatrixtoobtainstartingorbitals. Thisguessisverysimple
+butusuallyalsoadisasterbecauseitproducesorbitalsthatarefartoocompact.
+7.6.3 Basis Set Projection
+The remaining guesses (may) need the projection of initial guess orbitals onto the actual basis set. In ORCA
+there are two ways this can be done. GuessMode FMatrix and GuessMode CMatrix. The results from the
+two methods are usually rather similar. In certain cases GuessMode CMatrix may be preferable. GuessMode
+FMatrixissimplerandfaster. InshorttheFMatrixprojectiondefinesaneffectiveoneelectronoperator:
+𝑓ˆ= ∑︁ 𝜀 𝑝 𝑎† 𝑝 𝑎 𝑝 (7.44)
+𝑝
+wherethesumisoverallorbitalsoftheinitialguessorbitalset,𝑎† isthecreationoperatorforanelectroninguess
+𝑝
+MO𝑝,𝑎 isthecorrespondingannihilationoperatorand𝜀 istheorbitalenergy. Thiseffectiveoneelectronoperator
+𝑝 𝑖
+isdiagonalizedintheactualbasisandtheeigenvectorsaretheinitialguessorbitalsinthetargetbasis. Formost
+wavefunctionsthisproducesafairlyreasonableguess.
+CMatrixismoreinvolved. ItusesthetheoryofcorrespondingorbitalstofiteachMOsubspace(occupied,partially
+occupiedorspin-upandspin-downoccupied)separately[34,444]. Afterfittingtheoccupiedorbitals,thevirtual
+startingorbitalsarechosenintheorthogonalcomplementoftheoccupiedorbitals. Insomecases,especiallywhen
+restartingROHFcalculations,thismaybeanadvantage. Otherwise,itisnotexpectedthatCMatrixwillbegrossly
+superiortoFMatrixformostcases.
+7.6.4 PModel Guess
+ThePModelguess(chosenbyGuess PModelinthe%scfblockorsimplyakeywordlinewith!PModel)isone
+that is usually considerably successful. It consists of building and diagonalizing a Kohn–Sham matrix with an
+electrondensitywhichconsistsofthesuperpositionofsphericalneutralatomsdensitieswhicharepredetermined
+for both relativistic and nonrelativistic methods. This guess is valid for both Hartree–Fock and DFT methods,
+butnotforsemiempiricalmodels. However,duetothecomplexityoftheguessitwillalsotakealittlecomputer
+time(usuallylessthanoneSCFiteration). Themodeldensitiesareavailableformostatomsoftheperiodictable
+andconsequentlythePModelguessisusuallythemethodofchoice(particularlyformoleculescontainingheavy
+elements)unlessyouhavemoreaccuratestartingorbitalsavailable.
+7.6. ChoiceofInitialGuessandRestartofSCFCalculations 507
+
+[... start of page 530 ...]
+ORCAManual,Release6.0.0
+7.6.5 Hückel and PAtom Guesses
+TheextendedHückelguessproceedsbyperformingaminimalbasisextendedHückelcalculationandprojecting
+theMOsfromthiscalculationontotheactualbasissetusingoneofthetwomethodsdescribedabove. Theminimal
+basisistheSTO-3Gbasisset. TheHückelguessmaynotbeverygoodbecausetheSTO-3Gbasissetissopoor.
+Thereisalsoaccumulatingevidencethatthesuperpositionofatomicdensitiesproducesafairlygoodinitialguess.
+Thecritiqueoftheatomicdensitymethodisthattheactualshapeofthemoleculeisnottakenintoaccountandit
+ismoredifficulttoreliablydefinesinglyoccupiedorbitalsforROHFcalculationsorareasonablespindensityfor
+UHFcalculations. ThereforeORCAchoosesadifferentwayinthePAtomguess(whichisthedefaultguess): the
+HückelcalculationissimplycarriedoutforallelectronsinaminimalbasisofatomicSCForbitals. Thesewere
+determined once

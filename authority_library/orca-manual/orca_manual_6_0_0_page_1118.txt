@@ -1,0 +1,66 @@
+[... end of page 1117 ...]
+urownprograms. Itwouldthereforebeagoodpointfordevelopinganinterface. Itislikelythat
+thisfunctionalitywillbefurtherexpandedinthefuture.
+orca_2mkl BaseName
+(will produce BaseName.mkl from BaseName.gbw)
+orca_2mkl BaseName -molden
+(writes a file in molden format)
+orca_2mkl BaseName -mkl
+(writes a file in MKL format)
+7.58. UtilityPrograms 1095
+
+--- Page 1118 ---
+ORCAManual,Release6.0.0
+WehaverecentlyalsoaddedthecapabilitytoconvertanygbwtypefileintoMKLorMoldenformat. Thus,you
+canusethisdevicetovizualizeQROorUNOorUCOorbitalsoranytypeofnaturalorbitals:
+orca_2mkl gbw_type_file.extension mkl_file.extension -mkl -anyorbs
+# or
+orca_2mkl gbw_type_file.extension molden_file.extension -molden -anyorbs
+You also have the opportunity to run orca_2mkl backwards in order to produce gbw type files. You can use
+this device in order to import orbitals from other sources into ORCA. This is not a frequently used option and
+it has limited capabilities. Hence, it is documented here only in a cursory way in order for you to be able to
+experiment. NotethattheCASSCFtutorial,thatsupplementsthemanual,showshowtoeditthemolecularorbitals
+usingorca_2mkl.
+orca_2mkl BaseName -gbw
+(will produce BaseName.gbw out of BaseName.mkl)
+7.58.9 orca_2aim
+Thisutilityprogramreadsa.gbwfileandcreatesa.wfnand.wfxfilethatcanbeusedfortopologicalanalysisof
+theelectrondensitybyotherprograms. Thisworksforopen-shellandclosed-shellwavefunctions. Theusageis
+verysimple–justtypeAIMinthesimpleinputlineofyourinputfile,oruse
+orca_2aim BaseName
+(will produce BaseName.wfn and BaseName.wfx from BaseName.gbw)
+7.58.10 orca_vpot
+Thisprogramcalculatestheelectrostaticpotentialatagivensetofuserdefinedpoints. Itcanbeusedwitheither
+aninputfileorininteractivemode. Itneedsfourarguments:
+orca_vpot MyJob.gbw MyJob.scfp MyJob.vpot.xyz MyJob.vpot.out
+First: Thegbwfilecontainingthecorrectgeometryandbasisset
+Second: Thedesireddensitymatrixinthisbasis(perhapsusetheKeepDenskeyword)
+Third: anASCIIfilewiththetargetpositionsinAU,e.g.
+6 (number_of_points)
+5.0 0.0 0.0 (XYZ coordinates)
+-5.0 0.0 0.0
+0.0 5.0 0.0
+0.0-5.0 0.0
+0.0 0.0 5.0
+0.0 0.0 -5.0
+Fourth: Thetargetfilewhichwillthencontaintheelectrostaticpotential,e.g.
+6 (number of points)
+VX1 VY1 VZ1 (potential for first point)
+VX2 VY2 VZ2 (potential for second point)
+etc.
+Itshouldbestraightforwardforyoutoreadthisfileandusethepotentialforwhateverpurpose.
+Therearesomespecialwaystocallorca_vpot: Acallforuseinparallelmode
+mpirun -np 4 /full_path/orca_vpot_mpi MyJob.gbw MyJob.scfp MyJob.pot.xyz MyJob.pot.out
+Acalltocheck,whichdensitiesareavailableinMyJob.densities,
+1096 Chapter7. DetailedDocumentation
+
+[... start of page 1119 ...]
+ORCAManual,Release6.0.0
+orca_vpot MyJob.densities
+willgiveyoualistingofalldensitiescontainedinthefile.
+In the case that basename of gbw- and densities-file do not match, you have to pass the densities’ name as fifth
+argumenttoorca_vpot.
+orca_vpot MyJob.gbw OtherJob.scfp MyJob.pot.xyz MyJob.pot.out OtherJob
+Acalltoorca_vpotwithoutanyargumentswilldisplayahelpmessage.
+7.58.11 orca_euler
+This utility program is used to calculate the relative orientation between calculated hyperfin

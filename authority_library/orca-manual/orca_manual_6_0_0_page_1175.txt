@@ -1,0 +1,66 @@
+[... end of page 1174 ...]
+undfile“removeAtom.cmp”:
+Variable filename = "newGeom";
+Variable atomIndex = 0;
+New_Step
+!BP86
+Step_End
+New_Geom = ( Remove_atom, atomIndex, filename, 1);
+end
+thenthexyzfile‘newGeom.xyz’willbecreatedthatshouldlooklike:
+2
+H 2.5974927 -0.4116633 0.7667449
+H 2.5931354 -0.4494962 -0.7447820
+1152 Chapter7. DetailedDocumentation
+
+--- Page 1175 ---
+ORCAManual,Release6.0.0
+wheretheatomwithatomIndex=0meaningthefirstatom,meaningtheoxygenisremoved.
+Remove_Element
+Remove_element is similar to the Remove_atom but instead of using the index of the atom we use its atomic
+number. Thusthesyntaxis:
+Syntax: New_Geom=(Remove_Element,atomicnumber,“filename”,stepIndex,[geometryIndex]);
+where:
+atomicnumberistheatomicnumberoftheatomwewanttoremove. Itcanbeanintegernumberoravariable.
+filenameisthenameofthefilethatwewanttouseforthenewxyzfile. Itcanbeastringinquotationmarksor
+avariablealreadydefinedbefore. Inthenamethexyzextensionwillbeautomaticallyappended. stepIndex the
+numberofthestepfromwhichwewillgettheinitialgeometry. Ithastobeanintegernumber. geometryIndex
+Incasetherearemorethanonegeometriesinthecorrespondingpropertyfilewecanchooseone. Ifnonumberis
+givenbutdefaulttheprogramwillusethelastone.
+example:
+ifweuseagaintheinputfromparagraph1.1.7.2butinsteadofaskingthecompoundfile“removeAtom.cmp”we
+askforthecompoundfile“removeElement.cmp”thatlookslike:
+Variable filename = "newGeom";
+New_Step
+!BP86
+Step_End
+New_Geom = ( Remove_element, 8, filename, 1);
+end
+then we will get again the same xyz file that was crated in paragraph Remove_Atom since the atom with atomic
+number8(meaningtheOxygen)willberemovedfromtheoriginalgeometry.
+New_Step
+New_StepsignalsthebeginningofanewORCAinput.
+Syntax:
+New_Step
+...NormalORCAinputcommands
+Step_End
+ThereisnorestrictionintheinputofORCA,exceptofcoursethatitshouldnotincludeanotherCompoundblock.
+ItisimportanttorememberthataNew_StepcommandshouldalwaysendwithaStep_End command. Belowwe
+showasimpleexample.
+Example:
+New_Step
+! BP86 def2-SVP
+Step_End
+There is only a basic fundamental difference with a normal ORCA input. Inside the New_Step block it is not
+necessarytoincludeageometry. ORCAwillautomaticallytrytoreadthegeometryfromthepreviouscalculation.
+OfcourseageometrycanbegivenandthenORCAwilluseit.
+7.59. CompoundMethods 1153
+
+[... start of page 1176 ...]
+ORCAManual,Release6.0.0
+Print
+Printing in the ORCA outpug can be customized using the print command. The syntax of the print command
+closelyfollowsthecorrespondingprintfcommandfromC/C++. Sotheusageoftheprintcommandis:
+Syntax:
+print(formatstring,[variables]);
+For each variable there can be specifiers and f

@@ -1,0 +1,80 @@
+[... end of page 1226 ...]
+d %6.2lf %16.12lf (+)\n",JobStep,angle, E0 );
+endif
+if (minimum=0 and maximum=0) then
+print(" %3d %6.2lf %16.12lf \n",JobStep,angle, E0 );
+endif
+endfor
+print("////////////////////////////////////////////////////////\n");
+End # end of compound block
+1204 Chapter7. DetailedDocumentation
+
+--- Page 1227 ---
+ORCAManual,Release6.0.0
+7.60.11 Multi reference
+Introduction
+Thisisascriptthatcalculatestheatomicelectrondenstitiesinfreeatomsandmakesalibraryofthem.
+Filename
+atomDensities.inp
+SCRIPT
+# FN 07/2024
+#
+# A compound script to run calculation on free atoms
+# in order to generate a library of electron densities
+#
+%compound
+Variable Element = {" ",
+"H", "He",
+"Li","Be","B" ,"C" ,"N" ,"O" ,"F" ,"Ne"
+};
+Variable Nact = {" ",
+"1" , "0",
+"1" ,"0" ,"3" ,"4" ,"5" ,"6" ,"7" ,"0"
+};
+Variable Norb = {" ",
+"1" , "0",
+"1" ,"0" ,"4" ,"4" ,"4" ,"4" ,"4" ,"0"
+};
+Variable Nroots = {" ",
+"1" , "0",
+"1" ,"0" ,"3" ,"3" ,"1" ,"3" ,"3" ,"0"
+};
+Variable Charge = {" ",
+"0" , "0",
+"0" ,"0" ,"0" ,"0" ,"0" ,"0" ,"0" ,"0"
+};
+Variable Mult = {" ",
+"2" , "1",
+"2" ,"1" ,"2" ,"3" ,"4" ,"3" ,"2" ,"1"
+};
+Variable HFTyp = {" ",
+"UHF", "RHF
+",
+˓→
+"CASSCF","RHF","CASSCF" ,"CASSCF" ,"CASSCF" ,"CASSCF" ,"CASSCF" ,"RHF"
+};
+Variable el;
+for el from 1 to Element.GetSize()-1 do
+if (HFTyp[el]="CASSCF") then
+New_Step
+! cc-pVDZ VeryTightSCF Conv
+%base "atom_&{Element[el]}_&{Charge[el]}_&{Mult[el]}"
+%casscf nel = &{Nact[el]};
+norb = &{Norb[el]};
+nroots = &{Nroots[el]};
+mult = &{Mult[el]};
+end
+(continuesonnextpage)
+7.60. CompoundExamples 1205
+
+[... start of page 1228 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+* xyz &{Charge[el]} &{Mult[el]}
+&{Element[el]} 0.0 0.0 0.0
+*
+Step_end
+else
+New_Step
+! &{HFTyp[el]} cc-pVDZ VeryTightSCF Conv
+%base "atom_&{Element[el]}_&{Charge[el]}_&{Mul

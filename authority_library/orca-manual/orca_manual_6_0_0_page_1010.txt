@@ -1,0 +1,83 @@
+[... end of page 1009 ...]
+edral
+Colvars). CoordinationnumberColvarsaredimensionlessanyway. Ifnotspecified,reasonabledefaultvaluesfor
+thescaleareused,whichare1.0AngstromfordistanceColvars,20.0degreeforangleanddihedralColvars,and
+0.2forcoordinationnumberColvars. NotethattheScalemodifieronlyappliestotheColvargivenlastbeforeit
+intheMetadynamicscommand.
+Asanexample,considerthefollowingcommandstosetupatwo-dimensionalMetadynamicssimulation:
+Manage_Colvar Define 1 Distance Atom 0 Atom 1
+Manage_Colvar Define 2 Angle Atom 0 Atom 1 Atom 2
+Metadynamics Colvar 1 Scale 1.0_A Colvar 2 Scale 10.0_Deg
+7.51. AbinitioMolecularDynamicsSimulations 987
+
+--- Page 1010 ---
+ORCAManual,Release6.0.0
+TokeepColvarswithintheregionofinterestduringMetadynamicssimulations,harmonicwallscanbeimposed
+on Colvars. This is achieved via the Wall modifier. As a first argument, it expects the direction of the wall,
+whichcanbeLoweror Upper. Thesecondargumentisthepositionofthiswall–giveninphysicalunitsofthe
+Colvar(e. g., AngstromfordistanceColvars), not inscaleunits. Asanoptionalthirdrealargument, thespring
+constantoftheharmonicwallcanbespecifiedinkJmol−1 unit−2, whereunitisthedefaultphysicalunitofthe
+Colvar(Angstromfordistances,degreeforangles). Ifomitted,aspringconstantof50kJmol−1 Angstrom−2 for
+distances,0.5kJmol−1 degree−2 forangles,and250.0kJmol−1 forcoordinationnumbersisused(areasonable
+choice). BothlowerandupperwallcanbedefinedafteroneWallmodifier,suchasin“Metadynamics Colvar
+1 Wall Lower 3.0_A 50.0 Upper 10.0_A 50.0”. Notethatone-sidedharmonicwallscanalsobeimposed
+onColvarsviatheRestraint command. ForstandardMetadynamics,thisisredundant. However,forextended
+LagrangianMetadynamics(seebelow),itmakesadifference: RestraintsactontheColvarandthereforeonthereal
+atomistic system, whereas the walls defined in the Metadynamics command act directly on the virtual particle.
+Again,notethattheWallmodifieronlyappliestotheColvargivenlastbeforeitintheMetadynamicscommand.
+ThelastmodifierwhichappliestoColvarsistheRangemodifier. IthasnoinfluenceontheMetadynamicsrunitself,
+and onlycontrols theoutput ofthe freeenergy profiles. The Range modifier expectsthree arguments. The first
+twohavetoberealnumbersanddefinethelowerandupperintervalbordersforwhichthefreeenergyprofilewith
+respecttothisColvarshallbeoutput. Thethirdargumentisofintegertypeandcontrolsthenumberofgridpoints
+toproduceforthisinterval. Intwo-dimensionalMetadynamics,bothColvarscanhaveassociatedRangemodifiers,
+whichthencontroltheintervalandresolutionofthe2Dgridforthefreeenergyprofile. Inthiscase,thegridshould
+notbemuchfinerthan100×100;otherwise,theevaluationofthegridpointswillbecomequiteslow. IfnoRange
+modifier is given, default values are used (range of 0...20 Angstrom for distance Colvars, 0...180 degree for
+angleColvars,−180...180degreefordihedralColvars,and0...3forcoordinationnumberColvars). Asabove,
+notethattheRangemodifieronlyappliestotheColvargivenlastbeforeitintheMetadynamicscommand.
+Addition of new Gaussian hills to the bias potential is controlled via the HillSpawn modifier. It expects three
+arguments. Thefirstargumenthastobeofintegertypeanddefinesthehillspawningfrequency,i. e.,everyhow
+manyMDstepsanewhillisadded(typicallyevery10–50fs). Thesecondargumentisarealnumberandspecifies
+theheightofeachnewhillinunitsofkJmol−1 (typically0.1–1.0kJmol−1). Thethirdargumentsetsthewidth
+of the Gaussian hills 𝜎 (which is the standard deviation, not the variance 𝜎2) in “scale units” – see the Scale
+modifierabove. Intwo-dimensionalMetadynamicssimulations,thewidthappliesforbothdimensionsatthesame
+time, andthescalesofthetwoColvarsneedtobeadjustedtoobtainthecorrect“aspectratio”ofthehillwidth.
+Standardchoicesfor𝜎are0.1–1.0scaleunits. Thehillspawningparameterscanbechangedatanypointduring
+aMetadynamicssimulations,notmodifyingthehillswhicharealreadypresent. Ifspawningofnewhillsshallbe
+temporarilysuspendedduringaMetadynamicssimulations,“Metadynamics HillSpawn Off”canbespecified.
+Ifyouwantdodeleteallhills,considertheResetmodifierdescribedbelow.
+The Store modifier controls how often the current intermediate free energy profile is saved to disk.
+It expects one integer argument which specifies the number of MD simulation time steps between two
+such stores. In case of one-dimensional Metadynamics, these free energy profiles have the file names
+“basename-metadynamics_profile_###.csv”, where “###” indicates the step number after which the pro-
+file was written. In addition to that, a file “basename-metadynamics_profile_history.csv” is writ-
+ten, which contains all the previously computed free energy profiles as columns, so that they can easily
+be printed in one single plot. For two-dimensional Metadynamics, Gnuplot source files with file names
+“basename-metadynamics_2d_profile_###.gp”arewritten,whichcanbeconvertedintocontourplotswith
+thefreewaretoolGnuplot(runsbothonWindowsandGNULinux). Therawdataforthesecontourplotscanbe
+foundincorrespondingfilesnamed“basename-metadynamics_2d_profile_###.gp.csv”. Notethatinboth
+cases, the free energy scale origin is set to the deepest free energy well, so that all numbers are positive. If the
+Storemodifierisnotspecified,thefreeenergyprofilesarestoredevery1000MDstepsperdefault.
+TheWellTemperedmodifierswitchesonwell-temperedMetadynamics[73]. IncontrasttostandardMetadynam-
+ics,thefreeenergyprofileconvergestowardsalimitforlongrunswiththisapproach. Inshortterms,thisapproach
+scalesdownthehillsizeatpositionswherealreadymanyhillshavebeenspawnedbefore,sothatthechangesinthe
+biaspotentialbecomesmallerovertime(convergence). TheWellTemperedmodifierexpectsonerealargument,
+whichistheso-calledbiastemperature,specifiedintemperatureunits. Thebiastemperatureshouldbechosenin
+a way so that 1 ·𝑘 ·𝑇 is around the same size as the largest barrier which the simulation shall overcome.
+2 B Bias
+Forexample, abiastemperatureof12000Kiswell-suitedtoovercomebarriersofaround100kJmol−1. Note
+thattheMetadynamicsmoduleneedstoknowthesimulationtemperatureinordertoreconstructthefreeenergy
+profileinawell-temperedMetadynamicsrun. Typically,athermostatshouldbeactiveduringaMetadynamicsrun,
+keepingthesimulationtemperatureconstant. Inthiscase,thetemperatureissimplyobtainedfromthethermostat.
+988 Chapter7. DetailedDocumentation
+
+[... start of page 1011 ...]
+ORCAManual,Release6.0.0
+However,ifnothermostatfortheregionallisspecified,thesimulationtemperaturehastobespecifiedmanually
+for well-tempered Metadynamics. This can be achieved by the temperature modifier, which expects one real
+argument–thesimulationtemperatureintemperatureunits.
+TheLagrangemodifierswitchesonextendedLagrangianMetadynamics[408]. Inthisvariant,avirtualparticle
+(withmassandvelocity)movesinthespacespannedbytheColvars,andtheonlyconnectionbetweenthisparticle
+andtherealatomisticsystemisaharmonicspring. Thebiaspotential(theGaussianhills)onlyactsonthevirtual
+particle. The first argument is the mass of the virtual particle in a.m.u. The second argument is the harmonic
+spring constant in units of kJ mol−1, which is evaluated in scale units –

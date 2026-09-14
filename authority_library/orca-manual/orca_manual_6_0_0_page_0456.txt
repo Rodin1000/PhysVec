@@ -1,0 +1,90 @@
+[... end of page 455 ...]
+pt
+%base "&{JobName}.step&{JobStep}"
+%geom
+constraints
+{A 1 0 2 &{angle} C}
+{A 1 0 3 &{angle} C}
+{A 1 0 4 &{angle} C}
+end
+end
+Step_End
+else
+New_step
+! &{method} &{basis} TightSCF Opt
+%base "&{JobName}.step&{JobStep}"
+%geom
+constraints
+{A 1 0 2 &{angle} C}
+{A 1 0 3 &{angle} C}
+{A 1 0 4 &{angle} C}
+end
+end
+(continuesonnextpage)
+6.20. CompoundMethods 433
+
+--- Page 456 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+* int 0 1
+N 0 0 0 0.0 0.0 0.0
+DA 1 0 0 2.0 0.0 0.0
+H 1 2 0 1.06 &{angle} 0.0
+H 1 2 3 1.06 &{angle} 120.0
+H 1 2 3 1.06 &{angle} 240.0
+*
+Step_End
+endif
+Read energies[iang] = SCF_ENERGY[jobStep];
+print(" index: %3d Angle %6.2lf Energy: %16.12lf Eh\textbackslash{}n", iang, angle,␣
+energies[iang]);
+˓→
+EndFor
+Thenwehavethemostinformationdensepart. Westartwiththedefinitionofaforloop. Thesyntaxincompound
+forforloopsis:
+ForvariableFromstartValueToendValueDo
+directives
+EndFor
+Aswecanseeintheexampleabove,thestartValueandendValuecanbeconstantnumbersorpreviouslydefined
+variables,orevenfunctionsofthesevariables. Keepinmindthattheyhavetobeintegers. Thesignalthattheloop
+hasreachedit’sendistheEndFor directive. Formoredetailswithregardtothefor loopspleaserefertosection
+For.
+Thenweproceedtoassignsomevariables.
+angle = amin + iang*step;
+JobStep = iang+1;
+JobStep_m = JobStep-1;
+Thesyntaxofthevariableassignementislikeineveryprogramminglanguagewithavariable,followedwiththe
+=symbolandthenthevalueoranequation. Pleasekeepinmind,thattheassignement must alwaysfinishwith
+the;symbol.
+Thenextstepisanothersignificantpartofeveryprogramminglanguage,namelytheif block. Thesyntaxoftheif
+blockisthefollowing:
+if (expressiontoevaluate)Then
+directives
+elseif(expressiontoevaluate)Then
+directives
+else
+directives
+EndIf
+Theelseif andelsepartsoftheblockareoptionalbutthefinalEndIf mustalwayssignaltheendoftheif block.
+Formoredetailsconcerningtheusageoftheif blockpleaserefertosectionIf ofthemanual.
+Nextwehaveacommandwhichisspecificforcompoundandnotapartofanormalprogramminglanguage. This
+istheReadGeomcommand. It’ssyntaxis:
+Read_Geom(integervalue);
+Beforeexplainingthiscommandwewillproceedwiththenextoneinthecompoundscriptandreturnforthisone.
+Thenextcommandisthebasisofallcompoundscripts. ThisistheNew_StepCommand. Thiscommandsignals
+compoundthatanormalORCAcalculationfollows. It’ssyntaxis:
+New_Command NormalORCAinputStep_End
+SomecommentsabouttheNew_Stepcommand. Firstly,insidetheNew_Step-Step_Endcommandsonecanaddall
+possilbecommandsthatanormalORCAinputaccepts. Weshouldrememberherethatthecommandsthatdefine
+434 Chapter6. RunningTypicalCalculations
+
+[... start of page 457 ...]
+ORCAManual,Release6.0.0
+thenumberofprocessorsandtheMaxCorecommandwillbeignored.
+Asecondpointtokeepinmindistheideaofthestep. EveryNew_Step-Step_Endstructurecorrespondstoastep,
+startingcountingfrom1(ThefirstORCAcalculation). Thishelpsusdefinethepropertyfilethatthiscalculation
+willcreate,sothatwecanuseittoretrieveinformationfromit.
+AsingificantfeatureintheNew_Step-Step_End block. istheusageofthestructure&{variable}. Thisstructure
+allowstheusertousevariablesthataredefinedoutsidetheNew_Step-Step_Endblockinsideit,makingtheORCA
+inputmoregeneric. Forexample,inthescriptgivenabove,webuildthebasenameofthecalculations
+%base "&{JobName}.step&{JobSte

@@ -1,0 +1,68 @@
+[... end of page 661 ...]
+_energy_xxx.pngetc. Allfilespro-
+ducedbySINGLE_ANISOarereferencedinthecorrespondingoutputsection. Example:
+PLOT true
+7.17.4 How to cite
+Wewouldappreciateifyoucitethefollowingpapersinpublicationsresultingfromtheuseof SINGLE_ANISO:
+• Chibotaru,L.F.;Ungur,L.J.Chem. Phys.,2012,137,064112.
+• Ungur,L.Chibotaru,L.F.Chem. Eur. J.,2017,23,3708-3718.
+Inaddition,usefulinformationlikethedefinitionofpseudospinHamiltoniansandtheirderivationcanbefoundin
+thispaper.
+7.17. InterfacetoSINGLE_ANISOmodule 639
+
+--- Page 662 ---
+ORCAManual,Release6.0.0
+7.18 Interface to POLY_ANISO module
+7.18.1 General description
+The POLY_ANISO is a stand-alone utility allowing for a semi-ab initio description of the (low-lying) electronic
+structureandmagneticpropertiesofpolynuclearcompounds. Themodelbehinditisbasedonthelocalised na-
+ture of the magnetic orbitals (i.e. the 𝑑 and 𝑓 orbitals containing unpaired electrons). For many compounds of
+interest,thelocalisedcharacterofthemagneticorbitalsleadstoveryweakcharacteroftheexchangeinteraction
+between magnetic centers. Due to this weakness of the inter-site interaction, the molecular orbitals and corre-
+spondinglocalisedgroundandexcitedstatesmaybeoptimizedintheabsenceofthemagneticinteractionatall.
+Forthispurpose,variousfragmentationmodelsmaybeapplied. Themostcommonlyusedfragmentationmodel
+isexemplifiedinFig.7.5:
+Fig.7.5: Fragmentationmodelofapolynuclearcompound.
+The upper scheme shows a schematic overview of a tri-nuclear compound and the resulting three mononuclear
+fragmentsobtainedbydiamagneticatomsubstitutionmethod. Bythisscheme,theneighbouringmagneticcenters,
+containing unpaired electrons are computationally replaced by their diamagnetic equivalents. As example, tran-
+sition metal (TM) sites are best described by either a diamagnetic Zn(II) or Sc(III), in function of which one is
+theclosest(intermsofchargeandatomicradius). Forlanthanides(LN),thesameprincipleisapplicable,La(III),
+Lu(III)orY(III)arebestsuitedtoreplaceagivenmagneticlanthanide. Individualmononuclearmetalfragments
+aretheninvestigatedbythecommonCASSCF+SOC/NEVPT2+SOC/SINGLE_ANISOcomputationalmethod. Asin-
+gledatafileforeachmagneticsite,producedbytheSINGLE_ANISOrun,isneededbythePOLY_ANISOcodeas
+input.
+Magnetic interaction between metal sites is very important for accurate description of low-lying states and their
+properties. Whilethefullexchangeinteractionisquitecomplex(e.g. requiringamultipolardescriptionemploying
+alargesetofparameters[413,869]),inasimplifiedmodelitcanbeviewedasasumofvariousinteractionmech-
+anisms: magneticexchange,dipole-dipoleinteraction,antisymmetricexchange,etc. InthePOLY_ANISOcodewe
+haveimplementedseveralmechanisms,whichcanbeinvokedsimultaneouslyforeachinteractingpair.
+ThedescriptionofthemagneticexchangeinteractionisdonewithintheLinesmodel[527]. Thismodelisexactin
+threecases:
+1. interactionbetweentwoisotropicspins(Heisenberg),
+2. interactionbetweenoneIsingspin(onlyS component)andoneisotropic(i.e. usual)spin,and
+𝑍
+3. interactionbetweentwoIsingspins.
+Inallothercaseswhenmagneticsiteshaveintermediateanisotropy(i.e. whenthespin-orbitcouplingandcrystal
+fieldeffectsareofcomparablestrengths),theLinesmodelrepresentsanapproximation. However,itwassuccess-
+fullyappliedforawidevarietyofpolynuclearcompoundssofar.
+Inadditiontothemagneticexchange,magneticdipole-dipoleinteractioncanbeaccountedexactly,byusingtheab
+initiocomputedmagneticmomentforeachmetalsite(asavailableinsidethedatafile). Inthecaseofstrongly
+anisotropiclanthanidecompounds(likeHo3+orDy3+),themagneticdipole-dipoleinteractionisusuallythedom-
+inantone. Forexample,asystemcontainingtwomagneticdipoles𝜇⃗ and𝜇⃗ ,separatedbydistance⃗rhaveatotal
+1 2
+640 Chapter7. DetailedDocumentation
+
+[... start of page 663 ...]
+ORCAManual,Release6.0.0
+energy:
+𝜇2
+𝐸 = 𝐵𝑜ℎ𝑟[𝜇⃗ ·𝜇⃗ −3(𝜇⃗ ⃗𝑛 )·(𝜇⃗ ⃗𝑛 )],
+𝑑𝑖𝑝 𝑟3 1 2 1 1,2 2 1,2
+where 𝜇⃗ are the magnetic moments of sites 1 and 2, respectively; 𝑟 is the distance between the two magnetic
+1,2
+dipoles,⃗𝑛 isthedirectionalvectorconnectingthetwomagneticdipoles(ofunitlength). 𝜇2 isthesquareof
+1,2 𝐵𝑜ℎ𝑟
+theBohrmagneton; withanapproximatevalueof0.43297in𝑐𝑚−1/T.AsinferredfromtheaboveEquation,the
+dipolarmagneticinteractiondependsonthedistanceandontheanglebetweenthemagneticmomentsonmagnetic
+cente

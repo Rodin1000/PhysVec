@@ -1,0 +1,58 @@
+[... end of page 257 ...]
+lowing chapter focuses on the traditional multi-reference
+approachesaspartoftheorca_mrcimodule.
+Although there has been quite a bit of experience with it, this part of the program is still somewhat hard to use
+andrequirespatienceandcarefultestingbeforetheresultsshouldbeaccepted. Whilewetrytomakeyourlifeas
+easyaspossible,youhavetobeawarethatultimatelyanymeaningfulmultireferenceabinitiocalculationrequires
+moreinsightandplanningfromtheusersidethanstandardSCForDFTcalculationorsinglereferencecorrelation
+6.7. MultireferenceConfigurationInteractionandPertubationTheory 235
+
+--- Page 258 ---
+ORCAManual,Release6.0.0
+approacheslikeMP2–sodon’tbefainthearted! Youshouldalsobeawarethatwithmultireferencemethodsitis
+veryeasytoletalargecomputerrunforalongtimeandstilltonotproduceameaningfulresult–yourinsightis
+akeyingredienttoasuccessfulapplication! Belowafewexamplesillustratesomebasicusesoftheorca_mrci
+module.
+RI-approximation
+Firstofall,itisimportanttounderstandthatthedefaultmodeoftheMR-CImoduleinitspresentimplementation
+performsafullintegraltransformationfromtheAOtotheMObasis. Thisbecomesverylaboriousandextremely
+memory intensive beyond approximately 200 MOs that are included in the CI. Alternatively, one can construct
+molecular electron-electron repulsion integrals from the resolution of the identity (RI) approximation. Thus a
+meaningfulauxiliarybasissetmustbeprovidedifthisoptionischosen. Werecommendthefittingbasesdeveloped
+bytheTurboMoledevelopersforMP2calculations. Thesegiveaccuratetransitionenergies;however,theerrorin
+thetotalenergiesissomewhathigherandmaybeontheorderof1mEhorso. CheckIntModetochangethedefault
+modefortheintegraltransformation. Notethatineitherway,theindividuallyselectingMRCImodulerequiresto
+haveallintegralsinmemorywhichsetsalimitonthesizeofthemoleculethatcanbestudied.
+IndividualSelection
+Secondly,itisimportanttounderstandthattheMR-CImoduleisoftheindividuallyselectingtype. Thus,onlythose
+excitedconfigurationstatefunctions(CSFs)whichinteractmorestronglythanagiventhreshold(T )withthe
+sel
+0thorderapproximationstothetargetstateswillbeincludedinthevariationalprocedure. Theeffectoftherejected
+CSFs is estimated using second order perturbation theory. The 0th order approximations to the target states are
+obtainedfromthediagonalizationofthereferencespaceconfigurations. Afurtherapproximationistoreducethe
+sizeofthisreferencespacethroughanotherselection–allinitialreferenceswhichcontributelessthanasecond
+threshold(T )tothe0thorderstatesarerejectedfromthereferencespace.
+pre
+Singleexcitations
+Oneimportantaspectconcernsthesingleexcitations. IfthereferenceorbitalscomefromaCASSCFcalculation
+the matrix elements between the reference state and the single excitations vanishes and the singles will not be
+selected. However, they contribute to fourth and higher orders in perturbation theory and may be important for
+obtaining smooth potential energy surfaces and accurate molecular properties. Hence, the default mode of the
+MRCImodulerequirestoincludeallofthesingleexcitationsviatheflagAllSingles =true. Thismayleadto
+lengthycomputationsifthereferencespacesbecomeslarge!
+ReferenceSpaces
+Third, the reference spaces in the MR-CI module can be of the complete active space (CAS(n-electrons,m-
+orbitals))orrestrictedactivespace(RAS,explainedlater)type. Itisimportanttounderstandthattheprogram
+usestheorbitalsaroundtheHOMO-LUMOgapasprovidedbytheusertobuildupthereferencespace! Thus,if
+theorbitalsthatyouwanttoputintheactivespacearenotcoming“naturally”fromyourSCFcalculationinthe
+rightplaceyouhavetoreorderthemusingthe“moread”and“rotate”featurestogetherwiththeNoIterdirec-
+tive. Toselectthemostmeaningfulandeconomicreferencespaceisthemostimportantstepinamultireference
+calculation. Italwaysrequiresinsightfromtheusersideandalsocareand,perhaps,alittletrialanderror.
+236 Chapter6. RunningTypicalCalculations
+
+[... start of page 259 ...]
+ORCAManual,Release6.0.0
+SizeConsistency
+Fourth,itisimportanttounderstandthatCItypemethodsarenotsizeconsistent. Practicallyspeakingtheenergy
+of the supermolecule A-B with noninteracting A and B fragments is not equal to the energies of isolated A and
+isolatedB.Thereareapproximatewaystoaccountforthis(ACPF

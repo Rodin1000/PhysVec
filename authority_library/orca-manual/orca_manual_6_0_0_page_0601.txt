@@ -1,0 +1,87 @@
+[... end of page 600 ...]
+tvariations
+incandCmaybestronglycoupledandtheenergyfunctionalmayhavemanylocalminimain(c,C)space. Conse-
+quently,thechoiceofstartingorbitalsisofreallyhighimportanceandthechoicewhichorbitalsandelectronsare
+includedintheactivespacehasdecisiveinfluenceonthesuccessofaCASSCFstudy. Ingeneral,aftertransforma-
+tiontonaturalorbitals,onecanclassifytheactivespaceorbitalsbytheiroccupationnumberswhichvarybetween
+0.0 and 2.0. In general, convergence problems are almost guaranteed if orbitals with occupation numbers close
+1ForapproximatefullCIapproaches,CASSCFisneitherinvarianttoactive-activerotationsnorexactlysize-consistent.
+578 Chapter7. DetailedDocumentation
+
+--- Page 601 ---
+ORCAManual,Release6.0.0
+tozeroorcloseto2.0areincludedintheactivespace. Occupationnumbersbetween0.02and1.98aretypically
+veryreasonableandshouldnotleadtolargeconvergenceproblems. Thereasonfortheoccurrenceofconvergence
+problemsisthattheenergyisonlyveryweaklydependentonrotationsbetweeninternalandactiveorbitalsifthe
+activeorbitalisalmostdoublyoccupiedandsimilarlyfortherotationsbetweenexternalandweaklyoccupiedactive
+orbitals. However,insomecases(forexampleinthestudyofpotentialenergysurfaces)itmaynotbeavoidable
+to include weakly or almost inactive orbitals in the active space and in these cases the use of the most powerful
+convergenceaidsisnecessary(videinfra). Asinthecaseofsingle-determinantwavefunctions(RHF,UHF,RKS,
+UKS)therearefirstandsecondorderconvergingmethodsavailable. ThefirstorderCASSCFmethodsrequirethe
+transformedintegrals(𝑡𝑢|𝑣𝑥)with𝑥belongingtoanysubspace. Thisisaverysmallsubspaceofthetotaltrans-
+formedintegrallistandisreadilyheldincentralstorageevenforlargercalculations. Ontheotherhand, second
+orderCASSCFmethodsrequiretheintegrals(𝑝𝑞|𝑥𝑦)and(𝑝𝑥|𝑞𝑦)(𝑝,𝑞 =internal,active;𝑥,𝑦 =anyorbital). This
+isafairlylargesetofintegralsandtheirgenerationislaboriousintermsofCPUtimeanddiskstorage. Second
+orderCASSCFcalculationsarethereforemorelimitedinthesizeofthemoleculeswhichcanbewelltreated. It
+wouldbepossibletobasicallyavoidtheintegraltransformationalsointhecaseofsecond-orderCASSCFcalcu-
+lationsandproceedtofullydirectcalculations. Suchcalculationsmaybecomequitetimeconsumingsincethere
+maybealargenumberofFockmatrixbuildsnecessary.
+TheaugmentedHessianmethod(Newton-Raphson)solvestheeigenvalueproblem:
+(︂ )︂(︂ )︂ (︂ )︂
+0 g 1 1
+=𝜀 (7.159)
+g H t t
+Here,gistheorbitalgradient(derivativeofthetotalenergywithrespecttoanon-redundantrotationbetweentwo
+orbitals)andHistheorbitalHessian(secondderivativeoftheenergywithrespecttotwonon-redundantorbital
+rotations). Thevectort(inintermediatenormalizationobtainedfromtheCIlikevector)summarizestherotation
+angles. Theanglesareusedtodefinetheantisymmetricmatrix(𝑋 = −𝑋 isthustherotationanglebetween
+𝑝𝑞 𝑞𝑝
+orbitals𝑝and𝑞):
+(︂ )︂
+0 t
+X= , (7.160)
+−t 0
+whichisusedtoparametrizetheunitarymatrixU=exp(X)whichisusedtoupdatetheorbitalsaccordingto:
+c new =c old U (7.161)
+(wherecisanMOcoefficientmatrix).
+Startingorbitals. Youcannotbecarefulenoughwithyourstartingorbitals. Whattypeofinitialguessworksbest
+dependsonthesystem. Quiteoftenitisnotthemagnitudeoftheinitialgradient,butthesimilaritybetweeninitial
+and final active orbitals. The CASSCF tutorial discusses a number of guess options in more detail. Generally
+speaking, canonical orbitals HF orbitals from a RHF calculation are not good choice, as the identification and
+selection of the active space orbitals is often difficult. Usually DFT orbitals (quasi-restricted or RKS) perform
+betterinthisrespect. Alternatively,ifCASSCForbitalsfromapreviousrunoraclose-bygeometryareavailable
+this is a good choice. For coordination chemistry complexes, the guess generated with orca_mergefrag (see
+the CASSCF tutorial), is probably the best choice - especially for heave metals. Natural orbitals from a simple
+correlation calculation like MP2 or a calculation with the MRCI module are usually a good choice and easily
+generated. Forexample:
+#
+# First job provides reasonable natural orbitals
+#
+! RI-MP2 SVP def2-SVP/C
+%mp2 natorbs true
+density unrelaxed # or relaxed (more expensive)
+end
+* int 0 1
+C 0 0 0 0.00 0.0 0.00
+O 1 0 0 1.20 0.0 0.00
+H 1 2 0 1.10 120.0 0.00
+H 1 2 3 1.10 120.0 180.00
+*
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 579
+
+[... start of page 602 ...]
+ORCAManual,Release6.0.0
+Nowexaminetheoccupationnumbersofthenaturalorbitals(youwillfindthatintheoutputoftheMP2partof
+thecalculation):
+Natural Orbital Occupation Numbers:
+N[ 0] = 2.00000000
+N[ 1] = 2.00000000
+N[ 2] = 1.98676733
+N[ 3] = 1.97726840
+N[ 4] = 1.97500109
+N[ 5] = 1.96759239
+N[ 6] = 1.96423113
+N[ 7] = 1.93719340
+N[ 8] = 0.05427454
+N[ 9] = 0.02555886
+N[ 10] = 0.0253058

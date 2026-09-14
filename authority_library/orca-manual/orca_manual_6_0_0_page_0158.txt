@@ -1,0 +1,87 @@
+[... end of page 157 ...]
+lspeed-up. Withconv,
+asingleauxiliarybasismustbeprovidedthatissufficientlylargertoapproximatetheFockmatricesaswellthe
+gradient/Hessianintegrals. IndirectmodeanadditionalauxiliarybasissetcanbesetfortheAuxCslot.
+! SV(P) RIJK def2/JK
+# Commented out: Detailed settings of the auxiliary basis in the %basis block,
+# where only the auxJK slot must be set.
+# %basis
+# auxJK "def2/JK" # or "AutoAux"
+# end
+TheRIJKmethodologyismoreaccurateandrobustforCASSCFe.g. heretheerrorisjust0.5mEH.
+6.1. SinglePointEnergiesandGradients 135
+
+--- Page 158 ---
+ORCAManual,Release6.0.0
+Organicmoleculeswithnearlydoubleoccupiedorbitalscanbechallengefortheorbitaloptimizationprocess. We
+comparecalculationsdonewith/withouttheNRsolver:
+! SV(P)
+! moread
+%moinp "Test-CASSCF-Benzene-2.mrci.nat"
+%casscf nel 6
+norb 6
+nroots 1
+mult 1
+# overwriting default settings with NR close to convergence
+switchstep NR
+end
+TheNRvarianttakes5cyclestoconverge,whereasthedefault(SuperCI_PT)requires8cycles. Ingeneral,first
+ordermethods,takemoreiterationscomparedtotheNRmethod. However,firstordermethodsaremuchcheaper
+thantheNRandthereforeitmaypayofftodoafewiterationsmoreratherthanswitchingtotheexpensivesecond
+ordermethods. Moreover,secondordermethodsarelessrobustandmaydivergeincertaincircumstances(toofar
+fromconvergence). Whenplayingwiththeconvergencesettings,thereisalwaysatrade-offbetweenspeedversus
+robustness. Thedefaultsettingsarechosencarefully.[459]Facingconvergenceproblems, itcanbeusefultouse
+analternativescheme(orbstep SuperCIandswitchstep DIIS)inconjunctionwithalevel-shifts(ShiftUp,
+ShiftDn). Alternatively,changingtheguessorbitalsmayavoidconvergenceproblemsaswell.
+RobustConvergencewithTRAH-CASSCF
+The restricted-step second-order converger TRAH Quadratic Convergence is now also available for both state-
+specificandstate-averagedCASSCFcalculations.[382]ToactivateTRAHforyourCASSCFcalculation,youjust
+needtoadd!TRAHinoneofthesimpleinputlinesandaddanauxiliarybasis.
+! TRAH Def2-SVP Def2-SVP/C TightSCF
+%casscf
+nel 6
+norb 6
+mult 1
+nroots 2
+end
+*xyz 0 1
+N 0.0 0.0 0.0
+N 0.0 0.0 1.1
+end
+Inmostcases,thereisnoneedtoplaywithanyinputparameters. Theonlyexceptionisthechoiceofactivemolec-
+ularorbitalrepresentationsthatcanhaveasignificantimpactontheconvergencerateforspin-coupledsystems. As
+canbeseenfromFig. Fig.6.14,forsuchcalculationslocalizedactiveorbitalsperformbest. Inanyothercase,the
+naturalorbitals(default)shouldbeemployed.
+136 Chapter6. RunningTypicalCalculations
+
+[... start of page 159 ...]
+ORCAManual,Release6.0.0
++1
+10
++0
+10
+-1
+10
+-2
+10
+-3
+10
+-4
+10
+-5
+10
+-6
+10
+-7
+10
+-8
+10
+0 10 20 30 40 50 60 70 80 90
+||g||
+SXPT
+Macro, loc
+Micro, loc
+Macro, nat
+Macro, can
+Iteration
+Fig.6.14

@@ -1,0 +1,96 @@
+[... end of page 598 ...]
+
+# trafos and batching and for storage of
+# integrals and amplitudes
+# don't be too generous
+STol 1e-5 # Max. element of the residual vector
+# for convergence check
+LShift 0.3 # Level shift to be used in update of
+# coefficients
+MaxDIIS 7 # Max number of DIIS vectors to be stored
+# this lets you control how much and what is residing
+# in central memory. May speed up things. Note that
+# MaxCore is not respected here
+(continuesonnextpage)
+576 Chapter7. DetailedDocumentation
+
+--- Page 599 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+InCore 0 # nothing in core
+1 # + sigma-vector and amplitudes (default)
+2 # + Jij(a,b) Kij(a,b) operators
+3 # + DIIS vectors
+4 # + 3-exernal integral Kia(b,c)
+5 # + 4-external integrals Kab(c,d)
+# this is identical to ALL
+# the default is AUTO which means that incore
+# is chosen based on MaxCore
+end
+7.15 The Complete Active Space Self-Consistent Field (CASSCF)
+Module
+7.15.1 General Description
+Thecompleteactivespaceself-consistentfield(CASSCF)methodisaspecialformofamulticonfigurationalSCF
+methodandcanbethoughtofasanextensionoftheHartree-Fockmethod. Itisaverypowerfulmethodtostudy
+staticcorrelationeffectsandasolidbasisforMR-CIandMR-PTtreatments. Itcanbeappliedtothegroundstate
+and excited states or averages thereof. The implementation in ORCA is fairly general and reasonably efficient.
+However, CASSCF calculations are fairly complex and ultimately require a lot of insight from the user in order
+to be successful. In addition to detailed description here, the manualexplores some typical examples in section
+CASSCFNaturalOrbitalsasInputforCoupled-ClusterCalculations. Furthermore,themanualissupplemented
+withatutorialforCASSCFthatcoversmanypracticaltipsonthecalculationdesignandusageoftheprogram.
+Thewavefunction. ThewavefunctionofagivenCASSCFstateiswrittenas
+⃒ ⃒Ψ𝑆 𝐼 ⟩︀ = ∑︁ 𝐶 𝑘𝐼 ⃒ ⃒Φ𝑆 𝑘 ⟩︀ . (7.149)
+𝑘
+Here, ⃒ ⃒Ψ𝑆⟩︀ is the CASSCF 𝑁-electron wavefunction for state 𝐼 with total spin S. The set of ⃒ ⃒Φ𝑆⟩︀ is a set of
+𝐼 𝑘
+configurationstatefunctions(forexamplelinearcombinationofSlaterdeterminants)eachadaptedtoatotalspin
+𝑆. Theexpansioncoefficients𝐶 representthefirstsetofvariationalparameters. EachCSFisconstructedfrom
+𝑘𝐼
+a common set of orthonormal molecular orbitals 𝜓 (r) which are in turn expanded in basis functions 𝜓 (r) =
+𝑖 𝑖
+∑︀ 𝑐 𝜑 (r). TheMOcoefficients𝑐 formthesecondsetofvariationalparameters.
+𝜇 𝜇𝑖 𝜇 𝜇𝑖
+Theenergy. TheenergyoftheCASSCFwavefunctionisgivenbytheRayleighquotient
+⟨ ⃒ ⃒ ⟩
+Ψ𝑆
+𝐼
+⃒
+⃒
+𝐻ˆ
+BO
+⃒
+⃒
+Ψ𝑆
+𝐼 (7.150)
+𝐸(c,C)= ⟨︀ ⃒ ⟩︀ ,
+Ψ𝑆⃒Ψ𝑆
+𝐼 𝐼
+andrepresentsanupperboundtothetruetotalenergy. However,CASSCFcalculationsarenotdesignedtoprovide
+valuesfortotalenergywhichareclosetotheexactenergy. ThepurposeofaCASSCFcalculationistoprovidea
+qualitativelycorrectwavefunction,whichformsagoodstartingpointforatreatmentofdynamicelectroncorrela-
+tion.
+TheCASSCFmethodisfullyvariationalinthesensethattheenergyismadestationarywithrespecttovariations
+inbothsetsofMOandCIcoefficients. Atconvergence,thegradientoftheenergywithrespecttotheMOandCI
+coefficientsvanishes
+𝜕𝐸(c,C)
+=0, (7.151)
+𝜕𝑐
+𝜇𝑖
+𝜕𝐸(c,C)
+=0. (7.152)
+𝜕𝐶
+𝑘𝐼
+Orbitalspaces. InCASSCFcalculations,theMOspaceisdividedintothreeuserdefinedsubspaces:
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 577
+
+[... start of page 600 ...]
+ORCAManual,Release6.0.0
+• The“inactiveorbitals”aretheorbitalswhicharedoublyoccupiedinallconfigurationstatefunctions(labels
+𝑖,𝑗,𝑘,𝑙).
+• The“activeorbitals”aretheorbitalswithvariableoccupationnumbersinthevariousCSFs(labels𝑡,𝑢,𝑣,𝑤).
+• The“externalorbitals”(labels𝑎,𝑏,𝑐,𝑑)
+Notethatinolderpublications,theinactiveandactiveorbitalsaredistinguishedandreferredtoas“internal”or-
+bitals.
+Thewavefunctionandenergyisinvariantwithrespecttounitarytransformationswithinthethreesubspaces. The
+specialfeatureofaCASSCFwavefunctionisthatafixednumberofelectronsisassignedtoeachsubspace. The
+internalsubspaceisofcoursecompletelyfilledbuttheCSFsintheactivespaceconstituteafull

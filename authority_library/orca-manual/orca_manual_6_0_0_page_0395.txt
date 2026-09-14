@@ -1,0 +1,61 @@
+[... end of page 394 ...]
+ontogetherwiththefragmentoptimizationcanbeusedinordertoquicklypreoptimize
+yoursystematMMlevel. E.g. youcanoptimizethehydrogenpositionsoftheproteinandwatermolecules,
+andatthesametimerelaxnon-standardmolecules,forwhichnoexactbondedparametersareavailable,as
+rigidbodies.
+!MM L-OptH
+%mm
+ORCAFFFilename "DNA_hexamer.ORCAFF.prms"
+(continuesonnextpage)
+372 Chapter6. RunningTypicalCalculations
+
+--- Page 395 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+*pdbfile 0 1 protein_ligand.pdb
+%geom
+Frags # all other atoms belong to fragment 1 by default
+2 {22307:22396} end # cofactor
+3 {22397:22423} end # ligand
+end
+RigidFrags {2 3} end # treat cofactor and ligand as individual rigid bodies
+end
+FrequencyCalculation
+Ifallatomsareactive,aregularfrequencycalculationiscarriedoutwhenrequesting!NumFreq. Iftherearealso
+non-active atoms in the QM/MM system, the Partial Hessian Vibrational Analysis (PHVA, see section Partial
+Hessian Vibrational Analysis) is automatically selected. Here, the PHVA is carried out for the above defined
+activeRegionExt,wheretheextensionshellatomsareautomaticallyusedas‘frozen’atoms. Notethattheanalytic
+HessianisnotavailableduetothemissinganalyticsecondderivativesfortheMMcalculation. Notethatinanew
+calculationafteranoptimizationitmighthappenthatthenewautomaticallygeneratedextendedactiveregionis
+differentcomparedtothepreviousregionbeforeoptimization. Thismeansthatwhenusingapreviouslycomputed
+Hessian(e.g. attheendofanoptimizationoraNEB-TSrun)theHessiandoesnotfittothenewextendedactive
+region. ORCAtriestosolvethisproblembyfetchingtheinformationontheextendedregionfromthehessfile. If
+thatdoesnotwork(e.g. ifyoudistortthegeometryaftertheHessiancalculation)youshouldmanuallyprovidethe
+listofatomsoftheextendedactiveregion. Thisisdoneviathefollowingkeyword:
+%qmmm
+OptRegion_FixedAtoms {27 1288:1290 4400} end # manually define the
+# activeRegionExt atoms.
+end
+Note that ORCA did print the necessary information in the output of the calculation in which the Hessian was
+computed:
+Fixed atoms used in optimizer ... 27 1288 1289 1290 4400
+NudgedElasticBandCalculations
+NEB calculations (section Nudged Elastic Band Method) can be carried out in combination with the multiscale
+featuresinordertoe.g. studyenzymecatalysis. Whenautomaticallybuildingtheextensionshellatthestartofa
+Multiscale-NEBcalculation,notonlythecoordinatesofthemaininputstructure(‘reactant’),butalsotheatomic
+coordinates of the ‘product’ and, if available, of the ‘transition state guess’ are used to determine the union of
+the extension shell of the active region. For large systems it is advised to use the active region feature for the
+NEBcalculation. Notethattheatomicpositionsofthenon-activeatomsofreactantandproductand,ifavailable,
+transitionstateguess,shouldbeidentical.
+6.16. ORCAMultiscaleImplementation 373
+
+[... start of page 396 ...]
+ORCAManual,Release6.0.0
+MolecularDynamics
+Ifthereareactiveandnon-activeatomsinthemultiscalesystem,onlytheactiveatomsareallowedtopropagatein
+theMDrun. Ifallatomsareactive,allatomsarepropagated. Formoreinformationontheoutputandtrajectory
+options,seesectionRegions.
+RigidMMWater
+AsTIP3Pwatermighthavetobetreatedasrigidbodiesduetoitsparametrization-pleasecheckoutthespecifics
+oftheappliedforcefieldparametrizati

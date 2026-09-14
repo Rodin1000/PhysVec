@@ -1,0 +1,335 @@
+{
+  "query": "How to adjust SCF convergence criteria for high band-gap ceramic complexes in ORCA?",
+  "package": "orca-manual",
+  "results": [
+    {
+      "id": "9.6.1_Convergence_Tolerances__orca_manual_4_2_1-page-0479__81e9a14b218d95a30bd0918e3fb64d36__full__0",
+      "text": "9.6 SCF Convergence 447\nHere, MO1 and MO2 are the indices of the two MOs of interest. Recall that ORCA starts counting MOs with\nindex 0, i.e. the MO with index 1 is the second MO. Angle is the rotation angle in degrees. A rotation\nangle of 90◦corresponds to ﬂipping two MOs, an angle of 45 ◦leads to a 50:50 mixture of two MOs, and a\n180◦rotation leads to a change of phase. Operator1 and Operator2 are the orbitals sets for the rotation.\nFor UHF calculations spin-up orbitals belong to operator 0 and spin-down orbitals to operator 1. RHF and\nROHF calculations only have a single orbital set.\nThe Rotate feature can be used to produce broken symmetry solutions say in transition metal dimers. In\norder to do that ﬁrst perform a high-spin calculation, then ﬁnd the pairs of MOs that are symmetric and\nantisymmetric combinations of each other. Take these MOs as the initial guess and use rotations of 45 ◦for\neach pair to localize the startup MOs. If you are lucky and the broken symmetry solution exists, you have a\ngood chance of ﬁnding it this way. The physical meaning of such a solution is a diﬀerent question that will\nnot be touched here.\n9.6 SCF Convergence\nSCF convergence is a pressing problem in any electronic structure package because the total execution times\nincreases linearly with the number of iterations. Thus, it remains true that the best way to enhance the\nperformance of an SCF program is to make it converge better. In some cases, especially for open-shell\ntransition metal complexes, convergence may be very diﬃcult. ORCA makes a dedicated eﬀort to achieve\nreasonable SCF convergence for these cases without compromising eﬃciency. However, there are cases that\ndo not converge, but ﬁnd a list of things to try ﬁrst before giving up in this chapter.\nAnother issue is whether the solution found by ORCA is stable, i.e. a minimum on the surface of orbital\nrotations. Especially for open-shell singlets it can be hard to achieve a broken-symmetry solution. The SCF\nstability analysis (section 9.9) may be able to help in such situations.\n9.6.1 Convergence Tolerances\nBefore discussing how to converge a SCF calculation it should be deﬁned what is meant by “converged”.\nORCA has a variety of options to control the target precision of the energy and the wavefunction that can be\nselected in the % scf block, or with a simple input line keyword that merges the criterion label with “SCF”,\ne.g. ! StrongSCF or ! VeryTightSCF:\n%scf\nConvergence # The default convergence is between medium and strong\nSloppy # very weak convergence\nLoose # still weak convergence\nMedium # intermediate accuracy\nStrong # stronger\nTight # still stronger\nVeryTight # even stronger\nExtreme # close to numerical zero of the computer\n# in double precision arithmetic\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "9.6.1_Convergence_Tolerances__orca_manual_4_2_1-page-0479.txt",
+        "package": "orca-manual",
+        "section_title": "9.6.1_Convergence_Tolerances__orca_manual_4_2_1-page-0479.txt"
+      },
+      "score": 0.9464206974584821,
+      "original_score": 0.9404674416205356,
+      "vector_score": 1.0,
+      "bm25_score": 0.7023372081026782,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "scf",
+        "convergence",
+        "high",
+        "complexes",
+        "orca"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "9.6.6_Approximate_Second_Order_SCF_SOSCF__orca_manual_4_2_1-page-0483__3bbf138f8127b8c0bcc1081d834add07__full__0",
+      "text": "9.6 SCF Convergence 451\n9.6.5 An alternative DIIS algorithm: KDIIS\nAn alternative algorithm that makes use of the DIIS concept is called KDIIS in ORCA. The KDIIS algorithm\nis designed to bring the orbital gradient of any energy expression to zero using a combination of DIIS\nextrapolation and ﬁrst order perturbation theory. Thus, the method is diagonalization-free. In our hands it\nis superior to the standard DIIS algorithm in many cases, but not always. The algorithm is invoked with the\nkeyword ! KDIIS and is available for RHF, UHF and CASSCF.\n9.6.6 Approximate Second Order SCF (SOSCF)\nSOSCF is an approximately quadratically convergent variant of the SCF procedure [375, 376]. The theory is\nrelatively involved and will not be described here. In short – SOSCF computes an initial guess to the inverse\norbital hessian and then uses the BFGS formula in a recursive way to update orbital rotation angles. As\ninformation from a few iterations accumulates, the guess to the inverse orbital hessian becomes better and\nbetter and the calculation reaches a regime where it converges superlinearly. As implemented, the procedure\nconverges as well or slightly better than DIIS and takes a somewhat less time. However, it is also a lot\nless robust, so that DIIS is the method of choice for many problems (see also the description of the full\nNewton-Raphson procedure in the next section). On the other hand, SOSCF is useful when DIIS gets stuck\nat some error around ∼0.001 or 0.0001. Such cases were the primary motive for the implementation of\nSOSCF into ORCA.\nThe drawback of SOSCF is the following: in the beginning of the SCF, the orbital gradient (the derivative of\nthe total energy with respect to rotations that describe the mixing of occupied and virtual MOs) is large,\nso that one is far from the quadratic regime. In such cases, the procedure is not successful and may even\nwildly diverge. Therefore it is recommended to only invoke the SOSCF procedure in the very end of the\nSCF where DIIS may lead to “trailing” convergence. SOSCF is controlled by the variables SOSCFStart and\nSOSCFMaxIt. SOSCFStart is a threshold for the orbital gradient. When the orbital gradient, or equivalently\nthe DIIS Error, fall below SOSCFStart, the SOSCF procedure is initiated. SOSCFMaxIt is the latest iteration\nto start the SOSCF even if the orbital gradient is still above SOSCFStart.\n%scf\n# control of the SOSCF procedure\nCNVSOSCF true # default: false\nSOSCFStart 0.1 # default: 0.01\nSOSCFMaxIt 5 # default: 1000\n# more convenient:\nSOSCFStart 0.1 MaxIt 5 end\nend\nFor many calculations on transition metal complexes, it is a good idea to be conservative in the startup\ncriterion for SOSCF, it may diverge otherwise. A choice of 0.01 or lower can be recommended.\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_id": "full",
+        "source_file": "9.6.6_Approximate_Second_Order_SCF_SOSCF__orca_manual_4_2_1-page-0483.txt",
+        "section_title": "9.6.6_Approximate_Second_Order_SCF_SOSCF__orca_manual_4_2_1-page-0483.txt"
+      },
+      "score": 0.8023403120388504,
+      "original_score": 0.7851525130857069,
+      "vector_score": 0.9617567966549366,
+      "bm25_score": 0.07873537880878737,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "scf",
+        "convergence",
+        "complexes",
+        "orca"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "9.9_SCF_Stability_Analysis__orca_manual_4_2_1-page-0498__cf074cf047e6cceb42cb51d39eff897a__full__0",
+      "text": "466 9 Detailed Documentation\neigenvalues are found, the SCF solution corresponds to a saddle point and not a true local minimum in the\nspace considered in the analysis. A typical case are stretched bonds of diatomics, where the symmetry of the\ninitial guess leads to a restricted solution instead of the often preferred unrestricted one. Several spaces are\ntheoretically possible [179], however, ORCA limits itself to the analysis RHF/RKS in the space of UHF/UKS\nor UHF/UKS in the space of UHF/UKS. As such, it is available for the SCF parts of DFT and HF. [180]\nIn the following, HF is used to indicate both HF and KS. Consider the following input (unless indicated\notherwise, default values are shown):\n! BHLYP def2-SVP NORI\n%scf\nguess hcore # for illustrative purposes only\nHFTyp UHF # default based on spin multiplicity\nSTABPerform true # default false\nSTABRestartUHFifUnstable true # restart the UHF-SCF if unstable\nSTABNRoots 3 # number of eigenpairs sought\nSTABMaxDim 3 # Davidson expansion space = MaxDim * NRoots\nSTABMaxIter 100 # maximum number of Davidson iterations\nSTABNGuess 4096 # size of initial guess matrix: 4096 x 4096\nSTABDTol 0.0001 # convergence criterion from iteration to iteration\nSTABRTol 0.0001 # convergence criterion max residual norm\nSTABlambda +0.5 # mixing parameter\nSTABORBWIN -1, -1, -1, -1, -1, -1, -1, -1 # four parameters in case of RHF\n# orbital window, -1 refers to automatic determination\nSTABEWIN -5.0, 5.0 # lower and upper cutoff in Eh for automatic freezing\n#---------------------------------------------------------------------------------\n# alternative specification using a sub-block:\nstab\nNRoots 3\nMaxDim 3 # etc.\nend\nend\n* xyz 0 1\nh 0.0 0.0 0.0\nh 0.0 0.0 1.4\n*\nThe determination of the electronic Hessian is structurally comparabale to the TDHF/CIS/TDDFT procedure.\nThus, many options are very similar and the user is encouraged to read the section on TDDFT (section 9.23)\nto clarify some of the options given here. Since one is usually only interested in the qualitative determination\n“stable or not?”, three roots should be suﬃcient to ﬁnd the lowest eigenvalue. By the same philosophy,\nMaxDim, MaxIter, NGuess and the convergence criteria were chosen. lambda refers to the λ of equation 37\nof reference 179, which determines the mixing of the original SCF solution and the new orbitals to yield a\nnew guess. Choosing this value is not trivial, since positive and negative values can lead to diﬀerent new\nsolutions (at least in principle). The convergence of the ensuing SCF depends on it, as well, since all SCF\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "9.9_SCF_Stability_Analysis__orca_manual_4_2_1-page-0498.txt",
+        "source_file": "9.9_SCF_Stability_Analysis__orca_manual_4_2_1-page-0498.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.782113064459079,
+      "original_score": 0.7631663744120424,
+      "vector_score": 0.9083379216240155,
+      "bm25_score": 0.18248018556414947,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "scf",
+        "convergence",
+        "criteria",
+        "orca"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "2.1.3_Spectroscopy__orca_manual_4_2_1-page-0024__1b2460e5605127d0dac8006f8dc59b33__full__0",
+      "text": "XXII\n2 ORCA 4.2 Changes\n2.1 New Features\n2.1.1 Local correlation\n• Iterative (T) for open shells\n• Multi-level scheme for open shell systems (all PNO accuracy levels)\n• DLPNO-STEOM-CCSD for closed shells\n• DLPNO-CCSD(T)-F12 for open shells\n• Automatic fragmentation in LED analysis\n• RIJCOSX-LED implementation\n• HF-LD method for eﬃcient dispersion energy calculations\n2.1.2 Multi-Reference\n• FIC-CASPT2 implementation including level shift and IP/EA shift.\n• FIC-NEVPT2 unrelaxed densities and natural orbitals.\n• CIPSI/ICE improvements. Can be run now with conﬁgurations, individual determinants or CSFs\n(experimental)\n• FIC-ACPF/AQCC: variants of the FIC-MRCI ansatz\n• Eﬃcient linear response CASSCF\n• Reduced memory requirements in MRCI and CIPSI/ICE\n2.1.3 Spectroscopy\n• GIAO EPR calculations (one issue with the SOMF operator still remaining)\n• Improvements to ESD module for ﬂuorescence, phosphorescence, bandshape, lifetime and resonance\nRaman calculations\n• ESD now includes also the prediction of the Intersystem Crossing non-radiative rates\n• Hyperﬁne couplings for CASSCF calculations (but not as response)\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "2.1.3_Spectroscopy__orca_manual_4_2_1-page-0024.txt",
+        "source_file": "2.1.3_Spectroscopy__orca_manual_4_2_1-page-0024.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.6706075790582433,
+      "original_score": 0.6638852847533095,
+      "vector_score": 0.8298566059416369,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    },
+    {
+      "id": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0052__def4430f77b4987f0285a15615a47504__full__0",
+      "text": "20 6 General Structure of the Input File\nConvergence acceleration: the default is DIIS which is robust. For most closed-shell organic\nmolecules SOSCF converges somewhat better and might be a good idea to use. For “trailing\nconvergence”, KDIIS or the true second-order procedures NRSCF and AHSCF might be good\nchoices.\nDIIS SCF DIIS Turns DIIS on\nNODIIS Turns DIIS oﬀ\nKDIIS SCF KDIIS Turns Kollmar’s DIIS on\nNRSCF SCF NR Turns Newton-Raphson SCF on\nAHSCF Same but with augmented Hessian step\nNONRSCF Turns Newton-Raphson SCF oﬀ\nSOSCF SCF SOSCF Turns SOSCF on\nNOSOSCF Turns SOSCF oﬀ\nDAMP SCF CNVDAMP Turns damping on\nNODAMP Turns damping oﬀ\nLSHIFT SCF CNVSHIFT Turns level shifting on\nNOLSHIFT Turns level shifting oﬀ\nConvergence strategies (does not modify the convergence criteria)\nEasyConv Assumes no convergence problems.\nNormalConv Normal convergence criteria.\nSlowConv Selects appropriate SCF converger cri-\nteria for diﬃcult cases. Most transition\nmetal complexes fall into this category.\nVerySlowConv Selects appropriate SCF converger cri-\nteria for very diﬃcult cases.\nForceConv Force convergence: do not continue with\nthe calculation, if the SCF did not fully\nconverge.\nIgnoreConv Ignore convergence: continue with the\ncalculation, even if the SCF wavefunc-\ntion is far from convergence.\nCPCM(solvent)\nC-PCM\nCPCM Invoke the conductor-like polarizable\ncontinuum model with a standard sol-\nvent (see section 9.35 for a list of sol-\nvents). If no solvent is given, inﬁnity (a\nconductor) is assumed.\nSpin-orbit coupling\nSOMF(1X) REL SOCType,\nSOCFlags\nInvokes the RI-SOMF(1X) treatment of\nthe spin-orbit coupling operator\nMiscellaneous options\nANGS COORDS UNITS Select angstrom units\nBOHRS Select input coordinates in atomic units\nFRACOCC SCF FRACOCC Turns the fractional occupation option\non (FOD is always calculated in this\ncase)\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_title": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0052.txt",
+        "section_id": "full",
+        "source_file": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0052.txt"
+      },
+      "score": 0.5287278452797162,
+      "original_score": 0.487747657912735,
+      "vector_score": 0.42933154589487627,
+      "bm25_score": 0.7214121059841699,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "scf",
+        "convergence",
+        "criteria",
+        "complexes"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022__78f49d4facd1d5a01c416b6730711ee4__full__0",
+      "text": "XX\n1 ORCA 4.2 Foreword\nDear ORCA Users or potential ORCA users,\nWe are all very proud that we can present ORCA Version 4.2. to you! We thoroughly hope that you enjoy\nthe program and that it will serve you well in all of your scientiﬁc endeavors. As with previous releases,\nwe have worked very hard on this release until the last minute and while we did our best to ensure that\neverything is working and complete, we can of course not exclude the possibility that a few things might\nhave escaped our attention. Hence, please give us feedback over the next few months – we plan to follow up\nwith a minor release soon.\nWith this release, we have largely continued the path that we have been following for about the last decade –\nnamely to engage in wavefunction theory and make it applicable to larger and larger and larger systems with\nhigher and higher accuracy.\nIt has been increasingly evident that DLPNO methods are a staple of ORCA and with this release we have\nsigniﬁcantly enhanced the DLPNO methodology by making sure that iterative (T) corrections are available\nfor closed- and open-shell systems. Also the long awaited DLPNO-STEOM for closed shells is an excellent\nexcited state method. Open shell DLPNO-CCSD(T)-F12 has been completed for this release as well.\nThe second staple of ORCA are multireference methods. In this release, we have added some signiﬁcant\nfunctionality, most importantly there is a full CASPT2 implementation now in ORCA and there are signiﬁcant\nimprovements in our large-scale approximate full CI scheme (ICE). There also is a fully internally contracted\nquadratic MRCI scheme implemented (essentially internally contracted multireference coupled cluster).\nThe third staple of ORCA are spectroscopic calculations. We have continued to enhance the NMR capabilities\nof ORCA by adding the RI-MP2 chemical shift calculations. It also works for double hybrid functionals and\ngive pretty accurate results. In addition, there have been a number of enhancements in the ORCA ESD\nmodule for the calculation of ﬂuorescence, phosphorescence spectra as well as vibronic bandshapes and\nresonance Raman spectra. One signiﬁcant addition is spin-orbit coupling in TD-DFT. Additionally, ORCA\nnow has the capability to optimize to conical intersections.\nThe fourth staple of ORCA are analysis tools that allow you to go beyond the bare numbers. In this respect\nthe very successful local energy decomposition has been further extended to cover DLPNO-MP2. There\nalso is a low-cost, high accuracy method added: HF-LD that adds London dispersion to a Hartree-Fock\ncalculation.\nA lot of work has gone into the improvement of the implicit solvation capabilities. We have added the Gaussian\ncharge scheme that is numerically much more stable than the usual point charge scheme used in CPCM or\nCOSMO. Great improvements have also been made to the nudge elastic band transition state optimizer. In\naddition, we are now using the libxc library to give access to a wider variety of density functionals. The MD\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "orca-manual",
+        "source_file": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022.txt",
+        "section_title": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022.txt"
+      },
+      "score": 0.5269169974225776,
+      "original_score": 0.4967202100240187,
+      "vector_score": 0.6209002625300234,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "high",
+        "band",
+        "orca"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    },
+    {
+      "id": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021__72e5cefb9c642f759756406daaa4db36__part_0__0",
+      "text": "XIX\nList of Tables\n6.1 Main keywords that can be used in the simple input of ORCA. . . . . . . . . . . . . 12\n6.2 Density functionals available in ORCA. . . . . . . . . . . . . . . . . . . . . . . . . . 23\n6.3 Basis sets available on ORCA. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25\n6.4 Overview of auxiliary basis sets available in ORCA. . . . . . . . . . . . . . . . . . . 30\n6.5 Overview of library keywords for ECPs and associated basis sets available in ORCA. 33\n8.1 Computer times for solving the coupled-cluster/coupled-pair equations for Serine . . 62\n8.2 Computed spectroscopic constants of N 2 with coupled-cluster methods. . . . . . . . 63\n8.2 Computed spectroscopic constants of N 2 with coupled-cluster methods. . . . . . . . 64\n8.3 Comparison of various basis sets for highly correlated calculations . . . . . . . . . . 70\n8.4 Comparison of various basis sets for correlated calculations. . . . . . . . . . . . . . . 72\n8.6 Accuracy settings for DLPNO coupled cluster (current version). . . . . . . . . . . . . 90\n8.7 Accuracy settings for DLPNO coupled cluster (deprecated 2013 version). . . . . . . . 90\n8.10 DSD-DFT parameters deﬁned in ORCA . . . . . . . . . . . . . . . . . . . . . . . . . 99\n8.12 Comparison of the performance of the MRCI and MDCI modules for a single refer-\nence calculation with the bn-ANO-DZP basis set on the zwitter-ionic form of serine. 213\n8.15 Energies of the H 2O-CH2 example for illustrating how the diﬀerent LED contri-\nbutions are evaluated. The superscript opt denotes energies of optimized structures,\nfixed denotes energies of isolated fragments in the dimer structure. In the last column\nthe energy of the dimer is reported. . . . . . . . . . . . . . . . . . . . . . . . . . . . . 311\n9.2 Predeﬁned COSX Grid keywords . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+      "metadata": {
+        "section_title": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021.txt",
+        "section_id": "part_0",
+        "package": "orca-manual",
+        "source_file": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021.txt"
+      },
+      "score": 0.4745484595312762,
+      "original_score": 0.46382495870538387,
+      "vector_score": 0.5797811983817298,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    },
+    {
+      "id": "9.32.2.4_Example_Modelling_of_Eective_Broadening_Eective_Stokes_Shift_and__orca_manual_4_2_1-page-0829__0b4e2c95f167fd202c497fd6204dedc0__full__0",
+      "text": "9.32 The orca asa Program 797\nFigure 9.38: Absorption and ﬂuorescence spectra for T=0 K (blue) and T=300 K (red) generated\nafter orca asarun on the ﬁleexample004.inp. Black lines show spectra corresponding\nto the case where all low-frequency modes were excluded from the calculation.\nThe eﬀective Stokes shift and linewidth parameters which are evaluated in the simple self-consistent procedure\nare given in the output of the orca asa run:\n------------------------------------------------------------------------------\nState E0 EV fosc Stokes shift Effective Stokes shift\n(cm**-1) (cm**-1) (cm**-1) (cm**-1)\n------------------------------------------------------------------------------\n1: 21140.00 24535.85 0.074529 300.00 7091.70\n-----------------------------------------------------------------------------------------------\nBROADENING PARAMETETRS (cm**-1)\n-----------------------------------------------------------------------------------------------\nIntrinsic Effective\nState -------------------------- --------------------------------------------------------\nSigma FWHM\nGamma Sigma FWHM --------------------------- ---------------------------\n0K 298.15K 300.00K 0K 298.15K 300.00K\n-----------------------------------------------------------------------------------------------\n1: 50.00 100.00 293.50 1125.34 1411.13 1413.57 2703.84 3376.75 3382.48\nNote that the evaluation of the eﬀective parameters is rather approximate and these values can noticeable\ndeviate from those which can be directly deduced from the calculated spectra. However, such an information\nusually provides the proper order of magnitude of the eﬀective vibronic broadening and Stokes shift. As\nindicated in the program output above, the eﬀective bandshape has predominantly a Gaussian character\nwhich varies with the temperature so that σ= 1125 cm−1 (T = 0 K) and σ= 1414 cm−1 (T = 300 K). Indeed,\nas shown in Figure 9.39 the absorption spectrum at T = 300 K can be well ﬁtted using Gaussian lineshape\nwith σ= 1388 cm−1 (FWHM= 3270 cm−1). One can see that at higher temperatures the deviation between\nthe spectrum and its Gauss ﬁt becomes even smaller.\nIn molecules the normal distribution of the electronic transition energies in the ensemble would give rise to a\nGaussian bandshape of the absorption band. However, the corresponding standard deviation is expected to\nbe of the order of 100 cm −1, whereby a typical Gaussian bandwidth of the order of 1000 cm −1 appears to\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "9.32.2.4_Example_Modelling_of_Eective_Broadening_Eective_Stokes_Shift_and__orca_manual_4_2_1-page-0829.txt",
+        "section_title": "9.32.2.4_Example_Modelling_of_Eective_Broadening_Eective_Stokes_Shift_and__orca_manual_4_2_1-page-0829.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.41379811840183855,
+      "original_score": 0.38937304000191514,
+      "vector_score": 0.4867163000023939,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "band",
+        "orca"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "9.13.2_CASSCF_Properties__orca_manual_4_2_1-page-0566__4510d473b1978f9dcf50a676bf233b24__full__0",
+      "text": "534 9 Detailed Documentation\n%casscf\nnel 8\nnorb 6\nmult 3\nCIStep DMRGCI\n# Detailed settings\ndmrg\n# more/refined options\n...\nend\nend\nIt is highly recommended to start the calculation with split-localized orbitals. Any set of starting orbitals\n(gbw ﬁle) can be localized using the orca loc program. Typing orca loc in the shell will return a small\nhelp-ﬁle with details on how to setup an input for the localization. Examples for DMRG including the\nlocalization are in the corresponding section of the manual 9.17. The utility program orca loc is documented\nin section 9.40.5. Split-localization refers to an independent localization of the internal and virtual part of\nthe desired active orbitals.\nNOTE:\n• Let us stress again: it is strongly recommended to ﬁrst LOOK at your orbitals and make sure that the\nones that will enter the active space are really the ones that you want to be in the active space! Many\nproblems can be solved by thinking about the desired physical contents of the reference space before\nstarting a CASSCF. A poor choice of orbitals results in poor convergence or poor accuracy of the\nresults! Choosing the active orbitals always requires chemical and physical insight into the molecules\nthat you are studying!\n• Please try the program with default settings before playing with the more advanced options. If you\nencounter convergence problems, have a look into your output, read the warning and see how the\ngradient and energy evolves. Increasing MaxIter will not help in many cases.\n• Be careful with keywords such as !tightscf, !verytightscf and so on. These keywords set higher\nintegral thresholds, which is a good idea, but also tighten the CASSCF convergence thresholds. If you\ndo not need a tighter energy convergence, reset the criteria in the casscf block using ETol. More many\napplications an energy convergence beyond 10 −7 is unnecessary.\n9.13.2 CASSCF Properties\nThe CASSCF program is able to calculate UV transition, CD spectra, SOC, SSC, Zeeman splittings, EPR\ng-matrices and A-matrices (the latter implemented in the same way as in the DCD-CAS(2) method [431]),\nmagnetization, magnetic susceptibility and MCD spectra. Note that the results for the Fermi contact\ncontribution to A will not be reliable if the spin density is dominated by spin polarization, which is a dynamic\ncorrelation eﬀect. The properties are exercised in more detail in the CASSCF tutorial. The techniques used\nto calculate SOC, and Zeeman splittings are identical to those implemented into the MRCI program. Input\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_title": "9.13.2_CASSCF_Properties__orca_manual_4_2_1-page-0566.txt",
+        "section_id": "full",
+        "source_file": "9.13.2_CASSCF_Properties__orca_manual_4_2_1-page-0566.txt"
+      },
+      "score": 0.3863057438234284,
+      "original_score": 0.34713377002492385,
+      "vector_score": 0.360821583319369,
+      "bm25_score": 0.29238251684714345,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "convergence",
+        "criteria",
+        "orca"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    },
+    {
+      "id": "9.32.3.1_Example_Gauss-Fit_of_Absorption_Spectrum__orca_manual_4_2_1-page-0841__d7bed6ad247bad2da7fe41e597f22c8f__full__0",
+      "text": "9.32 The orca asa Program 809\nFigure 9.45: Comparison of the experimental (black) and ﬁtted (red) absorption spectra corre-\nsponding to the ﬁt run of orca asa on the ﬁle example007.001.inp. Blue curves\nrepresent individual contributions to the absorption spectrum from each state.\nAs shown in Figure 9.45 the reﬁned ﬁt leads to much better agreement between the experimental and ﬁtted\nabsorption spectra (MWAD=0.0045).\nDue to some peculiarities of the simplex algorithm for function minimization, you can still reﬁne the ﬁt by\nrerunning orca asa on the ﬁle example007.002.inp! This leads to an even lower value of the parameter\nMWAD= 0.0038, and therefore to better agreement of experimental and ﬁtted spectra (even though the\nprevious run has been claimed to be converged).\nIt is also possible to perform a ﬁt using the same value of inhomogeneous linewidth for all electronic states.\nFor this purpose one needs to choose as a guess the same linewidth parameters in the $el states block:\n$el_states\n8\n1 11118.58 0.00 1000.0 1.0687 0.0000 0.0000\n2 13673.38 0.00 1000.0 -0.5530 0.0000 0.0000\n3 21267.40 0.00 1000.0 0.3675 0.0000 0.0000\n4 27024.71 0.00 1000.0 1.4041 0.0000 0.0000\n5 31414.74 0.00 1000.0 1.7279 0.0000 0.0000\n6 35180.77 0.00 1000.0 1.6246 0.0000 0.0000\n7 39985.52 0.00 1000.0 2.5708 0.0000 0.0000\n8 11665.01 0.00 1000.0 1.2332 0.0000 0.0000\nIn addition the constraint block should be modiﬁed as follows:\n$el_states_c\n8\n1 1 0 1 1 0 0\n2 2 0 1 2 0 0\n3 3 0 1 3 0 0\n",
+      "metadata": {
+        "source_file": "9.32.3.1_Example_Gauss-Fit_of_Absorption_Spectrum__orca_manual_4_2_1-page-0841.txt",
+        "section_id": "full",
+        "section_title": "9.32.3.1_Example_Gauss-Fit_of_Absorption_Spectrum__orca_manual_4_2_1-page-0841.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.37018278792521486,
+      "original_score": 0.3573293754338927,
+      "vector_score": 0.44666171929236587,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    },
+    {
+      "id": "9.6.7_Full_Second_Order_SCF_Newton-Raphson_SCF__orca_manual_4_2_1-page-0485__73eedbdd377d829ed1119c526ad3960b__full__0",
+      "text": "9.6 SCF Convergence 453\neach NR iteration can be precisely speciﬁed as the cost of one electric ﬁeld type CP-SCF calculation for a\nsingle perturbation on the same system.\nOne important aspect of the NR implementation is that the NR solver checks itself for convergence. The\norbital gradient is calculated before the CP-SCF program is called. If the orbital gradient is below its\nthreshold (TolG), convergence is signaled irrespective of what the other convergence indicators are. The\norbital gradient is a rigorous criterion and therefore the results are considered reliable. If tighter convergence\nis desired, the thresholds TolG and TolX should be lowered.\nThe following example for a “normal” case of a Hartree–Fock geometry optimization converges in 5 cycles:\n! RHF TZVPP Opt VeryTightSCF\n* xyz 0 1\nN 0 0 0\nN 0 0 1\n*\nWith the alternative ﬁrst order SCF it also takes 5 cycles, but in each geometry optimization step there\nare more SCF iterations. In these examples, the total time for the calculations is comparable (less than 30\nseconds), but that may be diﬀerent for other cases.\n! RHF TZVPP Opt TightSCF\n! NRSCF\n* xyz 0 1\nN 0 0 0\nN 0 0 1\n*\nThe CP-SCF program is called with the convergence and method ﬂags that are also used in Z-vector\ncalculations (e.g. in MP2 or CIS/TD-DFT gradient calculations). They are accessible through the %method\nblock (see also section 9.8):\n%method Z_solver Pople # Pople’s solver. Usually great!\nCG # conjugate gradient\nDIIS # Pulays DIIS\nAugHess # Augmented Hessian (for SCF only)\nZ_MaxIter 64 # maximum number of CP-SCF iterations\nZ_MaxDIIS 10 # for DIIS: maximum number of expansion vectors\nZ_Shift 0.3 # for DIIS: level shift\nZ_Tol 1e-6 # convergence tolerance on residual\nend\n",
+      "metadata": {
+        "source_file": "9.6.7_Full_Second_Order_SCF_Newton-Raphson_SCF__orca_manual_4_2_1-page-0485.txt",
+        "section_title": "9.6.7_Full_Second_Order_SCF_Newton-Raphson_SCF__orca_manual_4_2_1-page-0485.txt",
+        "section_id": "full",
+        "package": "orca-manual"
+      },
+      "score": 0.32200753596820914,
+      "original_score": 0.29375784996688453,
+      "vector_score": 0.36719731245860565,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "scf",
+        "convergence"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "8.5_SCF_Stability_Analysis__orca_manual_4_2_1-page-0228__f7e48d3d924dbd189379d9dae1068382__full__0",
+      "text": "196 8 Running Typical Calculations\nThese are current implemented in both RHF/RKS and UHF/UKS, but only for CIS/TDA and RPA/TD-DFT,\nno multireference methods yet. For the latter case, the overlap of the |X−Y⟩vector is used [178].\n8.4.9 Restricted Open-shell CIS\nIn addition to the CIS/TD-DFT description of excited states, ORCA features the orca rocis module to\nperform conﬁguration interaction with single excitations calculations using a restricted open-shell Hartree–\nFock (ROHF) reference. It can be used to calculate excitation energies, absorption intensities and CD\nUHFintensities. In general, ROCIS calculations work on restricted open-shell HF reference functions but\nin this implementation it is possible to enter the calculations with RHF (only for closed-shell molecules) or\nUHF reference functions as well. If the calculation starts with an UHF/UKS calculation, it will automatically\nproduce the quasi-restricted orbitals which will then be used for the subsequent ROCIS calculations. Note\nthat if the reference function is a RHF/RKS function the method produces the CIS results. The module is\ninvoked by providing the number of roots sought in the %rocis block of the input ﬁle:\n! SVP TightSCF\n%rocis NRoots 2\nMaxDim 5 #Davidson expansion space = MaxDim * NRoots\nend\n* xyz -2 2\nCu 0.00 0.00 0.00\nCl 2.25 0.00 0.00\nCl -2.25 0.00 0.00\nCl 0.00 2.25 0.00\nCl 0.00 -2.25 0.00\n*\nIn this example the MaxDim parameter is given in addition to the number of roots to be calculated. It controls\nthe maximum dimension of the expansion space in the Davidson procedure that is used to solve the CI\nproblem.\nThe use of ROCIS is explained in greater detail in section 9.24.\n8.5 SCF Stability Analysis\nThe SCF stability will give an indication whether the SCF solution is at a local minimum or a saddle\npoint. [179, 180] It is available for RHF/RKS and UHF/UKS. In the latter case, the SCF is restarted by\ndefault using new unrestricted start orbitals if an instability was detected. For a demonstration, consider the\nfollowing input:\n",
+      "metadata": {
+        "package": "orca-manual",
+        "source_file": "8.5_SCF_Stability_Analysis__orca_manual_4_2_1-page-0228.txt",
+        "section_title": "8.5_SCF_Stability_Analysis__orca_manual_4_2_1-page-0228.txt",
+        "section_id": "full"
+      },
+      "score": 0.2887807914202954,
+      "original_score": 0.2591466577294744,
+      "vector_score": 0.32393332216184295,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "scf",
+        "orca"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "9.6.1_Convergence_Tolerances__orca_manual_4_2_1-page-0480__5b483987f15d08d7b58561d0406b90e1__full__0",
+      "text": "448 9 Detailed Documentation\nend\nLike other keys, Convergence is a compound key that assigns default values to a variety of other variables\ngiven in the box below. The default convergence criteria are reasonable and should be suﬃcient for most\npurposes. For a cursory look at populations weaker convergence may be suﬃcient, whereas other cases may\nrequire stronger than default convergence. Note that Convergence does not only aﬀect the target convergence\ntolerances but also the integral accuracy as discussed in the section about direct SCF and alike. This is very\nimportant: if the error in the integrals is larger than the convergence criterion, a direct SCF calculation\ncannot possibly converge.\nThe convergence criteria are always printed in the output. Given below is a list of the convergence criteria\nfor ! TightSCF, which is often used for calculations on transition metal complexes.\n%scf\nTolE 1e-8 # energy change between two cycles\nTolRMSP 5e-9 # RMS density change\nTolMaxP 1e-7 # maximum density change\nTolErr 5e-7 # DIIS error convergence\nTolG 1e-5 # orbital gradient convergence\nTolX 1e-5 # orbital rotation angle convergence\nConvCheckMode 2 # = 0: check all convergence criteria\n# = 1: stop if one of criterion is met, this is sloppy!\n# = 2: check change in total energy and in one-electron energy\n# Converged if delta(Etot)<TolE and delta(E1)<1e3*TolE\nConvForced # = 0: convergence not mandatory for next calculation step\n# = 1: break, if you did not meet the convergence criteria\nend\nIf ConvCheckMode=0, all convergence criteria have to be satisﬁed for the program to accept the calculation\nas converged, which is a quite rigorous criterion. In this mode, the program also has mechanisms to decide\nthat a calculation is converged even if one convergence criterion is not fulﬁlled but the others are overachieved.\nConvCheckMode=1 means that one criterion is enough. This is quite dangerous, so ensure that none of the\ncriteria are too weak, otherwise the result will be unreliable. The default ConvCheckMode=2 is a check of\nmedium rigour — the program checks for the change in total energy and for the change in the one-electron\nenergy. If the ratio of total energy and one-electron energy is constant, the self-consistent ﬁeld does not\nﬂuctuate anymore and the calculation can be considered converged. If you have small eigenvalues of the\noverlap matrix, the density may not be converged to the number of signiﬁcant ﬁgures requested by TolMaxP\nand TolRMSP.\nConvForced is a ﬂag to prevent time consuming calculations on non-converged wave functions. It will default\nto ConvForced=1 for Post-HF methods, Excited States runs and Broken Symmetry calculations. You can\noverwrite this default behavior by setting ConvForced=0.\nIrrespective of the ConvForced value that has been chosen, properties or numerical calculations (NumGrad,\nNumFreq) will not be performed on non-converged wavefunctions!\n",
+      "metadata": {
+        "section_title": "9.6.1_Convergence_Tolerances__orca_manual_4_2_1-page-0480.txt",
+        "source_file": "9.6.1_Convergence_Tolerances__orca_manual_4_2_1-page-0480.txt",
+        "section_id": "full",
+        "package": "orca-manual"
+      },
+      "score": 0.26399999999999996,
+      "original_score": 0.19999999999999996,
+      "vector_score": null,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "scf",
+        "convergence",
+        "criteria",
+        "complexes"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0044__14a9dcbc7268879e8f6ff1bcb0a878e4__full__0",
+      "text": "12 6 General Structure of the Input File\nTable 6.1: Main keywords that can be used in the simple input of ORCA.\nKeyword Input\nblock\nVariable Comment\nHF METHOD METHOD Selects the Hartree–Fock method\nDFT Selects the DFT method (see table 6.2\non page 23 for a list of functionals)\nFOD FOD analysis (see 9.6.8.2) employ-\ning default settings (TPSS/def2-TZVP,\nTightSCF, SmearTemp = 5000 K)\nRuntypes\nENERGY or SP METHOD RUNTYP Selects a single point calculation\nOPT Selects a geometry optimization calcu-\nlation (using internal redundant coordi-\nnates)\nCOPT Optimization in Cartesian coordinates\n(if you are desperate)\nZOPT Optimization in Z-matrix coordinates\n(dangerous)\nGDIIS-COPT COPT using GDIIS\nGDIIS-ZOPT ZOPT using GDIIS\nGDIIS-OPT Normal optimization using GDIIS\nENGRAD Selects an energy and gradient calcula-\ntion\nNUMGRAD Numerical gradient (has explicitly to\nbe asked for, if analytic gradient is not\navailable)\nNUMFREQ Numerical frequencies\nNUMNACME Numerical non-adiabatic coplings (only\nfor CIS/TD-DFT)\nMD Molecular dynamic simulation\nCIM Cluster-In-Molecule calculation\nAtomic mass/weight handling\nMass2016 METHOD AMASS Use the latest (2016) atomic masses of\nthe most abundant or most stable iso-\ntopes instead of atomic weights.\nSymmetry handling\nUseSym Turns on the use of molecular symme-\ntry (see section 6.5). THIS IS VERY\nRUDIMENTARY!\nNoUseSym Turns symmetry oﬀ\nSecond order many body perturbation theory\nMP2 Selects Method=HF and DoMP2=true\nMP2RI or RI-MP2 Select the MP2-RI method\nSCS-MP2 Spin-component scaled MP2\nRI-SCS-MP2 Spin-component scaled RI-MP2\n(synonym is SCS-RI-MP2)\n",
+      "metadata": {
+        "section_title": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0044.txt",
+        "source_file": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0044.txt",
+        "package": "orca-manual",
+        "section_id": "full"
+      },
+      "score": 0.2464484331984775,
+      "original_score": 0.2310698297943648,
+      "vector_score": 0.288837287242956,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    },
+    {
+      "id": "8.13.1_A_Simple_MR-EOM_Calculation__orca_manual_4_2_1-page-0282__30970df16b76c5e6eb92f18ccda13df9__full__0",
+      "text": "250 8 Running Typical Calculations\nthe T amplitude equations, an orbital selection scheme to reduce the size of the inactive core and virtual\nsubspaces in the calculation of excitation energies and a strategy for obtaining nearly size-consistent results\nin MR-EOM. The purpose of this section is simply to provide a simple example which illustrates the most\nbasic usage of the MR-EOM implementation in ORCA.\n8.13.1 A Simple MR-EOM Calculation\nLet us consider an MR-EOM-T |T†|SXD|U-h-v calculation on formaldehyde. An MR-EOM-T |T†|SXD|U-h-v\ncalculation is speciﬁed via the MR-EOM keyword along with the speciﬁcation of a state-averaged CASSCF\ncalculation (i.e. CASSCF(nel, norb) calculation with the number of roots of each multiplicity to be included\nin the state-averaging) and the number of desired roots in each multiplicity block for the ﬁnal MRCI\ndiagonalization. We note that the CASSCF module is described in sections 8.1.7 and 9.13 and that a\ndescription of the MRCI module is given in sections 8.12 and 9.30. Here, we have a state-averaged CAS(6,4)\ncalculation, comprised of 3 singlets and 3 triplets and we request 6 singlet roots and 6 triplet roots in our\nﬁnal MRCI diagonalization (i.e. the roots to be computed in the MR-EOM-T |T†|SXD|U-h-v calculation):\n!MR-EOM def2-TZVP VeryTightSCF\n%casscf\nnel 6\nnorb 4\nmult 1,3\nnroots 3,3\nend\n%mdci\nSTol 1e-7\nend\n%mrci\nnewblock 1 *\nnroots 6\nrefs cas(6,4) end\nend\nnewblock 3 *\nnroots 6\nrefs cas(6,4) end\nend\nend\n* xyz 0 1\nH 0.000000 0.934473 -0.588078\nH 0.000000 -0.934473 -0.588078\nC 0.000000 0.000000 0.000000\nO 0.000000 0.000000 1.221104\n*\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "8.13.1_A_Simple_MR-EOM_Calculation__orca_manual_4_2_1-page-0282.txt",
+        "source_file": "8.13.1_A_Simple_MR-EOM_Calculation__orca_manual_4_2_1-page-0282.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.2013561870107486,
+      "original_score": 0.18505733368443733,
+      "vector_score": 0.23132166710554664,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 54,
+    "final_results_count": 15
+  }
+}

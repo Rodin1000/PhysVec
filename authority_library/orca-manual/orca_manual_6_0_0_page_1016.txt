@@ -1,0 +1,68 @@
+[... end of page 1015 ...]
+ngotherfactors)canbreakthismomentumconservation,leadingtoadriftoftheCoMover
+time. Ifthisshallbeavoided,specifythismodifier.
+If no call to Initvel occurred before this command, the atom velocities are initialized to zero. If no call to
+Timestepoccurredbeforethiscommand,adefaulttimestepof0.5fsisset.
+You can cleanly end a MD run by creating an empty file with the name “EXIT” (note the all-uppercase letters
+oncase-sensitivefilesystems). OnUnixoperatingsystemssuchasGNULinux,thiscaneasilybeachievedbythe
+command“touch EXIT”. willdetectthefile,aborttheMDrun,anddeletethefile. Youwillstillgettheremaining
+output(suchasthetimingstatistics),andyoudon’thavetodeletealltheremaining“.tmp”files,whichbothwould
+notbethecaseifyouwouldhavekilledtheprocessinstead.
+7.51. AbinitioMolecularDynamicsSimulations 993
+
+--- Page 1016 ---
+ORCAManual,Release6.0.0
+SCFLog
+MandatoryArguments: value Keyword {Discard,Last,Append,Each}
+OptionalArguments: —
+Modifiers: —
+Controlshow/ifthedetailedoutputfromtheelectronstructurecalculation(i. e.,integrals,scf,gradient,...) will
+bewrittentologfiles. Discardcompletelydiscardstheoutput. Lastonlykeepsthelastoutputforeachprogram
+call (useful to read error message if simulation aborts). Append redirects all the output into one single log file
+(“basename.scf.log”, “basename.int.log”, “basename.grad.log”, ...), appending each step at the end of the file.
+Eachwritestheoutputforeachstepandeachprogramtodifferentlogfiles,whichhavethestepnumberintheir
+filenames.
+The amount of information which is printed to the SCF log file can be controlled by the standard ORCA print
+flags,suchas“%output PrintLevel Maxi end”. Notethatbydefault,ORCAreducestheprintlevelafterthe
+first SCF. Due to this, properties such as orbital energies and population analyses will only be printed once by
+default. IfyouwanttokeeptheprintlevelconstantforsubsequentSCFruns, disablethisfeaturevia“%method
+ReducePrint false end”intheORCAinput.
+ThedefaultvalueisAppend. Notethatthiscanleadtolargelogfilesinlongruns.
+Screendump
+MandatoryArguments: —
+OptionalArguments: —
+Modifiers: —
+PrintsthecurrentstateoftheMDmodule(atompositions,velocities,potentialandkineticenergy,cellproperties,
+etc.) tothescreenandlogfileinawell-definedand“grepable”format. Thisismostlyusefulforunittesting,e. g.,
+toverifyifthesystemstateafteraMDrunequalsthestateobtainedfromsomeotherORCAbinarydistribution.
+Thermostat
+MandatoryArguments: type Keyword {Berendsen,CSVR,NHC,None}
+OptionalArguments: temperature Real [temperature]
+Modifiers: Timecon tau Real [time]
+Ramp target_temp Real [temperature]
+Chain chain_length Integer —
+MTS mts Integer —
+Yoshida yoshida Integer —
+Region region ... ...
+Massive —
+Changestheatomthermostatsettingsforsubsequentsimulationruns. “Type”setsthethermostattype. Currently,
+threethermostattypesareimplemented: Berendsen[92],Nosé–Hooverchains(NHC)[562,563],and“Canonical
+Sampling through Velocity Rescaling” (CSVR) [129]. The very basic and robust Berendsen thermostat should
+onlybeusedforearlypre-equilibrationruns,asitdoesnotsamplethecanonicalensembleandleadstoproblems
+suchastheflyingicecubeeffect. BoththeNHCandtheCSVRthermostatsareverysophisticated,andcorrectly
+samplethecanonicalensemble. OneofthesetwoshouldbeusedinallstandardNVTsimulations. UseNoneas
+typetodisablethethermostat.
+Theoptionaltemperatureargumentsetsthetargettemperaturetowhichthesystemisthermostated. Ifthisargument
+isomitted,thetemperaturefromthelastcalltotheInitvelcommandisused(ifnosuchcallwasinvokedbefore,
+thesimulationisaborted).
+994 Chapter7. DetailedDocumentation
+
+[... start of page 1017 ...]
+ORCAManual,Release6.0.0
+TheTimeconmodifiersetsthecouplingstrengthofthethermostat(largetimeconstantscorrespondtoweakcou-
+pling). The default value is 10fs, which is a relatively strong coupling. For a production run, 100fs would be
+appropriate. Valuesintherangeof10...100fsarereasonable(seealsosection1.5.3).
+If the Ramp modifier is used, a temperature ramp can be applied during a MD run. The final temperature at the
+endoftheramphastobespecifieddirectlyafterthemodifier. Theinitialtemperatureatthebeginningoftheramp
+is taken from the temperature argument (or from the last Initvel command if this argument is missing). The
+temperaturerampisappliedonlytotheRun commandwhichfirstfollowstherampdefin

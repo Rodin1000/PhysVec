@@ -1,0 +1,93 @@
+[... end of page 601 ...]
+viousrunoraclose-bygeometryareavailable
+this is a good choice. For coordination chemistry complexes, the guess generated with orca_mergefrag (see
+the CASSCF tutorial), is probably the best choice - especially for heave metals. Natural orbitals from a simple
+correlation calculation like MP2 or a calculation with the MRCI module are usually a good choice and easily
+generated. Forexample:
+#
+# First job provides reasonable natural orbitals
+#
+! RI-MP2 SVP def2-SVP/C
+%mp2 natorbs true
+density unrelaxed # or relaxed (more expensive)
+end
+* int 0 1
+C 0 0 0 0.00 0.0 0.00
+O 1 0 0 1.20 0.0 0.00
+H 1 2 0 1.10 120.0 0.00
+H 1 2 3 1.10 120.0 180.00
+*
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 579
+
+--- Page 602 ---
+ORCAManual,Release6.0.0
+Nowexaminetheoccupationnumbersofthenaturalorbitals(youwillfindthatintheoutputoftheMP2partof
+thecalculation):
+Natural Orbital Occupation Numbers:
+N[ 0] = 2.00000000
+N[ 1] = 2.00000000
+N[ 2] = 1.98676733
+N[ 3] = 1.97726840
+N[ 4] = 1.97500109
+N[ 5] = 1.96759239
+N[ 6] = 1.96423113
+N[ 7] = 1.93719340
+N[ 8] = 0.05427454
+N[ 9] = 0.02555886
+N[ 10] = 0.02530580
+N[ 11] = 0.01358500
+N[ 12] = 0.01096092
+N[ 13] = 0.01028129
+N[ 14] = 0.00702048
+N[ 15] = 0.00627820
+A rule of thumb is that orbitals with occupation numbers between 1.98 and 0.02 should be in the active space.
+Thus, inthepresentcasewespeculatethata10electronsin8orbitalsactivespacewouldbeappropriateforthe
+CASSCFofthegroundstate. Let’stry:
+#
+# Run a CASSCF calculation for the ground state of H2CO
+#
+! SVP def2-SVP/C SmallPrint
+! moread
+%moinp "Test-CASSCF-MP2-H2CO.mp2nat"
+%casscf nel 10
+norb 8
+mult 1
+end
+* int 0 1
+C 0 0 0 0.00 0.0 0.00
+O 1 0 0 1.20 0.0 0.00
+H 1 2 0 1.10 120.0 0.00
+H 1 2 3 1.10 120.0 180.00
+*
+Ifwerunthatcalculation,itconvergesandproducesthefollowing:
+MACRO-ITERATION 10:
+--- Inactive Energy E0 = -82.97337099 Eh
+E(CAS)= -113.889438276 Eh DE= -0.000000807
+--- Energy gap subspaces: Ext-Act = -0.431 Act-Int = -0.240
+N(occ)= 1.99763 1.99696 1.98360 1.97923 1.94253 0.05958 0.02153 0.01894
+||g|| = 0.000361782 Max(G)= 0.000189613 Rot=9,2
+---- THE CAS-SCF GRADIENT HAS CONVERGED ----
+--- FINALIZING ORBITALS ---
+---- DOING ONE FINAL ITERATION FOR PRINTING ----
+--- Forming Natural Orbitals
+--- Canonicalize Internal Space
+--- Canonicalize External Space
+Fromwhichweseethatwehadtwoorbitalstoomanyintheactivespacewithoccupationnumbersverycloseto
+two. Thepresenceofbarelycorrelatedorbitals(occupationcloseto0.0or2.0)cancauseconvergenceproblems.
+Theirinclusionintheactivespacedoesnotsignificantlychangetheenergyanditmightbettertoomittheseorbitals
+fromthestart.
+580 Chapter7. DetailedDocumentation
+
+[... start of page 603 ...]
+ORCAManual,Release6.0.0
+Inthepresentcase,were-runtheCASSCFwith6activeelectronsinsixorbitals. Theresultis:
+MACRO-ITERATION 2:
+--- Inactive Energy E0 = -101.16144179 Eh
+E(CAS)= -113.882700257 Eh DE= -0.012049926
+--- Energy gap subspaces: Ext-Act = -0.411 Act-Int = -0.142
+N(occ)= 1.98172 1.97921 1.94092 0.05983 0.02089 0.01743
+||g|| = 0.052811635 Max(G)= 0.025065586 Rot=19,7
+--- Orbital Update [SuperCI(PT)]
+--- Canonicalize Internal Space
+--- Canonicalize External Space
+--- SX_PT (Skipped TA=0 IT=0): ||X|| = 

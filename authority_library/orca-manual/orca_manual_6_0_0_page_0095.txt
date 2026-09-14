@@ -1,0 +1,71 @@
+[... end of page 94 ...]
+nfittingsetmustbeprovided,asthemethodmakesuseoftheRIapproximation.
+• CanonicalRI-MP2energydifferencesaretypicallyreproducedtowithinafractionof1kcal/mol. Thedefault
+thresholdshavebeenchosensoastoreproduceabout99.9%ofthetotalRI-MP2correlationenergy.
+• The preferred way to control the accuracy of the method is by means of specifying “LoosePNO”, “Nor-
+malPNO”and“TightPNO”keywords. “NormalPNO”correspondstodefaultsettingsanddoesnotneedto
+be given explicitly. More details and an exhaustive list of input parameters are provided in section Local
+MP2. NotethatthethresholdsdifferfromDLPNOcoupledcluster.
+72 Chapter6. RunningTypicalCalculations
+
+--- Page 95 ---
+ORCAManual,Release6.0.0
+• ResultsobtainedfromRI-MP2andDLPNO-MP2, orfromDLPNO-MP2withdifferentaccuracysettings,
+must never be mixed, such as when computing energy differences. In calculations involving open-shell
+species,eventheclosed-shellmoleculesneedtobesubjecttoaUHFtreatment.
+• Spin-component scaled DLPNO-MP2 calculations are invoked by using the ! DLPNO-SCS-MP2 keyword
+instead of ! DLPNO-MP2 in the simple input line. Weights for same-spin and opposite-spin contributions
+can be adjusted as described for the canonical SCS-MP2 method. Likewise, there is a DLPNO-SOS-MP2
+keyword to set the parameters defined by the SOS-MP2 method (but there is no Laplace transformation
+involved).
+• Thefrozencoreapproximationisusedbydefault. Ifcoreorbitalsareinvolvedinthecalculation, theyare
+subjecttothetreatmentdescribedinsectionLocalMP2.
+• Calculationscanbeperformedinparallel.
+• ItmaybebeneficialtoacceleratetheHartree-FockcalculationbymeansoftheRIJCOSXmethod(requiring
+specificationofasecondauxiliaryset).
+ExplicitcorrelationhasbeenimplementedintheDLPNO-MP2-F12methodologyforRHFreferencewavefunc-
+tions.[653] The available approaches are C (keyword ! DLPNO-MP2-F12) and the somewhat more approximate
+D(keyword ! DLPNO-MP2-F12/D).ApproachDisgenerallyrecommendedasitresultsinasignificantspeedup
+whileleadingonlytosmallerrorsrelativetoapproachC.InadditiontotheMOandcorrelationfittingsets,aCABS
+basissetisalsorequiredforbothF12approachesasshownbelow.
+# DLPNO-MP2-F12 calculation using approach C
+! cc-pVDZ-F12 aug-cc-pVDZ/C cc-pVDZ-F12-CABS DLPNO-MP2-F12 TightSCF
+# OR: DLPNO-MP2-F12 calculation using approach D (recommended)
+! cc-pVDZ-F12 aug-cc-pVDZ/C cc-pVDZ-F12-CABS DLPNO-MP2-F12/D TightSCF
+LocalMP2derivatives
+AnalyticalgradientsandtheresponsedensityareavailablefortheRHFvariantoftheDLPNO-MP2method.[685,
+686]UsageisassimpleasthatofRI-MP2. Forexample,thefollowinginputcalculatesthegradientandthenatural
+orbitals:
+! DLPNO-MP2 def2-SVP def2-SVP/C TightSCF EnGrad
+%MaxCore 512
+# With 'EnGrad', specifying 'density relaxed' is unnecessary.
+# However, it is needed when calculating properties without the gradient.
+%MP2 Density Relaxed
+NatOrbs True
+End
+*xyz 0 1
+C 0.000 0.000 0.000
+O 0.000 0.000 1.162
+O 0.000 0.000 -1.162
+*
+Theimplementationsupportsspin-componentscalingandcanbeusedtogetherwithdouble-hybriddensityfunc-
+tionals. Thelatterareinvokedwiththenameofthefunctionalprecededby“DLPNO-”. Asimplegeometryopti-
+mizationwithadouble-hybriddensityfunctionalisillustratedintheexamplebelow:
+! DLPNO-B2PLYP D3 NormalPNO def2-TZVP def2-TZVP/C Opt
+%MaxCore 1000
+*xyz 0 1
+O 0.000 0.000 0.000
+H 0.000 0.000 1.000
+H 0.000 1.000 0.000
+*
+6.1. SinglePointEnergiesandGradients 73
+
+[... start of page 96 ...]
+ORCAManual,Release6.0.0
+Forsmallersystems,theperformancedifferencebetweenDLPNO-MP2andRI-MP2isnotparticularlylarge,but
+very substantial savings in computational time over RI-MP2 can be achieved for systems containing more than
+approximately70-80atoms.
+SinceMP2isanexpensivemethodforgeometryoptimizations,itisgenerallyagoodideatousewell-optimized
+starting structures (calculated, for example, with a dispersion-corrected DFT functional). Moreover, it is highly
+advisabletoemployaccurateGridsforRIJCOSXortheexchange-correlationfunctional(ifapplicable),astheSCF
+iterati

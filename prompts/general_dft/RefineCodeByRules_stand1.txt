@@ -1,0 +1,49 @@
+Your task is to check and correct errors in a given **ORCA input file** according to the rules provided, ensuring the input strictly complies with all requirements, and applying fixes **based only on the error messages from the DFT software output**.
+
+-----------------------------------------------------------------------------------------------
+[Input]:
+1. CODE_FORMER: the input **ORCA .inp** file content. In this input, there may be errors or non-compliance issues that you need to identify and correct according to the rules.
+   - NOTE: This is **NOT** python or julia code. It is an ORCA input consisting of **blocks/keywords**.
+   - The original input contains **comment sections and descriptions** for each block; **DO NOT delete them**.
+2. CODE_RULES: the rules file content that specifies all requirements, constraints, and formatting standards that the ORCA input must follow.
+3. ERROR_OUTPUT: the **DFT software (ORCA) output error messages** (e.g., from stdout/stderr). This is the **ONLY** runtime signal you may use to decide what to change.
+
+-----------------------------------------------------------------------------------------------
+[Instructions - your workflow]:
+1. You read the input CODE_FORMER in detail and check possible errors and non-compliance issues.
+   - Compare the ORCA input against ALL requirements specified in CODE_RULES
+   - Identify violations, missing requirements, style inconsistencies, or any deviations from the rules
+   - Focus on: ORCA input syntax, keyword usage, block syntax (%...end), geometry blocks (* ... *), ordering/formatting rules, naming conventions, and any other requirements specified in CODE_RULES
+   - IMPORTANT: When deciding what to correct for runtime validity, you MUST rely **only** on ERROR_OUTPUT (plus the formatting/constraints in CODE_RULES). Do NOT invent new issues not evidenced by ERROR_OUTPUT or CODE_RULES.
+
+2. Once you identify errors or non-compliance issues, you correct them in the ORCA input.
+   - Your corrected input MUST obey EVERY requirement in CODE_RULES
+   - You are FORBIDDEN to add any new substantive content beyond what is necessary to fix the reported errors and compliance issues
+   - You are FORBIDDEN to make any significant change to the existing structure unless required by ERROR_OUTPUT or CODE_RULES
+   - You ONLY correct errors and non-compliance issues to ensure full adherence to CODE_RULES and removal of the errors shown in ERROR_OUTPUT
+   - You are STRICTLY FORBIDDEN to change the code type (it must remain an ORCA input file)
+   - CRITICAL PRESERVATION RULE: For each existing block, you MUST preserve all original comment sections and descriptions (e.g., lines starting with '#Tags_...' and any human-readable explanatory comment lines). You may edit comment text ONLY if strictly necessary for compliance, but you MUST NOT remove them.
+
+3. You MUST make sure that the corrected input content obeys EVERY term in CODE_RULES faithfully, and that each correction is justified by ERROR_OUTPUT and/or CODE_RULES.
+
+4. After correcting the input, you will output a brief summary about ALL the errors and non-compliance issues that are identified and corrected by you (referencing the relevant ERROR_OUTPUT messages and/or rule violations).
+
+-----------------------------------------------------------------------------------------------------
+[Output format]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- "summary": you summarize briefly all the errors and non-compliance issues identified and corrected by you. If the input already fully complies, state "Input fully complies with all rules and no ERROR_OUTPUT issues require changes."
+- "code_type": must be "orca" (lowercase string)
+- "code_content": the full corrected ORCA input as a string (plain source, do not include ``` fences)
+
+You MUST NOT include this prompt itself (including the example below) in your output, in order to avoid the case that the example code itself is extracted as your generated code.
+
+Example output (exact dictionary form, shown here for clarity. You MUST add a "```json" right before the dict and "```" right after the dict! (not shown here) Beside from this dict, NO other information should be output):
+{
+"summary": "[1] Corrected invalid keyword 'COSMO' per ERROR_OUTPUT by replacing with CPCM/SMD according to CODE_RULES. [2] Fixed malformed %basis block missing 'end'. [3] ...",
+"code_type": "orca",
+"code_content": "#Tags_keywords\n#Main methods and options...\n! B3LYP def2-SVP CPCM\n\n#Tags_inputblocks_scf\n#SCF settings...\n%scf\n  MaxIter 200\nend\n\n* xyz 0 1\nH 0.0 0.0 0.0\n*"
+}
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'. Even if you fail to generate a complete code_content, you must KEEP this output format.

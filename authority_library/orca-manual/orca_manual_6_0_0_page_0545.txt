@@ -1,0 +1,85 @@
+[... end of page 544 ...]
+ration(CAHF)orallstatesofagivenspinforagivenconfiguration
+(SAHF). Especially the SAHF feature gives you easy access to most degenerate high symmetry situations and the
+orbitalsresultingfromsuchcalculationswillbeveryconvenientasinputforCIcalculations.
+%scf
+HFTyp ROHF
+ROHF_case CAHF # configuration averaged HF
+SAHF # spin averaged HF
+ROHF_NumOp 3 # number of operators (3, 2 or 1)
+ROHF_NOrb[1] 2,1 # number of orbitals in each open-shell
+ROHF_NEl[1] 1,1 # number of electrons in each open-shell
+end
+end
+522 Chapter7. DetailedDocumentation
+
+--- Page 545 ---
+ORCAManual,Release6.0.0
+Thehypotheticalexamplebelowcouldrepresentanexcitedstateofanoctahedrald3 transitionmetalcomplex. In
+thiscasetherearefiveopen-shellorbitals. Thefirstthreeopen-shellorbitalscontaintwoelectronsandthelasttwo
+oneelectron. TheinputforaSAHFcalculationisidentical,justreplaceCAHFwithSAHF.
+%scf
+HFTyp ROHF
+ROHF_case CAHF # configuration averaged HF
+ROHF_NumOp 3 # 3 operators in this case: closed, open1, open2
+ROHF_NOrb[1] 3,2 # 3 orbitals in first open shell, 2 in the second
+ROHF_NEl[1] 2,1 # 2 electrons in first open shell, 1 in the second
+end
+Another feature of the ROHF code is the ability to converge the SCF to a given Configuration State Function
+(CSF-ROHF)[512]. InthiswayonecanapproachresultsfromMCSCFcalculations. Thiscanberequestedintwo
+ways.
+Theusercangiveaspecificcouplingsituation.
+%scf
+HFTyp ROHF
+ROHF_CASE USER_CSF # User defined CSF
+ROHF_REF {1 1 -1 -1} end # CSF to be converged to
+end
+Ortheusercangivehowmanyorbitalspershell. Whereeachopen-shellwillcouplewithantiparallelspinwith
+thepreviousone.
+%scf
+HFTyp ROHF
+ROHF_CASE AF_CSF # User defined CSF
+ROHF_AFORBS 2,2 # Coupling Situation
+end
+Asanexample,onecanthinkofaFe(III)dimer,whereeachcenterislocallyhighspin,buttheycoupleantiferro-
+magneticallytoeachother. InordertogettheROHFsolutionforthissystem,firstoneneedasetofguessorbitals.
+TheguessorbitalscanbeobtainedeitherfromtheQROsofanUHFcalculation,orahighspinROHFcalculation,
+orevenaSAHForCAHF.Independentlyofthemethodused, theorbitalsneedtobelocalizedandorderedina
+way that the 5 3d orbitals of each iron are grouped together in sequence. From this, one can run a CSF-ROHF
+calculationfortheantiferromagneticCSFasshownbellow:
+%scf
+HFTyp ROHF
+ROHF_CASE USER_CSF # User defined CSF
+ROHF_REF {1 1 1 1 1 -1 -1 -1 -1 -1} end # 2 open shells coupling antiparallel
+end
+or
+%scf
+HFTyp ROHF
+ROHF_CASE AF_CSF # User defined CSF
+ROHF_AFORBS 5,5 # 2 open shells coupling antiparallel
+end
+TheCSF-ROHFprocedurecanrecognizedoublyoccupiedandvirtualorbitalsinthedefinitionoftheCSFwhen
+theUSER_CSFcaseisinvoked. Whendetected,theseorbitalswillberotatedoutoftheopen-shellsdefinedinthe
+ROHFmethodandthecalculationwillrunnormally:
+%scf
+HFTyp ROHF
+ROHF_CASE USER_CSF # User defined CSF
+ROHF_REF {1 1 2 1 -1 -1 0 -1} end # the DOMO will be rotated to the closed-shell and
+(continuesonnextpage)
+7.8. ChoiceofWavefunctionandIntegralHandling 523
+
+[... start of page 546 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# the VMO will be rotated to the virtual space.
+end
+TheusercanalsodirectlyinputtheROHFvariablesbymeansoftheROHFOPT Case Userkeyword. Forexample
+forthehighspincasewiththreeelectronsinthreeorbitalsgivestwooperatorswithvectorcouplingcoefficients
+𝑎=1and𝑏=2(Zernerconvention).
+%scf
+HFTyp ROHF
+ROHFOP Case User # manual input of ROHF variables
+Nop 2 # number of operators
+Norb[1] 3 # number of open-shell orbitals
+Nel[1] 3 # number of open-shell electrons
+A[1,1] 1 # Coulomb vector in the 

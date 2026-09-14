@@ -1,0 +1,29 @@
+{
+  "pdf_name": "a2c6a726-390f-44b5-8395-af2aad956b5e.pdf",
+  "orca_inputs": [
+    {
+      "id": "geom_opt",
+      "title_of_calculation": "Geometry Optimization",
+      "input_command": "!BP86 def2-TZVP(-f) def2-TZVP/J ZORA COSMO RKS PAL4\n!NormalPrint VeryTightSCF SlowConv Grid4 NoFinalGrid OPT\n%basis newgto Cu \"CP(PPP)\" end\nend\n%SCF Directresetfreq 1\n DIIS MaxEq 15\n end\n Shift Shift 0.5\n Erroff 0.1\n end\n MaxIter 1000\n End\n%method SpecialGridAtoms 29\n SpecialGridIntAcc 7\n end \n%maxcore 4000",
+      "xyzfile": "* xyz CHARGE SPIN_MULTIPLICITY\nSTARTING COORDINATES\n*"
+    },
+    {
+      "id": "sp_tddft_xas",
+      "title_of_calculation": "Single Point and TDDFT XAS Calculation",
+      "input_command": "!WB97X KDIIS RIJCOSX def2-TZVP(-f) def2-TZVP/J ZORA COSMO RKS PAL8\n!NormalPrint VeryTightSCF SlowConv Grid4 NoFinalGrid\n%basis newgto Cu \"CP(PPP)\" end\nend\n%tddft NRoots 40\nMaxDim 400\nOrbWin[0] = LOWEST_ENERGY_DONOR_ORBITAL,\nHIGHEST_ENERGY_DONOR_ORBITAL, -1, -1\nOrbWin[1] = LOWEST_ENERGY_DONOR_ORBITAL,\nHIGHEST_ENERGY_DONOR_ORBITAL, -1, -1\nDoQuad true\nend\n%method SpecialGridAtoms 29\n SpecialGridIntAcc 7\n end\n%MaxCore 4000\n%SCF\n MaxIter 500\n end",
+      "xyzfile": "* xyz CHARGE SPIN_MULTIPLICITY\nCOORDINATES\n*"
+    },
+    {
+      "id": "dft_rocis",
+      "title_of_calculation": "DFT-ROCIS Calculation",
+      "input_command": "!WB97X def2-TZVP(-f) def2-TZVP/J ZORA COSMO RKS\n!NormalPrint PAL8 VeryTightSCF SlowConv Grid4 NoFinalGrid\n!MOREAD NOITER\n%moinp \"SINGLE_POINT_FILENAME.qro\"\n%basis newgto Cu \"CP(PPP)\" end\nend\n%method SpecialGridAtoms 29\n SpecialGridIntAcc 7\n end\n%MaxCore 4000\n%rocis NRoots 20\nMaxDim 1000\nSOC true\nDoRI true\nDoHigherMult true\nDoLowerMult true\nPrintLevel 3\nOrbwin LOWEST_ENERGY_DONOR_ORBITAL,\nHIGHEST_ENERGY_DONOR_ORBITAL, LOWEST_ENERGY_ACCEPTOR_ORBITAL,\nHIGHEST_ENERGY_ACCEPTOR_ORBITAL \nDoDFTCIS true\nDFTCIS_c = 0.21, 0.49, 0.29\nEnd",
+      "xyzfile": "* xyz CHARGE SPIN_MULTIPLICITY\nCOORDINATES\n*"
+    },
+    {
+      "id": "sorci",
+      "title_of_calculation": "SORCI Calculation",
+      "input_command": "! RHF def2-TZVP(-f) def2-TZVP/J NormalPrint ZORA COSMO\n! PAL2\n!Moread NoIter\n%Moinp \"INPUT_ORBITALS.gbw\"\n%basis newgto Cu \"CP(PPP)\" end\n end\n%method SpecialGridAtoms 29\n SpecialGridIntAcc 7\n end\n%MaxCore 4000\n%mrci CIType sorci\n UseIVOs false\n IntMode RITrafo\n Maxdim 100\n TSel 1e-6\n TPre 1e-5\n TNat 1e-5\n ETol 1e-6\n RTol 1e-6\n MaxDIIS 35\n MaxIter 400\n MaxMemInt 10000\n allsingles false\n soc\n printlevel 5\n GTensor True\n NDoubGTensor 1\n end\n NewBlock 1 *\n NRoots 10\n excitations cisd\n Refs\n CAS(16,10)\n End\n NewBlock 3 *\n NRoots 10\n excitations cisd\n Refs\n CAS(16,10)\n end\n NewBlock 5 *\n NRoots 10\n excitations cisd\n Refs\n CAS(16,10)\n end\n end\n end\n%rel\nsoctype 3\nsocflags 1,3,3,0\nend",
+      "xyzfile": "*xyz CHARGE SPIN_MULTIPLICITY\nCOORDINATES\n*"
+    }
+  ]
+}

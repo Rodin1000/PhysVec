@@ -1,0 +1,78 @@
+[... end of page 524 ...]
+538669 0.81336259
+L 2 ! L shells are a s and a p shell with identical exponents
+1 0.89739483 0.24008573 0.46214684
+2 0.21746772 0.81603757 0.66529098
+L 1
+1 4.52660451 1.00000000 1.00000000
+$END ! Optional
+Thefileformatfortheauxiliarybasissetsisexactlythesame. BasissetscanbealsoexportedinGAMESS-US
+formatbytheorca_exportbasisutility(sectionorca_exportbasis). Notethatinordertoreadbasissetsprinted
+byORCA(using!PrintBasis),theNewGTOandendkeywordsmustberemoved.
+502 Chapter7. DetailedDocumentation
+
+--- Page 525 ---
+ORCAManual,Release6.0.0
+7.5.7 Advanced Specification of Effective Core Potentials
+LibraryECPsandBasisSets
+Besidesthesimpleinputline(sectionEffectiveCorePotentials),assignmentofECPscanbedonewithinthe%basis
+blockusingtheECPandNewECPkeywordsasinthefollowingexample:
+%basis
+ECP "def2-ECP" # All elements (for which the ECP is defined)
+NewECP Pt "def2-SD" end # Different ECP for Pt
+end
+AvariantoftheNewECPkeywordcanbeusedforindividualatomsinsidethegeometrydefinition:
+* xyz ...
+...
+S 0.0 0.0 0.0 NewECP "SDD" end
+...
+*
+NotethatthesekeywordsonlyaffecttheECPandnotthevalencebasisset!
+In case the basis set for an element/atom has been changed using the NewGTO keyword (see sections Assigning
+orAddingBasisFunctionstoanElement andAssigningorAddingBasisFunctionstoIndividualAtomsabove)it
+maybenecessarytoremovetheECPfromthatelement/atom. ThiscanbedonewiththeDelECPkeywordinthe
+%basisblockorcoordinatesinput,respectively:
+! LANL2DZ # Uses HayWadt ECPs by default, starting from Na
+%basis
+NewGTO S "Def2-TZVP" end # All-electron up to Kr
+DelECP S # Remove HayWadt ECP
+end
+* xyz ...
+...
+Cu 0.0 0.0 0.0
+DelECP # Remove HayWadt ECP
+NewGTO "Def2-QZVPP" end # All-electron up to Kr
+...
+*
+ToremoveallECPsloadedbydefault(e.g. incasenoglobalbasissetischosen)youcanusethe!NoECPsimple
+keyword.
+ManualInputofECPParameters
+TomanuallyspecifyECPparameters,theNewECPkeywordisfollowedbytheelementforwhichanECPistobe
+entered,thenumberofcoreelectronstobereplaced(N_core)andthemaximumangularmomentum(lmax). The
+ECPspecificationisfinishedbygivingthedefinitionsoftheindividualshellsthatconstitutetheangulardependent
+potentialsU .
+𝑙
+%basis
+NewECP <element>
+N_core <number of core electrons>
+lmax <max. angular momentum>
+[shells]
+end
+end
+ForeachECPshell,firsttheangularmomentum𝑙hastobegiven,followedbythenumberofprimitives. Theprim-
+itivesthemselvesarethenspecifiedbygivingarunningindexandtherespectivetupleofexponent𝑎 ,expansion
+𝑘𝑙
+coefficient𝑑 andradialpower𝑛 .
+𝑘𝑙 𝑘𝑙
+7.5. ChoiceofBasisSet 503
+
+[... start of page 526 ...]
+ORCAManual,Release6.0.0
+# ECP shell
+l <number of primitives>
+1 a1l d1l n1l
+2 a2l d2l n3l
+...
+Asanexample,considertheSD(10,MDF)forVanadium. ThenameindicatesaStuttgart–DresdentypeECPthat
+replaces10coreelectronsandisderivedfromarelativisticcalculationfortheneutralatom. Itconsistsof4shells
+with angular momentum s, p, d, and f. Note that the f shell has an expansion coeffici

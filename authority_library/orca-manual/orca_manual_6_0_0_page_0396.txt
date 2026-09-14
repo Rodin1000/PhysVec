@@ -1,0 +1,55 @@
+[... end of page 395 ...]
+notonlythecoordinatesofthemaininputstructure(‘reactant’),butalsotheatomic
+coordinates of the ‘product’ and, if available, of the ‘transition state guess’ are used to determine the union of
+the extension shell of the active region. For large systems it is advised to use the active region feature for the
+NEBcalculation. Notethattheatomicpositionsofthenon-activeatomsofreactantandproductand,ifavailable,
+transitionstateguess,shouldbeidentical.
+6.16. ORCAMultiscaleImplementation 373
+
+--- Page 396 ---
+ORCAManual,Release6.0.0
+MolecularDynamics
+Ifthereareactiveandnon-activeatomsinthemultiscalesystem,onlytheactiveatomsareallowedtopropagatein
+theMDrun. Ifallatomsareactive,allatomsarepropagated. Formoreinformationontheoutputandtrajectory
+options,seesectionRegions.
+RigidMMWater
+AsTIP3Pwatermighthavetobetreatedasrigidbodiesduetoitsparametrization-pleasecheckoutthespecifics
+oftheappliedforcefieldparametrization-weofferakeywordfortheautomatedrigidtreatmentofallactiveMM
+water molecules. The following keyword applies bond and angle constraints to active MM water molecules in
+optimizationsaswellasMDruns:
+Rigid_MM_Water false # Default: false.
+ForcefieldInput
+For the MM part of the QM/MM calculation forcefield parameters are necessary. Internally, ORCA uses the
+ORCA forcefield. For a description on the format, how to obtain and manipulate the forcefield parameters, see
+sectionORCAForcefieldFile.
+Note:
+• ORCAFF.prmsfilesonlyneedtobeprovidedforQM/MM,QM/QM2/MMandIONIC-CRYSTAL-QMMM
+calculations.
+• ForQM/QM2andMOL-CRYSTAL-QMMMcalculationsthereisnoneedtoprovideaORCAFF.prmsfile.
+• TheORCAFF.prmsfilefortheIONIC-CRYSTAL-QMMMcalculationcanbeconvenientlysetupwiththe
+orca_crystalpreptool,seesectionorca_crystalprep.
+• ForIONIC-CRYSTAL-QMMMandMOL-CRYSTAL-QMMMcalculationstheself-consistentlyoptimized
+MMpointchargesoftheentiresupercellarestoredinanORCAFF.prmsfile,seesectionChargeConvergence
+betweenQMandMMregion. ThisORCAFF.prmsfilecanthenbeusedinsubsequentcalculationswithlarger
+QMregions,differentmethodsandbasissets,excitedstatecalculations,etc.
+TheforcefieldfilenameisprovidedviathekeywordORCAFFFilename:
+%qmmm
+ORCAFFFilename "UBQ.ORCAFF.prms"
+end
+QM-MM,QM-QM2andQM2-MMBoundary
+This section is important for the QM/MM, QM/QM2 and QM/QM2/MM methods. For the latter method two
+boundaryregionsarepresent(betweenQMandQM2aswellasbetweenQM2andMMregion),andbothcango
+throughcovalentbonds. InthefollowingwewillonlydiscusstheconceptfortheboundarybetweenQMandMM,
+butthesameholdstruefortheothertwoboundaries.
+374 Chapter6. RunningTypicalCalculations
+
+[... start of page 397 ...]
+ORCAManual,Release6.0.0
+LinkAtoms
+ORCAautomaticallygenerateslinkatomsbasedontheinformationoftheQMregionandonthetopologyofthe
+system(basedontheORCAFF.prmsfile). ORCAplaceslinkatomsonthebondbetweenQMandMMatoms.
+Important:
+• When defining the QM, QM2 and MM regions, make sure that you only cut through single bonds (not
+aromatic,double,triplebonds,etc.).
+BondLengthScalingfactor
+ThedistancebetweenQMatomandlinkatomisdeterminedviaascalingfactor(i

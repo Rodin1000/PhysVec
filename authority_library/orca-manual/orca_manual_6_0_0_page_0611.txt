@@ -1,0 +1,75 @@
+[... end of page 610 ...]
+edusingthethresh-
+oldFreezeActive. RotationsofthistypearedampedaslongasalltheirweightissmallerthanFreezeActive.
+IncontrasttotheShiftDn,itdampsjustthe“troublesome”partsofinternal-activerotations. Thisoptionapplies
+toalloftheorbitaloptimizationschemesbuttheSuperCI_PT.
+FreezeIE 0.4 # keep active space until int-ext rotation have
+# a contribution of less than 40% to the ||g||
+FreezeActive 0.03 # keep almost doubly occupied orbitals as long as
+# their contribution is less than 3% to the ||g||
+IfthecalculationstartsfromaconvergedHartree-Fockorbitals,thecoreorbitalsshouldnotchangedramatically
+588 Chapter7. DetailedDocumentation
+
+--- Page 611 ---
+ORCAManual,Release6.0.0
+bytheCASSCFoptimization. Oftentrailingconvergenceisassociatedtorotationswithlowlyingorbitals. Their
+contributiontothetotalenergyisfairlysmall. WiththekeywordFreezeGradtheserotationscanbeomittedfrom
+theorbitaloptimizationprocedure.
+FreezeGrad 0.2 # omit hitting a gradient norm ||g|| <0.2
+TheaffectedorbitalsareprintedatthestartupofCASSCF.
+FreezeGrad ... enabled if ||g|| is below 0.02
+Note Convergence can be signaled if the reduced gradient reaches GTol
+Last frozen orbital ... 9
+First deleted orbital ... 320
+Once rotations with core and deleted orbitals are stabilized they will be damped.
+Bydefaultrotationswithfrozencore(ordeletedvirtuals)arenotomitted. IftheoptionFreezeGradisactive,the
+ratiowithrespecttothetotalgradientisprinted.
+||g|| = 0.001240414 Max(G)= -0.000431747 Rot=319,1
+--- Option=FreezeGrad: ||g|| = 0.001081707
+= 87.21%
+Omitting frozencore elements
+UsingtheRIApproximation.
+AsidefromtheFockmatrices,integralsappearingintheorbitalgradientandHessianrequiresubstantialcompu-
+tationtime. Agoodwaytospeedupthecalculationsattheexpenseof“only”obtainingapproximateresultsisto
+introducetheRIapproximation. TrafStep RIapproximatedtheaforementionedintegrals. Herearesufficiently
+largeauxiliarybasismustbeprovided-ideallya/JKor/C.Furtheraccelerationcanbeachievedapproximatingthe
+Fockmatrixconstructionwith!RIJCOSXor!RIJKasdescribedinsectionRI,RIJCOSXandRIJKapproximations
+forCASSCF.MoredetailscanalsobefoundintheCASSCFtutorial. NotethatwithORCA4.1, therearethree
+destinctauxiliarybasisslots,thatneedtobesetiftheauxiliarybasisisdefinedviathe%basisblock.
+TrafoStep RI # RI used in transformation
+# Note: Needs an auxiliary basis for
+# AuxC slot.
+Exact # exact transformation (default)
+Monitoringtheactivespace
+Duringtheiterations,theactiveorbitalsarechosentomaximizetheoverlapwithactiveorbitalsfromtheprevious
+iterations. Maximizing the overlap does not make any restrictions on the nature of the orbitals. Thus initially
+localizedorbitalswillstaylocalizedandordered,whichissometimesadesiredfeaturee.g. inthedensitymatrix
+renormalizationgroupapproach(DMRG).ThisfeatureissetwiththekeywordActConstraintsandisenabledby
+default(afterthefirst3macroiterations). Forsomeorbitaloptimizationprocedures,suchastheSuperCI,natural
+orbitals are more advantageous. Therefore, the ActConstraints can be turned off in favor of natural orbital
+construction(seebelow). Ifthekeywordisnotsetbytheuser,ORCApicksthebestchoiceforthegivenorbital
+optimizationstep.
+ActConstraints 0 # no checks and no changes
+1 # maximize overlap of active orbitals and check sanity. (default for DIIS)
+2 # make natural orbitals in every iteration (default SuperCI)
+3 # make canonical orbitals in every iteration
+4 # localize orbitals
+Inadditiontomaximizingtheoverlap,"ActConstraints 1"checksifthecompositionoftheactivespacehas
+changedi.e. anorbitalhasbeenrotatedoutoftheactivespace. Inthiscase,ORCAabortsandstoresthelastvalid
+setoforbitals. Belowisanexampleerrormessage.
+--- Orbital Update [ DIIS]
+--- Failed to constrain active orbitals due to rotations:
+(continuesonnextpage)
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 589
+
+[... start of page 612 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Rot( 37, 35) with OVL=0.960986
+Rot( 38, 34) with OVL=0.842114
+Rot( 43,104) with OVL=0.031938
+In the snippet above, the active space ranges from 37-43. The program reports that orbitals 37,38 and 43 have
+changedtheircharacter. Theoverlapoforbital43(active)withtheprevioussetofactiveorbitalsisjust3%andthe
+programaborts. Thereareanumberofreasons,whythishappensinthecalculation. Ifthiserroroccursconstantly
+with the same orbitals, it is worthwhile to inspect the rotating partner orbitals (visualize). It might be sign that
+theactivespaceisnotbalancedandshouldbeextended. Inma

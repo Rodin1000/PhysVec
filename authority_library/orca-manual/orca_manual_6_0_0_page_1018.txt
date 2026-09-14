@@ -1,0 +1,82 @@
+[... end of page 1017 ...]
+
+OptionalArguments: —
+Modifiers: —
+Sets the simulation time step ∆𝑡 used to integrate the equations of motion for all following runs to 𝑑𝑡. If your
+systemcontainshydrogenatoms,atimestepnotabove0.5fsisrecommended. Ifonlyheavieratomsarepresent,
+a larger time step may be chosen. A good estimate for a time step that still allows for an accurate simulation is
+√
+∆𝑡= 𝑚·0.5fs,where𝑚isthemassofthelightestatominthesystem(ina.m.u.). Thisisonereasonwhysome
+scientistsperformsimulationswithfullydeuteratedcompounds: Itallowstoincreasethetimestepbyafactorof
+≈1.4:-)
+IfthiscommandisnotinvokedbeforeaRun call,adefaulttimestepof0.5fswillbesetbeforestartingtherun.
+7.51. AbinitioMolecularDynamicsSimulations 995
+
+--- Page 1018 ---
+ORCAManual,Release6.0.0
+7.51.8 Scientific Background
+Inthissection,someofthemethodsandalgorithmsusedwithinORCA’sMDmodulearedescribedinsomemore
+depth,withafocusonthescientificbackground.
+TimeIntegrationandEquationsofMotion
+ThecentralconceptofmoleculardynamicssimulationsistosolveNewton’sequationsofmotion(atleastaslong
+astheatomcoresaretreatedclassically). Theseread
+(︁ )︁
+𝐹 ⃗𝑥(𝑡)
+𝑖
+𝑥¨ (𝑡)= , 𝑖=1...𝑁,
+𝑖 𝑚
+𝑖
+where𝑥 (𝑡)denotesthepositionofthe𝑖-thdegreeoffreedomattime𝑡, 𝑚thecorrespondingmass, and𝐹 the
+𝑖 𝑖
+forceactinguponthisdegreeoffreedom. Astheforcemaydependonallpositions,thisisacoupledsystemof𝑁
+ordinarydifferentialequations(ODEs). Inthegeneralcase,itisnotpossibletoobtainananalyticalsolutionofthis
+system,andthereforenumericalsolutionmethodsareapplied. Thesearealmostalwaysbasedondiscretizingthe
+timevariableandapproximatelysolvingthesystembytakingfinitetimesteps.
+Of all different methods to numerically solve coupled systems of ODEs, the symplectic integration schemes for
+Hamiltonian systems attained special attention in the field of molecular dynamics. They possess a very good
+conservationofenergy. Incontrasttomanyothermethods,theyshowareasonablebehaviorwheninvestigatingthe
+long-termevolutionofchaoticHamiltoniansystems(like,e. g.,MDsimulations). Threepopularsuchsymplectic
+integration schemes are the Leapfrog algorithm, the Verlet method, and the Velocity Verlet integrator. Despite
+theirdifferentnames,theyareverysimilar. ItcanbeeasilyseenthattheVerletandVelocityVerletmethodsare
+algebraically equivalent (by eliminating the velocities from the Velocity Verlet algorithm), and it can be shown
+that,eventually,allthreemethodsareidentical.3 Allthreemethodsareexplicitintegrationmethodswithaglobal
+error of order 2, and therefore one order better than the semi-implicit Euler method, which is also a symplectic
+integrationscheme. AstheVelocityVerletalgorithmistheonlyofthesethreemethodswhichyieldsvelocitiesand
+positionsatthesamepointintime,manypopularmoleculardynamicspackages(CP2k,CPMD,LAMMPS)use
+thisscheme. Forthesamereasons,theORCAMDmoduleusestheVelocityVerletalgorithmastimeintegration
+method.
+ThegeneralequationsoftheVelocityVerletschemeread
+1
+⃗𝑥(𝑡+∆𝑡)=⃗𝑥(𝑡)+⃗𝑣(𝑡)∆𝑡+ ⃗𝑎(𝑡)∆𝑡2,
+2
+⃗𝑎(𝑡)+⃗𝑎(𝑡+∆𝑡)
+⃗𝑣(𝑡+∆𝑡)=⃗𝑣(𝑟)+ ∆𝑡.
+2
+Byinserting
+𝐹⃗ (𝑡)
+⃗𝑎 (𝑡)= 𝑖 , 𝑖=1...𝑁,
+𝑖 𝑚
+𝑖
+onearrivesatthetwo-stepmethod
+𝐹⃗ (𝑡)
+⃗𝑥 (𝑡+∆𝑡)=⃗𝑥 (𝑡)+⃗𝑣 (𝑡)∆𝑡+ 𝑖 ∆𝑡2, 𝑖=1...𝑁,
+𝑖 𝑖 𝑖 2𝑚
+𝑖
+𝐹⃗ (𝑡)+𝐹⃗ (𝑡+∆𝑡)
+⃗𝑣 (𝑡+∆𝑡)=⃗𝑣 (𝑟)+ 𝑖 𝑖 ∆𝑡, 𝑖=1...𝑁,
+𝑖 𝑖 2𝑚
+𝑖
+whichisimplementedinORCA’sMDmodule.
+3Hairer,Lubich,Wanner,“GeometricNumericalIntegration”,Springer2006.
+996 Chapter7. DetailedDocumentation
+
+[... start of page 1019 ...]
+ORCAManual,Release6.0.0
+VelocityInitialization
+InthebeginningofaMDsimulation,itisoftenthecasethatonlytheinitialpositionsoftheatomsareknown,but
+notthevelocities. AsMDsimulationsareperformedatsomefinitetemperature,itisagoodideatoinitializethe
+velocitiesinawaysuchthatthedesiredsimulationtemperatureisalreadypresentinthebeginning. Instatistical
+mechanics,itisoftenassumedthatthevelocitydistributionofatomsisgivenbyaMaxwell–Boltzmanndistribution
+(which is strictly only the case in idealized gases). Therefore, it is a reasonable choice to initialize the atom’s
+velocitiesaccordingtotheMaxwell–BoltzmannequationinthebeginningofaMDsimulation. Thegoalistofind
+aninitialvelocitydistr

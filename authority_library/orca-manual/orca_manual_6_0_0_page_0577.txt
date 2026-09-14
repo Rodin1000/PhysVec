@@ -1,0 +1,82 @@
+[... end of page 576 ...]
+problems in geometry optimizations using analytic
+gradients.[686] However, if one wishes to calculate (semi-)numerical derivatives of the DLPNO-MP2 energy,
+gradient, or properties using finite differences, large errors can occur. Therefore, in these cases it is advisable
+to keep the pair lists and correlation domains fixed upon displacement. Currently, this can be achieved using
+thefollowingprocedure: first,thecalculationatthereferencegeometryiscarriedoutwiththeadditionalsetting
+StoreDLPNOData=true:
+! DLPNO-MP2 def2-SVP def2-SVP/C VeryTightSCF
+%base "calc0"
+(continuesonnextpage)
+554 Chapter7. DetailedDocumentation
+
+--- Page 577 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%mp2
+StoreDLPNOData true
+end
+*xyzfile 0 1 geom0.xyz
+Thiswillproducetheadditionalfilescalc0.MapDLPNO00.tmp,calc0.MapDLPNOPre0.tmp,calc0.IJLIST.0.tmp,
+calc0.IJLISTSCR.0.tmp, and calc0.IJNPNO.0.tmp, which are needed in the working directory for the next step
+togetherwiththelocalizedorbitalsincalc0.loc. Thecalculationatthedisplacedgeometryisthenrequestedas:
+! DLPNO-MP2 def2-SVP def2-SVP/C VeryTightSCF
+%mp2
+RefBaseName "calc0"
+end
+*xyzfile 0 1 geom1.xyz
+The program will use the orbitals from calc0.loc as a starting guess for the localization and map the reference
+orbitalstothenewonesbasedonmaximaloverlap. Thelistsofcorrelatedandscreenedoutpairsarereadfromthe
+filescalc0.IJLIST.0.tmpandcalc0.IJLISTSCR.0.tmp,whilethedomaininformation(MO-PAO,MO-Aux,etc.) is
+readfromcalc0.MapDLPNO00.tmpandcalc0.MapDLPNOPre0.tmp. ThenumberofPNOsforaeachpair(stored
+incalc0.IJNPNO.0.tmp)isalsokeptconsistentwiththereferencecalculation: theoneswiththehigestoccupation
+numbersarekept,disregarding𝑇CutPNO .
+Thisprocedureshouldimprovetheaccuracyandnumericalstabilityformanuallycalculatedgeometricderivatives
+ofvariousDLPNO-MP2properties(includingthosethatrequireanalyticfirstorsecondderivativesatthedisplaced
+geometries). Forsemi-numericalHessiancalculations(NumFreq),itissufficienttoaddStoreDLPNOData=true
+as shown below and ORCA will handle the rest. For the sake of numerical stability, it is also recommended to
+increasePAOOverlapThreshandaddaPNOlevelshiftforthereasonsdescribedinsectionLocalMP2Response
+Properties.
+! DLPNO-MP2 def2-SVP def2-SVP/C VeryTightSCF NumFreq
+%mp2
+StoreDLPNOData true
+PAOOverlapThresh 1e-5
+TScalePNO_LShift 0.1
+end
+# geometry definition
+Note that in case the orbital localization Hessian is (near-)singular, the mapping of orbitals from reference to
+displacedgeometrieswilllikelyfail. Nosolutionispresentlyimplementedforthisproblem.
+Multi-LevelDLPNO-MP2calculations
+WiththeDLPNO-MP2methoditispossibletotreattheinteractionsamongdifferentfragmentsofasystemwith
+varyingaccuracy,orexcludesomeinteractionsfromtheelectroncorrelationtreatmententirely. Amoredetailed
+discussionintheDLPNO-CCSD(T)contextisgiveninsectionMulti-LevelCalculationsandinref.[810]. Herewe
+justpresentthetechnicalcapabilitiesoftheMP2moduleandtherequiredinput. Currently,multilayercalculations
+areonlyavailableforclosed-shellDLPNO-MP2. Multilayergradientsandresponsepropertiesarealsopossible.
+Fragmentsmustbedefined–seeFragmentSpecification.
+! DLPNO-MP2 NoFrozenCore TightPNO
+%mp2
+LoosePNOFragInter {1 *} # * can be used as a wildcard for either or both indices
+NormalPNOFragInter {1 1} {1 2} # multiple fragment pairs can be listed like this
+TightPNOFragInter {2 3}
+HFFragInter {3 1} {4 2}
+CustomFragInter
+FragPairs {4 4} {3 4} # pair definition is required
+HFOnly false # flag to skip MP2 for these pairs - same as HFFragInter
+FrozenCore false # flag to skip core correlation - requires !NoFrozenCore
+(continuesonnextpage)
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 555
+
+[... start of page 578 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+TCutPNO 1e-8 # custom value for these pairs
+TCutDO 1e-2 # custom value for these pairs
+TCutDOij 1e-5 # custom value for these pairs
+TCutPre 1e-6 # custom value for these pairs
+end
+end
+# geometry and fragment definition
+Note that a given pair or fragments can only belong to a single layer and definitions later in the input overwrite
+previousones. Thismeansthatiftheaboveinputisusedina4-fragmentcalculation,the1-4interfragmentinter-
+actionswillbetreatedwithLoosePNOthresholds,theinteractionswithinfragment1andwithfragment2–with
+NormalPNOthresholds,

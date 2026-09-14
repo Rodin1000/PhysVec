@@ -1,0 +1,101 @@
+[... end of page 700 ...]
+onstantenergy-shifts𝐸 → 𝐸 +constwhenthepotential𝑉 ischangedbyaconstant–forhydrogenic
+ions. Formany-electronsystems,thescaled-ZORAHamiltonianstilldoesnotyieldsimple,constantenergyshift
+for𝑉 →𝑉 +const. ButitproducestheexactDiracenergyforhydrogen-likeatomsandperformsbetterthanthe
+first-orderregularapproximationforatomicionizationenergies.
+678 Chapter7. DetailedDocumentation
+
+--- Page 701 ---
+ORCAManual,Release6.0.0
+Theregularapproximationwithmodelpotential
+TheideaofthisapproachgoesbacktoVanWüllen[865],whosuggestedtheprocedureforDFT.Howeverwealso
+useitforothermethods. ThescalarrelativisticZORAself-consistentfieldequationisinourimplementation(in
+atomicunits):
+[︂ 𝑐2 ]︂
+p p+𝑉 𝜓 =𝜀 𝜓 (7.174)
+2𝑐2−𝑉 eff 𝑖 𝑖 𝑖
+where𝑐isthespeedoflight. ItlookslikethenormalnonrelativisticKohn–ShamequationwiththeKSpotential
+𝑉 :
+eff
+𝑉
+eff
+(r)=− ∑︁
+|r−
+𝑍 𝐴
+R |
++ ∫︁
+|r
+𝜌
+−
+(r′
+r
+)
+′|
+𝑑r′+𝑉xc[𝜌](r) (7.175)
+𝐴
+𝐴
+(𝑍 isthechargeofnucleus𝐴and𝑅 isitsposition;𝜌(𝑟)isthetotalelectrondensityand𝑉 [𝜌]theexchange-
+𝐴 𝐴 𝑥𝑐
+correlation potential – the functional derivative of the exchange-correlation energy with respect to the density).
+Thekineticenergyoperator𝑇 = −1∇2 ofthenonrelativistictreatmentissimplyreplacedbytheZORAkinetic
+2
+energyoperator:
+𝑐2
+𝑇ZORA =p p (7.176)
+2𝑐2−𝑉
+Clearly,intheregionswherethepotential𝑉 issmallcomparedto𝑐2,thisoperatorreducestothenonrelativistic
+kinetic energy. 𝑉 could be the actual KS potential. However, this would require to solve the ZORA equations
+inaspecialwaywhichdemandsrecalculationofthekineticenergyineverySCFcycle. Thisbecomesexpensive
+and is also undesirable since the ZORA method is not gauge invariant and one obtains fairly large errors from
+suchaprocedureunlessspecialprecautionistaken. VanWüllen[865]hasthereforearguedthatitisareasonable
+approximationtoreplacethepotential𝑉 withamodelpotential𝑉˜ whichisconstructedasfollows:
+model
+𝑉˜ =− ∑︁ 𝑍 𝐴 + ∫︁ 𝜌 model (r′) 𝑑r′+𝑉 LDA[︀ 𝜌model]︀ (r) (7.177)
+model |r−R | |r−r′| xc
+𝐴
+𝐴
+Themodeldensityisconstructedasasumoversphericallysymmetric(neutral)atomicdensities:
+∑︁
+𝜌 model (r)= 𝜌𝐴(r) (7.178)
+𝐴
+Thus,thisdensityneitherhasthecorrectnumberofelectrons(forchargedspecies)noranyspinpolarization. Yet,
+in the regions close to the nucleus, where the relativistic effects matter, it is a reasonable approximation. The
+atomicdensityisexpandedinasumofs-typeGaussianfunctionslike:
+𝜌𝐴(r)= ∑︁ 𝑑 𝑖 exp (︁ −𝛼 𝑖 |r−R 𝐴 |2 )︁ (7.179)
+𝑖
+The fit coefficients were determined in three different ways by near basis set limit scalar relativistic atomic HF
+calculationsandarestoredasalibraryintheprogram. ThefittingdensitiesareavailableforelementsuptoRn,
+as well as the actinoids. Through the variable ModelDens (vide supra) the user can choose between these fits
+andstudythedependenceoftheresultsinthischoice(itshouldbefairlysmallexcept,perhaps,withtheheavier
+elementsandtheHFdensitieswhicharenotrecommended). Theindividualcomponentsofthemodelpotential
+(eq. (7.177))canbeturnedonoroffthroughtheuseofthevariableModelPot(videsupra).
+VanWüllenhasalsoshownthatthecalculationofanalyticalgradientswiththisapproximationbecomescloseto
+trivialandthereforescalarrelativisticallelectrongeometryoptimizationsbecomeeasilyfeasiblewithintheZORA
+approach. However,since𝑇ZORA isconstructedbynumericalintegrationitisveryimportantthattheusertakes
+appropriateprecautionintheuseofasuitableintegrationgridandalsotheuseofappropriatebasissets! Inthe
+caseofOneCenter truethenumericalintegrationisdoneaccuratelyalongtheradialcoordinateandanalytically
+alongtheangularvariablessuchthattoolargegridsarenotnecessaryunlessyourbasissetishighlydecontracted
+andcontainsverysteepfunctions.
+7.23. RelativisticOptions 679
+
+[... start of page 702 ...]
+ORCAManual,Release6.0.0
+7.23.3 The Douglas-Kroll-Hess Method
+TheDouglas-Kroll-Hess(DKH)methodexpandstheexactrelation(7.166)intheexternalpotentialV.InORCA
+thefirst-andsecond-orderDKHmethodsareimplemented. Thefirst-orderDKHHamiltonianisgivenby
+ℎ˜(1) =𝐸 +𝐴 𝑉𝐴 +𝐵 𝑉(𝑝)𝐵 , (7.180)
+++ 𝑝 𝑝 𝑝 𝑝 𝑝
+with
+√︃
+𝐸 = √︀ 𝑐4+𝑐2𝑝2, 𝐴 = 𝐸 𝑝 +𝑐2 , 𝐵 = 𝑐 (7.181)
+𝑃 𝑝 2𝐸 𝑝 𝑝 √︀ 2𝐸 𝑝 (𝐸 𝑝 +𝑐2)
+Atsecondorder,itreads
+1
+ℎ˜(2) =ℎ˜(1) + [𝑊 ,𝑂] (7.182)
+++ ++ 2 𝑝
+where
+𝑐𝜎𝑝
+{𝑊 ,𝐸 }=𝛽𝑂, 𝑂 =𝐴 [𝑅 ,𝑉]𝐴 , 𝑅 = (7.183)
+𝑝 𝑝 𝑝 𝑝 𝑝 𝑝 𝐸 +𝑐2
+𝑝
+definethesecond-ordercontribution. InORCA,thespin-freepartofℎ˜(2) isimplem

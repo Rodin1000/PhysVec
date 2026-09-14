@@ -1,0 +1,54 @@
+[... end of page 404 ...]
+ QM region should be located in the central part of the supercell. The QM atoms are
+embeddedintheremainderofthesupercell,thesurroundingMMatoms,whicharerepresentedbyatom-centered
+pointchargesandinfluencetheQMcalculations. Howthesechargesareobtained,isoutlinedinthenextparagraph.
+382 Chapter6. RunningTypicalCalculations
+
+--- Page 405 ---
+ORCAManual,Release6.0.0
+ChargeConvergencebetweenQMandMMregion
+The core idea of the CRYSTAL-QMMM method is to reach charge convergence between the QM and the MM
+atoms. Forthispurpose,theMMchargesareupdatedself-consistentlywiththeatomic(CHELPG)chargesofthe
+QM atoms. This idea follows the work of reference [213] for the IONIC-CRYSTAL-QMMM and of reference
+[109]fortheMOL-CRYSTAL-QMMM.
+!IONIC-CRYSTAL-QMMM or MOL-CRYSTAL-QMMM
+%qmmm
+Conv_Charges true # default true for both CRYSTAL-QMMM variants
+Conv_Charges_MaxNCycles 10 # default 30 for MOL-CRYSTAL-QMMM
+# default 10 for IONIC-CRYSTAL-QMMM
+Conv_Charges_ConvThresh 0.01 # threshold (default 0.01) for maximum charge change
+#for atom type between two subsequent charge convergence
+# cycles
+Scale_FormalCharge_MMAtom 1. # default is 1. MM atomic charges used in QM part of
+# the CRYSTAL-QMMM calculation are scaled by this factor
+end
+During optimizations, the charge convergence scheme can be used (i) only at the very beginning, (ii) every N
+geometrysteps,or(iii)foreachgeometrystep,usingthefollowingkeyword:
+%geom
+ReConvCharge 1 # default is 1. Redo charge convergence scheme every N steps.
+end
+Afterchargeconvergence, theconvergedchargesarestoredinthefilebasename.convCharges.ORCAFF.prms. It
+can be used for a later calculation (with the same or different electronic structure settings) with the following
+keywordcombination:
+!IONIC-CRYSTAL-QMMM or !MOL-CRYSTAL-QMMM
+%qmmm
+Conv_Charges false
+ORCAFFFilename "firstjob.convCharges.ORCAFF.prms"
+end
+MM-MMInteraction
+Unlikewiththeothermultiscalemethods(QMMM,QM/QM2,QM/QM2/MM)theMMregionisonlytreatedasa
+perturbationtotheQMregion. The(bondedandnonbonded)MM-MMinteractionisnotcomputed-sinceitwould
+not affect the QM-MM interaction - and thus the active region (optimizations, frequencies, ...) in CRYSTAL-
+QMMMcalculationsshouldberestrictedtoatomsoftheQMregion.
+6.16. ORCAMultiscaleImplementation 383
+
+[... start of page 406 ...]
+ORCAManual,Release6.0.0
+PreparingCRYSTAL-QMMMCalculations
+The input structures and input files for the CRYSTAL-QMMM calculations can be prepared with the
+orca_crystalprepmodule(seesectionorca_crystalprep).
+MOL-CRYSTAL-QMMM
+ConceptuallyweuseanadditiveQM/MMcalculation,inwhichtheQMregioninteractswiththeMMregiononly
+vianonbondedinteractions. Lennard-JonesinteractionbetweenQMandMMregioniscomputedusingvander
+WaalsparametersfromtheUFFforcefield. ThechargeconvergencetreatmentbetweenQMandMMregionstarts
+withzerochargesontheMMatoms,andisiterateduntilconvergenceoftheQMatomi

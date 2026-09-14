@@ -1,0 +1,73 @@
+[... end of page 379 ...]
+nbeusedinconjuctionwithanarbitrarynumberoffragments.
+• TheLEDschemecanbeusedtodecomposeDLPNO-CCSDandDLPNO-CCSD(T)energies. Atthemo-
+ment,itisnotpossibletousethisschemetodecomposeDLPNO-MP2energiesdirectly. However,forclosed
+shellsystems,onecanobtainDLPNO-MP2energiesfromaDLPNO-CCSDcalculationbyaddingaseries
+of keywords in the %mdci block: (i) TScalePairsMP2PreScr 0 ; (ii) UseFullLMP2Guess true; (iii)
+TCutPairs 10(oranylargevalue). TheLEDcanbeusedasusualtodecomposetheresultingenergy.
+6.13. LocalEnergyDecomposition 357
+
+--- Page 380 ---
+ORCAManual,Release6.0.0
+• Foraclosedshellsystemoftwofragments(sayAandB),theLEDschemecanbeusedtofurtherdecompose
+theLEDcomponentsofthereferenceHFenergy(intrafragment,electrostaticsandexchange)intoasumof
+frozenstateandorbitalrelaxationcorrectioncontributions. MoreinformationcanbefoundinRef.[29].
+• Toobtainthefrozenstatetermsonehasto: (i)generatea.gbwfilecontainingtheorbitalsofbothfragments
+(AB.gbw)usingorca_mergefrag A.gbw B.gbw AB.gbw,whereA.gbwandB.gbwaretheorbitalfilesof
+isolatedfragmentsattheaductgeometry;(ii)runtheLEDasusualbyusingMOReadtoreadtheorbitalsin
+theAB.gbwfileinconjunctionwithMaxiter 0inboththe%scfblock(toskiptheSCFiterations)andthe
+%mdciblock(toskiptheunnecessaryCCSDiterations).
+6.14 The Hartree-Fock plus London Dispersion (HFLD) method for
+the study of Noncovalent Interactions
+StartingfromORCA4.2,theefficientandaccurateHFLDmethod[30]canbeusedforthequantificationandanalysis
+of noncovalent interactions between a pair of user-defined fragments. Starting from ORCA 5.0, an open shell
+variantoftheHFLDmethodisalsoavailable.[24]
+TheleadingideahereistosolvetheDLPNOcoupledclusterequationswhileneglectingintramonomercorrelation.
+TheLEDschemeisthenusedtoextracttheLondondispersion(LD)energyfromtheintermolecularpartofthe
+correlation. Finally, the resulting LD energy is used to correct interaction energies computed at the HF level.
+Hence,HFLDcanbeconsideredasadispersion-correctedHFapproachinwhichthedispersioninteractionbetween
+the fragments is added at the DLPNO-CC level. As such, it is particulartly accurate for the quantification of
+noncovalent interactions such as those found in H-bonded systems, pre-reactive intermediates (e.g., Frustrated
+LewisPairs),dispersionandelectrostaticallyboundsystems. Largererrorsareinprincipleexpectedfortransition
+metalcomplexes,asitisthecaseforanydispersioncorrectedHartree-Fockscheme.
+The efficency of the approach allows the study of noncovalent interactions in systems with several hundreds of
+atoms. Aninputexampleisreportedbelow.
+! HFLD aug-cc-pvdz aug-cc-pvdz/C verytightscf
+*xyz 0 1
+C(1) 0.18726407287156 0.08210467619149 0.19811955853244
+H(1) 1.07120465088431 -0.00229078749404 -0.46002874025040
+H(1) -0.15524644515923 1.12171178448874 0.04316776563623
+O(2) -1.47509614629583 -1.29358571885374 2.29818864036820
+H(2) -0.87783948760158 -0.98540169212890 1.58987042714267
+H(2) -1.22399221548771 -2.20523304094991 2.47014489963764
+*
+In the corresponding output, after the DLPNO-CC iterations and the LED output, the following information is
+printed:
+---------------------------- ----------------
+Inter-fragment dispersion -0.001871763
+---------------------------- ----------------
+------------------------- --------------------
+FINAL SINGLE POINT ENERGY -114.932878050741
+------------------------- --------------------
+ThetotalHFLDenergyoftheadductisthus-114.932878050741a.u.. Tocomputeinteractionenergies,wehaveto
+substractfromthisvaluetheHartree-Fockenergiesofthemonomersinthegeometrytheyhaveinthecomplex,i.e.,
+-38.884413525377and-76.040412827089a.u. forCH andH O,respectively. Thetotalinteractionenergyisthus
+2 2
+-0.00805a.u. or-5.1kcal/mol(thecorrespondingDLPNO-CCSD(T)/TightPNO/CBSvalueis-5.3kcal/mol.[33]).
+Notethat,toobtainbindingenergies,thegeometricpreparationshouldbeaddedtothisvalue. Thiscanbecomputed
+usingastandardcomputationalmethod,e.g,DFTorDLPNO-CCSD(T).
+Someofthemostimportantaspectsofthemethodaresummarizedbelow:
+358 Chapter6. RunningTypicalCalculations
+
+[... start of page 381 ...]
+ORCAManual,Release6.0.0
+• Accuracy and Recommended Settings.Fornoncovalentinteractions,HFLDtypicallyprovidesanac-
+curacycomparabletothatoftheDLPNO-CCSD(T)methodifdefaultPNOsettingsareused. FortheHFLD
+scheme, these are defined as TCutPNO = 3.3e-7 and TCutPairs 1e-5. If used in conjuction with a def2-
+TZVP(-f)basisset,thesesettingsaretypicallydenotedas“HFLD*”andarerecommededforstandardappli-
+cationsonlargesystems.[24]Forexample, HFLD*settingswereusedinRef.[25]toelucidatethecomplex
+pattern of interactions responsible for the stability of the DNA duplex. If great accuracy is required, it is
+recommenedtouseTightPNOsettingsinconjuctionwithTCutPNO1e-8andtwo-pointbasissetextrapo-
+lation(aug-cc-pVTZ/aug-cc-pVQZ)toapproachtheCBSlimit. Thesesettingsaretypicallydenotedasthe
+“gold”HFLDsettings.[24]
+• Reference determinant in the Open shell 

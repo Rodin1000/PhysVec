@@ -1,0 +1,76 @@
+[... end of page 201 ...]
+canalreadycheckwhetheryourTS
+optimizationisfollowingtherightmode(whichisthecaseinourexample,sinceweareinterestedintheabstraction
+ofH1fromC0byO5.
+• If you want the algorithm to follow a different mode than the one with lowest eigenvalue, you can either
+choosethenumberofthemode:
+%geom
+TS_Mode {M 1} # {M 1} mode with second lowest eigenvalue
+end # (default: {M 0}, mode with lowest eigenvalue)
+end
+oryoucangiveaninternalcoordinatethatshouldbestronglyinvolvedinthismode:
+6.3. GeometryOptimizations,SurfaceScans,TransitionStates,MECPs,ConicalIntersection1s7,9
+IRC,NEB
+
+--- Page 202 ---
+ORCAManual,Release6.0.0
+%geom
+TS_Mode {B 1 5} # bond between atoms 1 and 5,
+end # you can also choose an angle: {A N1 N2 N1}
+# or a dihedral: {D N1 N2 N3 N4}
+end
+Tip:
+• IfyoulookforaTSofabreakingbondtherespectiveinternalcoordinatemightnotbeincludedinthelistof
+redundantinternalcoordinatesduetothebonddistancebeingslightlytoolarge,leadingtosloworevenno
+convergenceatall. InordertopreventthatbehavioraregionofatomsthatareactiveintheTSsearchcan
+bedefined,consistingofe.g. thetwoatomsofthebreakingbond. Duringtheautomaticgenerationofthe
+internalcoordinatesthebondradiioftheseatoms(andtheirneighbouringatoms)areincreased,makingit
+moreprobablethatbreakingorformingbondsintheTSaredetectedasbonds.
+%geom
+TS_Active_Atoms { 1 2 3 } # atoms that are involved in TS, e.g. for proton
+end # transfer the proton, its acceptor and its donor
+TS_Active_Atoms_Factor 1.5 # factor by which the cutoff for bonds is increased for
+# the above defined atoms.
+# (Default 1.5, i.e. increased by 50%)
+end
+HessiansforTransitionStateCalculations
+Fortransitionstate(TS)optimizationasimpleinitialHessian,whichisusedforminimization,isnotsufficient. Ina
+TSoptimizationwearelookingforafirstordersaddlepoint,andthusforapointonthePESwherethecurvatureis
+negativeinthedirectionoftheTSmode(theTSmodeisalsocalledtransitionstatevector,theonlyeigenvectorof
+theHessianattheTSgeometrywithanegativeeigenvalue). Startingfromaninitialguessstructurethealgorithm
+usedintheORCATSoptimizationhastoclimbuphillwithrespecttotheTSmode,whichmeansthatthestarting
+structurehastobeneartheTSandtheinitialHessianhastoaccountforthenegativecurvatureofthePESatthat
+point. Thesimpleforce-fieldHessianscannotaccountforthis,sincetheyonlyknowharmonicpotentialsandthus
+positivecurvature.
+Themoststraightforwardoptioninthiscasewouldbe(afterhavinglookedforapromisinginitialguessstructure
+withthehelpofarelaxedsurfacescan)tocalculatetheexactHessianbeforestartingtheTSoptimization. With
+thisHessian(dependingonthequalityoftheinitialguessstructure)weknowtheTSeigenvectorwithitsnegative
+eigenvalue and we have also calculated the exact force constants for all other eigenmodes (which should have
+positiveforceconstants). FortheHF,DFTmethodsandMP2,theanalyticHessianevaluationisavailableandis
+thebestchoice,fordetailsseesectionFrequencies(VibrationalFrequencies).
+Whenonlythegradientsareavailable(mostnotablytheCASSCF),thenumericalcalculationoftheexactHessian
+isverytimeconsuming,andonecouldaskifitisreallynecessarytocalculatethefullexactHessiansincetheonly
+specialthing(comparedtothesimpleforce-fieldHessians)thatweneedistheTSmodewithanegativeeigenvalue.
+HereORCAprovidestwodifferentpossibilitiestospeeduptheHessiancalculation, dependingonthenatureof
+the TS mode: the Hybrid Hessian and the calculation of the Hessian value of an internal coordinate. For both
+possibilities the initial Hessian is based on a force-field Hessian and only parts of it are calculated exactly. If
+the TS mode is of very local nature, which would be the case when e.g. cleaving or forming a bond, then the
+exactlycalculatedpartoftheHessiancanbethesecondderivativeofonlyoneinternalcoordinate,theonewhich
+issupposedtomakeuptheTSmode(theformedorcleavedbond). IftheTSmodeismorecomplicatedandmore
+delocalized,ase.g. inaconcertedprotontransferreaction,thenthehybridHessian,aHessianmatrixinwhichthe
+numerical second derivatives are calculated only for those atoms, which are involved in the TS mode (for more
+details,seesectionGeometryOptimization),shouldbesufficient. Ifyouaredealingwithmorecomplicatedcases
+wherethesetwoapproachesdonotsucceed,thenyoustillhavethepossibilitytostarttheTSoptimizationwitha
+fullexactHessian.
+180 Chapter6. RunningTypicalCalculations
+
+[... start of page 203 ...]
+ORCAManual,Release6.0.0
+NumericalFrequencycalculationsarequiteexpensive. YoucanfirstcalculatetheHessianatalowerleveloftheory
+orwithasmallerbasissetandusethisHessianasinputforasubsequentTSoptimization:
+%geom
+inhess Read # this command comes with:
+InHessName "yourHessian.hess" # filename of Hessian input file
+end
+Another possibility to save computational time is to calculate exact Hessian values only for those atoms which
+arecrucialfortheTSoptimizationandtouseapproxim

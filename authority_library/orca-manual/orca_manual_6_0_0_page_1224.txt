@@ -1,0 +1,73 @@
+[... end of page 1223 ...]
+# 1. Maybe Create the necessary driver script
+# for the external optimizer and make it executable
+# NOTE: This will depenend on the operating system
+# -------------------------------------------------
+if (createDriverScript) then
+driverScript = openFile(driverScriptName, "w");
+write2File(driverScript, "source ~/.bashrc\n");
+write2File(driverScript, "%s %s\n", submitCommand, orcaInputName );
+write2File(driverScript, "cp %s %s_Compound_1_EXT.engrad\n", engradFilename, baseFilename);
+closeFile(driverScript);
+(continuesonnextpage)
+7.60. CompoundExamples 1201
+
+--- Page 1224 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+sys_cmd("chmod +x %s",driverScriptName);
+EndIf
+# ------------------------------------------------
+# 2. Maybe Create the ORCA input that will run the
+# compound script for the gradient extrapolation
+# -------------------------------------------------
+if (createORCAInput) then
+orcaInput = openFile(orcaInputName, "w");
+Write2File(orcaInput, "%%Compound \"%s\"\n", gradCreateFile);
+Write2File(orcaInput, " with\n");
+Write2File(orcaInput, " molecule =\"%s_Compound_1_EXT.xyz\"\;\n", baseFilename);
+Write2File(orcaInput, " charge = %d\;\n", charge);
+Write2File(orcaInput, " mutliplicity = %d\;\n", mult);
+Write2File(orcaInput, " method = \"%s\"\;\n", method);
+Write2File(orcaInput, " basis = \"%s\"\;\n", basis);
+Write2File(orcaInput, " restOfInput = \"%s\"\;\n", restOfInput);
+Write2File(orcaInput, " myPropName = \"%s\"\;\n", myPropName);
+Write2File(orcaInput, " myFilename = \"%s\"\;\n", myFilename);
+Write2File(orcaInput, " removeFiles = false\;\n");
+Write2File(orcaInput, " DoOptimization = %s\;\n", DoOptimization.GetString());
+Write2File(orcaInput, " produceEnGradFile = %s\;\n", produceEnGradFile.GetString());
+Write2File(orcaInput, " enGradFilename = \"%s\"\;\n", enGradFilename);
+Write2File(orcaInput, "End\n");
+closeFile(orcaInput);
+EndIf
+# ------------------------------------------------
+# 3. Copy the initial XYZ file to the one needed
+# for the external optimizer
+# -------------------------------------------------
+sys_cmd("cp %s %s_Compound_1_EXT.xyz", molecule, baseFilename);
+# --------------------------------------------------
+# 1. Run the driver ORCA input file that calls the
+# External optimizer
+# --------------------------------------------------
+New_Step
+!ExtOpt Opt
+*xyzfile &{charge} &{mult} &{baseFilename}_Compound_1_EXT.xyz
+%method
+ProgExt "./&{driverScriptName}"
+End
+Step_End
+End
+Comments
+Theinitialstructureshouldcontainsomeghostatoms.
+1202 Chapter7. DetailedDocumentation
+
+[... start of page 1225 ...]
+ORCAManual,Release6.0.0
+7.60.10 Umbrella script
+Introduction
+Thisscriptcalculatesthepotentialforthe“umbrellaeffect”inNH_3. Inadditionitlocatestheminimaandmaxima
+inthepotentialsurface.
+Filename
+Umbrella.cmp
+SCRIPT
+# --------------------------------------

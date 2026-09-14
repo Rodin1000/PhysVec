@@ -1,0 +1,83 @@
+[... end of page 522 ...]
+dwanttogenerateafittingbasis,you
+havetospecifyitagainintheCOORDSsection,evenif AutoAuxisalreadypresentinthesimpleinputlineorinthe
+%basisblock. Forexample:
+! Def2-SVP Def2/JK
+%basis
+NewAuxJKGTO H
+"AutoAux"
+end
+end
+*xyz 0 1
+O 0.00 0.00 0.00
+H -0.25 0.93 0.00
+H 0.96 0.00 0.00
+AddGTO
+P 1
+(continuesonnextpage)
+500 Chapter7. DetailedDocumentation
+
+--- Page 523 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+1 1.6 1.0
+D 1
+1 1.0 1.0
+end
+NewAuxJKGTO
+"AutoAux"
+end
+*
+Here the oxygen atom is assigned the Def2-SVP basis and the Def2/JK fitting basis, the first hydrogen atom is
+assignedtheDef2-SVPbasisandanautomaticallygeneratedfittingbasisandthesecondhydrogenatomisassigned
+the Def2-SVP basis with two additional polarization functions and a larger automatically generated fitting basis
+thataccountsforthesefunctions.
+Tip: When assigning custom basis sets it is always a good idea to print the basis set information (%output
+print[p_basis] 2 endorsimply!PrintBasis)andcheckthateverythingiscorrect.
+7.5.5 Assigning Basis Sets and ECPs to Fragments
+In multi-level or QM/QM calculations it may be convenient to assign different basis sets to different fragments.
+ThiscanbedonewiththekeywordsFragBasis,FragAuxJ,FragAuxJK,FragAuxC,FragCABS,andFragECPin
+the%basisblock,followedbythenumberofthefragment(numberingstartsat1!) andastandardbasissetorECP
+fromtheORCAlibrary(seeTablesTable7.10andTable4.3). NotethatunliketheNewGTOkeyword,FragBasis
+alsochangestheECP,ifapplicable. Fragmentbasissetswilloverloadtheglobalorelement-specific(Assigningor
+AddingBasisFunctionstoanElement)choicebutcanbeoverloadedforindividualatoms(AssigningorAdding
+BasisFunctionstoIndividualAtoms). IfAutoAuxisrequestedforafragment,itwillbegeneratedfortheactual
+orbitalbasissetchosenforeachatom,evenifitischangedinthecoordinatessection. However,ifAutoAuxwas
+requestedforanelementorinthesimpleinput,theauxiliarybasiswillbegeneratedbeforethefragmentbasisis
+assigned(whichisnotdesired),thereforeAutoAuxmustberequestedagainforthefragment. Anexampleisgiven
+below:
+! PrintBasis BP86 NoIter
+! def2-SVP def2/J
+%basis
+FragBasis 1 "def2-TZVP"
+FragBasis 2 "cc-pVTZ-PP"
+FragAuxJ 2 "AutoAux"
+FragECP 3 "SK-MCDHF-RSC"
+FragAuxJ 3 "def2/JK"
+end
+*xyz 0 1
+H(1) 0 0 0
+I(1) 0 0 1.6
+H(2) 0 5 0 NewGTO "cc-pVTZ" end
+I(2) 0 5 1.6
+H(3) 5 0 0
+I(3) 5 0 1.6
+*
+# Final basis sets:
+# Atom Basis ECP AuxJ
+# 0H def2-TZVP def2-ECP def2/J
+# 1I def2-TZVP def2-ECP def2/J
+# 2H cc-pVTZ - AutoAux(cc-pVTZ)
+# 3I cc-pVTZ-PP SK-MCDHF-RSC AutoAux(cc-pVTZ-PP)
+# 4H def2-SVP - def2/JK
+# 5I def2-SVP SK-MCDHF-RSC def2/JK
+7.5. ChoiceofBasisSet 501
+
+[... start of page 524 ...]
+ORCAManual,Release6.0.0
+It is also possible to read fragment-specific basis sets from a file. The syntax is analogous, using the keywords
+ReadFragBasis,ReadFragAuxJ,ReadFragAuxJK,ReadFragAuxC,ReadFragCABS,andReadFragECP.Inthis
+case,theinputstringisexpectedtobeanexistingbasissetfileinGAMESS-USformat(seesectionReadingOrbital
+andAuxiliaryBasisSetsfromaFile). Allotherdetailsabove(e.g.,regardingECPsandAutoAux)alsoapplyhere.
+7.5.6 Reading Orbital and Auxiliary Basis Sets from a File
+Byusingthevar

@@ -1,0 +1,81 @@
+[... end of page 210 ...]
+eachspecifiedfragmentasarigidbody,butrelaxthepositionandorientationoftheserigidbodies.
+Note:
+• Thefragmentshavetobedefinedafterthecoordinateinput.
+Amorecomplexexampleisdepictedinthefollowing:
+! L-OptH
+%mm
+ORCAFFFILENAME "CHMH.ORCAFF.prms"
+end
+*pdbfile 0 1 CHMH.pdb
+(continuesonnextpage)
+188 Chapter6. RunningTypicalCalculations
+
+--- Page 211 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%geom
+Frags
+2 {8168:8614} end # First the fragments need to be defined
+3 {8615:8699} end # Note that all other atoms belong to
+4 {8700:8772} end # fragment 1 by default
+5 {8773:8791} end #
+RelaxFrags {2} end # Fragment 2 is fully relaxed
+RigidFrags {3 4 5} end # Fragments 3, 4 and 5 are treated as rigid bodies each.
+end
+6.3.19 Nudged Elastic Band Method
+TheNudgedElasticBand(NEB)methodisusedtofindaminimumenergypath(MEP)connectinggivenreactant
+andproductstateminimaontheenergysurface. Aninitialpathisgeneratedandrepresentedbyadiscretesetof
+configurations of theatoms, referred to as imagesof the system. The number of images isspecified by the user
+andhastobelargeenoughtoobtainsufficientresolutionofthepath. TheimplementationinORCAisdescribed
+in detail in the article by Ásgeirsson et. al.[4] and in section Nudged Elastic Band Method along with the input
+options. The most common use of the NEB method is to find the highest energy saddle point on the potential
+energy surface specifying the transition state for a given initial and final state. Rigorous convergence to a first
+order saddle point can be obtained with the climbing image NEB (CI-NEB), where the highest energy image is
+pusheduphillinenergyalongthetangenttothepathwhilerelaxingdownhillinorthogonaldirections. Another
+methodforfindingafirstordersaddlepointistheNEB-TSwhichusestheCI-NEBmethodwithaloosetolerance
+tobeginwithandthenswitchesovertotheOptTSmethodtoconvergeonthesaddlepoint. Thiscombinationcan
+beagoodchoiceforcalculationsofcomplexreactionswheretheScanTSmethodfailsorwhere2Drelaxedsurface
+scansarenecessarytofindagoodinitialguessstructurefortheOptTSmethod. ThezoomNEBvariantsareagood
+choiceincaseofverycomplextransitionstateswithlongtails. Formoreanddetailedinformationonthevarious
+NEBvariantsimplementedinORCApleaseconsultsectionNudgedElasticBandMethod.
+IntheirsimplestformNEB,NEB-CIandNEB-TSonlyrequirethereactantandproductstateconfigurations(one
+viathexyzblock,andtheotheroneviathekeywordneb_end_xyzfile):
+!NEB-TS # or !NEB or !NEB-CI or !ZOOM-NEB-TS or !ZOOM-NEB-CI
+# or !Fast-NEB-TS (corresponds to IDPP-TS defined in the NEB-TS manuscript)
+# or !Loose-NEB-TS (corresponds to default NEB-TS in the NEB-TS manuscript)
+%neb
+neb_end_xyzfile "final.xyz"
+end
+BelowisanexampleofanNEB-TSruninvolvinganintramolecularprotontransferwithinaceticacid. Thesimplest
+inputis
+!XTB NEB-TS
+%neb
+neb_end_xyzfile "final.xyz"
+end
+*xyz 0 1
+C 0.416168 0.038758 -0.014077
+C 0.041816 0.011798 1.439610
+O 1.524458 0.176600 -0.453888
+O -0.654209 -0.127881 -0.803857
+H -0.391037 -0.126036 -1.737478
+H -0.913438 0.507022 1.585301
+H -0.057787 -1.026455 1.750845
+H 0.819515 0.485425 2.030252
+*
+Wherethefinal.xyzstructurecontainsthecorrespondingstructurewiththeprotonontheotheroxygen.
+TheinitialpathisreasonableandtheCIcalculationcanbeswitchedonafterfiveNEBiterations.
+6.3. GeometryOptimizations,SurfaceScans,TransitionStates,MECPs,ConicalIntersection1s8,9
+IRC,NEB
+
+[... start of page 212 ...]
+ORCAManual,Release6.0.0
+Starting iterations:
+Optim. Iteration HEI E(HEI)-E(0) max(|Fp|) RMS(Fp) dS
+Switch-on CI threshold 0.020000
+LBFGS 0 4 0.081017 0.073897 0.018915 3.2882
+LBFGS 1 5 0.070244 0.056668 0.013913 3.2770
+LBFGS 2 5 0.062934 0.038972 0.008763 3.3376
+LBFGS 3 5 0.057358 0.032076 0.006535 3.3950
+LBFGS 4 4 0.053260 0.019015 0.003599 3.4826
+Image 4 will be converted to a climbing image in the next iteration (max(|Fp|) < 0

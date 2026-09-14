@@ -1,0 +1,76 @@
+[... end of page 999 ...]
+modulejustreadstheregiondefinitionsfromthe
+QM/MMmodule,butisnotabletomakeanychangeshere.
+Regionscanbeusefulformanypurposes. Forexample,a“realistic”wallofatomscanbebuiltaroundthesystem
+bydefiningtheactiveregionsuchthatitonlycontainsthenon-wallatoms. Thewallatomswillthenbefrozen.
+Apartfromthat,trajectoriesofregionscanbewrittentodisk,onlycontainingthe“interesting”partofasimulation.
+Furthermore,velocityinitializationcanbeappliedtoregions,enablingtostartasimulationinwhichdifferentsets
+of atoms possess different initial temperatures. Thermostats can be attached to regions to keep different sets of
+7.51. AbinitioMolecularDynamicsSimulations 977
+
+--- Page 1000 ---
+ORCAManual,Release6.0.0
+atomsatdifferenttemperaturesduringthewholesimulation. Thisallowsforsophisticatedsimulationsetups(cold
+soluteinhotsolvent,temperaturegradientthroughthesystem,etc).
+RegionsaredefinedormodifiedbytheManage_Regioncommand. Manyothercommandstakeregionsasoptional
+arguments. Pleaseseethecommandlistbelow.
+Metadynamics
+Metadynamicsisapowerfultooltoanalyzefreeenergyprofilesofreactionsandotherprocesses(solvation, ag-
+gregation, conformerchange, dissociation)basedonmoleculardynamicssimulations. Ithasbeendevelopedby
+LaioandParrinelloin2002[487]. Inprinciple,thefrequencyofobservingacertainprocessinMDsimulationsis
+directlyrelatedtothefreeenergybarrieroftheprocess. However,manyinterestingprocesses(suchaschemical
+reactions)possesssuchahighfreeenergybarrierthattheywillneveroccuronthetimescalestypicalforAIMD
+simulations (100 ps). To increase the frequency at which such processes happen, so-called rare event sampling
+methodscanbeemployed. Metadynamicsisoneamongthose. Itworksbybuildingupabiaspotentialasasum
+ofGaussianhills,sothatfreeenergyminimaareslowlyfilledupandthesystemisgraduallypushedawayfromits
+restingpoints.
+Pleasenotethatthereisalsoamethodwiththesamenameforexploringconformationspacethathasbeenpub-
+lished by Grimme in 2019 [330]. It is in principle based on the original “Parrinello” Metadynamics, but with
+severalmodificationsandextensions. TheORCAMDmodulecontainstheoriginalParrinellovariantofMetady-
+namics[487],togetherwithseveralextensionssuchaswell-temperedMetadynamics[73]andextendedLagrangian
+Metadynamics[408]. TheGrimmemethodforconformersearchwillprobablybeimplementedinthefuture.
+InMetadynamics,onehastodefineoneormore“collectivevariables”(Colvars)alongwhichthefreeenergyprofile
+ofthesystemwillbesampled. AColvarisinprinciplenothingmorethanacontinuousfunctionofallatompositions
+which returns a real number. A simple example of a Colvar is the distance between two atoms, which could be
+usedtoexplorethefreeenergyprofileofabondformationorcleavage. IntheORCAMDmodule,Colvarscanbe
+definedviatheManage_Colvarcommand. AvailableColvartypesaredistances(includingprojectionsontolines
+or into planes), angles, dihedral angles, and coordination numbers [408]. The latter allows, e. g., to accurately
+compute p𝐾 values of weak acids in solvent [853, 854]. For the distances, angles, and dihedral angles, atom
+A
+groups instead of single atoms can be specified, so that, e. g., the distance between the centers of mass of two
+moleculescanbedefinedasaColvar.
+BasedononeortwoColvars(ORCAsupportsone-dimensionalandtwo-dimensionalMetadynamics),aMetady-
+namicssimulationcanbesetup. Therearemanyparameterstochoose,whicharedescribedinthesectionofthe
+Metadynamicscommand. Afterallparametershavebeenset,theactualsimulationissimplystartedviatheRun
+command. ItisalsopossibletorestartMetadynamicssimulationssothattheycanbesplitintomultiplesucces-
+siveruns;seetheRestartcommand. Afullexampleforatwo-dimensionalwell-temperedextendedLagrangian
+Metadynamicssimulationcanbefoundonbelow.
+NotethatMetadynamicssimulationstypicallyrequireverymuchcomputationaltime(atleastseveral10000MD
+stepsforaroughlyconvergedresult,dependingontheColvarchoice). Sothisisbynomeansamethodto“shortly
+tryout”. However, therearenocheapermethodsforpredictingfreeenergyprofiles(apartfromverysimpleap-
+proximationssuchastheharmonicoscillator),andthepredictivepowerofcomputingfreeenergyprofilescomes
+ataprice.
+7.51.6 Command List
+Inthefollowing,analphabeticallistofallcommandscurrentlyknowntotheMDmoduleisgiven. Thedescription
+of each command starts with a small box which contains the command’s name and a table of arguments and
+modifiers. Thelast-but-onecolumninthetablespecifiesthetypeofeachargument. Possibletypesare“Integer”,
+“Real”,“String”,and“Keyword”. Inthelattercase,thelastcolumncontainsalistofallowedkeywordvaluesin
+{braces}. Ifthetypeis“Real”andisaphysicalquantitywithunit,thequantityisgiveninthelastcolumnin
+[squarebrackets]. Eachsuchboxisfollowedbyatextualdescriptionofthecorrespondingcommand.
+978 Chapter7. DetailedDocumentation
+
+[... start of page 1001 ...]
+ORCAManual,Release6.0.0
+7.51.7 Command Overview
+Command Description
+Cell Definesandmodifiescells
+Constraint Managesconstraints
+Dump Controlstrajectoryoutput
+Initvel Randomlyinitializesatomvelocities
+Manage_Colvar Managescollectivevariables(“Colvars”)
+Manage_Region Managesregions
+Metadynamics SetsparametersforMetadynamicsruns
+Minimize PerformsaCartesianenergyminimization
+PrintLevel Controlstheoutputverbosity
+Randomize Setstherandomseed
+Restart Restartsasimulationtoseamlesslycon

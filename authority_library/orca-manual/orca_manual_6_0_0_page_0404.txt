@@ -1,0 +1,60 @@
+[... end of page 403 ...]
+egions,
+andcorrespondingtotheoverallmultiplicityofthecombinedhighandlowlevelregion). ThechargeoftheMM
+regionisdeterminedbasedontheMMparametersprovidedbytheforcefield.
+%qmmm
+QMAtoms {0:3} end # high level region
+Charge_Medium 0 # charge of the medium system. Default 0.
+Mult_Medium 1 # multiplicity of the medium system. Default 0.
+end
+*xyz 0 1 # charge and mult. of the high level region, i.e. atoms 0 to 3
+6.16. ORCAMultiscaleImplementation 381
+
+--- Page 404 ---
+ORCAManual,Release6.0.0
+Availablelowlevelmethods
+ThefollowingQM2(lowlevel)methodsareavailable:
+!QM/XTB/MM
+!QM/XTB1/MM
+!QM/XTB0/MM
+!QM/HF-3C/MM
+!QM/PBEH-3C/MM
+!QM/R2SCAN-3C/MM
+!QM/PM3/MM
+!QM/AM1/MM
+!QM/QM2/MM
+ForinformationonhowtospecifythecustomQM/QM2/MMmethodpleaseseeAvailableQM2Methods.
+ExampleInput
+AnexampleforaQM/QM2/MMcalculationlooksasfollows:
+!QM/HF-3c/MM Opt B3LYP def2-TZVP def2/J NumFreq
+%qmmm
+ORCAFFFilename "peptideChain.ORCAFF.prms"
+QMAtoms {16:33 68:82} end
+QM2Atoms {0:12 83:104} end
+ActiveAtoms { 0:38 65:120} end
+Charge_Medium 0
+end
+*pdbfile -1 1 peptideChain.pdb
+6.16.4 CRYSTAL-QMMM
+ForthesimulationofextendedsystemsORCAprovidestheCRYSTAL-QMMMfeatures:
+MOL-CRYSTAL-QMMM
+formolecularcrystals.
+IONIC-CRYSTAL-QMMM
+forsemiconductorsandinsulators.
+Inthissectionwepresenttheconceptsandkeywordsthatarecommontobothmethods. ORCAisamolecularcode
+and cannot carry out periodic calculations, but ORCA has been used for modeling selected properties for ionic
+solidsusingembeddedclustermodelsalreadyinthepast(seee.greference[213]). WithORCA5weprovidethe
+CRYSTAL-QMMMmethod,whichsimplifiessettingupandrunningthesetypesofembeddedclustercalculations.
+Theuserneedstoprovidethestructurewitha(largeenough)supercellrepresentativeforthecrystal,andprovide
+a list of QM atoms. The QM region should be located in the central part of the supercell. The QM atoms are
+embeddedintheremainderofthesupercell,thesurroundingMMatoms,whicharerepresentedbyatom-centered
+pointchargesandinfluencetheQMcalculations. Howthesechargesareobtained,isoutlinedinthenextparagraph.
+382 Chapter6. RunningTypicalCalculations
+
+[... start of page 405 ...]
+ORCAManual,Release6.0.0
+ChargeConvergencebetweenQMandMMregion
+The core idea of the CRYSTAL-QMMM method is to reach charge convergence between the QM and the MM
+atoms. Forthispurpose,theMMchargesareupdatedself-consistentlywiththeatomic(CHELPG)chargesofthe
+QM atoms. This idea follows the work of reference [213] for the IONIC-CRYSTAL-QMMM and of reference
+[109]fortheMOL-CRYSTAL-Q

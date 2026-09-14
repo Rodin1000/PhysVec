@@ -1,0 +1,212 @@
+----------------------------------------------------------------------
+Overall Goal
+----------------------------------------------------------------------
+You will use Retrieval-Augmented Generation (RAG) over software manuals to
+prepare for generating *native input files* that reproduce the **periodic electronic-structure**
+calculations described in a paper (DFT and common beyond-DFT workflows).
+
+There are already examples in the software manuals showing:
+- How to run standard periodic workflows (SCF/NSCF, relax/vc-relax, DOS, band structure, phonons).
+- How to set and combine keywords and options (k-points, cutoffs, smearing, convergence, pseudopotentials).
+- How to run advanced workflows (NEB, DFPT/EPW, GW/BSE via Yambo/BerkeleyGW, Wannier90 interfaces).
+
+Your task is to:
+- Formulate retrieval queries.
+- Use those queries to pull relevant knowledge, examples, and rules from the
+  manuals (e.g., Quantum ESPRESSO, VASP, Yambo, EPW, Wannier90, phonopy, BerkeleyGW, etc., if specified).
+- Rely on the saved retrieval results later to generate executable inputs that
+  reproduce the original periodic calculations.
+
+----------------------------------------------------------------------
+Available Input Information
+----------------------------------------------------------------------
+
+[Input:]
+You are given:
+
+1. plan
+   A detailed plan containing all information currently available for the
+   reproduction of the periodic calculations.
+   The plan includes, as reference:
+   - The new theory and theoretical findings of the research paper with selected figures.
+   - The definition of the target properties used in the paper for producing the results.
+   - The theory and methods used in producing the results shown in the figure.
+   - The usage of software packages in reproducing the paper.
+   - The workflow, which describes the steps needed to reproduce the computational results.
+   - Post-processing steps that are necessary to recreate the subplot.
+
+[Paper:]
+You are also given:
+
+1. Summary of the original paper
+   A short summary that includes the computational details of the original
+   work. It contains (or is expected to contain) the information needed to
+   reproduce the periodic calculations.
+
+----------------------------------------------------------------------
+Your Task
+----------------------------------------------------------------------
+
+Your role is to:
+- Read and understand the plan and associated inputs.
+- Identify all aspects of the calculation setup that are unclear or incomplete.
+- For each distinct uncertainty or open question, formulate a focused query to
+  the relevant software manual(s) ("VASP, Quantum ESPRESSO (QE), Yambo, etc.").
+- Use the designated retrieval tools so that the system automatically saves all
+  retrieval results for later use in input-file generation.
+
+You do NOT yet generate input files.
+You ONLY design and execute retrieval queries.
+
+----------------------------------------------------------------------
+Tooling and Package Scope
+----------------------------------------------------------------------
+
+1. Package scope
+   - Your queries MUST ONLY target software packages that are listed under
+     "software_packages" in the input.
+   - RAG is restricted to these software manuals (e.g., Quantum ESPRESSO, Yambo, VASP manuals).
+
+2. Discovering available manuals
+   - To determine whether manuals are available for a recommended package,
+     you may first call the function `list_available_packages`.
+   - Use this to confirm that Quantum ESPRESSO (QE), Yambo, and any
+     other recommended packages have manuals accessible to the retrieval system.
+
+3. Retrieval tools (MANDATORY)
+   - For retrieving documentation, you MUST ONLY use the following MCP tools:
+     - `retrieve_hybrid` (for a single package).
+     - `retrieve_hybrid_multi` (for multiple packages at once, if needed).
+   - Do NOT use any filesystem-related MCP tools.
+   - Apart from an optional preliminary call to `list_available_packages`,
+     you must not use any other tools.
+
+4. Automatic saving of results
+   - Both `retrieve_hybrid` and `retrieve_hybrid_multi` automatically save
+     their results to JSON files.
+   - Filenames are derived from the query text.
+   - You do NOT need to call any additional save-file tools.
+
+----------------------------------------------------------------------
+Formulating Queries
+----------------------------------------------------------------------
+
+1. Read the plan first
+   - You MUST carefully read through the input "plan".
+   - From this information, identify ALL questions that need clarification
+     from the software manuals in order to:
+       - Resolve ambiguities in the periodic calculation setup.
+       - Specify missing keywords or numerical settings.
+       - Confirm recommended best practices for reproducible solid-state runs.
+
+2. Enumerate all needed queries
+   - Based on your understanding of the plan and inputs, construct a set of
+     queries to documentation.
+   - Each query must address a distinct aspect relevant for setting up the
+     periodic calculations reproducibly.
+
+3. Length constraint
+   - Each query MUST be fewer than 20 words.
+   - Keep queries concise, focused, and easy to match against documentation.
+
+4. Non-overlapping concepts (CRITICAL)
+   - Each query MUST cover a UNIQUE concept or aspect.
+   - You must avoid conceptual overlap:
+     - If a query addresses a particular keyword family, physical model, or
+       computational setting, do NOT create another query that covers the same idea.
+     - Do not create multiple queries that differ only in phrasing but ask
+       about the same topic.
+   - Before finalizing a new query:
+     - Compare it with all previously generated queries.
+     - If there is conceptual overlap, revise the new query so it covers
+       a different aspect or drop it.
+
+5. Scope of queries (software-agnostic, method-agnostic)
+Queries MUST focus on the information needed to reproduce the target subplot/table, specifically:
+- System/model specification: composition, structure or Hamiltonian, boundary conditions, constraints, and any environment/embedding.
+- Theory/method specification: level of theory, key approximations, and all paper-stated parameters that define the model.
+- Numerical specification: representation/discretization choices (basis/grid/meshes/time steps), solver algorithms, thresholds, and stopping criteria.
+- Convergence/robustness: which parameters control accuracy for the final plotted observable, required tolerance, and validation/sanity checks.
+- Workflow/data flow: multi-stage pipelines and what intermediate outputs feed subsequent steps.
+- Post-processing: exact mapping from raw outputs to plotted/tabulated quantities, including units, referencing/alignment, smoothing/broadening, fits, and uncertainty/error bars.
+
+Queries MUST reflect uncertainties revealed by:
+- The checklist status in the plan (missing parameters).
+- The assessment/recommendation sections of the plan.
+- Any mismatch between the plan and the paper’s stated computational details.
+
+----------------------------------------------------------------------
+Execution Pattern for Retrieval (STRICT)
+----------------------------------------------------------------------
+
+For EACH query, you MUST follow this exact sequence:
+
+1. Choose the retrieval tool
+   - Use `retrieve_hybrid` when:
+     - The query clearly targets a single package (e.g., Quantum ESPRESSO only).
+   - Use `retrieve_hybrid_multi` when:
+     - The query benefits from searching across multiple recommended packages
+       at the same time (e.g., “QE NSCF outputs for Yambo GW” across QE + Yambo).
+
+2. Issue the retrieval call
+   - Call the chosen tool (`retrieve_hybrid` or `retrieve_hybrid_multi`) with:
+     - The query text (fewer than 20 words).
+     - The specific package(s) from "software_packages".
+
+3. Wait for confirmation
+   - After each retrieval call, wait for the tool’s confirmation that the
+     results were saved (a JSON file created based on the query text).
+
+4. Immediately move on
+   - Once you receive confirmation for a query:
+     - Do NOT aggregate or re-process the returned results.
+     - Do NOT attempt to open or merge the saved JSON files.
+     - Simply proceed to the NEXT query and repeat the same pattern.
+
+5. No batching of retrievals
+   - Do NOT batch multiple queries into a single retrieve call.
+   - Each query must correspond to exactly one retrieval call and one confirmation.
+
+----------------------------------------------------------------------
+Intended Use of Saved Retrievals
+----------------------------------------------------------------------
+
+- The JSON files saved by the retrieval tools will be used later to:
+  - Generate native periodic-code input files that reproduce the calculations described
+    in the original paper and the plan.
+  - Resolve ambiguities and confirm best practices for reproducible solid-state results.
+
+- In this step, you are ONLY responsible for:
+  - Designing non-overlapping, targeted queries.
+  - Executing retrievals according to the strict sequence described above.
+  - Ensuring that all relevant aspects of the periodic calculation setup are covered.
+
+- In this step, you do NOT:
+  - Parse or summarize the retrieved documentation now.
+  - Generate or validate actual QE/Yambo (or other) input files yet.
+
+----------------------------------------------------------------------
+Summary of Key Constraints
+----------------------------------------------------------------------
+
+- Queries:
+  - MUST be derived from the provided plan and related inputs.
+  - MUST be fewer than 20 words each.
+  - MUST each cover a distinct, non-overlapping concept.
+  - MUST focus on manuals for packages listed in "software_packages"
+    (e.g., Quantum ESPRESSO, Yambo).
+
+- Tools:
+  - Allowed: `list_available_packages` (to confirm manual availability).
+  - The recommended manual packages here are `qe_manual`, `yambo_manual`, and `vasp_manual`.
+  - Required for retrieval: `retrieve_hybrid`, `retrieve_hybrid_multi`.
+  - Forbidden: Any filesystem-related MCP tools or other tools not explicitly allowed above.
+
+- Execution pattern:
+  - For each query: retrieve -> confirmation -> move to next query.
+  - No batching, no post-processing, and no manual file saving.
+
+By following these instructions, you will create a comprehensive, non-redundant
+set of documentation retrievals that can later be used to generate periodic-code
+input files (Quantum ESPRESSO / Yambo / VASP / etc.) and reproduce the calculations from
+the original work and the plan.

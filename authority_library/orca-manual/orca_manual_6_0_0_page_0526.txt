@@ -1,0 +1,81 @@
+[... end of page 525 ...]
+gulardependent
+potentialsU .
+𝑙
+%basis
+NewECP <element>
+N_core <number of core electrons>
+lmax <max. angular momentum>
+[shells]
+end
+end
+ForeachECPshell,firsttheangularmomentum𝑙hastobegiven,followedbythenumberofprimitives. Theprim-
+itivesthemselvesarethenspecifiedbygivingarunningindexandtherespectivetupleofexponent𝑎 ,expansion
+𝑘𝑙
+coefficient𝑑 andradialpower𝑛 .
+𝑘𝑙 𝑘𝑙
+7.5. ChoiceofBasisSet 503
+
+--- Page 526 ---
+ORCAManual,Release6.0.0
+# ECP shell
+l <number of primitives>
+1 a1l d1l n1l
+2 a2l d2l n3l
+...
+Asanexample,considertheSD(10,MDF)forVanadium. ThenameindicatesaStuttgart–DresdentypeECPthat
+replaces10coreelectronsandisderivedfromarelativisticcalculationfortheneutralatom. Itconsistsof4shells
+with angular momentum s, p, d, and f. Note that the f shell has an expansion coefficient of 0.0 and thus will
+notcontributeatalltothiseffectivecorepotential. ThisistypicalforallSDpotentials(butmaybedifferentfor
+programpackageslikeTURBOMOLEthatdonotsupportarbitraryangularmomentumwithrespecttotheECP
+andthereforeuserecontractionsoftheoriginalparametersets).
+%basis
+# ECP SD(10,MDF) for V
+# M. Dolg, U. Wedig, H. Stoll, H. Preuss,
+# J. Chem. Phys. 86, 866 (1987).
+NewECP V
+N_core 10
+lmax f
+s 2
+1 14.4900000000 178.4479710000 2
+2 6.5240000000 19.8313750000 2
+p 2
+1 14.3000000000 109.5297630000 2
+2 6.0210000000 12.5703100000 2
+d 2
+1 17.4800000000 -19.2196570000 2
+2 5.7090000000 -0.6427750000 2
+f 1
+1 1.0000000000 0.0000000000 2
+end
+end
+ECPsandghostatoms
+Whenghostatomsaredefinedontheinput(seesectionSpecialdefinitions),ECPsarenotaddedtotheseatomsby
+default. Ifthatissomehowneeded,pleaseaddGhostECP trueunderthe%basisblock.
+%basis
+GhostECP true
+# AllowGhostECP true # synonym
+end
+7.5.8 Embedding Potentials
+Computationsonclustermodelssometimesrequirethepresenceofembeddingpotentialsinordertoaccountfor
+otherwiseneglectedrepulsivetermsattheborder[304]. InordertosimplifythesekindofcalculationswithORCA
+theECPembeddingcanbeaccomplishedquiteeasily:
+*xyz ...
+# atom> charge x y z optional ECP declaration
+Zr> 4.0 0.0 0.0 0.0 NewECP "SDD" end
+...
+*
+ThedeclarationofsuchacorelessECPcentertakesplaceinthecoordinatessectionbyappendingabracket“>”
+to the element symbol. Note that embedding ECPs are treated as point charges in ORCA, so the charge has to
+504 Chapter7. DetailedDocumentation
+
+[... start of page 527 ...]
+ORCAManual,Release6.0.0
+begivennext. ThecoordinatesofthecorelessECPcenterhavetobespecifiedasusualandmaybefollowedby
+anoptionalECPassignment. Ingeneral,calculationsthatemployanECPembeddingprocedureshouldbesingle
+point calculations. However if the need arises to perform a geometry optimization, make sure to set up explicit
+CartesianconstraintsforthecorelessECPcenters.
+7.5.9 Linear Dependence
+The previous sections describe the assessment of a desired molecular basis set from appropriately parametrized
+functions at various locations within the molecule (normally centered on atoms). The parametrization of these
+functionsissuchthatt

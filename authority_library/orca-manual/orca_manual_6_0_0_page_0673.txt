@@ -1,0 +1,75 @@
+[... end of page 672 ...]
+onal plots:
+XT_with_field_dM_over_dH.pngandXT_with_field_M_over_H.png,oneforeachofthetwoabove
+formulaused,alongsidewithrespectivegnuplotscriptsandgnuplotdatafiles.
+TORQ
+Thiskeywordspecifiesthenumberofangularpointsforthecomputationofthemagnetisationtorquefunc-
+tion,⃗𝜏 asfunctionofthetemperature,fieldstrengthandfieldorientation.
+𝛼
+TORQ
+55
+650 Chapter7. DetailedDocumentation
+
+--- Page 673 ---
+ORCAManual,Release6.0.0
+The torque is computed at all temperature given by TMAG or HEXP_temp inputs. Three rotations around
+CartesianaxesX,YandZareperformed.
+PRLV
+Thiskeywordcontrolstheprintlevel.
+• 2-normal. (Default)
+• 3orlarger(debug)
+PLOT
+Set to“true”, theprogram generatesa fewplots (png oreps format)via an interfaceto thelinux program
+gnuplot. The interface generates a datafile, a gnuplot script and attempts execution of the script for gen-
+eration of the image. The plots are generated only if the respective function is invoked. The magnetic
+susceptibility, molar magnetisation and blocking barrier (UBAR) plots are generated. The files are named:
+XT_no_field.dat, XT_no_field.plt, XT_no_field.png, MH.dat, MH.plt, MH.png, BARRIER_TME.
+dat,BARRIER_ENE.dat,BARRIER.pltandBARRIER.png,zeeman_energy_xxx.pngetc. Allfilespro-
+ducedbySINGLE_ANISOarereferencedinthecorrespondingoutputsection. Example:
+PLOT
+7.19 N-Electron Valence State Pertubation Theory
+CASPT2andNEVPT2belongstothefamilyofinternallycontractedperturbationtheorieswithCASCIreference
+wavefunctions. SeveralstudiesindicatethatCASPT2andNEVPT2produceenergiesofsimilarquality.[366,755]
+TheNEVPT2methodologydevelopedbyAngelietalexistsintwoformulationsnamelythestrongly-contracted
+NEVPT2 (SC-NEVPT2) and the partially contracted NEVPT2 (PC-NEVPT2). [44, 45, 46] Irrespective of the
+name“partiallycontracted”coinedbyAngelietal,thelatterapproachemploysafullyinternallycontractedwave-
+function(FIC).Hence,weusetheterm“FIC-NEVPT2”inplaceofPC-NEVPT2. ORCAfeaturesthefullyinter-
+nallycontractedandthestronglycontractedNEVPT2. ThelatteremploysstronglycontractedCSFs,whichforma
+morecompactandorthogonalbasismakingitcomputationallyslightlymoreattractive. Hence,theSC-NEVPT2
+hasbeenourworkhorseaforlongtime. NEVPT2hasmanydesirableproperties-amongthem:
+• ItisintruderstatefreeduetothechoiceoftheDyallHamiltonian[238]asthe0thorderHamiltonian.
+• The0thorderHamiltonianisdiagonalintheperturberspace. Thereforenolinearequationsystemneeds
+tobesolved.
+• It is strictly size consistent. The total energy of two non-interacting systems is equal to the sum of two
+isolatedsystems.
+• Itisinvariantunderunitarytransformationswithintheactivesubspaces.
+• “stronglycontracted”: Perturberfunctionsonlyinteractviatheiractive part. Differentsubspacesareor-
+thogonalandhencenotimeiswastedonorthogonalizationissues.
+• “fullyinternallycontracted”: Invarianttorotationsoftheinactiveandvirtualsubspaces.
+AsdescribedinSectionN-ElectronValenceStatePerturbationTheory(NEVPT2)ofthemanual,NEVPT2requires
+asinglekeywordontopofaworkingCASSCFinput. ThemethodsarecalledwithintheCASSCFblockanddetailed
+settingscanbeadjustedinthePTSettingssubblock.
+Wewillgothroughsomeofthedetailedsettinginthenextfewsubsections. Forhistoricalreasons,afewfeatures,
+such as the quasi-degenerate NEVPT2, are only available for the strongly contracted NEVPT2. As shown else-
+where,thestrongcontractionisnotagoodstartingpointforlinearscalingapproaches.[804]Thusneweradditions
+suchastheDLPNOandtheF12correctionrelyontheFICvariant. [338,344,345]NotethatORCAbydefaultem-
+ploysthefrozencoreapproximation,whichcanbedisabledwiththesimplekeyword!NoFrozenCore. Acomplete
+descriptionofthefrozecoresettingscanbefoundinsectionFrozenCoreOptions.
+%casscf
+...
+MULT 1,3 # multiplicity block
+(continuesonnextpage)
+7.19. N-ElectronValenceStatePertubationTheory 651
+
+[... start of page 674 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+NRoots 2,2 # number of roots for the MULT blocks
+CIStep DMRGCI # optional to run DMRG-NEVPT2.
+# default: CSFCI (recommended)
+trafostep ri # RI approximation for CASSCF and NEVPT2
+# calling the PT2 method of choice
+PTMethod SC_NEVPT2 # strongly contracted NEVPT2
+FIC_NEVPT2 # fully internally contracted / partially contracted NEVPT2
+DLPNO_NEVPT2 # FIC-NEVPT2 using the DLPNO framework for large molecules
+# detailed settings (optional) for the PT2 appro

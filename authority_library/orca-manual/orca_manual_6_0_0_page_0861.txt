@@ -1,0 +1,96 @@
+[... end of page 860 ...]
+A sensible two-step procedure is:
+# * generate some orbitals and LOOK AT THEM. Decide which ones
+# to include in the CI.
+# * re-read these orbitals with ! MORead NoIter. Perhaps use
+# the "rotate" feature to reorder the MOs
+# Then jump right into the CI which is defined in this se-
+# cond job
+#
+# NOTE: the MRCI module respects the %method FrozenCore settings
+# -----------------------------------------------------------
+Loc 0,0,0
+# Localize orbitals in the internal (first flag), active
+# (second flag) and external space (third flag).
+UseIVOs false
+# Use improved virtual orbitals in the CI
+# ---------------------------------
+(continuesonnextpage)
+838 Chapter7. DetailedDocumentation
+
+--- Page 861 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# Method selection
+# ---------------------------------
+CIType MRCI # Multireference CI (default)
+MRDDCI1 # Difference dedicated CI 1-degree of freedom
+MRDDCI2 # Difference dedicated CI 2-degrees of freedom
+MRDDCI3 # Difference dedicated CI 3-degrees of freedom
+MRACPF # Average coupled-pair functional
+MRACPF2 # Modified version of ACPF
+MRACPF2a # A slightly modified version of ACPF-2a
+MRAQCC # Average quadratic coupled-cluster
+MRCEPA_R # Multireference CEPA due to Ruttink
+MRCEPA_0 # CEPA-0 approximation
+SORCI # Spectroscopy oriented CI
+SORCP # Spectroscopy oriented couplet pair approx.
+MRMP2 # Multireference Moeller-Plesset at second order
+MRMP3 # Multireference Moeller-Plesset at third order
+MRMP4 # Multireference Moeller-Plesset at fourth order
+# but keeping only singles and doubles relative to
+# the reference configurations.
+# ---------------------------------
+# Selection thresholds
+# ---------------------------------
+Tsel 1e-6 # Selection threshold for inclusion in the CI based
+# 2nd order MP perturbation theory <0|H|I>/DE(MP)
+Tpre 1e-4 # Selection of configurations in the reference space
+# after the initial diagonalization of the reference
+# space only configurations with a weight large>Tpre
+# to any root are included
+AllSingles false
+# include ALL SINGLES in the CI. Default is now TRUE!!!
+# perturbative estimate of the effect of the rejected configurations
+EunselOpt 0 # no correction
+1 # based on the overlap with the 0th order wavefunction
+2 # calculation with the relaxed reference space
+# coefficients. This is the most accurate and only
+# slightly more expensive
+# For CIType=MRCI,MRDDCI and SORCI the approximate correction for
+# higher excitations
+DavidsonOpt Davidson1 # default
+Davidson2 # modified version
+Siegbahn # Siegbahn's approximation
+Pople # Pople's approximation
+# For MRACPF,MRACPF2,MRAQCC and SORCP
+NelCorr 0
+# Number of electrons used for computing the average coupled-
+# pair correction.
+# =0 : set equal to ALL electrons in the CI
+# =-1: set equal to all ACTIVE SPACE electrons
+# =-2: set equal to ACTIVE SPACE electrons IF inactive doubles
+# are excluded (as in MRDDCI)
+# >0 : set equal to user defined input value
+LinearResponse false
+# Use ground state correlation energy to compute the shift for
+# higher roots (not recommended)
+# ---------------------------------
+# Natural Orbital Iterations
+(continuesonnextpage)
+7.39. TheMultireferenceCorrelationModule 839
+
+[... start of page 862 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# ---------------------------------
+NatOrbIters 0 # default
+# number of average natural orbital iterations
+Tnat 1e-4
+# cutoff of natural orbitals. NOs with an occupation number less
+# then Tnat will not be included in the next iteration
+# Also, orbitals with occupation number closer than Tnat to 2.0
+# will be frozen in the next iteration
+Tnat2 -1
+# if chosen >0 then Tnat2 is the threshold for freezing the
+# almost doubly occupied orb

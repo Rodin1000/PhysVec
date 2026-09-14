@@ -1,0 +1,76 @@
+[... end of page 1170 ...]
+im][Dim];
+Variable alpha=2.0;
+Variable C;
+for i from 0 to Dim-1 Do
+for j from 0 to Dim-1 Do
+A[i][j] = i+j;
+EndFor
+EndFor
+A.PrintMatrix();
+C = Mat_x_Scal(alpha,A);
+A = Mat_x_Scal(alpha,A);
+A.PrintMatrix();
+C.PrintMatrix();
+End
+1148 Chapter7. DetailedDocumentation
+
+--- Page 1171 ---
+ORCAManual,Release6.0.0
+New_Geom
+New_Geomisaplatformforgeometrymanipulation. Thebasicideaistohavefunctionsthatcanreadageometry
+andthenproduceoneormorenewgeometrieswithsomecharacteristicsthatweneed. Forthemomentunderthe
+umbrellaofNew_Geomfall4differentfunctions,andtheseare: Displace,Remove_Atom,Remove_Element.
+Read
+TheRead commandreadsapropertyfromthepropertyfile.
+NOTEThisistheoldsyntaxtoreadthepropertyfileanditwillbedeprecatedinthenextversionofORCA.For
+thenewsyntaxpleaseusetheReadPropertycommand(seeReadProperty)
+Syntax
+ReadmyVar=propertyName[stepID]
+Where:
+myVar: Thevariablethatwillbeupdated
+propertyName: Thealiasforthepropertyweneedtoread
+stepID:Thesteptowhichwerefer.
+Example
+# ----------------------------------------------------
+# This is an example script for readProperty
+# -----------------------------------------------------
+%Compound
+Variable enDirect=0.0;
+New_Step
+!BP86
+*xyz 0 1
+H 0.0 0.0 0.0
+H 0.0 0.0 0.8
+*
+Step_End
+alias currStep;
+# First read the energy directly
+Read enDirect = DFT_Total_en[currStep];
+print("DFT Energy : %.12lf\n", enDirect);
+End
+ReadProperty
+OneofthefundamentalfeaturesofCompoundistheabilitytoeasilyreadORCAcalculatedvaluesfromtheproperty
+file.
+Syntax:
+[res=] readProperty(propertyName=myName, [step=myStep], [filename=myFilename], [baseProp-
+erty=true/false])
+Where: res: Anintegerthatreturnstheindexofthefoundpropertyifthepropertywasfoundinthepropertyfile,
+-1ifthepropertydoesnotexist. Thisisnotobligatory.
+propertyName: Astringaliasthatdefinesthevariabletheuserwantstoread.
+step: Thestepfromwhichwewanttoreadtheproperty. Ifnotgiventhepropertyfilefromthelaststepwillbe
+read.
+filename: Afilenameofapropertyfile. Ifafilenameandatthesametimeastepareprovidedtheprogramwill
+ignorethestepandtrytoreadthepropertyfilewiththegivenfilename.
+7.59. CompoundMethods 1149
+
+[... start of page 1172 ...]
+ORCAManual,Release6.0.0
+NOTEpleasenotethatintheendoffilenametheextension.property.txtwillbeadded.
+baseProperty: A true/false boolean. The default value is set to false. If the value is set to true then a generic
+propertyofthetypeaskedwillberead. Thismeansifdipolemomentisasked,itwillreturnthelastdipolemoment,
+irrelevantifandMP2orSCFonewaddefined.
+Example
+# ----------------------------------------------------
+# This is an example script for readProperty
+# ---

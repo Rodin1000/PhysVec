@@ -1,0 +1,59 @@
+[... end of page 1250 ...]
+ame property
+wherebasenameisthenameoftheORCAinput.
+PropertyFileinJSONformatisreadablebyanyJSONlibrary.
+1228 Chapter7. DetailedDocumentation
+
+--- Page 1251 ---
+CHAPTER
+EIGHT
+SOME TIPS AND TRICKS
+8.1 Input
+For calculations on open-shell systems we recommend to use the keywords !UNO !UCO in the input line. This
+willgeneratequasi-restrictedmolecularorbitalsQRO,unrestrictednaturalspin-orbitalsUNSO,unrestrictednatural
+orbitalsUNOandunrestrictedcorrespondingorbitalsUCO.Moreover,itwillprinttheUCOoverlapsintheoutput,
+whichcanprovideveryclearinformationaboutthespin-couplinginthesystem. Belowanexampleoftheinput
+andsectionoftheoutputisprovided.
+!B3LYP def2-SVP UNO UCO TightSCF
+TheUCOoverlapsectionintheoutputwilllooklike:
+***UHF Corresponding Orbitals were saved in MyJob.uco***
+----------------------
+Orbital Overlap(*)
+----------------------
+.
+.
+.
+96: 0.99968
+97: 0.99955
+98: 0.99947
+99: 0.99910
+100: 0.99873
+101: 0.99563
+102: 0.74329
+103: 0.00000
+Theoverlapcorrespondstoavalueusuallylessthan0.85denotesaspin-coupledpair. Whereas, valuescloseto
+1.00and0.00referstothedoublyoccupiedandsinglyoccupiedorbitalsrespectively.
+8.2 Cost versus Accuracy
+Adifficultbutimportantsubjectinelectronicstructuretheoryistobalancetheprice/accuracyratioofthecalcula-
+tions. Thisratioisgovernedby: (a)themethodused,(b)thebasissetusedand(c)thecutoffsandtolerancesused.
+TherearecertainlydifferingopinionsamongscientistsandImerelyquoteafewgeneral,subjectivepoints:
+• Calculationswithminimalbasissetsarealwaysunreliableandareonlygoodforexplorations. Thisisalso
+trueforsmallsplit-valencebasissetslike3-21G,3-21GSPandperhapsalso4-22GSP.Thesebasissetsare
+significantlymorereliablethantheirminimalbasiscounterpartsbutarenotcapableofdeliveringquantita-
+tivelyreliableresults. Theymay,however,betheonlychoiceifverylargemoleculesaretargeted.
+• In our own research we almost exclusively use the basis sets of the Karlsruhe group for non-relativistic
+calculations. Theyhavebeenupdatedtothe“def2”setthatismoreconsistentthantheolderbasissets.
+1229
+
+[... start of page 1252 ...]
+ORCAManual,Release6.0.0
+• Def2-SV(P)isthesmallestandcomputationallyefficientsplit-valencebasissetandislargelyidenticaltothe
+oldSV(P),exceptforthetransitionmetalswhichhavemoreconsistentpolarizationsets.
+• Def2-TZVPisdifferentfromtheoldTZVP.Ithasbeenrealizedthatifoneinvestsintoanaccuratetriple-
+zetadescriptionofthevalenceregionitmakeslimitedsensetoonlyemployasinglepolarizationfunction.
+TheaccuracyisthenlimitedbythepolarizationsetandisnotmuchbetterthanwhatonegetsfromSV(P).
+Hence, def2-TZVP contains a single p-set for hydrogens but is otherwise very similar to the old TZVPP
+basisset,e.g. itcontains2d1fpolarizationformaingroupelementsandmuchmoreextensivepolarization
+setsfortransitionmetals. Thehighestpolarizationfunction(fformaingroup)doesaddsubstantiallytothe
+computational effort. Hence, we often use def2-TZVP without the f polarization function. In order to do
+that one can use the keyword def2-TZVP(-f). Together with RI or RIJCOSX this is still

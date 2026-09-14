@@ -1,0 +1,85 @@
+[... end of page 734 ...]
+ requests use of numerical Hessian
+# modification of the internal Hessian
+Hess_Internal
+{A 3 2 1 D 2.0} # define a diagonal Hessian value of
+# 2 Eh/Bohr2 for the angle between
+# atoms 3 2 1. This can also be done for
+# bonds, dihedrals and Cartesian
+# coordinates.) The Hessian values of
+# multiple coordinates can be modified
+reset 5 # reset the modified internal Hessian values
+# after 5 cycles
+(continuesonnextpage)
+712 Chapter7. DetailedDocumentation
+
+--- Page 735 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# The following is only recommended
+# after a relaxed surface scan
+# in this example of the scan coordinate B 1 0;
+# "basename.004.xyz" contains the optimized structure
+# of the scan step with highest energy
+{B 1 0 C}
+XYZ1 "scanName.003.xyz" # the xyz-files of the structures
+XYZ2 "ScanName.005.xyz" # next to the highest energy point
+GBW1 "ScanName.003.gbw" # the gbw-files of the structures
+GBW2 "ScanName.005.xyz" # next to the highest energy
+# the gbw-files are optional
+end
+# Hessian update procedure
+Update Powell
+Bofill # default for TS optimization
+BFGS # default for geometry optimization
+# Hessian modification (only for P-RFO step)
+HESS_Modification Shift_Diag # shift the diagonal elements
+# (default)
+EV_Reverse # reverse the
+# diagonal elements
+# Minimal value of Hessian eigenvalues (only P-RFO step)
+HESS_MinEV 0.0001 # if an absolute Hessian eigenvalue
+# is smaller than this value, it is
+# set to HESS_MinEV
+# Rebuilding the model Hessian after a number of cycles can
+# accelerate the convergene of the optimization
+NResetHess 20 # Set the number of geometry steps after which
+# a new model Hessian is built (only with BFGS
+# update)
+NStepsInResetHess 5 # since previous steps and gradients are
+# available, it is possible to include
+# information about the PES in the
+# newly built Hessian (via a BFGS
+# update). This number should be
+# smaller than NResetHess
+end
+AsforparameterscanrunsORCAhassomespecialoptionsthatmayhelptospeeduptheoptimization:
+%geom UseSOSCF false # switches the converger to SOSCF
+# after the first point. SOSCF may
+# converge better than DIIS if the
+# starting orbitals are good.
+# default = false
+ReducePrint true # reduce printout after the first
+# point default=true
+# the initial guess can be changed after the first
+# point. The default is MORead. The MOs of the pre-
+# vious point will in many cases be a very good guess
+# for the next point. In some cases however, you may
+# want to be more conservative and use a general guess.
+OptGuess = OneElec # the one electron matrix
+= Hueckel # the extended Hueckel guess
+= PAtom; # the PAtom guess
+= Pmodel # the PModel guess
+= MORead # MOs of the prev. point (default)
+end
+7.26. GeometryOptimization 713
+
+[... start of page 736 ...]
+ORCAManual,Release6.0.0
+RedundantInternalCoordinates
+There are three types of internal coordinates: redundant internals, old redundant internals (redundant_old) and
+a new set of redundant internals (redundant_new, with improved internals for nonbonded systems). All three
+setsworkwiththesame“primitive”spaceofinternalcoordinates(stretches,bends,dihedralanglesandimproper
+torsions). Onlytheredundantinternalsworkswithonemoretypeofbendsincaseswhereanormalbendwould
+havebeenapproximately180∘. InredundantinternalcoordinatesthefullprimitivesetiskeptandtheHessianand
+gradientaretransform

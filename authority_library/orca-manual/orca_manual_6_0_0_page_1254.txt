@@ -1,0 +1,72 @@
+[... end of page 1253 ...]
+. Thesearealmostinvariablyrelated
+toopen-shellsituationsandtheanswerisalmostalwaystoprovide“better”startingorbitals. Hereismystandard
+strategytodealwiththis(assumingaDFTcalculation):
+• Perform a small basis set (SV) calculation in using the LSD or BP functional and RI approximation with a
+cheap auxiliary basis set. Set Convergence=Loose and MaxIter=200 or so. The key point is to use a
+largedampingfactoranddampuntiltheDIIScomesintoadomainofconvergence. Thisisaccomplished
+by SlowConv or even VerySlowConv. If you have an even more pathological case you may need to set
+DampFaclargerandDampErrsmallerthanchosenbythesedefaults. Thiscalculationisquitecrudeandmay
+takemanycyclestoconverge. Itwillhoweverberatherquickintermsofwallclocktime. IftheDIISgets
+stuckatsomeerror0.001orsotheSOSCF(orevenbetterTRAH)couldbeputinoperationfromthispointon.
+8.3. ConvergingSCFCalculations 1231
+
+--- Page 1254 ---
+ORCAManual,Release6.0.0
+• UsetheorbitalsofthiscalculationandGuessMode=CMatrixtostartacalculationwiththetargetbasisset.
+InDFTwenormallyuseapureGGAfunctional(e.g. BP86). Thiscalculationnormallyconvergesrelatively
+smoothly.
+• Usethetargetfunctional,gridetc. togetthefinalcalculationconverged. Inmanycasesthisshouldconverge
+fairlywellnow.
+Hereareafewotherthingsthatcanbetried:
+• Trytostartfromtheorbitalsofarelatedclosed-shellspecies. Ingeneralclosed-shellMOcalculationstend
+toconvergebetter. Youthenhopetoreachtheconvergenceradiusofanotherconvergerfortheopen-shell
+case.
+• Trytostartfromtheorbitalsofamorepositivecation. Cationcalculationstendtoconvergebetter.
+• Trytostartfromacalculationwithasmallerbasisset. Smallerbasissetsconvergebetter. Thenyouhave
+thechoiceof GuessMode=CMatrixorGuessMode=FMatrixwhichwillaffecttheconvergencebehavior.
+• Uselargelevelshifts. Thisincreasesthenumberofiterationsbutstabilizestheconverger. (shift shift
+0.5 erroff 0 end)
+• IfyouaredoingDFTcalculationstrytostartfromaHartree-Focksolutionforyourmolecule. HFcalcula-
+tionstendtoconvergesomewhatbetterbecausetheyhavealargerHOMO-LUMOgap(thereareofcourse
+exceptions).
+• Carefully look at the starting orbitals (Print[P_GuessOrb]=1) and see if they make sense for your
+molecule. Perhapsyouhavetoreorderthem(usingRotate)toobtainsmoothconvergence.
+• Mostofthetimetheconvergenceproblemscomefrom“unreasonable”structures. Didyoumakesurethat
+yourcoordinatesareinthecorrectunits(AngströmorBohrs?) andhavebeencorrectlyrecognizedassuch
+bytheprogram?
+• IfyouhavetroublewithUHFcalculationstryROHF(especiallySAHForCAHF)firstandthengotothe
+UHFcalculation.
+• FoolaroundwithGuess=Hueckel,PAtom orevenHCore.
+• Itmaysometimesbebettertoconvergetoanundesiredstateandthentaketheorbitalsofthisstate,reorder
+them(usingRotate)andtrytoconvergetothedesiredstate.
+• Similarly,badorbitalsmaybemanipulatedusingtheSCFstabilityanalysis(sectionSCFStabilityAnalysis)
+toprovideanewguess.
+• Trytostartthecalculationwithalargedampingfactor(DampFac=0.90;orevenlarger)andspecifyarela-
+tivelysmallDIISerrortoturndampingoff(sayDampErr=0.02;). Thiswillincreasethenumberofcycles
+butmayguideyouintoaregimewerethecalculationactuallyconverges.
+• TheadvicesabovemostlyapplytoHartree-FockandDFT.ForCASSCF,theavailableoptionsandhowthey
+can aid to overcome convergence problems are described in the CASSCF manual section. In many cases
+modifyingtheinitialguessoraddingalevelshiftwillhelp. Donothesitatetouselargelevel-shifts(e.g2.0
+oreven3.0). ThemanualisaccompaniedbyCASSCFtutorialthatgoesthroughmanydetailsoftheprocess
+includingpracticaladvicesonconvergence. Thechoiceofinitialguessiscrucial. Someguessesworkbetter
+for organic molecules while others excel for transition-metal complexes. The tutorial therefore discusses
+variousinitialguessoptionsavailableinORCA.
+• Ifnothingelsehelps,stop,grabafriendandgotothenextpub(youcanalsosendmeanunfriendlye-mail
+butthiswilllikelynotmakeyourcalculationconvergeanyquicker;⌣¨).
+1232 Chapter8. SomeTipsandTricks
+
+[... start of page 1255 ...]
+ORCAManual,Release6.0.0
+8.4 Choice of Theoretical Method
+The array of available functionals makes it perhaps difficult to decide which one should be used. While this
+is a matter of ongoing research and, in the end, can only be answered by experimentation and comparison to
+experimentalresultsorhigh-levelabinitiocalculations,Imayattempttogivesomeguidelines.
+Thesimplestdensityfunctionals(andingeneraltheleastaccurate)arethelocalfunctionals(Functional=LSD).
+AlthoughseveralvariantsofthelocalDFTexistinORCAthereislittletochooseamongthem—theygivemore
+orlessthesameresult.
+Thegradientcorrectedfunctionalsare(veryslightly)moreexpensivebecausethegradientoftheelectrondensityat
+eachpointinspacemustbecomputed,buttheyarealsosignificantlymoreaccurateforstructuresandenergeticsof
+molecules. Thevariousgradientcorrectedfunctionals(GGAfunctionals)aregenerallysimilarintheirbehavior.
+The BP functional is probably the most widely used in transition metal chemistry. The BLYP, PBE or PW91
+functionalsmay

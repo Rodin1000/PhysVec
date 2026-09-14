@@ -1,0 +1,82 @@
+[... end of page 974 ...]
+n,formuchfewergra-
+dientcalculationarenecessary,althoughyoudonotcorrectthemodes. Also,thederivativesoverthemodes
+arealreadycomputedsimultaneously.
+• Theexpectedenergyerror𝛿𝐸 canbechangedusingtheUF_DELEflag.
+• ThedefaultmethodistheVG,buttheAHASismoretrustworthyforunknownsystems,althoughalotheavier
+(Sec. Abettermodel,AdiabaticHessianAfteraStep(AHAS)and[199]).
+• Alwayscheckthesumof𝐾2printedontheoutput. Ifthatnumberistoohigh(above8orso),itmeansthat
+𝑖
+thegeometriesaretoodisplacedandthetheorymightnotworkonthesecases(checkfordifferentcoordinate
+systemsthen,Sec. Normalmodescoordinatesystems).
+• Also check for RMSD between the geometries after a step. If the difference is too big, there might be
+problemswiththestep.
+952 Chapter7. DetailedDocumentation
+
+--- Page 975 ---
+ORCAManual,Release6.0.0
+Mixingmethods
+Inprinciple, itispossibletousedifferentmethodstocomputedifferentpartsneededforthe ORCA_ESDmodule.
+Youcould,forinstanceuse(TD)DFTanalyticalgradientsfortheground/excitedstategeometriesandHessiansand
+amoreelaboratemethodsuchasSTEOM-CCSDtogettheenergiesandtransitiondipoles. Ifyouwanttodothat,
+justinputtheHessiansandusetheDELEflagfortheenergydifferencebetweenthestates-attheirowngeometry!
+- and TDIP x,y,z to input the transition dipole. If there is SOC and the transition dipole is complex, use TDIP
+x.real,x.imag,y.real,y.imag,z.real,z.imag. Theprogramwillautomaticallydetecteachcase. Ifyoudon’tinput
+these,theywillbeobtainedbythemoduleduringtherun,soyoucansettheexcitedmethodyouwantandletthe
+programfigureoutDELEandTDIP.
+OBS: It is not advisable to mix different levels of theory during a geometry step though. If you obtained a GS
+HessianfromDFT,doingastepbasedonaCASSCFESnumericalgradientmightnotleadtoreasonableresults.
+ThesamewouldbeproblematicevenfordifferentDFTfunctionals.
+Removaloffrequencies
+If,aftercalculatinganESHessianyouendupwithnegativefrequencies,thecalculationofthecorrelationfunction
+mightrunintotrouble. Thedefaultforthemoduleistoturnallnegativefrequenciespositive,printingawarning
+ifanyofthemwaslowerthan-300cm−1. Ifthatisthecase, youareprobablyonasaddlepointandnotevena
+minimum,soresultsshouldbetakenwithcare,
+Youcanalsochoosetocompletelyremovethenegativefrequencies(andthecorrespondingfromtheGS),bysetting
+IFREQFLAGREMOVEorleavethemasnegativewithIFREQFLAGLEAVEunder%ESD.
+Sometimes,lowfrequencieshavedisplacementsthatarejusttoolarge(checkontheKvector),ortheexperimental
+lowfrequencymodesaretooanharmonicandyoumightwanttoremovethem. Itisalsopossibletodothatsetting
+theTCUTFREQflag(incm−1),andallfrequenciesbelowthegiventhresholdwillberemoved.
+Normalmodescoordinatesystems
+When working with systems with weak bonds, such as hydrogen bonds and 𝜋 stacking, or with biphenyls and
+similarplanarmoleculesitiscommonthattherewillbelowfrequency-highamplitudemodesrelatedtotheangular
+bending. Ithasbeenshownthat,insomecases,thenormalmodestransformedfromCartesiancoordinatesmight
+benotsufficienttodescribesystemswiththeselargeamplitudemotion[149]. Inthose, thedefinitionofnormal
+modesintermsofsomecurvilinearsetofcoordinatessuchastheinternalonesaremoresuitable.
+ThefirstordertransformationfromCartesian(x)tointernal(s)coordinatesisgivenbyWilson’sBmatrix[426]as
+s=B(x−x ), (7.280)
+0
+and here we use Baker’s[68] delocalized internal coordinates as default. First, a redudant set is build and an
+singularvaluedecompositionoftheG = BB𝑇 matrixisperformedtoobtainthenon-redundantset. Thelatter
+canbegeneratedbyB′ =U𝑇B,whereUaretheeigenvectorscorrepondingtonon-zeroeigenvaluesofG. Then
+an orthogonal set is contructed from B′′ =G′−1/2U𝑇B. As the eigenvectors are not conitnuous functions of
+the coordinates, in order to avoid using an arbitrary selection, we will follow the work of Reimers[714] and set
+G−1/2U𝑇 = G¯−1/2U¯𝑇,orusethesametransformationfortheinitialanfinalcoordinates. Pleasenotethatthis
+mayleadtonumberslargerthan1ontheDuschinskyrotationmatrix,foritisanapproximationandthecalculated
+ratesmayvaryalittle. Thenormalmodesininternalcoordinates(L )arethenobtainedfromthoseinCartesian
+𝑠
+ones(L )as
+𝑥
+L =B′′M 1/2 L , (7.281)
+𝑠 𝑥
+andtheDuschinskyrelation((7.279))stillholds[149],withthedisplacementvectorbeingsimply
+K =L𝑇(¯s−s). (7.282)
+𝑠 𝑠
+TheoptionsavailableforcoordinatesystemscanbesetunderCOORDSYS,andcanbeCARTESIAN,INTERNAL
+(forBakerdelocalized-default), WINT(forweightedinternalsfollowingSwartandBickelhaupt[836]), FCWL
+(forceconstantweightedfollowingLindh[526])andFCWS(sameasbefore,butusingSwart’smodelHessian).
+7.48. MoreontheExcitedStateDynamicsmodule 953
+
+[... start of page 976 ...]
+ORCAManual,Release6.0.0
+OBS:Calculatingininternalcoordinatesisusuallybetterbutnotnecessarily. Ifsomethinggoeswrong,youmay
+alsowanttotrytheCartesianoption.
+GeometryrotationandDuschinskymatrices
+Theelectronictransitionshouldnottotakeplacesimultaneouslywithtranslationsandrotations[745]ofthemolec-
+ular structure. Before further calculations take place, the initial and final state structures are superimposed to
+satisfy Eckart’s conditions by obtaining a rotation matrix B that ensures ∑︀ 𝑚 (BR ×R¯ ) = 0 [239], with R
+𝑖 i i
+beingCartesiancoordinates. Astheinitialgeometryisrotated, somustbethecorrespondingnormalmodesL
+𝑥
+also. ThiscanbeturnedofbysettingtheflagUSEBFALSE.
+By the default the Duschinsky rotation m

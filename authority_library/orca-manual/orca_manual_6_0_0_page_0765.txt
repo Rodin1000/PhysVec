@@ -1,0 +1,71 @@
+[... end of page 764 ...]
+ the number of images that have been
+# placed on the path already and the
+# requested number of images. This is a
+# more aggressive setting pulling the
+# images closest to the center of the path
+# together more.
+# Extra Output options
+Monitor_Internals # Up to three internal coordinates can be defined
+{B 0 1} # for which the values are printed during the NEB run.
+{B 1 5} # Possible are (B)onds, (A)ngles, (D)ihedrals and (I)mpropers
+end
+end
+Outputfiles:
+• Configurationandtrajectoryfiles:
+742 Chapter7. DetailedDocumentation
+
+--- Page 765 ---
+ORCAManual,Release6.0.0
+– basename_initial_path_trj.xyz: TheinitialpathgeneratedatthestartoftheNEBrunandaftermini-
+mizationofRMSDbetweenthereactantandproductstates.
+– basename_MEP_trj.xyz: ThefinalconvergedMEPtrajectory.
+– basename_MEP_ALL_trj.xyz: Theconfigurationsofeachimageisappendedtothisfileforeachstep
+oftheNEBoptimization.
+– basename_trj.xyz: ThetrajectoryofTSoptimization.
+– basename_MEP.allxyz: Restartfilethatincludestheconfigurationofeachimagefromthelastiteration
+ofanNEBorNEB-CIiteration.
+– basename_NEB-CI_converged.xyz: TheconfigurationoftheclimbingimageafterasuccessfulNEB-
+CIcalculation.
+– basename_NEB-HEI_converged.xyz: Theconfigurationofthehighestenergyimageafterasuccessful
+NEBcalculation.
+– basename.xyz: TheconfigurationoftheoptimizedsaddlepointusingtheTSoptimization.
+• Logfiles:
+– basename.interp: TheinterpolatedenergyprofileofthepathforeachiterationduringtheNEB/NEB-CI
+optimization.
+– basename.interp.final: TheenergyprofilefortheconvergedpathofanNEB/NEB-CIoptimization.
+– basename.log: Agenerallogfilecontainingessentialinformationregardingtherune.g.,energy,forces
+andstepsize.
+7.30 Excited States via RPA, CIS, TD-DFT and SF-TDA
+ORCAfeaturesarelativelyefficientsingle-excitationCI(CIS),“random-phaseapproximation”(RPA)andtime-
+dependentDFTmodulethatcanbeusedtocalculateexcitationenergies,absorptionintensitiesandCDintensities.
+EspeciallyTD-DFTbecameverypopularforexcitedstatecalculationsasitofferssignificantlybetterresultsthan
+HF-CISataboutthesamecost. However,therearealsomanypitfallsofTD-DFT,someofwhicharediscussedin
+reviews[612][614]. TD-DFTmethodsareavailableforclosed-shellandspin-unrestrictedreferencestates,together
+with its collinear spin-flip variant. Analytic gradients are available for all these cases. There also is a doubles
+correctionimplementedthatimprovestheresults(butalsothecomputationalcost). Itisoftenusedtogetherwith
+double-hybrid functionals as explained below. The TD-DFT module of ORCA is also extensively used for the
+calculationofX-rayabsorptionspectraattheK-edgeofagivenelement.
+7.30.1 General Features
+Themoduleisinvokedwiththeblock:
+%cis end
+# or equivalently
+%tddft end
+There are a variety of options. The most important one is the number of excited states that you want to have
+calculated:
+%cis NRoots 10 end
+Theconvergencetolerancesaregivenby:
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 743
+
+[... start of page 766 ...]
+ORCAManual,Release6.0.0
+%cis
+...
+ETol 1e-6
+RTol 1e-6
+end
+The variable ETol gives the required convergence of the energies of the excited states (in Eh) and RTol is the
+required convergence on the norm of the residual vectors. Under normal ciorcumstances the calculations need
+about5-10iterationstoconvergetothedefaultconvergencetolerances.
+Once converged, the program prints the wave function composition. To keep the printing concise, coefficients
+smallerthan0.01areomitt

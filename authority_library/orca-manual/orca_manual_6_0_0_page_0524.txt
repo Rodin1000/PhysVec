@@ -1,0 +1,89 @@
+[... end of page 523 ...]
+gAuxJ 2 "AutoAux"
+FragECP 3 "SK-MCDHF-RSC"
+FragAuxJ 3 "def2/JK"
+end
+*xyz 0 1
+H(1) 0 0 0
+I(1) 0 0 1.6
+H(2) 0 5 0 NewGTO "cc-pVTZ" end
+I(2) 0 5 1.6
+H(3) 5 0 0
+I(3) 5 0 1.6
+*
+# Final basis sets:
+# Atom Basis ECP AuxJ
+# 0H def2-TZVP def2-ECP def2/J
+# 1I def2-TZVP def2-ECP def2/J
+# 2H cc-pVTZ - AutoAux(cc-pVTZ)
+# 3I cc-pVTZ-PP SK-MCDHF-RSC AutoAux(cc-pVTZ-PP)
+# 4H def2-SVP - def2/JK
+# 5I def2-SVP SK-MCDHF-RSC def2/JK
+7.5. ChoiceofBasisSet 501
+
+--- Page 524 ---
+ORCAManual,Release6.0.0
+It is also possible to read fragment-specific basis sets from a file. The syntax is analogous, using the keywords
+ReadFragBasis,ReadFragAuxJ,ReadFragAuxJK,ReadFragAuxC,ReadFragCABS,andReadFragECP.Inthis
+case,theinputstringisexpectedtobeanexistingbasissetfileinGAMESS-USformat(seesectionReadingOrbital
+andAuxiliaryBasisSetsfromaFile). Allotherdetailsabove(e.g.,regardingECPsandAutoAux)alsoapplyhere.
+7.5.6 Reading Orbital and Auxiliary Basis Sets from a File
+ByusingthevariablesGTOName,GTOAuxJName,GTOAuxJKName,GTOAuxCName,andGTOCABSName(GTOAuxName
+isasynonymforGTOAuxJName)abasissetcanbereadfromanASCIIfile. Inthiswayyoucanconstructormodify
+yourfavoritestandardbasissetandloaditeasilyintotheprogram.
+%basis
+# read an externally specified orbital basis
+GTOName = "MyBasis.bas"
+# read an externally specified Coulomb-fitting basis for RI calculations
+GTOAuxJName = "MyAuxJBasis.bas"
+# read an externally specified Coulomb- and exchange-fitting basis
+GTOAuxJKName = "MyAuxJKBasis.bas"
+# read an externally specified correlation-fitting basis
+GTOAuxCName = "MyAuxCBasis.bas"
+# read an externally specified complementary auxiliary basis set
+GTOCABSName = "MyCABSBasis.bas"
+end
+Awordofcaution: inC/C++thebackslashesindirectoryassignmentsmustbegiventwicetobecorrectlyunder-
+stood! Theformatisthatusedfor“GAMESS-US”intheEMSLlibrary[251]. Togiveanexampleofwhatthis
+formatlookslikehereisapartofthe3-21GSPbasisofBuenkerandcoworkers[587,588]:
+! lines in the beginning with '!' or '#' are comments
+! BASIS="3-21GSP"
+!Elements References
+!-------- ----------
+! H - Ne: A.V. Mitin, G. Hirsch, R. J. Buenker, Chem. Phys. Lett. 259, 151 (1996)
+! Na - Ar: A.V. Mitin, G. Hirsch, R. J. Buenker, J. Comp. Chem. 18, 1200 (1997).
+!
+$DATA ! Optional
+HYDROGEN ! (3s) -> [2s] Element symbols are also recognized
+S 2
+1 4.50036231 0.15631167
+2 0.68128924 0.90466909
+S 1
+1 0.15137639 1.00000000
+CARBON ! (6s,3p) -> [3s,2p]
+S 3
+1 499.24042249 0.03330322
+2 75.25419194 0.23617745
+3 16.86538669 0.81336259
+L 2 ! L shells are a s and a p shell with identical exponents
+1 0.89739483 0.24008573 0.46214684
+2 0.21746772 0.81603757 0.66529098
+L 1
+1 4.52660451 1.00000000 1.00000000
+$END ! Optional
+Thefileformatfortheauxiliarybasissetsisexactlythesame. BasissetscanbealsoexportedinGAMESS-US
+formatbytheorca_exportbasisutility(sectionorca_exportbasis). Notethatinordertoreadbasissetsprinted
+byORCA(using!PrintBasis),theNewGTOandendkeywordsmustberemoved.
+502 Chapter7. DetailedDocumentation
+
+[... start of page 525 ...]
+ORCAManual,Release6.0.0
+7.5.7 Advanced Specification of Effective Core Potentials
+LibraryECPsandBasisSets
+Besidesthesimpleinputline(sectionEffectiveCorePotentials),assignmentofECPscanbedonewithinthe%basis
+blockusingtheECPandNewECPkeywordsasinthefollowingexample:
+%basis
+ECP "def2-ECP" # All elements (for which the ECP is defined)
+NewECP Pt "def2-SD" end # Different ECP for Pt
+end
+Avariantof

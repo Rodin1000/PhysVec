@@ -1,0 +1,73 @@
+[... end of page 1019 ...]
+rature
+will strongly deviate from the initial value already after a few steps. First, the initial velocity distribution only
+considers the kinetic energy of the particles, but some amount of energy will be exchanged with the potential
+energycontribution(e. g.,bondstretching)immediately,alteringthetemperature. Secondly,thenumericalerrors
+introducedduetothefinitetimestep(andincaseofabinitioMD,alsoduetotheapproximateforces)willleadto
+adriftinenergyandthereforeintemperature. Tocountertheseeffects,itisoftendesirabletohaveatemperature
+controlduringthecourseofthesimulation(whichthenrunsintheNVTensemble),whichiscalledathermostat.
+7.51. AbinitioMolecularDynamicsSimulations 997
+
+--- Page 1020 ---
+ORCAManual,Release6.0.0
+Thereexistmanydifferentkindsofthermostats,rangingfromsimpleexpressionsuptohighlycomplexdynamical
+systems on their own. But all of them share a common issue: If the thermostat is coupled only weakly to the
+system, the temperature will change anyway. However, if the thermostat is coupled more strongly to the system
+(i. e.,intervenesstronger),thenthedynamicsofthesimulationwillchange,nolongerresemblingtheundisturbed
+originaldynamicswhichonewantstoinvestigate. Therefore,itisalwaysatradeoffbetweentemperaturestability
+anddisturbeddynamicstodecidehowstrongathermostatshouldbecoupledtothesystem.
+InORCA,currentlythreethermostatsareimplemented: TheBerendsenthermostat[92],theNosé–Hooverchain
+thermostat(NHC)[562,563],andthe“CanonicalSamplingthroughVelocityRescaling”thermostat(CSVR)[129].
+BerendsenThermostat
+TheBerendsenthermostat[92]issimilartothesimplevelocityrescalingscheme,butenhancedbyatimeconstant
+𝜏 tocontrolthecouplingstrength. Let𝑇 bethedesiredtargettemperatureand𝑇 thecurrenttemperatureofthe
+0
+system. Thenthetemperaturegradientcausedbythethermostatcanbeexpressedas
+𝑑𝑇 𝑇 −𝑇
+= 0 .
+𝑑𝑡 𝜏
+Consideringthefactthatdiscretetimesteps∆𝑡areused,thecorrectionfactorforthevelocitiesineachtimestep
+isdeterminedby
+√︂
+∆𝑡(𝑇 −𝑇)
+𝑓 := 1+ 0
+𝑇𝜏
+Thenewvelocitiesaretheneasilyobtainedas
+⃗𝑣 :=𝑓 ·⃗𝑣 , 𝑖=1...𝑁.
+𝑖,new 𝑖,old
+Let’sconsidersomespecialcases. If𝜏 =∆𝑡,thewholetemperaturedeviationfrom𝑇 iscorrectedimmediately,
+0
+suchthatthetemperatureisalwaysexactlykeptatthetargetvalue. Thisisidenticaltosimplevelocityrescaling
+(withoutanytimeconstant),whichisknowntoworkpoorlyformostsystems(asingleharmonicoscillatorwould,
+e. g.,simplyexplode). Withalargertimeconstant𝜏 >∆𝑇,thecouplingstrengthisreduced,leadingtoreasonable
+results. Typically,avalueof𝜏 intherangeof20...200·∆𝑇 willbeapplied. For𝜏 →∞,thecouplingstrength
+goestozero,suchthatthethermostatisnolongeractive. Valuesof𝜏 <∆𝑇 arenotallowed.
+Fromtheformula,itbecomesclearthataBerendsenthermostatwillhavenoeffectifthesystemhasatemperature
+of0K(orinthe“massive”case: iftheconsidereddegreeoffreedomhas0K),becauseitisbasedonmultiplying
+the velocities by a factor to modify the temperature. Therefore, this type of thermostat can’t be used to heat a
+systemupstartingfrom0K.
+Constraints
+Unlike restraints, constraints are geometric relations which are strictly enforced at every time (i. e., they do not
+fluctuatearoundtheirtargetvalue). Manymoleculardynamicstechniquesmakeuseofgeometricconstraints(e. g.,
+tokeepwatermoleculesrigid,ortofixsomereactioncoordinate). StandardBOMDdescribesthenucleiaspoint
+charges in space, such that the motion of the atoms is governed by the laws of classical mechanics. Systems in
+classicalmechanicscanbedescribedbytheLagrangeformalism,whichcontainsawellestablishedsub-formalism
+forholonomicconstraints,namelythemethodofLagrangemultipliers.
+However,moleculardynamicsdiscretizestimetosolvetheequationsofmotionswithfinitetimesteps,oftenusing
+aVerletintegrator. Withdiscretizedtime,itisslightlymoreinvolvedtoenforceandkeepexactconstraints. Within
+the last decades, algorithms have been developed to do so. One famous among them is the SHAKE algorithm.
+However,itcomeswiththedisadvantageofonlyenforcingtheconstraintsinthepositions,notinthevelocities. This
+mayleadtoproblemssuchasartificiallyhightemperaturevaluesdueto“hidden”velocitiesalongtheconstrained
+directions. AnextensionofSHAKEwhichalsoenforcestheconstraintsforthevelocitiesistheRATTLEalgorithm,
+whichisimplementedintheAIMDmoduleofORCA.
+TheRATTLEschemeisageneralizationoftheVelocityVerletintegratortoallowforconstraints. Thismeansthat
+RATTLEisnotappliedinadditiontotheVelocityVerletintegrator,butreplacesit. Incaseofnoactiveconstraints,
+998 Chapter7. DetailedDocumentation
+
+[... start of page 1021 ...]
+ORCAManual,Release6.0.0
+bothmethodsareidentical. Asystemofcoupledconstraintscannotbesolvedexactlyinonestep, andRATTLE
+usesaniterativeapproachtoenforceallconstraintssimultaneously. Thisisoftenamatterofconcernwithrespect
+toperformance. However,inAIMD,theenergyandgradientcalculationstypicallytakesecondsorevenminutes
+perstep,suchthattheadditionalcomputationtimeforiterativelysolvingtheconstraintscanbetotallyneglected.
+Asaniterativeprocedure,RATTLEisnotabletogiveexactsolutions,butonlyconvergeduptoagiventoler

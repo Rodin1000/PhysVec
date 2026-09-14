@@ -1,0 +1,75 @@
+[... end of page 331 ...]
+The1397cm−1 modeoftheH COmoleculeasobtainedfromtheinterfaceof ORCAtogOpenMoland
+2
+theorca_pltvibtooltocreatetheanimationfile.
+Theappearenceofthearrowscanalsobemodifiedasdescribedinthewebtutorialof gOpenMol.
+6.12. CalculationofProperties 309
+
+--- Page 332 ---
+ORCAManual,Release6.0.0
+IsotopeShifts
+Thecalculatedisotopeshiftsgreatlyaidintheidentificationofvibrations,theinterpretationofexperiments,and
+the assessment of the reliability of the calculated vibrational normal modes. It would be a very bad practice to
+recalculatetheHessianforinvestigatingisotopeshiftsinceHessiancalculationsaretypicallyexpensive, andthe
+Hessianitselfisindependentofthemasses. Belowwedescribehowtofindtheisotopeeffectwithoutrecomputing
+theHessian.
+LetussupposethatyouhavecalculatedaHessianasintheexamplediscussedabove,andyouwanttopredictthe
+effectof18Osubstitution. Inthiscaseyoucanusethesmallutilityprogram orca_vib. Firstofallyouneedto
+editthemassesgiveninthe.hessfilebyhand. Fortheexamplegivenabove,the.hessfileisasfollows:
+$orca_hessian_file
+......................
+$hessian
+12
+... the cartesian Hessian in Eh/bohr**"
+$vibrational_frequencies
+12
+...the vibrational frequencies (in cm-1) as in the output
+$normal_modes
+12 12
+... the vibrational normal modes in Cartesian displacements
+#
+# The atoms: label mass x y z
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Here we have changed 15.999 for oxygen into
+# 18.0 in order to see the oxygen 18 effects
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+$atoms
+4
+C 12.0110 0.000000 0.000000 -1.149571
+O 18.0000 -0.000000 -0.000000 1.149695
+H 1.0080 -0.000000 1.750696 -2.275041
+H 1.0080 -0.000000 -1.750696 -2.275041
+$actual_temperature
+0.000000
+$dipole_derivatives
+12
+... the dipole derivatives (Cartesian displacements)
+#
+# The IR spectrum
+# wavenumber T**2 TX TY TY
+#
+$ir_spectrum
+12
+... the IR intensities
+AfterchangingthemassofOfrom15.999to18.0asshownabove,letuscall:
+orca_vib Test-FREQ-H2CO.hess
+Thiswillrecomputevibrationalfrequenciesinthepresenceof18O.Letuscomparevibrationalfrequenciesinthe
+outputofthisrunwiththeoriginalfrequenciesincm−1:
+310 Chapter6. RunningTypicalCalculations
+
+[... start of page 333 ...]
+ORCAManual,Release6.0.0
+Mode H2C16O H2CO18O Shift
+-----------------------------------------
+6: 1284.36 1282.82 -1.54
+7: 1397.40 1391.74 -5.66
+8: 1766.60 1751.62 -14.98
+9: 2099.20 2061.49 -37.71
+10: 3499.11 3499.02 -0.09
+11: 3645.24 3645.24 0.00
+Anotherwaytoanalyzeisotopeshiftsistoplotthetwopredictedspectraandthensubtractonefromtheother. This
+willproducederivative-shapedpeakswithzerocrossingsatthepositionsoftheisotope-sensitivemodes.
+Note: Inthepresenceofpointchargesand/oranexternalelectricfield,thetranslationalandrotationalsymmetries
+of the system may be broken. In such cases, you may prefer NOT to project out the translational and rotational
+degreesoffreedomoftheHessian. Thiscanbeachievedas:
+orca_vib Test-FREQ-H2CO.hess -nopr

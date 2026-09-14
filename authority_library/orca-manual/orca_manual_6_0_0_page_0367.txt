@@ -1,0 +1,77 @@
+[... end of page 366 ...]
+densityforaseriesofiron
+compoundswithvariousoxidationandspinstates. Sincetheelectrondensitydependsonthefunctionalandbasis
+setemployed,fittingmustbecarriedoutforeachcombinationused. Acompilationofcalibrationconstants(𝛼,𝛽
+and𝐶)forvariousmethodswasassembled.[707]Usuallyanaccuracyofbetterthan0.10mms−1canbeachieved
+forDFTwithreasonablysizedbasissets.
+344 Chapter6. RunningTypicalCalculations
+
+--- Page 367 ---
+ORCAManual,Release6.0.0
+Thequadrupolesplittingisproportionaltothelargestcomponentoftheelectricfieldgradient(EFG)tensoratthe
+ironnucleusandcanbecalculatedusingtheformula:
+1
+(︂ 𝜂2)︂1
+2 (6.15)
+∆𝐸 = 𝑒𝑄𝑉 1+
+Q 2 𝑧𝑧 3
+where𝑒istheelectricalchargeofanelectronand𝑄isthenuclearquadrupolemomentofFe(approximately0.16
+barns). 𝑉 ,𝑉 and𝑉 aretheelectricfieldgradienttensorsand𝜂,definedas
+𝑥𝑥 𝑦𝑦 𝑧𝑧
+⃒ ⃒
+𝜂 = ⃒ ⃒ 𝑉 𝑥𝑥 −𝑉 𝑦𝑦⃒ ⃒ (6.16)
+⃒ 𝑉 ⃒
+𝑧𝑧
+istheasymmetryparameterinacoordinatesystemchosensuchthat|𝑉 |≥|𝑉 |≥|𝑉 |.
+𝑧𝑧 𝑦𝑦 𝑥𝑥
+Anexampleofhowtocalculatetheelectrondensityandquadrupolesplittingofanironcenterisasfollows:
+%eprnmr
+nuclei = all Fe {fgrad, rho}
+end
+If the core properties basis set CP(PPP) is employed, one might have to increase the radial integration accuracy
+fortheironatom. FromORCA5.0thisisconsideredduringgridconstructionandthedefaultsshouldworkvery
+well. HoweverforveryproblematiccasesitcanbeincreasedbycontrollingtheSPECIALGRIDINTACCflagunder
+%METHOD(seeSec. Otherdetailsandoptionsfordetails).
+The output file should contain the following lines, where you obtain the calculated quadrupole splitting directly
+andtheRHO(0)value(theelectrondensityattheironnucleus). Toobtaintheisomershiftonehastoinsertthe
+RHO(0)valueintotheappropriatelinearequation(Eq. (6.14)).
+Moessbauer quadrupole splitting parameter (proper coordinate system)
+e**2qQ = -0.406 MHz = -0.035 mm/s
+eta = 0.871
+Delta-EQ=(1/2{e**2qQ}*sqrt(1+1/3*eta**2) = -0.227 MHz = -0.020 mm/s
+RHO(0)= 11581.352209571 a.u.**-3 # the electron density at the Fe nucleus.
+Note:
+• Following the same procedure, Mössbauer parameters can be computed with the CASSCF wavefunction.
+Incaseofastate-averagedCASSCFcalculation,theaverageddensityisusedinthesubsequentMössbauer
+calculation.
+6.12.12 Broken-Symmetry Wavefunctions and Exchange Couplings
+A popular way to estimate the phenomenological parameter 𝐽 that enters the Heisenberg–Dirac–van Vleck
+AB
+Hamiltonianwhichparameterizestheinteractionbetweentwospinsystemsisthe“broken-symmetry”formalism.
+ThephenomenologicalHamiltonianis:
+𝐻 =−2𝐽 𝑆⃗ 𝑆⃗ (6.17)
+HDvV AB A B
+It is easy to show that such a Hamiltonian leads to a “ladder” of spin states from 𝑆 = 𝑆 + 𝑆 down to
+A B
+𝑆 =|𝑆 −𝑆 |. Iftheparameter𝐽 ispositivethesystems“A”and“B”aresaidtobeferromagneticallycoupled
+A B AB
+becausethehighestspin-stateislowestinenergywhileinthecasethat𝐽 isnegativethecouplingisantiferro-
+AB
+magneticandthelowestspinstateislowestinenergy.
+Inthebrokensymmetryformalismonetriestoobtainawavefunctionthatbreaksspatial(andspin)symmetry. It
+maybethoughtofasa“poorman’sMC-SCF”thatsimulatesamultideterminantalcharacterwithinasingledeter-
+minantframework. Muchcouldbesaidaboutthetheoreticaladvantages,disadvantages,problemsandassumptions
+thatunderlythisapproach. Here,weonlywanttoshowhowthisformalismisappliedwithinORCA.
+6.12. CalculationofProperties 345
+
+[... start of page 368 ...]
+ORCAManual,Release6.0.0
+For𝑁 unpairedelectronslocalizedon“siteA”and𝑁 unpairedelectronslocalizedona“siteB”onecancalculate
+A B
+theparameter𝐽 fromtwoseparatespin-unrestrictedSCFcalculations: (a)thecalculationforthehigh-spinstate
+AB
+with𝑆 = (𝑁A+𝑁B) and(b)the“brokensymmetry”calculationwith𝑀 = (𝑁A−𝑁B) thatfeatures𝑁 spin-up
+2 𝑆 2 A
+electrons that are quasi-localized on “site A” and 𝑁 spin-down electrons that are quasi-localized on “site B”.
+B
+Severalformalismsexisttoextract𝐽 : [91,303,636,

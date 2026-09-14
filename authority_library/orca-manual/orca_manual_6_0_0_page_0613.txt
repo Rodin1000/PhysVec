@@ -1,0 +1,87 @@
+[... end of page 612 ...]
+anges
+# partner orbitals for the active space based
+# on various concepts
+PMOS # based on orthogonalization tails.
+OSZ # based on oszillator orbital
+DOI # based on differential overlap
+DoubleShell # based on the shell and angular momentum
+# of the highest active orbitals, the first few
+# virtual orbitals correspond to the doubled-shell.
+# All other virt. orbitals are canonicalized.
+# For 3d-metal complexes, these are the 4d orbitals!
+# For 4d-metal complexes, these are the 5d orbitals!
+# And so on...
+#active space
+ActOrbs NatOrbs # natural
+CanonOrbs # canonical
+(continuesonnextpage)
+590 Chapter7. DetailedDocumentation
+
+--- Page 613 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+LocOrbs # localized
+unchanged # no changes
+dOrbs # purify metal d-orbital and call the AILFT
+fOrbs # purify metal f-orbital and call the AILFT
+SDO # Single Determinant Orbitals: this is only possible if the
+# active space has a single hole or a single electron.
+# SDOs are then the unique choice of orbitals that simultaneously
+# turns each CASSCF root into a single determinant.
+SDOs are specific for the active orbital space.[491] The set of options (PMOS, OSZ, DOI, DoubelShell) are
+specificfortheinactiveandexternalspace. Theyaimtoassisttheextensionofthecurrentactivespace. Allfour
+options,re-designthefirstNOrb(numberofactiveorbitals)nexttotheactivespace,whiletheremainingorbitals
+ofthesamesubspacearecanonical. There-designedorbitalarebasedondifferentconcepts.
+• PMOS generates the bonding / anti-bonding partner orbitals for the chosen active space. It is based on the
+orthogonalizationtailoftheactiveorbitals.
+• OSZgeneratesasingleorbitalforeachactiveorbital,thatmaximizesthedipole-dipoleinteraction.
+• DOIfollowsthesameprincipleasOSZ,butthedifferentialoverlapismaximizedinstead.
+• DoubleShellisspecifictotheexternalspace. ThehighestactiveMOor DoubleShellMOisanalyzed. A
+setoforbitalswiththesameangularmomentumbutlargerradialdistributionisgenerated.
+Optionally, the four options above can be supplemented with a reference MO using the keyword RefMO/
+DoubleShellMO.Thepresenceof RefMO/DoubleShellMOchangesthedefaultbehavior. Incaseof PMOS,OSZ
+andDOI,allorbitalsofthegivensubspacearechosentomaximizeasingleobjectivefunctionwithrespecttothe
+referenceMO(mustbeactive). Thiscontraststhedefaultsettings,whereforeachactiveMOanobjectivefunction
+ismaximizedandasingle“best”orbitalispicked. Inotherwords,inthedefaultsetting,eachactiveorbitalhasa
+corresponding“best”orbitalintheselectedsubspaceneighboringtheactivespace.
+RefMO 17 # MO with number 17 (default =-1)
+DoubleShellMO 17 # MO with number 17 (default=-1)
+The aforementioned options are aids and the resulting orbitals should be inspected prior extension of the active
+space. In particular the PMOS option is useful in the context of transition metal complexes to find suitable Lig-
+andbasedorbitals. Therearemoreoptions(dorbs, forbs, DoubleShell), thatarespecificallydesignedfor
+coordinationchemistry. AmoredetaileddescriptionisfoundintheCASSCFtutorialthatsupplementsthemanual.
+Iftheactivespaceconsistsofasinglesetofmetald-orbitals,naturalorbitalsmaybeamixtureofthed-orbitals.
+Theactiveorbitalsareremixedtoobtain“pure”d-orbitals(ligandfieldorbitals)iftheactorbsissettodorbs.
+Thesameholdsforf-orbitalsandtheoptionforbs. Furthermore,thekeyworddorbsautomaticallytriggersthe
+abinitioligandfieldanalysis(AILFT).[57,490]Theapproachhasbeenreportedinanumberofapplications.[53,
+56, 154, 169, 170, 428, 797, 835] Note that the actual representation depends on the chosen axis frame. It is
+thusrecommendedtoalignthemoleculeproperly. FormoredetailsontheAILFTapproach,werefertotheAILFT
+section(1-and2-shellAbinitioLigandFieldTheory),theoriginalpaperandtheCASSCFtutorial,whereexamples
+areshown. Forafewapplications,aprintingofthecompletewavefunctionisusefulandcanberequested.
+PrintWF 0 # (default) prints only the CFGs
+csf # Printing of the wavefunction in the basis of CSFs
+det # Printing of the wavefunction in the basis of Determinants
+TheCI-stepdefaultsettingisCSFbasedandisdoneinthepresentprogrambygeneratingapartial“formulatape”
+whichisreadineachCIiteration. ThetapemaybecomequitelargebeyondseveralhundredthousandCSFswhich
+limitstheapplicabilityoftheCASSCFmodule. TheacceleratedCI(ACCCI)hasthesamelimitations,butusesa
+slightlydifferentalgorithmthathandlesmulti-rootcalculationsmuchmoreefficiently. Fornow,properties(spin-
+orbitcoupling,g-Tensor...) aswellasNEVPT2correctionsarenotavailablewithACCCI.Nevertheless,itisthe
+recommendedoptiontoconvergeaCASSCFcalculationwithmultipleroots. Theresulting.gbwfilemaybeused
+inasuccessiveruntoobtainpropertiesorNEVPT2corrections.
+LargeractivespacesaretractablewiththeDMRGapproachortheiterativeconfigurationexpansion(ICE)devel-
+opedinourowngroup.[171,172]DMRGandICEreturnapproximatefullCIresults. Themaximumsizeofthe
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 591
+
+[... start of page 614 ...]
+ORCAManual,Release6.0.0
+activespacedependsonthesystemandtherequiredaccuracy. Activespacesof10–20orbitalsshouldbefeasible
+withbothapproaches. TheCASSCFtutorialcoversexampleswithACCCIandICEasCIsolvers.
+%casscf
+CIStep CSFCI # CSF based CI (default)
+ACCCI # CSF based CI solver with faster algorithm for multi-root calculations
+ICE # CSF based approximate CI -> ICE/CIPSI algorithm
+DMRGCI # density matrix renormalization group approach instead of the CI
+end
+In the ICE approach, the computation of the coupling coefficients is time-consuming and by default repeated in
+every macro-iteration. To avoid the reconstr

@@ -1,0 +1,90 @@
+[... end of page 1211 ...]
+ directions I and J
+# - Solve equations to get the energy for each combination
+# - Polarizability alpha(I,J) =- ( E(+I,+J) - E(+I,-J)-E(-I,+J)+ E(-i,-j)/(4*Field^2)
+# 4 Print polarisability
+#
+# ----------------------------------------------------------------------
+# ---------------------- Variables -------------------------------
+# --- Variables to be adjusted (e.g. using 'with' ----------------------
+(continuesonnextpage)
+7.60. CompoundExamples 1189
+
+--- Page 1212 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Variable molecule = "h2o.xyz";
+Variable charge = 0;
+Variable mult = 1;
+Variable method = "HF";
+Variable basis = " ";
+Variable restOfInput = "VeryTightSCF";
+Variable blocksInput = " ";
+Variable E_Field = 0.0001;
+Variable enPropName = "JOB_Info_Total_En";
+Variable removeFiles = true;
+# -------------- Rest of the variables --------------------------------
+Variable FField[3];
+Variable EFree, EPlusPlus, EPlusMinus, EMinusPlus, EMinusMinus, a[3][3];
+Variable FFieldStringPlusPlus, FFieldStringPlusMinus;
+Variable FFieldStringMinusPlus, FFieldStringMinusMinus;
+Variable aEigenValues, aEigenVectors;
+# -----------------------------------------
+# Calculation without field
+# -----------------------------------------
+New_Step
+!&{method} &{basis} &{restOfInput}
+&{blocksInput}
+*xyzfile &{charge} &{mult} &{molecule}
+Step_End
+EFree.ReadProperty(propertyName=enPropName);
+# ------------------------------------------------------------
+# Loop over the x, y, z directions
+# ------------------------------------------------------------
+for i from 0 to 2 Do
+for j from 0 to 2 Do
+# ----------------------------------------------------------
+# Create the appropriate direction oriented field string
+# ----------------------------------------------------------
+# ---------------------- (++) ------------------------------
+for k from 0 to 2 Do
+FField[k] = 0.0;
+EndFor
+FField[i] = FField[i] + E_Field;
+FField[j] = FField[j] + E_Field;
+write2String(FFieldStringPlusPlus, " %lf, %lf, %lf",
+FField[0], FField[1], FField[2]);
+#
+# --------------------- (+-) ------------------------------
+for k from 0 to 2 Do
+FField[k] = 0.0;
+EndFor
+FField[i] = FField[i] + E_Field;
+FField[j] = FField[j] - E_Field;
+write2String(FFieldStringPlusMinus, " %lf, %lf, %lf",
+FField[0], FField[1], FField[2]);
+#
+# --------------------- (-+) ------------------------------
+for k from 0 to 2 Do
+FField[k] = 0.0;
+EndFor
+FField[i] = FField[i] - E_Field;
+FField[j] = FField[j] + E_Field;
+write2String(FFieldStringMinusPlus, " %lf, %lf, %lf",
+FField[0], FField[1], FField[2]);
+(continuesonnextpage)
+1190 Chapter7. DetailedDocumentation
+
+[... start of page 1213 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+#
+# --------------------- (--) ------------------------------
+for k from 0 to 2 Do
+FField[k] = 0.0;
+EndFor
+FField[i] = FField[i] - E_Field;
+FField[j] = FField[j] - E_Field;
+write2String(FFieldStringMinusMinus, " %lf, %lf, %lf",
+FField[0], FField[1], FField[2]);
+# ------

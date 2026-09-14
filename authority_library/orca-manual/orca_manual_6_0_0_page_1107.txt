@@ -1,0 +1,75 @@
+[... end of page 1106 ...]
+t,twoconsecutivelocalizationsareperformed. Thelocalizedorbitalsarestoredintheformofa
+standardGBWfilenamed.loc. Keepinmindthatthelocalizationoftheoccupiedorbitalsmightchangethetotal
+energydependingonwhattypeofcalculationyouwanttoperformthereafter. ForRHFandUHFthereshouldn’t
+beanyproblems,butforCASSCFthekeywordOCCisnotsufficient. CASSCFisnotinvarianttorotationofall
+theoccupiedorbitals.
+Theotherwaytodothelocalizationiscallingtheorca_locprogramdirectlyfromshell,whichismoregeneral.
+Theorca_locprogramrequiresaninputofitsown. Theinputisatextfilecontainingthenecessaryparameters.
+If no input is specified, orca_loc returns a help-file with a description of the necessary input-parameters. You
+needtospecifyin/outputgbw-files,alongwithorbitalrangesandthelocalizationmethodtobeused. Asourceof
+1084 Chapter7. DetailedDocumentation
+
+--- Page 1107 ---
+ORCAManual,Release6.0.0
+confusion is the operator line op (alpha = 0 or beta = 1). For RHF(ROHF) and CASSCF, this should be set to
+zero. Theinputfileusuallylookslike,
+Myjob.gbw # input orbitals
+Myjob.loc.gbw # output orbitals
+10 # orbital window: first orbital to be localized e.g. first active
+15 # orbital window: last orbital to be localized e.g. last active
+0 # localization method:
+# 1=PIPEK-MEZEY,2=FOSTER-BOYS,3=IAO-IBO,4=IAO-BOYS,5=NEW-BOYS,
+6=AHFB
+˓→
+# The following parameters are optional
+# However, if you want to change one of them, all preceding ones have to be set, too.
+0 # operator: 0 for alpha, 1 for beta
+128 # maximum number of iterations
+1e-6 # convergence tolerance of the localization functional value
+0.0 # relative convergence tolerance of the localization functional value
+0.95 # printing thresh to call an orbital strongly localized
+0.85 # printing thresh to call an orbital bond-like
+2 # printlevel
+1 # use Cholesky Decomposition (0=false, 1=true)
+1 # randomize seed for localization (0=false, 1=true)
+Iftheinputfileiscalledmyloc.inp,running“orca_locmyloc.inp”willproducetheMyjob.loc.gbwfilecontaining
+thelocalizedorbitals. PleasemakesuretheMyjob.gbwisinthesamedirectoryasmyloc.inp.
+7.58.6 orca_blockf
+Thisutilityprogramallowsthecanonicalizationoforbitals(.gbwfile)forarbitrarysubspaces. Withcanonicaliza-
+tionwerefertotheblockdiagonalizationoftheFockmatrix. NotethatthenecessaryFockmatrixmustbegenerated
+andbeavailableondiskpriorcallingorca_blockf. Theprogramisdescribedinsectionsec:mrci.soc.lzfs.detailed,
+wheretheLocalZFSdecompositionisdiscussed.
+7.58.7 orca_plot
+Orca_plot is a utility program that can be used to generate 2D and 3D graphics of various types of orbitals and
+densitiesduringanORCArun. Itcaninprinciplecalledintwoways:
+1) Withinacalculationinputviathe%blocksection. ThisisdescribedinsectionOrbitalandDensityPlots. In
+thiswayitcanbeusedtocreategraphics(2D)or(3D)dataforvisualization.
+2) Itisalsopossibletorunthisprograminteractively. Theinputparametersare:
+gbwfile # name of gbw-file
+-i # interactive use of orca_plot
+-m 256 # max. memory in MB (if needed)
+Youwillthengetasimple, self-explainingmenuthatwillallowyoutogenerateavarietyoffiles(suchas.plt
+and.cube)directlyfromthe.gbwfileswithoutrestartingorrunninganewjob. Ifneeded,the-m-optionallows
+tocontrolthememoryusageofyourplottingjob.
+Thelistedutilitiesareprintedbywritingintheterminal
+orca_plot my.gbw -i
+1 - Enter type of plot
+2 - Enter no of orbital to plot
+3 - Enter operator of orbital (0=alpha,1=beta)
+4 - Enter number of grid intervals
+5 - Select output file format
+6 - Plot CIS/TD-DFT difference densities
+(continuesonnextpage)
+7.58. UtilityPrograms 1085
+
+[... start of page 1108 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+7 - Plot CIS/TD-DFT transition densities
+8 - Set AO(=1) vs MO(=0) to plot
+9 - List all available densities
+10 - Perform Density Algebraic Operations
+11 - Generate the plot
+12 - exit this program
+PerformOrbital

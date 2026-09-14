@@ -1,0 +1,76 @@
+[... end of page 569 ...]
+wing input for a GIAO-RI-MP2
+NMRshieldingcalculation:
+! RIJK RI-MP2 def2-SVP def2/JK def2-SVP/C TightSCF NMR NoFrozenCore
+%mp2
+Density relaxed # required
+UsePertCanOrbs true # Whether to use perturbed canonical orbitals for
+# the internal block of the perturbed Fock matrix
+PertCan_EThresh 1e-6 # Energy threshold for special treatment of
+# degenerate orbital pairs
+PertCan_UThresh 10 # Coefficient threshold for special treatment of
+# strongly interacting orbital pairs
+(continuesonnextpage)
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 547
+
+--- Page 570 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+FCut 1e-5 # Threshold for internal perturbed Fock elements
+RespStoreT true # Whether to precalculate and store all necessary
+# unperturbed amplitudes on disk
+RespDijConv false # Whether to store intermediates required for the
+# internal block of the response density on disk
+end
+* int 0 1
+O 0 0 0 0 0 0
+H 1 0 0 1.1056 0 0
+H 1 2 0 1.1056 109.62 0
+*
+Bydefaultperturbedcanonicalorbitalsareusedfortheoccupiedblock,i.e.,theinternalorbitalrotationcoefficients
+arechosenas
+𝐹(B)−𝑆(B)𝜀
+𝑈B = 𝑖𝑗 𝑖𝑗 𝑗
+𝑖𝑗 𝜀 −𝜀
+𝑗 𝑖
+whichresultsin𝐹B =0,therebyeliminatingitscontributiontotheperturbedamplitudes:
+𝑖𝑗
+∑︁[︁ ]︁
+𝑇𝑖𝑗,B ←− 𝑇𝑖𝑘𝐹B +𝑇𝑘𝑗𝐹B (7.112)
+𝑎𝑏 𝑎𝑏 𝑘𝑗 𝑎𝑏 𝑘𝑖
+𝑘
+If|𝜖 −𝜖 |<PertCan_EThreshor|𝑈𝐵|>PertCan_UThresh,then𝑈Bischosenusingthestandardformula
+𝑗 𝑖 𝑖𝑗 𝑖𝑗
+1
+𝑈B =− 𝑆(B)
+𝑖𝑗 2 𝑖𝑗
+Andtherelevantcontributionstoeq(7.112)areadded,unless⃒ ⃒𝐹B ⃒ ⃒<FCut. TherequiredamplitudesT𝑖𝑘andT𝑘𝑗
+𝑖𝑗
+(allamplitudes,incaseUsePertCanOrbs = false)arestoredondiskif RespStoreT = trueorrecalculated
+asneededotherwise. Thelatteroptionissignificantlyslowerandnotrecommendedunlessdiskspaceisanissue.
+Similarly,inthecaseofinsufficientRAM,theoptionRespDijConv = truetellsORCAtostoreallamplitudesin
+thebatch(requiredtocalculate𝐷B)ondisk,ratherthankeeptheminmemory. The3-index2-particledensities,
+𝑖𝑗
+neededfortheright-handsideoftheZ-vectorequations,arealwaysstoredondisk.
+NotealsothatinthisimplementationtheRIJCOSXFock-responsetermsarecalculatedwithoneoftheSCFgrids,
+chosenwithZ_GridX_RHS(seesectionCP-SCFOptions).
+7.13.9 Local MP2
+Inanalogytothedomain-basedlocalpairnaturalorbitalcoupled-clustermethods,thereisalsoalocallinearscaling
+versionofMP2(DLPNO-MP2)implementedinORCA.Itsdefaultthresholdsarechosentoreproduceabout99.9%
+ofthetotalRI-MP2correlationenergy,resultinginanaccuracyofafractionof1kcal/molforenergydifferences.
+Thetheoryhasbeendescribedintheliterature.[653,684]
+FurtherinformationoflocalcorrelationmethodsinORCAcanbefoundinsectionLocalcorrelation. Thelocal
+MP2methodbecomestrulybeneficialforverylargemoleculesandcanbeusedtocomputeenergiesofsystems
+containing several hundred atoms. Fig. 7.3 shows the scaling behavior for linear alkane chains. Note that this
+representsanidealizedsituation. Forthree-dimensionalmoleculesthecrossoverwithcanonicalRI-MP2isgoing
+tooccuratalaterpoint.
+548 Chapter7. DetailedDocumentation
+
+[... start of page 571 ...]
+ORCAManual,Release6.0.0
+Fig.7.3: ScalingoftheDLPNO-MP2methodwithdefaultthresholdsforlinearalkanechainsindef2-TZVPbasis.
+ShownarealsothetimesforthecorrespondingHartree-FockcalculationswithRIJCOSXandforRI-MP2.
+Inthefollowing,themostimportantdesignprinciplesoftheRHF-DLPNO-MP2arepointedout.
+• Unlike in the 2013 version of the DLPNO methodology, domains are selected by means of the differen-
+√︁
+tialoverlap ∫︀ 𝑖2(r)𝜇˜′2(r)

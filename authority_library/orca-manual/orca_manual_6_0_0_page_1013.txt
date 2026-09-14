@@ -1,0 +1,64 @@
+[... end of page 1012 ...]
+0toswitchit
+off(1.0means“noartificialacceleration”).
+TheDampmodifieristhedampingfactorforsimulatedannealingruns(hasnoeffectonL-BFGS).Atomvelocities
+are multiplied by this factor in every integration step. The default value is 0.98. Smaller values will make the
+algorithmmorestableandlesspronetooscillationsandovershoots,butwillalsorequiresignificantlymoresteps
+toconverge. Don’tusevalues≥1,asthenitwon’tbean“annealing”anymore:-)
+The StepLimit modifier specifies the maximum displacement of any atom (in length units) that can happen in
+onestepofaminimizationrun. Thiscanhelptoavoidlarge,unreliablestepswhichcouldleadtoabruptjumpsin
+geometryandveryhighpotentialenergies. ThismodifierconcernsbothL-BFGSandsimulatedannealingruns.
+990 Chapter7. DetailedDocumentation
+
+--- Page 1013 ---
+ORCAManual,Release6.0.0
+Negativevaluesdisablethesteplimit. Thesteplimitisdisabledbydefault. Ifyouneedtoswitchiton,trysomething
+intheorderof0.1Å.
+TheHistorymodifiercontrolsthedepthofgradientandpositionvectorhistorythatisusedintheL-BFGSmethod
+toapproximatetheinverseHessian. Thedefaultvalueis20. Smallervaluescanhelptostabilizethealgorithm.
+WiththeNoisemodifier,smallrandomnumberscanbeaddedtotheatompositionsbeforetheminimizationstarts.
+Thiscanhelptoescapelocalmaximaandsaddlepointsintheminimization. Forexample,aminimizationofan
+initiallylinearwatermoleculewouldnotbeabletoleavethismaximum–butwithsomerandom“noise”,itwill
+bepossible. Themodifierexpectsonerealargumentwhichspecifiesthemaximumatomdisplacementinlength
+units(somethinglike0.01Åwillbereasonable). Thisfeatureisswitchedoffbydefault.
+IftheOnlyHmodifierisgiven,allnon-hydrogenatomsareremovedfromtheactiveregionbeforetheminimization
+starts. Aftertheminimizationhasfinished,theoriginalactiveregionisrestored. Thisishelpfulifonlyhydrogen
+positionsshallbeoptimized,e. g.,torefineexperimentalcrystalstructures.
+PrintLevel
+MandatoryArguments: value Keyword {Low,Medium,High,Debug}
+OptionalArguments: —
+Modifiers: —
+Controlstheamountofinformationwhichisprintedtothescreenduringthesimulation. Debugshouldbeused
+onlyinrarecases,becauseitmightslowthesimulationdownheavily.
+ThedefaultvalueisMedium.
+Randomize
+MandatoryArguments: —
+OptionalArguments: seed Integer —
+Modifiers: —
+ThereareafewalgorithmsintheORCAMDmodulewhichrelyonrandomnumbers, e. g., theinitializationof
+atom velocities with the Initvel command. These random numbers are so-called “pseudo-random numbers”,
+producedbyadeterministicgenerator. Thisgeneratorhasastate,whichissimplyanintegernumber. Ifinitialized
+to the same state, the generator will always create the same sequence of “random” numbers. This sounds like a
+deficiencyatfirstthought,butisaveryimportantfeatureforscientificreproducibilityandfordebuggingpurposes.
+IfyoustartthesameMDinputfilewith“random”velocityinitializationacoupleoftimes,thetrajectorywillbe
+exactlyidenticalinallruns.
+However,therearecasesinwhichthisbehaviorisnotdesired,e. g.,ifyouwanttoaverageapropertyovermultiple
+trajectoriesofthesamesystem. Inthesecases,calltheRandomizecommandinthebeginningoftheinput. Ifno
+argument is given, the random number generator is initialized with the current system time as a seed. MD runs
+started at different times will have different random velocities in the beginning. If you want more control over
+this process, you can also specify a positive integer number as argument, which is used as initial random seed.
+Simulationsstartedwiththesameseedargumentwillhaveidenticalinitialrandomvelocities(ifallothersystem
+parameterssuchasatomcount,atomtypes,... remainidentical).
+WithoutacalltoRandomize,aseedof1isalwaysused.
+7.51. AbinitioMolecularDynamicsSimulations 991
+
+[... start of page 1014 ...]
+ORCAManual,Release6.0.0
+Restart
+MandatoryArguments: —
+OptionalArguments: fname String —
+Modifiers: IfExists —
+Readsarestartfiletocontinueapreviousmoleculardynamicsrun. Sucharestartfileiswrittenaftereverysimu-
+lationstep,suchthatacrashedsimulationmayeasilyberecovered. Thefilenameoftherestartfilemaybegiven
+viafname;otherwise,itisdeducedfromtheproject’sbasenameas<basename>.mdrestart.
+IftheIfExistsmodifierisspecified,arestartisonlyperformediftherestartfileexists. Theerror

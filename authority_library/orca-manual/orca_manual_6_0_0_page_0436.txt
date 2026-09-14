@@ -1,0 +1,66 @@
+[... end of page 435 ...]
+stheyrequireapproxi-
+mately3×𝑁atoms single-pointcalculations. Westronglyrecommendthat,inthesecases,youshoulduseDFT/TD-
+DFTtoobtaintheground/excited/tripletstategeometryandHessians,andonlyusethehigher-levelmethodforthe
+finalESDstep.
+Also,werecommendusingAPPROXADENunderthe%ESDoptions.
+%ESD
+APPROXADEN TRUE
+END
+6.18. ExcitedStateDynamics 413
+
+--- Page 436 ---
+ORCAManual,Release6.0.0
+Inthiscase,onlyonesinglepointatthegeometryofthegroundstateneedstobedone,andtheadiabaticenergy
+difference will be automatically obtained from the ES Hessian information, without the need of a second single
+pointattheextrapolatedESgeometry,whichcouldbeunstable.
+6.18.8 Circularly Polarized Spectroscopies
+GeneralAspects
+When circularly polarized (CP) light interacts with a chiral chemical structure (optically active), it differentially
+absorbsleftandrightCPlights(𝐼 ̸=𝐼 )resultingintheelectroniccirculardichroism(ECD).Similarly,it
+𝐿𝐶𝑃 𝑅𝐶𝑃
+candifferentiallyemitleftandrightCPlightsleadingtoCPluminescence(CPL),whichincludesCPfluorescence
+(CPF)andphosphorescence(CPP)spectra.
+VibrationeffectsonECDspectra
+Verticallyexcited(VE)computedECDspectraareknowntooftenbeunabletodescribetheexperiment. Thisis
+forexamplethecasein(R)methyloxirane. TheunshiftedorshiftedVEECDBP86computedspectradonotmuch
+theexperimentintermsofshapeandintensity. Ithasbeenshownthatthesespectraneedtobecomputedbytaking
+intoaccountvibronicinteractions[396].
+Hencefollowingstructureoptimizationandfrequenciescalculationsaccordingtotheinput:
+!BP86 DEF2-SVP TIGHTSCF OPT FREQ
+* xyz 0 1
+C 0.02461655377138 0.08670067686058 -5.20436273663217
+C -0.23485307714882 -0.31738971302751 -3.80610272711970
+O -0.15359212444282 1.06795113221760 -4.17749263689755
+H 1.05055243293426 -0.00333310016875 -5.61325012342071
+H -0.78323750369168 0.02252140387747 -5.95969728166753
+H -1.26417590138099 -0.65347889194363 -3.56065466091728
+C 0.84884023150886 -0.84537627906508 -2.89604274193698
+H 0.68194744925825 -0.50794125098111 -1.85197471265376
+H 0.85716491819315 -1.95559179229870 -2.89420656551675
+H 1.84600617099845 -0.48435690147087 -3.21751813823758
+*
+wecancomputeESDspectrumwithininVEapproximationandwithintheESDmodulesaccordingtothefollowing
+input:
+!BP86 DEF2-SVP TIGHTSCF PAL4
+%TDDFT
+NROOTS 10
+END
+%ESD
+ESDFlag ECD
+GSHESSIAN "c3h6o_opt_freq.hess "
+PRINTLEVEL 2
+DOHT TRUE
+LINEW 500
+SPECRANGE 40000, 70000
+STATES 1,2,3,4,5,6,7,8,9,10
+END
+* xyzfile 0 1 c3h6o_opt_freq.xyz
+The result is provided in Figure Fig. 6.69 where one can see that according to the expectations the computed
+spectrumagreeswiththeexperimentonlywhenFCandHTvibroniccouplingschemesaretakenintoaccount
+414 Chapter6. RunningTypicalCalculations
+
+[... start of page 437 ...]
+ORCAManual,Release6.0.0
+Fig.6.69:Experimental(black)versusBP86/TDDFT(VE,blueandFC+HTred)ECDspectraforC3H6Omolecule
+Com

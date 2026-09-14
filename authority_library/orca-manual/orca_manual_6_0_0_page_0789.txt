@@ -1,0 +1,77 @@
+[... end of page 788 ...]
+ Chapter7. DetailedDocumentation
+
+--- Page 789 ---
+ORCAManual,Release6.0.0
+PotentialEnergySurfaceScansalongNormalCoordinates
+Thegroundandexcitedstatepotentialenergysurfacescanalsobemappedasafunctionofnormalcoordinates. The
+normalmodetrajectoryrunisinvokedbythekeyword!MTR.Inadditionseveralparametershavetobespecifiedin
+theblock%mtr. Thefollowingexampleillustratestheuse:
+Firstyourunafrequencyjob:
+#
+! BP86 def2-SV(P) def2/J TightSCF AnFreq
+* xyz 0 1
+C 0.000001 -0.000000 -0.671602
+C 0.000000 0.000000 0.671602
+H -0.000000 -0.940772 -1.252732
+H -0.000000 -0.940772 1.252732
+H -0.000000 0.940772 -1.252732
+H -0.000000 0.940772 1.252732
+*
+andthen:
+! BP86 def2-SV(P) def2/J TightSCF MTR
+%tddft
+NRoots 3
+triplets false
+end
+%mtr
+HessName "ethene.hess"
+modetype normal
+MList 9,13
+RSteps 4,5
+LSteps 4,5
+ddnc 1.0, 0.5
+end
+* xyz 0 1
+C 0.000001 -0.000000 -0.671602
+C 0.000000 0.000000 0.671602
+H -0.000000 -0.940772 -1.252732
+H -0.000000 -0.940772 1.252732
+H -0.000000 0.940772 -1.252732
+H -0.000000 0.940772 1.252732
+*
+The HessNameparameterspecifiesthenameofthefilewhichcontainsnuclearHessianmatrixcalculatedinthe
+frequencyrun. TheHessianmatrixisusedtoconstructnormalmodetrajectories. Thekeyword MListprovides
+thelistofthenormalmodestobescanned. TheparametersRStepsand LStepsspecifythenumberofstepsin
+positiveandnegativedirectionalongeachmodeinthelist. Ingeneral,foragivensetofparameters
+mlist m1,m2,...mn
+rsteps rm1,rm2,...rmn
+lsteps lm1,lm2,...lmn
+the total number of the displaced geometries for which single point calculations will be performed is equal to
+∏︀ (𝑟 +𝑙 +1). Thus,inthepresentcasethisnumberisequalto(4+4+1)(5+5+1)=99.
+𝑚𝑖 𝑚𝑖
+𝑚𝑖
+The ddnc parameter specifies increments 𝛿𝑞 for respective normal modes in the list in terms of dimensionless
+𝛼
+normalcoordinates(DNC’s). Thetrajectoriesareconstructedsothatcorrespondingnormalcoordinatesarevaried
+intherangefrom−𝑙 𝛿𝑞 to𝑟 𝛿𝑞 . ThemeasureofnormalmodedisplacementsintermsDNC’sisappropriate
+𝛼 𝛼 𝛼 𝛼
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 767
+
+[... start of page 790 ...]
+ORCAManual,Release6.0.0
+choicesinceinspectroscopicalapplicationsthepotentialenergyfunction𝑈 isusuallyexpressedintermsofthe
+DNC’s. Inparticular,intheharmonicapproximation𝑈(𝑞 )hasaverysimpleformaroundequilibriumgeometry:
+𝛼
+𝑈 =𝑈 +
+3
+∑︁
+𝑁−6(cid:125)𝜔
+𝛼𝑞2 (7.232)
+0 2 𝛼
+𝛼
+where𝜔 isthevibrationalfrequencyofthe𝛼-thmode.
+𝛼
+Dimensionlessnormalcoordinate𝑞 canberelatedtothevectorofatomicCartesiandisplacements𝛿Xasfollows:
+𝛼
+𝑞 = (︁𝜔 𝛼 )︁1 2 ∑︁ 3𝑁 𝐿 𝛿𝑋 √︀ 𝑀 (7.233

@@ -1,0 +1,80 @@
+[... end of page 430 ...]
+computed,andtheTROOTSSLflagtospecifythetripletspin-sublevel(1,0,
+or-1).
+In practice, to obtain an ISC rate (𝑘 ) close enough to experimental values, one would need to consider all
+𝐼𝑆𝐶
+possibletransitionsbetweentheinitialsingletandallavailablefinalstates. Foranthracene,thesearepredictedto
+bethegroundtriplet(𝑇 )andthefirstexcitedtriplet(𝑇 ),consistentwithexperimentalobservations[402],while
+1 2
+thenexttriplet(𝑇 )isenergeticallytoohightobesignificant(Fig.6.66below). Anexampleinputusedtocalculate
+3
+the𝑘 from𝑆 to𝑇 at77𝐾 is:
+𝐼𝑆𝐶 1 1
+!B3LYP DEF2-TZVP(-F) TIGHTSCF ESD(ISC)
+%TDDFT NROOTS 5
+SROOT 1
+TROOT 1
+TROOTSSL 0
+DOSOC TRUE
+END
+%ESD ISCISHESS "ANT_S1.hess"
+(continuesonnextpage)
+408 Chapter6. RunningTypicalCalculations
+
+--- Page 431 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+ISCFSHESS "ANT_T1.hess"
+USEJ TRUE
+DOHT TRUE
+TEMP 77
+DELE 11548
+END
+* XYZFILE 0 1 ANT_T1.xyz
+$NEW_JOB
+!B3LYP DEF2-TZVP(-F) TIGHTSCF ESD(ISC)
+%TDDFT NROOTS 5
+SROOT 1
+TROOT 1
+TROOTSSL -1
+DOSOC TRUE
+END
+%ESD ISCISHESS "ANT_S1.hess"
+ISCFSHESS "ANT_T1.hess"
+USEJ TRUE
+DOHT TRUE
+TEMP 77
+DELE 11548
+END
+* XYZFILE 0 1 ANT_T1.xyz
+...
+Fig. 6.66: Scheme for the calculation of the intersystem crossing in anthracene. The 𝑘 (𝑖) between 𝑆 and
+𝐼𝑆𝐶 1
+eachtripletisasumofalltransitionstothespin-sublevelsandtheactualobserved𝑘𝑜𝑏𝑠 ,whichconsolidatesthese
+𝐼𝑆𝐶
+transitions. On the right, there is a diagram illustrating the distribution of excited states with 𝐸(𝑆 ) − 𝐸(𝑇 )
+1 𝑛
+depictedontheside. Since𝑇 isenergeticallytoohigh,intersystemcrossinginvolving𝑇 canbesafelyneglected.
+3 3
+Then,thederivativesoftheSOCMEarecomputedandtheratesareprintedattheend. Byperformingthesame
+calculationsforthe𝑇 statesandsummingupthesevalues,apredicted𝑘𝑜𝑏𝑠 = 1.17×108𝑠−1 canbeobtained,
+2 𝐼𝑆𝐶
+muchclosertotheexperimentalvalue,whichisassociatedwithalargeerroranyway.
+OBS.: IncaseswheretheSOCMEarerelativelylarge,e.g.,SOCME> 5𝑐𝑚−1,theHerzberg-Tellereffectmight
+be negligible, and a simple Frank-Condon calculation should yield good results. This is typically applicable to
+moleculeswithheavyatoms,wherevibroniccouplingislesssignificant.
+OBS2.: AlwaysconsiderthatthereareactuallyTHREEtripletspin-sublevels,andtransitionsfromthesingletto
+allofthemshouldbeincluded.
+6.18. ExcitedStateDynamics 409
+
+[... start of page 432 ...]
+ORCAManual,Release6.0.0
+OBS3.: ISCratesareextremelysensitivetoenergydifferences. Exercisecautionwhencalculatingthem. Ifamore
+accurateexcitedstatemethodisavailable,itshouldbeconsideredforprediction.
+6.18.5 Internal Conversion Rates (unpublished)
+TheESDmodulecanalsocalculateinternalconversion(IC)ratesfromanexcitedstatetothegroundstateatthe
+TDDFTandTDAlevels. ApartfromthegroundstateandexcitedstateHessians,theonlyadditionalquantitythat
+needstobecalculatedisthenonadiabaticcouplingmatrixelements(NACMEs).
+Theinputfileissimple:
+Herethe𝑆 geometry,aswellasthe𝑆 and𝑆 Hessianfiles,wereobtainedattheB3LYP-D3/def2-SVPlevelof
+0 0

@@ -1,0 +1,96 @@
+[... end of page 475 ...]
+
+r2SCANh # r2SCAN global hybrid with 10% HF exchange
+r2SCAN0 # r2SCAN global hybrid with 25% HF exchange
+r2SCAN50 # r2SCAN global hybrid with 50% HF exchange
+#***************************************
+# Range-Separated Hybrid functionals
+#***************************************
+wB97 # Head-Gordon's fully variable DF
+wB97X # Head-Gordon's DF with minimal HF exchange
+CAMB3LYP # Handy's fit
+LC_BLYP # Hirao's original application
+LC_PBE # Hirao's PBE-based range-separated hybrid
+wr2SCAN # r2SCAN range-separated hybrid
+end
+7.4. ChoiceofComputationalModel 453
+
+--- Page 476 ---
+ORCAManual,Release6.0.0
+Note that Functional is a compound keyword. It chooses specific values for the variables Exchange,
+Correlation,andACMdescribedbelow. Ifgivenasasimpleinputkeyword,insomecases,itwillalsoactivatea
+dispersioncorrection. YoucanexplicitlygivethesevariablesinsteadorinadditiontoFunctional. However,make
+surethatyouspecifythesevariablesafter youhaveassignedavaluetoFunctionalorthevaluesof Exchange,
+CorrelationandACMwillberesettothevalueschosenbyFunctional.
+EmpiricalParametersinDensityFunctionals. Somefunctionalsincorporateempiricalparametersthatcanbe
+changedtoimproveagreementwithexperiment. Currently,thereareafewparametersthatcanbechanged(other
+thantheparametersusedinthehybridfunctionals,whicharedescribedlater).
+The first of these parameters is 𝛼 of Slater’s X method. Theoretically, it has a value of 2/3 and this is used
+𝛼
+in the HFS and LSD functionals. However, the exchange contribution is underestimated by about 10% by this
+approximation(quitesignificant!) andavaluearound0.70-0.75isrecommendedformolecules.
+The second parameter is the 𝛽 for Becke’s gradient-corrected exchange functional. Becke determined the value
+0.0042byfittingtheexchangeenergiesforraregasatoms. Thereissomeevidencethatwithsmallerbasissets,a
+slightlysmallervaluesuchas0.0039givesimprovedresultsformolecules.
+Thenextparameteristhevalue𝜅,whichoccursinthePBEexchangefunctional. Ithasbeengiventhevalue0.804
+by Perdew et al. in order to satisfy the Lieb-Oxford bound. Since then, other workers have argued that a larger
+value for this parameter (around 1.2) gives better energetics, which is explored in the revPBE functional. Note,
+however,thatwhilerevPBEgivesslightlybetterenergetics,italsogivesslightlypoorergeometries.
+The last two parameters are also related to PBE. Within the PBE correlation functional, there is 𝛽 (not to be
+𝐶
+confusedwiththe𝛽exchangeparameterinBecke’sexchangefunctional),whoseoriginalvalueis𝛽 =0.066725.
+𝐶
+Modifiedvariantsexistwithdifferent𝛽 values,e.g.,thePBEsolfunctionalandthePBEh-3ccompoundmethod.
+𝐶
+Furthermore,the𝜇parameterinthePBEexchangefunctionalmaybemodified. Intheoriginalformulation,itis
+relatedto𝛽 via𝜇=𝛽 𝜋2,buthasbeenmodifiedinlatervariantsaswell.
+𝐶 𝐶 3
+%method
+XAlpha 0.75 # Slater's alpha parameter (default 2/3)
+XBeta 0.0039 # Becke's beta parameter (default 0.0042)
+XKappa 0.804 # PBE(exchange) kappa parameter (default 0.804)
+XMuePBE 0.21952 # PBE(exchange) mue parameter (default 0.21952)
+CBetaPBE 0.066725 # PBE(correlation) beta parameter (default 0.066725)
+end
+SpecifyingExchangeandCorrelationapproximationsindividually. Thefollowingkeywordsareavailablefor
+specifyingtheexchangeandcorrelationapproximationsindividually. Inaddition,scalingparameterscanbedefined
+toconstructuser-definedhybridor“extended”hybridfunctionals:
+%method
+Exchange
+X_NOX # No exchange
+X_SLATER # Slater's local exchange
+X_B88 # Becke '88 gradient exchange
+X_wB88 # Short-range Becke '88 exchange for range-separated functionals
+X_G96 # Gill '96 gradient exchange
+X_PW91 # Perdew-Wang (PW) '91 gradient exchange
+X_mPW # Adamo-Barone modification of PW exchange
+X_PBE # Perdew-Burke-Ernzerhof (PBE) exchange
+X_RPBE # Revised PBE exchange
+X_OPTX # Hoe/Cohen/Handy's optimized exchange
+X_X # Xu/Goddard exchange
+X_TPSS # TPSS meta-GGA exchange
+X_B97D # Grimme's modified exchange for the B97-D GGA
+X_B97BECKE # Becke's original exchange for the B97 hybrid
+X_SCAN # Perdew's constrained exchange for the SCAN meta-GGA
+X_RSCAN # Perdew's constrained exchange for the rSCAN meta-GGA
+X_R2SCAN # Perdew's constrained exchange for the r2SCAN meta-GGA
+Correlation
+(continuesonnextpage)
+454 Chapter7. DetailedDocumentation
+
+[... start of page 477 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+C_NOC # No correlation
+C_VWN5 # Local Vosko-Wilk-Nusair correlation (parameter set "V")
+C_VWN3 # Local Vosko-Wilk-Nusair correlation (parameter set "III")
+C_PWLDA # Local PW correlation
+C_P86 # Perdew '86 correlation
+C_PW91 # PW '91 correlation
+C_PBE # PBE correlation
+C_LYP # LYP correlation
+C_TPSS # TPSS meta-GGA correlation
+C_B97D # Grimme's modified correlation for the B97-D GGA
+C_B97BECKE # Becke's original correlation for the B97 hybrid
+C_SCAN # Perdew's constrained correlation for the SCAN meta-GGA
+C_RSCAN # Perdew's constrained correlation for the rSCAN met

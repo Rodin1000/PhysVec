@@ -1,0 +1,65 @@
+[... end of page 93 ...]
+1056 109.62 0
+*
+NotethatbydefaultcoreelectronsarenotcorrelatedunlesstheNoFrozenCorekeywordispresent.
+Fordetails,seesectionsTheSecondOrderManyBodyPertubationTheoryModule(MP2)andMP2levelmagnetic
+properties.
+6.1. SinglePointEnergiesandGradients 71
+
+--- Page 94 ---
+ORCAManual,Release6.0.0
+ExplicitlycorrelatedMP2calculations
+ORCAfeaturesanefficientexplicitcorrelationmodulethatisavailableforMP2andcoupled-clustercalculations
+(sectionExplicitlyCorrelatedMP2andCCSD(T)Calculations). Itisdescribedbelowinthecontextofcoupled-
+clustercalculations.
+LocalMP2calculations
+Purely domain-based local MP2 methodology dates back to Pulay and has been developed further by Werner,
+Schützandco-workers. ORCAfeaturesalocalMP2method(DLPNO-MP2)thatcombinestheideasofdomains
+and local pair natural orbitals, so that RI-MP2 energies are reproduced efficiently to within chemical accuracy.
+Due to the intricate connections with other DLPNO methods, reading of the sections Local Coupled Pair and
+Coupled-Cluster Calculations and and Local correlation is recommended. A full description of the method for
+RHFreferencewavefunctionshasbeenpublished.[684]
+Since DLPNO-MP2 employs an auxiliary basis set to evaluate integrals, its energies converge systematically to
+RI-MP2 as thresholds are tightened. The computational effort of DLPNO-MP2 with default settings is usually
+comparablewithorlessthanthatofaHartree-Fockcalculation. However,forsmallandmedium-sizedmolecules,
+RI-MP2isevenfasterthanDLPNO-MP2.
+Calculationsonopen-shellsystemsaresupportedthroughaUHFtreatment. Whilemostapproximationsarecon-
+sistent between the RHF and UHF versions, this is not true for the PNO spaces. DLPNO-MP2 gives different
+energiesforclosed-shellmoleculesintheRHFandUHFformalisms. Whencalculatingreactionenergiesor
+otherenergydifferencesinvolvingopen-shellspecies,energiesofclosed-shellspeciesmustalsobecalculated
+withUHF-DLPNO-MP2,andnotwithRHF-DLPNO-MP2. AsforcanonicalMP2,ROHFreferencewavefunc-
+tionsaresubjecttoanROMP2treatmentthroughtheUHFmachinery. ItisnotconsistentwiththeRHFversionof
+DLPNO-MP2,unlikeinthecaseofRHF-/ROHF-DLPNO-CCSD.
+InputforDLPNO-MP2requireslittlespecificationfromtheuser:
+# DLPNO-MP2 calculation with standard settings
+# sufficient for most purposes
+! def2-TZVP def2-TZVP/C DLPNO-MP2 TightSCF
+# OR: DLPNO-MP2 with tighter thresholds
+# May be interesting for weak interactions, calculations with diffuse basis sets etc.
+! def2-TZVP def2-TZVP/C DLPNO-MP2 TightPNO TightSCF
+%maxcore 2000
+*xyz 0 1
+... (coordinates)
+*
+NoteworthyaspectsoftheDLPNO-MP2method:
+• BothDLPNO-CCSD(T)andDLPNO-MP2arelinear-scalingmethods(albeittheformerhasalargerpref-
+actor). ThismeansthatifaDLPNO-MP2calculationcanbeperformed,DLPNO-CCSD(T)isoftengoing
+tobewithinreach,too. However,CCSD(T)isgenerallymuchmoreaccuratethanMP2andthusshouldbe
+givenpreference.
+• Acorrelationfittingsetmustbeprovided,asthemethodmakesuseoftheRIapproximation.
+• CanonicalRI-MP2energydifferencesaretypicallyreproducedtowithinafractionof1kcal/mol. Thedefault
+thresholdshavebeenchosensoastoreproduceabout99.9%ofthetotalRI-MP2correlationenergy.
+• The preferred way to control the accuracy of the method is by means of specifying “LoosePNO”, “Nor-
+malPNO”and“TightPNO”keywords. “NormalPNO”correspondstodefaultsettingsanddoesnotneedto
+be given explicitly. More details and an exhaustive list of input parameters are provided in section Local
+MP2. NotethatthethresholdsdifferfromDLPNOcoupledcluster.
+72 Chapter6. RunningTypicalCalculations
+
+[... start of page 95 ...]
+ORCAManual,Release6.0.0
+• ResultsobtainedfromRI-MP2andDLPNO-MP2, orfromDLPNO-MP2withdifferentaccuracysettings,
+must never be mixed, such as when computing energy differences. In calculations involving open-shell
+species,eventheclosed-shellmoleculesneedtobesubjecttoaUHFtreatment.
+• Spin-component scaled DLPNO-MP2 calculations are invoked by using the ! DLPNO-SCS-MP2 keyword
+instead of ! DLPNO-MP2 in the simple input line. Weights for same-spin and opposite-spin contributions
+can be adjusted as described for the canonical SCS-MP

@@ -1,0 +1,75 @@
+[... end of page 112 ...]
+s the Frozen Core (FC) approximation is applied by default. This implies that the
+coreelectronsarenotincludedinthecorrelationtreatment,sincetheinclusionofdynamiccorrelationinthecore
+electronsusuallyaffectsrelativeenergiesinsignificantly.
+Thefrozencoreoptioncanbeswitchedonoroffwith! FrozenCoreor ! NoFrozenCoreinthesimpleinput.
+MoreinformationandfurtheroptionsaregiveninsectionFrozenCoreOptionsandinsectionIncluding(semi)core
+orbitalsinthecorrelationtreatment.
+90 Chapter6. RunningTypicalCalculations
+
+--- Page 113 ---
+ORCAManual,Release6.0.0
+LocalCoupledPairandCoupled-ClusterCalculations
+ORCAfeaturesaspecialsetoflocalcorrelationmethods. Theprevalentlocalcoupled-clusterapproachesdateback
+toideasofPulayandhavebeenextensivelydevelopedbyWerner,Schützandco-workers. Theyusetheconcept
+ofcorrelationdomainsinordertoachievelinearscalingwithrespecttoCPU,diskandmainmemory. Whilethe
+centralconceptofelectronpairsisverysimilarinbothapproaches,thelocalcorrelationmethodsinORCAfollow
+acompletelydifferentandoriginalphilosophy.
+In ORCA rather than trying to use sparsity, we exploit data compression. To this end two concepts are used:
+(a) localization of internal orbitals, which reduces the number of electron pairs to be correlated since the pair
+correlationenergiesareknowntofalloffsharplywithdistance;(b)useofatruncatedpairspecificnaturalorbital
+basistospanthesignificantpartofthevirtualspaceforeachelectronpair. Thisguaranteesthefastestconvergence
+ofthepairwavefunctionandanearlyoptimalconvergenceofthepaircorrelationenergywhilenotintroducingany
+realspacecut-offsorgeometricallydefineddomains. ThesePNOshavebeenusedpreviouslybythepioneersof
+correlation theory. However, as discussed in the original papers, the way in which they have been implemented
+intoORCAisverydifferent. Forafulldescriptionoftechnicaldetailsandnumericaltestssee:
+• F.Neese,A.Hansen,D.G.Liakos: Efficientandaccuratelocalapproximationstothecoupled-clustersingles
+anddoublesmethodusingatruncatedpairnaturalorbitalbasis.[616]
+• F. Neese, A. Hansen, F. Wennmohs, S. Grimme: Accurate Theoretical Chemistry with Coupled Electron
+PairModels.[617]
+• F. Neese, F. Wennmohs, A. Hansen: Efficient and accurate local approximations to coupled electron pair
+approaches. Anattempttorevivethepair-naturalorbitalmethod.[622]
+• D.G.Liakos,A.Hansen,F.Neese: Weakmolecularinteractionsstudiedwithparallelimplementationsof
+thelocalpairnaturalorbitalcoupledpairandcoupled-clustermethods.[520]
+• A. Hansen, D. G. Liakos, F. Neese: Efficient and accurate local single reference correlation methods for
+high-spinopen-shellmoleculesusingpairnaturalorbitals.[361]
+• C.Riplinger,F.Neese: Anefficientandnearlinearscalingpairnaturalorbitalbasedlocalcoupled-cluster
+method.[719]
+• C.Riplinger,B.Sandhoefer,A.Hansen,F.Neese: Naturaltripleexcitationsinlocalcoupled-clustercalcu-
+lationswithpairnaturalorbitals.[721]
+• C. Riplinger, P. Pinski, U. Becker, E. F. Valeev, F. Neese: Sparse maps - A systematic infrastructure for
+reduced-scalingelectronicstructuremethods. II.Linearscalingdomainbasedpairnaturalorbitalcoupled
+clustertheory.[720]
+• D.Datta,S.Kossmann,F.Neese: Analyticenergyderivativesforthecalculationofthefirst-ordermolecular
+propertiesusingthedomain-basedlocalpair-naturalorbitalcoupled-clustertheory[191]
+• M. Saitow, U. Becker, C. Riplinger, E. F. Valeev, F. Neese: A new linear scaling, efficient and accurate,
+open-shelldomainbasedpairnaturalorbitalcoupledclustersinglesanddoublestheory.[738]
+In2013,theso-calledDLPNO-CCSDmethod(“domainbasedlocalpairnaturalorbital”)wasintroduced.[719]This
+methodisnearlinearscalingwithsystemsizeandallowsforgiantcalculationstobeperformed. In2016,significant
+changestothealgorithmwereimplementedleadingtolinearscalingwithsystemsizeconcerningcomputingtime,
+hard disk and memory consumption.[720] The principal idea behind DLPNO is the following: it became clear
+early on that the PNO space for a given electron pair (ij) is local and located in the same region of space as the
+electronpair(ij). InLPNO-CCSDthislocalitywaspartiallyusedinthelocalfittingtothePNOs(controlledbythe
+parameterTCutMKN).However,thePNOswereexpandedincanonicalvirtualorbitalswhichledtosomehigher
+orderscalingsteps. InDLPNO,thePNOsareexpandedinthesetofprojectedatomicorbitals:
+(︁ ∑︁ )︁
+|𝜇˜⟩= 1− |𝑖⟩⟨𝑖| |𝜇⟩
+𝑖
+where |𝜇⟩ is an atomic orbital and |𝑖⟩ refers to an occupied molecular orbital. Such projected orbitals are an
+overcompleterepresentationofthevirtualspace. Theprojectedorbital|𝜇˜⟩islocatedinthesameregionofspace
+as|𝜇⟩andhencecanbeassignedtoatomiccenters. ThishasfirstbeeninventedandusedbyPulayandSaebo[704]
+intheirpioneeringworkonlocalcorrelationmethodsandwidelyexploitedbyWerner,Schützandco-workersin
+6.1. SinglePointEnergiesandGradients 91
+
+[... start of page 114 ...]
+ORCAManual,Release6.0.0
+theirlocalcorrelationapproaches. [753,754]DLPNO-CCSDgoesonestepfurtherinexpandingthePNOs⃒ ⃒𝑎˜ ⟩︀
+𝑖𝑗
+ofagivenpair(𝑖𝑗)as:
+⃒ ⃒𝑎˜ ⟩︀ = ∑︁ 𝑑𝑖𝑗 |𝜇˜⟩
+𝑖𝑗 𝜇˜𝑎˜
+𝜇˜∈{𝑖𝑗}
+where𝜇˜ ∈{𝑖𝑗}isthedomainofatoms(rangeof𝜇˜)thatisassociatedwiththeelectronpairij. Theadvantageofthe
+PNOmethodis,thatthesedomainscanbechosentobelarge(>15-20atoms)withoutcompromisingtheefficiency
+ofthemethod.
+ThecomparisonbetweenLPNO-CCSDandDLPNO-

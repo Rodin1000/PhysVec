@@ -1,0 +1,87 @@
+[... end of page 608 ...]
+eorbitalshaveanoccupationofexactly2.0or0.0!
+TheDIISmaysometimesconvergeslowlyor“trail”towardstheendsuchthatrealconvergenceisneverreached.
+The KDIIS [452, 453] — based on perturbation theory — is an approximation to the regular DIIS procedure
+avoidingredundantrotations. BothDIISschemesavoidlineardependenciesintheexpansionspace.
+MaxDIIS 15 # max. no of DIIS vectors to keep
+DIISThresh 1e-7 # overlap criteria for linear dependency
+The combination of SuperCI and DIIS (switchstep) is particularly suited to protect the active space composi-
+tion. Adjusting the level shift will do the job. Here, level shift is the single most important lever to control
+convergence.
+586 Chapter7. DetailedDocumentation
+
+--- Page 609 ---
+ORCAManual,Release6.0.0
+# default = dynamic level-shifting based on Ext-Act, Int-Act
+ShiftUp 2.0 # static up-shift the virtual orbitals
+ShiftDn 2.0 # static down-shift the internal orbitals
+MinShift 0.6 # minimum separation subspaces
+Level-shiftisparticularlyimportantiftheactive,inactiveandvirtualorbitalsoverlapintheirorbitalenergies. The
+energyseparationofthesubspacesisprintedintheoutput. Ideally,theentriesExt-ActandAct-Intshouldbe
+positiveandlargerthan0.2Eh. Thiswillhelptheprogramtopreserveyouractivespacecompositionthroughout
+theiterations. Ifnoshiftisspecifiedintheinput,ORCAwillchoosealevel-shifttoguaranteeanenergyseparation
+betweenthesubspaces(MinShift).
+E(CAS)= -230.590325053 Eh DE= -0.000798832
+--- Energy gap subspaces: Ext-Act = -0.244 Act-Int = -0.002
+--- current l-shift: Up(Ext-Act) = 0.54 Dn(Act-Int) = 0.30
+IndifficultcasestheuseoftheNewton-Raphsonmethod(NR)isrecommendedevenifeachindividualiterationis
+considerablymoreexpensive. Itisstrongtowardstheendbutitwouldbeawastetostartorbitaloptimizationwith
+the expensive NR method since its radius of quadratic convergence is quite small. The computationally cheaper
+alternativeistheSOSCFprocedurebelongingtothefamilyofquasi-Newtonupdates.
+KeepinmindthattheNewton-Raphsonisdesignedforoptimizationonaconvexsurface(Hessianissemidefinite).
+IftheNRisswitchedontooearly,thereisagoodchancethatthisconditionisnotfulfilled. Inthiscasetheprogram
+willcomplainaboutnegativeeigenvaluesordiagonalelementsoftheHessianascanbeseeninthesnippetbelow.
+The next optimization step is large and unpredictable. It is a wildcard that can get you closer to convergence or
+immediatedivergenceoftheCASSCFprocedure.
+||g|| = 0.771376945 Max(G)= 0.216712933 Rot=140,53
+--- Orbital Update [ NR]
+Warning: NEGATIVE diagonal element D(81,53)= -4.733590
+Warning: NEGATIVE diagonal element D(82,53)= -4.737955
+...
+For larger system, the augmented Hessian equations are solved iteratively (NR iterations). The augmented Hes-
+sian is considered solved when the residual norm, < 𝑟|𝑟 >, is small enough. Aside from the overall CASSCF
+convergence,negativeeigenvaluesaffecttheseNRiterations.
+--- Orbital Update [ NR]
+AugHess Tolerance (auto): Tol= 1.00e-07
+AUGHESS-ITER 0: E= -0.174480747 <r|r>= 0.558679452
+AUGHESS-ITER 1: E= -0.308672359 <r|r>= 0.468254671
+AUGHESS-ITER 2: E= -0.434272813 <r|r>= 0.286305469
+AUGHESS-ITER 3: E= -0.439149451 <r|r>= 0.286514628
+AUGHESS-ITER 4: E= -0.605787445 <r|r>= 0.191691955
+AUGHESS-ITER 5: E= -0.607766529 <r|r>= 0.310450670
+AUGHESS-ITER 6: E= -0.611674930 <r|r>= 0.141402593
+AUGHESS-ITER 7: E= -0.623145299 <r|r>= 0.394505306
+AUGHESS-ITER 8: E= -0.658410333 <r|r>= 0.166915094
+AUGHESS-ITER 9: E= -0.790571374 <r|r>= 4.722929453
+AUGHESS-ITER 10: E= -0.790590554 <r|r>= 4.716012014
+AugHess: No convergence in the Davidson procedure
+...
+ThereareanumberofrefinedNRsettingsthatinfluencetheconvergencebehavioronanon-convexenergysurface.
+Wementionthekeywordsforcompletenessanddis-encouragefromchangingthedefaultsettings. Ifoverallconver-
+gencecannotbechangedduetonegativeeigenvalues,itisrecommendedtodelaytheNRswitchstep(switchconv,
+switchiter). Thiswillrequiresometrialanderror,sincethecurvatureofthesurfaceisapriorinotknow.
+%casscf
+...
+aughess
+Solver 0 # Davidson (default)
+(continuesonnextpage)
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 587
+
+[... start of page 610 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+1 # Pople (pure NR steps)
+2 # DIIS
+MaxIter 35 # max. no. of CI iters.
+MaxDim 35 # Davidson expansion space
+MaxDIIS 12 # max. number of DIIS vectors
+UseSubMatrixGuess true # diag a submatrix of the Hessian
+# as an initial guess
+NGuessMat 512 # size of initial guess matrix (part of
+# the Hessian exactly diagonalized)
+ExactDiagSwitch 512 # up to this dimension the Hessian
+# is exactly diagonalized (small problems)
+PrintLevel 1 # amount of output during AH iterations
+Tol 1e-6 # convergence tolerance
+Compress true # use compressed storage
+DiagShift 0.0 # shift of the diagona

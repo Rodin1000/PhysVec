@@ -1,0 +1,65 @@
+[... end of page 460 ...]
+Calculations
+
+--- Page 461 ---
+CHAPTER
+SEVEN
+DETAILED DOCUMENTATION
+7.1 The SHARK Integral Package and Task Driver
+7.1.1 Preface
+Starting with ORCA 5.0 very large changes have taken place in the way that the program handles integrals and
+integralrelatedtaskslikebuildingFockmatrices. SHARKis apowerfulandefficientinfrastructurethatgreatly
+facilitatesthehandlingofthesetasks. Thisallowsdeveloperstowritehighlystreamlinedcodewithoptimalper-
+formanceandahighdegreeofreliability. ComparedtothewayORCAhandledintegralsbeforeORCA5.0,tensof
+thousandsoflinesofcodes,oftenduplicatedornearlyduplicatedfromcloselyrelatedpartsoftheprogramcouldbe
+eliminated. Fromtheperspectiveoftheuser,thevisiblechangestotheinputandoutputoftheprogramcompared
+toORCA4.2.1andearlierarerelativelylimited. However,underthehood,thechangesarevastandmassiveand
+willensurethatORCA’sinfrastructureismodernandverywellsuitedforthefutureofscientificcomputing.
+ThebenefitsofSHARKfortheusersofORCAare:
+1. Improvedcodeefficiencythatisconsistentthroughallprogramtasks. Inparticular,complicatedtwo-electron
+integrals,forexampleinthecontextofGIAOs,two-electronspin-orbitcouplingandtwo-electronspin-spin
+coupling integrals are handled with vastly improved efficiency. Also, integral digestion has been vastly
+improvedwithverylargebenefitsforcalculationsthatbuildmanyFockmatricesatatime, forexamplein
+CIS/TD-DFT,analyticHessiansorresponsepropertycalculations.
+2. Improvedcodereliability,sinceallintegralsnowrunthroughawelldebugged,commoninterface
+3. Shorterdevelopmenttimes. Thenewinfrastructureissouserfriendlytoprogrammersthatwritingnewcode
+thatmakesuseofSHARKismuchfasterthaninthepast.
+4. SHARK handles basis sets much better than the old infrastructure. Whether the basis sets used follow a
+segmentedcontraction,generalcontractionorpartialgeneralcontractionisimmaterialsincethealgorithms
+havebeenoptimizedcarefullyforeachkindofbasisthroughout.
+7.1.2 The SHARK integral algorithm
+One cornerstone of SHARK is a new integral algorithm that allows for highly efficient evaluation of molecular
+integrals. ThealgorithmisbasedonthebeautifulMcMurchie-Davidsonalgorithmwhichleadstothefollowing
+equationforagiventwo-electronintegral:
+(𝜇 𝜈 |𝜅 𝜏 )=𝐶 ∑︁ 𝐸𝜇𝜈;𝑥𝐸𝜇𝜈;𝑦𝐸𝜇𝜈;𝑧 ∑︁ 𝐸𝜅𝜏;𝑥𝐸𝜅𝜏;𝑦𝐸𝜅𝜏;𝑧(−1)𝑡′+𝑢′+𝑣′ 𝑅
+𝐴 𝐵 𝐶 𝐷 𝑡 𝑢 𝑣 𝑡′ 𝑢′ 𝑣′ 𝑡+𝑡′,𝑢+𝑢′,𝑣+𝑣′
+𝑡𝑢𝑣 𝑡′𝑢′𝑣′
+Here
+𝐶 =8𝜋
+5/2
+=139.947346620998902770103
+andtheprimitiveCartesianGaussianbasisfunctions{𝜇 }where𝐴istheatomiccenter,wherebasisfunction𝜇is
+𝐴
+centeredatpositionR . InordertocatchaglimpseofwhattheMcMurchie-Davidsonalgorithmisabout,consider
+𝐴
+439
+
+[... start of page 462 ...]
+ORCAManual,Release6.0.0
+twounnormalized,primitiveGaussianscenteredatatoms𝐴and𝐵,respectively:
+𝐺 =𝑥𝑖 𝑦𝑗𝑧𝑘 exp(−𝛼𝑅2)
+𝐴 𝐴 𝐴 𝐴 𝐴
+𝐺 =𝑥𝑖′ 𝑦𝑗′ 𝑧𝑘′ exp(−𝛽𝑅2)
+𝐵 𝐵 𝐵 𝐵 𝐵
+BymeansoftheGaussianproducttheorem,thetwoexponentialsarestraightforwardlyrewrittenas:
+(︁ )︁
+exp(−𝛼𝑅2)exp(−𝛽𝑅2)=𝐾 exp −(𝛼+𝛽)𝑟2
+𝐴 𝐵 𝐴𝐵 𝑃
+With
+(︁ )︁
+𝐾 =exp − 𝛼𝛽 |R −R |2
+𝐴𝐵 𝛼+𝛽 𝐴 𝐵
+𝑟2 =|r−R |2istheelectronicpositionrelativetothepoint
+𝑃 𝑃
+R = 𝛼 R + 𝛽 R
+𝑃 𝛼+𝛽 𝐴 𝛼+

@@ -1,0 +1,65 @@
+[... end of page 865 ...]
+pin-orbit coupling (SOC) and spin-spin coupling (SSC) contributions to the zero-field splitting (ZFS) can
+be calculated very accurately using a wavefunction obtained from a multiconfigurational calculation of a multi-
+referencetypesuchasCASSCF,MRCI,orMRPTasisdescribedinQDPTMagneticPropertiesSectionMagnetic
+propertiesthroughQuasiDegeneratePerturbationTheory
+7.39. TheMultireferenceCorrelationModule 843
+
+--- Page 866 ---
+ORCAManual,Release6.0.0
+7.40 In case that you want to run QDPT-SOC calculation with man-
+ually
+#adjusted diagonal energies you can copy the following part into #the %mrci soc block #and modify it as
+needed(energiesaregivenin#wavenumbersrelativetotheloweststate)
+7.41 NOTE: It is YOUR responsibility to make sure that the CAS-CI
+state
+#thatyoumaywanttodresswiththeseenergiescorrelateproperly#withtheenergiesprintedhere. Theorderof
+statesoreventhe#identityofstatesmaychangewithandwithoutinclusionof#dynamiccorrelationInthecase
+thatdynamiccorrelationstrongly#mixesdifferentCAS-CIstatestheremaynotevenbeaproper#correlation!
+7.42
+EDiag[ 0] 0.00 # root 0 of block 0
+EDiag[ 1] 48328.40 # root 1 of block 0
+EDiag[ 2] 48328.40 # root 2 of block 0
+EDiag[ 3] 49334.96 # root 3 of block 0
+EDiag[ 4] 7763.59 # root 0 of block 1
+EDiag[ 5] 7763.59 # root 1 of block 1
+EDiag[ 6] 11898.46 # root 2 of block 1
+EDiag[ 7] 46754.23 # root 3 of block 1
+Those transition energies can be substituted by a more accurate energies
+provided in the input file as follows:
+dosoctruedossctrueEDiag[0]0.00#root0ofblock0EDiag[1]48328.40#root1ofblock0EDiag[2]48328.40
+#root2ofblock0EDiag[3]49334.96#root3ofblock0EDiag[4]7763.59#root0ofblock1EDiag[5]7763.59
+#root1ofblock1EDiag[6]11898.46#root2ofblock1EDiag[7]46754.23#root3ofblock1end
+Accurate diagonal energies generally improve the accuracy of the SOC and
+SSC splittings.
+(sec:mrci.soc.lzfs.detailed)=
+### Local Zero-Field Splitting
+The submodule can also be used to calculate the local ZFS splitting
+parameters of atomic centers. The method, referred to as local complete
+active space configuration interaction (L-CASCI), can be used to
+separate into atomic contributions the SOC part of the total ZFS tensor.
+The rational behind it and additional details are described in the
+original publication {cite}(cid:96)retegan_first-principles_2014(cid:96); below are listed
+only the steps required to reproduce the calculation for the dimer
+complex presented there.
+1\. The first step consists in obtaining the molecular orbitals that are
+going to be used in the configuration interaction (CI) procedure. A good
+set of orbitals can be obtained from a restricted open-shell
+spin-averaged Hartree-Fock (SAHF) calculation. The relevant part of the
+input is listed below:
+(continuesonnextpage)
+844 Chapter7. DetailedDocumentation
+
+[... start of page 867 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+(cid:96)(cid:96)(cid:96)orca
+! def2-tzvp keepfock
+% scf
+hftyp rohf
+rohf_case sahf
+rohf_numop 2
+rohf_nel[1] 9
+rohf_norb[1] 10
+end
+ForthepresentMn(II)Mn(III)dimerthereareatotalof9electronsdistributedinto10d-o

@@ -1,0 +1,56 @@
+[... end of page 30 ...]
+ucturemethodathandsatisfiescertainconditions. Inpractice,theyusuallydonotagreeverywell,
+eveniflargebasissetsareused.
+Inordertogenerateelectriclengthandvelocityaswellashighermomentevaluations,youcanusethekeywords
+DoDipoleLength = true
+DoDipoleVelocity = true
+DoHigherMoments = true
+intheappropriateORCAinputblocksthattriggertherespectiveexcitedstatecalculation.
+8 Chapter2. TheArchitectureofORCA
+
+--- Page 31 ---
+CHAPTER
+THREE
+CALLING THE PROGRAM (SERIAL AND PARALLEL)
+3.1 Calling the Program
+UnderWindowstheprogramiscalledfromthecommandprompt! (MakesurethatthePATHvariableissetsuch
+thattheorcaexecutablesarevisible)
+orca MyMol.inp > MyMol.out
+UnderUNIXbasedoperatingsystemsthefollowingcallisconvenient1(herealso:makesurethatthePATHvariable
+issettothedirectorywheretheorcaexecutablesreside):
+orca MyMol.inp >& MyMol.out &
+The program writes to stdout and stderr. Therefore the output must be redirected to the file MyMol.out in this
+example. MyMol.inp is a free format ASCII file that contains the input description. The program will produce
+a number of files MyMol.x.tmp and the file MyMol.gbw. The “*.gbw” file contains a binary summary of the
+calculation. GBWstandsfor“Geometry-Basis-Wavefunction”. Basicallythistogetherwiththecalculationflagsis
+whatisstoredinthisfile. YouneedthisfileforrestartingSCFcalculationsorstartingothercalculationswiththe
+orbitalsfromthiscalculationasinput. The“*.tmp”filesaretemporaryfilesthatcontainintegrals,Fockmatrices
+etc. thatareusedasintermediatesinthecalculation. Iftheprogramexitsnormallyallofthesefilesaredeleted.
+Ifithappenstocrashyouhavetoremovethefilesmanually(rm MyMol*.tmpunderUnixor del MyMol*.tmp
+underWindows). Incaseyouwanttomonitortheoutputfilewhileitiswritten,youcanusethecommand(under
+Unix):
+tail -f MyMol.out
+to follow (option -f) the progress of the calculation. Under Windows you have to either open another command
+shellanduse:
+type MyMol.out
+type MyMol.out |more
+oryouhavetocopytheoutputfiletoanotherfileandthenuseanytexteditortolookatit.
+copy MyMol.out temp.out
+edit temp.out
+youcannotuseedit MyMol.outbecausethiswouldresultinasharingviolation.
+ThereareparallelversionsforLinux,MACandWindowscomputers(thankstotheworkofMsUteBecker)which
+makeuseofOpenMPI(open-sourceMPIimplementation)andMicrosoftMPI(Windowsonly). Assumingthatthe
+MPIlibrariesareinstalledproperly onyourcomputer, itisfairlyeasytoruntheparallel versionofORCA.You
+simplyhavetospecifythenumberofparallelprocesses,like:
+1Manypeople(includingmyself)willprefertowriteasmallshellscriptthat,forexample,createsarundirectory,copiestheinputthere,
+runstheprogram,deletespossiblyleftovertemporaryfilesandthencopiestheoutputbacktotheoriginaldirectory.
+9
+
+[... start of page 32 ...]
+ORCAManual,Release6.0.0
+! PAL4 # everything from PAL2 to PAL8 and Pal16, Pal32, Pal64 is recognized
+or
+%pal nprocs 4 # any number (positive integer)
+end
+Onmultipleuserrequestthe‘parallelization’ofNumCalchasbeenmademoreflexible. IfbeforeORCAwould
+startn

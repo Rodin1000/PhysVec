@@ -1,0 +1,66 @@
+**Detailed Rules for Generating [ITensors/ITensorMPS] Codes**
+
+====================================================================================================
+
+## **Notation**
+
+**Function Categories:**
+- **ELEMENT functions:** Functions with tags {'site', 'hamiltonian', 'observable', 'initialstate', 'effector'}. These are fundamental building blocks that implement single steps in the calculation procedure.
+- **Task functions:** Functions with tags {'run', 'item', 'plot'}. These orchestrate ELEMENT functions to complete calculation tasks.
+- **Entry point:** The 'main' function serves as the entry point of the program.
+
+**Scope of this part:** This part applies **ONLY to task functions** (tags: 'run', 'item', 'plot') and the **'main' entry point**.
+**DO NOT modify ELEMENT functions** (tags: 'site', 'hamiltonian', 'observable', 'initialstate', 'effector').
+
+====================================================================================================
+
+## **Task Functions (run, item, plot, main)**
+
+**Context:** This part defines higher-level functions that orchestrate ELEMENT functions to complete calculation tasks. These functions follow a hierarchical structure: 'run' functions call ELEMENT functions, 'item' functions call 'run' functions, and 'main' calls 'item' and 'plot' functions.
+
+**Terminology:**
+- **"task"**: The whole reproduction process of the specified subplot/table
+- **"item"**: Individual elements in a subplot (e.g., curves, lines, point sets)
+
+
+### **Task Function Tags and Their Rules:**
+
+#### **6. "run"** - Complete Calculation for Single Parameter Set
+- **Purpose:** Implement calculation for a given set of inputs
+- **CRITICAL RULES:**
+  - **You are REQUIRED** to call 'site'/'hamiltonian'/'observable'/'initialstate'/'effector' tagged functions (AT LEAST ONE for each)
+  - **You are REQUIRED** to implement a complete calculation procedure: you MUST BEGIN from constructing site, and then construct hamiltonian, initial state and observables to calculating the wanted state by effector, and output the wanted quantities for a SINGLE parameter set
+  - **You are FORBIDDEN** to define explicitly site, Hamiltonian, observables in this function
+  - **You are STRICTLY FORBIDDEN** to use other 'run' functions in the definition
+- **Example:** In 'run_excited_state' definition, you should NOT use 'run_ground_state' directly. Instead, use 'site'/'hamiltonian'/... functions to calculate the ground state.
+- **Note:** You are ALLOWED to define multiple 'run' functions (e.g., run_state_1, run_state_2 for independent calculations)
+
+#### **7. "item"** - Data Generation for Task Items
+- **Purpose:** Generate data needed for an item in this task
+- **CRITICAL RULES:**
+  - **You are REQUIRED** to call 'run' tagged functions directly. You MUST include at least ONE 'run' function, or the code should be absorbed in other 'item' functions. 
+  - **You are FORBIDDEN** to call explicitly site/hamiltonian/initialstate/observable/effector functions
+  - **You are REQUIRED** to ONLY explicitly call 'run' functions to scan parameters
+  - **You are STRICTLY FORBIDDEN** to include specific parameter values in 'item' functions
+- **Example:** Function that calculates a correlation-interaction dependency in the targeted figure
+- **Note:** You are ALLOWED to define different 'item' functions for different items needed in the task
+
+#### **8. "plot"** - Data Visualization
+- **Purpose:** Demonstrate given data
+- **You are REQUIRED** to include plot function if your task is to reproduce a figure
+- **Note:** You are ALLOWED to define multiple 'plot' functions
+
+#### **9. "main"** - Entry Point
+- **Purpose:** Serve as the entry point
+- **CRITICAL RULES:**
+  - **You are FORBIDDEN** to call explicitly site/hamiltonian/observable/initialstate/effector functions
+  - **You are FORBIDDEN** to call 'run' functions
+  - **You are REQUIRED** to call 'item' functions and 'plot' functions DIRECTLY and EXPLICITLY to fulfill the reproduction task
+  - **You are REQUIRED** to include specific parameter values in the 'main' definition
+  - **You are FORBIDDEN** to define GLOBAL parameters
+- **Note:** You MUST choose parameter values according to the target research paper. Choose values according to your own preferences ONLY WHEN the original paper does NOT provide related parameter values.
+
+**CRITICAL:** You are FORBIDDEN to define functions with other tags.
+
+====================================================================================================
+

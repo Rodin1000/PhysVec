@@ -1,0 +1,68 @@
+[... end of page 995 ...]
+infilenames).
+%md
+# Comment
+Timestep 0.5_fs # Comment
+Dump Position Filename "trajectory#1.xyz"
+end
+SomemoreMDinputsyntaxrules:
+• The MD input is generally not case-sensitive. The only exception are file names on platforms with case-
+sensitivefilesystems(suchasGNULinux).
+• Emptylinesareallowed.
+2Technicallyspeaking,ORCAwillthenbeaTuring-completescriptinterpreter,suchthatanycomputationalproblemcanbesolvedwith
+ORCA:-)
+7.51. AbinitioMolecularDynamicsSimulations 973
+
+--- Page 996 ---
+ORCAManual,Release6.0.0
+• Commandsandoptionsareseparatedbyspaceortabulatorcharacters. Anycombinationofthesecharacters
+maybeusedasseparator.
+• BothDOSandUNIXlinebreakstyleisacceptable.
+Commands
+Asalreadynotedabove, thecentralitemoftheMDinputisacommand. Eachinputlinecontains(atmost)one
+command,andthesecommandsareexecutedinthegivenorder. Acommandtypicallytakesoneormorearguments,
+whicharegivenbehindthecommandname,separatedbywhitespaces,tabulatorcharacters,orcommas(optional).
+Theorderoftheargumentsforacommandisfixed(seecommandlistinsectionCommandList. Commandsmay
+have optional arguments, which are always specified at the end of the argument list, after the last non-optional
+argument. Ifthereexistmultipleoptionalargumentsforacommand,notallofthemneedtobespecified;however,
+theyneedtobespecifiedinthecorrectorderandwithoutgaps:
+%md
+Command Arg1 Arg2 Arg3 # fine
+Command Arg1, Arg2, Arg3 # fine
+Command Arg1 Arg2 Arg3 Optarg1 # fine
+Command Arg1 Arg2 Arg3 Optarg1 Optarg2 # fine
+Command Arg1 Arg2 Arg3 Optarg2 # will not work
+end
+Apart from arguments and optional arguments, commands can also have modifiers. These can be considered as
+“sub-commands”,whichmodifyagivencommand,andmaypossesstheirownargumentlists. Modifiersgenerally
+followafterallnon-optionalandoptionalarguments,andtheymaynotpossessoptionalargumentsontheirown.
+Ifacommandhasmultiplemodifiers,theorderinwhichtheyaregivenisnotimportant.
+In the following input example, “Mod1” and “Mod2” are modifiers of “Command”. “Mod1” takes one argument,
+“Mod2”doesnottakearguments:
+%md
+Command Arg1 # fine
+Command Arg1 Optarg1 # fine
+Command Arg1 Mod1 Modarg1 Mod2 # fine
+Command Arg1 Mod2 # fine
+Command Arg1 Mod2 Mod1 Modarg1 # fine
+Command Arg1 Optarg1 Mod1 Modarg1 Mod2 # fine
+end
+Tomakethisabstractdefinitionalittlemoreillustrative,pleaseconsideragainonelinefromtheinputsampleat
+thebeginningofthissection:
+%md
+Dump Position Stride 1 Filename "trajectory.xyz"
+end
+Here,“Dump”isthecommand,whichtakesonenon-optionalargumenttospecifywhichquantityshallbedumped
+–inthiscase,“Position”. The“Dump”commandhastwomodifiers,namely“Stride”and“Filename”. The
+formertakesoneintegerargument,thelatterastringargument. Swappingthetwomodifiers(togetherwiththeir
+respectivearguments,ofcourse)wouldnotchangethebehavior.
+974 Chapter7. DetailedDocumentation
+
+[... start of page 997 ...]
+ORCAManual,Release6.0.0
+SeparatingArguments
+Asshownabove,theargumentswhicharepassedtoacommanddonotneedtobeseparatedbycommas. However,
+itisallowed(andrecommended)tostillusecommas. First,itcanincreasethereadabilityoftheinputfile. Secondly,
+thereexistafewambiguouscasesinwhichcommas(orparentheses)shouldbeusedtoclarifytheintendedmeaning.
+Oneofthesecasesisthearithmeticminusoperator. Itcaneitherbeusedasbinaryoperator(subtractingonenumber
+fromanother),orasunaryoperator(returningthenegativeofanumber). Bydefault,theminusoperatorwillbe

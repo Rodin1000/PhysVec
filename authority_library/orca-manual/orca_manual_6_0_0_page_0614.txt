@@ -1,0 +1,78 @@
+[... end of page 613 ...]
+nthepresentprogrambygeneratingapartial“formulatape”
+whichisreadineachCIiteration. ThetapemaybecomequitelargebeyondseveralhundredthousandCSFswhich
+limitstheapplicabilityoftheCASSCFmodule. TheacceleratedCI(ACCCI)hasthesamelimitations,butusesa
+slightlydifferentalgorithmthathandlesmulti-rootcalculationsmuchmoreefficiently. Fornow,properties(spin-
+orbitcoupling,g-Tensor...) aswellasNEVPT2correctionsarenotavailablewithACCCI.Nevertheless,itisthe
+recommendedoptiontoconvergeaCASSCFcalculationwithmultipleroots. Theresulting.gbwfilemaybeused
+inasuccessiveruntoobtainpropertiesorNEVPT2corrections.
+LargeractivespacesaretractablewiththeDMRGapproachortheiterativeconfigurationexpansion(ICE)devel-
+opedinourowngroup.[171,172]DMRGandICEreturnapproximatefullCIresults. Themaximumsizeofthe
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 591
+
+--- Page 614 ---
+ORCAManual,Release6.0.0
+activespacedependsonthesystemandtherequiredaccuracy. Activespacesof10–20orbitalsshouldbefeasible
+withbothapproaches. TheCASSCFtutorialcoversexampleswithACCCIandICEasCIsolvers.
+%casscf
+CIStep CSFCI # CSF based CI (default)
+ACCCI # CSF based CI solver with faster algorithm for multi-root calculations
+ICE # CSF based approximate CI -> ICE/CIPSI algorithm
+DMRGCI # density matrix renormalization group approach instead of the CI
+end
+In the ICE approach, the computation of the coupling coefficients is time-consuming and by default repeated in
+every macro-iteration. To avoid the reconstruction, it is recommended to once generate a coupling coefficient
+library(cclib)andtouseitforallofyourICEcalculations. Thedetailsofthemethodologyandthecclibare
+describedintheICEsectionApproximateFullCICalculationsinSubspace: ICE-CI.
+DetailedsettingsfortheconventionalCIsolvers(CSFCI,ACCCI,ICE)canbecontrolledinasub-block. Notall
+oftheoptionsandpropertiesareavailableforCIStepsapartfromthedefault! NEVPT2,transitiondensities
+andspin-dependentpropertiessuchasspin-orbitcouplingarenotyetavailableforACCCIandICE.
+%casscf ci
+MaxIter 64 # max. no. of CI iters.
+MaxDim 10 # Davidson expansion space = MaxDim * NRoots
+NGuessMat 512 # Initial guess matrix: 512x512
+PrintLevel 3 # amount of output during CI iterations
+ETol 1e-10 # default 0.1*ETol in CASSCF
+RTol 1e-10 # default 0.1*ETol in CASSCF
+TGen 1e-4 # ICE generator thresh
+TVar 1e-11 # ICE selection thresh, default = TGen*1e-7
+end
+TheCI-stepDMRGCIinterfacestotheBLOCK programdevelopedinthegroupofG.K.-L.Chan[156,157,
+296, 787]. Adetaileddescriptionofthe BLOCK program, itsinputparameters, generalinformationandexam-
+plesonthedensitymatrixrenormalizationgroup(DMRG)approach,areavailableinthesectionDensityMatrix
+RenormalizationGroupofthemanual.
+TheimplementationofDMRGinBLOCKisfullyspin-adapted. However,spin-densitiesandrelatedpropertiesare
+notavailableinthecurrentversionoftheBLOCKcode. TostartaDMRGcalculationaddthekeyword“CIStep
+DMRGCI”intoaregularCASSCFinput. ORCAwillsetdefaultparametersandgenerateandinputfortheBLOCK
+program. Ingeneral,DMRGisnotinvarianttorotationintheactivespace. Theprogrambydefault willrunan
+automaticorderingprocedure(Fiedler). Moreandrefinedoptionscanbesetinthedmrgsub-blockofCASSCF
+—seesectionDensityMatrixRenormalizationGroupforacompletelistofkeywords.
+%casscf
+nel 8
+norb 6
+mult 3
+CIStep DMRGCI
+# Detailed settings
+dmrg
+# more/refined options
+...
+end
+end
+Itishighlyrecommendedtostartthecalculationwithsplit-localizedorbitals. Anysetofstartingorbitals(gbwfile)
+can be localized using the orca_loc program. Typing orca_loc in the shell will return a small help-file with
+details on how to setup an input for the localization. Examples for DMRG including the localization are in the
+corresponding section of the manual Density Matrix Renormalization Group. The utility program orca_loc is
+documentedinsectionorca_loc. Split-localizationreferstoanindependentlocalizationoftheinternalandvirtual
+partofthedesiredactiveorbitals.
+NOTE:
+592 Chapter7. DetailedDocumentation
+
+[... start of page 615 ...]
+ORCAManual,Release6.0.0
+• Letusstressagain: itisstronglyrecommendedtofirstLOOKatyourorbitalsandmakesurethattheones
+thatwillentertheactivespacearereallytheonesthatyouwanttobeintheactivespace! Manyproblemscan
+besolvedbythinkingaboutthedesiredphysicalcontentsofthereferencespacebeforestartingaCASSCF.
+Apoorchoiceoforbitalsresultsinpoorconvergenceorpooraccuracyoftheresults! Choosingtheactive
+orbitalsalwaysrequireschemicalandphysicalinsightintothemoleculesthatyouarestudying!
+• Pleasetrytheprogramwithdefaultsettingsbeforeplayingwiththemoreadvancedoptions. Ifyouencounter
+convergenceproblems,havealookintoyouroutput,readthewarni

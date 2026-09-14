@@ -1,0 +1,88 @@
+[... end of page 1210 ...]
+Values.csv", baseFilename);
+else
+write2String(csvFilename, "%s_absValues.csv", baseFilename);
+endIf
+write2String(myFilename, "%s.py", baseFilename);
+fPtr = openFile(myFilename, "w");
+# Import necessary libraries
+write2File(fPtr, "import pandas as pd\n");
+write2File(fPtr, "import seaborn as sns\n");
+write2File(fPtr, "import matplotlib.pyplot as plt\n");
+# Read the csv file
+(continuesonnextpage)
+1188 Chapter7. DetailedDocumentation
+
+--- Page 1211 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+write2File(fPtr, "df = pd.read_csv('%s')\n", csvFilename);
+#Make a lineplot
+write2File(fPtr, "sns.lineplot(data=df, x=\"distance\", y=\"calcValue\", hue=\"property\", \n
+lw=%d, markers=True, marker='%s', markersize=%d, dashes=False)\n", lw,␣
+marker, markersize);
+˓→
+write2File(fPtr, "plt.axhline(y=0, color='black', linestyle='-', linewidth=1)\n");
+write2File(fPtr, "plt.title(\"Energy Potential\", fontsize=%d)\n", fontsize+4);
+write2File(fPtr, "plt.xlabel(\"Ne-Ne Distance\", fontsize=%d)\n", fontsize);
+write2File(fPtr, "plt.ylabel(\"Energy (kcal/mol)\", fontsize=%d)\n", fontsize);
+write2File(fPtr, "plt.xticks(fontsize=%d)\n", fontSize);
+write2File(fPtr, "plt.yticks(fontsize=%d)\n", fontSize);
+write2File(fPtr, "plt.show()\n");
+closeFile(fPtr);
+sys_cmd("python3 %s", myFilename);
+EndIf
+End
+Comments
+Thisscripthassomeinteresingfeatures. ItcontainstwovariablesremoveFilesandDoPython. Ifthefirstofthem
+issettotruethenthescriptwilluseasystemcommandtoremovefilesthatarenotneededanymoreaftertheend
+ofthecalculation. Thelatter,DoPython,ifsettotruewillreadthe.csvfilethatiscreatedandwriteapythonfile
+tomakeaplotoftheresults. Thenitwillrunthepythonscripttoactuallymaketheplot.
+7.60.6 Numerical polarizabilities
+Introduction
+Thisscriptcalculatesnumericallythepolarizabilityofthemoleculeusingsinglepointcalculationswithanelectric
+field.
+Filename
+numericalPolarizability.cmp
+SCRIPT
+# Authors: Dimitrios G. Liakos / Frank Neese / Zikuan Wang
+# Date : May of 2024
+#
+# This is a compound script that calculates the
+# dipole-dipole polarizability tensor numerically
+# using the double derivative of energy.
+#
+# The idea is the following:
+#
+# 1 Perform a field free calculation
+#
+# 2 Loop over directions I=X,Y,Z
+#
+# 3 Loop over directions J=X,Y,Z
+#
+# - put a small Q-field in directions I and J
+# - Solve equations to get the energy for each combination
+# - Polarizability alpha(I,J) =- ( E(+I,+J) - E(+I,-J)-E(-I,+J)+ E(-i,-j)/(4*Field^2)
+# 4 Print polarisability
+#
+# ----------------------------------------------------------------------
+# ---------------------- Variables -------------------------------
+# --- Variables to be adjusted (e.g. using 'with' ----------------------
+(continuesonnextpage)
+7.60. CompoundExamples 1189
+
+[... start of page 1212 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Variable molecule = "h2o.xyz";
+Variable charge = 0;
+Variable mult = 1;
+Variable method = "HF";
+Variable basis = " ";
+Variable restOfInput = "VeryTightSCF";
+Variable blocksInput = " ";
+Variable E_Field = 0.0001;
+Variable enPropName = "JOB_Info_Total_En";
+Variable removeFiles = true;
+# -------------- Rest of the variables --------------------------------
+Variable FField[3];

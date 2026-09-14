@@ -1,0 +1,81 @@
+[... end of page 794 ...]
+DDFT
+LRCPCM true #Use LRCPCM
+CPCMEQ false #Which epsilon is used to compute the charges.
+DoNTO #Generate Natural Transition Orbitals
+NTOStates 1,2,3 #States to consider for NTO analysis. If empty, all will be done.
+NTOThresh 1e-4 #Threshold for printing occupation numbers
+SaveUnrNatOrb #Saves natural orbitals (not NTO) from unrelaxed densities
+#for the IROOT chosen (including IROOTLISTs)
+DoSoc false #Include spin-orbit coupling?
+(continuesonnextpage)
+772 Chapter7. DetailedDocumentation
+
+--- Page 795 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+SocGrad false #Set true to compute the SOC gradient for a given IROOT
+DOTRANS false #Transient spectra - starting from IROOT
+ALL #Compute all possible transitions
+7.31 Excited States via ROCIS and DFT/ROCIS
+TheORCAprogrampackageincludestheorca_rocismoduletoperformconfigurationinteractionwithsingle
+excitations(CIS)calculationsusingarestrictedopen-shellHartee-Fock(ROHF)referencefunction. Itproduces
+excitationenergies,absorptionenergiesandCDintensities. Itwasdesignedwiththeaimtoreproduceand-even
+moreimportantly-reliablypredicttransitionmetalL-edgesasobservedinX-rayabsorptionspectroscopy(XAS).
+7.31.1 General Use
+Inthepresentimplementationtheorca_rocismoduleisonlyabletoperformCIScalculationsontopofahigh-
+spinROHFreferencefunction. Allspinsoftheunpairedelectronshavetobecoupledferrmoagneticallytogive
+atotalspinof𝑆 = 1𝑁, where𝑁 isthenumberofunpairedelectrons. OtherROHFfunctionssuchasZerner’s
+2
+configuration averaged or spin averaged ROHF cannot be used as reference. The input for a high spin ROHF
+calculationisdoneinthe%scfblock.
+%scf HFTyp ROHF #Flag for ROHF
+ROHF_Case HighSpin #selects the high-spin case
+ROHF_NEl[1] = 4 #the number of unpaired electrons
+end
+InourexperienceROHFcalculationssufferalotfromconvergenceproblems. UHFcalculationsgenerallyexhibit
+betterconvergenceproperties. Inmostcasesthequasi-restrictedorbitals(qro’s)ofaUHFcalculationresemblethe
+ROHForbitals. ThustheprogramfeaturestheabilitytostartaROCIScalculationontopofaUHFcalculation. It
+willautomaticallycreatetheqro’sandbuildthereferencedeterminantwiththem. Ifonewantstoavoidthe(small)
+errorsthatareintroducedbythisprocedure, onemaytaketheqro’sofaUHFcalculationasstartingorbitalsfor
+a subsequent ROHF calculation. Furthermore it is possible to invoke the orca_rocis module for closed-shell
+molecules. TheprogramwillthenperformaCIcalculationwiththeprovidedRHFreferencefunction. Inthiscase
+itwillyieldthesameresultastheorca_cisprogram.
+A number of basic variables in the %rocis block control the settings of the Davidson procedure that is used to
+solvetheCIproblem:
+%rocis NRoots 6 # number of desired roots
+MaxDim 5 # Davidson expansion space = MaxDim * NRoots
+ETol 1e-6 # energy convergence tolerance
+RTol 1e-6 # residual vector convergence tolerance
+MaxIter 35 # maxmimum number of iterations
+NGuessMat 512 # dimension of the guess matrix: 512x512
+end
+ThedimensionoftheiterativesubspaceisgivenbyMaxDim·NRoots. ThelowestpossiblechoiceforMaxDimis
+avalueof2. Ingeneral,bychoosingMaxDim≈5-10timesNRootsyouwillachieveamorefavorableconvergence
+bythecostofanincreaseddiskspacerequirement. IncreasingtheNGuessMatvariablewillimprovetheconver-
+gence of the iterative CI procedure. The amount of output produced during the calculation is controlled via the
+PrintLevelvariable
+%rocis NRoots 3
+PrintLevel 3
+end
+Note,thatthisdoesnotinfluencewhichspectraarecalculatedorprinted. Theabsorptionspectrumcalculatedon
+thebasisofthepuredipoleapproximationforyourcalculationisalwaysprinted. Inaddition,itispossibletoallow
+7.31. ExcitedStatesviaROCISandDFT/ROCIS 773
+
+[... start of page 796 ...]
+ORCAManual,Release6.0.0
+for electric quadrupole and magnetic dipole contributions to the absorption spectrum as well as to calculate the
+CDspectrumchecksection(OnePhotonSpectroscopy)fordetails. Bydefininginthe%rocisblock:
+%rocis NRoots 6
+DoDipoleLength true
+DoDipoleVelocity true
+DoHigherMoments true
+DecomposeFoscLength true
+DecomposeFoscVelocity true
+DoFullSemiclassical true
+DoCD true
+end
+Theprintedspectralooklikethis:
+-----------------------------------------------------------------------------
+ABSORPTION SPECTRUM VIA TRANSITION ELECTRIC DIPOLE MOMENTS
+-----------------------------

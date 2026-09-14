@@ -1,0 +1,70 @@
+[... end of page 1023 ...]
+monics. In our setup, it is the same value for the expansion of the point charges in the embedding or
+theGaussianoverlapsintheQMpart. ItcanbesetupthroughthekeywordFMMQMMM_MAM.Werecommend
+FMMQMMM_MAM = 20 toensure a good accuracy, in theorder of 0.0001-0,0001 Ha. With a lower value of
+MAM=15,onecanusuallyexpectamHa(0.63kcal.mol−1)precision. Howeveritissystemdependent,sothatwe
+recommendyoutostartwithMAM=20andseehowitbehavesifyoudecreaseittoavalueof15. Theavailable
+valuesforMAMareintherange1-25.
+7.52. FastMultipoleMethod 1001
+
+--- Page 1024 ---
+ORCAManual,Release6.0.0
+%method
+DOFMMQMMM True #turn ON the use of the FMM
+FMMQMMM_MAM 20 #Default Maximum Angular Momentum
+end
+7.52.3 The “Very” Fast Multipole Method (VFMM)
+Duetotherecursiveschemebetweenlevels,theFFfeltinthecenterofaboxisbuiltbyonlycalculatinginteractions
+withtheLFFboxesateverylevel. Theevaluationof𝑉𝐿𝐹𝐹 becomesthebottleneckofthealgorithm. Toaccelerate
+it,anoptionhasbeenimplementedinwhichdifferentMAMtruncationparameterswillbeusedforallthe(>189)
+boxesintheLFFarea. ThisoptionFMMQMMMM_DoVFMMisturnedONbydefault,butshouldbeswitched
+OFFwhenevertheMAMissmallerthan15,thatwouldimpacttomuchtheaccuracywithoutimprovingmuchthe
+efficiency.
+%method
+DOFMMQMMM True #turn ON the use of the FMM
+FMMQMMM_DoVFMM True #Use the Very Fast Multipole Method
+end
+7.52.4 Recommended input
+Whenever there is an electrostatic embedding, for systems containing more than 10,000 point charges (ECM)
+or MM atoms (QMMM), it is recommended to turn on the FMM in order to accelerate the calculation of the
+electrostatic potential. However, when using heavy parallelization with more than 24 processors, the impact of
+enablingtheFastMultipoleMethod(FMM)maybenegligibleforsmallembeddingsize.
+Caution: FMM-QMMMdoesnotreplacetheQMMMkeyword.
+Thetwoelementsonecanplayonarethetruncationparameteroftheexpansion, MAM,andtheboxdimension
+at the deepest level (L ). Recommended/default parameters can be called in the keyword line directly using
+max
+FMM-QMMMorbysettingtheparametersaccordinglyinthe%methodblock:
+#keyword line
+! FMM-QMMM
+#OR through method block
+%method
+DOFMMQMMM True #turn ON the use of the FMM
+USEFMMQMMM True #turn ON the use of the FMM
+###parameters:
+FMMQMMM_DoVFMM True #Use the Very Fast Multipole Method
+FMMQMMM_MAM 20 #Maximum Angular Momentum
+FMMQMMM_Levels 0 #Number of levels set to 0, will be set automatically by box dim
+FMMQMMM_BoxDimInp 9.0 #Higher boundary to set up the dimension (in Bohr!)
+FMMQMMM_DoBoxDimOpt True #Optimize the box dimension
+end
+Theparametersusedbythealgorithmareprintedintheoutputbydefault,werecomendyoutochecktheminyour
+firstcalculations:
+----------------------
+SHARK INTEGRAL PACKAGE
+----------------------
+[...]
+(continuesonnextpage)
+1002 Chapter7. DetailedDocumentation
+
+[... start of page 1025 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Use FMM for one center integrals with PCs
+- - - - - - - FMM PARAMETERS- - - - - - -
+num PCs 75894
+VFMM USED
+MAM 20
+Input box dim 9.000
+Refined box dim 5.197
+Tree depth/levels 6
+- - - - 

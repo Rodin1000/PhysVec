@@ -1,0 +1,75 @@
+[... end of page 940 ...]
+
+(forMWADRelTol=1e-4). Thefileexample009.001.inpwillcontainthefittedeffectivevaluesofthevibrational
+frequency and dimensionless displacement: 𝜔 = 1404cm−1, ∆ = 1.35. One can notice that the fit is rather
+poorinthelow-andhigh-energyedgesoftheabsorptionandfluorescencespectra,respectively(Fig.7.57). The
+sourceofthisdiscrepancyisthesingle-modeapproximationwhichwasemployedhere. Thequalityofthefitcan
+besignificantlyimprovedassumingseveralmodeswithnon-zerodisplacementparameters. Notethatinsuchacase
+918 Chapter7. DetailedDocumentation
+
+--- Page 941 ---
+ORCAManual,Release6.0.0
+theproperguessonthenumberofactivemodesandcorrespondingdimensionlessdisplacementscanbededuced
+fromquantumchemicalcalculations.
+7.44.4 Quantum-Chemically Assisted Simulations and Fits of Optical Band-
+shapes and Resonance Raman Intensities
+Inthissectionwefinallyconnectthespectrasimulationalgorithmstoactualquantumchemicalcalculationsand
+outlineadetailedapproachfortheanalysisofabsorption, fluorescenceandresonanceRamanspectrawithinthe
+IMDHOmodel. Ourprocedurebecomeshighlyefficientandnearlyautomaticifanalyticalexcitedstatederivatives
+withrespecttonucleardisplacementsareavailable. However,thisavailabilityisnotmandatoryandhence,spectral
+predictionsmayaswellbeachievedbymeansofnormalmodescancalculationsforhigh-levelelectronicstructure
+methodsforwhichanalyticgradientshavenotbeenimplemented.
+Example: Quantum-ChemicallyAssistedAnalysisandFitoftheAbsorptionandResonanceRa-
+manSpectrafor1-1A →1-1B Transitionintrans-1,3,5-Hexatriene
+𝑔 𝑢
+ThefollowinginputfileforanORCAruninvokesthecalculationoftheexcited-stateorigindisplacementsalongall
+normalmodesbymeansofenergyandexcitedstategradientcalculationsattheground-stateequilibriumgeometry.
+ThemethodisvalidfortheIMDHOmodelforwhichtheexcited-stateenergygradientalongagivennormalmode
+andcorrespondingoriginshiftarerelatedinaverysimpleway.
+#
+# example010.inp
+#
+# TDDFT BHLYP Normal Mode Gradient Calculation
+#
+# The keyword NMGrad invokes the normal mode gradient calculation
+#
+! RKS BHandHLYP TightSCF SV(P) NMGrad
+%cis NRoots 1
+triplets false
+end
+%rr
+# the nuclear Hessian must have been calculated before - for example by a
+# DFT calculation.
+HessName= "hexatriene.hess"
+states 1 # Perform energy-gradient calculations for the 1st
+# excited state.
+Tdnc 0.005 # Threshold for dimensionless displacements to be
+# included in the input file for spectral simulations
+# generated at the end of the program run.
+# By default Tdnc= 0.005
+ASAInput true # Generate the input file for spectra simulations
+end
+* xyz 0 1
+C -0.003374 0.678229 0.00000
+H -0.969173 1.203538 0.00000
+C 1.190547 1.505313 0.00000
+H 2.151896 0.972469 0.00000
+C 1.189404 2.852603 0.00000
+H 0.251463 3.423183 0.00000
+H 2.122793 3.426578 0.00000
+C 0.003374 -0.678229 0.00000
+H 0.969172 -1.203538 0.00000
+(continuesonnextpage)
+7.44. SimulationandFitofVibronicStructureinElectronicSpectra,ResonanceRaman 919
+ExcitationProfilesandSpectrawiththeorca_asaProgram
+
+[... start of page 942 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+C -1.190547 -1.505313 0.00000
+H -2.151897 -0.972469 0.00000
+C -1.189404 -2.852603 0.00000
+H -0.251463 -3.423183 0.00000
+H -2.122793 -3.426578 0.00000
+*
+In the ORCA run the TDDFT excited state gradient calculations are performed on top of a TDDFT calculati

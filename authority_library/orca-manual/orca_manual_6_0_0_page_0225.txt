@@ -1,0 +1,68 @@
+[... end of page 224 ...]
+ctionproductisthentakenasthereferencestructure.
+Important: Theuseofforce-fieldsliketheGFN-FFisnotrecommendedhere,becauseitisnotsupposedtobreak
+bonds.
+202 Chapter6. RunningTypicalCalculations
+
+--- Page 225 ---
+ORCAManual,Release6.0.0
+6.4.8 Default frozen coordinates
+BydefaultGOATwillfreeze:
+1. allbonds,
+2. allanglesinvolvingtwosp2atomswithinthesamering,
+3. alldihedralsaroundastrongbond(d(B,C)<[0.95x(sumofcovalentradii)])oftwosp2centralatomswithin
+thesamering.
+“sp2atoms”areherelooselydefinedonlyforC,NandOwithlessthan4,3and2bondsrespectively.
+The first freeze is to avoid change of topology by bond breaking. The second and third are to avoid going over
+veryhighenergybarriersonchangingtheseangles,whichinpractice,unlessunderveryspecialcircumstanceswill
+neverflipanyway!
+These constraints are automatically lifted for GOAT-EXPLORE and can also be set to FALSE with their specific
+keywords.
+6.4.9 Some general observations
+Note:
+• GOATwillworkwithanymethodinORCA,allyouneedisthegradient. ThatincludesusingDFT,QM/MM,
+ONIOM,broken-symmetrystates,excitedstatesetc.
+• BeawarethatDFTismuchcostlierthanXTB.ItisperfectlypossibletorunGOATwithR2SCAN-3C,but
+bepreparedtousemanycoresorwaitforafewdays:D.Werecommendatleast%PAL NPROCS 32 END,to
+have8workerswith4coreseach. HybridDFTisevenheavier,soifyouwanttouseB3LYP,gowithatleast
+NPROCS 64-anddon’thurry. Theaimistodoaglobalsearchhere,itdoesnotcomeforfree!
+• Inmanycases,itmightbeusefultouseGFNUPHILL GFNFFtousetheGFN-FFforce-fieldPESduringthe
+uphill steps. There, an exact potential is not really needed as the main objective is to take structures out
+of their current minimum and GOAT will run much faster, only using the chosen method for the actual
+optimizations. GFN2XTB,GFN1XTBorGFN0XTBarealsovalidoptions.
+• Formethodsthatneedbondbreaking,suchasGOAT-EXPLOREorGOAT-REACT,GFNUPHILLGFNFFcan-
+not be used because the GFN-FF will not allow for bond breaking. Choose GFN2XTB, GFN1XTB or
+GFN0XTB.
+• YoucanalwayscheckwhattheworkersaredoingbylookingintotheBasename.goat.x.x.outfiles. The
+first number refers to the global iteration and the second to the specific worker. This is an ORCA output
+(withsomesuppressedprintingtosavespace)thatcanbeopenedinmostGUIs.
+• GOATwillautomaticallydetectfragmentsattheverybeginning,evenbeforethefirstgeometryoptimization.
+Itwillalsorespectfragmentsgivenviathegeometryblocks. YoucanturnthisoffbysettingAUTOFRAGto
+FALSEunder%GOAT.
+• Amidebondchiralityisnotfrozenbydefault,whichmeanstheinputtopologyyougaveforamides(cisor
+trans)maychange. Ifyouwanttofreezeit,setFREEZEAMIDEStoTRUE.
+• Similarly double bonds outside rings can also change their topology. Choose FREEZECISTRANS TRUE in
+ordertofreezethosedihedrals.
+• Forcertainmolecules,itmightbeinterestingtolimitthecoordinationnumberofcertainatoms,inthatcase
+useMAXCOORDNUMBER.
+• GOATwillrespectthechoicesfromthe%GEOMblockforthegeometriessoyoucanuseallkindsofconstraints
+you need for other types of coordinate freeze. It can also be combined with all kinds of arbitrary wall
+potentialsavailable(seeSection6.3.8).
+• Ifyouwanttopushonlycertainatomsuphill, youcangivealisttoUPHILLATOMS.Inthatcasetheuphill
+force shown in Fig. 6.24 will be applied only to the coordinates involving those atoms and the rest of the
+moleculewillonlyreacttothat. Thisisusefulforconformationalsearchesonpartsofabiggersystem.
+6.4. GOAT:globalgeometryoptimizationandensemblegenerator 203
+
+[... start of page 226 ...]
+ORCAManual,Release6.0.0
+• Bydefaultconformersupto12.0kcal/molfromtheglobalminimumareincluded,thiscanbechangedby
+settingMAXEN.
+6.4.10 Basic keyword list
+Herewepresentabasiclistofoptionstobegivenunder%GOAT:
+%GOAT
+#
+# general options
+#
+MAXITER 128 # defines an arbitrary number of max GOAT geom opt iters per worker.
+MAXOPTITER 256 # maximum number of geometry optimizations per GOAT iter.
+SKIPINITIALOPT TRUE # if you want to

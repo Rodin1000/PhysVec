@@ -1,0 +1,76 @@
+[... end of page 185 ...]
+. Ifthemoleculeisnotclosetothesourceoftheelectricfield,itiseven
+hardertogeneratestrongelectricfields: forexample,a100Vvoltageacrosstwometalplatesthatare1mm
+apartgeneratesanelectricfieldofmerely10−5V/Angstrom. Therefore,ifexperimentallyacertainstrength
+ofhomogeneouselectricfieldseemstopromoteareaction,butnosucheffectisfoundincalculation,please
+considerthepossibilitythattheexperimentallyobservedreactivityisduetoastronglocalelectricfieldnear
+the electrode surface (that is much higher than the average field strength in the system), or due to other
+effects such as electrolysis. Conversely, if you predict a certain molecular property change at an electric
+6.1. SinglePointEnergiesandGradients 163
+
+--- Page 186 ---
+ORCAManual,Release6.0.0
+fieldstrengthof,e.g. >0.1au,itmaybeanon-trivialquestionwhethersuchanelectricfieldcanbeeasily
+realizedexperimentally.
+• The electric field breaks the rotational symmetry of the molecule, in the sense that rotating the molecule
+can change its energy. Therefore, geometry optimizations in electric fields cannot be done with internal
+coordinates. Whentheuserrequestsgeometryoptimization,theprogramautomaticallyswitchestoCarte-
+sian coordinates if it detects an electric field. While Cartesian coordinates allow the correct treatment of
+molecular rotation, they generally lead to poor convergence, so a large number of iterations is frequently
+necessary.
+• Similarly, whenthe molecule ischarged, its energyis not invariant withrespect to translations. However,
+whenthereisonlyadipolarelectricfieldbutnoothertranslationalsymmetry-breakingforces(quadrupolar
+field,pointcharges,wallpotentials),achargedmoleculewillaccelerateforeverinthefield,anditsposition
+willneverconverge. Therefore,forgeometryoptimizationswithinapurelydipolarelectricfieldandnowall
+potentials,wedonotallowglobaltranslationsofthemolecule,evenwhentranslationcanreduceitsenergy.
+ForMDsimulationswehoweverdoallowtheglobaltranslationsofthemoleculebydefault. Ifthisisnot
+desired,onecanfixthecenterofmassintheMDrunusingtheCenterCOMkeyword(sectionRun).
+• For frequency calculations in electric fields, we do not project out the translational and rotational contri-
+butions of the Hessian (equivalent to setting ProjectTR false in %freq; see Frequency calculations -
+numericalandanalytical fordetails). Therefore,thefrequenciesoftranslationalandrotationalmodescan
+bedifferentfromzero,andcanmixwiththevibrationalmodes. Whentheelectricfieldisextremelysmall
+butnotzero,the“true”translational/rotationalsymmetrybreakingoftheHessianmaybesmallerthanthe
+symmetry breaking due to numerical error; this must be kept in mind when comparing the frequency re-
+sultsundersmallelectricfieldsversusunderzeroelectricfield(inthelattercaseProjectTRisbydefault
+true). Besides, when the translational and rotational frequencies exceed CutOffFreq (which is 1 cm−1 by
+default;seesectionFrequencycalculations-numericalandanalytical),theirthermochemicalcontributions
+arecalculatedasiftheyarevibrations.
+• While the program allows the combination of electric fields with an implicit solvation model, the results
+must be interpreted with caution, because the solvent medium does not feel the electric field. The results
+may therefore differ substantially from those given by experimental setups where both the solute and the
+solvent are subjected to the electric field. If the solvent’s response to the electric field is important, one
+shoulduseanexplicitsolvationmodelinstead. Alternatively,onecanalsosimulatetheelectricfieldinthe
+implicit solvent by adding inert ions (e.g. Na+, Cl−) to the system. Similarly, implicit solvation models
+cannot describe the formation of electrical double layers in the electric field and their influence on solute
+properties,soincaseelectricaldoublelayersareimportant,MDsimulationswithexplicittreatmentofthe
+ionsmustbecarriedout.
+• TheelectricfieldnotonlycontributestothecoreHamiltonian,buthasextracontributionsinGIAOcalcu-
+lations, duetothemagneticfieldderivativesofdipoleintegrals. Inthecaseofadipolarelectricfield, the
+GIAOcontributionshavebeenimplemented,makingitpossibletostudye.g. theeffectofelectricfieldson
+NMRshieldings,andasaspecialcase,nucleusindependentchemicalshieldings(NICSs),whichareuseful
+toolsforanalyzingaromaticity. QuadrupolarfieldscannotbeusedinGIAOcalculationsatthemoment.
+6.2 SCF Stability Analysis
+TheSCFstabilitywillgiveanindicationwhethertheSCFsolutionisatalocalminimumorasaddlepoint.[80,778]
+ItisavailableforRHF/RKSandUHF/UKS.Inthelattercase,theSCFisrestartedbydefaultusingnewunrestricted
+startorbitalsifaninstabilitywasdetected. Forademonstration,considerthefollowinginput:
+! BHLYP def2-SVP NORI
+%scf
+guess hcore
+HFTyp UHF
+STABPerform true
+(continuesonnextpage)
+164 Chapter6. RunningTypicalCalculations
+
+[... start of page 187 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+* xyz 0 1
+h 0.0 0.0 0.0
+h 0.0 0.0 1.4
+*
+TheHCOREguessleadstoasymmetric/restrictedguess,whichdoesnotyieldtheunrestrictedsolution. Thesame
+isoftentrueforotherguessoptions. Formoredetailsonthestabilityanalysis,seeSectionSCFStabilityAnalysis.
+6.3 Geometry Optimizations, Surface Scans, Transition States,
+MECPs, Conical Intersections, IRC, NEB
+The usage of analytic gradients is necessar

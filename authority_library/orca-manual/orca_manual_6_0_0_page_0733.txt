@@ -1,0 +1,89 @@
+[... end of page 732 ...]
+lue2, N end
+(continuesonnextpage)
+1Butthatdoesn’tmeanthatgeometryoptimizationitselfisstraightforward!Sometimes,evenwhenitisnotexpectedtheconvergencecan
+beprettybadanditmaytakeabetterstartingstructuretocometoastationarypoint.Inparticularfloppystructureswithmanypossiblerotations
+aroundsinglebondsandsoftdihedralanglemodesaretricky. ItmaysometimesbeadvantageoustocomputeaHessianmatrixata“cheap”
+leveloftheoryandthendotheoptimizationinCartesiancoordinatesstartingfromthecalculatedHessian.
+710 Chapter7. DetailedDocumentation
+
+--- Page 733 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# perform constrained optimizations with varying N1-N2-
+# distance from value1 up to value2 in N steps;
+# works as well for angles (use A N1 N2 N3) and for
+# dihedrals (use D N1 N2 N3 N4)
+Scan B N1 N2 [value1 value2 value3 ... valueN] end
+# perform constrained optimizations with N1-N2-distances
+# as given in the list;
+# works as well for angles (use A N1 N2 N3) and for
+# dihedrals (use D N1 N2 N3 N4)
+# perform a simultaneous multidimensional scan
+# possible for up to 3 different scan parameters. They each must
+# have an identical number of scan steps
+simul_Scan true # default false
+fullScan true # if !ScanTS is requested, fullScan assures
+# that the relaxed surface scan is fully
+# carried out before the TS optimization is
+# started (Default is false)
+# fragment optimization:
+# 1. all atoms have to belong to a fragment
+# 2. you have to connect the fragments
+ConnectFragments
+{1 2 C} # constrain the internal coordinates
+# connecting fragments 1 and 2
+{1 2 C N1 N2}# constrain the internal coordinates
+# connecting fragments 1 and 2, the
+# fragments are connected via atoms
+# N1 and N2
+{1 3 O} # optimize the internal coordinates
+# connecting fragments 1 and 3
+{1 3 O N1 N2}# optimize the internal coordinates
+# connecting fragments 1 and 3, the
+# fragments are connected via atoms
+# N1 and N2
+end
+# 3. you can constrain the fragment internally
+ConstrainFragments # constrain all internal coordinates
+{ 1 } # containing only atoms of fragment 1
+end
+# optimize hydrogens
+optimizeHydrogens true
+# in the context of a normal optimization all internal
+# coordinates not involving any hydrogens are constrained
+# in the context of a fragment optimization all internal
+# coordinates involving hydrogens are optimized (also in a
+# constrained fragment)
+# freeze the hydrogen positions with respect to the
+# heteroatoms
+freezeHydrogens true
+# invert the defined constraints, i.e. optimize the
+# constraints and constrain the remaining coordinates
+# this only works for the redundant internal coordinates
+# Cartesian coordinates are not affected by invertConstraints
+invertConstraints true # step type control
+Step qn # quasi-Newton step
+rfo # Rational function step (Default for !Opt)
+prfo # partitioned RFO step (Default for !OptTS)
+# Step size control
+MaxStep 0.3 # maximum step length in internal coordi-
+# nates. Default is 0.3 au
+Trust -0.3 # Initial trust radius. Default is -0.3 au
+# Trust <0 - use fixed trust radius
+(continuesonnextpage)
+7.26. GeometryOptimization 711
+
+[... start of page 734 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# of size -trust. I.e. -0.3 means fix
+# the trust radius at 0.3
+# Trust >0 - use trust radius update. I.e. 0.3
+# means start with trust radius 0.3 and update
+# the trust radius after each optimization step
+# Convergence tolerances. Note that the calculation is
+# only converged if all criteria are fullfilled. All
+# values given are default values.
+TolE 5e-6 # Energy change (a.u.)
+TolRMSG 1e-4 # RMS g

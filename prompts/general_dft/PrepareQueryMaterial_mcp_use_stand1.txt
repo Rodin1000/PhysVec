@@ -1,0 +1,96 @@
+IMPORTANT: You are in an MCP environment. Tool calls are REAL and will execute.
+
+Your task is to prepare query + retrieval materials for the CodeVerifier library:
+- Generate focused queries
+- Retrieve documentation from the specified libraries
+- Read the saved retrieval JSON files
+- Produce a final summary JSON with actionable Q-A pairs
+
+PURPOSE: Your output will be used by later LLMs to generate reliable functions for {type} {element} in {topic}. Ensure retrieved materials are comprehensive, accurate, and directly usable for function generation.
+
+--------------------------------------------------------------------------
+[Inputs]
+1) TYPE: {type}
+   - e.g., boson, fermion (for DFT usually fermion unless specified, e.g., phonon computation)
+2) ELEMENT: {element}
+   - e.g., scf, mp2, mdci, casscf, mrcc, keywords, geometry...
+3) ELEMENT_NOTE: {element_note}
+   - PRIMARY guidance for query generation. If empty, focus on general {type} {element} usage.
+4) TOPIC: {topic}
+   - e.g., itensor, netket, dft
+5) LIBRARY_NAMES: {library_names}
+   - e.g., ["orca_manual", "qe_manual"]
+6) QUERY_NUM: {query_num}
+7) QUERY_ELEMENT_DIR: {query_element_dir}
+   - Working directory is already set to this path.
+8) OUTPUT_SUMMARY_FILE: {output_summary_file}
+   - Filename of the final summary JSON to write in the working directory.
+
+Filesystem rule (CRITICAL):
+- For filesystem-mcp read_file/save_file ALWAYS use only the filename, e.g. "{output_summary_file}"
+- Do NOT include directories, do NOT use "..\\", do NOT use absolute paths.
+
+--------------------------------------------------------------------------
+[Mandatory Workflow]
+Step 1) Read and analyze ELEMENT_NOTE ({element_note}) to identify:
+- Core concepts and terminology
+- Required syntax/keywords/parameters
+- Typical examples and pitfalls relevant to {type} {element}
+
+Step 2) Generate exactly {query_num} queries (see query rules below).
+
+Step 3) Retrieval (ONE query at a time; no batching):
+- For each query, call retrieve-mcp:
+  - Use retrieve_hybrid_multi when multiple libraries are relevant
+  - Otherwise use retrieve_hybrid
+- CRITICAL retrieval constraints:
+  - You may ONLY retrieve from LIBRARY_NAMES: {library_names}
+  - You MUST ensure every library in LIBRARY_NAMES is used at least once across retrieval calls
+  - IMPORTANT: Pass final_num=15 (or higher) to retrieve more comprehensive results per query
+- Retrieval tools automatically save results to JSON files in the current working directory.
+
+Step 4) Read all retrieval results:
+- Call filesystem-mcp list_directory to list files in the working directory
+- Identify the JSON files produced by retrieval
+- Read each JSON file using filesystem-mcp read_file(file_path="<filename>")
+
+Step 5) Write final summary JSON:
+- Create {output_summary_file} in the working directory via filesystem-mcp save_file
+- Content must be a JSON array of objects:
+  [
+    {{"query": "<original query>", "answer": "<refined actionable answer>"}},
+    ...
+  ]
+- Each answer MUST be accurate, complete, and directly useful for generating a runnable, self-consistent DFT input template containing the {type} {element} block.
+
+Error handling (CRITICAL):
+- If save_file fails, inspect the error, fix file_path/content, and retry save_file.
+
+--------------------------------------------------------------------------
+[Query Generation Rules]
+Generate {query_num} queries such that:
+- Each query is < 20 words
+- Each query targets example input blocks / example calculations / specific manual sections for {element}
+- Queries must be DISTINCT (no conceptual overlap)
+- Focus on practical details needed to build a coherent, ready-to-run input:
+  - syntax and required keywords/blocks
+  - parameter meanings and valid ranges/choices
+  - interactions/dependencies with other blocks
+  - common mistakes and troubleshooting
+- If ELEMENT_NOTE is non-empty: base queries primarily on ELEMENT_NOTE terms and requirements.
+
+--------------------------------------------------------------------------
+[Tool-Calling Rules (CRITICAL)]
+- Do NOT write “Action/Thought/Observation” (not ReAct)
+- Do NOT describe what you will do
+- DIRECTLY call tools and wait for the tool response before the next call
+- Do NOT simulate tool calls—calls will execute
+
+--------------------------------------------------------------------------
+[Example Summary JSON Format]
+[
+  {{"query": "How to define SCF convergence settings in ORCA?", "answer": "Use ...; key options include ...; example block: ...; common pitfalls: ..."}},
+  {{"query": "How to set MP2 options and frozen core?", "answer": "Use ...; required keywords: ...; example input: ...; notes on memory/RI: ..."}}
+]
+
+Begin executing the workflow NOW.

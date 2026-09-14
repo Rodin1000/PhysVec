@@ -1,0 +1,75 @@
+[... end of page 235 ...]
+citedstategeometryusingtheregularmethods. Tohelpinthosecases,theflagFOLLOWIROOTmightbeset
+toTRUE.Then,excitedstatewavefunctionwillbeanalyzedandcomparedwiththereferenceone(morebelow),
+andtheIROOTwillbeautomaticallyadjustedtokeephomingthetargetstate.
+Oneexampleofsuchacalculationis:
+! wB97X OPT
+%TDDFT
+NROOTS 5
+IROOT 3
+FOLLOWIROOT TRUE
+END
+* xyz 0 1
+N 0.0 0.0 0.0
+H 0.0 0.0 1.0
+H 0.0 -0.9 0.5
+H 0.0 0.9 0.5
+*
+6.6. ExcitedStatesCalculations 213
+
+--- Page 236 ---
+ORCAManual,Release6.0.0
+Thiswillaskforanoptimizationofthethirdexcitedstateofammonia. Atsomepoint,thereisastatecrossingand
+what was state 3 now becomes state 2. The algorithm will recognize this and automatically change the IROOT
+flag,tokeepfollowingthesamestate. FOLLOWIROOTalsoworkswithspin-adaptedtripletsandspin-flipstates.
+Incaseswhereyouwanttokeepthecomparisononlywiththedensityfromtheveryfirstcomputedexcitedstate,
+e.g. theoneyougetonthefirstcycleofageometryoptimization,youcanuseKEEPFIRSTREF,asin:
+%TDDFT
+NROOTS 5
+IROOT 3
+FOLLOWIROOT TRUE
+KEEPFIRSTREF TRUE # default false
+END
+CriteriatoFollowIROOTs-startingfromORCA6
+StartingfromORCA6wehaveamuchmorerobustalgorithmtofollowtheseexcitedstates,inspiredbysomeof
+the recent literature [818] [135]. The algorithm now works as follows, after each excited state calculation using
+CIS/TDDFT:
+1. Givenareferencestate,takeallstateswithinanenergydifferenceofupto1eVtoit. Wedon’twanttocheck
+statesthataretoofarapartinenergy. Controlledby%TDDFT FIRENTHRESH 1.0 END,numberineV.
+2. Nowtakeallstateswithadifferenceof𝑆ˆ2notlargerthan0.5. Wedon’twanttocomparesingletstotriplets.
+Controlledby%TDDFT FIRS2THRESH 0.5 END.
+3. Calculatetheoverlapbetweenthetransitiondensitiesofallstateswiththereference-thisisthecorepart.
+4. Incasethereisambiguity-thatisiftwostateshaveoverlapsdifferingbyonly0.05-taketheonewiththe
+closertransitiondipoleangle. Controlledby%TDDFT FIRSTHRESH 0.05 END.
+5. UpdatetheIROOTtothestatethatwentbestonallthesetests.
+Note: TheseFIRkeywordsarespecifictoFollowIRoot.
+Nowbydefaultwemightalsoupdatethereferencestatefromtimetotimeincasetheseparationofstatesisvery
+clear. Thewayitworkis:
+1. IfthebestoverlapislargerthanFIRMINOVERLAP,whichis0.5bydefaultandFIRDYNOVERLAPisFALSE,we
+willassumethattheoverlapisgoodenoughandwewillalwaysupdatethereference. However,thedefault
+isFIRDYNOVERLAP TRUE,whichmeansalsohaveasecondcheckforrobustness.
+2. If FIRDYNOVERLAP TRUE and the best overlap is larger than 0.5 (or FIRMINOVERLAP), we will check for
+theratiobetweenthebestandthesecondbeststates. Ifthisratioisbetween0.3and0.6(controlledby
+%TDDFT FIRDYNOVERRATIO 0.3,0.6 END),itmeansthatthereisaclearseparationbetweenthebestand
+the second best and the reference can be updated safely. If the ratio is too close to 1, both states are too
+similar and it would be dangerous to update the reference state. If it is too close to zero, they are easy to
+distinguishandwedon’tneedtoupdatethereferenceyet[818].
+Important: Itisimportanttostressthatthiswillnotnecessarilysolveallproblems(rootflippingcanbeparticu-
+larlybadifthesystemishighlysymmetric),fortheexcitedstatesmaychangetoomuchduringtheoptimization. If
+thathappens,itisadvisabletorestartthecalculationaftersomestepsandcheckwhichIROOTyoustillwant. This
+canalsobeusedwhencalculatingnumericalgradientsandHessians,incaseyoususpectofrootflippingafterthe
+displacements.
+Important: Thisalgorithmiscompletelygeneralandshouldworkforanyexcitedstatemethod,aslongasthere
+aretransitiondensities. Wewillincludemoremethodsinthefuturewhenpossible.
+214 Chapter6. RunningTypicalCalculations
+
+[... start of page 237 ...]
+ORCAManual,Release6.0.0
+DoublesCorrection
+ForCIS(andalsoforperturbativelycorrectedtime-dependentdouble-hybridfunctionals)theprogramcancalculate
+adoublescorrectiontothesingles-onlyexcitedstates. ThetheoryisduetoHead-Gordonandco-workers[371].
+%cis dcorr n # n=1,2,3,4 are four different algorithms that
+# lead to (essentially) the same result but differ
+# in the way the rate-limiting steps are handled
+Spin-component scaling versions of CIS(D) can be evoked in the %cis block by setting DOSCS TRUE and the
+four scaling parameters, as defined by Head-Gordon and co-workers [716], in

@@ -1,0 +1,90 @@
+[... end of page 488 ...]
+verlapfittingison,
+thefollowingerrormessagemayalsobeencountered: “ErrorinCholeskyinversionofnumericaloverlap”.
+Convergenceissuesmayarisewhenthechosengridhasdifficultiesinrepresentingthebasisset. Thisisthe“grid
+equivalent”ofalineardependenceproblem,asdiscussedinLinearDependence. Itshouldalsobementionedthat
+the grid-related problem discussed here often goes hand in hand with basis set linear dependence, although not
+necessarily. Themoststraightforwardwayofdealingwiththisistoincreasethesizeoftheintegrationgrid. This,
+however,isnotalwaysdesirableorpossible.
+466 Chapter7. DetailedDocumentation
+
+--- Page 489 ---
+ORCAManual,Release6.0.0
+OnewaytoavoidtheCholeskyinversionissueistoturnoverlapfittingoff(!NoSFitting). However,thismeans
+that the numerical problems are still present, but are ignored. Due to the fact that overlap fitting operates with
+the numerical overlap and its inverse, it is more sensitive to linear dependence issues, so turning off the fitting
+proceduremayleadtoconvergence. Thismaybeapragmatic—butbynomeansclean—solution,sinceitrelies
+ontheassumptionthatthenumericalerrorsaresmall.
+Ontheotherhand,overlapfittingalsogivesasimilartooltodealwithlineardependenceissuesastheonediscussed
+forbasissets. Theeigenvaluesofthenumericaloverlapcanbesimilarlyinspectedandsmallvaluesscreenedout.
+There is unfortunately no universal way to determine this screening parameter, but see Linear Dependence for
+typicalvalues.
+Theparametersinfluencingthemethodusedforinversionandobtainingthefittingmatrixare:
+%method
+SFitInvertType Cholesky # Cholesky inversion (default)
+Cholesky_Q # Cholesky + full Q matrix
+Diag # Inversion via diagonalization
+Diag_Q # Diag + full Q matrix
+SInvThresh 1e-8 # Inversion threshold for Diag and Diag_Q (default 1e-8)
+end
+Bydefault,theinversionprocedureproceedsthroughCholeskydecompositionasitisthefastestoption. Ideally,
+theoverlapmatrixisnon-singularifthebasissetisnotlinearlydependent. Forsingularmatrices, theCholesky
+procedurewillfail. Itshouldbenotedatthispointthatthenumericaloverlapcanbecomelinearlydependentevenif
+theoverlapofbasisfunctionsisnot,andsoaseparateparameterwillbeneededtotakecareofgrid-relatedissues. To
+achievethis,adiagonalizationprocedure(Diag)canbeusedinsteadofCholeskywiththecorrespondingparameter
+to screen out eigenvectors belonging to eigenvalues below a threshold (SInvThresh). For both Cholesky and
+diagonalizationprocedures,a“fullQ”approachisalsoavailable(Cholesky_QandDiag_Q),whichcorresponds
+totheuseofamoreaccurate(untruncated)fittingmatrix.
+TreatmentofDispersionInteractionswithDFT-D3
+Introduction
+DFT-D3isanatom-pairwise(atom-triplewise)dispersioncorrectionwhichcanbeaddedtotheKS-DFTenergies
+andgradient[324]:
+𝐸DFT-D3 =𝐸KS-DFT+𝐸disp (7.26)
+𝐸disp isthenthesumofthetwo-andthree-bodycontributionstothedispersionenergy,𝐸disp =𝐸(2)+𝐸(3). Most
+importantisthetwo-bodyterm,whichisgivenatlongrangeby:
+∑︁ ∑︁ 𝐶𝐴𝐵
+𝐸disp =− 𝑠
+𝑛 𝑟𝑛
+𝑛 (7.27)
+𝐴<𝐵𝑛=6,8 𝐴𝐵
+where 𝐶𝐴𝐵 denotes the averaged (isotropic) 𝑛th-order dispersion coefficient for atom pair AB and 𝑟 is their
+𝑛 𝐴𝐵
+internuclear distance. 𝑠 is a functional-dependent scaling factor (see below). In the general case, an adequate
+𝑛
+dampingfunctionmustbeemployed.
+DampingFunctions
+Inordertoavoidnear-singularitiesforsmall𝑟 ,thedispersioncontributionneedstobedampedatshortdistances.
+𝐴𝐵
+OnepossiblewayistouserationaldampingasproposedbyBeckeandJohnson[90,424,425]:
+∑︁ ∑︁ 𝐶𝐴𝐵
+𝐸(2) =− 𝑠 𝑛 (7.28)
+𝑛 𝑟𝑛 +𝑓(𝑅𝐴𝐵)𝑛
+𝐴<𝐵𝑛=6,8 𝐴𝐵 0
+7.4. ChoiceofComputationalModel 467
+
+[... start of page 490 ...]
+ORCAManual,Release6.0.0
+with[425]
+√︃
+𝐶𝐴𝐵
+𝑅𝐴𝐵 = 8 (7.29)
+0 𝐶𝐴𝐵
+6
+and
+𝑓(𝑅𝐴𝐵)=𝑎 𝑅𝐴𝐵 +𝑎 . (7.30)
+0 1 0 2
+Dampingthedispersioncontributiontozeroforshortranges(asinRef. [324])isalsopossible:
+∑︁ ∑︁ 𝐶𝐴𝐵
+𝐸(2) =− 𝑠 𝑛 𝑓 (𝑟 ) (7.31)
+𝑛 𝑟𝑛 𝑑,𝑛 𝐴𝐵
+𝐴<𝐵𝑛=6,8 𝐴𝐵
+with
+1
+𝑓 = (7.32)
+𝑑,𝑛 1+6( 𝑟𝐴𝐵 )−𝛼𝑛
+𝑠𝑟,𝑛𝑅
+0
+𝐴𝐵
+Notethatthe𝑅𝐴𝐵 usedwiththisdampingarefromRef. [324]. Formoreinformationonthesupporteddamping
+0
+functions, see Ref [326]. The recommended variant is that with Becke-Johnson damping and is i

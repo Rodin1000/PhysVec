@@ -1,0 +1,80 @@
+[... end of page 1003 ...]
+ue). All atoms
+involved in constraints have to be included in the active region. In principle, constraints also work in Cartesian
+geometryoptimizationswiththeMinimize command, buttheperformancetogetherwithL-BFGSmaybepoor
+(exceptforCartesianconstraints,whichworkflawlesslyinL-BFGS).Inthesecases,trytousethesimulatedan-
+nealingmethodinstead.
+ThesimplestpossibilityistoconstraintheCartesianpositionofanatomtosomevalue. Azero-basedatomindexis
+required. ThecommandConstraint Add Cartesian 3wouldfixthefourthatominthesimulationatitscurrent
+7.51. AbinitioMolecularDynamicsSimulations 981
+
+--- Page 1004 ---
+ORCAManual,Release6.0.0
+positioninspace. Ifthedesiredpositionshallbeexplicitlygiven,itcanbespecifiedviatheTargetmodifier,e.
+g.,Constraint Add Cartesian 3 Target 5.0 1.0 1.0. Todeterminewhichdimensionstofix,oneofthe
+XYZ, XY, XZ, YZ, X, Y, or Z modifiers can be added. For example, Constraint Add Cartesian 3 X Target
+1.0wouldconstraintheXcoordinateofatom3totheabsolutevalue1.0,butwouldnotinfluencemovementalong
+theYandZcoordinateatall.
+By using the Distance keyword, distances between atoms can be fixed. The command Constraint Add
+Distance 3 5 would fix the distance between atom 3 and 5 to its current value. You need to specify exactly
+two atom indices; multiple distance constraints are entered via multiple Constraint commands. Also here, a
+desireddistancevaluecanbegivenviatheTargetmodifier,suchasConstraint Add Distance 3 5 Target
+350_pm.
+Similarly,anglesanddihedralanglesbetweenatomscanbefixedwiththeAngleandDihedralkeywords. Angles
+are defined by three atom indices, and dihedral angles by four atom indices. Also here, target values may be
+specified. Any combination of Cartesian, distance, angle, and dihedral constraints may be used simultaneously,
+andmayevenbeappliedtothesamegroupofatoms. Amoleculecanbemadecompletelyrigidbyconstraining
+all its bonds, angles, and torsions. Please make sure that your constraints are not over-determined, and do not
+contradicteachother. Otherwise,theycan’tbeenforcedandthesimulationwillprintwarningsorcrash.
+AdifferentandpowerfulclassofconstraintscanbedefinedwiththeCenterargument. Directlyafterthekeyword,
+alistofintegeratomnumbersisexpected. Thislistcanbeacombinationofnumbersandranges,e. g.,“1, 3,
+5..11, 14”. The weighted average position of this subset of atoms is then constrained to a fixed position in
+Cartesianspace. Bydefault,theweightsaretakenastheatommasses,suchthatthecenterofmassoftheselected
+atomsiskeptfixed. Thisallows,e. g.,torunaMDsimulationoftwomoleculeswithfixedcenterofmass,suchthat
+theircenterofmassdistanceremainsconstant. Customweightsforthedefinitionofthecentercanbeenteredby
+usingtheWeightsmodifieraftertheatomlist. Itexpectsexactlythesamenumberofrealargumentsasthelength
+ofthespecifiedatomlist. Thegeometriccenterofagroupofatomscanbeheldfixedbysettingallweightsto1.0,
+forexample“Constraint Add Center 2, 5..7 Weights 1.0 1.0 1.0 1.0”. Ifdesired,aTargetforthe
+centerpositioncanbegiven,whichexpectsthreerealnumbersfortheX,Y,andZcoordinateafterthekeyword.
+Ifnotargetisspecified,thecurrentcenterpositionisheldfixed.
+WiththeRigidtypeofconstraints,completegroupsofatomscanbekeptrigid,i. e.,keepalltheirdistancesand
+anglesrelativetoeachother,butmoveasawhole. AftertheRigidkeyword,alistofatomnumbersisexpected.
+Morethanonegroupofatomscanbekeptrigidatthesametime–justcalltheConstraint Add Rigidcommand
+multipletimeswithdifferentatomlists. Internally,therigidconstraintisrealizedbydefiningthecorrectnumberof
+distanceconstraints. Suchalargenumberofdistanceconstraintsishardtoconverge;therefore,warningmessages
+that RATTLE did not converge will not be shown if a rigid constraint is active. Almost planar (or even linear)
+groups of atoms are hard to keep rigid by using only distance constraints. It might help do add a dummy atom
+outsideoftheplaneandincludethisintotheconstraint.
+ORCAsupportsconstraintswithlinearlychangingtargetvalueduringthesimulation. Todefinesuchaconstraint,
+write“Ramp”directlyafterthe“Target”modifier. After“Ramp”, twicethenumberofrealnumbersthatwould
+have been required for “Target” follows (two instead of one for distances, angles, and dihedrals; six instead of
+threefor“Cartesian XYZ”,andsoon). Thefirsthalfoftheseargumentsarethestartingvalues,thesecondhalf
+are the final target values. For example, “Constraint Add Distance 3 5 Target Ramp 300_pm 400_pm”
+willdefineadistanceconstraintwithatargetvaluerisingfrom300pmto400pm. Therampwillbeperformed
+onceduringtheRun commandwhichfollowsnextaftertheconstraintdefinition. Therefore,thenumberofsteps
+specifiedinthisRuncommandalsospecifiestherateatwhichtheconstrainttargetismodified. Aftertheramphas
+beencompletedonce,thefinal(constant)targetvalue(s)willbeusedforallsubsequentRun commands.
+Ifanalreadydefinedconstraintisdefinedagain,itisoverwritten,i. e.,theoldversionoftheconstraintisautomat-
+icallydeletedfirst.
+ConstraintsareremovedwiththeRemovekeyword. Youcaneitherremovesingleconstraints,e. g.,Constraint
+Remove Distance 3 5, or groups of similar constraints. To remove all angle constraints, use Constraint
+Remove Angle All. Toremoveallrestraints,enterConstraint Remove All.
+TheListargumentprintsallcurrentlyactiveconstraintstothescreenandlogfile. Noadditionalargumentscan
+bespecified.
+Bydefault,theexternalforceactingoneachconstraintiscomputedineveryMDstepandwrittentoafilenamed
+“basename-constraints.csv”(onecolumnperconstraint). Thiscanbeuseful–theaverageforceactingona
+constraintcanbe,e. g.,usedforthermodynamicintegration[430]. Ifalargenumberofconstraintsisdefined,this
+982 Chapter7. DetailedDocumentation
+
+[... start of page 1005 ...]
+ORCAManual,Release6.0.0
+mightwastecomputertimeifitisnotrequired. Inthesecases, theconstraintscanbedefinedwiththeNoprint
+modifier. Forsuchconstraints,theactingforcesarenotcomputedandnotwrittentothefile. Notethatconstraints
+whichhavebeenpre-defined(e. g.,bytheforcefieldforrigidmoleculessuchasTIP3Pwater)automaticallyhave
+thismodifier.
+Pleasenotethateachconstraintdecreasesthenumberofthesystem’sdegreesoffreedom(DoF)byone. Thiseffect
+isincluded,e. g.,inthetemperaturecomputation,wheretheDoFcountenters. Fromthisconsideration,itcanalso
+beunderstoodthataconstraintbehavessignificantlydifferentfromarestraintwithverylargespringconstant: In
+theformercase,theDoFisremovedfromthesystem;inthelattercase,theDoFisstillthere,butcanonlymovein
+atinyinterval.
+Iti

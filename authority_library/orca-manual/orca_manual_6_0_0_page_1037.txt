@@ -1,0 +1,79 @@
+[... end of page 1036 ...]
+yz)asinputstructureforthesubsequentgeometryoptimizationin
+solution. Inthiscase,weconsiderwaterasthesolvent. Theinputfilelookslike:
+! B3LYP def2-TZVP D3BJ tightopt CPCM(Water)
+%cpcm
+cds_cpcm 2
+end
+%maxcore 4000
+* xyzfile 0 1 anisole.xyz
+3. Searchforthe“FINAL SINGLE POINT ENERGY”intheoutputfileforthesolvatedsystem(wecallit𝐸 ):
+𝑠
+------------------------- --------------------
+FINAL SINGLE POINT ENERGY -346.723542928530
+------------------------- --------------------
+4. Searchforthe“FINAL SINGLE POINT ENERGY”intheoutputfileforthesysteminvacuum(wecallit𝐸 ):
+0
+1014 Chapter7. DetailedDocumentation
+
+--- Page 1037 ---
+ORCAManual,Release6.0.0
+------------------------- --------------------
+FINAL SINGLE POINT ENERGY -346.719657762242
+------------------------- --------------------
+5. Calculate∆𝐺 = 𝐸 −𝐸 = −0.003885a.u. Ifweconvertittokcal/molandroundittotwodecimal
+𝑠𝑜𝑙𝑣 𝑠 0
+digits,wehave∆𝐺 = −2.44kcal/mol. Thisquantityisinverygoodagreementwithitsexperimental
+𝑠𝑜𝑙𝑣
+counterpart(-2.45kcal/mol[558]).
+6. Incasetheuserisinterestedinthevalueof∆𝐺 ,thisquantityisprintedinthe“CPCM Solvation Model
+𝑛𝑒𝑙
+Properties”block:
+CPCM Solvation Model Properties:
+Surface-charge : -0.02580685887229
+Corrected charge : 0.00000000000000
+Outlying charge corr. : 0.00005046198558 Eh 0.00137 eV
+Free-energy (cav+disp) : 0.00272597237192 Eh 0.07418 eV
+Here, ∆𝐺 correspondsto“Free-energy (cav+disp) “andiscalculatedthrougheqs(7.319)and (7.320).
+𝑛𝑒𝑙
+Thetermcalled“Surface-charge”correspondstothesolutenetchargethatliesoutsidetheC-PCMcavity. It
+isbasicallythesumoftheC-PCMcharges(withoutthescalingby𝑓(𝜀)). Theeffectofthisexcessofchargeon
+the energy and the C-PCM charges themselves can be corrected by the so-called outlying charge correction. In
+ORCA,thiscorrectioniscalculatedthroughaLagrangian-basedalgorithm,[705]butonlyprintedforinformation
+purposes. Thatis,theoutlyingchargeeffectisneitheraddedtotheSCFenergynortoitsderivatives. Inanycase,
+thecorrectedtotalchargeisprintedin“Corrected charge”,whilethecorrectiontermfortheenergyisprinted
+in“Outlying charge corr.”. Tofurtherhelptheuser, ORCAalsoprintsafilewithextension .cpcm_corr,
+wherethecorrectedC-PCMchargesareprovided.
+Ifwewanttouse,instead,theGSES_nelmodel,onejustneedstoadd surfacetypegepol_ses_gaussianin
+the%cpcmblock.
+Note: TheanalyticalHessianisnotavailablefortheGVDW_nelandGSES_nelmodelsasthesecondderivative
+of∆𝐺 withrespecttonucleardisplacementsisnotimplemented.
+𝑛𝑒𝑙
+7.53.2 The Conductor-like Screening Solvation Model (COSMO)
+Note: TheCOSMOsolvationmodelhasbeenremovedfromORCAv4.0.0!!!
+PleaseusetheC-PCMsolvationmodelincombinationwiththeCOSMOepsilonfunctionifrequired!
+As a short form to use the C-PCM model with the COSMO epsilon function, you can specify the solvent via
+!CPCMC(solvent) .
+7.53.3 The SMD Solvation Model
+TheSMDsolvationmodelhasbeenproposedbytheCramerandTruhlargroups,[558]andisbasedonthequantum
+mechanicalchargedensityofasolutemoleculeinteractingwithacontinuumdescriptionofthesolvent. Inthemodel
+thefullsoluteelectrondensityisusedwithoutdefiningpartialatomicchargesandthesolventisnotrepresented
+explicitly but rather as a dielectric medium with the surface tension at the solute–solvent boundary. SMD is a
+universal solvation model, in the sense that it is applicable to any charged or uncharged solute in any solvent
+or liquid medium for which a few key descriptors are known. In particular, these descriptors are the dielectric
+constant,refractiveindex,bulksurfacetension,andacidityandbasicityparameters. Neglectingtheconcentration
+contribution,themodelseparatestheobservablesolvationfreeenergyintotwomaincomponents,
+∆𝐺 =∆𝐺 +∆𝐺 . (7.321)
+S ENP CDS
+In ORCA, the first component is the bulk electrostatic contribution arising from a self-consistent reaction field
+treatment that involves the electrostatic interaction using the Conductor-like Polarizable Continuum Model (C-
+7.53. ImplicitSolvationModels 1015
+
+[... start of page 1038 ...]
+ORCAManual,Release6.0.0
+PCM).However,theradiiaresetto“intrinsicatomicCoulombradii”. Thesecondcomponent,calledthecavity-
+dispersion solvent-structure (CDS) term, is the contribution resulting from short-range interactions between the
+soluteandsolventmoleculesinthefirstsolvationshell. Thiscontributionisasumoftermsthatareproportional
+(withgeometry-dependentproportionalityconstantscalledatomicsurfacetensions)tothesolvent-accessiblesur-
+face areas of the individual atoms of the solute. The CDS contribution to the free energy of solvation is given
+by

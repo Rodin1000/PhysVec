@@ -1,0 +1,84 @@
+[... end of page 554 ...]
+regular MOM? (default FALSE)
+#
+# occupation number
+#
+ALPHACONF 0,1 # define the occupation of the frontier orbitals.
+# for RHF and doubly occupied states it could be 0,2.
+BETACONF 0,0,1 # same for the beta orbitals.
+IONIZEALPHA 23 # remove electron from alfa MO number 23?
+IONIZEBETA 12 # remove electron from alfa MO number 12?
+(continuesonnextpage)
+532 Chapter7. DetailedDocumentation
+
+--- Page 555 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+#
+# SOSCF Hessian update
+#
+SOSCFHESSUP LSR1 # symmetryc rank-1 update (default and recommended).
+LBFGS # L-BFGS update.
+LPOWELL # regular L-Powell update.
+LBOFILL # Bofill update, a combination of SR1 and Powell.
+7.10 CP-SCF Options
+Thecoupledperturbedself-consistentfield(CP-SCF)equationshavetobesolvedinmanycases,suchaswhensec-
+ondderivativeproperties(e.g. vibrationalfrequencies,polarizability,NMRshielding,indirectspin-spincoupling,
+hyperfinecoupling,g-tensor)ortheMP2relaxeddensity(inthiscasetheyarereferredtoasZ-vectorequations)
+arecalculated. Theyareasetoflinearequationsgenerallyexpressedas
+AU𝑥 =B𝑥,
+whereU𝑥isthevectorofsolutionsforperturbation𝑥,theright-handside(RHS)matrixB𝑥isperturbation-specific
+and the left-hand side (LHS) matrix A is perturbation-independent and contains, among other terms, the two-
+electronrepulsionintegrals(𝑖𝑗|𝑎𝑏)and(𝑖𝑎|𝑗𝑏). TheequationsaresolvediterativelyandtheLHSisreassembled
+ateverystep,whiletheRHSdoesnotchange. Thegenerationandtransformationofthetwo-electronintegralsare
+thereforethemosttime-consumingpartsoftheCP-SCFsolution.
+TheORCAmodulewhichsolvestheseequationsacceptsseveraloptionsgivenbelowwiththeirdefaultvalues:
+%method
+Z_Solver Pople # (default) Use the Pople algorithm to solve the equations
+DIIS # Use the DIIS algorithm
+CG # Use the conjugate gradient algorithm
+Z_Tol 1e-3 # Convergence tolerance for the residual norm.
+# Default is 1e-5 for VeryTightOpt
+# and varies from 3e-3 to 3e-6 from LooseSCF to ExtremeSCF
+Z_MaxIter 128 # Maximum number of iterations
+Z_MaxDIIS 12 # Maximum number of DIIS vectors
+Z_Shift 0.3 # Level shift for DIIS
+Z_GridXC 1 # XC angular grid used for the LHS
+Z_IntAccXC 3.467 # XC radial grid accuracy used for the LHS
+Z_GridX 1 # COSX angular grid used for the LHS
+Z_IntAccX 3.067 # COSX radial grid accuracy used for the LHS
+Z_GridX_RHS 2 # COSX grid used for the RHS of MP2 Z-vector eqs (see below)
+Z_COSX_Alg 0 # (default) choose the best COSX algorithm automatically
+1 # better prescreening, more efficient for few densities
+2 # uses more memory, more efficient for many densities
+end
+SinceORCA6,thesamesettingsareusedforallelectricresponsepropertycalculationsaswellasforCIS/TD-DFT
+gradientsandrelaxeddensities. Forconvenience,thekeywordsinthe%elpropinputblockarestillavailablebut
+they modify the same internal variables as those in %method. For magnetic response properties, the solver and
+convergencetolerancearesetseparatelyin%eprnmr,becausetheconvergencebehaviorofthemagneticresponse
+CP-SCFequationsissometimesdifferent.
+%elprop
+Solver # Alias, see: %method Z_Solver
+Tol # Alias, see: %method Z_Tol
+MaxIter # Alias, see: %method Z_MaxIter
+MaxDIIS # Alias, see: %method Z_MaxDIIS
+LevelShift # Alias, see: %method Z_Shift
+(continuesonnextpage)
+7.10. CP-SCFOptions 533
+
+[... start of page 556 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+%eprnmr
+Solver # Solver for magnetic response, see options at: %method Z_Solver
+Tol # Convergence tolerance for magnetic response
+MaxIter # Alias, see: %method Z_MaxIter
+MaxDIIS # Alias, see: %method Z_MaxDIIS
+LevelShift # Alias, see: %method Z_Shift
+end
+The keywords Z_GridX and Z_IntAccX are applicable if the RIJCOSX approximation is chosen for the treat-
+ment of two-electron integrals. They determine the angular and radial COSX integration grids, as discussed in
+sectionChangingTD-DFT,CP-SCFandHessiangrids. Analogously,thekeywordsZ_GridandZ_IntAccdeter-
+minetheintegrationgridforDFTXCfunctionals.
+IntegralsontheRHSareevalu

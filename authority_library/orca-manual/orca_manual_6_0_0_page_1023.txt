@@ -1,0 +1,104 @@
+[... end of page 1022 ...]
+(in Bohr!)
+FMMQMMM_DoBoxDimOpt True #Optimize the box dimension
+end
+ThehigherL
+max
+,thebiggerthenumberofboxes: atL=2onehas64boxesonlybutforL=6thecodegenerates
+morethan200,000boxes(86). ForL max ≥ 7,morethan2millionsboxesaregenerated,thiscanstartleadingto
+memoryissues,sothattheusershouldensureenoughmemoryisavailable(cf. Globalmemoryuse).
+1000 Chapter7. DetailedDocumentation
+
+--- Page 1023 ---
+ORCAManual,Release6.0.0
+7.52.2 Approximation of the Far Field interactions
+InaspaceoforiginO(0,0,0),letP(r )bethecenterofachargedistribution(e.g. aGaussianoverlaporadistribu-
+𝑃
+tionofpointcharges). Let’sconsiderapointAinthevicinityofP,suchthatA=(q ;r ),withq thechargeofa
+𝐴 𝐴 𝐴
+pointchargeorq =−1ifweconsideraGaussianoverlap. Inthatcase,thechargewouldindeedbetheoneofthe
+𝐴
+electronsituatedatapositionr =r −r fromthecenteroftheGaussianoverlap. Similarly,letQ(r )bethe
+𝐴𝑃 𝐴 𝑃 𝑄
+centerofachargedistributionandB,apointinthevicinityofQ,suchthatB=(q ;r ). Wenoter =r −r .
+𝐵 𝐵 𝑄𝑃 𝑄 𝑃
+TheCoulombinteractionbetweenAandBcanbeexpressedas:
+(︁ 1 )︁
+𝑈 =𝑓 ,
+𝐴𝐵 |r −r |
+𝑎 𝑏
+ThenameofthealgorithmcomesfromthewaytheFFinteractionsareevaluated. Itisdonethroughamutlipole
+expansionofthe 1 term,leadingtothefollowingexpression:
+|r𝑎−r𝑏|
+∞ 𝑙 ∞ 𝑗
+1 ∑︁ ∑︁ ∑︁ ∑︁
+= (−1)𝑗𝑅 (r )𝐼 (r )𝑅 (r ),
+|r −r | 𝑙,𝑚 𝐴𝑃 𝑙+𝑗,𝑚+𝑘 𝑄𝑃 𝑗,𝑘 𝐵𝑄
+𝐴 𝐵
+𝑙=0𝑚=−𝑙𝑗=0𝑘=−𝑗
+Thisseriesconvergesforwellseparatedcentersonly,thatiswhyaNFlayerisrequired. 𝑅 and𝐼 areregular
+𝑙,𝑚 𝑙,𝑚
+andirregularsolidscaledharmonics[706]:
+√︂
+1 4𝜋
+𝑅 (r)= r𝑙 𝑌 (r)
+𝑙,𝑚 √︀ (𝑙−𝑚)!(𝑙+𝑚)! 2𝑙+1 𝑙,𝑚
+√︂
+√︀ 1 4𝜋
+𝐼 (r)= (𝑙−𝑚)!(𝑙+𝑚)! 𝑌 (r)
+𝑙,𝑚 r𝑙+1 2𝑙+1 𝑙,𝑚
+𝑌 aresphericalharmonicsofdegree𝑙andorder𝑚. Fordetailsonthederivationofthisequationsee[49].
+𝑙,𝑚
+WecannowintroducethemultipoleexpansioncenteredinP(r ),ofachargedistributionQ(r,𝑃),as:
+𝑃
+∞ 𝑙
+(︁∑︁ ∑︁ )︁
+Q(r,𝑃)=𝑓 𝑅 (r−r )
+𝑙,𝑚 𝑃
+𝑙=0𝑚=−𝑙
+Inpractise:
+𝑀𝐴𝑀 𝑙
+(︁ ∑︁ ∑︁ )︁
+Q(r,𝑃)≈𝑓 𝑅 (r−r )
+𝑙,𝑚 𝑃
+𝑙=0 𝑚=−𝑙
+Qisavector,withelements𝑄 definedbythepairofvalues(𝑙,𝑚). InthecaseofapointchargeA(q ,r)we
+𝑙,𝑚 𝐴
+have:
+𝑄𝐴 (r,𝑃)=𝑞 ×𝑅 (r−r ),
+𝑙,𝑚 𝐴 𝑙,𝑚 𝑃
+whileforaGaussianoverlapdistribution⟨𝜇|𝜈⟩itbecomes:
+𝑄𝜇𝜈 (r,𝑃)=⟨𝜇|𝑅 (r−r )|𝜈⟩
+𝑙,𝑚 𝑙,𝑚 𝑃
+∫︁
+= 𝜇(r’)𝑅 (r−r )𝜈(r’)𝑑r’
+𝑙,𝑚 𝑃
+SothatwecanapproximatetheelectrostaticinteractionbetweenaGaussianoverlap⟨𝜇|𝜈⟩withcenterinr anda
+𝐵
+pointchargeA(q ,r )intheFF,throughthefollowingexpansion:
+𝐴 𝐴
+∫︀
+𝑞 𝜇(r)𝜈(r)𝑑r
+𝐴 ≈Q𝜇𝜈(r ,𝑃′)I(r )Q𝐴(r ,𝑃),
+|r −r | 𝑏 𝑃𝑃′ 𝐴
+𝐴 𝐵
+with𝑃 and𝑃’therespectivecenterofthemultipoleexpansions,andItheinteractionmatrix.
+Thetruncationparameteroftheexpansion,MAM,istheMaximumAngularMomentumoftheunderlyingsolid
+scaled harmonics. In our setup, it is the same value for the expansion of the point charges in the embedding or
+theGaussianoverlapsintheQMpart. ItcanbesetupthroughthekeywordFMMQMMM_MAM.Werecommend
+FMMQMMM_MAM = 20 toensure a good accuracy, in theorder of 0.0001-0,0001 Ha. With a lower value of
+MAM=15,onecanusuallyexpectamHa(0.63kcal.mol−1)precision. Howeveritissystemdependent,sothatwe
+recommendyoutostartwithMAM=20andseehowitbehavesifyoudecreaseittoavalueof15. Theavailable
+valuesforMAMareintherange1-25.
+7.52. FastMultipoleMethod 1001
+
+[... start of page 1024 ...]
+ORCAManual,Release6.0.0
+%method
+DOFMMQMMM True #turn ON the use of the FMM
+FMMQMMM_MAM 20 #Default Maximum Angular Momentum
+end
+7.52.3 The “Very” Fast Multipole Method (VFMM)
+Duetotherecursiveschemebetweenlevels,theFFfeltinthecenterofaboxisbuiltbyonlycalculatinginteractions
+withtheLFFboxesateverylevel. Theevaluationof𝑉𝐿𝐹𝐹 becomesthebottleneckofthealgorithm. Toaccelerate
+it,anoptionhasbeenimplementedinwhichdifferentMAMtruncationparameters

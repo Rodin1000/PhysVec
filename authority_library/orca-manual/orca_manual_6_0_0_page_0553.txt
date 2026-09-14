@@ -1,0 +1,62 @@
+[... end of page 552 ...]
+formorecomplicatedcaseswesuggestusingdirectlythesecondordermethod,toavoidescapingback
+tothegroundstatewith!NODIIS.
+Important: DoNOTcombineDeltaSCFwavefunctionswithCCSD,oranysuchmethodwithsingleexcitations.
+ItrequiresaspeciallizedversionofCCwhichwedon’thaveyet.
+530 Chapter7. DetailedDocumentation
+
+--- Page 553 ---
+ORCAManual,Release6.0.0
+7.9.2 Core-ionized States
+Anotherbigadvantageofthe DeltaSCFisthepossibilitytoconvergetocore-excitedand/orcore-ionizedstates.
+Wehaveasimplekeywordtokickoutelectronsfromanyorbital,eventhedeepcoreones:
+%SCF IONIZEALPHA 2 END
+and the electron from orbital number two will be removed. IONIZEBETA works for beta orbitals. One can start
+from an anion UHF -electronic structure obtained by adding one extra electron and remove a core electron like
+thistoobtaincore-excitedstatestoo. Geometryoptimization,EPR,andevenTD-DFTcalculationsareallvalidfor
+thesestates.
+As an example, the input below will ionize the 1s electron from a water molecule, which corresponds to MO 0
+here:
+!PBE0 DEF2-TZVP DELTASCF NODIIS UHF
+%SCF IONIZEALPHA 0 END
+* xyz 0 1
+O 2.127880 -0.361920 0.104770
+H 3.117210 -0.387460 0.070360
+H 1.838520 -0.926280 -0.655730
+*
+Note: Iftheorbitalisnotlocalizedoverasingleatomonemightneedtolocalizedthemfirst!
+andonecanseefromtheresultsthatisexactlywhereitconvergedto.
+----------------
+ORBITAL ENERGIES
+----------------
+SPIN UP ORBITALS
+NO OCC E(Eh) E(eV)
+0 0.0000 -20.108086 -547.1688
+1 1.0000 -1.567415 -42.6515
+2 1.0000 -1.057257 -28.7694
+3 1.0000 -0.939315 -25.5601
+4 1.0000 -0.882871 -24.0241
+5 0.0000 -0.304254 -8.2792
+6 0.0000 -0.239285 -6.5113
+7 0.0000 0.044344 1.2066
+(...)
+Note: ORCA automatically adjusts charge and multiplicity here. The input should contain those from the
+referencesystem!
+Herearesomeexamplesofbindingenergiesfor1selectrons. Theatomfromwhereitwasremovedishighlighted
+inbold:
+Table7.14: Bindingenergiesfrom1selectronsfoundbyDeltaSCFusingwB97M-V/DEF2-TZVPP,ineV.
+1sionization exp. wB97M-V
+H2O 539.82 541.17
+CO2 297.69 299.10
+NH3 405.56 406.82
+CH3CN 405.64 406.92
+• exp. takenfrom[143]
+7.9. DeltaSCF:ConvergingtoArbitrarySingle-ReferenceWavefunctions 531
+
+[... start of page 554 ...]
+ORCAManual,Release6.0.0
+7.9.3 Diabatic Couplings
+DeltaSCF is also a quite accurate method to obtained diabatic couplings, which can later be used in Markus
+theory to compute electron transfer rates. These can be computed by calculating the energy difference between
+electrontransferstatesandusingtheGeneralizedMulliken-HushApproach(GMH).Formoredetailspleasecheck
+forexamplethispaperfrom

@@ -1,0 +1,61 @@
+[... end of page 418 ...]
+ctrum obtained corresponds to the green line in Fig. 6.58. As shown, it closely resembles the spectrum
+obtained using AH, where a full geometry optimization was performed. Although not set as the default, this
+methodcomeshighlyrecommendedbasedonourexperience[199]. Anotheradvantageofthisapproachisthatthe
+derivativesofthetransitiondipolearecomputedsimultaneouslyoverCartesiandisplacementsontheESstructure
+usingthenumericalHessian. Subsequently,thesemodesarestraightforwardlyconverted.
+396 Chapter6. RunningTypicalCalculations
+
+--- Page 419 ---
+ORCAManual,Release6.0.0
+OBS:ThetransitiondipolesusedinourformulationarealwaysthoseoftheFINALstategeometry. Forabsorption,
+thiscorrespondstotheES,soinAHAS,thederivativesarecomputedoverthisgeometry. Forfluorescence, the
+defaultbehavioristorecomputethederivativesovertheGSgeometry. Alternatively,youcanchoosetosavetime
+and convert directly from ES to GS by setting CONVDER TRUE (though this is an approximation). For more
+details,refertoSec. MoreontheExcitedStateDynamicsmodule.
+OtherPESoptions
+TherearealsoafewotheroptionsthatcanbesetusingHESSFLAG.Forexample,youcancalculatethevertical
+ESHessianovertheGSgeometryandperformastep,knownastheVerticalHessian(HESSFLAGVH)method.
+This method has the advantage that the geometry step is expected to be better because it does not assume the
+initialESHessianisequaltotheGSHessian. However,itislikelytoencounternegativefrequenciesonthatVH,
+sinceyouarenotattheESminimum. Bydefault,ORCAwillturnnegativefrequenciesintopositiveones,issuinga
+warningifanywerelowerthan-300cm−1. Youcanalsochoosetocompletelyremovethem(andthecorresponding
+frequenciesfromtheGS)bysettingIFREQFLAGtoREMOVEorleavethemasnegativewithIFREQFLAGset
+toLEAVEunder%ESD.Justbeawarethatanoddnumberofnegativefrequenciesmightdisruptthecalculation
+ofthecorrelationfunction,sobesuretocheck.
+IfyourexcitedstateislocalizedandyouprefernottorecalculatetheentireHessian,youcanoptforaHybridHes-
+sian(HH)approach. ThisinvolvesrecomputingtheESHessianonlyforspecificatomslistedinHYBRID_HESS
+under %FREQ (Frequency calculations - numerical and analytical). The HH method uses the GS Hessian as a
+basebutadjustsitatthespecifiedatoms. Thiscomputationcanbeperformedeitherbeforeorafterthestep,offering
+twovariations: HybridHessianBeforeStep(HESSFLAGHHBS)orHybridHessianAfterStep(HESSFLAG
+HHAS).Whenusingeitheroftheseoptions,derivativesarerecalculatedacrossthemodesasneeded.
+AnotherapproachinvolvescomparingtheESHessianwiththeGSHessianandselectivelyrecomputingfrequencies
+thatdiffers. ThismethodworksbyapplyingadisplacementbasedontheGSHessianandevaluatingtheresulting
+energy change. If the predicted mode matches the actual mode, the prediction should be accurate. However, if
+thedifferenceexceedsaspecifiedthreshold,thegradientiscomputed,andthefrequencyforthatmodeisrecalcu-
+latedaccordingly. ThefinalESHessianisthenderivedfromtheUpdatedFrequencies(UF)andtheoriginalGS
+Hessian.
+ThisapproachofferstheadvantageofminimizingthecomputationofESgradientstypicalinstandardESHessians,
+therebyspeedinguptheprocess. Bydefault,thesystemchecksforfrequencyerrorsofapproximately20%. You
+canadjustthisthresholdusingtheUPDATEFREQERRflag;forinstance,settingUPDATEFREQERRto0.5under
+%ESDallowsforalargererrortoleranceof50%. Additionally,youcanimplementeithertheUpdatedFrequencies
+BeforeStep(HESSFLAGUFBS)ortheUpdatedFrequenciesAfterStep(UFAS)methods. Transitiondipole
+derivativesarecomputedconcurrentlywiththeupdateprocess.
+OBS:AlltheseoptionsapplytoFluorescenceandresonantRamanaswell.
+Duschinskyrotations
+The ES modes can sometimes be expressed as linear combinations of the GS modes (see Sec. {ref}isec:esd.
+absorption.theory.detailed), a phenomenon known in the literature as Duschinsky rotation [228]. In our
+formulationwithinORCA_ESD,itispossibletoaccountforthiseffect,whichreflectsacloserapproximationto
+real-worldscenarios,albeitatahighercomputationalcost.
+YoucanenablethisfeaturebysettingUSEJTRUE;otherwise,therotationmatrixJdefaultstounity. Forinstance,
+inthecaseofbenzene,whiletheeffectmaynotbepronounced,thereisnoticeableimprovementinmatchingpeak
+ratios with experimental data when incorporating rotations. Exploring this option may reveal more significant
+impactsinothercases.
+6.18. ExcitedStateDynamics 397
+
+[... start of page 420 ...]
+ORCAManual,Release6.0.0
+Fig.6.59: Experimentalabsorptionspectrumforbenzene(blackontheleft)andtheeffectofDuschinskyrotation
+onthespectrum.
+Temperatureeffects
+Inourmodel, theeffec

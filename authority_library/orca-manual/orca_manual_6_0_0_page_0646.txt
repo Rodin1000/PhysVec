@@ -1,0 +1,67 @@
+[... end of page 645 ...]
+plexesandfragmentsonthebasisofanabinitio,includingthe
+spin-orbitinteraction. AsastartingpointitusestheresultsofaCASSCF/NEVPT2/SOCcalculationfortheground
+andseveralexcitedspin-orbitmultiplets.
+Thefollowingquantitiescanbecomputed:
+• ParametersofpseudospinmagneticHamiltonians(themethodologyisdescribedin[168]):
+7.17. InterfacetoSINGLE_ANISOmodule 623
+
+--- Page 646 ---
+ORCAManual,Release6.0.0
+1. Firstorder(linearafterpseudospin)Zeemansplittingtensor(𝑔tensor),includingthedeterminationof
+thesignoftheproduct𝑔 ·𝑔 ·𝑔 .
+𝑋 𝑌 𝑍
+2. Secondorder(bilinearafterpseudospin)zero-fieldsplittingtensor(𝐷tensor).
+3. Higherorderzero-fieldsplittingtensors(𝐷2,𝐷4,𝐷6,...,𝑒𝑡𝑐.)
+4. HigherorderZeemansplittingtensors(𝐺1,𝐺3,𝐺5,...,𝑒𝑡𝑐.)
+• Crystal-Fieldparametersforthegroundatomic𝐽˜multipletforlanthanides. [414,857]
+• Crystal-Fieldparametersforthegroundatomic𝐿˜ termforlanthanidesandtransitionmetals.
+• Staticmagneticproperties[855,856]:
+1. VanVlecksusceptibilitytensor𝜒 (𝑇).
+𝛼𝛽
+2. Powdermagneticsusceptibilityfunction𝜒(𝑇).
+3. Magnetisationvector𝑀⃗(𝐻⃗)forspecifieddirectionsoftheappliedmagneticfield𝐻⃗.
+4. Powdermagnetisation𝑀 (𝐻,𝑇).
+𝑚𝑜𝑙
+5. Magnetisationtorquefunction⃗𝜏 (𝐻,𝑇).
+𝑚𝑜𝑙
+ThemagneticHamiltoniansaredefinedforadesiredgroupof𝑁 low-lyingelectronicstatesobtainedinCASSCF/
+SOCcalculationtowhichapseudospin𝑆˜issubscribedaccordingtotherelation𝑁 = 2𝑆˜+1. Thepseudospin𝑆˜
+reducestoatruespin𝑆 intheabsenceofspin-orbitcoupling. Forinstance,thetwowavefunctionsofaKramers
+doubletcorrespondtothepseudospin𝑆˜=1/2. Theimplementationisdonefor𝑎𝑛𝑦dimensionofthepseudospin
+𝑆˜,andcontrolledbythekeywordMLTP.
+The calculation of magnetic properties takes into account the contribution of excited states (the ligand-field and
+chargetransferstatesofthecomplexormononuclearfragmentwhichwereincludedintheCASSCF/CASPT2cal-
+culation)viatheirthermalpopulationandZeemanadmixture. Theeffectofintermolecularexchangeinteraction
+betweenmagneticmoleculesontheresultingmagneticpropertiesinacrystalisdescribedbyaphenomenological
+parameter𝑧𝐽 specifiedbytheuser.
+7.17.2 Running SINGLE_ANISO calculations
+TheSINGLE_ANISOis,inprinciple,astand-aloneutility(otool_single_aniso)thatcanbecalleddirectlyfrom
+theshellwithitsowninputfile,providedthattheabinitiodatafileisavailable:
+bash:$
+bash:$ $ORCA/x86_64/otool_single_aniso < single_aniso.input > single_aniso.output
+bash:$
+However, thisusagemaynotbesoconvenient, asthefile single_aniso.inputmustincludethetruenameof
+thedatafile. Fortheuser’sconvenience, adeeperintegrationbetween SINGLE_ANISOandCASSCFprogramin
+ORCAwasimplemented,asdescribedbelow.
+As a prerequisite for using the SINGLE_ANISO module to calculate the magnetic properties of the investigated
+compound,spin-orbitcouplingandotherrelativisticeffectsarealreadytakenfullyintoaccountatthestage
+of quantum chemistry calculation of the investigated compound. The necessary information of the ab initio
+calculationisprovidedinaformofa“datafile”: energyspectra,angularmomentumintegrals,etc. Theinterface
+withORCAgeneratestherequireddatafileautomatically. Thefollowingnamingconventionswereadoptedfor
+thedatafileinfunctionoftheemployedcomputationalmethod:
+• CASSCF+SOC+SINGLE_ANISO=>"$orca_input_name.CASSCF.anisofile"
+• CASSCF+QD-NEVPT2+SOC+SINGLE_ANISO=>"$orca_input_name.NEVPT2.anisofile"
+NotethatiftheCASSCF+QD-NEVPT2+SOC+SINGLE_ANISOcalculationisrequested,thentheSINGLE_ANISOwill
+beexecutedtwice,andtheabovetwodatafileswillbegenerated. TheinterfacewillgeneratetheSINGLE_ANISOin-
+putfilewiththekeywordsinformationprovidedintheCASSCF/anisosubblock. Thesefilenameofthedatafile
+624 Chapter7. DetailedDocumentation
+
+[... start of page 647 ...]
+ORCAManual,Release6.0.0
+is included automatically in the input file for the SINGLE_ANISO utility (keyword DATA), also generated auto-
+matically by the interface. The naming convention for the generated input files for the SINGLE_ANISO utility is
+“$orca_input_name.anisofile”.
+All keywords of the SINGLE_ANISO program are possible to be specified within the CASSCF/ANISO subblock.
+TheyarereferencedinSectionReferencelistofCASSCF/ANISOkeywords. Optionally,aworkingSINGLE_ANISO
+inputfilec

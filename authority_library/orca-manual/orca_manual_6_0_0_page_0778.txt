@@ -1,0 +1,106 @@
+[... end of page 777 ...]
+lobal hybrid functional, 𝛼 , 𝛼 , 𝛽 and 𝛽 are identical. 𝛼 and 𝛽 then depend on the amount of Fock
+1 2 1 2
+exchange (𝑎X ) only. This is different for range-separated hybrid functionals where 𝛼
+2
+and 𝛽
+2
+are set to zero.
+𝛼 and 𝛽 along with a value 𝑎 for the sTDA treatment are individually fitted for each range-separated hybrid
+1 1 𝑥
+functional.[723] It can bee seen from eq. (7.226) that the method is asymptotically correct which is crucial for
+excitationsofchargetransfertype.
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 755
+
+--- Page 778 ---
+ORCAManual,Release6.0.0
+InsTD-DFT,eq. (7.219)issolvedusingthesimplifiedmatrices𝐴′(seeabove)and𝐵′.
+𝑁atoms
+∑︁
+𝐵
+𝑖
+′
+𝑎,𝑗𝑏
+= (2𝑞
+𝑖
+𝐴
+𝑎
+𝛾
+𝐴
+𝐾
+𝐵
+𝑞
+𝑏
+𝐵
+𝑗
+−𝑎X𝑞
+𝑖
+𝐴
+𝑏
+𝛾
+𝐴
+𝐾
+𝐵
+𝑞
+𝑎
+𝐵
+𝑗
+) (7.231)
+𝐴,𝐵
+This approach yields better transition dipole moments and therefore spectra but the method is more costly than
+sTDA(afactorof2–5fortypicalsystems). TheparametersusedinsTDAandsTD-DFTareidentical. Thereare
+noadditionalparametersfittedforthismethod.
+CalculationSet-up
+sTDA and sTD-DFT can be combined with any (restricted or unrestricted) hybrid DFT singlepoint calculation.
+Gradientsandfrequenciesarenotimplemented! Themethodscanbeinvokedviathe%tddftblock. TableKeyword
+listforsTDAandsTD-DFT.givesalistofthepossiblekeywords.
+Table7.22: KeywordlistforsTDAandsTD-DFT.
+ModesTDA InvokesasTDAcalculation
+ModesTDDFT InvokesasTD-DFTcalculation
+EThresh𝑣𝑎𝑙𝑢𝑒 EnergythresholduptowhichCSFsareincluded(ineV)
+PTLimit𝑣𝑎𝑙𝑢𝑒 EnergythresholduptowhichCSFsbeyondEThreshmaybeselected(ineV)
+PThresh𝑣𝑎𝑙𝑢𝑒 SelectioncriteriontoincludeCSFbeyondEThresh(inEh)
+axstda𝑣𝑎𝑙𝑢𝑒 FockexchangeparameterusedinsTDA/sTD-DFTcalculation(forrange-separatedhybrids)
+beta1𝑣𝑎𝑙𝑢𝑒 Constantpartof𝐽 integralparameter𝛽
+beta2𝑣𝑎𝑙𝑢𝑒 𝑎X scaledpartof𝐽 integralparameter𝛽
+alpha1𝑣𝑎𝑙𝑢𝑒 Constantpartof𝐾 integralparameter𝛼
+alpha2𝑣𝑎𝑙𝑢𝑒 𝑎X scaledpartof𝐾 integralparameter𝛼
+tripletstrue Calculatesinglet-tripletexcitations(default: singlet-singlet)
+ThefollowingexampleshowshowtorunsuchasTDAcalculationusingtheBHLYPfunctionalifoneisinterested
+inallexcitationsupto10eV.
+! bhlyp def2-SV(P) nososcf tightscf
+! smallprint printgap nopop
+%maxcore 5000
+%tddft
+Mode sTDA
+Ethresh 10.0
+maxcore 5000
+end
+* xyzfile 0 1 coord.xyz
+Replacing Mode sTDA by Mode sTDDFT will invoke a sTD-DFT calculation instead. This is shown in the next
+exampleincombinationwiththe𝜔B97Xfunctionalanduserspecifiedparameters:
+! wb97x def2-SV(P) nososcf tightscf
+! smallprint printgap nopop
+%maxcore 5000
+%tddft
+Mode sTDDFT
+Ethresh 10.0
+axstda 0.56
+beta1 8.00
+beta2 0.00
+alpha1 4.58
+(continuesonnextpage)
+756 Chapter7. DetailedDocumentation
+
+[... start of page 779 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+alpha2 0.00
+maxcore 5000
+end
+* xyzfile 0 1 coord.xyz
+For the range-separated hybrid functionals LC-BLYP, CAM-B3LYP, 𝜔B97, 𝜔B97X, 𝜔B97X-D3 and 𝜔B97X-
+D3BJ,parametersareavailableandwillbeusedbydefaultifoneofthesefunctionalsisused. Thewayofspecifying
+parametersasshownaboveisusefulifthereisarange-separatedhybridfunctionalthathasnotbeenparametrized
+forsTDAyet. Forverylargesystems(e.g. >500atoms),itmaybeusefultodefineanupperboundaryPTLimitfor
+theselectionofc

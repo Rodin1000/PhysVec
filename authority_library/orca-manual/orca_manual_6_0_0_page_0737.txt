@@ -1,0 +1,79 @@
+[... end of page 736 ...]
+artesiangradient:
+g =G−Bg (7.193)
+𝑞 𝑥
+TheinitialHessianisformeddirectlyintheredundantinternalspaceandthenitselforitsinverseisupdatedduring
+thegeometryoptimization.
+BeforegeneratingtheNewtonstepwehavetoensurethatthedisplacementstakeplaceonlyinthenonredundant
+partoftheinternalcoordinatespace. Forthispurposeaprojector𝑃′:
+P′ =GG− =G−G (7.194)
+isappliedonboththegradientandtheHessian:
+g˜ =P′g (7.195)
+q q
+H˜ =P′H P′+𝛼(1−P′) (7.196)
+q q
+Thesecondtermfor𝐻˜ setsthematrixelementsoftheredundantpartoftheinternalcoordinatespacetoverylarge
+values(𝛼=1000).
+714 Chapter7. DetailedDocumentation
+
+--- Page 737 ---
+ORCAManual,Release6.0.0
+Coordinatesteps
+AQuasi-Newton(QN)stepisthesimplestchoicetoupdatethecoordinatesandisgivenby:
+Δq=−H˜−1g˜ (7.197)
+q q
+Amoresophisticatedstepistherationalfunctionoptimizationstepwhichproceedsbydiagonalizingtheaugmented
+Hessian:
+(︂ )︂(︂ )︂ (︂ )︂
+H g ∆q ∆q
+𝑞 𝑞 =𝑣 (7.198)
+g 0 1 1
+𝑞
+Thelowesteigenvalue𝜈 approacheszeroastheequilibriumgeometryisapproachedandthenicesideeffectof
+0
+theoptimizationisastepsizecontrol. Towardsconvergence,theRFOstepisapproachingthequasi-Newtonstep
+andbeforeitleadstoadampedstepistaken. Inanycase,eachindividualelementof∆qisrestrictedtomagnitude
+MaxStepandthetotallengthofthestepisrestrictedtoTrust. IntheRFOcase,thisisachievedbyminimizing
+thepredictedenergyonthehypersphereofradiusTrustwhichalsomodifiesthedirectionofthestepwhileinthe
+quasi-Newtonstep,thestepvectorissimplyscaleddown.
+Thus,thenewgeometryisgivenby:
+qnew =qold+∆q (7.199)
+However,whichCartesiancoordinatesbelongtothenewredundantinternalset? Thisisasomewhatcomplicated
+problemsincetherelationbetweeninternalsandCartesiansisverynonlinearandthestepininternalcoordinates
+isnotinfinitesimal. Thus,aniterativeprocedureistakentoupdatetheCartesiancoordinates. Firstofallconsider
+thefirst(linear)step:
+∆x=A∆q (7.200)
+with A = B𝑇G−. With the new Cartesian coordinates x = x +∆x a trial set of internals q can be
+𝑘+1 𝑘 𝑘+1
+computed. Thisnewsetshouldideallycoincidewithqnew butinfactitusuallywillnot. Thus,onecanrefinethe
+Cartesianstepbyforming
+∆∆q=qnew−q
+𝑘+1
+(7.201)
+whichshouldapproachzero. ThisleadstoanewsetofCartesians∆x′ = A∆∆qwhichinturnleadstoanew
+setofinternalsandtheprocedureisiterateduntiltheCartesiansdonotchangeandtheoutputinternalsequalq
+𝑛𝑒𝑤
+withinagiventolerance(10−7RMSdeviationinbothquantitiesisimposedinORCA).
+ConstrainedOptimization
+Constraints on the redundant internal coordinates can be imposed by modifying the above projector 𝑃′ with a
+projectorfortheconstraints𝐶:
+P=P′−P′C(CPC)−1CP′ (7.202)
+𝐶 isadiagonalmatrixwith1’sfortheconstraintsand0’selsewhere. ThegradientandtheHessianareprojected
+withthemodifiedprojector:
+𝑔˜ =𝑃𝑔 (7.203)
+𝑞 𝑞
+𝐻˜ =𝑃𝐻 𝑃 +𝛼(1−𝑃) (7.204)
+𝑞 𝑞
+7.26. GeometryOptimization 715
+
+[... start of page 738 ...]
+ORCAManual,Release6.0.0
+ConstrainedFragmentsOptimization
+Theconstrainedfragmentsoptionwasimplementedinordertoprovideaconvenientwaytohandleconstraintsfor
+systemsconsistingofseveralmolecules. Thedifferencetoacommonoptimizationliesinthecoordinatesetup. In
+acommoncoordinatesetuptheinternalcoordinatesarebuiltupasdescribedinthefollowing:
+Inafirststep,bondsareconstructedbetweenatompairswhichfulfillcertain(atomtypespecific)distancecriteria. If
+therearefragmentsinthesystem,whicharenotconnectedtoeachother(thisisthecasewhentherearetwoormore
+separatemolecules),anadditionalbondisassignedtothenearestatompairbetweenthenonbondedfragments. All
+otherinternalcoordinatesareconstructedonthebasisofthissetofbonds. Here,inasecondstep,bondanglesare
+constructedbetwe

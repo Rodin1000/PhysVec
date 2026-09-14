@@ -1,0 +1,87 @@
+[... end of page 731 ...]
+al model Hessians
+(Swart,Lindh,Almloef,Schlegel),anexactHessianandapartiallyexactHessian(bothrecommendedfortransition
+stateoptimization)forbothcoordinatetypes. Inredundantinternalcoordinatesseveraloptionsforthetypeofstep
+tobetakenexist. Theusercandefineconstraintsviatwodifferentpaths. Hecaneitherdefinethemdirectly(as
+bondlength,angle,dihedralorCartesianconstraints)orhecandefineseveralfragmentsandconstrainthefragments
+internallyandwithrespecttootherfragments. TheORCAoptimizercanbeusedasanexternaloptimizer,i.e.the
+energyandgradientcalculationsdonebyORCA.
+7.26. GeometryOptimization 709
+
+--- Page 732 ---
+ORCAManual,Release6.0.0
+7.26.1 Input Options and General Considerations
+Theuseofthegeometryoptimizationmoduleisrelativelystraightforward.1
+%method RunTyp Opt # use geometry optimization.
+#(equivalent is RunTyp=Geom)
+end
+# or simply "! Opt" in the keyword line
+# details of the optimization are controlled here
+%geom
+MaxIter 50 # max. number of geometry iterations
+# (default is 3N (N = number of atoms), at least 50 )
+# coordinate type control
+coordsys redundant # redundant internal coords (2022)
+cartesian # Cartesian coordinates
+# fallback option to Cartesian step if internals fail
+cartfallback true
+# transition state (TS) optimization
+TS_search EF # Switch on TS search, EF means
+# "eigenvector following"
+# alternatively use "! OptTS"
+TS_Mode {M 0} end # Choose the mode to follow uphill in the
+# TS optimization. {M X}: eigenvector of
+# the Hessian with X. lowest eigenvalue
+# (start counting at zero) (default: X=0)
+# Instead of a mode choose an internal coordinate strongly
+# involved in the eigenmode followed uphill
+TS_Mode {B 0 1} end # bond between atoms 0 and 1 or
+TS_Mode {A 2 1 0} end # angle between atoms 2, 1 and 0 or
+TS_Mode {D 3 2 1 0} end # dihedral of atoms 3, 2, 1 and 0
+# add or remove internal coordinates from the automatically
+# generated set of redundant internal coords
+modify_internal
+{ B 10 0 A } # add a bond between atoms 0 and 10
+{ A 8 9 10 R } # remove the angle defined
+# by atoms 8, 9 and 10
+{ D 7 8 9 10 R } # remove the dihedral angle defined
+end # by atoms 7, 8, 9 and 10
+# constrain internal coordinates:
+Constraints
+{ B N1 N2 value C } # the bond between N1 and N2
+{ A N1 N2 N1 value C } # the angle defined by N1, N2
+# and N3
+{ D N1 N2 N3 N4 value C } # the dihedral defined by N1,
+# N2, N3 and N4
+{ C N1 C } # the cartesian position of N1
+{ B N1 * C} # all bonds involving N1
+{ B * * C} # all bonds
+{ A * N2 * C } # all angles with N2 as central atom
+{ A * * * C } # all angles
+{ D * N2 N3 * C } # all dihedrals with N2 and N3 as
+# central atoms
+{ D * * * * C } # all dihedrals
+end
+# scan an internal coordinate:
+Scan B N1 N2 = value1, value2, N end
+(continuesonnextpage)
+1Butthatdoesn’tmeanthatgeometryoptimizationitselfisstraightforward!Sometimes,evenwhenitisnotexpectedtheconvergencecan
+beprettybadanditmaytakeabetterstartingstructuretocometoastationarypoint.Inparticularfloppystructureswithmanypossiblerotations
+aroundsinglebondsandsoftdihedralanglemodesaretricky. ItmaysometimesbeadvantageoustocomputeaHessianmatrixata“cheap”
+leveloftheoryandthendotheoptimizationinCartesiancoordinatesstartingfromthecalculatedHessian.
+710 Chapter7. DetailedDocumentation
+
+[... start of page 733 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# perform constrained optimizations with varying N1-N2-
+# distance from value1 up to value2 in N steps;
+# works as well for angles (use A N1 N2 N3) and for
+# dihedrals (use D N1 N2 N3 N4)
+Scan B N1 N2 [value1 value2 value3 ... valueN] end
+# perform constrained optimizations with N1-N2-distances
+# as given in the list;
+# works as well for angles (use A N1 N2 N3) and for
+# dihedrals (use D N1 N2 N3 N4)
+# perform a simultaneous multidimensional scan
+# p

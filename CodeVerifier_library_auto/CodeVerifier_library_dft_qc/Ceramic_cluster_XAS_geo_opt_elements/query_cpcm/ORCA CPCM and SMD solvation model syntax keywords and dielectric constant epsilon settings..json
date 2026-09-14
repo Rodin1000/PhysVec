@@ -1,0 +1,362 @@
+{
+  "query": "ORCA CPCM and SMD solvation model syntax, keywords, and dielectric constant (epsilon) settings.",
+  "package": "orca-manual",
+  "results": [
+    {
+      "id": "9.35.3_The_SMD_Solvation_Model__orca_manual_4_2_1-page-0912__51d21fc5f172c182967894040cb36c83__full__0",
+      "text": "880 9 Detailed Documentation\n9.35.2 The Conductor-like Screening Solvation Model (COSMO)\nThe COSMO solvation model has been removed from ORCA v4.0.0 !!!\nPlease use the C-PCM solvation model in combination with the COSMO epsilon function if required!\nAs a short form to use the C-PCM model with the COSMO epsilon function, you can specify the solvent via\n!CPCMC(solvent).\n9.35.3 The SMD Solvation Model\nThe SMD solvation model has been proposed by the Cramer and Truhlar groups [518], and is based on the\nquantum mechanical charge density of a solute molecule interacting with a continuum description of the\nsolvent. In the model the full solute electron density is used without deﬁning partial atomic charges and\nthe solvent is not represented explicitly but rather as a dielectric medium with the surface tension at the\nsolute–solvent boundary. SMD is a universal solvation model, in the sense that it is applicable to any charged\nor uncharged solute in any solvent or liquid medium for which a few key descriptors are known. In particular,\nthese descriptors are the dielectric constant, refractive index, bulk surface tension, and acidity and basicity\nparameters. Neglecting the concentration contribution, the model separates the observable solvation free\nenergy into two main components,\n∆GS = ∆GENP + ∆GCDS. (9.390)\nIn ORCA, the ﬁrst component is the bulk electrostatic contribution arising from a self-consistent reaction\nﬁeld treatment that involves the electrostatic interaction using the Conductor-like Polarizable Continuum\nModel (C-PCM). However, the radii are set to “intrinsic atomic Coulomb radii”. The second component,\ncalled the cavity-dispersion solvent-structure (CDS) term, is the contribution resulting from short-range\ninteractions between the solute and solvent molecules in the ﬁrst solvation shell. This contribution is a sum\nof terms that are proportional (with geometry-dependent proportionality constants called atomic surface\ntensions) to the solvent-accessible surface areas of the individual atoms of the solute. The CDS contribution\nto the free energy of solvation is given by\n∆GCDS =\natoms∑\nk\nσkAk(R,RZk + rs) + σ[M]\natoms∑\nk\nAk(R,RZk + rs), (9.391)\nwhere σk and σ[M] are the atomic surface tension of atom k and the molecular surface tension, respectively,\nand Ak is the solvent accessible surface area (SASA). The SASA depends on the geometry R, the set RZk of\nall atomic van der Waals radii, and the solvent radius rs, which is added to each of the atomic van der Waals\nradii. In the program Bondi radii are used for CDS contribution.\nMore details can be found in the original paper of Marenich et al. [518], which should be cited in publications\nusing results of SMD calculations.\nSMD can be employed in single point calculations and geometry optimizations, using single-determinant SCF\n(HF and DFT) and CASSCF methods. In post-SCF methods the result is corrected in the reference wave\nfunction. To use SMD the user must simply specify smd true in the %cpcm block and provide the name of\nthe solvent. This automatically sets a number of default SMD parameters (see the table below for a list\n",
+      "metadata": {
+        "source_file": "9.35.3_The_SMD_Solvation_Model__orca_manual_4_2_1-page-0912.txt",
+        "section_title": "9.35.3_The_SMD_Solvation_Model__orca_manual_4_2_1-page-0912.txt",
+        "package": "orca-manual",
+        "section_id": "full"
+      },
+      "score": 0.9985310386398746,
+      "original_score": 0.998281002663683,
+      "vector_score": 0.9978512533296038,
+      "bm25_score": 1.0,
+      "keyword_matches": 8,
+      "matched_keywords": [
+        "orca",
+        "cpcm",
+        "smd",
+        "solvation",
+        "model",
+        "dielectric",
+        "constant",
+        "epsilon"
+      ],
+      "match_ratio": 0.7272727272727273,
+      "is_html": false
+    },
+    {
+      "id": "8.14_Solvation__orca_manual_4_2_1-page-0289__b034380f03c6c4adcf4725921c12aa41__full__0",
+      "text": "8.14 Solvation 257\n8.14 Solvation\nSeveral implicit solvation models are implemented in ORCA. A completely integrated implementation of the\nconductor-like polarizable continuum model (C-PCM) oﬀers a range of options and has been implemented in\nall parts of ORCA. The following calculations can be used to carry out calculations in a polarizable continuum\nusing a realistic Van-der-Waals cavity:\n• Energies of molecules in solution with a ﬁnite dielectric constant ε using any HF or DFT method.\n• Optimization of molecular structures in solution using any HF or DFT method using analytic gradients.\n• Calculation of vibrational frequencies using the analytic Hessian for any HF or DFT method for which\nthe same quantity is available in vacuum.\n• Calculation of solvent eﬀects on response properties like polarizabilities through coupled-perturbed\nSCF theory. For magnetic response properties such as the g-tensor the C-PCM response vanishes.\n• Calculations of solvent shifts on transition energies using the time-dependent DFT or CIS method.\nHere one needs to know the refractive index of the solvent in addition to the dielectric constant.\n• First order perturbation estimate of solvent eﬀects on state and transition energies in multireference\nperturbation and conﬁguration-interaction calculations.\nAs a simple example let us look at the solvent eﬀect on the transition energy of the n→π∗ transition in\nformaldehyde. We ﬁrst do a normal CIS calculation:\n! RHF TZVP\n%cis nroots 1\nend\n* int 0 1\nC 0 0 0 0.000000 0.000 0.000\nO 1 0 0 1.200371 0.000 0.000\nH 1 2 0 1.107372 121.941 0.000\nH 1 2 3 1.107372 121.941 180.000\n*\nyielding a transition energy of 4.582 eV. Now we repeat the same calculation but with the CPCM model\nenabled (which is fairly simple; nothing except the dielectric constant and the refractive index needs to be\ninput; there are technical parameters which can be deﬁned by the user but this is not necessary in most\napplications; all modules will automatically recognize the presence of the CPCM terms automatically).\n",
+      "metadata": {
+        "section_title": "8.14_Solvation__orca_manual_4_2_1-page-0289.txt",
+        "section_id": "full",
+        "package": "orca-manual",
+        "source_file": "8.14_Solvation__orca_manual_4_2_1-page-0289.txt"
+      },
+      "score": 0.9361587216104765,
+      "original_score": 0.928341422215841,
+      "vector_score": 1.0,
+      "bm25_score": 0.641707111079205,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "orca",
+        "cpcm",
+        "solvation",
+        "model",
+        "dielectric",
+        "constant"
+      ],
+      "match_ratio": 0.5454545454545454,
+      "is_html": false
+    },
+    {
+      "id": "9.35.3_The_SMD_Solvation_Model__orca_manual_4_2_1-page-0913__7a2974cd20c204cae5114212dd22d1e2__full__0",
+      "text": "9.35 Implicit Solvation Models 881\nof parametrized solvents included in the SMD library). If required, the user can also manually specify the\nsolvent descriptors used in an SMD calculation.\n!CPCM(water)\n%cpcm smd true # turn on SMD\nSMDsolvent \"water\" # specify the name of solvent from the list\nsoln # index of refraction at optical frequencies at 293 K\nsoln25 # index of refraction at optical frequencies at 298 K\nsola # Abraham’s hydrogen bond acidity\nsolb # Abraham’s hydrogen bond basicity\nsolg # relative macroscopic surface tension\nsolc # aromaticity, fraction of non-hydrogenic solvent atoms\n# that are aromatic carbon atoms\nsolh # electronegative halogenicity, fraction of non-hydrogenic\n# solvent atoms that are F, Cl, or Br\nend\nBefore SCF start, the program prints the SMD information.\n------------------------------------------------------------------------------\nCPCM SOLVATION MODEL\n------------------------------------------------------------------------------\nCPCM parameters:\nEpsilon ... 80.4000\nRefrac ... 1.3300\nRsolv ... 1.3000\nSurface type ... GEPOL SES\nEpsilon function type ... CPCM\nSolvent: ... WATER\nSMD-CDS solvent descriptors:\nSoln ... 1.3328\nSoln25 ... 1.3323\nSola ... 0.0000\nSolb ... 0.0000\nSolg ... 0.0000\nSolc ... 0.0000\nSolh ... 0.0000\nRadii:\nRadius for N used is 3.5716 Bohr (= 1.8900 Ang.)\nCalculating surface ... done! ( 0.0s)\nGEPOL surface points ... 98\nGEPOL Volume ... 279.2288\nGEPOL Surface-area ... 211.1858\nCalculating surface distance matrix ... done! ( 0.0s)\nPerforming Cholesky decomposition & store ... done! ( 0.0s)\nOverall time for CPCM initialization ... 0.0s\nAfter the SCF is converged, the output ﬁle shows the SMD contribution to the total energy.\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "9.35.3_The_SMD_Solvation_Model__orca_manual_4_2_1-page-0913.txt",
+        "package": "orca-manual",
+        "source_file": "9.35.3_The_SMD_Solvation_Model__orca_manual_4_2_1-page-0913.txt"
+      },
+      "score": 0.7090849463058152,
+      "original_score": 0.6799934409363967,
+      "vector_score": 0.6836860541255301,
+      "bm25_score": 0.6652229881798634,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "cpcm",
+        "smd",
+        "solvation",
+        "model",
+        "epsilon"
+      ],
+      "match_ratio": 0.45454545454545453,
+      "is_html": false
+    },
+    {
+      "id": "9.35.1_The_Conductor-like_Polarizable_Continuum_Model_C-PCM__orca_manual_4_2_1-page-0908__a3f5004ce4c81e629ef33c5076c5973d__full__0",
+      "text": "876 9 Detailed Documentation\n• SMD [518] : The Solvation Model based on Density\nThe keywords to control these solvent models have been kept very similar to each other, so it is easy to switch\nbetween the two.\n9.35.1 The Conductor-like Polarizable Continuum Model (C-PCM)\nThe conductor-like polarizable continuum model (C-PCM) is an implementation of the conductor-like apparent\nsurface charge methods. In these models the solute is placed in a cavity of roughly molecular shape. The\nsolvent reaction ﬁeld is described by apparent polarization charges on the cavity surface, which are in turn\ndetermined by the solute. These charges can be treated as punctual (point charges) or be modelled as\nspherical Gaussians [519]. The cavity in ORCA is constructed diﬀerently depending on how the charges are\ntreated. In the case of using point charges, the cavity is generated through the GEPOL [520 –522] algorithm,\neither as solvent-excluding surface (SES), or solvent-accessible surface (SAS). When gaussian charges are\nconsidered, the user can choose between a scaled vdW surface or the GEPOL SES, and the charge positions\nare determined following a Lebedev quadrature approach. This scheme is known as Gaussian Charge Scheme\nand more details on how to use it are given in Section 9.35.1.1.\nThe ORCA C-PCM implementation closely follows the C-PCM [517] paper. The molecular Hamiltonian is\nperturbed by the solvent:\nˆH = ˆH0 + ˆV (9.376)\nwhere ˆH0 is the Hamiltonian of the isolated molecule, whereas ˆV describes the solute – solvent interactions.\nThe SCF procedure leads to the variational minimization of the free energy of the solute, G:\nG=\n⣨\nΨ\n⏐⏐⏐ˆH0\n⏐⏐⏐Ψ\n⟩\n+ 1\n2\n⣨\nΨ\n⏐⏐⏐ˆV\n⏐⏐⏐Ψ\n⟩\n(9.377)\nUsing the conductor-like boundary condition the electrostatic potential can be determined by\nV(⃗ r) +\ntesserae∑\ni\nVqi(⃗ r) = 0 (9.378)\nwhere V and Vqi are the electrostatic potential due to the solute and to the polarization charges and ⃗ ris a\npoint on the cavity surface. The vector of polarization charge can then be determined by\nAQ = −V (9.379)\nwhere the vector V contains the electrostatic potential due to the solute on the tesserae. The elements of\nthe matrix A have a diﬀerent functional form depending on how the charges are treated. If we use point\ncharges:\nAii = 1.07\n√\n4π\nSi\n(9.380)\nAij = 1\nrij\n(9.381)\nin which Si is the area of tessera i, and rij = |⃗ ri −⃗ rj|. When gaussian charges are considered:\n",
+      "metadata": {
+        "source_file": "9.35.1_The_Conductor-like_Polarizable_Continuum_Model_C-PCM__orca_manual_4_2_1-page-0908.txt",
+        "section_id": "full",
+        "section_title": "9.35.1_The_Conductor-like_Polarizable_Continuum_Model_C-PCM__orca_manual_4_2_1-page-0908.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.4441686072889445,
+      "original_score": 0.38858546801783894,
+      "vector_score": 0.4398676740770879,
+      "bm25_score": 0.18345664378084298,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "orca",
+        "smd",
+        "solvation",
+        "model",
+        "keywords"
+      ],
+      "match_ratio": 0.45454545454545453,
+      "is_html": false
+    },
+    {
+      "id": "9.32.4.3_Example_Normal_Mode_Scan_Calculations_of_Model_Parameters_for__orca_manual_4_2_1-page-0015__f8fcd1fe910c119d9155f9025ea7ecc0__part_0__0",
+      "text": "Contents XIII\n9.33.4 Complete Keyword List for the ESD Module . . . . . . . . . . . . . . . . . . 845\n9.34 Ab initio Molecular Dynamics Simulations . . . . . . . . . . . . . . . . . . . . . . . . 847\n9.34.1 Changes in ORCA 4.2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 847\n9.34.2 Input Format . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 848\n9.34.3 Command List . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 855\n9.34.4 Scientiﬁc Background . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 870\n9.34.4.1 Time Integration and Equations of Motion . . . . . . . . . . . . . . 870\n9.34.4.2 Velocity Initialization . . . . . . . . . . . . . . . . . . . . . . . . . . 871\n9.34.4.3 Thermostats . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 872\n9.34.4.4 Constraints . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 874\n9.35 Implicit Solvation Models . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 874\n9.35.1 The Conductor-like Polarizable Continuum Model (C-PCM) . . . . . . . . . . 875\n9.35.1.1 Use of the Gaussian Charge Scheme . . . . . . . . . . . . . . . . . . 877\n9.35.2 The Conductor-like Screening Solvation Model (COSMO) . . . . . . . . . . . 879\n9.35.3 The SMD Solvation Model . . . . . . . . . . . . . . . . . . . . . . . . . . . . 879\n9.36 Calculation",
+      "metadata": {
+        "section_title": "9.32.4.3_Example_Normal_Mode_Scan_Calculations_of_Model_Parameters_for__orca_manual_4_2_1-page-0015.txt",
+        "source_file": "9.32.4.3_Example_Normal_Mode_Scan_Calculations_of_Model_Parameters_for__orca_manual_4_2_1-page-0015.txt",
+        "package": "orca-manual",
+        "section_id": "part_0"
+      },
+      "score": 0.42492769348055914,
+      "original_score": 0.3798239831653089,
+      "vector_score": 0.39666944266088583,
+      "bm25_score": 0.3124421451830013,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "orca",
+        "smd",
+        "solvation",
+        "model"
+      ],
+      "match_ratio": 0.36363636363636365,
+      "is_html": false
+    },
+    {
+      "id": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021__72e5cefb9c642f759756406daaa4db36__part_0__0",
+      "text": "XIX\nList of Tables\n6.1 Main keywords that can be used in the simple input of ORCA. . . . . . . . . . . . . 12\n6.2 Density functionals available in ORCA. . . . . . . . . . . . . . . . . . . . . . . . . . 23\n6.3 Basis sets available on ORCA. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25\n6.4 Overview of auxiliary basis sets available in ORCA. . . . . . . . . . . . . . . . . . . 30\n6.5 Overview of library keywords for ECPs and associated basis sets available in ORCA. 33\n8.1 Computer times for solving the coupled-cluster/coupled-pair equations for Serine . . 62\n8.2 Computed spectroscopic constants of N 2 with coupled-cluster methods. . . . . . . . 63\n8.2 Computed spectroscopic constants of N 2 with coupled-cluster methods. . . . . . . . 64\n8.3 Comparison of various basis sets for highly correlated calculations . . . . . . . . . . 70\n8.4 Comparison of various basis sets for correlated calculations. . . . . . . . . . . . . . . 72\n8.6 Accuracy settings for DLPNO coupled cluster (current version). . . . . . . . . . . . . 90\n8.7 Accuracy settings for DLPNO coupled cluster (deprecated 2013 version). . . . . . . . 90\n8.10 DSD-DFT parameters deﬁned in ORCA . . . . . . . . . . . . . . . . . . . . . . . . . 99\n8.12 Comparison of the performance of the MRCI and MDCI modules for a single refer-\nence calculation with the bn-ANO-DZP basis set on the zwitter-ionic form of serine. 213\n8.15 Energies of the H 2O-CH2 example for illustrating how the diﬀerent LED contri-\nbutions are evaluated. The superscript opt denotes energies of optimized structures,\nfixed denotes energies of isolated fragments in the dimer structure. In the last column\nthe energy of the dimer is reported. . . . . . . . . . . . . . . . . . . . . . . . . . . . . 311\n9.2 Predeﬁned COSX Grid keywords . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+      "metadata": {
+        "source_file": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021.txt",
+        "package": "orca-manual",
+        "section_title": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021.txt",
+        "section_id": "part_0"
+      },
+      "score": 0.3871485992980453,
+      "original_score": 0.35179178771908637,
+      "vector_score": 0.4397397346488579,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "orca",
+        "keywords",
+        "settings"
+      ],
+      "match_ratio": 0.2727272727272727,
+      "is_html": false
+    },
+    {
+      "id": "9.35.1.1_Use_of_the_Gaussian_Charge_Scheme__orca_manual_4_2_1-page-0910__480b6113a2c2a7704595c529b80fe716__full__0",
+      "text": "878 9 Detailed Documentation\nSolvent Name Dielectric Constant Refractive Index\nWater 80.4 1.33\nAcetone 20.7 1.359\nAcetonitrile 36.6 1.344\nAmmonia 22.4 1.33\nBenzene 2.28 1.501\nCCl4 2.24 1.466\nCH2Cl2 9.08 1.424\nChloroform 4.9 1.45\nCyclohexane 2.02 1.425\nDMF 38.3 1.430\nDMSO 47.2 1.479\nEthanol 24.3 1.361\nHexane 1.89 1.375\nMethanol 32.63 1.329\nOctanol 10.3 1.421\nPyridine 12.5 1.510\nTHF 7.25 1.407\nToluene 2.4 1.497\nThe parameters can be more accurately deﬁned using the %cpcm block input. The available options are as\nfollows\n%cpcm epsilon 80.0 # Dielectric constant\nrefrac 1.0 # Refractive index\nrsolv 1.3 # Solvent probe radius\nrmin 0.5 # Minimal GEPOL sphere radius\npmin 0.1 # Minimal distance between two surface points\nfepstype cpcm # Epsilon function type: cpcm, cosmo\nxfeps 0.0 # X parameter for the feps scaling function\nsurfacetype gepol_ses # GEPOL surface: gepol_ses, gepol_sas\ngepol_ses_gaussian, vdw_gaussian\nndiv 5 # Maximum depth for recursive sphere generation\nnum_leb 302 # Lebedev points for the Gaussian charge scheme\nradius[N] 1.3 # Atomic radius for atomic number N in Angstrom\nAtomRadii(N,1.4) # Atomic radius for the Nth atom in Angstrom\nscale_gauss 1.2 # Scaling factor for the atomic radii in the\ngaussian charge scheme\nend\n9.35.1.1 Use of the Gaussian Charge Scheme\nThe Gaussian charge scheme avoids the Coulomb singularity present in conventional point charge surface\nelement models. This approach results in a smooth solvation potential and, more importantly, on smooth\nderivatives of this quantity with respect to external perturbations. Then, it is highly recommended to\n",
+      "metadata": {
+        "section_title": "9.35.1.1_Use_of_the_Gaussian_Charge_Scheme__orca_manual_4_2_1-page-0910.txt",
+        "section_id": "full",
+        "package": "orca-manual",
+        "source_file": "9.35.1.1_Use_of_the_Gaussian_Charge_Scheme__orca_manual_4_2_1-page-0910.txt"
+      },
+      "score": 0.2821858811354746,
+      "original_score": 0.21040446924902206,
+      "vector_score": 0.10191527708024742,
+      "bm25_score": 0.6443612379241208,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "cpcm",
+        "solvation",
+        "dielectric",
+        "constant",
+        "epsilon"
+      ],
+      "match_ratio": 0.45454545454545453,
+      "is_html": false
+    },
+    {
+      "id": "8.18.1_ORCA_Forceeld_File__orca_manual_4_2_1-page-0351__50feecfc98984208cf5f07103a0884e0__full__0",
+      "text": "8.18 ORCA MM Module 319\nTCutPNO 3.33e-7 # cutoff for PNO occupation numbers.\nTCutPairs 1e-5 # cutoff for estimated pair correlation energies\n# to be included in the CC treatment\nend\n8.18 ORCA MM Module\nSince version 4.2 ORCA features its own independent MM implementation.\nThe minimum input necessary for a MM treatment looks as follows.\n!MM\n%mm\nORCAFFFilename \"UBQ.ORCAFF.prms\"\nend\nIn this section we discuss the basic keywords and options, i.e.\n• the basic structure of the ORCA Forceﬁeld File,\n• how to generate the ORCA Forceﬁeld File,\n• how to manipulate the ORCA Forceﬁeld File,\n• how to speed up MM calculations,\n• further MM options and keywords.\nFurther options important for QM/MM calculations will be discussed in section 8.19.\n8.18.1 ORCA Forceﬁeld File\nFor the MM part of the QM/MM calculation force-ﬁeld parameters are necessary. ORCA has its own\nparameter ﬁle format ( ORCA forceﬁeld ﬁle - ORCAFF.prms), which includes the atom speciﬁc parameters\nfor nonbonded interactions:\n• partial charge\n• LJ coeﬃcients\nand parameters for bonded interactions:\n• bonds\n• angles\n• Urey-Bradley terms\n",
+      "metadata": {
+        "section_title": "8.18.1_ORCA_Forceeld_File__orca_manual_4_2_1-page-0351.txt",
+        "source_file": "8.18.1_ORCA_Forceeld_File__orca_manual_4_2_1-page-0351.txt",
+        "section_id": "full",
+        "package": "orca-manual"
+      },
+      "score": 0.27583830883581045,
+      "original_score": 0.24851145256546367,
+      "vector_score": 0.31063931570682957,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "orca",
+        "keywords"
+      ],
+      "match_ratio": 0.18181818181818182,
+      "is_html": false
+    },
+    {
+      "id": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022__78f49d4facd1d5a01c416b6730711ee4__full__0",
+      "text": "XX\n1 ORCA 4.2 Foreword\nDear ORCA Users or potential ORCA users,\nWe are all very proud that we can present ORCA Version 4.2. to you! We thoroughly hope that you enjoy\nthe program and that it will serve you well in all of your scientiﬁc endeavors. As with previous releases,\nwe have worked very hard on this release until the last minute and while we did our best to ensure that\neverything is working and complete, we can of course not exclude the possibility that a few things might\nhave escaped our attention. Hence, please give us feedback over the next few months – we plan to follow up\nwith a minor release soon.\nWith this release, we have largely continued the path that we have been following for about the last decade –\nnamely to engage in wavefunction theory and make it applicable to larger and larger and larger systems with\nhigher and higher accuracy.\nIt has been increasingly evident that DLPNO methods are a staple of ORCA and with this release we have\nsigniﬁcantly enhanced the DLPNO methodology by making sure that iterative (T) corrections are available\nfor closed- and open-shell systems. Also the long awaited DLPNO-STEOM for closed shells is an excellent\nexcited state method. Open shell DLPNO-CCSD(T)-F12 has been completed for this release as well.\nThe second staple of ORCA are multireference methods. In this release, we have added some signiﬁcant\nfunctionality, most importantly there is a full CASPT2 implementation now in ORCA and there are signiﬁcant\nimprovements in our large-scale approximate full CI scheme (ICE). There also is a fully internally contracted\nquadratic MRCI scheme implemented (essentially internally contracted multireference coupled cluster).\nThe third staple of ORCA are spectroscopic calculations. We have continued to enhance the NMR capabilities\nof ORCA by adding the RI-MP2 chemical shift calculations. It also works for double hybrid functionals and\ngive pretty accurate results. In addition, there have been a number of enhancements in the ORCA ESD\nmodule for the calculation of ﬂuorescence, phosphorescence spectra as well as vibronic bandshapes and\nresonance Raman spectra. One signiﬁcant addition is spin-orbit coupling in TD-DFT. Additionally, ORCA\nnow has the capability to optimize to conical intersections.\nThe fourth staple of ORCA are analysis tools that allow you to go beyond the bare numbers. In this respect\nthe very successful local energy decomposition has been further extended to cover DLPNO-MP2. There\nalso is a low-cost, high accuracy method added: HF-LD that adds London dispersion to a Hartree-Fock\ncalculation.\nA lot of work has gone into the improvement of the implicit solvation capabilities. We have added the Gaussian\ncharge scheme that is numerically much more stable than the usual point charge scheme used in CPCM or\nCOSMO. Great improvements have also been made to the nudge elastic band transition state optimizer. In\naddition, we are now using the libxc library to give access to a wider variety of density functionals. The MD\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022.txt",
+        "section_title": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.2666562000056618,
+      "original_score": 0.2243479038521423,
+      "vector_score": 0.2767941716835875,
+      "bm25_score": 0.014562832526361364,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "orca",
+        "cpcm",
+        "solvation"
+      ],
+      "match_ratio": 0.2727272727272727,
+      "is_html": false
+    },
+    {
+      "id": "8.18.2_Speeding_Up_Nonbonded_Interaction_Calculation__orca_manual_4_2_1-page-0355__bda0c0de2258f37d8807c04fd75c5fef__full__0",
+      "text": "8.18 ORCA MM Module 323\nThis ﬁle can then be modiﬁed, the required values can be added, and the resulting ﬁle can be deﬁned as\ninput for the QMMM calculation.\n8.18.1.2 Alternative Forceﬁeld Input Formats\nInstead of reading the ORCAFF.prms ﬁle ORCA can also directly read psf and prm ﬁles:\n%mm\nPSFFilename \"protein.psf\"\nPRMFilenames\n\"par_all36_prot.prm\"\n\"par_all36_solvent.prm\"\nend\nend\nIn this case ORCA does on-the-ﬂy convert the information from the psf and prm ﬁles to the ORCAFF.prms\nﬁle. Note that the ORCAFF.prms ﬁle is stored and available after the run, so that it can be used and\nmanipulated for later studies.\nAn example input for such a calculation would be the following:\n!MM L-OptH\n%mm\nPSFFilename \"protein.psf\"\nPRMFilenames\n\"par_all36_prot.prm\"\n\"par_all36_solvent.prm\"\nend\nend\n*pdbfile 0 1 ubq.pdb\n8.18.2 Speeding Up Nonbonded Interaction Calculation\nFor MM calculations of very large systems with hundreds of thousands of atoms, and for QMMM calculations\nwith fast QM methods (e.g. XTB, AM1) and / or very small QM systems, the computation of the\nnonbonded interactions can become a bottleneck. Diﬀerent schemes for speeding up the calculation of\nnonbonded interactions are available within the ORCA MM implementation. Two schemes truncate long-\nrange interaction, another scheme can be used for calculations with active regions, i.e. calculations where\nonly a part of the system is active or optimized. For more information on active regions see section 8.19.4.\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "8.18.2_Speeding_Up_Nonbonded_Interaction_Calculation__orca_manual_4_2_1-page-0355.txt",
+        "package": "orca-manual",
+        "section_title": "8.18.2_Speeding_Up_Nonbonded_Interaction_Calculation__orca_manual_4_2_1-page-0355.txt"
+      },
+      "score": 0.25917077334652555,
+      "original_score": 0.24545171359368345,
+      "vector_score": 0.3068146419921043,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.09090909090909091,
+      "is_html": false
+    },
+    {
+      "id": "8.18.4_Available_Keywords_for_the_MM_module__orca_manual_4_2_1-page-0357__4876fccdd02250cef3371992ee2e4fbf__full__0",
+      "text": "8.18 ORCA MM Module 325\n8.18.3 Rigid Water\nAs TIP3P water might have to be treated as rigid bodies due to its parametrization - please check out the\nspeciﬁcs of the applied force ﬁeld parametrization - we oﬀer a keyword for the automated rigid treatment of\nall active MM waters. The following keyword applies bond and angle constraints to active MM waters in\noptimization as well as MD runs:\n%mm\nRigid_MM_Water false # Default: false.\nend\n8.18.4 Available Keywords for the MM module\nHere we list all keywords that are accessible from within the mm block and that are relevant to MM, but\nalso QM/MM calculations. Some of the MM keywords can also be accessed via the qmmm block, see\nsection 8.19.10.\n!MM # or QMMM, as the MM keywords will also affect the MM part of the QMMM calculation\n%mm\n# Schemes for the truncation of long-range\n# Coulomb and LJ interaction:\n# The Shift Force scheme for the Coulomb interaction shifts the Coulomb potential\n# such that it becomes zero at the cutoff distance.\nShiftForceCoulomb true # Use the shift force scheme for the Coulomb interaction.\n# Default: true.\nCoulombCutOff 12. # Distance (in Ang). Default: 12 Ang.\n# With the Switch Force scheme for the LJ interaction is unchanged up to\n# LJCutOffInner. Between LJCutOffInner and LJCutOffOuter a smooth switching function\n# is applied onto the LJ potential so that the force goes down to zero at\n# LJCutOffOuter, without introducing discontinuities.\nSwitchForceLJ true # Use the switch force scheme for the LJ interaction.\n# Default: true.\nLJCutOffInner 10. # Distance (in Ang). Default: 10 Ang.\nLJCutOffOuter 12. # Distance (in Ang). Default: 12 Ang.\nDielecConst 1. # dielectric constant used in calc. of electrostatic\n# interaction. Default: 1.\nCoulomb14Scaling 1. # Scaling factor for electrostatic interaction between\n# 1,4-bonded atoms. Default: 1.\nPrintLevel 1 # Printing options: Can be 0 to 4, 0=nothing, 1=normal, ...\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_title": "8.18.4_Available_Keywords_for_the_MM_module__orca_manual_4_2_1-page-0357.txt",
+        "source_file": "8.18.4_Available_Keywords_for_the_MM_module__orca_manual_4_2_1-page-0357.txt",
+        "section_id": "full"
+      },
+      "score": 0.257430019659231,
+      "original_score": 0.19918923688740597,
+      "vector_score": 0.20954809568915647,
+      "bm25_score": 0.15775380168040395,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "orca",
+        "keywords",
+        "dielectric",
+        "constant"
+      ],
+      "match_ratio": 0.36363636363636365,
+      "is_html": false
+    },
+    {
+      "id": "8.19.10_Available_Keywords__orca_manual_4_2_1-page-0371__9ad60292545fae69ec386bb0842137f7__full__0",
+      "text": "8.19 ORCA QM/MM Implementation 339\n# the definition of the active atoms, default: false.\nUse_QM_InfoFromPDB false # use the column for occupancy in the input pdb file\n# for the definition of the QM atoms, default: false.\n# Information about topology and force field\nORCAFFFilename \"UBQ.ORCAFF.prms\"# ORCA forcefield file\nPSFFilename \"protein.psf\" # filename of the PSF file (e.g. from VMD)\nPRMFilenames # filenames of PRM files (CHARMM) that contain the\n\"par_all36_prot.prm\" # parameters for all the atom types defined in the PSF\n\"par_all36_solvent.prm\" # file. Need to be provided if PSF file is provided.\nend\n# Interaction types between QM and MM region\nCoupling Additive # Coupling between QM and MM: Options are:\n# Additive (Default)\nEmbedding Electrostatic # Embedding scheme for QM embedded in MM.\n# Electrostatic (Default)\n# Charge alteration scheme preventing overpolarization.\nChargeAlteration CS # CS (Default)\n# RCD\n# Z0\n# Z1\n# Z2\n# Z3\n# Parameters for placing the shifted and redistributed charges for RCD and CS schemes.\nScale_RCD 0.5 # Defines where on the bond between MM1 and MM2 the\n# shifted charge is positioned. Default: midpoint.\nScale_CS 0.06 # Defines where on the bond between MM2 and MM1/MM3 the\n# shifted charge is positioned. Default: 0.06 x bond.\n# The extended active region, optRegionExt, contains the atoms surrounding the active\n# atoms.\nExtendActiveRegion distance # rule to choose the atoms belonging to optRegionExt.\n# no - do not use optRegionExt atoms\n# cov_bonds - add only atoms bonded covalently to\n# active atoms\n# distance (default) - use a distance criterion (VDW\n# distance plus Dist_AtomsAroundOpt)\nDist_AtomsAroundOpt 1. # in Angstrom (Default 1). Only needed for\n# ExtendActiveRegion distance\nOptRegion_FixedAtoms {27 1288:1290 4400} end # manually define the optRegionExt\n# atoms. Default: empty list.\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_title": "8.19.10_Available_Keywords__orca_manual_4_2_1-page-0371.txt",
+        "section_id": "full",
+        "source_file": "8.19.10_Available_Keywords__orca_manual_4_2_1-page-0371.txt"
+      },
+      "score": 0.23750724580725663,
+      "original_score": 0.2233870096185021,
+      "vector_score": 0.2792337620231276,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.09090909090909091,
+      "is_html": false
+    },
+    {
+      "id": "8.15.1_Population_Analysis_and_Related_Things__orca_manual_4_2_1-page-0290__47b9580d6cec81ef763800006565811f__full__0",
+      "text": "258 8 Running Typical Calculations\n! RHF TZVP\n%cpcm epsilon 80\nrefrac 1.33\nend\n%cis nroots 1\nend\n* int 0 1\nC 0 0 0 0.000000 0.000 0.000\nO 1 0 0 1.200371 0.000 0.000\nH 1 2 0 1.107372 121.941 0.000\nH 1 2 3 1.107372 121.941 180.000\n*\nThis calculation yields:\n-------------------------\nCALCULATED SOLVENT SHIFTS\n-------------------------\nState Shift(Eh) Shift(eV) Shift(cm**-1) Shift(nm) ECI(eV) ECI+SHIFT(eV)\n-------------------------------------------------------------------\n0: -0.0026760 -0.073 -587.3 3.7 4.948 4.875\nNote that there are two diﬀerent types of shift: the ﬁrst is the diﬀerence between the CIS calculation in\nthe gas phase and the one using the solvated orbitals. This is the diﬀerence 4 .984 −4.582 eV = 0.402 eV.\nThis term is called the “slow” term and represents the interaction of the diﬀerence density with the frozen\nscreening charges of the ground state. The second term depends on the instantaneous polarization and is\ncalled the “fast” term. It is given by the extra −0.073 eV printed above thus yielding a total solvent shift\nof 0.402 −0.073 eV = 0.329 eV and a ﬁnal estimate of the transition energy of 4.875 eV in solution (this\nis clearly not an accurate value since it is too high as is always found with CIS; the calculated shift is also\nsomewhat higher compared to accurate MR-CI calculations which give 0.25 eV but it is in the right ballpark;\nlarger basis sets yield also better results here).\nIn addition, the Minnesota SMD solvation model is implemented in ORCA. See sections 9.35 and 9.35.3 for\nfurther details on the available solvation models and how to use them.\n8.15 Calculation of Properties\n8.15.1 Population Analysis and Related Things\nAtomic populations and the like are not really a molecular property since they are not observable. They\nare nevertheless highly useful for chemical interpretation purposes. ORCA lets you obtain very detailed\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "8.15.1_Population_Analysis_and_Related_Things__orca_manual_4_2_1-page-0290.txt",
+        "source_file": "8.15.1_Population_Analysis_and_Related_Things__orca_manual_4_2_1-page-0290.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.18729504798824087,
+      "original_score": 0.08778015590516834,
+      "vector_score": null,
+      "bm25_score": 0.43890077952584183,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "orca",
+        "cpcm",
+        "smd",
+        "solvation",
+        "model",
+        "epsilon"
+      ],
+      "match_ratio": 0.5454545454545454,
+      "is_html": false
+    },
+    {
+      "id": "9.35.1_The_Conductor-like_Polarizable_Continuum_Model_C-PCM__orca_manual_4_2_1-page-0909__27bafed888f35ec450deb9d8d92da34e__full__0",
+      "text": "9.35 Implicit Solvation Models 877\nAii = ζi\n√\n2/π\nFi\n(9.382)\nAij = erf (ζijrij)\nrij\n(9.383)\nHere, ζi is the exponent of the Gaussian charge i (i belongs to sphere I). This quantity is calculated as\nζi = ζ/(RI\n√wi), where RI is the radius of sphere I, wi is the weight of the Lebedev point i, and ζ is a width\nparameter optimized for each particular Lebedev grid [519]. On the other hand, ζij = ζiζj/\n√\nζ2\ni + ζ2\nj. The\nfunction Fi, known as switching function, measures the contribution of the Gaussian charge ito the solvation\nenergy. This function is calculated as\nFi =\natoms∏\nJ,i/∈J\ng(⃗ ri,⃗RJ) (9.384)\nwhere g(⃗ ri,⃗RJ) is the elementary switching function. In ORCA we use the improved Switching/Gaussian\n(ISWIG) function for g(⃗ ri,⃗RJ) proposed in ref [523]:\ng(⃗ ri,⃗RJ) = 1 −1\n2 {erf [ζi(RJ −riJ)] + erf [ζi(RJ + riJ)]} (9.385)\nIf g(⃗ ri,⃗RJ) <10−8 the value of g is set equal to 0.\nIf we consider a solvent with a dielectric constant ε, eq. 9.379 reads as\nAQ = −f(ε)V (9.386)\nwhere f(ε) = (ε−1)/(ε+ x) is a scaling function, and x is in the range 0-2. In C-PCM x is equal to 0.\nThe free energy of solvation can be approximately calculated as [524]\n∆GS = (E+ ∆GCD) −E0 (9.387)\nwhere E0 is the total energy of the molecule in vacuum and ∆ GCD is the nonelectrostatic contribution\n(dispersion and cavity formation terms). It can be calculated as [524]\n∆GCD = 1.321 + 0.0067639A (9.388)\nwhere A is the cavity surface area.\nThe C-PCM model can be used via\n! CPCM(solvent)\nwhere solvent can be one of\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "orca-manual",
+        "section_title": "9.35.1_The_Conductor-like_Polarizable_Continuum_Model_C-PCM__orca_manual_4_2_1-page-0909.txt",
+        "source_file": "9.35.1_The_Conductor-like_Polarizable_Continuum_Model_C-PCM__orca_manual_4_2_1-page-0909.txt"
+      },
+      "score": 0.18624475505457289,
+      "original_score": 0.0866012556735002,
+      "vector_score": null,
+      "bm25_score": 0.4330062783675011,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "orca",
+        "cpcm",
+        "solvation",
+        "model",
+        "dielectric",
+        "constant"
+      ],
+      "match_ratio": 0.5454545454545454,
+      "is_html": false
+    },
+    {
+      "id": "9.4.1_Built-in_Basis_Sets__orca_manual_4_2_1-page-0461__1cd1aa89ed24def1f2c5340d67b4e0bc__full__0",
+      "text": "9.4 Choice of Basis Set 429\nThe solvation method implemented together with the XTB methods (generalized born model with solvent\naccessable surface area model) can be invoked via the SMD solvent keywords:\n%cpcm\nsmd true\nSMDsolvent \"water\" # use water\nend\nPlease note that parallel jobs with XTB are possible and can be invoked as usual via\n%pal nprocs 4 end # alternatively use !pal4\nOnly if jobs are run over several nodes, the number of cores used by the XTB tool might be lower than\nrequested via the pal keyword.\n9.4 Choice of Basis Set\nA fair number of reasonable basis sets is hardwired in the program as will be described in the next section. In\naddition, whole basis sets can be read from a ﬁle, basis sets can be assigned for all atoms of a given type or,\nat the highest resolution, basis sets can be assigned to individual atoms which is convenient if diﬀerent parts\nof the molecule are to be treated at diﬀerent levels of accuracy. All hard wired basis sets were obtained from\nthe EMSL library [365] and the input format in ORCA is closely related to the “GAMESS-US” format.\nAs of ORCA version 4.0, the basis set handling has been\nsigniﬁcantly modiﬁed!\nPlease check your basis sets very carefully!\n9.4.1 Built-in Basis Sets\nThe basis set is speciﬁed in the block [ BASIS]. The format is straightforward. Note that there are three\ndistinguished slots for auxiliary basis sets (AuxJ, AuxC and AuxJK) to be used with RI approximation.\nWhich auxiliary basis slot is used in the actual program depends on the context. The AuxJ and AuxJK slots\nare used in the context of Fock matrix construction, whereas the AuxC slot is used for all other integral\ngeneration steps e.g. in post-Hartree Fock methods. Assigning the auxiliary basis with the one-liner, takes\ncare of the individual slots. However, in speciﬁc cases they must be set explicitly.\nAs of ORCA 4.0, the basis set name has to be put in quotation marks, as well as the basis set\nname identiﬁers are the same as in the one-liner!\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "orca-manual",
+        "section_title": "9.4.1_Built-in_Basis_Sets__orca_manual_4_2_1-page-0461.txt",
+        "source_file": "9.4.1_Built-in_Basis_Sets__orca_manual_4_2_1-page-0461.txt"
+      },
+      "score": 0.1712971182546793,
+      "original_score": 0.06982329600015026,
+      "vector_score": null,
+      "bm25_score": 0.3491164800007514,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "orca",
+        "cpcm",
+        "smd",
+        "solvation",
+        "model",
+        "keywords"
+      ],
+      "match_ratio": 0.5454545454545454,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 52,
+    "final_results_count": 15
+  }
+}

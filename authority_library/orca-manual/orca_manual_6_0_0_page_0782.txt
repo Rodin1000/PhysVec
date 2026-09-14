@@ -1,0 +1,79 @@
+[... end of page 781 ...]
+ Stored Notmade Notmade Notmade
+(ab|Q)integrals Stored Notmade Notmade Stored
+(ij|Q)integrals Stored Stored Stored Stored
+(ia|Q)integrals Stored Stored Stored Stored
+CoulombCIS From(ia|jb) From(ia|jb) From(ia|Q) From(ia|Q)
+ExchangeCIS From(ij|ab) RI-AO-direct RI-AO-direct From(ab|Q)
+XC-CIS Num. Int. Num. Int. Num. Int. Num. Int.
+V-termin(D) From(ia|jb) From(ia|jb) From(ia|Q) From(ia|Q)
+U-termin(D) From(ab|Q) RI-AO-direct RI-AO-direct From(ab|Q)
+NOTE:
+• In all three involved code sections (MP2, CIS, (D)) the storage format FLOAT is respected. It cuts down
+useofdiskandmainmemorybyafactoroftwocomparedthedefaultdoubleprecisionversion. Thelossof
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 759
+
+--- Page 782 ---
+ORCAManual,Release6.0.0
+accuracyshouldbenegligible;howeveritis–asalwaysinscience–bettertodoublecheck.
+• The (ab|Q) list of integrals may be the largest for many systems and easily occupies several GB of disk
+space(hencealgorithms2and3). However, thatdisk-spaceisoftenwellinvestedunlessyourunintoI/O
+bottlenecks.
+• The(ia|jb)and(ij|ab)listsofintegralsisalsoquitelargebutisrelativelyefficientlyhandled. Nevertheless,
+I/Omaybeaproblem.
+• Making the exchange contribution to the CIS residual vector in an RI-AO direct fashion becomes quite
+expensiveforalargernumberofstates. Itmaybeagoodchoiceifonlyoneortwoexcitedstatesaretobe
+calculatedforalargersystem.
+• CalculationsarepossiblewiththefullTD-DFTandtheTDA-DFTversions.
+• Usage of time-dependent double-hybrids should be cited as follows: For TD or TDA with any double
+hybrid,[328] TD-B2GPLYP,[310] TDA-PBE0-DH or TDA-PBE0-2,[578] TD-PBE0-DH, TD-PBE0-2, or
+TDA-B2GP-PLYP[770],TD-𝜔B2PLYPorTD-𝜔B2GPPLYP[146],TDA-𝜔B2PLYPorTDA-𝜔B2GPPLYP
+[145], TD(A)-RSX-QIDH or TD(A)-RSX-0DH [145], TDA-PBE-QIDH [119], TD-PBE-QIDH [386],
+TD(A)-DSD-BLYP or TD(A)-DSD-PBEP86 or many other spin-component-scaled double-hybrid func-
+tionals with TD(A)-DFT from 2017 [770], TD(A) 𝜔B88PP86 or TD(A) 𝜔PBEPP86 or many other spin-
+componentandoppositescaleddoublehybridswithTD(A)-DFTfrom2021[147].
+• For instructions on how to employ spin-component-scaling, spin-opposite-scaling, and the calculation of
+singlet-tripletexcitationenergieswithdoublehybrids, seeSec. DoublesCorrection. NotethatSCS/SOS-
+CIS(D)isonlyautomaticallyusedwhenaTD(A)-DFTcalculationisrequestedforthefunctionalsfrom2021
+byCasanova-PáezandGoerigk. [147]Inthoseinstances,“doscs”hasnottobeset. SCS/SOS-CIS(D)isnot
+automaticallyusedforPWPB95,𝜔wB97X-2,ortheDSDfunctionals.
+• CiteRef. [145]whensinglet-tripletexcitationsarecalculatedwithdoublehybrids.
+7.30.9 Natural Transition Orbitals
+ResultsofTD-DFTorCIScalculationscanbetedioustointerpreteasmanyindividualMOpairsmaycontribute
+to a given excited state. In order to facilitate the analysis while keeping the familiar picture of an excited state
+originatingfromessentiallyanelectronbeingpromotedfromadonororbitaltoanacceptororbital,theconceptof
+“naturaltransitionorbitals”canbeused.
+Theprocedureisquitestraightforward. Forexample,considerthefollowingjobonthepyridinemolecule:
+! PBE D3ZERO def2-SVPD tightscf
+%tddft nroots 5
+DoNTO true # flag to turn on generation of natural transition orbitals
+NTOStates 1,2,3 # States to consider for NTO analysis;
+#if empty all will be done
+NTOThresh 1e-4 # threshold for printing occupation numbers
+end
+* xyz 0 1
+N 0.000000 0.000000 1.401146
+C 0.000000 1.146916 0.702130
+C 0.000000 -1.146916 0.702130
+C -0.000000 1.205574 -0.702848
+C -0.000000 -1.205574 -0.702848
+C 0.000000 -0.000000 -1.421344
+H -0.000000 2.079900 1.297897
+H -0.000000 -2.079900 1.297897
+H -0.000000 2.179600 -1.219940
+H -0.000000 -2.179600 -1.219940
+H 0.000000 0.000000 -2.525017
+*
+760 Chapter7. DetailedDocumentation
+
+[... start of page 783 ...]
+ORCAManual,Release6.0.0
+whichresultsin:
+------------------------------------------
+NATURAL TRANSITION ORBITALS FOR STATE 1
+------------------------------------------
+Making the (pseudo)densities ... done
+Solving eigenvalue problem for the occupied space ... done
+Solving eigenvalue problem for the virtual space ... done
+Natural Transition Orbitals were saved in TD-DFT-Example-6.s1.nto
+Threshold fo

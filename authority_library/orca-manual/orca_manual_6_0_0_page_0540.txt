@@ -1,0 +1,79 @@
+[... end of page 539 ...]
+nts(UHFandUKS)andcanbeacceleratedwithRIJ,RIJONX,RIJK,orRIJCOSX.Solvationeffectscanalsobe
+accountedforwiththeC-PCMmodel. TheimplementationisalsoparallelizedwithMPI.Arestrictedopen-shell
+implementation(ROHFandROKS)isnotyetavailable.
+The default preconditioner (diag) for the Davidson algorithm uses approximate matrix element of the diago-
+nal Hessian. We have also added an improved preconditioner (full) that uses the exact orbital Hessian for a
+subset of the most important occupied-virtual MO pairs (with smallest orbital-energy difference). This number
+PreconMaxRed(default250)cannotbetoolarge.
+7.7. SCFConvergence 517
+
+--- Page 540 ---
+ORCAManual,Release6.0.0
+%scf
+trah
+Precond Diag # DIAG, FULL, or NONE
+PreconMaxRed 250 # maximum dimension of FULL Hessian for preconditioning
+end
+end
+Otherwise,additionalcomputationalbottleneckswouldbeintroducedwhentransformingthetwo-electronintegrals
+intheMObasisorwhendiagonalizingthisreduced-spaceHessian. Notethatfortheintegraltransformationthe
+RIapproximationisusedandanauxiliary/Cbasismustbeprovided. Pleasealsonotethat,sofar,wehaveonly
+implemented an XC Hessian contribution for LDA functionals. From our experience, the “full” precondition is
+veryadvantageousforRHFandUHFcalculationsofsmallmoleculesbutdoesnotprovideanyadvantageforother
+(TRAH-)SCFcalculations.
+IncasesforwhichtheconventionalSCFprocedures(DIIS/KDIIS/SOSCF)struggle,weinvokeTRAH-SCFauto-
+matically(AutoTRAH).Forthispurpose,weperformalinearinterpolationofthenormoftheelectronicgradienton
+thelog scaleafteraminimumnumberofSCFiterationsAutoTRAHIter(default20). Thenumberofiterations
+10
+forinterpolationsiscontrolledbyAutoTRAHNInter(default10). Iftheslope𝑠oftheinterpolatedgradientnorm
+10−𝑠 becomessmallerthanAutoTRAHTol(default1.125),conventionalSCFisshutdownandTRAH-SCFstart
+fromthecurrentsetofMOs. Thoseparameterswereoptimizedforabenchmarksetwiththepurposetominimize
+thecalculationtimesevenforSCFcalculationsthatarehardtoconverge. Thereisnotreallyaneedtomodifythe
+AutoTRAHparametersexceptforturningTRAHoffentirely.
+! NoTRAH
+TheaccuracyoftheSCFcalculationiscontrolledbyviathesimplekeywordsNORMALSCF,LOOSESCF,etc. The
+accuracythresholdthatchecksthegradientnormforTRAH-SCFcalculationsisisreadfromtheSCFinputblock.
+NotethatcheckingtheFrobensiusnormof||g||istheonlyconvergencecheckinTRAH.
+%scf
+TolG 1.e-6 # gradient norm threshold (converging macro iterations)
+end
+BelowacompletelistofinputparametersisgivenforTRAH.Pleasenotethatallparametersinfluencetheconver-
+genceandshouldnotbechangedcarelessly!
+%scf
+# AutoTRAH parameter
+AutoTRAH true
+AutoTRAHTol 1.125
+AutoTRAHIter 20
+AutoTRAHNInter 10
+# TRAH parameter
+trah
+MaxRed 16 # maximum number of Davidson micro iterations
+NStart 2 # number of start vectors for Davidson (at least 2)
+TolFacMicro 0.1 # Scaling factor for Davidson convergence
+# threshold = TolFacMicro * || G ||
+MinTolMicro 1.e-2 # minimum accuracy of micro iterations
+QuadRegionStart 1.e-3 # start Newton-Raphson if || G || < QuadRegionStart
+tradius 0.4 # initial trust radius
+AlphaMin 0.1 # lower bound of gradient scaling parameter
+AlphaMax 1000. # upper bound of gradient scaling parameter
+Randomize true # add white noise to Davidson start vectors
+PseudoRand false # use pseudo random numbers for comparibility
+MaxNoise 1.e-2 # maximum random number magnitude
+OrbUpdate Taylor # orbital update algorithm (TAYLOR or CAYLEY)
+InactiveMOs Canonical # CANONICAL or NOTSET
+Precond Diag # DIAG, FULL, or NONE
+PreconMaxRed 250 # maximum dimension of FULL Hessian for preconditioning
+(continuesonnextpage)
+518 Chapter7. DetailedDocumentation
+
+[... start of page 541 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+end
+OBS.: ThemaximumnumberofmacroiterationsisdefinedbyMAXITERunderthe%SCFblock.
+7.7.8 Finite Temperature HF/KS-DFT
+AfinitetemperaturecanbeusedtoapplyaFermi-likeoccupationnumbersmearingovertheorbitalsofthesystem,
+whichmaysometimeshelptogetconvergenceoftheSCFequationsinnearhopelesscases. Throughthesmearing,
+theelectronsaredistributeda

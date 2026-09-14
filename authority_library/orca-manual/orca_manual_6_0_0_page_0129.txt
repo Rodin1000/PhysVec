@@ -1,0 +1,82 @@
+[... end of page 128 ...]
+JCOSXarealmostidentical
+andfordef2-QZVPPRIJCOSXisalreadyafactoroftwofasterthanRI-JK.Forlargemoleculeslike(gly) with
+8
+smallbasissetsRI-JKisnotabigimprovementbutforlargebasissetitstillbeatsthenormal4-indexcalculation.
+RIJCOSX on the other hand is consistently faster. It leads to speedups of around 10 for def2-TZVPP and up to
+50-60fordef2-QZVPP.HereitoutperformsRI-JKby,again,afactoroftwo.
+106 Chapter6. RunningTypicalCalculations
+
+--- Page 129 ---
+ORCAManual,Release6.0.0
+DFTCalculationswithSecondOrderPerturbativeCorrection(Double-HybridFunctionals)
+Thereisafamilyoffunctionalswhichcameupin2006andwereproposedbyGrimme[320]. Theyconsistofa
+semi-empiricalmixtureofDFTcomponentsandtheMP2correlationenergycalculatedwiththeDFTorbitalsand
+their energies. Grimme referred to his functional as B2PLYP (B88 exchange, 2 parameters that were fitted and
+perturbativemixtureofMP2andLYP)–aversionwithimprovedperformance(inparticularforweakinteractions)
+ismPW2PLYP[771]andisalsoimplemented. Fromtheextensivecalibrationwork,thenewfunctionalsappear
+togivebetterenergeticsandanarrowererrordistributionthanB3LYP.Thus,theadditionalcostofthecalculation
+oftheMP2energymaybe wellinvested(andisquitelimitedinconjunctionwithdensity fittingintheRIpart).
+MartinhasreportedreparameterizationsofB2PLYP(B2GP-PLYP,B2K-PLYPandB2T-PLYP)thatareoptimized
+for “general-purpose”, “kinetic” and “thermochemistry” applications.[436, 842] In 2011, Goerigk and Grimme
+publishedthePWPB95functionalwithspin-opposite-scalingandrelativelylowamountsofFockexchange,which
+makeitpromisingforbothmain-groupandtransition-metalchemistry. [308]
+Amongthebestperformingdensityfunctionals[312]areMartin’s“DSD”-double-hybrids,whichusedifferentcom-
+binationsofexchangeandcorrelationpotentialsandspin-component-scaledMP2mixing. Threeofthesedouble-
+hybrids(DSD-BLYP,DSD-PBEP86andDSD-PBEB95)[467,468,469]areavailableviasimpleinputkeywords.
+Different sets of parameters for the DSD-double-hybrids are published, e.g. for the use with and without D3.
+ThekeywordsDSD-BLYP,DSD-PBEP86andDSD-PBEB95requestparametersconsistentwiththeGMTKN55[312]
+benchmarksetresults. ThekeywordsDSD-BLYP/2013and DSD-PBEP86/2013requesttheslightlydifferentpa-
+rametersetsusedinthe2013paperbyKozuchandMartin.[469]Toavoidconfusion,thedifferentparametersare
+presentedinTable6.7.
+Table6.7: DSD-DFTparametersdefinedinORCA
+Keywords ScalDFX ScalHFX ScalGGAC PS PT D3S6 D3S8 D3A2
+DSD-BLYP 0.25 0.75 0.53 0.46 0.60
+DSD-BLYP D3BJ 0.31 0.69 0.54 0.46 0.37 0.50 0.213 6.0519
+DSD-BLYP/2013 D3BJ 0.29 0.71 0.54 0.47 0.40 0.57 0 5.4
+DSD-PBEP86 0.28 0.72 0.44 0.51 0.36
+DSD-PBEP86 D3BJ 0.30 0.70 0.43 0.53 0.25 0.418 0 5.65
+DSD-PBEP86/2013 D3BJ 0.31 0.69 0.44 0.52 0.22 0.48 0 5.6
+DSD-PBEB95 0.30 0.70 0.52 0.48 0.22
+DSD-PBEB95 D3BJ 0.34 0.66 0.55 0.46 0.09 0.61 0 6.2
+NotethatD3A1isalways0forthesefunctionals.
+ThreedifferentvariantsofMP2canbeusedinconjunctionwiththesefunctionals. Justspecifyingthefunctional
+nameleadstotheuseofRI-MP2bydefault. Inthiscase,anappropriateauxiliarybasissetforcorrelationfitting
+needstobespecified. ItisverystronglyrecommendedtousetheRIvariantsinsteadofconventionalMP2,astheir
+performanceisvastlybetter. Indeed,thereishardlyeveranyreasontouseconventionalMP2. Toturnthisoption
+off just use !NORI in the simple input (which also turns off the RIJCOSX approximation) or %mp2 RI false
+end. MoreinformationcanbefoundintherelevantsectionsregardingRI-MP2.
+Finally,DLPNO-MP2canbeusedasacomponentofdouble-hybriddensityfunctionals. Inthatcase,a“DLPNO-”
+prefixneedstobeaddedtothefunctionalname,forexampleDLPNO-B2GP-PLYPorDLPNO-DSD-PBEP86. Please
+refertotherelevantmanualsectionsformoreinformationontheDLPNO-MP2method.
+Foreachfunctional,parameterscanbespecifiedexplicitlyintheinputfile,e.g. forRI-DSD-PBEB95withD3BJ:
+! D3BJ
+%method
+Method DFT
+DoMP2 True
+Exchange X_PBE
+Correlation C_B95
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 107
+
+[... start of page 130 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+LDAOpt C_PWLDA # specific for B95
+ScalDFX 0.34
+ScalHFX 0.66
+ScalGGAC 0.55
+ScalLDAC 0.55 # must be equal to ScalGGAC
+ScalMP2C 1.00 # for all DSD-DFs
+D3S6 0.61
+D3S8 0
+D3A1 0 # for all DSD-DFs
+D3A2 6.2
+end
+%mp2
+DoSCS True
+RI True
+PS 0.46
+PT 0.09
+end
+InthisversionofORCA,

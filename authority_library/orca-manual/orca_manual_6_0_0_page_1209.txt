@@ -1,0 +1,91 @@
+[... end of page 1208 ...]
+f a series of scripts for different
+# combinations of scans for dimensions, methods,
+# and properties
+#
+# Here as an example we use for:
+# - dimension: the Ne-Ne bond (dist)
+# - method : "HF" (method)
+(continuesonnextpage)
+1186 Chapter7. DetailedDocumentation
+
+--- Page 1209 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# - property : the SCF energy (propName)
+#
+# The script creates a csv file with the absolute energies
+# and an additional one with the potential energies in
+# kcal/mol. Both will be saved on disk.
+#
+# If 'DoPython' is set to true it will also create a python
+# script that plots the generated values and then run
+# it. The python script will be saved on disk and thus one
+# can afterwards manipulate it.
+#
+# NOTE The boolean option plotPotential will choose between
+# plotting absolute values or potential.
+#
+# NOTE The boolean obtion doKcal if set to true multiplies
+# the potential values with the HartreeToKcal factor.
+#
+# NOTE In case the doPython is set to true the script expects
+# that python3 is avaiable and also the following libraries:
+# - pandas
+# - seaborn
+# - matplotlib.pyplot
+#
+# -------------------------------------------------------------
+#
+# ---------------- Variables to change (e.g. through 'with') --------------------------
+Variable method = "HF"; # The methods of the calculation
+Variable basis = "cc-pVDZ"; # The basis set of the calculation
+Variable restOfInput = "TightSCF"; # Maybe something common for the simple input
+Variable charge = 0; # Charge
+Variable mult = 1; # Spin multiplicity
+Variable myPropName = "SCF_Energy"; # The properties we want to read
+#
+Variable lowerLimit = 2.5; # Lower limit value
+Variable UpperLimit = 5.0; # Upper limit value
+Variable NSteps = 13; # Number of steps for the grid
+Variable baseFilename = "myPotential"; # The basename for the created files
+Variable plotPotential= true; # Plot the potential instead of absolute values
+Variable DoKcal = true; # Multiply the potential values with the␣
+HartreeToKcal factor
+˓→
+Variable removeFiles = true; # Remove *_Compound_*, *bas* files
+# ------------------ python plot relevant variables ---------------------------------------
+Variable DoPython = true; # if we want python or not
+Variable lw = 4; # The line width in case we plot with python
+Variable marker = "o"; # The type of markers
+Variable markerSize = 10; # The size of the markers in case we plot
+Variable fontSize = 18;
+#
+# ----------------------- Rest of the variables ---------------------------------
+#
+Variable HartreeToKcal = 627.5096080305927; # Hartree to kcal/mol conversion␣
+factor
+˓→
+Variable stepSize = (UpperLimit-LowerLimit)/(NSteps-1); # The stepsize of the grid
+Variable calcValues[NSteps]; # An array to store the␣
+calculated values
+˓→
+Variable res, dist, calcValue;
+Variable myFilename, csvFilename;
+Variable fPtr; # A file to write
+# ---------------------------------------------------
+# Open and Write file header for the absolute values
+(continuesonnextpage)
+7.60. CompoundExamples 1187
+
+[... start of page 1210 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# ---------------------------------------------------
+write2String(csvFilename, "%s_absValues.csv", baseFilename);
+fPtr = OpenFile(csvFilename, "w");
+write2File(fptr, "distance,method,property,calcValue\n");
+# ---------------------------------------------------
+# Perform the calculations and update the file
+# ---------------------------------------------------
+for iStep from 0 t

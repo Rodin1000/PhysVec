@@ -1,0 +1,67 @@
+[... end of page 785 ...]
+Tcalculation. Again,theRIJCOSXapproximationcanbeused
+inTD-DFTandCIScalculationsandleadstoverylargespeedupsatvirtuallynolossinaccuracy.
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 763
+
+--- Page 786 ---
+ORCAManual,Release6.0.0
+RIApproximation(MO-Basis)
+AsanalternativetothedirectAO-basiscomputationORCAallowstouseRI-integralstransformedtotheMObasis
+togeneratetheCImatrix. Thisalgorithmismoredisk-intensive. However,formediumsizedmoleculeswehave
+observedspeedupsontheorderof15ormorewiththismethod. Itisparticularlybenefitialtogetherwithhybrid
+functionals.
+In order to use this method you have to specify mode riints in the %tddft block and you also have to assign
+anauxiliarybasisset(forexampledef2-TZVP/C).Thereisasecondalgorithmofthiskindthatislabelledmode
+riints_disk
+Notethattheauxiliarybasissethastobevalidforcorrelationtreatmentsincasethatyouhaveahybridfunctional.
+ThusthebasissetsdevelopedforRI-MP2aresuitable(def2-SVP/C,def2-TZVP/Canddef2-TZVPP/C).Ifyou
+haveanon-hybridfunctionalthenormalRI-Jauxiliarybasissetsarefine.
+AnexamplethatusestheB3LYPfunctionalisgivenbelow:
+! RKS B3LYP/G SV(P) def2-SVP/C TightSCF
+%tddft
+mode riints # or riints_disk (often faster but requires more disk space)
+nroots 8
+end
+* int 0 1
+C 0 0 0 0.00 0.0 0.0
+O 1 0 0 1.20 0.0 0.0
+H 1 2 0 1.08 120.0 0.0
+H 1 2 3 1.08 120.0 180.0
+*
+Note:
+• Do not forget to assign a suitable auxiliary basis set! If Hartree-Fock exchange is present (HF or hybrid-
+DFT)thesearetheauxiliarybasesoptimizedforcorrelationwhilefornon-hybridfunctionalsthestandard
+RI-Jbasesaresuitable.
+• Thestandardauxiliarybasissetsmaynotbesuitableifyouhavediffusefunctionspresentandwanttostudy
+Rydbergstates. Youhavetoaugmenttheaxuliarybasiswithdiffusefunctionsyourselfinthiscase.
+• Bepreparedthatthetransformedintegralstakeupsignificantamountsofdiskspace.
+IntegralHandling
+IftheSCFcalculationiscarriedoutinanintegraldirectfashionthiswillalsobedoneintheCIS/TD-DFTcalcula-
+tion. Thus,nobottlenecksarisingfromlargeintegraltransformationsorlargediskspacerequirementariseinthe
+calculations. AnexceptionistheMObasedRIapproximationsdescribedintheprevioussection.
+ValenceversusRydbergStates
+Forvalenceexcitedstatestheusualorbitalbasissetsarereasonable. Thus,withpolarizeddouble-zetabasissets
+sensibleresultsareobtained. EspeciallyDFTcalculationshavethenicefeatureofnotbeingoverlybasissetde-
+pendent.
+IfRydbergstatesaredesired,youshouldmakesurethatdiffusefunctionsarepresentinyourbasisset. Youcould
+always use the augmented-specific basis, e.g. DEF2-TZVPD, ma-DEF2-TZVP, or aug-cc-pVTZ, or add some
+extradiffusebasistoyourregularbasis. Thesecanbeaddedtoany“normal”basisset. Forexample,thefollowing
+exampleprovidesaratherhighqualitybasisforexcitedstatecalculationsthatisbasedontheAhlrichsbasisset:
+764 Chapter7. DetailedDocumentation
+
+[... start of page 787 ...]
+ORCAManual,Release6.0.0
+%basis
+# augment the carbon basis set by diffuse functions
+addgto 6
+s 1
+1 0.01 1.0
+p 1
+1 0.01 1.0
+d 1
+1 0.07 1.0
+end
+end
+Tip: IfyouwanttoaugmentagivenbasissetitissensibletorunapreliminarySCFcalculationanduse%output
+print[p_basis] 2 end. This will provide you with a detailed listing of basis functions and their exponents.
+Youcanthenaddadditionals,pandperhapsd-functionswiththeAddGTOcommand

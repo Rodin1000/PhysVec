@@ -1,0 +1,49 @@
+[... end of page 24 ...]
+be
+downloadedseparatelyfromtheGrimmelab’srepository. Thextbbinaryneedstobecopiedtothedirectoryto
+whichtheorcabinarieswerecopiedto.
+1.2 Units and Conversion Factors
+Internally the program uses atomic units. This means that the unit of energy is the Hartree (Eh) and the unit of
+lengthistheBohrradius(𝑎 ). Thefollowingconversionfactorstootherunitsareused:
+0
+1Eh = 27.2113834eV
+1eV = 8065.54477cm−1 =23.0605 kcal
+mol
+1cm−1 = 29979.2458MHz
+1𝑎 = 0.5291772083Å
+0
+1a.t.u. = 2.418884310−17s
+2 Chapter1. GeneralInformation
+
+--- Page 25 ---
+CHAPTER
+TWO
+THE ARCHITECTURE OF ORCA
+In this chapter we describe the broad features of ORCA’s internal structure. This knowledge is not necessary to
+carryoutcalculationswithORCA.Itmay,however,helptounderstandwhichmodulesarebeingcalledinwhich
+orderandwhythisishappeninginthesequenceitdoes.
+2.1 The structure of the ORCA source code
+ThesourcecodeofORCAisbroadlystructuredinthreeparts:
+1) Themainprogram.
+2) Thecodeforthe“ORCAtoollibrary”.
+3) Thecodeforindividualmodules.
+ThecodeintheORCAtoollibraryisbeingcompiledintoonelibraryfilethatsubsequentlyislinkedwithallORCA
+modules. Thecodefortheindividualmodulescanmakeuseofeverythingthatisinthelibrary,butthemodules
+arenotsupposedtolinktooruseanycodeofthemainprogramoranyothermodule. Thiswayofstructuringthe
+codeensuresthatthemodulesremainmaintainableandthattherearenocomplexandunwantedinterdependencies
+thatwouldmakeiteventuallyimpossibletoexchangemodulesfornewcode.
+2.2 The shell structure of ORCA
+Thewholeorganizationofthecodeandtheinformationflowcanbethoughtofasconsistingofashellstructure
+whereashellisalayerofsoftwarewithwell-definedfunctionsandawell-definedinterfacetotheshellsaboveand
+belowit.
+3
+
+[... start of page 26 ...]
+ORCAManual,Release6.0.0
+The lowest layer of the shell consists of the SHARK integral package. This is the “motor” of the program that
+takescareofmostcomputeintensivetasksandessentiallyallpartsthatinvolveintegralsoverbasisfunctions. This
+amountstocalculatingallone-andtwo-electronintegrals, formingFockandFock-likematricesandperforming
+integraltransformationsusingallkindsofbasissetsandkernels. MostoftheSHARKcodeisindependentofthe
+remainingORCAsourcecodeinfrastructure.
+The layer above SHARK is the actual ORCA source code. ORCA interacts with the user through the interface
+anditorchestratestheenti

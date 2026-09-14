@@ -1,0 +1,94 @@
+[... end of page 290 ...]
+ Normal, Large
+PrintWFN 1
+TPrintWFN 1e-3
+# MREOM stuff (expert territory!)
+DoMREOM true/false
+# Definition of CI blocks
+NewBlock multiplicity irrep
+NRoots 1
+Excitations none
+CIS
+CID
+CISD
+# active space definition
+refs CAS(nel, norb) end
+# or
+(continuesonnextpage)
+268 Chapter6. RunningTypicalCalculations
+
+--- Page 291 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+refs RAS(nel: ras1norb ras1nel / ras2norb / ras3norb ras3nel
+) end
+# or individual definition. Must yield the corret number of
+electrons!
+refs
+{ 2 0 1 0 1 1 }
+{ 2 0 1 1 0 1 }
+end
+end
+end
+6.8 MR-EOM-CC: Multireference Equation of Motion Coupled-
+Cluster
+TheMultireferenceEquationofMotionCoupled-Cluster(MR-EOM-CC)methodology[193,194,203,406,407,
+639]hasbeenimplementedinORCA.ThestrengthoftheMR-EOM-CCmethodologyliesinitsabilitytocalculate
+manyexcitedstatesfromasinglestate-averagedCASSCFsolution,forwhichonlyasinglesetofamplitudesneeds
+to be solved and the final transformed Hamiltonian is diagonalized over a small manifold of excited states only
+throughanuncontractedMRCIproblem. Hence,agivenMR-EOMcalculationinvolvesthreesteps,performedby
+threeseparatemodulesinORCA:
+1. astate-averagedCASSCFcalculation(CASSCFmodule),
+2. thesolutionofamplitudeequationsandthecalculationoftheelementsofthesimilaritytransformedHamil-
+tonians(MDCImodule),
+3. andtheuncontractedMRCIdiagonalizationofthefinalsimilaritytransformedHamiltonian(MRCImodule).
+ThecurrentimplementationallowsforMR-EOM-TT†-h-v,MR-EOM-TT†SXD-h-vandMR-EOM-TT†SXDU-h-
+vcalculations. Amoredetaileddescriptionofthesemethodsandtheavailableinputparameterswillbegivenin
+Sec.MultireferenceEquationofMotionCoupled-Cluster(MR-EOM-CC)Theory. Wealsonotethatthetheoretical
+detailsunderlyingthesemethodscanbefoundinRef.[407]. InSec.MultireferenceEquationofMotionCoupled-
+Cluster(MR-EOM-CC)Theory, wewilldiscussastrategyfortheselectionofthestate-averagedCASandother
+stepsforsettingupanMR-EOMcalculationindetail. Furthermore,wewilldiscusshowspin-orbitcouplingeffects
+canbeincludedinMR-EOMcalculations,aprojectionschemetoaidwithconvergencedifficultiesintheiterationof
+the𝑇 amplitudeequations,anorbitalselectionschemetoreducethesizeoftheinactivecoreandvirtualsubspaces
+in the calculation of excitation energies and a strategy for obtaining nearly size-consistent results in MR-EOM.
+The purpose of this section is simply to provide a simple example which illustrates the most basic usage of the
+MR-EOMimplementationinORCA.
+6.8.1 A Simple MR-EOM Calculation
+LetusconsideranMR-EOM-T|T†|SXD|U-h-vcalculationonformaldehyde. AnMR-EOM-T|T†|SXD|U-h-vcal-
+culationisspecifiedviatheMR-EOMkeywordalongwiththespecificationofastate-averagedCASSCFcalculation
+(i.e. CASSCF(nel, norb) calculation with the number of roots of each multiplicity to be included in the state-
+averaging for the reference state) and the number of desired roots in each multiplicity block for the final MRCI
+diagonalization. WenotethattheCASSCFmoduleisdescribedinsectionsCompleteActiveSpaceSelf-Consistent
+FieldMethod andTheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Moduleandthatadescriptionof
+theMRCImoduleisgiveninsectionsMultireferenceConfigurationInteractionandPertubationTheoryandThe
+MultireferenceCorrelationModule. Here,wehaveastate-averagedCAS(6,4)calculation,comprisedof3singlets
+and3tripletsandwerequest6singletrootsand6tripletrootsinourfinalMRCIdiagonalization(i.e.therootsto
+becomputedintheMR-EOM-TT†SXDU-h-vcalculation):
+6.8. MR-EOM-CC:MultireferenceEquationofMotionCoupled-Cluster 269
+
+[... start of page 292 ...]
+ORCAManual,Release6.0.0
+!MR-EOM def2-TZVP VeryTightSCF
+%casscf # reference state
+nel 6
+norb 4
+mult 1,3
+nroots 3,3
+end
+%mdci
+STol 1e-7
+end
+%mrci # final roots
+newblock 1 *
+nroots 6
+refs cas(6,4) end
+end
+newblock 3 *
+nroots 6
+refs cas(6,4) end
+end
+end
+* xyz 0 1
+H 0.000000 0.934473 -0.588078
+H 0.000000 -0.934473 -0.588078
+C 0.000000 0.000000 0

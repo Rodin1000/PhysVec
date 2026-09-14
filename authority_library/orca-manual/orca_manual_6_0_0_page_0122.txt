@@ -1,0 +1,69 @@
+[... end of page 121 ...]
+fPNOsperelectronpair. Thisisthemostcriticalparameterandhasadefaultvalueof
+3.33×10−7. (b)𝑇CutPairs controlsaperturbativeselectionofsignificantpairsandhasadefaultvalueof10−4.
+(c)𝑇CutMKN isatechnicalparameterandcontrolsthesizeofthefitsetforeachelectronpair. Ithasadefault
+value of 10−3. All of these default values are conservative. Hence, no adjustment of these parameters is
+necessary. AllDLPNO-CCSDtruncationsareboundtothesethreetruncationparametersandshouldalmost
+notbetouched(Hencetheyarealsonotdocumented:) ).
+• Thepreferredwaytoadjustaccuracywhenneededistousethe“LoosePNO/NormalPNO/TightPNO”key-
+words. In addition, “TightPNO” triggers the full iterative (DLPNO-MP2) treatment in the MP2 guess,
+whereastheotheroptionsuseasemicanonicalMP2calculation. Table6.5andTable6.6containthethresh-
+oldsusedbythecurrent(2016)andold(2013)implementations,respectively.
+• LPNO-VCEPA/n(n=1,2,3)methodsareonlyavailableintheopen-shellversionyet.
+6.1. SinglePointEnergiesandGradients 99
+
+--- Page 122 ---
+ORCAManual,Release6.0.0
+• LPNOvariantsoftheparameterizedcoupled-clustermethods(pCCSD,seesectionTheory)arealsoavailable
+(e.g. LPNO-pCCSD/1aandLPNO-pC/2a).
+• The LPNO methods reproduce the canonical energy differences to typically better than 1 kcal/mol. This
+accuracy exists over large parts of the potential energy surface. Tightening TCutPairs to 1e-5 gives more
+accurateresultsbutalsoleadstosignificantlylongercomputationtimes.
+• Potential energy surfaces are virtually but not perfectly smooth (like any method that involves cut-offs).
+Numericalgradientcalculationshavebeenattemptedandreportedtohavebeensuccessful.
+• The LPNO methods do work together with RIJCOSX, RI-JK and also with ANO basis sets and basis set
+extrapolation. Theyalsoworkforconventionalintegralhandling.
+• The methods behave excellently with large basis sets. Thus, they stay efficient even when large basis sets
+areusedthatarenecessarytoobtainaccurateresultswithwavefunctionbasedabinitiomethods. Thisisa
+prerequisiteforefficientcomputationalchemistryapplications.
+• ForLPNO-CCSD,calculationswithabout1000basisfunctionsareroutine,calculationswithabout1500ba-
+sisfunctionsarepossibleandcalculationswith2000-2500basisfunctionsarethelimitonpowerfulcomput-
+ers. ForDLPNO-CCSDmuchlargercalculationsarepossible. ThereisvirtuallynocrossoverandDLPNO-
+CCSDisessentiallyalwaysmoreefficientthanLPNO-CCSD.Startingfromabout50atomsthedifferences
+becomelarge. ThelargestDLPNO-CCSDcalculationtodatefeatured>1000atomsandmorethan20000
+basisfunctions!
+• Usinglargemainmemoryisnotmandatorybutadvantageoussinceitspeedsuptheinitialintegraltransfor-
+mationsignificantly(controlledby“MaxCore”inthe%mdciblock,seesectionLocalcorrelation).
+• Theopen-shellversionsareabouttwiceasexpensiveasthecorrespondingclosed-shellversions.
+• Analyticgradientsarenotavailable.
+• Anunrelaxeddensityimplementationisavailableforclosed-shellDLPNO-CCSD,permittingcalculationof
+first-orderproperties.
+Table6.5: AccuracysettingsforDLPNOcoupledcluster(currentversion).
+Setting 𝑇 𝑇 𝑇 𝑇 MP2pairtreatment
+CutPairs CutDO CutPNO CutMKN
+LoosePNO 10−3 2×10−2 1.00×10−6 10−3 semicanonical
+NormalPNO 10−4 1×10−2 3.33×10−7 10−3 semicanonical
+TightPNO 10−5 5×10−3 1.00×10−7 10−3 fulliterative
+Table6.6: AccuracysettingsforDLPNOcoupledcluster(deprecated2013version).
+Setting 𝑇 𝑇 𝑇 MP2pairtreatment
+CutPairs CutPNO CutMKN
+LoosePNO 10−3 1.00×10−6 10−3 semicanonical
+NormalPNO 10−4 3.33×10−7 10−3 semicanonical
+TightPNO 10−5 1.00×10−7 10−4 fulliterative
+Asanexample,seethefollowingisomerizationreactionthatappearstobeparticularlydifficultforDFT:
+100 Chapter6. RunningTypicalCalculations
+
+[... start of page 123 ...]
+ORCAManual,Release6.0.0
+Isomerizesto:
+Theresultsofthecalculations(closed-shellversions)withthedef2-TZVPbasisset(about240basisfunctions)are
+shownbelow:
+Method EnergyDifference(kcal/mol) Time(min)
+CCSD(T) -14.6 92.4
+CCSD -18.0 55.3
+LPNO-CCSD -18.6 20.0
+CEPA/1 -12.4 42.2
+LPNO-CEPA/1 -13.5 13.4
+Thecalculationsaretypicalinthesensethat: (a)theLPNOmethodsprovideanswersthatarewithin1kcal/mol
+ofthecanonicalresults,(b)CEPAapproximatesCCSD(T)morecloselythanCCSD.Thespeedupsofafactorof
+2–5are

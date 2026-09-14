@@ -1,0 +1,88 @@
+[... end of page 356 ...]
+.xyz
+%eprnmr
+Nuclei = all H {ssall}
+end
+The spin-spin coupling constants will be stored in the file ethylcrotonate_sscc.property.txt, which the
+simulationoftheNMRspectrumwillneedtoread. TheNMRshieldingsandwillbecomputedinthenextstep,
+forwhichtheinputethylcrotonate_nmr.inplookslikethis:
+!TPSS pcSseg-3 autoaux tightscf NMR
+*xyzfile 0 1 ethylcrotonate.xyz
+334 Chapter6. RunningTypicalCalculations
+
+--- Page 357 ---
+ORCAManual,Release6.0.0
+ThefinalNMRspectrumsimulationiscarriedoutusingorca_nmrspectrum,whichrequiresaseparateinputfile
+ethylcrotonate.nmrspecwhichlookslikethis(notetherequiredfinalENDstatement):
+NMRShieldingFile = "ethylcrotonate_nmr" #property file for shieldings
+NMRCouplingFile = "ethylcrotonate_sscc" #property file for couplings
+NMRSpecFreq = 80.00 #spectrometer freq [MHz] (default 400)
+PrintLevel = 0 #PrintLevel for debugging info
+NMRCoal = 1.0 #threshold for merged lines [Hz] (default 1)
+NMRREF[1] 31.77 #shielding for 1H reference [ppm]
+NMRREF[6] 188.10 #shielding for 13C reference [ppm]
+NMREquiv #lists of NMR-equivalent nuclei
+1 {13 14 15} end #H 13,14,15 are equivalent (methyl)
+2 {16 17} end #H 16 and 17 equivalent (ethyl)
+3 {8 10 11} end #H 8,10,11 again equivalent methyl
+end #end equiv nucl block
+END #essential end of input
+andcontainsthefollowingkeywords:
+NMRShieldingFileandNMRCouplingFiledenotethe.property.txtfilesfromwhichtheshieldingtensors
+and coupling constants will be read by the NMR spectrum module. If this line is not given, the program will
+exepecttheshieldingsorcouplingsinthepropertyfileofthecurrentcalculation.
+NMRSpecFreqTheNMRspectrometerfrequencyinMHzisdecisiveforthelooksofthespectrumasshieldings
+aregiveninppmandcouplingsaregiveninHz. Defaultis400MHz.
+NMRCoalIftwolinesarecloserthanthisthreshold(giveninHz)thenthemodulewillcoalescethelinestooneline
+withdoubleintensity. Defaultit1Hz.
+NMRREF[X] Reference value for the absolute shielding of element X used in the relative shifts of the simulated
+spectrum. Typically,thesearetheabsoluteshieldingvaluesfromaseparatecalculationofTMS,forexample,and
+willbezeroppminthesimulatedspectrum.
+NMREquivTheuserhastospecifygroupsofNMRequivalentnuclei. Thesearetypicallyatomswhichinterchange
+ontheNMRtimescale,likemethylgroupprotons. Theshieldingsandcouplingswillbeaveragedforeachgroup
+specifiedbytheuser.
+with this input, orca_nmrspectrum is called with two arguments, the first one is a gbw file which contains all
+informationsaboutthemolecule,typicallythisisthegbwfileofthenmrorthesscccalculation,andthenameof
+theinputfilegivenabove:
+orca_nmrspectrum ethylcrotonate_nmr.gbw ethylcrotonate.nmrspec > output
+Ifthiscalculationiscarriedout,theNMRspectrummodulewillreadthefiles
+ethylcrotonate_sscc.property.txtandethylcrotonate_nmr.property.txt,extracttheshieldingsand
+couplings,averagetheequivalentnucleiandsetupaneffectiveNMRspinHamiltonianforeachnucleus:
+𝐻 (𝑝,𝑞)=𝜎 𝛿 +𝐽 𝐼 𝐼 . (6.13)
+𝑁𝑀𝑅 𝑝 𝑝𝑞 𝑝𝑞 𝑝 𝑞
+Caution: This includes all nuclei this nuclear spin couples to and should not contain too many spins (see
+SpinSpinRThres), as the spin Hamiltonian for each atom and the nuclei it couples to is diagonalized brute
+force. Afterwards, allspinexcitationsareaccumulatedandmergedintothefinalspectrumforeachelement.
+ForethylcrotonatetheNMRspectrumoutputlookslikethis:
+-----------------------------------------------------
+NMR Peaks for atom type 1, ref value 31.7700 ppm :
+-----------------------------------------------------
+Atom shift[ppm] rel.intensity
+8 2.34 9.00
+8 2.36 9.00
+8 2.25 9.00
+8 2.27 9.00
+9 6.34 1.00
+6.12. CalculationofProperties 335
+
+[... start of page 358 ...]
+ORCAManual,Release6.0.0
+9 6.36 3.00
+9 6.38 3.00
+9 6.41 1.00
+9 6.14 1.00
+9 6.16 3.00
+9 6.19 3.00
+9 6.21 1.00
+12 7.95 1.00
+12 7.85 3.00
+12 7.75 4.00
+12 7.65 4.00
+12 7.56 3.00
+12 7.47 1.00
+13 1.71 9.00
+13 1.61 18.00
+13 1.52 9.00
+16 4.56 4.00
+16 4.46 12.00
+16 

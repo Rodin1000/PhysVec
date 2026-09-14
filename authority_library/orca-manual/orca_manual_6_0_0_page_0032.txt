@@ -1,0 +1,67 @@
+[... end of page 31 ...]
+pen-sourceMPIimplementation)andMicrosoftMPI(Windowsonly). Assumingthatthe
+MPIlibrariesareinstalledproperly onyourcomputer, itisfairlyeasytoruntheparallel versionofORCA.You
+simplyhavetospecifythenumberofparallelprocesses,like:
+1Manypeople(includingmyself)willprefertowriteasmallshellscriptthat,forexample,createsarundirectory,copiestheinputthere,
+runstheprogram,deletespossiblyleftovertemporaryfilesandthencopiestheoutputbacktotheoriginaldirectory.
+9
+
+--- Page 32 ---
+ORCAManual,Release6.0.0
+! PAL4 # everything from PAL2 to PAL8 and Pal16, Pal32, Pal64 is recognized
+or
+%pal nprocs 4 # any number (positive integer)
+end
+Onmultipleuserrequestthe‘parallelization’ofNumCalchasbeenmademoreflexible. IfbeforeORCAwould
+startnprocsdisplacementswithasingleprocesseach,theusercannowdecideonhowmanyprocessesshouldwork
+onasingledisplacement.
+Forthisthenprocskeywordgotasibling:
+%pal nprocs 32 # or nprocs_world - total number of parallel processes
+nprocs_group 4 # - number of parallel processes per sub-task
+end
+ThissettingwillORCAmakeuse32processes,with4processesworkingonthesamedisplacement,thusrunning
+8displacementssimultaneously. Themethodsthatcanprofitfromthisnewfeatureare
+1. allNumCalc-methods: asNumGrad,NumFreq,VPT2,OverTones,NEB,andGOAT.
+2. theanalyticalHessian,leadingtoaniceincreaseofparallelperformance.
+Itishighlyrecommendedtochoosenprocs_grouptobeanintegerdivisorofnprocs_world!
+Forconvenientuseacoupleofstandard‘groupings’aremadeavailableviasimpleinputkeyword:
+PAL4(2x2) - 2 groups a 2 workers
+PAL8(4x2) - 4 groups a 2 workers
+PAL8(2x4) ...
+PAL16(4x4)
+PAL32(8x4)
+PAL32(4x8)
+PAL64(8x8)
+Thefollowingmodulesandutilityprogramsarepresentlyparallelized/usableinmulti-processmode:
+10 Chapter3. CallingtheProgram(SerialandParallel)
+
+[... start of page 33 ...]
+ORCAManual,Release6.0.0
+AUTOCI
+CASSCF/NEVPT2/CASSCFRESP
+CIPSI
+CIS/TDDFT
+GRAD(generalGradientprogram)
+GUESS
+LEANSCF(memoryconservingSCFsolver)
+MCRPA
+MDCI(Canonical-andDLPNO-Methods)
+MM
+MP2andRI-MP2(includingGradients)
+MRCI
+PC
+PLOT
+PNMR
+POP
+PROP
+PROPINT
+REL
+ROCIS
+SCFGRAD
+SCFRESP(withSCFHessian)
+STARTUP
+VPOT
+NumericalGradients,Frequencies,Overtones-and-Combination-Bands
+VPT2
+NEB(NudgedElasticBand)
+Thus,allmajormodulesareparallelizedinthepresentversion. Theeffi

@@ -1,0 +1,91 @@
+[... end of page 1209 ...]
+ariables ---------------------------------
+#
+Variable HartreeToKcal = 627.5096080305927; # Hartree to kcal/mol conversion␣
+factor
+˓→
+Variable stepSize = (UpperLimit-LowerLimit)/(NSteps-1); # The stepsize of the grid
+Variable calcValues[NSteps]; # An array to store the␣
+calculated values
+˓→
+Variable res, dist, calcValue;
+Variable myFilename, csvFilename;
+Variable fPtr; # A file to write
+# ---------------------------------------------------
+# Open and Write file header for the absolute values
+(continuesonnextpage)
+7.60. CompoundExamples 1187
+
+--- Page 1210 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# ---------------------------------------------------
+write2String(csvFilename, "%s_absValues.csv", baseFilename);
+fPtr = OpenFile(csvFilename, "w");
+write2File(fptr, "distance,method,property,calcValue\n");
+# ---------------------------------------------------
+# Perform the calculations and update the file
+# ---------------------------------------------------
+for iStep from 0 to NSteps-1 Do
+dist = lowerLimit + (iStep)*stepSize;
+New_Step
+!&{method} &{basis} &{restOfInput}
+*xyz &{charge} &{mult}
+Ne 0.0 0.0 0.0
+Ne 0.0 0.0 &{dist}
+*
+Step_end
+res = calcValue.readProperty(propertyName=myPropName);
+write2File(fPtr, "%.4lf,%20s,%20s,%20.10lf\n", dist, method,myPropName, calcValue);
+calcValues[iStep]=calcValue;
+EndFor
+CloseFile(fPtr); # Close the file
+# ---------------------------------------------------
+# Evaluate and write the relative values
+# ---------------------------------------------------
+write2String(csvFilename, "%s_relValues.csv", baseFilename);
+fPtr = OpenFile(csvFilename, "w");
+write2File(fPtr, "distance,method,property,calcValue\n");
+for iStep from 0 to NSteps-1 Do
+dist = lowerLimit + (iStep)*stepSize;
+if (DoKcal) then
+calcValue = (calcValues[iStep]-calcValues[NSteps-1])*HartreeToKcal;
+else
+calcValue = calcValues[iStep]-calcValues[NSteps-1];
+EndIf
+write2File(fPtr, "%.4lf,%20s,%20s,%20.10lf\n", dist, method,myPropName, calcValue);
+EndFor
+CloseFile(fPtr); # Close the file
+if (removeFiles) then
+sys_cmd("rm *_Compound_* *.bas*");
+EndIf
+# ---------------------------------------------------
+# Create a python file and run it
+# ---------------------------------------------------
+if (DoPython) then
+if (plotPotential) then
+write2String(csvFilename, "%s_relValues.csv", baseFilename);
+else
+write2String(csvFilename, "%s_absValues.csv", baseFilename);
+endIf
+write2String(myFilename, "%s.py", baseFilename);
+fPtr = openFile(myFilename, "w");
+# Import necessary libraries
+write2File(fPtr, "import pandas as pd\n");
+write2File(fPtr, "import seaborn as sns\n");
+write2File(fPtr, "import matplotlib.pyplot as plt\n");
+# Read the csv file
+(continuesonnextpage)
+1188 Chapter7. DetailedDocumentation
+
+[... start of page 1211 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+write2File(fPtr, "df = pd.read_csv('%s')\n", csvFilename);
+#Make a lineplot
+write2File(fPtr, "sns.lineplot(data=df, x=\"distance\", y=\"calcValue\", hue=\"property\", \n
+lw=%d, markers=True, marker='%s', markersize=%d, dashes=False)\n", lw,␣
+marker, markersize);
+˓→
+write2File(fPtr, "plt.axhline(y=0, color='black', linestyle='-', linewidth=1)\n");
+write2File(fPtr, "plt.title(\"Energy Potential\", fon

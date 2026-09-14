@@ -1,0 +1,64 @@
+[... end of page 296 ...]
+
+0-1A -> 2-1A 9.070040 73154.8 136.7 -0.00000 0.00000 -0.74486 0.00000
+0-1A -> 3-1A 9.728237 78463.5 127.4 -0.00000 -0.00000 -0.00000 -0.00000
+0-1A -> 4-1A 10.618534 85644.3 116.8 0.00000 0.35898 0.00000 -0.00000
+0-1A -> 5-1A 10.675343 86102.5 116.1 0.00000 0.00000 -0.00000 -0.00000
+Warning:
+• It is important to note that the transition moments and oscillator strengths (and state dipole moments)
+have been blindly computed by the MRCI module and currently, no effort has been made to include
+274 Chapter6. RunningTypicalCalculations
+
+--- Page 297 ---
+ORCAManual,Release6.0.0
+the effects of the various similarity transformations in the evaluation of these quantities. Hence these
+quantitiesareonlyapproximateandshouldonlybeusedasaqualitativeaidtodeterminewhichstates
+aredipoleallowedorforbidden. Furthermore,sincethecalculateddensitiesareapproximate,soarethe
+resultsofthepopulationanalysisthatareprintedbeforetheabsorptionandCDspectra.
+• While both the CASSCF and MRCI modules can make use of spatial point-group symmetry to some
+extent,theMR-EOMimplementationiscurrentlylimitedtocalculationsin𝐶 symmetry.
+1
+6.8.2 Capabilities
+TheMR-EOMmethodologycanbeusedtocalculateadesirednumberofstatesforbothclosed-andopen-shell
+systemsfrom asingle state-averagedCASSCF solution. Currently, the approachis limitedtoserial calculations
+andto smallersystems insmalleractive spaces. One shouldbeaware thatin themostcost-effective MR-EOM-
+T|T†|SXD|U-h-vapproach(i.e.thesmallestdiagonalizationmanifold),anMRCIdiagonalizationisperformedover
+all1hand1pexcitedconfigurationsoutoftheCAS,whichwillinevitablylimitthesizeoftheinitialCASwhich
+canbeused. Wehavealsoimplementedanorbitalselectionschemewhichcanbeusedtoreducethesizeofthe
+inactivecoreandvirtualsubspacesinthecalculationofexcitationenergies,andthiscanbeemployedtoextendthe
+applicabilityoftheapproachtolargersystems. Thecurrentimplementationcanalsobeusedinconjunctionwith
+the spin-orbit coupling submodule (General Description) of the MRCI module to calculate spin-orbit coupling
+effects in MR-EOM calculations to first order. These and other features of the current implementation will be
+discussedinMultireferenceEquationofMotionCoupled-Cluster(MR-EOM-CC)Theory.
+6.8.3 Perturbative MR-EOM-PT
+TheMR-EOMfamilyofmethodsnowalsofeaturesanalmostfullyperturbativeapproachcalledMR-EOMPT[501].
+ThismethodsharesthefeaturesoftheMR-EOMCCparentmethodwhileusingnon-iterativeperturbativeestimates
+forthe𝑇ˆ and𝑆ˆ,𝑋ˆ,𝐷ˆ amplitudes. ThisslightlyreducestheaccuracycomparedtoiterativeMR-EOMCCwhile
+reducingruntime. Furthermore,convergenceissuesduetonearlysingular𝑇ˆand𝑆ˆ,𝑋ˆ,𝐷ˆ amplitudescannotoccur
+anymore.
+ThismethodcanbeinvokedbyaddingthekeywordDoMREOM_MRPT Truetothe%mdciblock.
+6.9 Solvation
+ORCAfeaturesseveralimplicitsolvationmodels,includingthefullyintegrated“conductor-likepolarizablecon-
+tinuum(C-PCM)”and“MinnesotaSMD”solvationmodels,whichareavailableinallitscomponents. Withthese
+models, various types of calculations can be performed using a polarizable continuum with a realistic van der
+Waalscavityassummarizedbelow:
+• Energiesofmoleculesinsolutionwithafinitedielectricconstant𝜀usingHForanyDFTmethod.
+• OptimizationofmolecularstructuresinsolutionusingHForanyDFTmethodwithanalyticgradients.
+• CalculationofvibrationalfrequenciesusingtheanalyticHessianforHForanyDFTmethod,providedthat
+thesamecalculationisavailableinvacuum.
+• Calculation of solvent effects on response properties like polarizabilities through coupled-perturbed SCF
+theory. Formagneticresponseproperties,suchastheg-tensor,theC-PCMresponsevanishes.
+• Calculations of solvent shifts on transition energies using the time-dependent DFT or CIS method. The
+refractiveindexofthesolventneedstobeprovidedinadditiontothedielectricconstant.
+• Firstorderperturbationestimateofsolventeffectsonstateandtransitionenergiesinmultireferencepertur-
+bationandconfiguration-interactioncalculations.
+Other implicit solvation strategies are available in ORCA. In particular, an interface to the open source imple-
+mentation of the COSMO-RS model (openCOSMO-RS), as well as different solvation models that can be used
+6.9. Solvation 275
+
+[... start of page 298 ...]
+ORCAManual,Release6.0.0
+inXTB(ALPB,ddCOSMO,andCPCM-X).Adetailedoverviewoftheavailableimplicitsolvationmethodsand
+theirusageisprovidedinSectionsONIOMMethods,andImplicitSolvationModels.
+Asasimpleexample,letuscomputethesolventeffectonthe𝑛→𝜋* transitionenergyinformaldehydewiththe
+C-PCM model. This effect can be obtained by subtracting the solution-phase and gas-phase transition

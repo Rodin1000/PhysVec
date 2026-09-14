@@ -1,0 +1,62 @@
+[... end of page 236 ...]
+t: Itisimportanttostressthatthiswillnotnecessarilysolveallproblems(rootflippingcanbeparticu-
+larlybadifthesystemishighlysymmetric),fortheexcitedstatesmaychangetoomuchduringtheoptimization. If
+thathappens,itisadvisabletorestartthecalculationaftersomestepsandcheckwhichIROOTyoustillwant. This
+canalsobeusedwhencalculatingnumericalgradientsandHessians,incaseyoususpectofrootflippingafterthe
+displacements.
+Important: Thisalgorithmiscompletelygeneralandshouldworkforanyexcitedstatemethod,aslongasthere
+aretransitiondensities. Wewillincludemoremethodsinthefuturewhenpossible.
+214 Chapter6. RunningTypicalCalculations
+
+--- Page 237 ---
+ORCAManual,Release6.0.0
+DoublesCorrection
+ForCIS(andalsoforperturbativelycorrectedtime-dependentdouble-hybridfunctionals)theprogramcancalculate
+adoublescorrectiontothesingles-onlyexcitedstates. ThetheoryisduetoHead-Gordonandco-workers[371].
+%cis dcorr n # n=1,2,3,4 are four different algorithms that
+# lead to (essentially) the same result but differ
+# in the way the rate-limiting steps are handled
+Spin-component scaling versions of CIS(D) can be evoked in the %cis block by setting DOSCS TRUE and the
+four scaling parameters, as defined by Head-Gordon and co-workers [716], in the following order: same-spin
+indirect term (CTss), opposite-spin indirect term(CTos), same-spin direct term(CUss), and opposite-spin direct
+term(CUos). Note that this implementation only works for the version with the parameter 𝜆 = 1 as defined in
+Ref. [716]. TheexamplebelowshowshowtoapplytheSCS-CIS(D)versionwith𝜆 = 1whoseusagehasbeen
+advocatedinRef. [311]. Theuserisabletospecifyotherscalingparameters.
+%cis
+dcorr # n=1,2,3,4
+doscs true # set SCS-CIS(D) to true (default: false)
+scspar 0.333, 1.2, 0.43, 1.24 #SCS-CIS(D) scaling parameters in this order
+CTss, CTos, CUss, CUos
+end
+Note the use of commas to separate the parameters. These parameters do not communicate with the SCS/SOS
+parameterssetforground-stateSCS/SOS-MP2inthe%mp2block.
+Note:
+• CIS(D)isoftenaquitebigimprovementoverCIS.
+• Thecostofthe(D)correctionisO(N5)andthereforecomparabletoRI-MP2. Sincetherearequiteafew
+things more to be done for (D) compared to RI-MP2, expect the calculations to take longer. In the most
+elementaryimplementationthecostisabouttwotimesthetimeforRI-MP2foreachroot.
+• The(D)correctioniscompatiblewiththephilosophyofthedouble-hybriddensityfunctionalsandshould
+beusedifthesefunctionalsarecombinedwithTD-DFT.Theprogramtakesthisasthedefaultbutwillnot
+enforceit. The(D)correctioncanbeusedbothinaTD-DFTandTDA-DFTcontext.
+• InourimplementationitisonlyimplementedtogetherwiththeRIapproximationandthereforeyouneedto
+supplyanappropriate(“/C”)fittingbasis.
+• TheprogramwillautomaticallyputtheRI-MP2moduleintooperationtogetherwiththe(D)correction. This
+willresultinthenecessaryintegralsbecomingavailabletotheCISmodule.
+• Singlet-tripletexcitationscanbecalculatedbysettingTRIPLETSTRUEinthe%cisor%tddftblocks,re-
+spectively. TheimplementationhasbeentestedfordoublehybridsinRef. [145].
+• Forspin-adaptedtriplets(TRIPLETSTRUE),theonlyoptionavailablecurrentlyisDCORR1.
+• Spin-component and spin-opposite scaling techniques for double-hybrids within the TD- and TDA-DFT
+frameworks,asdefinedbySchwabeandGoerigk[770],canbeevokedinthesamewayinthe%tddftblock
+asdescribedforSCS-CIS(D)above. Whileuser-definedparameterscanbeenteredinsuchaway,aseriesof
+newfunctionalsareavailablethroughnormalkeywords,whichusethehereinpresentedSCS/SOS-CIS(D)
+implementation. [147]SeeSec. ChoiceofFunctionalforalistofthosefunctionals.
+6.6. ExcitedStatesCalculations 215
+
+[... start of page 238 ...]
+ORCAManual,Release6.0.0
+Spin-orbitcoupling
+Italsopossibletoincludespin-orbitcouplingbetweensingletsandtripletscalculatedfromTD-DFTbyusingquasi-
+degenerateperturbationtheory(pleaserefertotherelevantpublication[198]),similarlytowhatisdoneinROCIS.
+Inordertodothat,theflagDOSOCmustbesettoTRUE.Thereducedmatrixelementsareprintedandthenew
+transitiondipolesbetweenallSOCcoupledstatesarealsoprintedaftertheregularones. Thisoptioniscurrently
+stillnotcompatiblewithdoublehybrid

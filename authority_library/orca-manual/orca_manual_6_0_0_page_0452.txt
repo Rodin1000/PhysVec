@@ -1,0 +1,74 @@
+[... end of page 451 ...]
+re
+# the guest(s) will be read. can contain different
+# charges and multiplicities for each guests on the
+# comment line. will only be read if exactly two
+# integer numbers are given, otherwise ignored.
+DOCKLEVEL SCREENING # defines a general strategy for docking.
+(continuesonnextpage)
+6.19. TheORCADOCKER:AnAutomatedDockingAlgorithm 429
+
+--- Page 452 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# will alter things like that population density
+NORMAL # and final number of optimized structrures.
+COMPLETE # default is NORMAL.
+NREPEATGUEST 1 # number of times to repeat the content of the "GUEST" file
+CUMULATIVE TRUE # add the contents of the "GUEST" file one on
+# top of each other?
+# default is FALSE, meaning each will be done independently.
+FIXHOST TRUE # freeze coordinatef for the HOST during all steps?
+# (default FALSE)
+#
+# evolution step
+#
+EVPES GFNFF # which PES to use **only** during the evolution step.
+GFN0XTB # can be different from the final optimization.
+GFN1XTB
+GFN2XTB
+#
+# final optimization
+#
+NOPT 10 # a fixed number of structures to be optimized
+NOOPT FALSE # do not optimize any structure at all? (default FALSE)
+6.20 Compound Methods
+CompoundMethodsisaformofsophisticatedscriptinglanguagethatcanbeuseddirectlyintheinputofORCA.
+Using‘Compound’theusercancombinevariouspartsofanormalORCAcalculationtoevaluatecustomfunctions
+ofhisown. Inordertoexplainitsusage,wewilluseanexample. Foramoredetaileddescriptionofthismodule
+theuserisreferredtosectionCompoundMethods.
+6.20.1 example
+Asatypicalexamplewewillusetheconstrainedoptimizationdescribingthe“umbrellaeffect”of𝑁𝐻 . Thescript
+3
+willperformaseriesofcalculationsandintheenditwillprintthepotentialofthemovementplusitwillidentify
+theminimaandthemaximum. Thecorrespondingcompoundscriptistheoneshownbelow.
+# ----------------------------------------------
+# Umbrella coordinate mapping for NH3
+# Author: Frank Neese
+# ----------------------------------------------
+variable JobName = "NH3-umbrella";
+variable amin = 50.0;
+variable amax = 130.0;
+variable nsteps = 21;
+Variable energies[21];
+Variable angle;
+Variable JobStep;
+Variable JobStep_m;
+variable step;
+Variable method = "BP86";
+Variable basis = "def2-SVP def2/J";
+(continuesonnextpage)
+430 Chapter6. RunningTypicalCalculations
+
+[... start of page 453 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+step = 1.0*(amax-amin)/(nsteps-1);
+# Loop over the number of steps
+# ----------------------------
+for iang from 0 to nsteps-1 do
+angle = amin + iang*step;
+JobStep = iang+1;
+JobStep_m= JobStep-1;
+if (iang>0) then
+Read_Geom(JobStep_m);

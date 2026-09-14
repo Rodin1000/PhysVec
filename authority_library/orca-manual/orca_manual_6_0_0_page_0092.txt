@@ -1,0 +1,88 @@
+[... end of page 91 ...]
+ger
+calculations,particularlyifthebasissetsareaccurate.
+#
+# MP2 optimization example
+#
+! SCS-MP2 def2-TZVP OPT NoFrozenCore
+* int 0 1
+C 0 0 0 0.00 0.0 0.00
+O 1 0 0 1.20 0.0 0.00
+H 1 2 0 1.09 120.0 0.00
+H 1 2 3 1.09 120.0 180.00
+*
+Thisjobresultsin:
+---------------------------------------------------------------------------
+Redundant Internal Coordinates
+--- Optimized Parameters ---
+(Angstroem and degrees)
+Definition OldVal dE/dq Step FinalVal
+----------------------------------------------------------------------------
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 69
+
+--- Page 92 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+1. B(O 1,C 0) 1.2081 0.000488 -0.0003 1.2078
+2. B(H 2,C 0) 1.1027 0.000009 -0.0000 1.1027
+3. B(H 3,C 0) 1.1027 0.000009 -0.0000 1.1027
+4. A(O 1,C 0,H 3) 121.85 0.000026 -0.00 121.85
+5. A(H 2,C 0,H 3) 116.29 -0.000053 0.01 116.30
+6. A(O 1,C 0,H 2) 121.85 0.000026 -0.00 121.85
+7. I(O 1,H 3,H 2,C 0) -0.00 -0.000000 0.00 0.00
+----------------------------------------------------------------------------
+JusttodemonstratetheaccuracyofRI-MP2, hereistheresultwithRI-SCS-MP2insteadofSCS-MP2, withthe
+additionofdef2-TZVP/C:
+---------------------------------------------------------------------------
+Redundant Internal Coordinates
+--- Optimized Parameters ---
+(Angstroem and degrees)
+Definition OldVal dE/dq Step FinalVal
+----------------------------------------------------------------------------
+1. B(O 1,C 0) 1.2081 0.000487 -0.0003 1.2078
+2. B(H 2,C 0) 1.1027 0.000009 -0.0000 1.1027
+3. B(H 3,C 0) 1.1027 0.000009 -0.0000 1.1027
+4. A(O 1,C 0,H 3) 121.85 0.000026 -0.00 121.85
+5. A(H 2,C 0,H 3) 116.29 -0.000053 0.01 116.30
+6. A(O 1,C 0,H 2) 121.85 0.000026 -0.00 121.85
+7. I(O 1,H 3,H 2,C 0) -0.00 0.000000 -0.00 -0.00
+----------------------------------------------------------------------------
+You see that nothing is lost in the optimized geometry through the RI approximation thanks to the efficient and
+accurateRI-auxiliarybasissetsoftheKarlsruhegroup(ingeneralthedeviationsinthegeometriesbetweenstandard
+MP2andRI-MP2areverysmall). Thus,RI-MP2reallyisasubstantialimprovementinefficiencyoverstandard
+MP2.
+GeometricgradientsandHessianscanbecalculatedwithRI-MP2inconjunctionwiththeRIJCOSXmethod. They
+arecalledthesamewayaswithaconventionalSCFwavefunction,forexampletoperformageometryoptimization
+withtightconvergenceparameters:
+! RI-MP2 def2-TZVPP def2/J def2-TZVPP/C TightSCF RIJCOSX
+! TightOpt
+...
+MP2Properties,DensitiesandNaturalOrbitals
+TheMP2methodcanbeusedtocalculateelectricandmagneticpropertiessuchasdipolemoments,polarizabilities,
+hyperfinecouplings,g-tensorsorNMRchemicalshieldingtensors. Forthispurpose,theappropriateMP2density
+needstoberequested-otherwisethepropertiesarecalculatedusingtheSCFdensity!
+Twotypesofdensitiescanbeconstructed-an“unrelaxed”density(whichbasicallycorrespondstotheMP2ex-
+pectationvaluedensity)anda“relaxed”densitywhichincorporatesorbitalrelaxation. Forbothsetsofdensitiesa
+populationanalysisisprintediftheSCFcalculationalsorequestedthispopulationanalysis. Thesetwodensities
+are stored as JobName.pmp2ur.tmp and JobName.pmp2re.tmp, respectively. For the open shell case case the
+corresponding spin densities are also constructed and stored as JobName.rmp2ur.tmp and JobName.rmp2re.
+tmp.
+Inadditiontothedensityoptions,theuserhastheabilitytoconstructMP2naturalorbitals. Ifrelaxeddensitiesare
+available,theprogramusestherelaxeddensitiesandotherwisetheunrelaxedones. Thenaturalorbitalsarestored
+asJobName.mp2natwhichisaGBWtypefilethatcanbereadasinputforotherjobs(forexample,itissensible
+tostartCASSCFcalculationsfromMP2naturalorbitals). Thedensityconstructioncanbecontrolledseparatelyin
+theinputfile(evenwithoutrunningagradientoroptimization)by:
+70 Chapter6. RunningTypicalCalculations
+
+[... start of page 93 ...]
+ORCAManual,Release6.0.0
+#
+# MP2 densities and natural orbitals
+#
+%mp2 Density none # no density
+unrelaxed # unrelaxed density
+relaxed # relaxed density
+NatOrbs true # Natural orbital construction on or off
+end
+Belowisacalculationofthedipoleandq

@@ -1,0 +1,87 @@
+[... end of page 1218 ...]
+et (X)
+# -------------------------------------------------
+corrGradX =mat_p_mat(1, totalGradX, -1, scfGradX);
+EndIf
+# -------------------------------------------------
+# Step4. SCF Calculation with large basis set (Y)
+# -------------------------------------------------
+New_Step
+!HF &{UpperBasis} &{restOfInput}
+Step_End
+res = scfEnY.readProperty(propertyName="SCF_Energy");
+res = scfGradY.readProperty(propertyName="Nuclear_Gradient", Property_Base=true);
+(continuesonnextpage)
+1196 Chapter7. DetailedDocumentation
+
+--- Page 1219 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# -------------------------------------------------
+# Step5. Correlation calculation with large basis set (Y)
+# -------------------------------------------------
+if (addCorrelation) then
+New_Step
+! &{method} &{UpperBasis} &{restOfInput}
+Step_end
+res = scfEnY.readProperty(propertyName=scfEnPropName);
+res = corrEnY.readProperty(propertyName=corrEnPropName);
+res = totalGradY.readProperty(propertyName="Nuclear_Gradient", Property_Base=true);
+# -------------------------------------------------
+# Evaluate correlation gradient with big basis set Y
+# -------------------------------------------------
+corrGradY = mat_p_mat(1, totalGradY, -1, scfGradY);
+EndIf
+# -------------------------------------------------
+# Step6. Extrapolate the SCF part of the gradient and energy
+# -------------------------------------------------
+eX = exp(-alpha * sqrt(LowerCardinal));
+eY = exp(-alpha * sqrt(UpperCardinal));
+denominator = eY-eX;
+scfEnCBS = (scfEnX*eY - scfEnY*eX)/(eY-eX);
+for i from 0 to scfGradX.GetSize()-1 Do
+gradX = scfGradX[i];
+gradY = scfGradY[i];
+scfGradCBS[i] = (gradX * eY - gradY * eX)/denominator;
+endFor
+if (addCorrelation) then
+# -------------------------------------------------
+# Step7. Extrapolate the correlation part of the gradient and energy
+# -------------------------------------------------
+denominator = LowerCardinal^(beta)-(UpperCardinal)^(beta);
+corrEnCBS = (LowerCardinal^(beta)*corrEnX-(UpperCardinal)^(beta)*corrEnY)/denominator;
+for i from 0 to scfGradX.GetSize()-1 Do
+gradX = corrGradX[i];
+gradY = corrGradY[i];
+corrGradCBS[i] = (LowerCardinal^(beta)*gradX-(UpperCardinal)^(beta)*gradY)/denominator;
+endFor
+# -------------------------------------------------
+# Add SCF and correlation part to get total CBS extrapolated values
+# -------------------------------------------------
+totalGradCBS = mat_p_mat( 1, scfGradCBS, 1, corrGradCBS);
+EndIf
+# -------------------------------------------------
+# Step8. Present the results
+# -------------------------------------------------
+print( "\n\n\n");
+print( "--------------------------------------------------------\n");
+print( " Compound Extrapolation of Gradient \n");
+print( "--------------------------------------------------------\n");
+(continuesonnextpage)
+7.60. CompoundExamples 1197
+
+[... start of page 1220 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+print( "Number of atoms : %d\n", nAtoms);
+print( "Lower basis set : %s\n", LowerBasis);
+print( "Upper basis set : %s\n", UpperBasis);
+print( "Alpha : %.2lf\n", alpha);
+print( "Beta : %.2lf\n", beta);
+print( "Lower Cardinal number : %d\n", LowerCardinal);
+print( "Upper Cardinal number : %d\n", UpperCardinal);
+print( "Method : %s\n", method);
+print( "AddCorrelation : %s\n", AddCorrelation.GetString());
+print( "Produce EnGrad File : %s\n", produceEnGradFile.GetString());
+print( "\n\n");
+print( "SCF Energy wi

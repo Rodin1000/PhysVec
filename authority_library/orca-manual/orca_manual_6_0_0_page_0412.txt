@@ -1,0 +1,88 @@
+[... end of page 411 ...]
+s interaction
+%LJCoefficients "temp.LJ"
+# file containing the point charges for the electrostatic interaction
+%pointcharges "temp.pc"
+%geom
+# calculate the exact Hessian before the first optimization step
+Calc_Hess true
+# in case of a TS optimization the updated Hessian of the previous
+# TS optimization run is read instead of calculating a new one
+read_temp_Hess true
+end
+Note:
+• IfyouareusingbOptor bTSyouhavetotakecareofadditionaltermsovertheboundary. Eitheryoucan
+zerooutthedihedraltermsoftheQ2-Q1-M1-M2configurations,oryoucanfixtherespectiveQ2atoms.
+• IfyouwanttousetheORCAconstraints,youhavetoalsoputthemintheGromacspartofthecalculation.
+6.17. QM/MMviaInterfacestoORCA 389
+
+--- Page 412 ---
+ORCAManual,Release6.0.0
+• IftherearenobondsbetweentheQMandMMsystems,thebOptoptimizationoftheQMsystemmighthave
+convergenceproblems. ThisisthecaseifthestepsizeistoolargeandthusQMatomscometooclosetoMM
+atoms. TheconvergenceproblemscanbecircumventedbyaddingextracoordinatesandHessiandiagonal
+values for Cartesian coordinates of selected QM atoms to the set of internal coordinates. This should be
+doneforonlyfewatomsthatareintheboundaryregion.
+%geom
+# add the Cartesian position of atoms 2 and 4 to the
+# set of internal coordinates with a diagonal Hessian value of 0.1
+Hess_Internal
+{C 2 D 0.1}
+{C 4 D 0.1}
+end
+end
+6.17.2 ORCA and pDynamo
+TheinterfacewiththepDynamolibraryisbrieflydocumentedhere. Itusesthesameplaintextfilestoexchange
+informationbetweenthepDynamolibraryandORCA.Inordertohavesimiarfunctionalityaspresentedabove,we
+haveextendedtheinterfacetogeneratemorecomplexORCAinputfilesbyacceptingverbatimblocksoftext. We
+havealsoimplementedinpDynamothecapabilityofwritingfilescontainingLennard-Jonesparameters.
+AsimpleexamplewhichcalculatestheQM/MMenergyforasmalldesignedpeptideinwhichthesidechainof
+oneaminoacidistreatedQMisilustratedbelow. Forthisexample,acompletegeometryoptimizationisgoingto
+beperformedduringtheORCAcall.
+import os
+import pCore
+import pBabel
+import pMolecule
+import pMoleculeScripts
+# Read the initial coordinates from the .pdb file.
+system = pMoleculeScripts.PDBFile_ToSystem(
+"1UAO.pdb", modelNumber=1, useComponentLibrary=True)
+# Instantiate the required models.
+mmmodel = pMolecule.MMModelOPLS("protein")
+nbmodel = pMolecule.NBModelORCA()
+qcmodel = pMolecule.QCModelORCA(
+command=os.getenv("ORCA_COMMAND"),
+deleteJobFiles=False, header="bp86 def2-svp qmmmopt/pdynamo",
+job="chignolin", run=True)
+# Assign the models to the system.
+system.DefineMMModel(mmmodel)
+system.DefineQCModel(
+qcmodel, qcSelection=pCore.Selection([35, 36, 37, 34, 40, 41]))
+system.DefineNBModel(nbmodel)
+system.electronicState = pMolecule.ElectronicState(
+charge=-1, multiplicity=1)
+# Print a summary and calculate the energy.
+system.Summary()
+system.Energy()
+After the execution of the above Python program, a series of files are going to be created chignolin.inp,
+chignolin.pc,chignolin.ljandORCAisgoingtobecalled. ThegeneratedORCAinputfileislistedbelow.
+390 Chapter6. RunningTypicalCalculations
+
+[... start of page 413 ...]
+ORCAManual,Release6.0.0
+! bp86 def2-svp qmmmopt/pdynamo
+% geom
+constraints
+{C 0 C}
+{C 1 C}
+end
+end
+% pointcharges "chignolin.pc"
+% ljcoefficients "chignolin.lj"
+* xyz -1 1
+H -1.0637532468 1.1350324675 2.4244220779
+C -0.5230000000 0.6870000000 3.2490000000
+C 0.4180000000 1.7240000000 3.8660000000
+O -0.0690000000 2.7620000000 4.2830000000
+O 1.6090000000 1.4630000000 3.9110000000
+H -1.22400

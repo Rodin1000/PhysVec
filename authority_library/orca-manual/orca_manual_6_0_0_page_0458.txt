@@ -1,0 +1,83 @@
+[... end of page 457 ...]
+d command but
+in older compound files. For more details concerning the Get_From_Prop_File please refer to section
+sec:compound.commands.get_from_prop_file.detailed.
+# Print a summary at the end of the calculation
+# ---------------------------------------------
+print("////////////////////////////////////////////////////////\\n");
+print("// POTENTIAL ENERGY RESULT\\n");
+print("////////////////////////////////////////////////////////\\n");
+variable minimum,maximum;
+variable Em,E0,Ep;
+variable i0,im,ip;
+for iang from 0 to nsteps-1 do
+angle = amin + 1.0*iang*step;
+JobStep = iang+1;
+minimum = 0;
+(continuesonnextpage)
+6.20. CompoundMethods 435
+
+--- Page 458 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+maximum = 0;
+i0 = iang;
+im = iang-1;
+ip = iang+1;
+E0 = energies[i0];
+Em = E0;
+Ep = E0;
+if (iang>0 and iang<nsteps-1) then
+Em = energies[im];
+Ep = energies[ip];
+endif
+if (E0<Em and E0<Ep) then minimum=1; endif
+if (E0>Em and E0>Ep) then maximum=1; endif
+if (minimum = 1 ) then
+print(" %3d %6.2lf %16.12lf (-)\textbackslash{}n",JobStep,angle, E0 );
+endif
+if (maximum = 1 ) then
+print(" %3d %6.2lf %16.12lf (+)\textbackslash{}n",JobStep,angle, E0 );
+endif
+if (minimum=0 and maximum=0) then
+print(" %3d %6.2lf %16.12lf \textbackslash{}n",JobStep,angle, E0 );
+endif
+endfor
+print("////////////////////////////////////////////////////////\\n");
+Oncealldataareavailablewecanusetheminequationslikeinanyprogramminglanguage.
+Thesyntaxoftheprintstatementis:
+print(formatstring,[variables]);
+Forexampleinthepreviousscriptweuseitlike:
+print(" %3d %6.2lf %16.12lf \n",JobStep,angle, E0 );
+where%3d,%6.2lf and%16.2lf areformatidentifiersandJobStep,angleandE0arepreviouslydefinedvariables.
+Thesyntaxfollowscloselythewidelyacceptedsyntaxoftheprintf commandintheprogramminglanguageC.For
+moredetailsregardingtheprintstatememntpleaserefertosection: Print.
+Similartotheprint commandarethewrite2fileandwrite2stringcommandsthatareusedtowriteinsteadofthe
+outputfile,eithertoafilewechooseortoproduceanewstring.
+FinallyitisreallyimportnatnottoforgetthateverycompoundfileshouldfinishwithafinalEnd.
+Oncewerunthepreviousexamplewegetthefollowingoutput:
+////////////////////////////////////////////////////////
+// POTENTIAL ENERGY RESULT
+////////////////////////////////////////////////////////
+1 50.00 -56.486626696200
+2 54.00 -56.498074637200
+3 58.00 -56.505200120800
+4 62.00 -56.508823168800
+5 66.00 -56.509732863600 (-)
+6 70.00 -56.508724734300
+7 74.00 -56.506590613800
+8 78.00 -56.504070086000
+9 82.00 -56.501791816800
+10 86.00 -56.500229017900
+11 90.00 -56.499674856600 (+)
+12 94.00 -56.500229018100
+13 98.00 -56.501791817200
+14 102.00 -56.504070082800
+(continuesonnextpage)
+436 Chapter6. RunningTypicalCalculations
+
+[... start of page 459 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+15 106.00 -56.506590613300
+16 110.00 -56.5

@@ -1,0 +1,68 @@
+[... end of page 34 ...]
+procs=$match
+let "nodes=nprocs"
+elif [[ ${(j: :) $(grep -v '^#' $1):u} == *%(#b)PAL*NPROCS' '#(<0-9>##)* ]]; then
+nprocs=$match
+let "nodes=nprocs"
+fi
+cat > ${b}.job <<EOF
+#!/bin/zsh
+#PBS -l nodes=1:ppn=${nodes:=1}
+#PBS -S /bin/zsh
+#PBS -l walltime=8760:00:00
+setopt EXTENDED_GLOB
+setopt NULL_GLOB
+(continuesonnextpage)
+–disable-builtin-atomicscircumventsthis.
+12 Chapter3. CallingtheProgram(SerialandParallel)
+
+--- Page 35 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+export PATH=$PBS_O_PATH
+logfile=$PBS_O_WORKDIR/${b}.log
+tdir=$(mktemp -d /Volumes/scratch/$USER/${b}__XXXXXX)
+trap '
+echo "Job terminated from outer space!" >> $logfile
+rm -rf $tdir
+exit
+' TERM
+cp $PBS_O_WORKDIR/$1 $tdir
+foreach f ($PBS_O_WORKDIR/*.gbw $PBS_O_WORKDIR/*.pot) { cp $f $tdir }
+cd $tdir
+echo "Job started from ${PBS_O_HOST}, running on $(hostname) in $tdir using
+$(which orca)" > $log
+file
+=orca $1 1>>$logfile 2>&1
+cp ^(*.(inp|tmp*)) $PBS_O_WORKDIR/
+rm -rf $tdir
+EOF
+qsub -j oe -o ${b}.job.out ${b}.job
+7. ParallelORCAdistinguishes3casesofdiskavailability:
+1. eachprocessworksonitsown(private)scratchdirectory(thedataonthisdirectorycannotbeseenby
+anyotherprocess). Thisisflaggedby“workingonlocalscratchdirectories”
+2. allprocessesworkinacommonscratchdirectory(allprocessescanseeallfile-data)ORCAwilldis-
+tinguishtwosituations:
+1. allprocessesareonthesamenode-flaggedby“workingonacommondirectory”
+2. the processes are distributed over multiple nodes but accessing a shared filesysten - flagged by
+“workingonashareddirectory”
+3. thereareatleast2groupsofprocessesondifferentscratchdirectories,oneofthegroupsconsistingof
+morethan1process-flaggedby“workingondistributeddirectories”
+ParallelORCAwillfindout,whichofthesecasesexistsandwillhandletheI/Orespectively. IfORCAstates
+disk availability differently from what you would expect, check the number of available nodes and/or the
+distributionpattern(fill_up/round_robin)
+8. IfParallelORCAfindsafilenamed“MyMol.nodes”inthedirectorywhereit’srunning,itwillusethenodes
+listedinthisfiletostarttheprocesseson,providedyourinputfilewas“MyMol.inp”. Youcanusethisfile
+asyourmachinefilespecifyingyournodes,usingtheusualOpenMPImachinefilenotation.
+Note: If you run the parallel ORCA version on only one computer, you do not need to provide a nodefile, and
+neither have to enable an rsh/ssh access, as in this case the processes will simply be forked! If you start ORCA
+withinaqueueingsystemyoualsodon’tneedtoprovideanodefile. Thequeueingsystemwillcareforit.
+9. ItispossibletopassadditionalMPI-parameterstothempirunbyaddingtheseargumentstotheORCAcall:
+3.2. HintsontheUseofParallelORCA 13
+
+[... start of page 36 ...]
+ORCAManual,Release6.0.0
+/mypath_orca_executables/orca MyMol.inp –bind-to core(cid:96)
+-or-formultiplearguments
+/mypath_orca_executables/orca MyMol.inp "–bind-to core –verbose"
+10. A

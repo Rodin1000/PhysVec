@@ -1,0 +1,88 @@
+[... end of page 464 ...]
+e of nearly of the compute intensive,
+laborioustasks,whileORCAwillorganizeandtriggerallofthesetasks. ORCAandSHARKcommunicateviaa
+leanandwell-definedinterfacetoexchangethenecessarydata. Inthisway, amodern, efficient, easytouseand
+readilymaintainabledevelopmentenvironmentiscreated.
+7.1.6 SHARK User Interface
+While SHARK is a large and complicated machinery, we have deliberately kept the interface as straightforward
+andsimpleaspossible. Thereareonlyafewflagsthatcanbesetthatareexplainedbelow:
+Inthesimpleinputlinethereis:
+! UseShark
+! NoUseShark
+ThisturnsSHARKon(default)oroff. NotethattheoptiontoturnSHARKoff,willbeuniquetoORCA5.0. Future
+versionsofORCAwillalwaysmakeuseofSHARKandthelegacycodewilldisappearfromtheprogramforgood.
+442 Chapter7. DetailedDocumentation
+
+--- Page 465 ---
+ORCAManual,Release6.0.0
+%shark
+UseGeneralContraction false # turns general contraction algorithm on or
+# off. There normally is no need to set this
+# flag since the program will find the
+# contraction case automatically
+Printlevel 1 # Amount of output generated. Choose 0 to
+# suppress output and 2 for more output.
+# Everything else is debug level printing and
+# will fill your harddrive very quickly with
+# unusable information
+PartialGCFlag -1 # Let the program decide whether to use PGC
+0 # do not use it
+1 # Enforce PGC (even for ANO bases)
+FockFlag SHARK_libint_hybrid # default: best of both worlds
+force_shark # Force Shark where possible
+force_libint # Force libint where possible
+RIJFlag RIJ_Auto # default: program decides the best way
+Split_rij # new SHARK Split-RI-J algorithm
+Split_rij_2003 # Highly efficient re-implementation of the
+# Original 2003 algorithm. Mostly used!
+rij_regular # Use traditional 3 center integrals
+# (not recommended)
+end
+7.2 More on Coordinate Input
+WewillnowenterthedetaileddiscussionofthefeaturesofORCA.Notethatsomeexamplesarestillwrittenin
+the“oldsyntax”butthereisnoneedfortheusertoadoptthatoldsyntax. Thenewsyntaxworksaswell.
+7.2.1 Fragment Specification
+Theatomsinthemoleculecanbeassignedtocertainfragments. Thishelpstoorganizetheoutputinthepopulation
+analysissection,isusedforthefragmentoptimizationfeature,forthelocalenergydecompositionandformulti-
+levelcalculations. Therearetwooptionstoassignatomstofragments. Thefirstoptionistoassignagivenatomto
+agivenfragmentbyputtinga(n) directlyaftertheatomicsymbol. Fragmentenumerationstartswithfragment
+1!
+%coords
+CTyp xyz # the type of coordinates xyz or internal
+Charge -2 # the total charge of the molecule
+Mult 2 # the multiplicity = 2S+1
+coords
+Cu(1) 0 0 0
+Cl(2) 2.25 0 0
+Cl(2) -2.25 0 0
+Cl(2) 0 2.25 0
+Cl(2) 0 -2.25 0
+end
+end
+In this example the fragment feature is used to divide the molecule into a “metal” and a “ligand” fragment and
+consequentlytheprogramwillprintthemetalandligandcharacterscontainedineachMOinthepopulationanalysis
+section.
+Alternativelyyoucanassignatomstofragmentsinthegeomblock:
+*xyz -2 2
+Cu 0 0 0
+(continuesonnextpage)
+7.2. MoreonCoordinateInput 443
+
+[... start of page 466 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Cl 2.25 0 0
+Cl -2.25 0 0
+Cl 0 2.25 0
+Cl 0 -2.25 0
+*
+%geom
+Fragments
+1 {0} end # atom 0 for fragment 1
+2 {1:4} end # atoms 1 to 4 for fragment 2
+end
+end
+Note:
+• Withthesecondoption(geom-fragments)the%geomblockhastobewrittenafterthecoordinatesection.
+• geom-fragmentsalsoworkswithcoordinatesthataredefinedviaanexternalfile.
+• Forthegeom-fragmentsoptiontheatomsareassignedtofragment1ifnoassignmentisgiv

@@ -1,0 +1,92 @@
+[... end of page 654 ...]
+convergence. Theorbitalfilecalled
+“CeCOT2_1.gbw”willbegeneratedafterthisstep. WefurtherusethisgbwfiletodotheCASSCFcalculation.
+!DKH DKH-DEF2-SVP TightSCF conv Moread
+%moinp "CeCOT2_1.gbw"
+%basis
+newgto Ce "SARC2-DKH-QZVP" end
+end
+%casscf nel 1
+norb 7 # 1 electrons in 7 f orbitals
+mult 2
+nroots 7 # 7 doublet states
+(continuesonnextpage)
+632 Chapter7. DetailedDocumentation
+
+--- Page 655 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+rel
+dosoc true # include spin-orbit coupling
+end
+end
+*xyz -1 2
+......
+*
+WeneedtochecktheorbitalsaftertheCASSCFstepwiththeorbitalfilenamed“CeCOT2_2.gbw”obtained.
+85 86 87 88 89 90 91
+0.45543 0.45310 0.27655 0.45085 0.45251 0.45760 0.45713
+0.14286 0.14286 0.14286 0.14286 0.14286 0.14286 0.14286
+-------- -------- -------- -------- -------- -------- --------
+0 Ce f0 26.2 0.9 0.0 1.3 3.3 0.5 6.6
+0 Ce f+1 5.4 20.2 0.0 24.0 3.4 5.6 39.1
+0 Ce f-1 0.4 30.4 0.0 52.8 10.7 0.6 3.9
+0 Ce f+2 3.8 0.2 0.7 1.4 4.7 76.7 10.7
+0 Ce f-2 50.7 0.7 0.0 2.1 4.2 4.0 1.3
+0 Ce f+3 8.2 22.0 0.0 1.2 55.8 0.0 11.6
+0 Ce f-3 4.7 25.3 0.0 16.5 17.1 10.1 25.2
+Orbitals85,86,88-91and130areoccupiedandstronglymetalbased4𝑓-orbitals. Forcomparison,theconverged
+CASSCForbitalsarepure4𝑓-orbitals(99%metal-based). Theorbitalsneedtoberotatedinordertofittheactive
+space(85-91). Thenwecanusetheresultsof CASSCF/SOCcalculationtocallfortheSINGLE_ANISOprogram.
+!DKH DKH-DEF2-SVP TightSCF conv Moread
+%moinp "CeCOT2_2.gbw"
+%basis
+newgto Ce "SARC2-DKH-QZVP" end
+end
+%scf rotate {87,130,90} end
+end
+%casscf nel 1
+norb 7
+mult 2
+nroots 7
+rel
+dosoc true
+end
+ANISO
+doaniso true
+MLTP 2,2,2 # 3 Kramers doublets, J=5/2
+MAVE 1, 12 # nsym=1, Lebedev grid number 12
+XFIE 0.1 # the applied magnetic field is 0.1 T
+CRYS_element "Ce"
+CRYS_charge 3
+NCUT 14
+ABCC_abc 11.0735, 12.6738, 22.4854, 84.436, 86.690, 83.969
+ABCC_center 0.82682, 0.31234, 0.78619
+ZJPR -0.120
+HEXP_temp 2.0, 3.0
+HEXP_H 0.0, 1.0, 2.0, 3.0, 4.0
+HEXP_M[0]= 0.0, 2.46, 2.86, 2.95, 2.98
+(continuesonnextpage)
+7.17. InterfacetoSINGLE_ANISOmodule 633
+
+[... start of page 656 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+HEXP_M[1]= 0.0, 2.04, 2.68, 2.87, 2.94
+TEXP_temp 0.0, 10.0, 20.0, 30.0, 40.0, 50.0
+TEXP_chiT 4.5, 4.5, 4.58, 4.62, 4.66, 4.70
+UBAR true
+PLOT true
+ZEEM[0]=1.0, 0.0, 0.0
+ZEEM[1]=0.0, 0.0, 1.0
+ZEEM[2]=0.0, 1.0, 0.0
+ZEEM[3]=0.75, 0.0, 0.25
+end
+end
+*xyz -1 2
+......
+*
+TheorderofthekeywordslistedintheCASSCF/ANISOsubblockdoesnotmatter.
+7.17.3 Reference list of CASSCF/ANISO keywords
+TheonlyrequiredkeywordforSINGLE_ANISOistheDATA,specifyingthenameofthedatafilecontainingtheab
+initioinformation. TheORCAinterfaceincludesthiskeywordautomaticallyandtheref

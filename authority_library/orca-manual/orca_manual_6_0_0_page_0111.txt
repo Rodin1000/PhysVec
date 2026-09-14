@@ -1,0 +1,76 @@
+[... end of page 110 ...]
+edinconjunctionwithF12,athirdbasissetisrequired-thiscanbetheregular
+auxiliary“/C”basis,butwerecommendtosteponelevelupintheauxiliarybasisset(e.g. useacc-pVTZ/C
+fittingbasisinconjunctionwithcc-pVDZ-F12)
+• ItisperfectlyfeasibletouseRIJCOSXorRI-JKatthesametime. Inthiscase,youshouldprovideafourth
+basissetfortheCoulombfitting
+• RHFandUHFareavailable,ROHFnot. (Although,onecandoaROHFlikecalculationbyusingQROs)
+• Gradientsarenotavailable
+DoingexplicitlycorrelatedMP2calculationsisstraightforward. Forexamplelookatthefollowingcalculationon
+thewatermoleculeatagivengeometry:
+88 Chapter6. RunningTypicalCalculations
+
+--- Page 111 ---
+ORCAManual,Release6.0.0
+#
+! F12-MP2 cc-pVDZ-F12 cc-pVDZ-F12-CABS VeryTightSCF PModel
+* xyz 0 1
+O 0.000000000000 0.000000000000 0.369372944000
+H 0.783975899000 0.000000000000 -0.184686472000
+H -0.783975899000 0.000000000000 -0.184686472000
+*
+andsimilarlyinconjunctionwiththeRIapproximation:
+#
+! F12-RI-MP2 cc-pVDZ-F12 cc-pVDZ-F12-CABS cc-pVTZ/C VeryTightSCF PModel
+* xyz 0 1
+O 0.000000000000 0.000000000000 0.369372944000
+H 0.783975899000 0.000000000000 -0.184686472000
+H -0.783975899000 0.000000000000 -0.184686472000
+*
+Theoutputisrelativelyeasytointerpret:
+-----------------
+RI-MP2-F12 ENERGY
+-----------------
+EMP2 correlation Energy : -0.241038994909
+F12 correction : -0.054735459470
+-----------------
+MP2 basis set limit estimate : -0.295774454379
+Hartree-Fock energy : -76.057963800414
+(2)_S CABS correction to EHF : -0.003475342535
+-----------------
+HF basis set limit estimate : -76.061439142949
+MP2 total energy before F12 : -76.299002795323
+Total F12 correction : -0.058210802005
+-----------------
+Final basis set limit MP2 estimate : -76.357213597328
+Itconsistsofseveralparts. Thefirstistheregular(RI-)MP2correlationenergyintheorbitalsbasisfollowedby
+the additive MP2 correction which are combined to provide an MP2 correlation energy basis set limit estimate.
+The second part consists of an estimate in the error in the underlying SCF energy. This is the “(2)_S CABS”
+correction. ThecombinationoftheSCFenergywiththiscorrectionyieldsanestimateoftheSCFbasissetlimit.
+Thecorrectionwilltypicallyundershootsomewhat,buttheerrorisverysmooth. Finally,thecorrectedcorrelation
+energyandthecorrectedSCFenergyareaddedtoyieldtheF12totalenergyestimateatthebasissetlimit.
+Let’slookatsomeresultsandcomparetoextrapolation:
+#
+# Correlation energies of the water molecule: extrapolation versus F12
+#
+# cc-pVDZ MP2: -0.201380894
+# T : -0.261263141
+# Q : -0.282661311
+# T/Q : -0.298276192
+# Q/5 : -0.300598282
+# F12-DZ : -0.295775804
+# RI-F12-DZ : -0.295933560 (cc-pVDZ/C)
+# -0.295774489 (cc-pVTZ/C)
+# F12-TZ : -0.299164006
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 89
+
+[... start of page 112 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# RI-F12-TZ : -0.299163478 (cc-pVQZ/C)
+# F12-QZ : -0.300130086
+ItisobviousthatextrapolatedandF12correlationenergiesconvergetothesamenumber(inthiscasearound300
+mEh). ThebestextrapolatedresultisstillbelowtheF12result(thiswouldprimarilybemeaningfulinavariational
+calculation). However,firstofallthiswasanexpensiveextrapolationandsecond,thesmallresidualF12erroris
+very smooth and cancels in energy differences. In any case, already the F12-double-zeta 

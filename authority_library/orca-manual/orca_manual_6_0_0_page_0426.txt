@@ -1,0 +1,72 @@
+[... end of page 425 ...]
+-F) CPCM(ETHANOL) OPT FREQ
+* XYZFILE 0 3 BIA.xyz
+Alternatively,onecanusemethodslikeVG,AHAS,etc.,toapproximatethetripletgeometryandHessian. How-
+ever,thisapproachrequirespreparingtheHessianinaseparateESDrun(Sec. Approximationstotheexcitedstate
+6.18. ExcitedStateDynamics 403
+
+--- Page 426 ---
+ORCAManual,Release6.0.0
+PES).
+Additionally,youmustinputtheadiabaticenergydifferencebetweenthegroundsingletandgroundtripletstatesat
+theirrespectivegeometries(withoutanyzero-pointenergycorrection)usingtheDELEflagunder%ESD.Inthis
+case,thespin-adaptedtripletcomputedpreviouslyservesasourreferencetripletstate. Anexampleinputforthe
+ratecalculationusingTDDFTisasfollows:
+!B3LYP DEF2-TZVP(-F) TIGHTSCF CPCM(ETHANOL) ESD(PHOSP) RI-SOMF(1X)
+%TDDFT
+NROOTS 20
+DOSOC TRUE
+TDA FALSE
+IROOT 1
+END
+%ESD GSHESSIAN "BIA.hess"
+TSHESSIAN "BIA_T1.hess"
+DOHT TRUE
+DELE 17260
+END
+* XYZFILE 0 1 BIA.xyz
+$NEW_JOB
+!B3LYP DEF2-TZVP(-F) TIGHTSCF CPCM(ETHANOL) ESD(PHOSP) RI-SOMF(1X)
+%TDDFT
+NROOTS 20
+DOSOC TRUE
+TDA FALSE
+IROOT 2
+END
+%ESD GSHESSIAN "BIA.hess"
+TSHESSIAN "BIA_T1.hess"
+DOHT TRUE
+DELE 17260
+END
+* XYZFILE 0 1 BIA.xyz
+$NEW_JOB
+!B3LYP DEF2-TZVP(-F) TIGHTSCF CPCM(ETHANOL) ESD(PHOSP) RI-SOMF(1X)
+%TDDFT
+NROOTS 20
+DOSOC TRUE
+TDA FALSE
+IROOT 3
+END
+%ESD GSHESSIAN "BIA.hess"
+TSHESSIAN "BIA_T1.hess"
+DOHT TRUE
+DELE 17260
+END
+* XYZFILE 0 1 BIA.xyz
+Phosphorescenceratecalculationarealwaysaccompaniedbythegenerationofthevibrationallyresolvedphospho-
+rescencespectrum,whichcanbevisualizedinthesamewayasfluorescencespectra.
+OBS.: Whencomputingphosphorescencerates,eachratefromindividualspinsub-levelsmustberequestedsepa-
+rately. Youmayusethe$NEW_JOBoption,justchangingtheIROOT,towriteeverythinginasingleinput. After
+SOC,thethreetripletstates(𝑇 with𝑀 =-1,0and+1)willsplitintoIROOTs1,2and3,andallofthemmustbe
+1 𝑆
+includedwhencomputingthefinalphosphorescencerate. Inthiscase,itisreasonabletoassumethatthegeometries
+andHessiansofthesespinsub-levelsarethesame,andwewillusethesame.hessfileforallthree.
+OBS2.: Thegroundstategeometryshouldbeusedintheinputfile,similartothecaseoffluorescence(videsupra).
+404 Chapter6. RunningTypicalCalculations
+
+[... start of page 427 ...]
+ORCAManual,Release6.0.0
+OBS3.: Apart from DELE, one can also use the TDIP keyword to input a high-level transition dipole moment,
+similar to the fluorescence case. This enables e.g. the calculation of phosphorescence rates/spectra using e.g.
+NEVPT2orDLPNO-STEOM-CCSDtransitiondipolemoments,with(TD)DFTgeometriesandHessians. Note
+howeverthatthetransitiondipolemomentinphosphoresc

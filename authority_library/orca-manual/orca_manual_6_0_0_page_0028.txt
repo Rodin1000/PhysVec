@@ -1,0 +1,115 @@
+[... end of page 27 ...]
+ingonthecommonalitiesinthecalculatedpropertiesandthatareindependentoftheunderlyingelectronic
+structuremethodused.
+TherearethreequalitativelydifferentsetsofpropertiesthatarecoveredinORCApropertycalculations:
+1) Responseproperties. Thesearepropertiesthatcanbeformulatedasderivativesofthetotalenergy.
+2) QDPTproperties. Thesearepropertiesthatarecalculatedbyquasi-degenerateperturbationtheory(QDPT).
+ThisamounttodiagonalizingtheHamiltoniancontainingexternalfieldsandrelativisticcorrectionsovera
+numberofrootsdeliveredbytheunderlyingelectronicstructuremethod
+3) Excitedstateproperties: theseare,atleastatthispointintime,transitionmomentsbetweendifferentelec-
+tronicstatesofthesystem.
+2.3. Themaster/slaveconceptandthecallingsequence 5
+
+--- Page 28 ---
+ORCAManual,Release6.0.0
+2.4.1 Response properties
+Alargenumberofpropertiescanbewrittenasderivativesofthetotalenergy. Thesearefirstorderproperties:
+𝜕𝐸 ∑︁ ⟨ ⃒ ⃒ ⟩
+𝑋
+𝑀
+=
+𝜕𝑀
+= 𝑃
+𝜇
+±
+𝜈
+𝜇⃒
+⃒
+̂︀ℎ
+𝑀
+⃒
+⃒
+𝜈
+𝜇𝜈
+Here,𝑃
+𝜇
+±
+𝜈
+isthefirst-orderelectron(‘+’)orspin(‘-‘)density ̂︀ℎ
+𝑀
+istheoperatorthatisdescribingthepropertyof
+interest(e.g. thedipolemomentoperator)andthebasissetis{𝜇}.
+Secondorderpropertiesare:
+𝑋
+𝑀𝑁
+=
+𝜕𝑀
+𝜕2
+𝜕
+𝐸
+𝑁
+= ∑︁ 𝑃
+𝜇
+±
+𝜈
+⟨ 𝜇 ⃒ ⃒
+⃒
+̂︀ℎ
+𝑀𝑁
+⃒ ⃒
+⃒
+𝜈 ⟩ + ∑︁𝜕
+𝜕
+𝑃
+𝑁
+𝜇 ± 𝜈 ⟨ 𝜇 ⃒ ⃒
+⃒
+̂︀ℎ
+𝑀
+⃒ ⃒
+⃒
+𝜈 ⟩
+𝜇𝜈 𝜇𝜈
+Heretheimportantquantityis 𝜕𝑃 𝜇 ± 𝜈,thefirstderivative(or“response”)oftheelectronorspindensitywithrespect
+𝜕𝑁
+to perturbation 𝑁. It can be shown that the order of perturbations 𝑀 and 𝑁 is immaterial and hence one can
+choosethemoreconvenientperturbationtocalculatetheresponsedensityfor.
+Itisimportanttopointoutthattheequationsforresponsepropertiescanalwaysbebroughtintothisform,irrespec-
+tiveofwhetherthecalculationisaHartree-Fock,DFT,MP2,coupledcluster,CASSCForfull-CIwavefunction.
+Giventheconsiderablegeneralityofthepropertyequations, itseemslogicaltocreateaninfrastructureinwhich
+these similarities are exploited to the largest possible extent. In ORCA the central place where all densities and
+responsedensitiesarestoredistheDensityContainer. Thisisusedintenselythroughouttheactualcalculation
+andleftondiskasBaseName.densitieswhereitcanbeusedforvisualization.
+Intermsofthecalculationflowthemainprogramcontainsallthelogictodrivethiscalculation. Itfirstdrivesthe
+SCFandpossiblythepost-SCFcalculations. Afterthisisdone,theSCFprogramcollectstheinformationabout
+whichpropertyintegralswillbeneededdowntheroadandcallthepropertyintegralprogramorca_propintthat
+willcalculatethenecessaryintegralsandstorestheminanothercentralstoragecontainer, the“propertyintegral
+container”.
+Thenextstepofthecalculationisthatthemainprogramdeterminesforwhichpropertiesresponsedensitiesare
+needed. It collects these perturbations and calls the response modules. In the case of a SCF wavefunction (HF
+orDFT),thisistheorca_scfrespprogram. Thisprogramwilldividetherequestedperturbationsintodifferent
+typeslike,real-symmetric,imaginary-antisymmetric,tripletetc. Thenitsolvestheresponseequationsforalltypes
+of perturbations simultaneously. This leads to large efficiency gains since the same integrals are needed on the
+left-handsideofthecoupled-perturbedSCF(CP-SCF)equationsirrespectiveoftheactualperturbations. Hence,
+poolingallperturbationsofagiventypetogetherismuchmoreefficientthantreatingtheseperturbationsoneata
+time. Thisleadstohighefficiencygains,inparticularforpropertieslikeNMRparameterswherenucleusdependent
+perturbationsarerequired.
+ForanumberofotherelectronicstructuremethodslikeMP2,CASSCForAutoCItherespectivemodulescanbe
+run in “response mode” where instead of solving the equations for the energy, they pick up the amplitudes that
+weredeterminedintheenergyrunandusethemtogetherwiththepropertyintegralsinordertoproduceresponse
+densities.
+Theresponsedensitiesarethenstoredinthedensitycontainertoo. Atthispoint,onehaseverythingthatisrequired
+inordertocalculatetheactualproperties–ataskthatisperformedbyorca_prop.
+Theorca_propprogramworksbybrowsingthroughthedensitycontainerandlooksfordensitiesthatareappropri-
+ateforcalculatingarequestedproperty. Assoonasitfindsanappropriatedensity(orcombinationofunperturbed
+and response density), it will calculate the property. For example, if you have calculated SCF, MP2 and CCSD
+in the same calculation and have asked for the calculation of all three densities, orca_prop will calculate three
+dipolemomentsandprintthemrightnexttoeachother.
+6 Chapter2. TheArchitectureofORCA
+
+[... start of page 29 ...]
+ORCAManual,Release6.0.0
+Onebeneficialsideeffectofthisorganizationisthatitisverywellsuitedforfutureextensions. Ifanewmethod
+becomesavailableinORCAthatisabletoproducedensitiesandpossiblyresponsedensities,thepropertiesforthis
+methodwillbefullyavailablewithoutanyprogrammerneedingtowriteasinglelineofadditionalcode. Italso
+ensuresthatallpropertiesarecalculatedinaconsistentfashionandwithaconsistentpri

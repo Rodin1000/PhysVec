@@ -1,0 +1,91 @@
+[... end of page 538 ...]
+hen the orbital gradient, or equivalently the DIIS Error, fall below SOSCFStart, the
+SOSCFprocedureisinitiated. SOSCFMaxItisthelatestiterationtostarttheSOSCFeveniftheorbitalgradientis
+stillaboveSOSCFStart.
+%scf
+# control of the SOSCF procedure
+CNVSOSCF true # default: false
+SOSCFStart 0.1 # default: 0.01
+SOSCFMaxIt 5 # default: 1000
+# more convenient:
+SOSCF Start 0.1 MaxIt 5 end
+end
+Formanycalculationsontransitionmetalcomplexes, itisagoodideatobeconservativeinthestartupcriterion
+forSOSCF,itmaydivergeotherwise. Achoiceof0.01orlowerisrecommended.
+516 Chapter7. DetailedDocumentation
+
+--- Page 539 ---
+ORCAManual,Release6.0.0
+7.7.7 Trust-Region Augmented Hessian (TRAH) SCF
+The trust-region augmented Hessian (! TRAH) approach[64, 349, 381, 733] should be used if the standard SCF
+solver[264,607,702,703]DIIS+SOSCFfailsorisexpectedtofail. TRAH-SCFshouldconvergeforanysystem.
+Convergence to the electronic ground state is also guaranteed because information of the electronic Hessian is
+exploited.
+TheTRAHapproachconstructsaquadraticmodeloftheSCFenergyasafunctionoftheorbitalrotationparameters
+x,
+1
+𝐸(x)=𝐸 +g𝑇x+ x𝑇Hx
+0 2
+andminimizes𝐸(x)w.r.txwiththeconstraintthatorbitalrotationsshouldliewithinatrustregionℎ
+||x||≤ℎ.
+Suchaconstraintminimizationleadstothelevel-shiftedNewtonequations
+(H−𝜇I)x=−g,
+whichhavethetwounknowns(𝜇,x). Insteadofsolvingthelevel-shiftedNewtonsequations,theeigenvaluesand
+eigenvectorsofthescaledaugmentedHessianaresolved,
+(︂
+0
+𝛼g𝑇)︂(︂
+1
+)︂ (︂
+1
+)︂
+=𝜇 ,
+𝛼g H x˜ x˜
+TheTRAHeigenvalueequationsaresolvediterativelywiththeDavidsonalgorithmuntiltheresidualnormforx˜
+isbelowascaled(byTolFacMicro)normoftheelectronicgradient. Thescalingparameter𝛼isadjustedinevery
+Davidsoniteration(microiteration)suchthat
+1
+||x||≈|| x˜||≤ℎ
+𝛼
+by using a bisection search within [𝛼 ,𝛼 ] and ensures that the orbital rotation (update) vectors are within the
+0 1
+trustregion. Oncexisfound,theorbitalsareupdatedandanewmacroiterationstartswiththeSCFenergyand
+electronic gradient computation g. TRAH terminates if the gradient norm ||g|| is below a user-given threshold
+TolG.
+The most time consuming stepsof the algorithm are the computation of theelectronicgradient g and the linear
+transformationsoftheelectronicHessianHwithsometrialvectorsduringtheDavidsonmicroiterations. Both
+intermediatescanbecomputedefficientlyintheatomic-orbitalbasisusingAO-FockmatricesasdoneforTD-DFT
+or CP-SCF. Hence, TRAH-SCF can be also used for very large molecules. However, in contrast to a standard
+DIISapproach,differencedensitymatricescannotbeusedwhichmakestheshellpairscreeningbasedonSchwarz
+estimatesanddensitymatriceslesseffectiveforTRAH.Toacceleratethevarioussigmavectorcomputations,we
+choose for those steps in the micro iterations as for CP-SCF smaller grids for evaluation of XC functionals and
+semi-numericalexchangeCOSX,whichiscontrolledvia
+%method
+Z_GridXC 1 // Lebedev Grid
+Z_IntAccXC 3.467 // eps parameter of radial grid
+Z_GridX 1 // Lebedev Grid
+Z_IntAccX 3.067 // eps parameter of radial grid
+end
+TRAH-SCFiscurrentlyimplementedforrestrictedclosed-shell(RHFandRKS)andunrestrictedopen-shelldeter-
+minants(UHFandUKS)andcanbeacceleratedwithRIJ,RIJONX,RIJK,orRIJCOSX.Solvationeffectscanalsobe
+accountedforwiththeC-PCMmodel. TheimplementationisalsoparallelizedwithMPI.Arestrictedopen-shell
+implementation(ROHFandROKS)isnotyetavailable.
+The default preconditioner (diag) for the Davidson algorithm uses approximate matrix element of the diago-
+nal Hessian. We have also added an improved preconditioner (full) that uses the exact orbital Hessian for a
+subset of the most important occupied-virtual MO pairs (with smallest orbital-energy difference). This number
+PreconMaxRed(default250)cannotbetoolarge.
+7.7. SCFConvergence 517
+
+[... start of page 540 ...]
+ORCAManual,Release6.0.0
+%scf
+trah
+Precond Diag # DIAG, FULL, or NONE
+PreconMaxRed 250 # maximum dimension of FULL Hessian for preconditioning
+end
+end
+Otherwise,additionalcomputationalbottleneckswouldbeintroducedwhentransformingthetwo-electronintegrals
+intheMObasisorwhendiagonalizingthisreduced-spaceHessian. Notethatfortheintegraltransformationthe
+RIapproximationisusedandanauxiliary/Cbasismustbeprovided. Pleasealsonotethat,sofar,wehaveonly
+implemented an XC Hessian contribution for LDA functionals. From our experience, the “full” precondition is
+veryadvantageousforRHFandUHFcalc

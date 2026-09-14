@@ -1,0 +1,85 @@
+[... end of page 1105 ...]
+Pipek-Mezey method (PM), the Foster-Boys
+method(FB),theintrinsicatomicorbitals(IAO)basedPMmethodandtheIAObasedFBmethod.
+For Foster-Boys localization there are three different algorithms: first there is the conventional algorithm (FB).
+Second,thereisanalternativealgorithm(NEWBOYS),whichisfasterandcouldbeused,forexample,tolocalize
+thevirtualMOsofalargesystem.
+The third Foster-Boys algorithm is based on an augmented Hessian procedure (AHFB). It is particularly suited
+to obtain very tightly converged orbitals if an appropriate tolerance is requested (useful for local correlation).
+7.58. UtilityPrograms 1083
+
+--- Page 1106 ---
+ORCAManual,Release6.0.0
+Furthermore,itsystematicallyconvergestowardsalocalminimum,ratherthanadifferenttypeofstationarypoint.
+Themethodproceedsinthreestages. AninitialsetoflocalizedorbitalsisobtainedthroughtheNEWBOYSmethod.
+ThisisfollowedbyanaugmentedHessianmaximization(rationalfunctionoptimization)eitherwithdirectorwith
+Davidson diagonalization, depending on the number of orbitals. Efficiency is therefore achieved for small and
+largesystemsalike. IftheoptimizationfailstoproceedbuttheaugmentedHessianhasgotthecorrecteigenvalue
+structure, a Newton-Raphson maximization is triggered as the third stage. Currently, the only user-adjustable
+parameter of the AHFB method is the tolerance Tol. Convergence is signalled when the eigenvalue structure is
+correct,andthelargestelementoftheorbitalgradient,4⟨𝑖|r|𝑗⟩(⟨𝑗|r|𝑗⟩−⟨𝑖|r|𝑖⟩),isbelowTol. Thisisdifferent
+from the other localization methods, which take the difference in the localization sum between two successive
+iterationsastheconvergencecriterion.
+The intrinsic atomic orbitals and intrinsic bond orbitals (IAOIBO) localization method is developed by Gerald
+Knizia,seeRef. [449]. InIAOIBOmethod,theoccupiedMOsareprojectedtoaminimalbasissettogettheIAOs,
+firstly. In ORCA different from original IAOIBO method, the converged SCF MO of atoms are used instead of
+HuzinagaMINIorSTO-3G.However,theIAOchargescomputedbyourmethodarequitesimilartooriginalIAO.
+Then,Pipek-MezeyfunctionalisemployedtolocalizetheseIAOstoIBOs. Finally,IBOswillbebacktransformed
+totheiroriginalbasisset. TheIAOpartialchargesofcanonicalMOsforeachatomisalsoprintedoutbeforethe
+IAOIBOlocalization. ButmakesureyouhaveincludedalloccupiedMOsintheIAOIBOlocalization. Otherwise,
+theIAOchargesaremeaningless. WefurtherimprovedtheoriginalIAOIBOmethodbyusingtheFBfunctional
+insteadofPMfunctional. ThecomputationaltimeofthenewmethodnamedIAOBOYSshouldbefasterthanthe
+standardFBmethodforlargesystems. However, theIAObasedmethodcanonlybeusedforthelocalizationof
+occupiedMOs.
+TherearetwowaystodotheMOlocalizationinORCA.Thesimplerwayistorequestthelocalizationattheend
+ofanyORCAcalculationinputfile. Detailsaresetinthe%locblock.
+%loc
+LocMet PM # Localization method e.g. PIPEK-MEZEY
+FB # FOSTER-BOYS
+IAOIBO # IAOIBO
+IAOBOYS # IAOBOYS
+NEWBOYS # FOSTER-BOYS
+AHFB # Augmented Hessian Foster-Boys
+Tol 1e-6 # absolute convergence tolerance for the localization sum
+# default value is 1e-6
+# In the case of AHFB, however, this is the gradient threshold!
+Random 0 # Always take the same seed for start for localization
+# (For testing/debug purpose,optional)
+1 # Take a random seed for start of localization (default)
+PrintLevel 2 # Amount of printing
+MaxIter 64 # Max number of iterations
+T_Bond 0.85 # Thresh that classifies orbitals in bond-like at the printing
+T_Strong 0.95 # Thresh that classifies orbitals into strongly-localized at
+# the printing
+OCC true # Localize the occupied space
+T_CORE -99.9 # The Energy window for the first OCC MO to be localized (in a.u.)
+# Here, we localize all occupied MOs including core orbitals.
+VIRT true # Localize the virtual space
+end
+The localized MOs are obtained iteratively. Convergence is achieved when the localization functional value is
+self-consistent(contraledbyTol). SettingtheflagsOCC/VIRTtotruewillrequestalocalizationofthesubspace.
+Ifbothflagsareset,twoconsecutivelocalizationsareperformed. Thelocalizedorbitalsarestoredintheformofa
+standardGBWfilenamed.loc. Keepinmindthatthelocalizationoftheoccupiedorbitalsmightchangethetotal
+energydependingonwhattypeofcalculationyouwanttoperformthereafter. ForRHFandUHFthereshouldn’t
+beanyproblems,butforCASSCFthekeywordOCCisnotsufficient. CASSCFisnotinvarianttorotationofall
+theoccupiedorbitals.
+Theotherwaytodothelocalizationiscallingtheorca_locprogramdirectlyfromshell,whichismoregeneral.
+Theorca_locprogramrequiresaninputofitsown. Theinputisatextfilecontainingthenecessaryparameters.
+If no input is specified, orca_loc returns a help-file with a description of the necessary input-parameters. You
+needtospecifyin/outputgbw-files,alongwithorbitalrangesandthelocalizationmethodtobeused. Asourceof
+1084 Chapter7. DetailedDocumentation
+
+[... start of page 1107 ...]
+ORCAManual,Release6.0.0
+confusion is the operator line op (alpha = 0 or beta = 1). For RHF(ROHF) and CASSCF, this should be set to
+zero. Theinputfileusuallylookslike,
+Myjob.gbw # input orbitals
+Myjob.loc.gbw # output orbitals
+10 # orbital window: first orbital to be localized e.g. first active
+15 # orbital window: last orbital to be localized e.g. last active
+0 # localization method:
+# 1=PIPEK-MEZEY,2=FOSTER-BOYS,3=IAO-IBO,4=IAO-BOYS,5=NEW-BOYS,
+6=AHFB
+˓→
+# The following parameters are optional
+# However, if you want to change

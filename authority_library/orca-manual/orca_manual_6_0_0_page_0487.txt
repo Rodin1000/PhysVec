@@ -1,0 +1,79 @@
+[... end of page 486 ...]
+edurehasalsobeenimplementedinORCAand—incontrast
+toFriesner’spseudo-spectralmethod—doesnotneedspeciallyoptimizedgrids. Thebasicideaistoremovethe
+griderrorswithinthebasissetby“fitting”thenumericaloverlaptotheanalyticalone. Duetoitsnature,overlap
+fittingissupposedtoworkbetterwithlargerbasissets.
+6Thetheoryofthisapproachtogetherwithallevaluationsandimplementationdetailsisdescribedin[383,623].Referencestoearlierwork
+canalsobefoundthere.
+464 Chapter7. DetailedDocumentation
+
+--- Page 487 ---
+ORCAManual,Release6.0.0
+TheRIJCOSXgradient
+Giventheexchangematrix,theexchangeenergyisgivenby(asumoverspincasesisleftouthereforsimplicity):
+1∑︁
+𝐸X =
+2
+𝑃
+𝜇𝜈
+𝐾
+𝜇𝜈
+(P) (7.23)
+𝜇𝜈
+PrevioustoORCA6,thegradientoftheCOSXcontributiontotheenergywastakenasanapproximation:
+𝜕𝐸
+𝑋 ≈2
+∑︁∑︁𝜕𝐹
+𝜇𝑔𝐺 (7.24)
+𝜕𝜆 𝜕𝜆 𝜈𝑔
+𝑔 𝜇𝜈
+with
+𝜕𝐹 𝜇𝑔 =𝑤1/2 ∑︁ 𝑃 𝜕𝑋 𝜇𝑔 (7.25)
+𝜕𝜆 𝑔 𝜅𝜇 𝜕𝜆
+𝜅
+aspublishedintheoriginalimplementationpaper[623].
+StartingfromORCA6,thiswasupdatedtothefullderivativeoftheenergycomponent,includingthederivativeof
+allterms: gridweightderivatives,derivativeoftheSFittingmatricesandallderivativesof𝐹 and𝐺7. Thegradient
+isthusnowmoreaccurateandlessnoisy. Incaseonewantstoreverttothepreviousapproximatedversion(not
+recommended),justset:
+%method
+cosxgradtype grad_n
+useqgradfit false
+end
+WorkingwiththeCOSXNumericalGrids
+Forexpertusers,thegridparametersfortheexchangegridscanbeevenmorefinelycontrolled:
+%method
+IntAccX Acc1, Acc2, Acc3
+GridX Ang1, Ang2, Ang3
+end
+Therearethreegridsinvolved: thesmallestgrid(Acc1,Ang1)thatisusedfortheinitialSCFiterations,themedium
+grid(Acc2,Ang2)thatisuseduntiltheendoftheSCFandthelargestgrid(Acc3,Ang3)thatisusedforthefinal
+energyandthegradientevaluations. UseFinalGridXcanbeusedtoturnthislastgridonoroff,thoughchanging
+this is not generally recommended. More details about the grid constructions can be found in Details on the
+numericalintegrationgrids.
+SomeSFittingParameters
+Tomodifytheoverlapfittingparameters,thefollowinginputcanbespecified:
+%method
+UseSFitting false # Same as NoSFitting in the simple input
+# (Default is true)
+UseQGradFit false # Uses the SCF fitting matrix for gradient calculations
+# (Default is true)
+end
+Note that overlap fitting also works for HF and MP2 gradients without specifying any additional keyword. The
+UseQGradFit parameter uses the same fitting matrix for the gradients as for the energy calculation and is the
+defaultbehaviorsinceORCA6.
+7Thetheoryisnotyetpublished,butwillbesoon.
+7.4. ChoiceofComputationalModel 465
+
+[... start of page 488 ...]
+ORCAManual,Release6.0.0
+UseofPartialContractionScheme
+SinceORCA5.0,generally-contractedbasissetscanbehandledefficientlybyusinganintermediatepartiallycon-
+tracted(pc)atomic-orbitalbasisfortheexchange-matrixcomputationwithoutaffectingtheresults[383]. Depend-
+ing on the basis set and element type, computational speedups by many orders of magnitude are possible. For
+testingorbenchmarkpurposes,theKmatrixcomputationcanbedoneintheoriginalbasisbyusingtheflag
+%method
+COSX_PartialContraction false # No intermediate basis for generally contracted shells
+# (Default is true)
+end
+RestoringFullSymmetry

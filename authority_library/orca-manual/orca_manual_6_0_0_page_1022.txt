@@ -1,0 +1,62 @@
+[... end of page 1021 ...]
+Thereexistsalotofdetailedandpedagogicalliteratureonthesubject(werecommendforinstance[49]and[377]).
+Inthefollowingwewillonlydescribethemainparameters.
+Theideaofthealgorithmistodividespacetohandledifferentlyshort-andlong-rangeinteractions. Thelatterwill
+beapproximated(cf. ApproximationoftheFarFieldinteractions). Todoso,thewholesystemisplacedinacubic
+boxwhichisiterativelydividedin8childrenboxes(forminglevelsL:L=0→L=L
+max
+)soastoformastructure
+calledanOctree(seeFig. Fig.7.62).
+7.52. FastMultipoleMethod 999
+
+--- Page 1022 ---
+ORCAManual,Release6.0.0
+Fig.7.62: Divisionofthesystemintoboxes,schematicrepresentationin2D.
+Atthedeepestlevel,L = L max ,foreverybox,wecandefinealayerofnearestneighboursboxes(NN)whichwill
+beresponsiblefortheNear-Field(NF,i.e.short-range). Theelectrostaticpotentialduetotherestoftheboxesis
+defineastheFar-Field(FF,i.e. long-range).
+∀𝐵 , V =VNF+VFF
+𝐵 𝐵 𝐵
+AsvisibleonFigureFig.7.62,onecandividetheFFareabetweenaLocalFarField(LFF,green)areaandaRemote
+FarFieldarea(RFF,grey),sothatarecursiveschemebetweenlevelsappears:
+∀𝐵 VFF =VLFF+VRFF
+𝐵 𝐵 𝐵
+=VLFF+W𝑇 VFF
+𝐵 𝑃𝑎𝑟𝑒𝑛𝑡(𝐵)→𝐵 𝑃𝑎𝑟𝑒𝑛𝑡(𝐵)
+TheLFFboxesaretheboxesintheNFoftheparentbutnotintheNFofthechildren,thatrepresentsamaximum
+of189boxes. TheRFFpotentialisduetoboxeswhichactuallyrepresenttheFFareaoftheparentboxofB.This
+meansthatoneneedstocalculateonlytheLFFtermateverylevel,therestofthepotentialwillbeinheritedfrom
+theparentbox.
+The number of levels, L , can be setup in the input directly (FMMQMMM_Levels), or will be deduced from
+max
+the provided box dimension (FMMQMMM_BoxDimInp, dimension of the box at L ). The second option
+max
+(default) is recommended, with a box dimension around 9.0 Bohr (FMMQMMMM_BoxDimInp 9.0 ). If FM-
+MQMMM_DoBoxDimOpt option is turned to TRUE (default), the box dimension will be reduced as much as
+possiblewhilekeepingthesamevalueofL ,thistoensurethealgorithmworksoptimallyregardingbothaccu-
+max
+racyandefficiency.
+%method
+DOFMMQMMM True #turn ON the use of the FMM
+FMMQMMM_BoxDimInp 9.0 #Higher boundary to set up the dimension (in Bohr!)
+FMMQMMM_DoBoxDimOpt True #Optimize the box dimension
+end
+ThehigherL
+max
+,thebiggerthenumberofboxes: atL=2onehas64boxesonlybutforL=6thecodegenerates
+morethan200,000boxes(86). ForL max ≥ 7,morethan2millionsboxesaregenerated,thiscanstartleadingto
+memoryissues,sothattheusershouldensureenoughmemoryisavailable(cf. Globalmemoryuse).
+1000 Chapter7. DetailedDocumentation
+
+[... start of page 1023 ...]
+ORCAManual,Release6.0.0
+7.52.2 Approximation of the Far Field interactions
+InaspaceoforiginO(0,0,0),letP(r )bethecenterofachargedistribution(e.g. aGaussianoverlaporadistribu-
+𝑃
+tionofpointcharges). Let’sconsiderapointAinthevicinityofP,suchthatA=(q ;r ),withq thechargeofa
+𝐴 𝐴 𝐴
+pointchargeorq =−1ifweconsideraGaussianoverlap. Inthatcase,thechargewouldindeedbetheoneofthe
+𝐴
+electronsituatedatapositionr =r −r fromthecenteroftheGaussianoverlap. Similarly,letQ(r )bethe
+𝐴𝑃 𝐴 𝑃 𝑄
+centerofachargedistributionandB,apointinthevicinityo

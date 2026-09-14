@@ -1,0 +1,54 @@
+[... end of page 825 ...]
+shcanbeadaptedaccordingly.
+LetuscomebacktotheUV/VisspectraofNi(dmg) . ForthetwomostintensepeaksthenaturalorbitalsandNTOs
+2
+ofMC-RPAandSA-CASSCF,respectively,areshowninFig.7.37. Whilethemostintensepeakineachspectrum
+(bandA)correspondtothesame𝜋 → 𝜋* excitation,transitionaandBarecompletedifferent,i.e. 𝑑 → 𝜋* and
+𝜋 →𝜋*.
+7.32. ExcitedStatesviaMC-RPA 803
+
+--- Page 826 ---
+ORCAManual,Release6.0.0
+(a)(a)SAnaturalorbitals (b)(b)NTOs
+Fig.7.37: CalculatedUV/VisspectraofNi(dmg) .
+2
+7.32.4 Computational Aspects
+The code is intended to be used for medium-sized and larger open-shell molecules. It has the same scaling as
+ORCA’sfirst-orderCASSCFenergyimplementationthoughalargerpre-factorasthecomputationalcostgrow“in
+principle”linearlywiththenumberofroots.
+TheimplementationisAO-drivenmeaningthatthecomputationalbottleneckistheFockmatrixconstructionfor
+the several state-specific pseudo AO densities. Note that there are up to 6 pseudo AO densities for each state.
+ThecomputationalcostscanbereducedsignificantlyiftheRIJCOSXapproximationisemployed,whichishighly
+recommended.
+ThesecondmostexpensivepartoftheMC-RPAcomputationarethetwo-electronintegralswith3activeindices
+𝑔 . As we aim for running calculations on larger systems, there is only an implementation of the integral
+𝑝𝑡𝑢𝑣
+transformationthatusestheresolution-of-the-identity(RI)approximation.
+TherestrictionsontheauxiliarybasissetsarethesameasfortheCASSCFcode(Sec. GeneralDescription). That
+is
+• IftheFockmatricesareconstructedin Director Conventionalmode, the/CbasesareusedfortheRI
+approximationofthe𝑔 integrals.
+𝑝𝑡𝑢𝑣
+• IftheRIJCOSXapproximationfortheFockmatricesisemployed,the/JKbasesareusedforboththeFock
+matricesandthe𝑔 integrals.
+𝑝𝑡𝑢𝑣
+NotethatMC-RPAimplementationcanberuninparallelwithMPIwhichallowsforcomputingUV/VisandECD
+spectralargeopen-shellmoleculesinalimitedamountoftime.
+Before starting running MC-RPA, it is recommended to converge the state specific CASSCF energy calculation
+until you hit the point of stagnating convergence. Note that property calculations in general assume vanishing
+electronicgradientsotherwisenumericalissuesintheeigenvalue/responseequationsmayoccur.
+804 Chapter7. DetailedDocumentation
+
+[... start of page 827 ...]
+ORCAManual,Release6.0.0
+7.32.5 Keyword List
+%mcrpa
+NRoots 0 # The number of desired roots
+TolR 1e-5 # Convergence threshold for residual norm
+TolLDP 1e-5 # linear dependency threshold for generalized eigenvalue problem
+PrintWF CFG # print CI part in (CFG (default), CSF, or DET basis)
+TolPrint 1e-2 # Threshold for printing elements of excitation vector
+MaxRed 200 # maximum size of reduces space for ALL VECTORS IN TOTAL
+MaxIter 100 # maximum number of (Davidson) iterations
+TDA false # Switch off full TD-CASSCF (Tamm-Dancoff approximation)
+DoNTO false # Generate Natur

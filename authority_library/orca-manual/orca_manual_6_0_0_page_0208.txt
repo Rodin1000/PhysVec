@@ -1,0 +1,72 @@
+[... end of page 207 ...]
+m a T1 reference, using SF-TD-DFT
+# (but remember to set the multiplicity as 3 instead of 1)
+END
+* xyz 0 1
+C 0.595560237 -0.010483480 -0.000284187
+C -0.831313750 0.167231832 0.001482505
+H -1.381857976 0.227877089 0.963419721
+H 1.265119434 0.874806815 0.006897459
+H -1.382258208 0.243775568 -0.959090898
+H 1.027489724 -1.032962768 -0.008829646
+*
+6.3. GeometryOptimizations,SurfaceScans,TransitionStates,MECPs,ConicalIntersection1s8,5
+IRC,NEB
+
+--- Page 208 ---
+ORCAManual,Release6.0.0
+6.3.14 Constant External Force - Mechanochemistry
+Constant external force can be applied on the molecule within the EFEI formalism[717] by pulling on the two
+definedatoms. Toapplytheexternalforce,usethePOTENTIALSinthegeomblock. ThepotentialtypeisCfor
+Constantforce,indexesoftwoatoms(zero-based)andthevalueofforceinnN.
+! def2-svp OPT
+%geom
+POTENTIALS
+{ C 2 3 4.0 }
+end
+end
+* xyz 0 1
+O 0.73020 -0.07940 -0.00000
+O -0.73020 0.07940 -0.00000
+H 1.21670 0.75630 0.00000
+H -1.21670 -0.75630 0.00000
+*
+TheresultsareseenintheoutputoftheSCFprocedure,wherethetotalenergyalreadycontainstheforceterm.
+----------------
+TOTAL SCF ENERGY
+----------------
+Total Energy : -150.89704913 Eh -4106.11746 eV
+Components:
+Nuclear Repulsion : 36.90074715 Eh 1004.12038 eV
+External potential : -0.25613618 Eh -6.96982 eV
+Electronic Energy : -187.54166010 Eh -5103.26802 eV
+6.3.15 Intrinsic Reaction Coordinate
+TheIntrinsicReactionCoordinate(IRC)isaspecialformofaminimumenergypath,connectingatransitionstate
+(TS)withitsdownhill-nearestintermediates. AmethoddeterminingtheIRCisthususefultodeterminewhether
+atransitionstateisdirectlyconnectedtoagivenreactantand/oraproduct.
+ORCAfeaturesitsownimplementationofMorokumaandcoworkers’popularmethod.[412]TheIRCmethodcan
+besimplyinvokedbyaddingtheIRCkeywordasinthefollowingexample.
+! B3LYP SV(P) TightSCF KDIIS SOSCF Freq IRC
+* xyz 0 2
+C -0.000 0.001 -0.000
+H 1.290 0.005 -0.006
+H -0.330 1.050 -0.002
+H -0.252 -0.532 -0.929
+H -0.286 -0.545 0.911
+O 2.499 0.220 0.065
+H 2.509 1.085 0.525
+*
+FormoreinformationandfurtheroptionsseesectionIntrinsicReactionCoordinate.
+Note:
+• The same method and basis set as used for optimization and frequency calculation should be used for the
+IRCrun.
+186 Chapter6. RunningTypicalCalculations
+
+[... start of page 209 ...]
+ORCAManual,Release6.0.0
+• TheIRCkeywordcanberequestedwithout,butalsotogetherwithOptTS,ScanTS,NEB-TS,AnFreqand
+NumFreqkeywords.
+• InitsdefaultsettingstheIRCcodecheckswhetheraHessianwascomputedbeforetheIRCrun. Ifthatis
+notthecase,andifnoHessianisdefinedviathe%ircblock,anewHessianiscomputedatthebeginningof
+theIRCrun.
+• A final trajectory (_IRC_F

@@ -1,0 +1,65 @@
+[... end of page 398 ...]
+dedsetupcanbecalledusingtheFMM-QMMMkeyworddirectlyinthe
+keywordsline. However, moredetailsaboutthealgorithmparametersandallinputoptionscanbefoundin(see
+alsoparagraphFastMultipoleMethod)
+! FMM-QMMM
+It is recommended to use that option whenever the MM part is composed of more than 10,000 atoms (or point
+chargesforECMmethods).
+376 Chapter6. RunningTypicalCalculations
+
+--- Page 399 ---
+ORCAManual,Release6.0.0
+6.16.2 Additive QMMM
+TheminimuminputnecessaryforanadditiveQM/MMcalculationlooksasfollows.
+!QMMM
+%qmmm
+QMAtoms {0 1 2 27 28} end
+ORCAFFFilename "UBQ.ORCAFF.prms"
+end
+6.16.3 ONIOM Methods
+For the simulation of large systems with up to 10000 atoms, or for large QM regions in biomolecules, ORCA
+provides the QM/QM2 and QM/QM2/MM methods. The specifics of the two different methods are discussed
+further below. Here we are presenting the common concepts and keywords of both methods. For subtractive
+methods, we use a high level (QM) and a low level (QM2) of accuracy for different parts of the system. The
+advantagesofthis-incontrarytoQM-MMmethods-areasfollows:
+• QM2methodsarepolarizable,theinteractionwiththehighlevelregionismoreaccurate.
+• NoMMparametersareneededfortheatomsthataredescribedattheQM2level.
+AvailableQM2Methods
+ORCAhasseveralbuiltinQM2methods:
+• Semiempiricalmethods(AM1,PM3)
+• Tight-bindingDFT(XTB0,XTB1,XTB(orXTB2))
+• Compositemethods(HF-3c,PBEh-3c,r2SCAN-3c)
+• User-definedQM2methods
+Theindividualkeywordsforthesemethodsare:
+!QM/XTB or !QM/XTB/MM
+!QM/XTB1 or !QM/XTB1/MM
+!QM/XTB0 or !QM/XTB0/MM
+!QM/HF-3C or !QM/HF-3C/MM
+!QM/PBEH-3C or !QM/PBEH-3C/MM
+!QM/R2SCAN-3C or !QM/R2SCAN-3C/MM
+!QM/PM3 or !QM/PM3/MM
+!QM/AM1 or !QM/AM1/MM
+Userscandefinetheirownlow-levelmethodsinthefollowingway
+!QM/QM2 or !QM/QM2/MM
+%qmmm
+QM2CUSTOMMETHOD "B3LYP"
+QM2CUSTOMBASIS "def2-SVP def2/J"
+end
+Alternatively,acustomQM2method/basissetfilecanbeprovided:
+!QM/QM2 or !QM/QM2/MM
+%qmmm
+QM2CustomFile "myQM2Method.txt" # File should be available in working directory.
+end
+ThecustomQM2methodfilecancontainanydesiredinput,ase.g. thefilemyQM2Method.txt:
+6.16. ORCAMultiscaleImplementation 377
+
+[... start of page 400 ...]
+ORCAManual,Release6.0.0
+!cc-pVDZ HF TightSCF NOSOSCF KDIIS
+%basis
+NewAuxJKGTO Mg "AutoAux" end
+end
+Note:
+• Onlyaddmethods(includingconvergencesettings)andbasissetsfortheQM2Customoptions. Everything
+else(parallelization,memory,solvation,etc.) istakencareofbyORCAitself.
+Electrosta

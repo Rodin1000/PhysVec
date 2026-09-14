@@ -1,0 +1,107 @@
+[... end of page 462 ...]
+𝑡𝑢𝑣 𝑡𝑢𝑣,𝑡′𝑢′𝑣′
+Therearemanybenefitstothisformulation:
+1. The integral is factorized allowing steps to be performed independent of each other. For example, the E
+matricescanbecalculatedatthebeginningofthecalculationandreusedwheneverneeded. Theirstorageis
+unproblematic
+2. Matrixmultiplicationsleadtoextremelyefficientformationofthetargetintegralsanddrivethehardwareat
+peakperformance
+440 Chapter7. DetailedDocumentation
+
+--- Page 463 ---
+ORCAManual,Release6.0.0
+3. StepslikecontractionofprimitiveintegralsandtransformationfromtheCartesiantothesphericalHarmonics
+basiscanbefoldedintothedefinitionoftheEmatricesthusleadingtoextremelyefficientcodewithnextto
+nooverheadcreatesbyshortloops.
+4. Programmingintegralsbecomesveryeasyandefficient. Othertypesofintegralsaswellasderivativeinte-
+gralsarereadilyapproachedinthesameway. Also,two-andthree-indexrepulsionintegrals,asneededfor
+theRIapproximationarealsoreadilyformulatedinthisway.
+5. One-electronintegralsareequallyreadilydonewiththisapproach.
+Thereisaverylargenumberoftechnicalitiesthatwewillnotdescribeinthismanualwhichisonlyintendedto
+providethegistofthealgorithm.
+7.1.3 SHARK and libint
+Up to ORCA 4.2.1, ORCA has almost entirely relied on the libint2 integral library which is known to be very
+efficient and powerful. Starting from ORCA 5.0, both SHARK and libint are used for integral evaluations and
+libint is fully integrated into the SHARK programming environment. Integrals that are only available in one of
+the packages are done with this package (e. g. GIAO, SOC and Spin-Spin integrals in SHARK; F12 or second
+derivativeintegralsinlibint). Fortheintegralsavailableinbothpackages,theprogrammakesajudiciouschoice
+aboutthemostefficientroute. Thereasonforthishybridapproachisthefollowing:
+TheSHARKintegralalgorithmisatitsbestforhigherangularmomentumfunctions(𝑙 > 2;𝑑-functions)which
+is where the efficiency of the matrix multiplications leads to very large computational benefits. Integrals over,
+say, four 𝑓- or 𝑔-functions perform much faster (up to a factor of five) than with traditional integral algorithms.
+However,forlowangularmomenta,thereisoverheadcreatedbythematrixmultiplicationsandalsobythefactthat
+theMcMurchieDavidsonalgorithmisknowntonotbethemostFLOPcountefficientalgorithm. Tosomeextent,
+this is take care of by using highly streamlined routines for low angular momenta that perform extremely well.
+However,therearepenaltiesforintermediateangularmomenta,wheretheefficiencyofthematrixmultiplications
+hasnotsetinandtheintegralsaretoocomplicatedforhandcoding. Theseintegralsperformbestwithlibintand
+consequently,theprogramwill,bydefault,selectlibinttoperformsuchintegralbatches.
+7.1.4 Basis set types
+OnesignificantaspectofmolecularintegralevaluationisthetypeofcontractionthatispresentinaGaussianbasis
+set. Themostgeneraltypeofbasissetismetinthe“generalcontraction”scheme. HereallprimitiveGaussianbasis
+functionsofagivenangularmomentumarecollectedinavector{𝜑}. Ingeneral,allprimitiveswillcontributeto
+allbasisfunctions{𝜙}ofthissameangularmomentum. Hence,wecanwrite:
+⎛ ⎞ ⎛ ⎞⎛ ⎞
+𝜙 𝑑 𝑑 ··· 𝑑 𝜑
+1 11 11 1𝑀𝑙 1
+⎜
+⎜ ⎜
+𝜙
+. . .
+2 ⎟
+⎟ ⎟ =
+⎜
+⎜ ⎜
+𝑑
+. . .
+21 𝑑
+. . .
+21 ·
+..
+·
+.
+· 𝑑
+. . .
+2𝑀𝑙 ⎟
+⎟ ⎟
+⎜
+⎜ ⎜
+𝜑
+. . .
+2 ⎟
+⎟ ⎟
+⎝ ⎠ ⎝ ⎠⎝ ⎠
+𝜙 𝑑 𝑑 ··· 𝑑 𝜑
+𝑁𝑙 𝑁𝑙1 𝑁𝑙2 𝑁𝑙𝑀𝑙 𝑀𝑙
+Where𝑁 and𝑀 arethenumberofactualbasisfunctionsandprimitivesrespectively. Typically,thenumberof
+𝑙 𝑙
+primitivesismuchlargerthanthenumberofbasisfunctions. Thematrixdcollectsthecontractioncoefficientsfor
+eachangularmomentum. Typicalbasissetsthatfollowthiscontractionpatternareatomicnaturalorbital(ANO)
+basissets. TheyaretypicallybasedonlargeprimitivesetsofGaussians. Suchbasissetsputverydemandsonthe
+integralpackagesincetherearemanyintegralsoverprimitiveGaussianbasisfunctionsthatneedtobegenerated. If
+theintegralpackagedoesnottakeadvantageofthegeneralcontraction,thenthisintegralevaluationwillbehighly
+redundantsinceidenticalintegralswillbecalculated𝑁 times(andhence,integralsoverfourgenerallycontracted
+𝑙
+shellswillberedundantlygenerated𝑁4 times). SHARKtakesfulladvantageofgeneralcontractionforallone-
+𝑙
+andtwo-electronintegralsthatitcangenerate. Here,theuniqueadvantagesoftheintegralfactorizationcometo
+fullbenefitsinceallintegralquadruplesofagivenatomquadruple/angularmomentumquadruplecanbeefficiently
+generatedbyjusttwolargematrixmultiplications.
+Theoppositeofgeneralcontractionismetwithsegmentedcontraction. Hereeachbasisfunctioninvolvesanumber
+7.1. TheSHARKIntegralPackageandTaskDriver 441
+
+[... start of page 464 ...]
+ORCAManual,Release6.0.0
+ofprimitives:
+∑︁
+𝜙 = 𝑑 𝜑
+𝜇 𝑘𝜇 𝑘
+𝑘
+Quitetypically,noneofthe𝜑 thatoccurinthecontractionofonebasisfunctionsoccursinanyotherbasisfunction.
+𝑘
+Typicalbasissetsofthisformarethe“def2”basissetsoftheKarlsruhegroup. Theyarereadilyhandledbymost
+integralpackagesandbothSHARKandlibintareefficientinthiscase.
+Thethirdclassofbasissetsismet,whengeneralcontractioniscombinedwithsegmentedcontraction. Basissets
+ofthistypeare,forexample,thecorrelationconsistent(cc)basissets. Wecallsuchbasissets“partiallygenerally
+contracted”. In such basis sets, part of the basis functions are generally contracted (for example, the s- and p-
+functionsinmaingroupelements),whileotherbasisfunctions(e. g. polarizationfunctions,diffusefunctions,core
+correlationfunctions)arenotg

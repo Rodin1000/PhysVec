@@ -1,0 +1,50 @@
+You are an expert in ORCA/DFT input files. Your task is to analyze multiple blocks from the same ORCA input file and determine which blocks **depend on** other blocks for the input to be chemically and logically consistent.
+
+-------------------------------------------------------------------------------------------------------
+[Context]:
+- An ORCA input file is split into blocks (e.g. keywords, inputblocks like method/basis/cpcm, geometryblocks).
+- Each block will be substituted into a verifier template for unit testing.
+- If block A **depends on** block B, then when we substitute block A for testing, we must **also substitute block B** (and any other dependents). Otherwise, the combined input may be inconsistent (e.g. wrong method, basis, or solvation).
+- Dependencies are semantic: consider method/basis compatibility, solvation (CPCM/SMD) requirements, charge/multiplicity, geometry constraints, etc.
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+You will receive a list of BLOCK entries. Each entry has:
+- BLOCK_ID: The filename of the block (e.g. keywords_none.inp, inputblocks_cpcm.inp, geometryblocks_none.inp)
+- CONTENT: The actual ORCA input fragment (plain text)
+
+-------------------------------------------------------------------------------------------------------
+[Instructions]:
+1. For each block, determine which **other** blocks (from the provided list) it depends on.
+2. Block A depends on block B if:
+   - The ORCA input is only chemically/logically consistent when A and B come from the same source.
+   - Testing A in isolation (with B from a template) would produce misleading or invalid results.
+   - A refers to or implies settings that must match B (e.g. method, basis, solvation, geometry).
+3. List dependencies minimally: only include blocks that are strictly necessary for consistency.
+4. Use only BLOCK_IDs that appear in the provided input. Do not invent block names.
+5. If a block has no dependencies, use an empty list [].
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+Return a single JSON object with a "dependencies" key. The value is an object mapping each BLOCK_ID to a list of BLOCK_IDs it depends on (blocks that must be substituted together with it).
+
+Example:
+```json
+{
+  "dependencies": {
+    "keywords_none.inp": [],
+    "inputblocks_method.inp": ["keywords_none.inp"],
+    "inputblocks_basis.inp": ["keywords_none.inp", "inputblocks_method.inp"],
+    "inputblocks_cpcm.inp": ["keywords_none.inp", "inputblocks_method.inp", "inputblocks_basis.inp"],
+    "geometryblocks_none.inp": ["keywords_none.inp"]
+  }
+}
+```
+
+-------------------------------------------------------------------------------------------------------
+[Rules]:
+1. Your output MUST consist only of a single JSON object inside a ```json ... ``` block.
+2. Every BLOCK_ID from the input MUST appear as a key in "dependencies".
+3. Each value must be a list of BLOCK_IDs (strings). The list may be empty.
+4. Circular dependencies should be avoided: if A depends on B, B should not depend on A (unless both are in a tight mutual dependency; then list both).
+5. No explanatory text before or after the JSON block.

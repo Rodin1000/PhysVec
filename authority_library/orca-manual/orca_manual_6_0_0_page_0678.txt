@@ -1,0 +1,72 @@
+[... end of page 677 ...]
+F12 true # Request the F12 correction
+end
+end
+*xyz 0 3
+O 0.0 0.0 0.0
+O 0.0 0.0 1.207
+*
+AlinearscalingversionofNEVPT2-F12,theDLPNO-NEVPT2-F12,allowstotacklesystemswithseveralthou-
+7.19. N-ElectronValenceStatePertubationTheory 655
+
+--- Page 678 ---
+ORCAManual,Release6.0.0
+sandofbasisfunctions.[338]WiththeexceptionoftheDLPNO_NEVPT2keyword,theinputstructureisotherwise
+identicaltoNEVPT2-F12method.
+# aug-cc-pvdz/C used as RI basis
+! cc-pvdz-F12 aug-cc-pvdz/C cc-pvdz-f12-cabs
+%casscf nel 8
+norb 6
+mult 3,1
+TrafoStep RI #RI approximation must be on for F12
+PTMethod DLPNO_NEVPT2
+# detailed settings
+PTSettings
+F12 true #Do the F12 correction
+end
+end
+*xyz 0 3
+O 0.0 0.0 0.0
+O 0.0 0.0 1.207
+*
+NotethattheDLPNO-NEVPT2-F12algorithmisunitaryinvariantwithrespecttosubspacerotationofinactiveand
+activeorbitals. BytighteningtheDLPNOtruncationthresholds,thecanonicalNEVPT2-F12canbereproduced,
+evenwithlocalizedinternalandactivemolecularorbitals.
+# aug-cc-pvdz/C used as RI basis
+! cc-pvdz-F12 aug-cc-pvdz/C cc-pvdz-f12-cabs
+%casscf nel 8
+norb 6
+mult 3,1
+gtol 1e-6
+etol 1e-14
+TrafoStep RI #RI approximation must be on for F12
+nevpt2 3 #DLPNO-NEVPT2
+actorbs locorbs #use localized active MOs.
+intorbs locorbs #use localized internal MOs.
+# detailed settings
+PTSettings
+F12 true #Do the F12 correction
+TCutPNO 0.0
+TCutDO 0.0
+TCutCMO 0.0
+TCutDOij 0.0
+end
+end
+*xyz 0 3
+O 0.0 0.0 0.0
+O 0.0 0.0 1.207
+*
+656 Chapter7. DetailedDocumentation
+
+[... start of page 679 ...]
+ORCAManual,Release6.0.0
+7.19.4 Tackling large active CASSCF spaces
+Largeactivespaces(CAS(10,10)andmore)requirespecialattentionasthestandardimplementationinvolvesthe
+fourthorderreduceddensitymatrix(4-RDM).[46]Thestorageofthelattercaneasilyreachseveralgigabytesand
+thuscannotbekeptincorememory. ORCAthusbydefaultconstructsandcontractsthe4-RDMonthefly(D4Step
+fly). Note that the program can be forced to keep the 4-RDM on disk (D4Step disk) or in memory (D4Step
+core).
+Asidefromthestorage,theformationofthe4-RDMitselfbecomesthetimedominatingstepoftheNEVPT2cal-
+culationforlargeactivespaces. Therearetwosetofapproximationstotacklethechallenge. Theprescreening(PS)
+ortheextendedprescreening(EPS)approximationandthecumulantexpansion.[343]
+In ad

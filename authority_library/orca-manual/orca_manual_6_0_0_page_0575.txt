@@ -1,0 +1,84 @@
+[... end of page 574 ...]
+allerthanZLoc_EThresh(orZLoc_EThresh_coreforthecoreorbitals)aresubjecttothemodifiedpro-
+cedure. Iftheprogrameliminatesanyeigenvectors,itmightsometimesbeagoodideatocheckifcalculated
+propertiesarereasonable(oratleasttocheckthenaturaloccupationnumbers). EigenvectorsoftheHessian
+arecalculatedbyDavidsondiagonalizationbydefault,butdirectdiagonalizationcanbechosenforsmaller
+systems,instead.
+• DiagonalizationofthelocalizationorbitalHessiancanbeswitchedoffaltogetherbysettingZLoc_EThresh
+to0.
+• If the “Asymmetric localization equation residual norm” exceeds the localization Z-vector equation toler-
+ance (ZLoc_Tol), there are typically two plausible reasons: (1) the localized orbitals are not sufficiently
+tightlyconverged(toolarge LocTol)orunconverged, or(2)theorbitallocalizationHessianhasgotsmall
+eigenvaluesthatwerenoteliminated.
+552 Chapter7. DetailedDocumentation
+
+--- Page 575 ---
+ORCAManual,Release6.0.0
+Thisisanoverviewovertheoptionsrelatedtothegradient:
+# Settings specific to the localization equation z-solver
+%mp2 ZLoc_Solver CG # Use conjugate gradient solver (default)
+DIR # Use direct solver
+JAC # Use DIIS-accelerated Jacobi solver
+ZLoc_Tol 1.0e-3 # Residual convergence tolerance for the
+# localization Z-solver
+# Default: same value as Z_Tol for CPSCF
+ZLoc_MaxIter 1024 # Maximum localization Z-solver iterations
+ZLoc_MaxDIIS 10 # Number of DIIS vectors for the Jacobi solver
+ZLoc_Shift 0.2 # Shift for the Jacobi solver
+# Options for eliminating (near-)singular eigenvectors of the
+# orbital Hessian of the localization function.
+ZLoc_EThresh 3.0e-4 # Eigenvectors with an eigenvalue below
+# this threshold are eliminated.
+ZLoc_EThresh_core 3.0e-4 # Same as ZLoc_EThresh, but for the core orbitals.
+# Default: identical value as ZLoc_EThresh.
+# Options for determining eigenvectors of the localization orbital Hessian.
+ZLoc_UseDavidson True # Use Davidson diagonalization.
+# If false, use direct diagonalization.
+ZLoc_DVDRoots 32 # Number of Davidson roots to be determined.
+ZLoc_DVDNIter 256 # Number of Davidson iterations.
+ZLoc_DVDTolE 3.0e-10 # Eigenvalue tolerance for the Davidson solver.
+# Default: 1e-6 * ZLoc_EThresh
+ZLoc_DVDTolR 1.0e-7 # Residual tolerance for the Davidson solver.
+# Default: 0.1 * (ZLoc_Tol)^2
+ZLoc_DVDMaxDim 10 # During Davidson diagonalization, the space of trial
+# vectors is expanded up to MaxDim * DVDRoots.
+# Choice of the PNO processing algorithm.
+DLPNOGrad_Opt AUTO # Chooses automatically between RAM and DISK
+# (default and recommended)
+RAM # Enforce memory-based one-pass algorithm
+DISK # Enforce disk-based two-pass algorithm
+BUFFERED # Buffered algorithm. Usage is discouraged.
+# Experimental, unpredictable I/O performance.
+end
+LocalMP2ResponseProperties
+Analyticalsecondderivativeswithrespecttoelectricandmagneticfieldsareimplementedforclosed-shellDLPNO-
+MP2(aswellasdouble-hybridDFT).[825]Thus,analyticdipolepolarizabilityandNMRshieldingtensors(with
+ourwithoutGIAOs)areavailable. AllconsiderationsandoptionsdiscussedinsectionsLocalMP2andLocalMP2
+Gradientapplyhereaswell,whileadditionalremarksspecifictosecondderivativesaregivenbelow.
+• DLPNO-MP2responsepropertycalculationsareexpectedtobefasterthantheRI-MP2equivalentsforsys-
+temslargerthanabout70atomsor300correlatedelectrons.
+• Using the NormalPNO default thresholds, relative errors in the calculated properties, due to the local ap-
+proximations,aresmallerthan0.5%,or5–10timessmallerthantheinherentinaccuracyofMP2vsamore
+accuratemethodlikeCCSD(T).
+• DLPNO-MP2secondderivativesaremuchmoresensitivetonear-lineardependenciesandothernumerical
+issuesthantheenergyorfirst-orderproperties. Wehavemadeeffortstochoosereasonableandrobustde-
+faults,howeverweencouragetheusertobecriticaloftheresultsandtoproceedwithcaution,especiallyif
+diffusebasissetsornumericalintegration(DFT,COSX)areused. Inthelattercase, DefGrid3isrecom-
+mended.
+• In particular, the near-redundancy of PAO domains introduces numerical instabilities in the algorithm.
+Hence, these should be truncated at PAOOverlapThresh=1e-5, which is higher than the default for the
+energyandgradient. Therefore,theenergyandgradientinjobs,whichincluderesponsepropertycalcula-
+tions,maydeviatefromjobs,whichdonot. Thedifferenceismuchsmallerthantheaccuracyofthemethod
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 553
+
+[... start of page 576 ...]
+ORCAManual,Release6.0.0
+(vsRI-MP2)butitisstilladvisabletousethesamevalueof PAOOverlapThreshinallcalculations,when
+calculating,e.g.,relativeenergies.
+• Forthesamereason,ifdiffusebasissetsareused,itisadvisedtosetSThresh=1e-6inthe%scfblock.
+• Another instability arises due to small differences between the occupation number of kept and discarded
+PNOsandmayresultinverylargeerrors. ThesmallestdifferenceisprintedduringtheDLPNO-MP2relaxed
+densitycalculation:
+SmallestoccupationnumberdifferencebetweenPNOsandcomplementaryPNOs. Absolute: 3.10e-10Rel-
+ative: 3.28e-02
+Wefoundthatarelativedifferenceunder10−3,whichisnotuncommon,m

@@ -1,0 +1,72 @@
+[... end of page 531 ...]
+Symmetry
+Another simple way to break the initial guess symmetry for more trivial cases, is to simply use the keyword !
+GUESSMIX.Thiswillautomaticallymix50%ofthealphaLUMOintothealphaHOMO.Thatisequivalenttoa45
+degreerotationasdoneaboveandonlyfortheseorbitals. Itmightbeusefulwhenonewantsanopen-shellsinglet
+andneedsthealphaandbetaorbitalstostartdifferently.
+Thespecificangleofrotationcanbecontrolledwith:
+%scf
+guessmix 75 # angle in degrees, default is 45
+end
+7.6. ChoiceofInitialGuessandRestartofSCFCalculations 509
+
+--- Page 532 ---
+ORCAManual,Release6.0.0
+7.6.9 Calculating only the energy of an input density
+In caseyou wantto givethe resultof a previousSCF andrecalculate theenergy, ormaybe someother property
+(liketheMP2energy)usingthatdensitywithoutchangingtheorbitals,youcanusetheflags!CALCGUESSENERGY
+NOITER.
+TheSCFprogramwillreadtheorbitals,computethedensityandoneFockmatrixnecessarytogettheenergyand
+moveonwithnoorbitalupdates. ThiscanbeusedtocombineDFTorbitalswithDLPNO-CCSD(T)forexample.
+Becarefulwiththeresultsyougetfromthisbecausetheseorbitalsarenotvariationalanymore!
+7.7 SCF Convergence
+SCFconvergenceisapressingprobleminanyelectronicstructurepackagebecausethetotalexecutiontimesin-
+creaseslinearlywiththenumberofiterations. Thus,itremainstruethatthebestwaytoenhancetheperformanceof
+anSCFprogramistomakeitconvergebetter. Insomecases,especiallyforopen-shelltransitionmetalcomplexes,
+convergence may be very difficult. ORCA makes a dedicated effort to achieve reasonable SCF convergence for
+thesecaseswithoutcompromisingefficiency.
+AnotherissueiswhetherthesolutionfoundbyORCAisstable,i.e. aminimumonthesurfaceoforbitalrotations.
+Especiallyforopen-shellsingletsitcanbehardtoachieveabroken-symmetrysolution. TheSCFstabilityanalysis
+(sectionSCFStabilityAnalysis)maybeabletohelpinsuchsituations. Pleasealsonotethatif ! TRAHisusedthe
+solutionmustbeatruelocalminimumthoughnotnecessarilyaglobal.
+7.7.1 Convergence Tolerances
+BeforediscussinghowtoconvergeaSCFcalculationitshouldbedefinedwhatismeantby“converged”. ORCA
+hasavarietyofoptionstocontrolthetargetprecisionoftheenergyandthewavefunctionthatcanbeselectedinthe
+% scfblock,orwithasimpleinputlinekeywordthatmergesthecriterionlabelwith“SCF”,e.g. ! StrongSCF
+or! VeryTightSCF:
+%scf
+Convergence # The default convergence is between medium and strong
+Sloppy # very weak convergence
+Loose # still weak convergence
+Medium # intermediate accuracy
+Strong # stronger
+Tight # still stronger
+VeryTight # even stronger
+Extreme # close to numerical zero of the computer
+# in double precision arithmetic
+end
+Likeotherkeys,Convergenceisacompoundkeythatassignsdefaultvaluestoavarietyofothervariablesgiven
+in the box below. In table Threshold choices for compound convergence keys we present the chosen values for
+eachcompoundkey. Ifthecorrespondingsimpleinputsaregiven(StrongSCF,VeryTightSCF,...etc), thenin
+additionthevaluesoftableAdditionalthresholdchoicessetbythesimpleinputkeys(strongSCF,...etc.) arealso
+set. The default convergence criteria are reasonable and should be sufficient for most purposes. For a cursory
+lookatpopulationsweakerconvergencemaybesufficient,whereasothercasesmayrequirestrongerthandefault
+convergence. NotethatConvergencedoesnotonlyaffectthetargetconvergencetolerancesbutalsotheintegral
+accuracy as discussed in the section about direct SCF and alike. This is very important: if the error in the
+integralsislargerthantheconvergencecriterion,adirectSCFcalculationcannotpossiblyconverge.
+The convergence criteria are always printed in the output. Given below is a list of the convergence criteria for
+! TightSCF,whichisoftenusedforcalculationsontransitionmetalcomplexes.
+%scf
+TolE 1e-8 # energy change between two cycles
+TolRMSP 5e-9 # RMS density change
+(continuesonnextpage)
+510 Chapter7. DetailedDocumentation
+
+[... start of page 533 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+TolMaxP 1e-7 # maximum density change
+TolErr 5e-7 # DIIS error convergence
+TolG 1e-5 # orbital gradient convergence
+TolX 1e-5 # orbital rotation angle convergence
+ConvCheckMod

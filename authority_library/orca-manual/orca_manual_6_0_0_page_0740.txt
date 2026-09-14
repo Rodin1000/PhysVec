@@ -1,0 +1,98 @@
+[... end of page 739 ...]
+the structures
+XYZ2 "ScanName.005.xyz" # next to the highest energy point
+GBW1 "ScanName.003.gbw" # the gbw-files of the structures
+GBW2 "ScanName.005.xyz" # next to the highest energy
+# the gbw-files are optional
+end
+end
+AdditionallythemanipulationofthediagonalHessianvaluesoftheinternalHessianispossibleforfurtherinternal
+coordinates,butwithoutanextracalculation. Heretheusercanjustdefineavalue(inEh/Bohr2).
+Hess_Internal
+{A 3 2 1 D 2.0} # define a diagonal Hessian value of
+# 2 Eh/Bohr2 for the angle between
+# atoms 3 2 1
+{B 1 0 D -0.5} # define a diagonal Hessian value of
+# -0.5 Eh/Bohr2 for the bond between
+# atoms 1 and 0
+end
+7.26. GeometryOptimization 717
+
+--- Page 740 ---
+ORCAManual,Release6.0.0
+ThedefinitionofsuchHessian(diagonal)elementsispossibleformultipleinternalcoordinates. Thesejustreplace
+thevaluesoftheforcefieldmodelHessian.
+HybridHessian
+We implemented the calculation of a “Hybrid Hessian” as an alternative to the full Hessian calculation for TS
+optimization. Here only those parts of the Hessian, that are important for the TS optimization, are calculated
+exactly. Forthiscalculationwedefinetwokindsofatoms: atomswhosecouplingswiththeotheratomsaretreated
+exactly(E)andatomswhosecouplingsaretreatedapproximately(A).
+InafirststepanAlmloefmodelHessianisbuiltupinredundantinternalcoordinatesandtransformedtoCartesian
+coordinates. ThisHessiangivesthesecondderivativeelementsforatompairsA/A.Inasecondstepthesecond
+derivativeelementsbetweenpairsE/EandE/Aarecalculatednumericallyasinanumericalfrequencycalculation:
+ΔE = ΔE = 𝑔 𝑗 𝑖, , 𝐵 𝐶 −𝑔 𝑗 𝑒 , 𝑞 𝐶 . (7.210)
+∆𝑖 ∆𝑗 ∆𝑗 ∆𝑖 𝑑𝑖𝑠𝑝𝑙.
+𝐵 𝐶 𝐶 𝐵
+with:
+𝑖,𝑗 x-,y-orz-direction
+𝐵,𝐶 pairsofE/E,E/A,A/E
+𝑑𝑖𝑠𝑝𝑙. magnitudeofdisplacement
+𝑔𝑒𝑞. forceonatom𝐶 indirection𝑗 incurrentgeometry
+𝑗,𝐶
+𝑔𝑖,𝐵 forceonatom𝐶 indirection𝑗 afterdisplacementofatom𝐵indirection𝑖
+𝑗,𝐶
+PartialHessianVibrationalAnalysis
+We implemented the Partial Hessian Vibrational Analysis (PHVA), as published by Li, Jensen in [513], for the
+analysisofthenatureofstationarypointsofstructuresobtainedwithQM/MMoptimizations.
+# PHVA after a QM/MM optimization in the (dispersion-/PC-) field
+# caused by the MM-atoms
+! NumFreq
+%LJCoefficients "temp.LJ" # file with the Lennard Jones
+# coefficients for dispersion interaction
+# obtained from last QM/MM run
+%pointcharges "temp.pc" # file with the point charges for
+# electrostatic interaction
+# obtained from last QM/MM run
+#
+%freq
+PARTIAL_Hess {0 1 2} # atoms which are "frozen" and which make
+# the boundary to the MM-system
+end
+end
+NOTE
+• ThisprocedureshouldbeusedforQM/MMoptimizedstructuresonlytoverifythenatureofthestationary
+pointandhaveanestimateoftheZPE.
+Hereweshortlydescribetheprocedure: InPHVAwedividethesystemintotwoparts𝐵 (ofsize𝑛atoms)and𝐶
+(size𝑁−𝑛). Lettheatomset𝐵belongtotheregionwherethechemicalchangeislocalized. ThePartialHessian
+matrixisbuiltupasfollows:
+(︂ )︂
+𝐾 0
+𝐵𝐵 (7.211)
+0 𝐾𝜀
+𝐶𝐶
+718 Chapter7. DetailedDocumentation
+
+[... start of page 741 ...]
+ORCAManual,Release6.0.0
+With:
+𝐾 :𝑥,𝑦,𝑧 direction
+𝐵𝐵
+⎛ ⎞
+𝜀 0 0
+𝐾
+𝐶
+𝜀
+𝐶
+=⎜
+⎝0
+...
+0
+⎟
+⎠
+, 𝜀=10−8au, (7.212)
+0 0 𝜀
+thiscorrespondstousingnear-infinitemassesfortheatomsin𝐶.
+Withthisprocedurewegetthefollowingeigenvaluestructure:
+• Sixzeroeigenvalueswithmodescorrespondingtotranslationalandrotationalmotionoftheentiremolecule.
+• 3(𝑁 −𝑛)−6small(lessthan1cm−1)eigenvalueswithmodescorrespondingmainlytointernalmotion
+withinregion

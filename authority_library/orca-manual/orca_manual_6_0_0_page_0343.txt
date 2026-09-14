@@ -1,0 +1,85 @@
+[... end of page 342 ...]
+}
+end
+As mentioned above, the exact same procedure is also available for A-tensors. Here is an example for the NH
+2
+radicalwiththeVPT2inputfilevpt2_NH2_FF.inp:
+!UKS BP86 def2-svp def2/J ExtremeSCF defgrid3
+%vpt2
+VPT2 On
+end
+%method
+Z_Tol 1e-12
+end
+(continuesonnextpage)
+320 Chapter6. RunningTypicalCalculations
+
+--- Page 343 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+* xyz 0 2
+N -0.01498947828047 -0.01894387811818 0.00000000000000
+H 1.03197835263254 0.00908678452370 0.00000000000000
+H -0.22855980523269 1.00639225931822 0.00000000000000
+*
+and the input file - something like vpt2_NH2_A.inp - for the level of theory that will be used in the A-tensor
+computation:
+!UKS BP86 def2-SVP TightSCF
+%geom inhess read
+inhessname "vpt2_NH2_FF.hess"
+end
+%vpt2
+VPT2 On
+AvgProp Atensor
+end
+*xyz 0 2
+N -0.01498947828047 -0.01894387811818 0.00000000000000
+H 1.03197835263254 0.00908678452370 0.00000000000000
+H -0.22855980523269 1.00639225931822 0.00000000000000
+*
+%eprnmr
+Nuclei = all N { aiso, adip }
+Nuclei = all H { aiso, adip }
+end
+andsimilarlyfortheg-tensorif AtensorisreplacedbyGtensorinthe%vpt2block(the%eprnmrblockcanbe
+omittedthen).
+Notethataconvenientwaytocomputevibrationalcorrectionsistheusageofacompoundscript. Withaninput
+filecalledNH2.inp:
+* xyz 0 2
+N 0.00312611577632 0.00395297373474 0.00000000000000
+H 1.01930353842041 0.00049997276783 0.00000000000000
+H -0.23400058507735 0.99208221922117 0.00000000000000
+*
+%Compound "NH2.cmp"
+andthecorrespondingcompoundscriptNH2.cmp:
+New_Step
+!UHF def2-SVP VeryTightSCF
+%vpt2
+VPT2 On
+end
+%method
+Z_Tol 1e-12
+end
+* xyz 0 2
+N 0.00312611577632 0.00395297373474 0.00000000000000
+(continuesonnextpage)
+6.12. CalculationofProperties 321
+
+[... start of page 344 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H 1.01930353842041 0.00049997276783 0.00000000000000
+H -0.23400058507735 0.99208221922117 0.00000000000000
+*
+Step_End
+New_Step
+!UHF def2-SVP VeryTightSCF
+%geom inhess read
+inhessname "NH2_Compound_1.hess"
+end
+%vpt2
+VPT2 On
+AvgProp Atensor
+end
+*xyz 0 2
+N 0.00312611577632 0.003952973

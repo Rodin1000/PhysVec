@@ -1,0 +1,61 @@
+[... end of page 401 ...]
+72 -1.231202352 -2.710760176
+C -0.738352472 0.318369069 -1.443687014
+H -0.738352472 -0.294739868 -0.538164669
+H 0.142397528 0.965221387 -1.423275731
+H -1.619102472 0.965221387 -1.423275731
+Ascanbeseenfromtheinput,theonlydifferencetoaregularcalculationisthenecessitytodefinethehighlevel
+regionviatheQMAtomskeyword.
+6.16. ORCAMultiscaleImplementation 379
+
+--- Page 402 ---
+ORCAManual,Release6.0.0
+Systemchargesandmultiplicities
+Thetwosubsystemscanhavedifferent(integer)chargesandmultiplicities. Definingthecorrectchargesandmul-
+tiplicities is important. The charge and multiplicity defined via the coordinate section defines the charge and
+multiplicityofthehighlevelregion(QMAtoms). Theuserstillneedstodefinethechargeandmultiplicityofthe
+totalsystem(correspondingtothesumofthechargeofthehighlevelandlowlevelparts,andcorrespondingtothe
+overallmultiplicity).
+%qmmm
+QMAtoms {0:3} end # high level region
+Charge_Total 0 # charge of the full system. Default 0.
+Mult_Total 1 # multiplicity of the full system. Default 1.
+end
+*xyz 0 1 # charge and mult. of the high level region, i.e. atoms 0 to 3
+Availablelowlevelmethods
+ThefollowingQM2(lowlevel)methodsareavailable:
+!QM/XTB
+!QM/XTB1
+!QM/XTB0
+!QM/HF-3C
+!QM/PBEH-3C
+!QM/R2SCAN-3C
+!QM/PM3
+!QM/AM1
+!QM/QM2
+ForinformationonhowtospecifythecustomQM/QM2methodpleaseseeAvailableQM2Methods.
+Solvation
+ImplicitSolvationeffectscanbeincludedinQM/QM2calculations. Ontheonehand,forQM/XTBcalculations,
+one can adopt the analytical linearized Poisson-Boltzmann (ALPB) solvation model, the domain decomposition
+COSMO(ddCOSMO),ortheextendedconductor-likepolarizablecontinuummodel(CPCM-X),andontheother
+hand,ifnoXTBisrequested,ORCAusestheC-PCM.TheuserjustneedstoaddthefollowingtagsintheORCA
+inputfile,
+XTBfortheQM2region:
+!QM/XTB ALPB(Water)
+or
+!QM/XTB DDCOSMO(Water)
+or
+!QM/XTB CPCMX(Water)
+NoXTBfortheQM2region:
+!QM/HF-3c CPCM(Water)
+IftheddCOSMO(XTB)ortheC-PCM(non-XTB)arerequested,therearetwopossibleONIOM/implicit-solvation
+methods:[873]
+380 Chapter6. RunningTypicalCalculations
+
+[... start of page 403 ...]
+ORCAManual,Release6.0.0
+• C-PCM/B:Theeffectofthesolventis,inthefirstplace,includedinthecalculationforthelargeQM2system.
+Oncethiscalculationfinishes,thesolvationchargeslocatedonthesurfaceofthecavityforthelargesystem
+areusedaspointchargesforthesubsequentlow-levelandhigh-levelcalculationsforthesmallsystem.
+• C-PCM/C:TheeffectofthesolventisonlyincludedinthecalculationforthelargeQM2system.
+Theusercanchooseoneschemeortheotherviathetag“solv_scheme”

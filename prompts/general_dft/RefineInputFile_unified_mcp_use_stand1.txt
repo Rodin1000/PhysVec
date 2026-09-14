@@ -1,0 +1,138 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is to refine an ORCA input file by running it, capturing errors, retrieving documentation to fix errors, and iteratively improving the file until it runs successfully.
+
+**PURPOSE: Execute the ORCA input file, use error feedback to retrieve documentation, apply fixes, and re-execute until ORCA accepts the input without errors or MAX_ITERATIONS is reached. Output ONE JSON file that accumulates incrementally - after each iteration, append a new entry to the JSON array.**
+
+--------------------------------------------------------------------------
+[FIDELITY GUARDRAILS — CRITICAL, OVERRIDES EVERYTHING ELSE]
+
+1) DO NOT DEGRADE / DO NOT SIMPLIFY THE MAIN INPUT
+- The main file "{program_file}" must NOT be “simplified to make it run.”
+- You must preserve all calculation intent from ORIGINAL_PLAN and ORIGINAL_INPUT_CODE.
+- You may ONLY remove/disable a keyword/block if:
+  (a) ORCA documentation explicitly says it is invalid for this ORCA version, AND
+  (b) you replace it with the closest valid equivalent that preserves intent (e.g., COSMO→CPCM/SMD).
+
+2) LOCKED REQUIREMENTS (must remain present in "{program_file}" at ALL times)
+- Method/functional specified in ORIGINAL_PLAN.
+- Relativistic treatment specified in ORIGINAL_PLAN (e.g., ZORA) unless docs say incompatible with the chosen basis; then replace with doc-approved equivalent.
+- Basis set intent: element-specific basis/ECP requirements from ORIGINAL_PLAN must stay (fix naming/definition; do not delete the basis block).
+- Solvation model intent from ORIGINAL_PLAN (if COSMO deprecated, replace with CPCM/SMD but keep “continuum solvation”).
+- Output requirements from ORIGINAL_PLAN (if PrintLevel invalid, replace with valid print controls that produce similar info).
+
+3) DEBUGGING ISOLATION RULE (use a separate debug file)
+- If you need to isolate a parser problem, create a separate file:
+  "debug_<program_stem>.<file_ext>" inside {output_folder}.
+- You may temporarily simplify ONLY the debug file to identify the failing line/keyword.
+- Never replace the main file with the simplified debug file.
+- Only apply a fix to "{program_file}" after it is validated on the debug file AND preserves plan intent.
+
+4) SUCCESS IS STRICT
+- You may declare success ONLY if stdout contains "ORCA TERMINATED NORMALLY"
+  AND there are no fatal errors
+  AND the current "{program_file}" still satisfies LOCKED REQUIREMENTS + ORIGINAL_PLAN.
+- “No errors captured” is NOT success unless the termination string is present.
+
+--------------------------------------------------------------------------
+[Input:]
+1. TYPE: {type}
+2. TOPIC: {topic}
+3. PROGRAM_FILE: {program_file}
+4. PROGRAM_PATH: {program_path}
+5. FILE_EXT: {file_ext}
+6. MAX_ITERATIONS: {max_iterations}
+7. QUERY_NUM: {query_num}
+8. LIBRARY_NAMES: {library_names}
+9. QUERY_DIR: {query_dir}
+10. OUTPUT_FOLDER: {output_folder}
+11. ORIGINAL_PLAN: {original_plan}
+12. ORIGINAL_INPUT_CODE: {original_input_code}
+
+Note:
+- Filesystem-mcp working directory = {output_folder}. Use ONLY filenames or paths relative to it.
+- program-dft-mcp is configured with the ORCA input path. Use run_orca with file_path="{program_file}" (filename only).
+- retrieve-mcp saves results into {query_dir} (= {output_folder}/query).
+
+-----------------------------------------------------------------------------
+[Execution tool:]
+- If FILE_EXT is "inp": use program-dft-mcp `run_orca` with file_path="{program_file}".
+- If FILE_EXT is "jl": use program-mcp `run_julia_file` with file_path="{program_file}".
+
+-----------------------------------------------------------------------------
+[Unified workflow – repeat until SUCCESS or MAX_ITERATIONS]
+
+**STEP 0: Pre-run plan compliance check (MANDATORY EVERY ITERATION)**
+- Read "{program_file}".
+- Check that LOCKED REQUIREMENTS are still present.
+- If any locked item is missing, restore it immediately before running ORCA.
+
+**STEP 1: Run the program**
+- MANDATORY: call run_orca (or run_julia_file) with file_path="{program_file}".
+
+**STEP 2: Analyze results and update JSON incrementally (MANDATORY after every run)**
+- Extract error messages with as much specificity as possible:
+  include line numbers and the offending token/keyword if ORCA prints them.
+- IMPORTANT: Do NOT truncate away the actual parser line if it exists.
+- Update refinement log JSON incrementally:
+  - Filename: refinement_log_<program_stem>_<file_ext>.json
+  - Append:
+    {{
+      "iteration_num": <n>,
+      "queries_made": [...],
+      "errors_of_software": [...],
+      "new_input": "<complete current file content>"
+    }}
+
+**STEP 3: Decide next action**
+- If stdout contains "ORCA TERMINATED NORMALLY":
+  - Verify ORIGINAL_PLAN + LOCKED REQUIREMENTS are satisfied.
+  - If satisfied: FINAL STEP → STOP.
+  - If not satisfied: treat as NOT SUCCESS → go to STEP 4 to restore missing plan items.
+- Else if ERROR and iteration < MAX_ITERATIONS: go to STEP 4.
+- Else: FINAL STEP → STOP.
+
+**STEP 4: Fix loop (only when error and iterations left)**
+
+  **4a. Diagnose without degrading**
+  - Read "{program_file}" and compare with ORIGINAL_INPUT_CODE.
+  - Identify minimal changes needed to fix errors while keeping LOCKED REQUIREMENTS.
+
+  **4b. If error is unclear: create and run a debug file (MANDATORY when needed)**
+  - Create "debug_<program_stem>.inp" by copying "{program_file}".
+  - Make minimal, targeted edits in the debug file to isolate the failing keyword/line.
+  - Run ORCA on the debug file to confirm the cause.
+  - Do NOT simplify "{program_file}" during diagnosis.
+
+  **4c. Generate error-based queries (exactly {query_num})**
+  - Queries must target the exact failing keyword/block and the plan-required intent.
+  - Example: “ORCA %basis element-specific basis syntax NewGTO”, NOT “ORCA basis”.
+
+  **4d. Retrieve documentation (MANDATORY on errors)**
+  - For each query, call retrieve_hybrid / retrieve_hybrid_multi using only {library_names}.
+  - Track all queries for the next JSON entry.
+
+  **4e. Plan fixes (RAG + errors + plan)**
+  - Fix by correction/replacement, not deletion:
+    - If a basis name is unrecognized: find correct ORCA naming OR define explicit basis via %basis NewGTO/NewECP.
+    - If a solvation keyword is deprecated: replace with CPCM/SMD but keep the solvation intent.
+    - If a print option is invalid: replace with valid print controls that yield equivalent info.
+  - Never remove a locked requirement without a doc-approved equivalent replacement.
+
+  **4f. Apply fixes to "{program_file}"**
+  - Use edit_file with exact old_text matching.
+  - After edits, go back to STEP 0 → STEP 1.
+
+**FINAL STEP**
+- Read "{program_file}" and verify:
+  - stdout previously showed "ORCA TERMINATED NORMALLY"
+  - ORIGINAL_PLAN satisfied
+  - LOCKED REQUIREMENTS satisfied
+- Verify the refinement_log JSON exists and contains all iterations.
+- Then STOP.
+
+-----------------------------------------------------------------------------
+[CRITICAL REMINDERS]
+- Main file must never be simplified to “make it run.”
+- Use debug_<stem>.inp for isolation if needed.
+- Success requires "ORCA TERMINATED NORMALLY" + plan compliance.

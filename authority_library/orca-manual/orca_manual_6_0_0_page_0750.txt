@@ -1,0 +1,106 @@
+[... end of page 749 ...]
+). WhiletheCPUtimeisproportionaltothenumberofimages,thenumberof
+iterationsneededforconvergencetotheMEPcanbecomesmallerwhenmoreimagesareincludedinthediscrete
+representationofthepath.
+Thetangenttothepathateachimage,𝜏ˆ,canbeestimatedintwoways(keyword: tangent),eitherbytheoriginal
+𝑖
+method[416]orbythemorenumericallystableimproved[384]estimate(defaultoption). Intheformer,thetangent
+atanimageistakentobealinearcombinationofthetwolinesegmentsthatconnecttoimage𝑖,
+𝑟 −𝑟 𝑟 −𝑟
+𝜏 = 𝑖+1 𝑖 + 𝑖 𝑖−1
+𝑖 |𝑟 −𝑟 | |𝑟 −𝑟 |
+𝑖+1 𝑖 𝑖 𝑖−1
+Intheimprovedtangentestimate,thelinesegmentfromthecurrentimagetotheadjacentimagewithhigherenergy
+isused,i.e.
+{︃
+𝜏+ ifE >E >E
+𝜏 = 𝑖+1 𝑖 𝑖−1
+𝑖 𝜏− ifE <E <E
+𝑖+1 𝑖 𝑖−1
+7.29. NudgedElasticBandMethod 727
+
+--- Page 750 ---
+ORCAManual,Release6.0.0
+where𝜏+ =𝑟 −𝑟 and𝜏− =𝑟 −𝑟 . Withtheexceptionofimage𝑖beingatanenergyextremumalongthe
+𝑖+1 𝑖 𝑖 𝑖−1
+path,thenanenergy-weightedaverageofthetwolinesegmentstoadjacentimagesisused,
+{︃
+𝜏+∆𝑉max+𝜏−∆𝑉min ifE >E
+𝜏 = 𝑖 𝑖 𝑖+1 𝑖−1
+𝑖 𝜏+∆𝑉min+𝜏−∆𝑉max ifE <E
+𝑖 𝑖 𝑖+1 𝑖−1
+where
+max
+∆𝑉 =max(|𝐸 −𝐸 |,|𝐸 −𝐸 |)
+𝑖 𝑖+1 𝑖 𝑖−1 𝑖
+max
+∆𝑉 =min(|𝐸 −𝐸 |,|𝐸 −𝐸 |)
+𝑖 𝑖+1 𝑖 𝑖−1 𝑖
+Thenthetangentisnormalized,𝜏ˆ =𝜏 /|𝜏 |. Withanaccurateestimateofthetangent,theperpendicularcomponent
+𝑖 𝑖 𝑖
+oftheatomforceiscomputedby,
+𝐹⊥ =𝐹 −(𝐹 ·𝜏ˆ)𝜏ˆ
+𝑖 𝑖 𝑖 𝑖 𝑖
+Inthefree-endNEBmethod,theendpointimagesareoptimizedsimultaneouslyalongwiththeintermediateim-
+ages,i.e. 𝑀 movableimagesareused. Threedifferentvariantsofthefree-endNEBmethod(keywords:free_end,
+free_end_type) are included in ORCA: where (i) the endpoints are restrained to move along the same (or sepa-
+rate)energyisocontour[5,919],(ii)accordingtotheatomicforceactingperpendiculartothepathand(iii)thefull
+atomicforce. Forthefirstvariant, the‘reactant’and‘product’endpontimages, canberestrainedtomovealong
+twodifferentenergycontours,𝐸 (givenbykeyword:free_end_ec)and𝐸 (givenbykeyword: free_end_ec_end),
+0 1
+tokeepthepathbounded. Then,iftheimagesdriftawayfromtheisocontourbecauseofcurvatureoftheenergy
+surface,anharmonicrestrainttermisusedtopulltheimagebacktothecontour.[5]Thestiffnessoftheharmonic
+restraintisgivenbyauser-suppliedparameter(keyword:free_end_kappa). Itisimportanttocarefullyselectthe
+energyvaluesandthestrengthoftheharmonicrestraint,otherwisethepathmaybecomekinked. Forthesecond
+variant,theendpointimagesareunboundedbutdisplaceddirectlytowardstheMEP.Thisistypicallyacceptableif
+theendpointimagesarealreadyinvicinitytotheMEPandislesspronetokinksdevelopingalongthepath. For
+thethirdvariant,theendpointimagesbecomeoptimizedtothereactantandproductenergyminimum.
+7.29.1 Spring forces
+Inordertocontrolthedistributionoftheimagesalongthepath,springforcesareincludedtoactbetweenadjacent
+images,tangentialtothepath[416],
+𝐹
+sp,‖
+=
+(︀
+𝑘
+sp
+|𝑟 −𝑟 |−𝑘
+sp
+|𝑟 −𝑟 |
+)︀
+𝜏ˆ
+𝑖 𝑖 𝑖+1 𝑖 𝑖−1 𝑖 𝑖−1 𝑖
+Themagnitudeofthespringforces(i.e. stiffness)iscontrolledbyspringconstants,𝑘sp. Thetypicalvaluesofthe
+spring constant (keyword: springconst) can be taken to be within the range of 0.01 Eh/Bohr2 to 1.0 Eh/Bohr2.
+If the spring constants are choosen to be the same for all pairs of adjacent images, the images will be equally
+distributed along the path. However, it is also possible to choose energy-weighted spring constants (keyword:
+energy_weighted) so as to increase the density of images in the higher energy regions[4, 385]. In an energy-
+weightedNEBcalculationthespringconstantsarescaledaccordingtotherelativeenergyoftheimages, froma
+lower-boundvalue(keyword:springconst)toanupper-boundvalue(keyword:springconst2),by
+𝑘 sp = {︂ (1−𝛼 𝑖 )𝑘u+𝛼 𝑖 𝑘l, if𝐸 𝑖 >𝐸ref
+𝑖 𝑘 , otherwise
+𝑙
+𝛼 =
+𝐸max−𝐸
+𝑖
+𝑖 𝐸max−𝐸ref
+where𝑘u and𝑘l aretheupper-andlower-boundvaluesforthespringconstant. 𝐸max isthecurrentestimateofthe
+maximumenergyalongthepath,𝐸 isthehigherenergyimageofthepairofimagesconnectedbylinesegment𝑖
+𝑖
+and𝐸ref istheenergyofthehigherenergyminimum. Theenergy-weightedspringswilltypicallyservetoimprove
+thetangentestimateinthebarrierregionandhencestabilizethecalculations. Theinclusionofenergy-weighted
+springscanbeimportantinreactionswheretheenergybarrierisnarrowand/orthepathwayischaracterizedbya
+long‘energytail’,e.g.,inrearrangementsordissociationreactions. Thechoiceofspringconstantswillaffectthe
+behaviorofacalculation,especiallythenumberofiterationsneededtoreachconvergence. Otherformulationsfor
+springforcesarealsoavailablesinceORCA4.2(keyword: springtype). Thesearereferredtoastheoriginal[416]
+andideal[553]springforces. Theoriginalspringforcesareestimatedbyaspringactingoneachdegreeoffreedom
+728 Chapter7. DetailedDocumentation
+
+[... start of page 751 ...]
+ORCAManual,Release6.0.0
+betweenapairofadjacentimages. Foridealspringseachimageisassignedanidealpositionalongthepathbased
+on a linear interpolation of the current location of the images and the individual images interact with the ideal
+locationsviaspringforces. Theidealspringsarecurrentlynotimplementedtoworkwithenergyweightedspring
+constants.
+WhileonlythecomponentofthespringforceparalleltothepathisincludedinanNEBcalculation(bydefault)the
+usercanchoosetoincludeafractionofthes

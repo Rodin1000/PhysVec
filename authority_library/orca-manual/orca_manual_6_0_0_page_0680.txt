@@ -1,0 +1,75 @@
+[... end of page 679 ...]
+icissue,whichis
+avoidedwithtighterthresholds(D4TPre=1e-14). Thedefaultsettingsischosenconservativeandrarelyproduces
+artifacts. As last resort, an imaginary shift can be added to mitigate intruder states. Note that imaginary shifts
+(default=0.0)arerestrictedthecanonicalFIC-NEVPT2-notDLPNO.
+ThePSapproximationcompletelyneglectsCFGswithasmallweight. ThisiscontrastedbytheEPSapproximation,
+wherethesmallweights(uptothreshD4TQuad)arestillaccountedfor(firstordercorrection).[343]. Theresults
+aremorerobustbutalsomoreexpensivecomparedtothePSapproximation.
+PTSettings
+D4Step D4PT # running the standard code withthe EPS approximation
+D4TPre 1e-10 # default truncation 4-RDM
+(continuesonnextpage)
+7.19. N-ElectronValenceStatePertubationTheory 657
+
+--- Page 680 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+D4TQuad 1e-14 # selects CFGs for the first order correction.
+end
+Huge computational savings can be achieved with the cumulant expansion, which have been recently re-
+evaluated.[343]. Theresultsshouldbetreatedwithcareasfalseintruderstatescanemerge.[911]Inthesecases,
+the imaginary level shift is the only mitigation tool. Note that the imaginary shift is implemented only for FIC-
+NEVPT2.
+PTSettings
+D4Step Cu4 # 4-RDM approximated with cumulants
+# "Cu34" to approximate 3-RDM and 4-RDM
+imaginary 0.0 # imaginary shift (only for FIC-NEVPT2)
+end
+7.19.5 Selecting or Specific States for NEVPT2
+ORCAbydefaultcomputesallstatesdefinedintheCASSCFblockinputwiththeNEVPT2approach. Thereare
+cases,wherethisisnotdesiredandtheuserwantstoskipsomeofthesestates. TheinputmaskofSelectedRoots
+isequivalenttotheweightskeywordinthe%casscfblock: TheenumerationSelectedRoots[0]referstothe
+numberingofthemultiplicityblocksandtherespectiverootsdefinedinCASSCF.
+!NEVPT2 ...
+%casscf
+...
+MULT 1,3 # multiplicity block
+NRoots 2,2 # number of roots for the MULT blocks
+# detailed settings (optional) for the PT2 approaches
+PTSettings
+# option to skip the PT2 correction for a selected multiplicity block and root
+# (same input structure as weights in %casscf)
+selectedRoots[0]=0,1 # skip the first roots of MULT=1
+selectedRoots[1]=0,0 # skip MULT=3 roots
+end
+end
+7.19.6 Unrelaxed Densities and Natural Orbitals
+WiththeFIC-NEVPT2ansatz,itispossibletorequeststate-specificunrelaxeddensities
+𝛾(𝑝,𝑞)=<Ψ |𝐸𝑝|Ψ >,
+𝐼 𝑞 𝐼
+where Ψ refers to NEVPT2 wave function of the I’th state. The code is implemented using the ORCA AGE
+𝐼
+tool-chains.[474] In its present form the code runs serial. Note that the density can be used to generate natural
+orbitals.
+%casscf
+...
+PTMethod FIC_NEVPT2
+# detailed settings (optional)
+PTSettings
+# densities are disabled by default
+Density Unrelaxed # unrelaxed density <0+1|E(p,q)|0+1>
+Cu4 # cumulant 4-rdm approximated unrel. density
+(continuesonnextpage)
+658 Chapter7. DetailedDocumentation
+
+[... start of page 681 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Cu34 # cumulant 3/4-rdm approximated unrel. density
+FirstOrder # approximate unrel. density <0|E(p,q)|1>
+NatOrbs True # off by default
+end
+end
+The density as well the natural orbitals are state-specific. Thus, ORCA repeats the population analysis for each
+state. Withtheaddedkeyword!KeepDenstheNEVPT2densityisstoredinthedensitycont

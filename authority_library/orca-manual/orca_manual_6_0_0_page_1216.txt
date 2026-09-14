@@ -1,0 +1,89 @@
+[... end of page 1215 ...]
+Variable NNegative = 0;
+Variable OptDone;
+# -----------------------------------------------------------
+# Perform a single point calculation. We need it for
+# the initial geometry from the property file
+# -----------------------------------------------------------
+New_Step
+!&{method}
+Step_End
+myGeom.Read();
+myGeom.WriteXYZFile(filename=myFilename);
+(continuesonnextpage)
+7.60. CompoundExamples 1193
+
+--- Page 1216 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# -----------------------------------------------------------
+# Start a for loop over number of tries
+# ----------------------------------------------------------
+For itry From 1 To maxNTries Do
+# --------------------------------------------
+# Perform a geometry optimization/Frequency calculation
+# --------------------------------------------
+New_Step
+! &{method} freq Opt
+*xyzfile &{charge} &{multiplicity} &{myFilename}
+Step_End
+res = freqs.readProperty(propertyName = "THERMO_FREQS");
+res = modes.readProperty(propertyName = "HESSIAN_MODES");
+myGeom.Read();
+# ---------------------------------------------
+# check for sufficiently negative frequencies
+# ---------------------------------------------
+NNegative = 0;
+For ifreq From 0 to freqs.GetSize()-1 Do
+if ( freqs[ifreq] < CutOff ) then
+myGeom.FollowNormalMode(vibrationSN=ifreq, scalingFactor=scaling);
+NNegative = NNegative + 1;
+endif
+endfor
+myGeom.WriteXYZFile(filename=myFilename);
+If ( NNegative <= NNegativeTarget ) then
+goto OptDone;
+endif
+endfor
+# -----------------------------------------------------------------
+# Either found correct geometry or reached maximum number of tries.
+# -----------------------------------------------------------------
+OptDone :
+if (NNegative > NNegativeTarget) then
+print("ERROR The program did not find a structure with the desired\n number of imaginary␣
+frequencies.\n There are %9.3lf negative frequencies after %3d steps", NNegative,itry);
+˓→
+else
+print("\nSUCCESS optimized structure with (%d) negative\n frequencies found after %3d steps",
+NNegative, itry);
+˓→
+endif
+End
+7.60.8 Gradient extrapolation
+Introduction
+Thisscriptextrapolatesthegradientofamolecule. ItusesatwopointextrapolationwheretheHartree-Fockand
+correlationpartsofthegradientareextrapolatedseparately. Thisopensthewayforgeometryoptimizationswith
+extrapolatedgradients.
+Filename
+gradientExtrapolation.cmp
+SCRIPT
+1194 Chapter7. DetailedDocumentation
+
+[... start of page 1217 ...]
+ORCAManual,Release6.0.0
+# Author: Dimitrios G. Liakos and Frank Neese
+# Date : May of 2024
+#
+# This is a compound file that extrapolates the
+# energy gradients to Complete Basis Set Limit (CBS).
+#
+# STEPS:
+# Step1 : Run HF calculation with small basis set
+# Read scfGradX and scfEnX
+# Step2 : Run Correlation calculation with small basis set
+# Read totalGradX and totalEnX
+# Step3 : Calculate the gradient differene to get
+# the corrGradX (only the correlation part)
+# Step4 : Run HF calculation with big basis set
+# Read scfGradY and scfEnY
+# Step5 : Run correlat

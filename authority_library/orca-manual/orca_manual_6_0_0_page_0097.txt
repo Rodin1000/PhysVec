@@ -1,0 +1,76 @@
+[... end of page 96 ...]
+# packed format suitable for efficient processing
+! AO-METHOD
+# computes contributions from integrals with 3- and 4-external
+# labels directly from AO integrals. Can be done for integral
+# direct and conventional runs. In particular, the conventional
+# calculations can be very efficient
+! MO-METHOD (this is the default)
+# performs a full four index integral transformation. This is
+# also often a good choice
+! RI-METHOD
+# selects the RI approximation for all integrals. Rarely advisable
+! RI34-METHOD
+(continuesonnextpage)
+74 Chapter6. RunningTypicalCalculations
+
+--- Page 97 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# selects the RI approximation for the integrals with 3- and 4-
+# external labels
+#
+# The module has many additional options that are documented
+# later in the manual.
+! RCSinglesFock
+! RIJKSinglesFock
+! NoRCSinglesFock
+! NoRIJKSinglesFock
+# Keywords to select the way the so-called singles Fock calculation
+# is evaluated. The first two keywords turn on, the second two turn off
+# RIJCOSX or RIJK, respectively.
+Note:
+• ThesameFrozenCoreoptionsasforMP2areappliedintheMDCImodule.
+• SinceORCA4.2,anadditionalterm,called“4th-orderdoubles-triplescorrection”isconsideredinopen-shell
+CCSD(T).Toreproducepreviousresults,oneshoulduseakeyword,
+%mdci
+Include_4thOrder_DT_in_Triples false
+end
+Thecomputationaleffortforthesemethodsishigh—O(N6)forallmethodsandO(N7)ifthetriplescorrection
+is to be computed (calculations based on an unrestricted determinant are roughly 3 times more expensive than
+closed-shell calculations and approximately six times more expensive if triple excitations are to be calculated).
+This restricts the calculations somewhat: on presently available PCs 300–400 basis functions are feasible and if
+you are patient and stretch it to the limit it may be possible to go up to 500–600; if not too many electrons are
+correlatedmaybeevenupto800–900basisfunctions(whenusingAO-directmethods).
+Tip:
+• ForcalculationsonsmallmoleculesandlargebasissetstheMO-METHODoptionisusuallythemosteffi-
+cient;sayperhapsuptoabout300basisfunctions. Forintegralconventionalruns,theAO-METHODmay
+evenmoreefficient.
+• Forlargecalculations(>300basisfunctions)theAO-METHODoptionisagoodchoice. If,however,youuse
+verydeeplycontractedbasissetssuchasANOsthesecalculationsshouldberunintheintegralconventional
+mode.
+• AOX-METHODisusuallyslightlylessefficientthanMO-METHODorAO-METHOD.
+• RI-METHOD is seldom the most efficient choice. If the integral transformation time is an issue than you
+canselect%mdci trafotype trafo_riorchooseRI-METHODandthen%mdci kcopt kc_ao.
+• RegardingthesinglesFockkeywords(RCSinglesFock,etc.),theprogramusuallydecideswhichmethodto
+usetoevaluatethesinglesFockterm. Formoredetailsonthenatureofthisterm,andoptionsrelatedtoits
+evaluation,seeThesinglesFockterm.
+Toputthisintoperspective,consideracalculationonserinewiththecc-pVDZbasisset—abasisonthelowerend
+ofwhatissuitableforahighlycorrelatedcalculation. ThetimerequiredtosolvetheequationsislistedinTable
+6.1. Wecandrawthefollowingconclusions:
+• As long as one can store the integrals and the I/O system of the computer is not the bottleneck, the most
+efficientwaytodocoupled-clustertypecalculationsisusuallytogoviathefulltransformation(itscalesas
+O(N5)whereasthelaterstepsscaleasO(N6)andO(N7)respectively).
+6.1. SinglePointEnergiesandGradients 75
+
+[... start of page 98 ...]
+ORCAManual,Release6.0.0
+• AO-based coupled-cluster calculations are not much inferior. For larger basis sets (i.e. when the ratio of
+virtualtooccupiedorbitalsislarger),thecomputationtimeswillbeevenmorefavorablefortheAObased
+implementation. TheAOdirectmethodusesmuchlessdiskspace. However,whenyouuseaveryexpensive
+basis set the overhead will be larger than what is observed in this example. Hence, conventionally stored
+integrals—ifaffordable—areagoodchoice.
+• AOX-basedcalculationsrunatessentiallythesamespeedasAO-basedcalculations. SinceAOX-basedcal-
+culationstakefourtimesasmuchdiskspace,theyareprettymuchoutdatedandtheAOXimplementationis
+onlykeptforhistoricalreasons.
+•

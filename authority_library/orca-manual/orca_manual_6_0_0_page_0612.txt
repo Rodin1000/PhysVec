@@ -1,0 +1,89 @@
+[... end of page 611 ...]
+hanges
+1 # maximize overlap of active orbitals and check sanity. (default for DIIS)
+2 # make natural orbitals in every iteration (default SuperCI)
+3 # make canonical orbitals in every iteration
+4 # localize orbitals
+Inadditiontomaximizingtheoverlap,"ActConstraints 1"checksifthecompositionoftheactivespacehas
+changedi.e. anorbitalhasbeenrotatedoutoftheactivespace. Inthiscase,ORCAabortsandstoresthelastvalid
+setoforbitals. Belowisanexampleerrormessage.
+--- Orbital Update [ DIIS]
+--- Failed to constrain active orbitals due to rotations:
+(continuesonnextpage)
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 589
+
+--- Page 612 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Rot( 37, 35) with OVL=0.960986
+Rot( 38, 34) with OVL=0.842114
+Rot( 43,104) with OVL=0.031938
+In the snippet above, the active space ranges from 37-43. The program reports that orbitals 37,38 and 43 have
+changedtheircharacter. Theoverlapoforbital43(active)withtheprevioussetofactiveorbitalsisjust3%andthe
+programaborts. Thereareanumberofreasons,whythishappensinthecalculation. Ifthiserroroccursconstantly
+with the same orbitals, it is worthwhile to inspect the rotating partner orbitals (visualize). It might be sign that
+theactivespaceisnotbalancedandshouldbeextended. Inmanyinstanceschangingthelevel-shiftorlowering
+switchconvissufficienttoprotecttheactivespace. Insomecases,turningoffthesanitycheck("ActConstraints
+0")andre-rotatingorbitalswillbringCASSCFclosertoconvergence. Someproblemscanbeavoidedbyabetter
+designofthecalculation. TheCASSCFtutorialelaboratesonthesubjectinmoredetail.
+Therearesituationssuchasparameterscans,where“actconstraints”iscounter-productiveandshouldbedisabled.
+Inotherwords,wewanttoallowchangesintheactivespacecomposition. Asanexample,considertherotation
+ofethylenearounditsdouble-bondrepresentedbyaCAS(2,2). Althoughtheactivespaceconsistsofthebonding
+andanti-bondingorbitals𝜋-orbitals,theircompositionintermsofatomicorbitalschangesfromtheeclipsedtothe
+staggeredconformation. Dependingontheactualinputsettings(orbstepandnumberofscanpoints), thismight
+triggeranabort.
+Finalorbitalsoptions.
+Oncethecalculationhasconverged,ORCAwilldoafinalmacro-iteration,wheretheorbitalare“finalized”. For
+complete active spaces (CAS), these transformations do not alter the final energy and wavefunction. Note, that
+solutions from approximate CAS-CI solvers such as the ICE approach or the DMRG ansatz are affected by the
+final orbital transformation. The magnitude depends on the truncation level (e.g. TGen, TVar and MaxM) of the
+approximatedwavefunction. Thedefaultfinalorbitalsarecanonicalintheinternalandexternalspacewithrespect
+tostate-averagedFockoperator. Theactiveorbitalsarechosenasnaturalorbitals. Otherorbitalchoicesareequally
+validandcanbeselectedfortheindividualsubspaces.
+#internal space
+IntOrbs CanonOrbs # canonical
+LocOrbs # localized
+unchanged # no changes
+# partner orbitals for the active space based
+# on various concepts
+PMOS # based on orthogonalization tails.
+OSZ # based on oszillator orbital
+DOI # based on differential overlap
+#external space
+ExtOrbs CanonOrbs # canonical
+LocOrbs # localized
+unchanged # no changes
+# partner orbitals for the active space based
+# on various concepts
+PMOS # based on orthogonalization tails.
+OSZ # based on oszillator orbital
+DOI # based on differential overlap
+DoubleShell # based on the shell and angular momentum
+# of the highest active orbitals, the first few
+# virtual orbitals correspond to the doubled-shell.
+# All other virt. orbitals are canonicalized.
+# For 3d-metal complexes, these are the 4d orbitals!
+# For 4d-metal complexes, these are the 5d orbitals!
+# And so on...
+#active space
+ActOrbs NatOrbs # natural
+CanonOrbs # canonical
+(continuesonnextpage)
+590 Chapter7. DetailedDocumentation
+
+[... start of page 613 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+LocOrbs # localized
+unchanged # no changes
+dOrbs # purify metal d-orbital and call the AILFT
+fOrbs # purify metal f-orbital and call the AILFT
+SDO # Single Determinant Orbitals: this is only possible if the
+# active space has a single hole or a single electron.
+# SDOs are then the unique choice of orbitals that simultaneously
+# turns each CASSCF root into a single determinant.
+SDOs are specific for the active orbital space.[491] The set of options (PMOS, OSZ, DOI, DoubelShell) are
+specificfortheinactiveandexternalspace. Theyaimtoassisttheextensionofthecurrentactivespace. Allfour
+options,re-designthefirstNOrb(numberofactiveorbitals)nexttotheactivespace,whiletheremainingorbitals
+ofthesamesubspacearecanonical. There-designedorbitalarebasedondifferentconcepts.
+• PMOS generates the bond

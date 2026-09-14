@@ -1,0 +1,64 @@
+Your task is to generate executable code that reproduces results from a research paper according to the provided task plan.
+
+-----------------------------------------------------------------------------------------------
+[inputs]:
+You will receive:
+
+(1) plan
+    A detailed plan describing available information for reproducing the calculations:
+    - intended calculation step to run now
+    - theoretical methods/models
+    - constraints/approximations/expectations
+    - figure/table/subplot identifier(s) to reproduce
+
+(2) summary of the calculation setup
+    A concise description of:
+    - computation type (opt, freq, SP, excited states, etc.)
+    - level of theory, basis set, solvation, approximations
+    - known numerical settings (SCF thresholds, grids, integration, etc.)
+
+CRITICAL:
+- You must not invent missing paper-specific values if they can be found via MCP.
+- If values are not found via MCP, keep executability by choosing a clearly stated
+  assumption (see "remaining_unclear_factors").
+
+-----------------------------------------------------------------------------------------------
+[Instructions]
+
+1. Read Plan_info to understand the task requirements and all parameter values.
+2. Read Query_summary to understand how to use the required packages.
+3. STRICTLY follow Code_generation_rules to structure the code. Output the required structure from the start: first block = #Tags_keywords then # Scientific problem: and # Elements used: then ! line(s); before each %... use #Tags_inputblocks_<name> plus purpose/provenance; before * xyz use #Tags_geometryblocks plus purpose/provenance, then * xyz ... * with no # lines inside; use def2-TZVP not def2-TZVP(-f), def2-SVP not ZORA-def2-SVP in basis.
+4. Geometry must be inline * xyz Charge Mult followed by full coordinate lines; *** xyzfile * is NOT allowed.**
+5. Generate complete, executable code that reproduces the target properties as instructed by the user request.
+6. Ensure ALL parameter values are explicitly specified in the input file of the DFT software. 
+
+**CRITICAL:** You MUST STRICTLY FOLLOW the code generation rules.
+
+-----------------------------------------------------------------------------------------------
+[Output]
+Your output MUST consist of two parts:
+
+1. **JSON block**: A JSON object (valid for json.loads()) enclosed in ```json and ```. The dictionary MUST contain ONLY metadata:
+   - "subplot_name": The subplot name specified in Plan_info.
+   - "code_type": The lowercase string "orca input file that can be executed directly".
+   Do NOT put code_content in the JSON.
+
+2. **Code block**: The full source code inside XML-style fences: <CODE> and </CODE>. Put the code directly between these tags; no JSON escaping.
+
+**CRITICAL:** You MUST NOT include this prompt itself (including the example below) anywhere in your output. This prevents the example from being mistakenly extracted as generated code.
+
+**CRITICAL:** Use real newline characters (actual line breaks) between lines in the code block. Do NOT use the two-character sequence backslash-n (\n) to represent newlines—ORCA requires actual line breaks in the input file. Each line of the ORCA input (e.g. ! line, %block, * xyz coordinates) must be on its own line.
+
+**CRITICAL:** Use <CODE> to start and </CODE> to end the code block. Do NOT use <CODE> again as the closing tag.
+
+Example output (format only; do not copy into your output):
+```json
+{
+  "subplot_name": "example_figure",
+  "code_type": "orca input file that can be executed directly"
+}
+```
+
+<CODE>
+...code content here...
+</CODE>

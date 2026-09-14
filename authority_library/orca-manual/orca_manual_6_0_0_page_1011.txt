@@ -1,0 +1,86 @@
+[... end of page 1010 ...]
+Storemodifierisnotspecified,thefreeenergyprofilesarestoredevery1000MDstepsperdefault.
+TheWellTemperedmodifierswitchesonwell-temperedMetadynamics[73]. IncontrasttostandardMetadynam-
+ics,thefreeenergyprofileconvergestowardsalimitforlongrunswiththisapproach. Inshortterms,thisapproach
+scalesdownthehillsizeatpositionswherealreadymanyhillshavebeenspawnedbefore,sothatthechangesinthe
+biaspotentialbecomesmallerovertime(convergence). TheWellTemperedmodifierexpectsonerealargument,
+whichistheso-calledbiastemperature,specifiedintemperatureunits. Thebiastemperatureshouldbechosenin
+a way so that 1 ·𝑘 ·𝑇 is around the same size as the largest barrier which the simulation shall overcome.
+2 B Bias
+Forexample, abiastemperatureof12000Kiswell-suitedtoovercomebarriersofaround100kJmol−1. Note
+thattheMetadynamicsmoduleneedstoknowthesimulationtemperatureinordertoreconstructthefreeenergy
+profileinawell-temperedMetadynamicsrun. Typically,athermostatshouldbeactiveduringaMetadynamicsrun,
+keepingthesimulationtemperatureconstant. Inthiscase,thetemperatureissimplyobtainedfromthethermostat.
+988 Chapter7. DetailedDocumentation
+
+--- Page 1011 ---
+ORCAManual,Release6.0.0
+However,ifnothermostatfortheregionallisspecified,thesimulationtemperaturehastobespecifiedmanually
+for well-tempered Metadynamics. This can be achieved by the temperature modifier, which expects one real
+argument–thesimulationtemperatureintemperatureunits.
+TheLagrangemodifierswitchesonextendedLagrangianMetadynamics[408]. Inthisvariant,avirtualparticle
+(withmassandvelocity)movesinthespacespannedbytheColvars,andtheonlyconnectionbetweenthisparticle
+andtherealatomisticsystemisaharmonicspring. Thebiaspotential(theGaussianhills)onlyactsonthevirtual
+particle. The first argument is the mass of the virtual particle in a.m.u. The second argument is the harmonic
+spring constant in units of kJ mol−1, which is evaluated in scale units – see the Scale modifier above. Typical
+values depend on the system and Colvars, but might be 100 a.m.u. and 10 kJ mol−1. Optionally, a third and
+fourthparametercanbegiventoswitchonthermostatingofthevirtualparticle. AsimpleBerendsenthermostat
+isappliedhere. Thethirdargumentisthetargettemperatureofthevirtualparticle,andthefourthargumentisthe
+thermostattimeconstant𝜏. Agoodchoicewouldbeatargettemperatureof100Kand𝜏 = 10fs. Notethatin
+contrasttothenormalBerendsenthermostat,thevirtualparticleisonlycooled,butneverheated. Inotherwords,
+thethermostatonlybecomesactiveiftheinstantaneoustemperatureofthevirtualparticlebecomeslargerthanthe
+targettemperature. Thisistoensurethatthevirtualparticlecanchangeitsdirection–otherwise,itmighthappen
+thatitisdriveninthesamedirectionforverylongtimeintervals.
+TheResetmodifierresetsthebiasprofile,i. e.,itdeletesallhillswhichhadbeenspawned,sothatthebiasprofile
+becomesflatagain. AllotherparametersoftheMetadynamicssimulationarenotmodified. If,forexample,hill
+spawningisstillon,thennewhillswillbespawnedinthenextsimulationrun.
+The Off modifier completely switches off Metadynamics. It deletes all hills and turns off the Metadynamics
+module. It also resets the choice of Colvars for Metadynamics, so you will need to use this first if you want to
+setupaseconddifferentMetadynamicsrunwithinthesameinputscript. Thismodifiercanonlybegivenasfirst
+argumenttotheMetadynamicscommand,andnofurtherargumentscanfollow.
+ArestartfilefortheMetadynamicsmodule(filename“basename.metarestart”)iswritteneachtimeanewhill
+hasbeenspawned. TheRestartcommanddetectsthisfileandautomaticallyrestartstheMetadynamicsrun(i. e.,
+loadsallhillsandthepositionsandvelocitiesoftheextendedLagrangianvirtualparticleifactive). However,this
+onlyhappenswhenMetadynamicsisactiveandsetupatthetimewhentheRestart commandisinvoked. The
+parametersfortheMetadynamicssimulationarenotrestarted. Therefore,leaveallparametersettingsviacallsto
+the Metadynamics command inplace inyour input file, and simplycall the Restart command afterall those,
+directlybeforetheRun command.
+PleaseseealsothediscussiononMetadynamicsin[Section1.3](#moldyn:sec_metadynamics).
+Thissectionisconcludedwithafullexampleforatwo-dimensionalwell-temperedextendedLagrangianMetady-
+namicsrunwithrestartability(justrunthesameinputagaintocontinuethesimulationwhereitendedlast). The
+twoColvarsaredefinedasdistancesbetweenatoms. Youneedtoadaptallparametersinbluetoyourquestionand
+system:
+Timestep 0.5_fs
+Initvel 350_K
+Thermostat NHC 350_K Timecon 100.0_fs
+Dump Position Stride 1 Filename "trajectory.xyz"
+Manage_Colvar Define 1 Distance Atom 0 Atom 1
+Manage_Colvar Define 2 Distance Atom 2 Atom 3
+Metadynamics Colvar 1 Scale 1.0_A Wall Lower 3.0 50.0 Upper 10.0 50.0 Range 0.0 15.0 100
+Metadynamics Colvar 2 Scale 1.0_A Wall Lower 1.0 50.0 Upper 8.0 50.0 Range 0.0 13.0 100
+Metadynamics HillSpawn 40 0.5 0.5 Store 2000
+Metadynamics WellTempered 6000_K
+Metadynamics Lagrange 100.0 10.0 200.0_K 10.0_fs
+Restart IfExists
+Run 100000
+7.51. AbinitioMolecularDynamicsSimulations 989
+
+[... start of page 1012 ...]
+ORCAManual,Release6.0.0
+Minimize
+MandatoryArguments: —
+OptionalArguments: method Keyword {Combined,LBFGS,Anneal}
+Modifiers: Steps n Integer —
+MaxGrad thres Real [kJmol−1Å−1]
+RMSGrad thres Real [kJmol−1Å−1]
+TempConv thres Real [temperature]
+Accel value Real —
+Damp value Real —
+StepLimit value Real [length]
+History n Integer —
+Noise value Real [length]
+OnlyH —
+PerformsaCartesianenergyminimizationofthesystem. Formolecules,thisislessefficientthanORCA’sbuilt-in
+geometry optimization in internal coordinates (i. e., requires more steps to converge). However, the algorithms
+employedherealsoworkwithlargeatomcounts(e. g.,50000)assometimesencounteredinQM/MMsimulations,
+which is absolutely out of scope of ORCA’s primary optimization module. Furthermore, the minimi

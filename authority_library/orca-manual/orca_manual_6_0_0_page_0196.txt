@@ -1,0 +1,69 @@
+[... end of page 195 ...]
+rsphericaloftheform
+(︂
+|R−O|
+)︂30
+𝑉 =
+𝑟𝑎𝑑𝑖𝑢𝑠
+orarectangularboxpotentialwith6wallsoftheform
+𝑉 =𝑒5(R−𝑤𝑎𝑙𝑙)
+Thesecanbegivenintwoways: byexplicitlydefiningtheoriginofthepotentialanditslimits,e.g:
+%GEOM ELLIPSEPOT 0,0,0,5,3,4 # the last are the a,b and c radii
+or:
+%GEOM SPHEREPOT 0,0,0,5 # the last is the radius
+or:
+6.3. GeometryOptimizations,SurfaceScans,TransitionStates,MECPs,ConicalIntersection1s7,3
+IRC,NEB
+
+--- Page 196 ---
+ORCAManual,Release6.0.0
+%GEOM BOXPOT 0,0,0,4,-4,3,-3,6,-6 # maxx, minx, maxy, miny, maxz and minz last
+wherethefirstthreenumbersarethecenterandthelastistheradiusforthesphere(ora,bandcfortheellipsoid)
+andthemaxandminx,yandzdimensionsofthebox. AllnumbersshouldbegiveninÅngström.
+Incaseasinglenumberisgiveninstead,thewallswillbeautomaticallycenteredaroundthecentroidofthemolecule
+andthatnumberwillbeaddedtotheminimumsphereorboxthatisnecessarytocontainthemolecule. Forexample:
+%GEOM SPHEREPOT 2
+or:
+%GEOM BOXPOT 2
+willbuildaminimumwallcenteredonthecentroidthatenclosesthemoleculeandadd2Ångströmontopofit.
+Stillonthespherecase,anegativenumberlike
+%GEOM SPHEREPOT -2
+willmakethetotalradiusofthespheretobeÅngström.
+OBS:Thiswillapplytoregulargeometryoptimizations,aswellastotheGlobalOptimizer(GOAT).
+6.3.9 Relaxed Surface Scans
+Afinalthingthatcomesinreallyhandyarerelaxedsurfacescans,i.e. youcanscanthroughonecoordinatewhile
+allothersarerelaxed. Itworksasshowninthefollowingexample:
+! B3LYP/G SV(P) Opt
+%geom Scan
+B 0 1 = 1.35, 1.10, 12 # C-O distance that will be scanned
+end
+end
+* int 0 1
+C 0 0 0 0.0000 0.000 0.00
+O 1 0 0 1.3500 0.000 0.00
+H 1 2 0 1.1075 122.016 0.00
+H 1 2 3 1.1075 122.016 180.00
+*
+IntheexampleabovethevalueofthebondlengthbetweenCandOwillbechangedin12equidistantstepsfrom
+1.35downto1.10Ångströmsandateachpointaconstrainedgeometryoptimizationwillbecarriedout.
+Note:
+• Ifyouwanttoperformageometryoptimizationataseriesofvalueswithnon-equidistantstepsyoucangive
+thisseriesinsquarebrackets,[]. Thegeneralsyntaxisasfollows:
+B N1 N2 = initial-value, final-value, NSteps
+or:
+B N1 N2 [value1 value2 value3 ... valueN]
+• Inadditiontobondlengthsyoucanalsoscanbondanglesanddihedralangles:
+B N1 N2 = ... # bond length
+A N1 N2 N3 = ... # bond angle
+D N1 N2 N3 N4 = ... # dihedral angle
+174 Chapter6. RunningTypicalCalculations
+
+[... start of page 197 ...]
+ORCAManual,Release6.0.0
+Tip:
+• Asinconstrainedgeometryoptimizationsitispossibletostarttherelaxedsurfacescanwithadifferentscan
+parameterthanthevaluepresentinyourmolecule. Butkeepinmindthatthisvalueshouldnotbetoofar
+awayfromyourinitialstructure.
+Amorechallengingexampleisshownbelow. Here,theH-atomabstractionstepfromCH toOH-radicaliscom-
+4
+putedwitharelaxedsurfacescan(videsupra). Thejobwa

@@ -1,0 +1,69 @@
+[... end of page 976 ...]
+ucanchoosetouseDFTforthegradient,energyandtransitiondipole,andthefast
+simplifiedTDA(Sec. SimplifiedTDAandTD-DFT)onlyforthederivativesbysetingSTDATRUEunder
+%ESD.
+• A simple trick can be used to accelerate the computation of derivatives. If the first displacement gives a
+transitiondipolethatistooclosetothereference,thenthederivativecanbeassumedtobesmallandjustthe
+plusdisplacementmaybetakentocomputethederivative(withanusuallysmallerror). Ifitislargeenough,
+thentheminusdisplacementisalsodoneandcentraldifferencesisused. Thisisthedefaultmethodandcan
+beturnedoffbysettingFASTDERtoFALSE.
+• ThecentraldifferencesoptioncanbealtogetherturnedoffbysettingCENTRALDIFFFALSEunder%ESD.
+954 Chapter7. DetailedDocumentation
+
+--- Page 977 ---
+ORCAManual,Release6.0.0
+• Ifyouarehavingproblems,setalargerPRINTLEVELtochecktheindividualcalculationofthederivatives,
+youmightbehavingsomekindofrootflippingduringthedisplacement,orsomeotherissue.
+TheFourierTransformstep
+After the calculation ofthe correlation function, it is necessary todo a Fourier Transform (FT) step. To do that
+numerically,itisneededtocorrectlychoosethegridinwichthetimepointswillbecomputed,forthataffectshow
+theresultswillbeobtainedinthefrequencydomain. Wehavedevelopedamethodtogenerateanoptimalsetof
+parameters,dependingonthefinalspectralresolutiondesired[199]anditwillbeusedbydefault. Evenso,you
+canchooseyourowngridbysettingtheNPOINTSandMAXTIME(inatomicunits!) flagsunder%ESD.There
+areafewcommentsrelatedtothat:
+• Because we solve the FT using a very efficient Cooley-Tukey algorithm, the NPOINTS should be always
+multipleoftwo. Youcanputanynumberontheinput,butthenextlargermultipleoftwowillbecalculated
+andset.
+• The MAXTIME should be enough so that the correlation function goes to zero. If anything goes wrong,
+pleasechecktheBASENAME.corrfuncfileforthat.
+• ThefinerthespectralresolutionchosenwithSPECRES,thelargestMAXTIMEmustbe.
+• IfyouhavealargerMAXTIME,youalsomustincreaseNPOINTS,otherwisethegridwillbetoosparseand
+manyoscillationswillbeskipped.
+Spectrumoptions
+ThefinalspectrumissavedinaBASENAME.spectrumfile,withthetotalspectrum,theFCandHTpartsdiscrim-
+inated,asexplainedinSec. ExcitedStateDynamics. Hearesomedetailedaboutit:
+• The range for which the spectrum is saved is given by default, but it can be set using SPECRANGE flag
+under%ESD,asSPECRANGE10000,70000.
+• All of the INPUT units should always be in CM-1, but you can choose the OUTPUT units by setting the
+UNITflagtoCM-1,NMorEV.
+• Inordertobetterconvergethecorrelationfunctionandapproximateexperimentalspectra,alineshapefunc-
+tioncanbeusedinsteadofthedelta. ThedefaultistouseaLOREZENTIANlineshape,butLINEScanbe
+settoDELTA,LORENTZ,GAUSSorVOIGT.
+• TheDELTAlineshapemightleadtoacorrelationfunctionthatoscillatesforever, sopleasetakecarewith
+thatoption.
+• ThedefaultlinewidthsareLINEW50andINLINEW250.
+• If you use a VOIGT lineshape, the Gaussian width can be controlled separately using the INLINEW flag.
+Bydefault,itwillbeproportialtotheLorezntiantoreachthesameFWHM.
+• The LINEW and INLINEW are NOT the full width half maximum (𝐹𝑊𝐻𝑀) of these curves. However
+theyarerelatedtothemby: 𝐹𝑊𝐻𝑀 =2×𝐿𝐼𝑁𝐸𝑊 and𝐹𝑊𝐻𝑀 =2.355×𝐼𝑁𝐿𝐼𝑁𝐸𝑊.
+𝑙𝑜𝑟𝑒𝑛𝑡𝑧 𝑔𝑎𝑢𝑠𝑠
+FortheVOIGTcurve,itisalittlemorecomplicatedbutintermsoftheotherFWHMs,itcanbeaproximated
+√︁
+as𝐹𝑊𝐻𝑀 =0.5346×𝐹𝐻𝑊𝑀 + (0.2166×𝐹𝑊𝐻𝑀2 +𝐹𝑊𝐻𝑀2 ).
+𝑣𝑜𝑖𝑔𝑡 𝑙𝑜𝑟𝑒𝑛𝑡𝑧 𝑙𝑜𝑟𝑒𝑛𝑡𝑧 𝑔𝑎𝑢𝑠𝑠
+• TheresolutionofthespectrumcanbemodifiedwiththeSPECRESflag. Bydefaultitisafractionofthe
+LINEW.Pleasebeawarethathigherresolution(smallerSPECRES),meanalargergridforthecorrelation
+functionandmoretimepointstocalculateon.
+7.48. MoreontheExcitedStateDynamicsmodule 955
+
+[... start of page 978 ...]
+ORCAManual,Release6.0.0
+General
+• ThetemperatureisaccountedforexactlyonAbsorptionandEmission[199]andcanbesetusingtheTEMP
+flag.
+• PRINTLEVELcanbesettoHIGHinordertoprintmoredetails,includingHuang-Rhysfactorswhichare
+usefulforrationalizingthecontributionofdifferentvibrationalmodestotherate/spectrum.
+• ThefrequenciesreadfromtheHessianfilescanbescaledbyanynumberbysettingtheSCALINGflagunder
+%ESD.Thedefaultis1.0.
+• Ifnecessary,thetransitiondipolecanalsobescaledbysettingtheTDIPSCALINGflag.
+• If you just want to compute an ES PES and stop, set WRITEHESS to TRUE and the correlation 

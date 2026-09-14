@@ -1,0 +1,78 @@
+[... end of page 184 ...]
+tivechargeinthenegativezdirection,andanegativechargeinthepositivezdirection,thenthezcomponent
+oftheelectricfieldispositive. Thisconventionisconsistentwithmostbutnotallotherprograms[784],socare
+mustbetakenwhencomparingtheresultsofORCAwithotherprograms.
+Another important aspect is the gauge origin of the electric field. The gauge origin of the electric field is the
+point(ormoreaccuratelyspeaking,oneofthepoints-asthereareinfinitelymanysuchpoints)wheretheelectric
+potential due to the electric field is zero. Different choices of the gauge origin do not affect the geometry and
+wavefunctionofthemolecule,astheydonotchangetheelectricfieldfeltbythemolecule,buttheydochangethe
+162 Chapter6. RunningTypicalCalculations
+
+--- Page 185 ---
+ORCAManual,Release6.0.0
+energyofthemolecule. Thedefaultgaugeoriginisthe(0,0,0)pointoftheCartesiancoordinatesystem,butitis
+possibletochooseothergaugeorigins:
+%scf
+EFieldOrigin CenterOfMass # use center of mass
+CenterOfNucCharge # use center of nuclear charge
+0.0, 0.0, 0.0 # use given X,Y,Z as origin (default: 0,0,0)
+# in the units chosen for the coordinates (Angstrom/Bohr)
+end
+NotethedefaultgaugeoriginoftheelectricfieldisdifferentfromthedefaultgaugeoriginoftheELPROPmod-
+ule,whichisthecenterofmass. Iftheuserchoosesthecenterofmass/nuclearchargeasthegaugeoriginofthe
+electric field, the gauge origin will move as the molecule translates; this has important consequences. For ex-
+ample, in an MD simulation of a charged molecule in an electric field, the molecule will not accelerate, unlike
+when EFieldOrigin is fixed at a given set of coordinates, where the molecule will accelerate forever. In gen-
+eral, CenterOfMass and CenterOfNucCharge are mostly suited for the finite difference calculation of electric
+properties,whereonefrequentlywantstochoosethecenterofmassornuclearchargeasthegaugeoriginofthe
+resultingmultipolemomentorpolarizabilitytensor. Instead,afixedoriginisexpectedtobemoreusefulforsimu-
+latingthechangesofwavefunction,geometry,reactivity,spectraetc. underanexternallyappliedelectricfield,as
+experimentallytheelectricfieldisusuallyappliedinthelabframe,ratherthanthecomovingframeofthemolecule.
+SimilartoEField,onecanalsoaddaquadrupolarfield:
+%scf
+QField 0.1, 0.0, 0.0, 0.05, 0.0, 0.0 # xx, yy, zz, xy, xz, yz components (in au) of the␣
+quadrupolar field
+˓→
+end
+Thegaugeoriginofthequadrupolarfieldisthesameasthatofthedipolarelectricfield. Moreover,theQField
+canbeusedtogetherwiththeEFieldkeyword. Thisallowsonetosimulateagraduallyvaryingelectricfield,for
+examplethefollowinginputspecifiesanelectricfieldthathasastrengthof0.01auatthegaugeorigin((0,0,0)by
+default),pointingtothepositivezdirection,andincreasesby0.001auforeveryBohrasonegoesinthepositivez
+direction:
+%scf
+EField 0.0, 0.0, 0.01
+QField 0.0, 0.0, 0.001, 0.0, 0.0, 0.0
+end
+Asasecondexample,onecanalsosimulateaniontrap:
+%scf
+QField -0.01, -0.01, -0.01, 0.0, 0.0, 0.0
+end
+Underthisquadrupolarfieldsetting,aparticlewillfeelanelectricfieldthatpointstowardsthegaugeorigin,whose
+strength(inau)is0.01timesthedistancetothegaugeorigin(inBohr). Thiswillkeepcationsclosetotheorigin,
+but pushes anions away from the origin. Unfortunately, there is no analytic gradient available for quadrupolar
+fields.
+NOTE
+• Anau(atomicunit)isafairlylargeunitforelectricfields: 1au=51.4V/Angstrom. Bycomparison,charged
+residuesinproteins,aswellasscanningtunnelingmicroscope(STM)tips,typicallygenerateelectricfields
+withinabout1V/Angstrom;electrodesurfacesusuallygenerateelectricfieldswithin0.1V/Angstromunder
+typicalelectrolysisconditions[784]. Ifthemoleculeisnotclosetothesourceoftheelectricfield,itiseven
+hardertogeneratestrongelectricfields: forexample,a100Vvoltageacrosstwometalplatesthatare1mm
+apartgeneratesanelectricfieldofmerely10−5V/Angstrom. Therefore,ifexperimentallyacertainstrength
+ofhomogeneouselectricfieldseemstopromoteareaction,butnosucheffectisfoundincalculation,please
+considerthepossibilitythattheexperimentallyobservedreactivityisduetoastronglocalelectricfieldnear
+the electrode surface (that is much higher than the average field strength in the system), or due to other
+effects such as electrolysis. Conversely, if you predict a certain molecular property change at an electric
+6.1. SinglePointEnergiesandGradients 163
+
+[... start of page 186 ...]
+ORCAManual,Release6.0.0
+fieldstrengthof,e.g. >0.1au,itmaybeanon-trivialquestionwhethersuchanelectricfieldcanbeeasily
+realizedexperimentally.
+• The electric field breaks the rotational symmetry of the molecule, in the sense that rotating the molecule
+can change its energy. Therefore, geometry optimizations in electric fields cannot be done with internal
+coordinates. Whentheuserrequestsgeometryoptimization,theprogramautomaticallyswitchestoCarte-
+sian coordinates if it detects an electric field. While Cartesian coordinates allow the correct treatment of
+molecular rotation, they generally lead to poor convergence, so a large number of iterations is frequently
+necessary.
+• Similarly, whenthe molecule ischarged, its energyis not invariant withrespect to translations. However,
+whenthereisonlyadipola

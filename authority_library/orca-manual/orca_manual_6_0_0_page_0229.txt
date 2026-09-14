@@ -1,0 +1,69 @@
+[... end of page 228 ...]
+therearesixfrequencieswhichareidenticallyzero. Thesefrequencies
+correspondtotherotationsandtranslationsofthemolecule. TheyhavebeenprojectedoutoftheHessianbefore
+thecalculationofthefrequenciesandthus,thezerovaluesdonottellyouanythingaboutthequalityoftheHessian
+that has been diagonalized. The projection can be turned off by PROJECTTR FALSE under %FREQ, so that the
+206 Chapter6. RunningTypicalCalculations
+
+--- Page 229 ---
+ORCAManual,Release6.0.0
+frequenciesofthetranslationsandrotationscandeviatefromzeroandthedeviationsrepresentametricofthenu-
+mericalerroroftheHessiancalculation. Thisisdoneautomaticallywhenthereise.g. anexternalelectricfieldthat
+makestheexacttranslationaland/orrotationalmodeshavenon-zerofrequencies(seesectionAddingfiniteelectric
+field). However,innormalcaseswherethemoleculeisexpectedtoobeybothtranslationalandrotationalinvari-
+ance, itisstronglydiscouraged toturnoff PROJECTTRwhencalculatingthermochemicalquantities(especially
+entropies and Gibbs free energies). This is because when the frequencies of translational and rotational modes
+exceedCutOffFreq(whichis1cm−1 bydefault),theircontributionstothepartitionfunctionwillbecalculated
+usingtheformulasforvibrations. Asaresult,thecalculatedentropyisinaccurate(duetotreatingtranslationsand
+rotations as vibrations), is sensitive to numerical noise, and in particular exhibits a finite jump when the (theo-
+reticallyzero)frequenciesofthetranslationalandrotationalmodescrossCutOffFreq. Therefore,theonlycase
+wheretheuserneedstoturnoff PROJECTTRmanuallyiswhentheexactHessianisexpectedtohavezerotransla-
+tionalandrotationalfrequencies,andonewantstocheckhowmuchthetranslationalandrotationaleigenvaluesof
+theactuallycomputedHessiandeviatefromzero. Thethermochemicalquantitiesfromsuchacalculationareless
+reliableandshouldnotbeused;eveniftheydifferconsiderablyfromtheresultswithPROJECTTR TRUE,thisdoes
+notnecessarilymeanthatthelatterareunreliable.
+WithoutPROJECTTR FALSE,thereliabilityofthecalculatedfrequencieshastobejudgedbycomparisonofcalcu-
+lationswithdifferentconvergencecriteria,increments,integrationgridsetc. Thenumericalerrorinthefrequencies
+may reach 50 cm−1 but should be considerably smaller in most cases. Significant negative frequencies indicate
+saddlepointsoftheenergyhypersurfaceandprovethattheoptimizationhasnotresultedinanenergyminimum.
+OBS: By default, the Hessian is made translation invariant by applying the “acoustic sum rule” ([786]), which
+reduces the effect of noise from numerical integration coming from DFT or COSX, except for the Partial and
+Hybrid Hessians where it does not make sense. It can be set to false by using TRANSINVAR FALSE under
+%FREQ.
+6.5.1 Mass dependencies
+Ofcoursethecalculatedfrequenciesdependonthemassesusedforeachatom. Whilethiscanbeinfluencedlater
+through the orca_vib routine (see Section Isotope Shifts for more detail) and individually for each atom in the
+geometryinput,onemightpreferusingasetofpreciseatomicmassesratherthanthesetofatomicweights(which
+aresetasdefault). Thiscanbeachievedthroughthe!Mass2016keyword,whichtriggersOrcatousethoseatomic
+massesrepresentingeitherthemostabundantisotopeorthemoststableisotope(ifallisotopesareunstable)ofa
+certainelement(e.g. themassof35𝐶𝑙forchlorineorthemassof98𝑇𝑐).
+Note: Thecalculationofnumericalfrequenciesputsratherhighdemandsonbothcomputertimeandaccuracy.
+Inordertogetreliablefrequenciesmakesurethat:
+• YourSCFistightlyconverged. Aconvergenceaccuracyofatleast10−7 Ehinthetotalenergyand10−6 in
+thedensityisdesirable.
+• GridsofatleastDEFGRID2(default)areused.
+• The use of two-sided (i.e. central) differences increases the computation time by a factor of two but gives
+moreaccurateandreliableresults.
+• SmallauxiliarybasissetslikeDGauss/JorDeMon/Jmaynotresultinfullyconvergedfrequencies(upto40
+cm−1 differencecomparedtofrequenciescalculatedwithoutRI).Thedef2/Juniversalauxiliarybasissets
+ofWeigendthatarenowthedefaultinORCA(ortheSARC/Jforscalarrelativisticcalculations)arethought
+togivesufficientlyreliableresults.
+• Possibly, the convergence criteria of the geometry optimization need to be tightened in order to get fully
+convergedresults.
+• Ifyoucanaffordit,decreasethenumericalincrementto0.001Bohrorso. Thisputsevenhigherdemandson
+theconvergencecharacteristicsoftheSCFcalculationbutshouldalsogivemoreaccuratenumericalsecond
+derivatives. Iftheincrementistoosmallortoohighinaccurateresultsareexpected.
+Thecalculationofanalyticalfrequenciesismemoryconsuming. Tocontrolmemoryconsumptionthe%maxcore
+parameter must be set. For example %maxcore 8192 - use 8 Gb of memory per processor for the calculation.
+6.5. VibrationalFrequencies 207
+
+[... start of page 230 ...]
+ORCAManual,Release6.0.0
+Theusershouldprovidethevalueaccordingtothecomputeravailablememory. Thebatchingbasedon%maxcore
+parameterwillbeintroducedautomaticallytoovercomeprobablememoryshortage.
+Numericalfrequencycalculationsarerestartable(butanalyticalfrequencycalculationsarenot). Ifthenumerical
+frequenciesjobdiedforonereasonoranotheryoucansimplycontinuefromwhereitstoppedasinthefollowing
+example:
+! STO-3G NumFreq
+%freq Restart true # restart an old calculation
+# this requires .res.* files 

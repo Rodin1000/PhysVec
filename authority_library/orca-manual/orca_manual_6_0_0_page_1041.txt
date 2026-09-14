@@ -1,0 +1,79 @@
+[... end of page 1040 ...]
+lvent) DRACO
+Alternatively,itcanalsoberequestedinthe%cpcmblock:
+%cpcm
+DRACO true
+end
+In ORCA, the default scheme to calculate the partial charges in eq (7.324) is the electronegativity-equilibration
+(EEQ) charge model (D4 case),[132]. However, one can also request the Charge Extended Hückel (CEH)
+model.[541]ThechargeschemewithinDRACOiscontrolledbythefollowingtaginthe%cpcmblock:
+%cpcm
+draco_charges ceh # default = eeq
+end
+1018 Chapter7. DetailedDocumentation
+
+--- Page 1041 ---
+ORCAManual,Release6.0.0
+IfCEHchargesarerequested,ORCAneedstorunanXTBcalculationtogeneratethem. Here,oneshouldhave
+atleasttheversion6.7.1ofXTB(olderversionswillnotgeneratetheCEHcharges,seesectionProgramCompo-
+nents). Regarding the fractional coordination number in eq (7.324), it is calculated as described in GFN2-XTB
+calculations.[70]
+Note: DRACOcanonlybeused,forthemoment,insingle-pointenergycalculations.
+7.53.5 OpenCOSMO-RS
+ORCA is interfaced to openCOSMO-RS,[293] an open source implementation of the COSMO-RS model.[447,
+448]Thismodeliswidelyusedinbothacademiaandindustrytopredictfluidphasethermodynamics.
+ThemainideabehindCOSMO-RSisthattheinteractionbetweenmoleculesintheliquidphasecandedepicted
+as an ensemble of interacting surface segments. The properties on the surface segments are calculated via QM
+calculationsofthesoluteandthesolventinaperfectconductor(𝜖=∞),andtheinteractionfreeenergiesbetween
+segmentsarefunctionsofasetofdescriptors. Amongthem,themostrelevantoneisthescreeningchargedensity
+(𝜎).
+AcompletedescriptionoftheCOSMO-RSmodelusedinORCAisprovidedinref[293],andthecodeisavailable
+inhttps://github.com/TUHH-TVT. SinceopenCOSMO-RShasbeenparametrizedforORCA6.0,theexecutable
+is shipped together with the ORCA 6.0 binaries and called openCOSMORS. ORCA will then call internally this
+executablewheneveritisneeded.
+COSMO-RScalculationswithinORCAareaspecialtypeofcalculation. ByrequestingCOSMO-RS,ORCAruns
+a set of single-point-energy calculations for both the solute and the solvent and then calls the openCOSMO-RS
+executable,whichexpectsaninputgeometryforthesoluteandthesolventandcalculatesthefreeenergyofsolvation
+ofthesoluteinthesolvent. AworkflowofacalculationrequestingCOSMO-RSinORCAisthefollowing:
+1. Single-point-energycalculationofthesoluteinthegas-phase
+2. Single-point-energycalculationofthesoluteinaconductor(𝜖=∞)
+3. Single-point-energycalculationofthesolventinaconductor(𝜖=∞)
+4. DoCOSMO-RSviatheopenCOSMO-RSexecutableandcomputesolvationproperties
+Points1to3correspondtoDFTcalculationsattheBP86/def2-TZVPDlevel. Thisistheleveloftheoryusedto
+parametrizeCOSMO-RSforORCA6.0. Asitisshownlater,theusercanchangethefunctionalandbasisset,but
+thisisnotrecommended!
+Regardingcalculations2and3,toproducesmooth𝜎profiles,ORCAdiscardsthesurfacesegmentswithanarea<
+0.01Å2. Forthesetwocalculations,theradiiofseveralelementsusedtoconstructthecavityofsoluteandsolvent
+aredifferentthanthedefaultsemployedwithinnon-COSMO-RScalculations(usingC-PCM).Thisisduetothe
+factthattheprovidedopenCOSMO-RSbinariesinvolveaspecialparametrizationofCOSMO-RSforORCA6.0,
+andthisdoesnotonlyaffecttheCOSMO-RSparameters,butalsotheradiiofseveralelementsusedintheC-PCM
+part.
+Afterpoint4isdone,thefreeenergyofsolvation(∆𝐺 )ofthesoluteinthesolventisprintedintheORCAoutput
+S
+file. InORCA6.0theuseofopenCOSMO-RSisrestrictedtothecalculationof∆𝐺 .
+S
+HowtoRunaORCA/COSMO-RSCalculation
+ORCA/COSMO-RScalculationsarecontrolledthroughthe%cosmorsblock. Thesetypeofcalculationsrequire
+twoinputstructures,oneforthesoluteandoneforthesolvent. Thesolutecoordinatesareprovidedintheinputfile
+asdoneforanyothertypeofcalculation. However,regardingthestructureforthesolvent,therearetwooptions:
+1. Retrievethestructureofthesolventfromadatabase
+2. Providethestructureinaseparatefile
+Tousestrategy1,weneedtorequestthesolventvia:
+COSMORS(Solvent)
+7.53. ImplicitSolvationModels 1019
+
+[... start of page 1042 ...]
+ORCAManual,Release6.0.0
+inthesimpleinputorusingthe%cosmorsblock:
+%cosmors
+solvent "Solvent"
+end
+ThelistofinternalsolventsavailableinORCAareshowninTable7.29. Forinstance,forawatermoleculesolvated
+byacetonitrile,theinputfilelookslike:
+!COSMORS(Acetonitrile)
+* xyz 0 1
+O 0.00000006589375 0.00157184228646 0.00000000004493
+H 0.77316868532439 -0.58666889665624 -0.00000000000005
+H -0.77316876182122 -0.58666895650640 -0.00000000000005
+*
+Iftheuserwantstoprovideastructu

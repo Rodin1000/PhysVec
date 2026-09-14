@@ -1,0 +1,79 @@
+[... end of page 545 ...]
+s coupling antiparallel
+end
+TheCSF-ROHFprocedurecanrecognizedoublyoccupiedandvirtualorbitalsinthedefinitionoftheCSFwhen
+theUSER_CSFcaseisinvoked. Whendetected,theseorbitalswillberotatedoutoftheopen-shellsdefinedinthe
+ROHFmethodandthecalculationwillrunnormally:
+%scf
+HFTyp ROHF
+ROHF_CASE USER_CSF # User defined CSF
+ROHF_REF {1 1 2 1 -1 -1 0 -1} end # the DOMO will be rotated to the closed-shell and
+(continuesonnextpage)
+7.8. ChoiceofWavefunctionandIntegralHandling 523
+
+--- Page 546 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# the VMO will be rotated to the virtual space.
+end
+TheusercanalsodirectlyinputtheROHFvariablesbymeansoftheROHFOPT Case Userkeyword. Forexample
+forthehighspincasewiththreeelectronsinthreeorbitalsgivestwooperatorswithvectorcouplingcoefficients
+𝑎=1and𝑏=2(Zernerconvention).
+%scf
+HFTyp ROHF
+ROHFOP Case User # manual input of ROHF variables
+Nop 2 # number of operators
+Norb[1] 3 # number of open-shell orbitals
+Nel[1] 3 # number of open-shell electrons
+A[1,1] 1 # Coulomb vector in the open shell
+B[1,1] 2 # Exchange vector in the open shell
+end
+end
+One awkward feature of the ROHF theory is that the Fock operator is somewhat arbitrarily defined. Different
+choices lead to the same wavefunction, but have different convergence properties that may vary from system to
+system. ORCAthusletstheuserchoosethedesiredvariant. Playingaroundwiththesechoicesmayturnadivergent
+orslowlyconvergingROHFcalculationintoasuccessfulcalculation!
+TheROHF_Restrictfeatureisanotherfeaturethatmaybeuseful. IfyoususpectthattheROHFcalculationdoes
+notconvergebecauseanopen-shellandaclosed-shellorbitalareflippingbackandforth,youcantrytoavoidthis
+behaviorbychoosingROHF_Restrict true. Ofcoursethereisnoguaranteethatitwillwork,andnoguarantee
+thatthesystemstaysinthedesiredstate. However,itdecreasesthechancesoflarge,uncontrolledsteps.
+%scf ROHF_Mode 0 # construct F according to Pulay (default)
+1 # construct F as in the Gamess program
+2 # construct F according to Kollmar
+ROHF_Restrict false # restrict orbital interchanges and off-diagonal elements
+# (default=false)
+# a complete list of ROHF variables
+ROHFOP Case User # manual input of ROHF variables
+Nop 2 # number of operators
+Norb[1] 3 # number of open-shell orbitals
+Nel[1] 3 # number of open-shell electrons
+A[1,1] 1 # Coulomb vector in the open shell
+B[1,1] 2 # Exchange vector in the open shell
+Mode 2 # use the Kollmar operator
+Restrict false # do not restrict
+end
+end
+7.8.3 UHF Natural Orbitals
+The program can produce the UHF natural orbitals (UNOs). With these, the open-shell wavefunction can be
+picturedconveniently. Thesyntaxissimple:
+%scf UHFNO true
+end
+# or simply: ! UNO
+TherearevariousprintingoptionsforUNOsdescribedintheoutputsectionPopulationAnalysesandControlof
+Output. TheUNOscanalsobeplottedasdescribedintheplotssectionOrbitalandDensityPlots. Ingeneralthe
+programstoresafileBaseName.uno,whereBaseNameisbydefaultthenameofyouinputfilewith.inpstripped
+off. Accordingly, the gbw file is named BaseName.gbw. The .uno file is a normal gbw file that contains the
+geometry,basissetandtheUNOorbitals. Itcouldbeused,forexample,tostartaROHFcalculation.
+524 Chapter7. DetailedDocumentation
+
+[... start of page 547 ...]
+ORCAManual,Release6.0.0
+7.8.4 Integral Handling (Conventional and Direct)
+Asthenumberofnonzerointegralsgrowsveryrapidlyandreacheseasilyhundredsofmillionsevenwithmedium
+sizedbasissetsinmediumsizedmolecules,storageofallintegralsisnotgenerallyfeasible. Thisdesperatesituation
+preventedSCFcalculationsonlargermoleculesforquitesometime,sothatAlmlöf[19,20,21]madetheinsightful
+suggestiontorepeattheintegralcalculation,whichwasalreadythedominantstep,ineverySCFcycletosolvethe
+storageproblem. Naively,onewouldthinkthatthisraisestheeffortforthecalculationto𝑛iter𝑡integrals (where𝑛iter is
+thenumberofiterationsand𝑡integrals isthetimeneededtogeneratethenonzerointegrals). However,thisisnotthe
+casebecauseonlythechangeintheFockmatrixisrequiredfromoneiterationtothenext,butnottheFockmatrix
+itself. As the calculations starts to converge, more and more integrals can be skipped. The integral c

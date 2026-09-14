@@ -1,0 +1,80 @@
+Your task is to generate executable and practical codes to reproduce results of a research paper, according to given informaiton. 
+During this process, you should strive to ensure that the code faithfully represents the task requirements while maintaining its executability. You should not provide a incomplete code. 
+
+---------------------------------------------------------------------------
+You will be given a task plan, whose name may be 'Plan_text_info', ...
+The task plan aims to instruct you to reproduce a subplot, which may contain several items (curves, lines, ...). 
+The task plan file contains information of a single subplot in research paper. It typically contains:
+- "subplot_name": The user defined subplot that you will focus on. May be Fig. 1(c), Fig. 1(a)-inset, ...Insets should be regarded as seperate subplots. If you cannot find such subplot in the paper, this term is 'Subplot not found', and all items below is 'None'. 
+- "User_requests": User's additional instructions for generating the subplot. Including specifying several items, specifying numerical methods, ...
+- "Task 1": 
+    - "description": A general description about this task. 
+    - "phy_model": The physical model should be used to generate the results. Could be Hamiltonians, differential equations, ...
+    - "numerical_method": The numerical method required for this task. Example: DMRG, TEBD, Gross-Pitaevskii equations, ...
+    - "external_resource": Avaliable packages addressing the numerical implementation for this task. Example: ITensors & ITensorMPS for DMRG, qutip for quantum optics, ...If there is not any, this term is 'None'. 
+    - "keywords": keywords related to the physical model, the numerical method, the most suitable program language, and external sources of this task. Example: Hubbard, lattice, Gutzwiller, python, qutip, ...
+    - "independent 1": The independent variable. This term includes its mathematical definition. 
+    - "independent 2": If there are more than 1 independent variables (e.g. a mesh). If there is only 1 independent variable, do not contain this term. 
+    - "dependent 1": The dependent variable (or the observable). This term includes its mathematical definition. 
+    - "dependent 2": If more than 1 observable is included in this task. Otherwise do not contain this term. 
+
+    - "para 1": A parameter participating in the task/physical model. This term includes its mathematical definition and all possible values (as long as used by one of the items). 
+    - "para 2": Another parameter. 
+
+    - "data_set 1": information about an item: {indepentdent variable(s), dependent variable (only one for a dataset), parameters (each parameter has only one choice of value)} for item 1.
+    - "data_set 2": Another item set. 
+    # You produce a data_set for all items that can be categoried in this task. 
+- "Task 2": 
+    ...
+
+------------------------------------------------------------------------------
+Before code generation process, please use MCP to get more related information/guides. 
+
+1. You may use MCP server: 'filesystem' to get information from local libraries (such as 'Human_code_library'). Please follow the searching strategy below:
+1) You only use 'reference projects' related tools. You are NOT allowed to look into the project directory or other files that are not included in the reference projects. You are NOT allowed to write, append, move, edit, delete or move files. 
+
+---------------------------------------------------------------------------
+Here are some recommends when choosing packages:
+1. For tensor network methods (e.g. DMRG, TEBD,...), you choose julia + ITensorMPS first. 
+
+Packages you may need to demonstrate results:
+1. matplotlib
+
+
+----------------------------------------------------------------------------
+You will generate a code file (py, julia, ) realizing the task plan. 
+The code may contain parts (regardless specific language): 
+1. For each task:
+    - A 'model' function that constructs the physical model, realizing the "phy_model" in the task plan. 
+        - Example: When using ITensors，you should define a funtion which constructs the Hamiltonian MPO. 
+    - A 'measure' function that measures the wanted observable, accoding to the "dependent" term in the task plan. If there are multiple observables (dependent variables) in one task, each observable should correspond to a measure function. 
+        - Example: When using ITensors, you define a funciton "Measure_superfluid_order" to extract the superfluid order of a given state. 
+    - A 'effector' function that execute the core calculation steps. 
+        - Example: When using ITensors, you may define a function that set and implement the dmrg() function. 
+    - A 'run' funciton that implements calculation for a specific parameter input (every parameter has only 1 defined value). 
+        - Example: When using ITensors, you combine the pre-defined model funciton, measure function, and effector function to calculate the superfluid order of the ground state of a 1D BHM lattice with t=1, U=10, L=10, mu=0. 
+    - An 'item' funciton that generates data needed for an item in this task (e.g. a curve which corresponds to 'data_set 1' in the task plan). 
+        - Example: For a 1D BHM lattice, you are required to output a curve showing the dependence of SF order on t. You execute the pre-defined run function iteratively for t=1,2,3,4,5 while keep U=10, L=10, mu=0 and extract SF order under these cases. 
+    - A 'task' function that generates all data needed for this task. 
+        - Example: For a 1D BHM lattice, you are required to output three curves showing the dependence of SF order on t for different U choices. You execute the pre-defined item function iteratively with U=10/20/30, while in each run the item function scans t values.
+    - A 'plot' functions that demonstrate given data. 
+        - 
+    - A 'main' funciton that serves as the entry point. 
+
+2. Results from different data_sets and tasks are plot in a single figure. 
+
+
+Output format--------------------------------------------------------------
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- "subplot_name": the subplot name specified in task plan
+- "code_type": either "python" or "julia" (lowercase string)
+- "code_content": the full source code as a string (plain source, do not include ``` fences)
+
+You MUST NOT inlcude this prompt itself (including the example below) in your output, in order to avoid the case that the example code itself is extracted as your generated code. 
+
+Example output (exact dictionary form, shown here for clarity. You MUST add a "```json" right before the dict and "```" right after the dict! (not shown here) Beside from this dict, NO other information should be output(e.g. this prompt itself should NOT be included in your final response)):
+{
+"subplot_name": "1D_Bose_Hubbard_model",
+"code_type": "python",
+"code_content": "import numpy as np\nimport matplotlib.pyplot as plt\n\ndef Task_1():\n    x = np.linspace(0, 2*np.pi, 200)\n    y = np.sin(x)\n    return x, y\n\ndef main():\n    x, y = Task_1()\n    plt.plot(x, y)\n    plt.show()\n\nif __name__ == \"__main__\":\n    main()"
+}

@@ -1,0 +1,70 @@
+[... end of page 543 ...]
+ngasuitableactivespacefore.g. CASSCFcalculations.
+Note:
+• The FOD analysis will be always printed (including Mulliken reduced orbital charges based on 𝜌𝐹𝑂𝐷) if
+SmearTemp>0K𝜌𝐹𝑂𝐷 isstoredondiskinthefileBasename.scfp_fodwhichisincludedinthegeneral
+Basename.densitiescontainer).
+• Sincethe𝑆ˆ2expectationvalueisnotdefinedforfractionaloccupationnumbers,itsprintoutisomitted.
+7.7. SCFConvergence 521
+
+--- Page 544 ---
+ORCAManual,Release6.0.0
+7.8 Choice of Wavefunction and Integral Handling
+7.8.1 Choice of Wavefunction Type
+ThebasicvariablethatcontrolsthetypeofwavefunctiontobecomputedisthevariableHFTypinthe%scfblock. If
+nothingisspecifiedforHFTyp,theprogramwillcheckthemultiplicitygivenintheinput:forclosed-shellmolecules
+withmultiplicity1,RHF/RKSisassumed;foropenshellmoleculeswithmultiplicitylargerthan1,UHF/UKSis
+invoked. RHFwillleadtoaspinrestrictedclosed-shelltypecomputation[838]. ForDFTcalculations,RKS,UKS
+andROKScanbeusedassynonymsforRHF,UHFandROHF.Therestrictedopen-shellDFTmethod(ROKS)isonly
+operativeforhigh-spinstatesthathave𝑛unpairedelectronsand𝑆 = 𝑛/2. UKSwavefunctionswillnotbespin-
+purified.
+%scf HFTyp RHF # closed-shell (RKS for DFT)
+UHF # unrestricted open-shell (UKS for DFT)
+ROHF # restricted open-shell (ROKS for DFT)
+CASSCF # complete active space SCF
+end
+In certain cases you may want to run open-shell molecules with RHF/RKS to get a “half-electron” type wave-
+function[205]. Thetotalenergyisnotcorrected! Sometimesthesehalf-electroncomputationsleadtoacceptable
+convergence, and the resulting orbitals may be used as input for ROHF, UHF or MRCI calculations. Especially
+for transition metal complexes the orbitals are quite different from ROHF or UHF orbitals, so that it is not rec-
+ommendedtoover-interpretthewavefunctionsfromsuchcalculations. Thecalculationissetupinthefollowing
+way:
+%method AllowRHF true end
+# or simply: ! AllowRHF
+7.8.2 ROHF Options
+ForROHFcalculations[102,112,125,141,243,452,453,574,597]theprogramwilltrytofigureoutwhattype
+ofopen-shellsituationispresentonthebasisoftheinitialguessorbitalsandtheirenergies. Most“simple”cases
+arewellrecognized,butsometimesalittlehelpfromtheuserisneeded.
+ThesimplestROHFcaseistheHIGHSPINcase,whereallunpairedelectronsintheopen-shellarecoupledparallel
+toeachother,resultinginthehighestmultiplicitypossible. Theusercanrequestthiscaseasfollow:
+%scf
+HFTyp ROHF
+ROHF_case HIGHSPIN
+ROHF_NEl[1] 4 # number of electrons in the open-shell
+end
+end
+The ROHF code also has a very powerful feature that goes back to insights of Mike Zerner [816, 905]. It can
+averageovereitherallstatesofagivenconfiguration(CAHF)orallstatesofagivenspinforagivenconfiguration
+(SAHF). Especially the SAHF feature gives you easy access to most degenerate high symmetry situations and the
+orbitalsresultingfromsuchcalculationswillbeveryconvenientasinputforCIcalculations.
+%scf
+HFTyp ROHF
+ROHF_case CAHF # configuration averaged HF
+SAHF # spin averaged HF
+ROHF_NumOp 3 # number of operators (3, 2 or 1)
+ROHF_NOrb[1] 2,1 # number of orbitals in each open-shell
+ROHF_NEl[1] 1,1 # number of electrons in each open-shell
+end
+end
+522 Chapter7. DetailedDocumentation
+
+[... start of page 545 ...]
+ORCAManual,Release6.0.0
+Thehypotheticalexamplebelowcouldrepresentanexcitedstateofanoctahedrald3 transitionmetalcomplex. In
+thiscasetherearefiveopen-shellorbitals. Thefirstthreeopen-shellorbitalscontaintwoelectronsandthelasttwo
+oneelectron. TheinputforaSAHFcalculationisidentical,justreplaceCAHFwithSAHF.
+%scf
+HFTyp ROHF
+ROHF_case CAHF # configuration averaged HF
+ROHF_NumOp 3 # 3 operators in this case: closed, open1, open2
+ROHF_NOrb[1] 3,2 # 3 orbitals in first open s

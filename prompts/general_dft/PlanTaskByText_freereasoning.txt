@@ -1,0 +1,92 @@
+Your task is to produce a detailed, practical plan for generating the required quantum-chemistry results using the ORCA software package.
+
+Goal: Another person (or agent) should be able to reproduce the target results from the paper using ONLY (1) the plan you output and (2) the specified quantum-chemistry software—without needing to consult the original paper again.
+
+--------------------------------------------------------------------------
+[Input]
+1. subplot_name:
+   The specific subplot/table you must focus on.
+   Format examples: "Fig. 3(a)", "Figure 3(a)", "Fig. 1(b) inset", ...
+   Treat each inset as a separate subplot.
+
+2. PDF_info:
+   The research article content to reproduce. This file contains only the text from the paper; images are excluded.
+
+3. User_requests:
+   Any additional reproduction constraints from the user for this specific subplot.
+
+--------------------------------------------------------------------------
+[Instructions]
+1. You MUST summarize ALL necessary knowledge from PDF_info that is required to reproduce the target subplot/table.
+2. Your plan MUST be sufficient for reproducing the target subplot/table WITHOUT consulting the original paper again.
+3. You MUST list the key software packages required.
+   - Include quantum-chemistry software as needed (e.g., ORCA, Gaussian, Turbomole, NWChem, etc.).
+   - Use the minimum number of software packages unless the paper or User_requests requires more.
+   - If User_requests specifies particular software or a specific combination, prioritize the user's request.
+
+4. You MUST respect and use the exact settings/parameter values reported in the paper for any parameters mentioned.
+   - If some parameters are not clearly stated in the paper, explicitly note that they are unclear.
+   - In such cases, choose a reasonable default value and clearly document it in your output.
+
+5. You MUST identify and output:
+   (a) **Scientific problem**: The type of calculation and physics/chemistry being addressed. Use clear, standard categories where applicable, for example:
+       - **Ground-state**: DFT, HF, MP2, CCSD(T), etc.
+       - **Excited-state**: TDDFT, TDA (UV–Vis, NTOs, spectra), etc.
+       - **Multireference**: CASSCF, NEVPT2, etc.
+       - **Core-level / X-ray**: XAS, XANES (e.g. core-TDDFT, ΔSCF-type; often K-edge).
+       - **Relativity / spin–orbit**: ZORA, DKH, ECP; SOC, ISC, etc.
+       - **Solvation / environment**: PCM, CPCM, SMD, etc.
+   (b) **Elements used**: The chemical elements involved in the calculation (from the molecular composition, ECPs, or targeted edges). Give a list, e.g. ["Cu", "C", "F"] or ["Fe", "N", "O"].
+
+6. You MUST require single-core (serial) execution only—no parallel computation.
+   - Due to resource limitations, the plan must NOT assume or request multi-core, MPI, or any parallelization.
+   - The reproduction environment is single-process/single-core; the plan and any software settings must reflect this (e.g. "run ORCA in serial", "single core", "no %pal or nprocs > 1").
+
+7. You MUST NOT repeat yourself.
+   - State each point exactly once and move on.
+   - If a parameter or decision is uncertain, note it briefly in "unclear_factor" rather than deliberating at length inside the plan.
+   - If you catch yourself restating the same idea, STOP and proceed to the next step.
+
+--------------------------------------------------------------------------
+[Output]
+You MUST return a JSON object (valid for json.loads()) wrapped in a fenced code block using ```json ... ```.
+
+The dictionary MUST contain the following keys:
+- "subplot_name":
+  The user-defined subplot you will reproduce (e.g., "Fig. 1(c)", "Fig. 1(a)-inset").
+  If the subplot cannot be found in the paper, set this field to "Subplot not found" and set all fields below to "None".
+
+- "User_requests":
+  The user's additional instructions for generating the subplot (e.g., selecting a subset of curves, specifying numerical methods).
+  If there are no user requests, set this to "None".
+
+- "plan":
+  A detailed, step-by-step reproduction plan that satisfies all requirements above.
+
+- "scientific_problem":
+  A concise description of the scientific problem and calculation type (see categories in Instructions §5a). Examples:
+  - "Ground-state DFT (B3LYP) geometry optimization."
+  - "Core-level XAS K-edge (Cu) via core-TDDFT."
+  - "Excited-state TDDFT UV–Vis; NTOs for assignment."
+  - "Multireference CASSCF + NEVPT2 for spin-state energetics."
+  - "Relativistic DFT (ZORA) with spin–orbit coupling."
+
+- "elements_used":
+  List of chemical element symbols used in the calculation (e.g. ["Cu", "C", "F"], ["Fe", "N", "O"]). If unclear, give your best inference and note in unclear_factor.
+
+- "unclear_factor":
+  A list of unclear or missing factors/parameters not stated in the paper, or aspects that are physically under-defined, for which you chose default values (include the chosen defaults and justification).
+
+Example:
+```json
+{
+  "subplot_name": "Fig. 3(a)",
+  "User_requests": "Only calculate and output the curve with parameter T=10",
+  "plan": "A detailed plan to reproduce Fig. 3(a) ...",
+  "scientific_problem": "Core-level XAS K-edge (Cu) via core-TDDFT; ZORA for scalar relativity.",
+  "elements_used": ["Cu", "C", "F", "N"],
+  "unclear_factor": [
+    "Parameter X not specified in the paper; defaulted to ... because ..."
+  ]
+}
+```

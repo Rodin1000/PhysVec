@@ -1,0 +1,88 @@
+[... end of page 778 ...]
+ile 0 1 coord.xyz
+Replacing Mode sTDA by Mode sTDDFT will invoke a sTD-DFT calculation instead. This is shown in the next
+exampleincombinationwiththe𝜔B97Xfunctionalanduserspecifiedparameters:
+! wb97x def2-SV(P) nososcf tightscf
+! smallprint printgap nopop
+%maxcore 5000
+%tddft
+Mode sTDDFT
+Ethresh 10.0
+axstda 0.56
+beta1 8.00
+beta2 0.00
+alpha1 4.58
+(continuesonnextpage)
+756 Chapter7. DetailedDocumentation
+
+--- Page 779 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+alpha2 0.00
+maxcore 5000
+end
+* xyzfile 0 1 coord.xyz
+For the range-separated hybrid functionals LC-BLYP, CAM-B3LYP, 𝜔B97, 𝜔B97X, 𝜔B97X-D3 and 𝜔B97X-
+D3BJ,parametersareavailableandwillbeusedbydefaultifoneofthesefunctionalsisused. Thewayofspecifying
+parametersasshownaboveisusefulifthereisarange-separatedhybridfunctionalthathasnotbeenparametrized
+forsTDAyet. Forverylargesystems(e.g. >500atoms),itmaybeusefultodefineanupperboundaryPTLimitfor
+theselectionofconfigurationsthatarebeyondEThresh(otherwisethewholeconfigurationspacewillbescanned).
+Thiscanbedoneasshownbelow:
+! cam-b3lyp def2-SV(P) nori tightscf
+! nososcf smallprint printgap nopop
+%pal nprocs 4
+end
+%maxcore 5000
+%tddft
+Mode sTDDFT
+Ethresh 10.0
+PThresh 1e-4
+PTLimit 30
+maxcore 20000
+end
+%method
+runtyp energy
+end
+* xyzfile 0 1 coord.xyz
+Inthiscase,allexcitationsupto7eVareconsideredfromtheverybeginning. Configurationsbetween7and14
+eVareincludediftheircouplingtotheconfigurationsbelow7eVisstrongenough(intotallargerthanPThresh).
+All configurations beyond 14 eV are neglected. Since the sTDA/sTD-DFT calculations run in serial mode, it is
+recommendedtoresetthemaxcorewithinthe%tddftblock(asdoneintheaboveexamples). Inthelattersample
+input,thegroundstateprocedurerunsinparallelmodeon4coreswithamaxcoreof5000MBsetforeachnode.
+ThesubsequentsTD-DFTcalculationthenrunsonasinglecore,butinordertousealltheavailablememory,the
+maxcoreisresettoalargervalue(i.e.,20000MB).Ifthemaxcorestatementwithinthe%tddftblockwasmissing,
+only5000MBofmemorywouldbeavailableinthesTD-DFTcalculation. Notefurthermorethatforverylarge
+systems, using a functional with the correct asymptotic behaviour is very important (due to the fixed amount of
+GGAexchange,CAM-B3LYPdoesnotprovidethisproperty).
+The ORCA output will summarize the important properties of your calculation which allows you to check your
+input:
+---------------------------------------------------------------------------------
+ORCA sTDA CALCULATION
+please cite in your paper
+orginal sTDA method: S. Grimme, J. Chem. Phys. 138, 244104 (2013)
+range-separated sTDA: T. Risthaus, A. Hansen, S. Grimme, Phys. Chem. Chem. Phys.
+16, 14408-14419 (2014)
+sTD-DFT approach: C. Bannwarth, S. Grimme, Comp. Theor. Chem.
+1040-1041, 45-53 (2014)
+---------------------------------------------------------------------------------
+spectral range up to (eV) ... 10.000000
+occ. MO cut-off (eV) ... -24.052589
+virt. MO cut-off (eV) ... 17.726088
+(continuesonnextpage)
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 757
+
+[... start of page 780 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+perturbation threshold ... 1.000e-04
+CSF selection range up to (eV) ... 30.000000
+MOs in sTD-DFT ... 37
+occ. MOs in sTD-DFT ... 14
+virt. in sTD-DFT ... 23
+calculate triplets ... no
+Calculating the dipole lengths integrals ...
+Transforming integrals ...
+Calculating the dipole velocity integrals ...
+Transforming integrals ...
+Calculating magnetic dipole integrals ...
+Transforming integrals .

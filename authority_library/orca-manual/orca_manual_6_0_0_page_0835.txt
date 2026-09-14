@@ -1,0 +1,78 @@
+[... end of page 834 ...]
+︀aredeterminedbysolvingthedecoupledUHFIP-EOM-CCSDproblems
+𝑖𝑗 ¯𝑖𝑗 ¯𝑖¯𝑗 𝑖¯𝑗
+for the ionization of an 𝛼 electron and the ionization of a 𝛽 electron, respectively. Hence, an UHF STEOMCC
+calculationinvolvestwoseparateIPcalculations(O(𝑁5)scaling)andtwoseparateEAcalculations(O(𝑁5)scaling
+steps).
+Allthespeedupoptions,includingCCSD(2)(onlyavailableinRHFimplementation)andCOSX,whichareavail-
+ableforEOM-CCSDarealsoavailableforSTEOMCC.ThemostimportantstepsinaSTEOMCCcalculationare
+theIP-EOMandEA-EOMcalculations. ThesestepsareperformedusingtheEOM-CCSDmoduleandtherelevant
+keywordsarethesameasthatdescribedinExcitedStatesviaEOM-CCSD.Thekeywordswhichareexclusiveto
+theRHFSTEOMmoduleare:
+812 Chapter7. DetailedDocumentation
+
+--- Page 835 ---
+ORCAManual,Release6.0.0
+%mdci
+#RHF STEOM parameters - defaults displayed
+DoCISNat true # automatic selection of active space
+NActIP 3 # number of states defined as active in the IP calculation
+NActEA 2 # number of states defined as active in the EA calculation
+DoTriplet false # target state of triplet multiplicity
+DoDbFilter true # filters out states with doubles excitation character
+DoNewActSch true # new active space selection scheme for STEOM-CCSD
+DoSOLV # perturbative correction for solvation effects (experimental)
+#Default values for automatic active space selection scheme
+OThresh 0.001 # Cut off occupation of CIS natural orbitals in IP calculation
+VThresh 0.001 # Cut off occupation of CIS natural orbitals in EA calculation
+IPSThrs 80 # The percentage singles threshold for the IP calculation
+EASThrs 80 # The percentage singles threshold for the EA calculation
+end
+ThekeywordspertainingtotheUHFSTEOMmoduleare:
+%mdci
+#UHF STEOM parameters - defaults displayed
+DoCISNat true # automatic selection of active space
+NActIP_a 3 # number of states defined as active in the IP calculation
+# for the removal of an α electron
+NActIP_b 3 # number of states defined as active in the IP calculation
+# for the removal of a β electron
+NActEA_a 2 # number of states defined as active in the EA calculation
+# for the attachment of an α electron
+NActEA_b 2 # number of states defined as active in the EA calculation
+# for the attachment of a β electron
+DoDbFilter true # filters out states with doubles excitation character
+UseQROs false # use QROs or not
+DoNewActSch true # new active space selection scheme for STEOM-CCSD
+#Default values for automatic active space selection scheme
+OThresh 0.001 # Cut off occupation of CIS natural orbitals in tIP calculations
+VThresh 0.001 # Cut off occupation of CIS natural orbitals in EA calculations
+IPSThrs 80 # The percentage singles threshold for the IP calculations
+EASThrs 80 # The percentage singles threshold for the EA calculations
+end
+7.34.2 Selection of Active space
+The results of a STEOM-CC calculation depend upon the number of roots selected as active in the EOMIP and
+EOMEA calculations. In ORCA, they are chosen automatically, by using state-averaged CIS natural transition
+orbitals(NTO).Bydefault,thenumberofrootsincludedinthisinitialCIScomputationisequaltothenumberof
+rootsrequestedinSTEOM(NRoots). However,thiscanbemodifiedsettingNRootsCISNATtohighervalues. The
+orbitalsuptoapredefinedoccupationarethenchosentobeactiveintheEOMIPandEOMEAcalculations,andthis
+iscontrolledbythekeywordsOThreshandVThreshrespectively. Now,therearetwopossiblewaystochoseactive
+space. OneistousethecriteriaofpercentageoccupationofNTO’sasdescribedinref[236]. However,anewerand
+morerobustapproachistousethecriteriaofabsoluteoccupation,whichisdefaultinthecurrentimplementation.
+One can switch on the old percentage occupation based active space selection by setting DoNewActSch to false
+(notrecommended).
+OnecanalsoselecttheactivespacesmanuallybyturningtheDoCISNattofalseandsettingtheNActIPandNActEA
+(RHFSTEOMcalculation)ortheNActIP_a,NActIP_b,NActEA_aandNActEA_b(UHFSTEOMcalculation)to
+desiredvalues. However,thisisnotrecommendedforgeneraluses. Thefollowingsnippetshowstheoutputofthe
+activeorbitalselectionprocedureonaclosed-shellmolecule:
+------------------------------------------
+STATE AVERAGED NATURAL ORBITALS FOR ACTIVE SPACE SELECTION
+(continuesonnextpage)
+7.34. ExcitedStatesviaSTEOM-CCSD 813
+
+[... start of page 836 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+------------------------------------------
+Solving eigenvalue problem for the occupied space ... Occupied block occupation :
+0 0.000478
+1 0

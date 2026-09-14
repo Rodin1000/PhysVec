@@ -1,0 +1,123 @@
+[... end of page 776 ...]
+
+* MULLIKEN POPULATION ANALYSIS *
+********************************
+-----------------------
+MULLIKEN ATOMIC CHARGES
+-----------------------
+0 O : -0.094934
+1 C : -0.074730
+2 H : 0.084824
+3 H : 0.084840
+Sum of atomic charges: 0.0000000
+(...)
+Inordertoprinttheanalysisformultiplestates,simplyuseIROOTLISTandTROOTLIST:
+754 Chapter7. DetailedDocumentation
+
+--- Page 777 ---
+ORCAManual,Release6.0.0
+!B3LYP DEF2-SVP
+%TDDFT NROOTS 5
+IROOTLIST 1,2,3
+TROOTLIST 1,2,3
+UPOP TRUE
+END
+* XYZ 0 1
+O -1.88199 1.42016 -0.00000
+C -1.80947 0.20286 0.00000
+H -2.50488 -0.38174 -0.59212
+H -1.04956 -0.29504 0.59212
+*
+7.30.7 Simplified TDA and TD-DFT
+ORCA also supports calculations of excited states using the simplified Tamm-Dancoff approach (sTDA) by S.
+Grimme[323]. ThesTDAisparticularlysuitedtocalculateabsorptionspectraofverylargesystems. sTDAaswell
+asthesimplifiedtime-dependentdensityfunctionaltheory(sTD-DFT)[69]approachrequirea(hybrid)DFTground
+statecalculation. Forlargesystems,usingrange-separatedhybridfunctionals(e.g. 𝜔B97X)isrecommended.[723]
+ThesTD-DFTapproachinparticularyieldsmuchbetterelectroniccirculardichroism(ECD)spectraandshould
+beusedforthispurpose.
+TheoreticalBackground
+Abriefoutlineofthetheorywillbegiveninthefollowing. Formoredetails,pleaserefertotheoriginalpapers[69,
+323]. InthesTDA,theTDAeigenvalueproblemfromeq.(7.220)issolvedusingatruncatedandsemi-empirically
+simplified𝐴′ matrix. Thetrunctationnegelectsallexcitationsthatarebeyondtheenergyrangeofinterest,except
+afewstronglycoupledones. Thematrixelementsfromeq. (7.221)aresimplifiedbyneglectingtheresponseof
+thedensityfunctionalandbyapproximatingtheremainingtwo-electronintegralsasdampedCoulombinteractions
+betweentransition/chargedensitymonopoles. Inthefollowing, theindices𝑖,𝑗 denoteoccupied, 𝑎,𝑏virtualand
+𝑝,𝑞eitherkindoforbitals.
+𝑁atoms
+∑︁
+𝐴′ =𝛿 𝛿 (𝜖 −𝜖 )+ (2𝑞𝐴𝛾𝐾 𝑞𝐵 −𝑞𝐴𝛾𝐽 𝑞𝐵) (7.226)
+𝑖𝑎,𝑗𝑏 𝑖𝑗 𝑎𝑏 𝑎 𝑖 𝑖𝑎 𝐴𝐵 𝑗𝑏 𝑖𝑗 𝐴𝐵 𝑎𝑏
+𝐴,𝐵
+𝑞𝐴 and𝑞𝐵 arethetransition/chargedensitymonopoleslocatedonatom𝐴and𝐵,respectively. Theseareobtained
+𝑝𝑞 𝑝𝑞
+fromLöwdinpopulationanalysis(seeSec. LöwdinPopulationAnalysis). 𝜖 istheKohn-Shamorbitalenergyof
+𝑝
+orbital𝑝. 𝛾𝐾 and𝛾𝐽 aretheMataga-Nishimoto-Ohno-KlopmandampedCoulomboperatorsforexchange-type
+𝐴𝐵 𝐴𝐵
+(𝐾)andCoulomb-type(𝐽)integrals,respectively.
+(︂ )︂1
+𝛾𝐽 = 1 𝛽 (7.227)
+𝐴𝐵 (𝑅
+𝐴𝐵
+)𝛽 +(𝑎X𝜂)−𝛽
+(︂ )︂1
+𝛾𝐾 = 1 𝛼 (7.228)
+𝐴𝐵 (𝑅 )𝛼+𝜂−𝛼
+𝐴𝐵
+Here,𝜂isthearithmeticmeanofthechemicalhardnessofatom𝐴and𝐵. 𝛼and𝛽aretheparametersofthemethod
+andaregivenby:
+𝛼=𝛼 +𝑎 𝛼 (7.229)
+1 𝑥 2
+𝛽 =𝛽 +𝑎 𝛽 (7.230)
+1 𝑥 2
+For any global hybrid functional, 𝛼 , 𝛼 , 𝛽 and 𝛽 are identical. 𝛼 and 𝛽 then depend on the amount of Fock
+1 2 1 2
+exchange (𝑎X ) only. This is different for range-separated hybrid functionals where 𝛼
+2
+and 𝛽
+2
+are set to zero.
+𝛼 and 𝛽 along with a value 𝑎 for the sTDA treatment are individually fitted for each range-separated hybrid
+1 1 𝑥
+functional.[723] It can bee seen from eq. (7.226) that the method is asymptotically correct which is crucial for
+excitationsofchargetransfertype.
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 755
+
+[... start of page 778 ...]
+ORCAManual,Release6.0.0
+InsTD-DFT,eq. (7.219)issolvedusingthesimplifiedmatrices𝐴′(seeabove)and𝐵′.
+𝑁atoms
+∑︁
+𝐵
+𝑖
+′
+𝑎,𝑗𝑏
+= (2𝑞
+𝑖
+𝐴
+𝑎
+𝛾
+𝐴
+𝐾
+𝐵
+𝑞
+𝑏
+𝐵
+𝑗
+−𝑎X𝑞
+𝑖
+𝐴
+𝑏
+𝛾
+𝐴
+𝐾
+𝐵
+𝑞
+𝑎
+𝐵
+𝑗
+) (7.231)
+𝐴,𝐵
+This approach yields better transition dipole moments and therefore spectra but the method is more costly than
+sTDA(afactorof2–5fortypicalsystems). TheparametersusedinsTDAandsTD-DFTareidentical. Thereare
+noadditionalp

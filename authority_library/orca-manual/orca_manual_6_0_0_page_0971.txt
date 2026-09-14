@@ -1,0 +1,90 @@
+[... end of page 970 ...]
+rytoincludethekeywordNewMCD True;otherwise,
+thepreviousMCDimplementationwillbecalledinstead.
+%mrci
+soc
+DoSOC True
+DoVelocity True
+DoQuadrupole True
+DoMCD True
+newMCD True
+B 50000.0
+end
+end
+%casscf
+DoDipoleVelocity True
+DoFullSemiClassical True
+rel
+DoSOC True
+DoMCD True
+B 50000.0
+Temperature 300.0
+end
+end
+948 Chapter7. DetailedDocumentation
+
+--- Page 971 ---
+ORCAManual,Release6.0.0
+%rocis
+SOC True
+DoMCD True
+B 50000.0
+DoDipoleVelocity True
+DoFullSemiClassical True
+end
+%mdci
+DoSOC True
+DoMCD True
+DoVelocity True
+DoQuadrupole True
+B 50000.0
+Temperature 300.0
+end
+ItisimportanttokeepinmindthatthecalculationoftheMCDreliesontheproperdescriptionofthetransition
+momentsandangularmomentumforcalculatingtheZeemanperturbation. Therefore,theuserisresponsiblefor
+selectingtheproperelectronicstructuremethod.
+7.47.4 List of related keywords
+%selected module
+DoMCD False # Enables the use of the MCD module
+DoDipoleVelocity True # Use the electric dipolar velocity formulation
+# for the light-matter interaction
+DoFullSemiClassical False # Use the full semiclasical ligth-matter
+# interaction transition moments
+MCDGridtype 1 # Grid for the molecular orientational average
+# 1 = Lebedev grid (default)
+# 2 = Regular grid
+MCDLebedev 14 # Number of points if Lebedev grid is selected
+# 6, 12, 14(default), 26, 50, 110, 194, 302, 434, 590, 770
+NPOINTSPHI 10 # Number of points for phi angle if regular grid is selected
+NPOINTSTHETA 10 # Number of points for theta angle if regular grid is selected
+B 3000.0 # Magnetic field in Gauss
+Temperature 300.0 # Self-explanatory. One temperature must be defined
+# for each B value
+end
+7.48 More on the Excited State Dynamics module
+ORCA has now a module designed to calculate properties related to excited states named ORCA_ESD. It can be
+usedtopredictabsorption/emissionspectra,transitionrates,resonantRaman,andMCDspectra,basedonapath
+integralapproachtothedynamicprocess[199]. Ithassomeofthefunctionalitiesof ORCA_ASAandevenmore,
+asitwillbediscussed. WhatwedohereisNOTaconventionaldynamicswithtrajectoriesalongtimepoints,we
+rathersolvetheequationforthetransitionratesorintensitiesdependingonthedifferentcasesconsidered.
+ThisformulationworksbecausethereisananalyticsolutiontothepathintegraloftheMultidimensionalHarmonic
+OscillatorandtheassumptionofHarmonicnuclearmovementiscritical. Inmanycasesthatapproximationdoes
+holdandtheresultsareinverygoodagreementwiththeexperiment. ThegeneralusageoftheORCA_ESDmodule
+and some examples are already presented on Sec. Excited State Dynamics and it is recommended to read that
+beforegoingintothedetailshere. Wenowwilldiscussthespecificsandkeywordsrelatedtoofeachpartofthe
+module. Acompletekeywordlistcanbefoundattheendofthissection.
+7.48. MoreontheExcitedStateDynamicsmodule 949
+
+[... start of page 972 ...]
+ORCAManual,Release6.0.0
+7.48.1 Absorption and Emission Rates and Spectrum
+GeneralAspectsoftheTheory
+Theideabehindcalculatingtheabsorptionoremissionratesstartswiththeequationfromthequantizationofthe
+electromagneticfieldforthetransitionratesbetweenandinitialandafinalstate:
+4𝜔3𝑛2
+𝑘(𝜔) = |⟨Ψ |𝜇|Ψ ⟩|2𝛿(𝐸 −𝐸 ±(cid:126)𝜔) (7.275)
+𝑖𝑓 3(cid:126)𝑐3 𝑖 ̂︀ 𝑓 𝑖 𝑓
+with(cid:126)𝜔beingtheenergyofthephoton,𝜇thedipoleoperatorand𝑛therefractiveindexofthesolvent,assuggested
+̂︀
+byStricklerandBerg[829].
+One way to obtain 𝑘(𝜔) is to compute it i

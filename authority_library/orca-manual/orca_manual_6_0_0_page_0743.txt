@@ -1,0 +1,71 @@
+[... end of page 742 ...]
+the
+𝑑𝑖𝑓𝑓 𝐼 𝐽 𝐼 𝐽 𝑚𝑒𝑎𝑛
+gradientmeanandPisaprojectionmatrixthatprojectsoutthegradientdifference(x)andnon-adiabaticcoupling
+(y)directioncomponents:
+P=1−xxT−yyT
+NowwehavethreeapproachestosolvethisprobleminORCA,thatwillbeexplainednext.
+Gradient Projection: This is exactly what has been described above, and will be chosen as default whenever
+NACMEsbetweenIandJareavailable. Itisinprinciplethefasterandmostaccuratemethod. Itcanbeinvoked
+bysetting:
+720 Chapter7. DetailedDocumentation
+
+--- Page 743 ---
+ORCAManual,Release6.0.0
+%CONICAL
+METHOD GRADIENT_PROJECTION #or simply GP
+END
+OBS.: TurningontheETF(seeSec. NACMEswithbuilt-inelectron-translationfactor)canimprovetheoptimiza-
+tionwhenusingthefullGradientProjectionmethod.
+GradientProjection(withoutNACME):Itisanapproximationtothemethodabove,thatonegetsbycompletely
+neglectingtheNACMEs. Itisessentiallyequivalenttofindingasurfacecrossingpoint, andwillnotnecessarily
+findminimainsidetheCIseam-space,althoughthefinal∆𝐸 shouldbezero.
+𝐼𝐽
+%CONICAL
+METHOD GP_NONACME
+END
+UpdatedBranchingPlane: HeretheideaistostartfromaguessNACME,whichisanyunitvectorperpendicular
+tox,anddoanprogressiveupdateonit,similartotheBFGSupdateontheHessian[544]. The“BranchingPlane”
+definedbyxandygetstheniterativelymoreaccurateuntilcovergenceisachieved. Ithasbeenshowntobequite
+accurateandisthedefaultwheneverNACMEsarenotavailable. Canbeusedwith:
+%CONICAL
+METHOD UBP
+END
+Finally,the∆𝐸 energythresholdfortheoptimizationcanbealteredwith:
+𝐼𝐽
+%CONICAL
+ETOL 1e-4 #default
+END
+7.26.5 Numerical Gradients
+Ifyouwanttousenumericalinsteadofanalyticgradientsyouhavetouse
+! NumGrad
+inyourinputfile. Additionallythesettingsforthenumericaldifferentiationcanbechanged:
+%numgrad
+CentralDiff true # You should use two-sided numerical differentiation, but it
+# is possible to switch to one-sided numerical differentiation.
+DX 0.005 # Increment in Bohr for the differentiation.
+TransInvar true # Take advantage of translation invariance
+end
+7.26.6 ORCA as External Optimizer
+IfyouwanttomakeuseofORCA’sroutinesforoptimization,TSoptimization,NEB,IRC,GOAT,etc.,butnotuse
+ORCA’sbuilt-inelectronicstructuremethods,youcanusethekeyword:
+! ExtOpt
+in your input file. All information that you give on the electronic structure is discarded. In each optimiza-
+tion/NEB/IRCstepORCAwritesaninputfilecalledbasename_EXT.extinp.tmpwiththefollowinginfo:
+basename_EXT.xyz # xyz filename: string, ending in '.xyz'
+0 # charge: integer
+1 # multiplicity: positive integer
+(continuesonnextpage)
+7.26. GeometryOptimization 721
+
+[... start of page 744 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+1 # NCores: positive integer
+0 # do gradient: 0 or 1
+pointcharges.pc # point charge filename: string (optional)
+Commentsfrom#untiltheendofthelineshouldbeignored. Thefilebasename_EXT.xyzwillalsobepresentin
+theworkingdirectory. ORCAalwaysrequeststheenergy,butagradientonlyifneededforthechosencalculation
+type.
+ORCAthencalls:
+scriptname basename_EX

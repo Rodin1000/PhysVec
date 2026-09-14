@@ -1,0 +1,78 @@
+[... end of page 68 ...]
+,MWB Hf–Pt
+60,MDF4 Au–Rn
+def-SD 28,MWB Rb–Cd
+46,MWB In–La
+28,MWB Ce–Lu
+60,MWB Hf–Pt
+60,MDF4 Au,Hg,Rn
+78,MWB Tl–At
+78,MDF Fr,Ra
+60,MWB Ac–Lr
+SDD 2,SDF Li,Be
+2,MWB B–Ne
+10,SDF Na,Mg
+10,MWB Al–Ca
+continuesonnextpage
+46 Chapter4. GeneralStructureoftheInputFile
+
+--- Page 69 ---
+ORCAManual,Release6.0.0
+Table 4.3–continuedfrompreviouspage
+ECPkeyword CoresizePage47,1 Elements Valencebasissets
+10,MDF Sc–Ni
+10,MWB Cu-Zn
+28,MWB Ga–Sr
+28,MHF Y–Cd
+28,MDF Ge–Br,Rb–Xe
+46,MWB In–Ba
+28,MWB La–Lu
+60,MWB Hf–Hg
+78,MWB Tl–Rn
+60,MWB Ac–Lr
+LANL1 10 Na–Ar
+18 K–Zn
+28 Ga–Kr
+36 Rb–Cd
+46 In–Xe
+54 Cs–La
+68 Hf–Tl
+78 Pb,Bi
+LANL2 10 K–Cu
+28 Rb–Ag
+46 Cs–La
+60 Hf–Au
+Note: SomebasissetsassignanECPbydefaultwhenrequestedthroughthesimpleinput(butnotthroughthe
+%basisblock): forexample,“def2”basissetsusethedef2-ECP.Forothers,seethefootnotesunderTable7.10.
+The simplestway to assignECPs is byusing the ECPkeyword within thekeyword line, althoughinput through
+the%basisblockisalsopossible(AdvancedSpecificationofEffectiveCorePotentials). TheECPkeyworditself
+assignsonlytheeffectivecorepotential,notavalencebasisset! AsanexampleforanexplicitlynamedECPyou
+coulduse
+! def2-TZVP def2-SD
+This would assign the def2-SD ECP according to the definition given in the table above. Without the def2-SD
+keywordORCAwoulddefaulttodef2-ECP.
+4.4 Numerical Integration in ORCA
+Starting from its version 5.0, ORCA has a new scheme for the quadratures used in numerical integration. It is
+basedonthesamegeneralideaswhichwereusedfortheoldgrids,exceptthatweusedmachinelearningmethods,
+togetherwithsomefinalhands-onoptimization,tofindtheoptimalparametersforallatomsuptothe6throwof
+theperiodictable,withthe7throwbeingextrapolatedfromthat. ForfurtherdetailslookatRef. [383]. Wealso
+realizedthattheCOSXandDFTgridshaveoveralldifferentrequirements,andthesewereoptimizedseparately.
+The big advantage of this new scheme is that it is significantly more accurate and robust than the old one, even
+if having the same number of grid points. We tested energies, geometries, frequencies, excitation energies and
+propertiestodevelopthreenewgridschemesnamed: DEFGRID1, DEFGRID2andDEFGRID3, thatwillauto-
+maticallyfixallgridsthatareusedinthecalculations. DEFGRID1behavesessentiallyliketheolddefaults,but
+1Whereapplicable,referencemethodanddataaregiven(S:single-valence-electronion;M:neutralatom;HF:Hartree-Fock;WB:quasi-
+relativistic;DF:relativistic).
+2CorrespondstoLANL2andtoLANL1whereLANL2isunavailable.
+3I:OLD-SD(28,MDF)forcompatibilitywithTURBOMOLE.
+4Au,Hg:OLD-SD(60,MDF)forcompatibilitywithTURBOMOLE.
+4.4. NumericalIntegrationinORCA 47
+
+[... start of page 70 ...]
+ORCAManual,Release6.0.0
+itismorerobust. Thesecondisthenewdefault,andisexpectedtoyieldsufficientlysmallerrorsforallkindsof
+applications(seeSectionDetailsonthenumericalintegrationgridsfordetails). Thelastisaheavier,higher-quality
+grid,thatisclosetothelimitifoneconsidersanenormousgridasareference.
+InordertochangefromthedefaultDEFGRID2,onejustneedstoadd!DEFGRID1or!DEFGRID3tothemain
+input.
+It is

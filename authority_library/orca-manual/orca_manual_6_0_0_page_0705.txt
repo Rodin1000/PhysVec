@@ -1,0 +1,108 @@
+[... end of page 704 ...]
+tionedreferences,whichdiffers
+somewhatfromthatintheprevioussections. Theone-electronDiracequationissolveddirectly:
+(︂ CL CL)︂
+DC=MCE, C= + − (7.184)
+CS CS
++ −
+toobtaintheunitarytransformationmatrix:
+(︂
+U U
+)︂ (︂
+1
+−X†)︂(︂
+R 0
+)︂
+U= ++ +− =
+U U X 1 0 R′
+−+ −−
+X=CS (︀ CL)︀−1
++ +
+(︁ )︁−1
+R=S−
+2
+1 S−
+2
+1S˜S−1
+2
+2 S1
+2
+1
+S˜ =S+ X†TX
+2𝑐2
+whichexactlyblock-diagonalizestheHamiltonian:
+(︂ h+ 0 )︂
+U†DU= (7.185)
+0 h−
+h+ =R†LR (7.186)
+682 Chapter7. DetailedDocumentation
+
+--- Page 705 ---
+ORCAManual,Release6.0.0
+(︂ )︂
+1
+L=V+TX+X†T+X† W−T X (7.187)
+4𝑐2
+whereV,T,S,andWarethepotential,kinetic,overlap,andrelativisticpotential(𝑝ˆ𝑉ˆ𝑝ˆ)integralmatrices. h+is
+thusthematrixformoftherelativistically-correctedone-electronHamiltonianusedfortherestofthecalculation.
+Note that the potential operator 𝑉ˆ used in the above equations only includes the electron–nuclear Coulomb in-
+teraction. Externalpointchargesmayoptionallybeincludedvia%rel ModelPot[4]=1(default0). Thisoption
+affectsenergyandNMRshieldingcalculationsbutitispresentlynotavailableforgradientsorHessians.
+DLUapproximation
+The diagonal local approximation to the unitary transformation matrix (DLU), as introduced by Peng and Rei-
+her,[659] reduces the computational cost of the X2C transformation by approximating U (i.e., R and X) as an
+atomic-block-diagonalmatrix.
+⨁︁ ⨁︁
+R≈ R X≈ X
+𝐴 𝐴
+𝐴 𝐴
+where⨁︀ denotesadirectsumofatomicdiagonalblocks. Eqs(7.184)–(7.187)canthenbesolvedindependently
+𝐴
+fordiagonalatomicblocksh+ . Off-diagonalblocksh+ areobtainedas:
+𝐴𝐴 𝐴𝐵
+h+ =R†L R
+𝐴𝐵 𝐴 𝐴𝐵 𝐵
+(︂ )︂
+1
+L =V +T X +X†T +X† W −T X
+𝐴𝐵 𝐴𝐵 𝐴𝐵 𝐵 𝐴 𝐴𝐵 𝐴 4𝑐2 𝐴𝐵 𝐴𝐵 𝐵
+Itisalsopossibletoapproximatelightatoms𝑎,𝑏(belowacertainatomicnumber)asnon-relativistic:
+X =R =I
+𝑎 𝑎
+W =W =0
+𝑎𝑏 𝑎𝐵
+h+ =V +T
+𝑎𝑏 𝑎𝑏 𝑎𝑏
+h+ =(V +T X )R
+𝑎𝐵 𝑎𝐵 𝑎𝐵 𝐵 𝐵
+Unlike the one center approximation (which is also available for X2C), all nuclei are included in the potential
+operator𝑉ˆ. UseoftheDLUapproximationiscontrolledvia:
+%rel
+DLU false # default - not used
+true # turn DLU on
+LightAtomThresh 0 # (default) highest atomic number treated as non-relativistic
+end
+X2Cderivativesandproperties
+AsdiscussedinsectionPicture-ChangeEffects,whencomputingpropertieswithrelativisticmethods,derivatives
+needtobetakenofthecorrectHamiltonian,namelyh+(eq(7.186))intheX2Ccase. Theseincludecontributions
+duetothederivativesofRandX,whichareoftensmall. Therefore,itispossibletoneglectthemandsavesome
+computationaltimeviathefollowingoption:
+%rel
+PictureChange 2 # compute the full relativistic Hamiltonian derivative
+1 # neglect derivatives of R and X
+0 # (default) use the non-relativistic operator
+end
+ThesamesettingisappliedtoallpropertiesforwhichtheX2Ccorrectionisimplemented. Currently, theseare:
+geometricgradients,electricdipoles,quadrupoles,andpolarizabilities,electricfieldgradients,EPRhyperfinecou-
+plings, and NMR shieldings and spin–spin couplings. For the Hessian, the X2C correction is implemented in a
+7.23. RelativisticOptions 683
+
+[... start of page 706 ...]
+ORCAManual,Release6.0.0
+semi-numeric fashion. The DLU approximation is applied throughout, if requested, and reduces the computa-
+tionaleffortdramatically. Notethatformagneticproperties,therestrictedmagneticbalance(RMB)forthesmall
+componentbasisfunctionsisusedwheneverGIAOsarerequested(e.g. NMRshielding),whiletherestrictedki-
+neticbalance(RKB)isusedotherwise(e.g. NMRcoupling). Thespin–orbitcouplingintegralsusedforvarious
+propertiesonlyincludearelativisticcorrectiontotheone-electronterm,asisthecaseforDKH.
+Forsecondderivativepropertieswhosenumberisproportionaltothenumberofatoms,e.g. theDSOtermofNMR
+couplings,firstderivativesofvariousintermediatequantitiesrequiredforthefullX2Csecondderivati

@@ -1,0 +1,75 @@
+[... end of page 1120 ...]
+put format
+ORCA - to be read via %basis NewGTO
+GAMESS-US - to be read as %basis GTOName 'mybasis.bas'
+default - ORCA
+-a, --atoms : list of elements
+Cu - single element
+Ga Ge As Se - list of elements separated by blanks
+default - whole periodic table is printed
+-o, --outfile: name of outputfile
+mybasis.bas
+default - derived name
+(continuesonnextpage)
+1098 Chapter7. DetailedDocumentation
+
+--- Page 1121 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+EXAMPLE: orca_exportbasis -b svp -e sdd -a Ag -f GAMESS-US -o mybasis.bas
+TheoutputstoredinGAMESS-USformatcanbeusedinthe%basisblockofthenextORCAcalculation.
+%basis
+GTOName "mybasis.bas"
+GTOAuxJName "myauxjbasis.bas"
+GTOAuxJKName "myauxjkbasis.bas"
+GTOAuxCName "myauxjcbasis.bas"
+end
+7.58.13 orca_eca
+Thisutilityprogrammakesuseofthecalculatedexchangecouplingconstantstocomputerelativeenergiesofall
+possible spin states through diagonalization of spin Hamiltonian. The absolute and relative energies of the spin
+states are printed in the *.en and *.en0 files respectively. The on-site spin expectation values are also printed
+ina *.spfile.Thefollowingexamplecalculatesthespinladderforasystemwithexchangecouplingconstantof
+-152.48cm**-1betweenMn(III)andMn(IV).
+%sim
+ms_bs 0.5 # Arbitrary spin state
+end
+# specification of spin centers
+$spins 2
+1 2.0 # Spin on first manganese
+2 1.5 # Spin on second manganese
+# Exchange coupling constant (H = -2J S1 S2)
+$ecc 1
+1 -152.48
+$aiso_bs 2 # A false segment just to print the *.sp file
+1 0.00
+2 0.00
+7.58.14 orca_pnmr
+orca_pnmrcalculatestheparamagneticcontributiontotheNMRshieldingtensorfromEPR𝑔,𝐴,and𝐷tensors
+(seeSectionParamagneticNMRshieldingtensorsfortheoreticalbackground). Itisastandaloneprogramwhich
+youcaninvokeonthecommandlineafterthemainORCAcalculationhasfinished. Alternatively,itcanreaduser-
+provided𝑔/𝐴/𝐷tensorsfromaninputfile(option-i). Notethatorca_pnmrexpects𝑔and𝐴tensorsthatconform
+totheconventiondescribedinSectionCartesianIndexConventionsforEPRandNMRTensors.
+USAGE: orca_pnmr BaseName [-i] [-v]
+OPTIONS: -i : read from the input file "BaseName.pnmr.inp"
+-v : print more output (Z matrices)
+When called without options, orca_pnmr will attempt to extract 𝑔, 𝐷, and 𝐴 tensors from the property file
+BaseName.property.txtandusethesetocalculatetheparamagneticshieldingsat298K.Notethatthisfunction-
+alityisnotsophisticated: itonlyrecognizesEPRtensorscalculatedbytheEPRNMRmodule. Amoreflexibleway
+tousethecapabilitiesoforca_pnmristomanuallyeditthetextfileBaseName.pnmr.inpandthenrunorca_pnmr
+withthe-ioption. Thefilehasthefollowingformat:
+7.58. UtilityPrograms 1099
+
+[... start of page 1122 ...]
+ORCAManual,Release6.0.0
+3 # Spin multiplicity (2S+1)
+298 # Temperature range minimum [K]
+300 # Temperature range maximum [K]
+1 # Temperature step [K]
+1 # Have g-tensor? 0 or 1
+2.004689 0.000000 -0.000000 # Cartesian g-tensor
+0.000000 2.004689 0.000000 # (if available)
+0.000000 0.000000 2.002123
+1 # Have D-tensor? 0 or 1
+-0.514341 -0.000000 -0.000000 # Cartesian D-tensor [cm-1]
+-0.000000 -0.514341 -0.000000 # (if available)
+-0.000000 -0.00

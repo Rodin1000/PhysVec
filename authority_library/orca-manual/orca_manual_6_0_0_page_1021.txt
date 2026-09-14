@@ -1,0 +1,55 @@
+[... end of page 1020 ...]
+lightlymoreinvolvedtoenforceandkeepexactconstraints. Within
+the last decades, algorithms have been developed to do so. One famous among them is the SHAKE algorithm.
+However,itcomeswiththedisadvantageofonlyenforcingtheconstraintsinthepositions,notinthevelocities. This
+mayleadtoproblemssuchasartificiallyhightemperaturevaluesdueto“hidden”velocitiesalongtheconstrained
+directions. AnextensionofSHAKEwhichalsoenforcestheconstraintsforthevelocitiesistheRATTLEalgorithm,
+whichisimplementedintheAIMDmoduleofORCA.
+TheRATTLEschemeisageneralizationoftheVelocityVerletintegratortoallowforconstraints. Thismeansthat
+RATTLEisnotappliedinadditiontotheVelocityVerletintegrator,butreplacesit. Incaseofnoactiveconstraints,
+998 Chapter7. DetailedDocumentation
+
+--- Page 1021 ---
+ORCAManual,Release6.0.0
+bothmethodsareidentical. Asystemofcoupledconstraintscannotbesolvedexactlyinonestep, andRATTLE
+usesaniterativeapproachtoenforceallconstraintssimultaneously. Thisisoftenamatterofconcernwithrespect
+toperformance. However,inAIMD,theenergyandgradientcalculationstypicallytakesecondsorevenminutes
+perstep,suchthattheadditionalcomputationtimeforiterativelysolvingtheconstraintscanbetotallyneglected.
+Asaniterativeprocedure,RATTLEisnotabletogiveexactsolutions,butonlyconvergeduptoagiventolerance.
+In the ORCA MD module, the tolerance is currently set to 10−2 pm for distances, and 10−4 degree for angles
+and dihedral angles. This tolerance is typically reached within a few dozen iterations. In some cases, it might
+happenthattheRATTLEiterationsdonotconvergetotherequiredtolerance. Thisistypicallythecaseiftheset
+ofconstraintsisover-determinedorcontradictory.
+The mathematical and technical details of RATTLE are not described here, they can be found in the literature.
+The general concept of RATTLE was suggested by Andersen [35]. The original article only covered distance
+constraints. Afollow-upworkdescribeshowtohandleanyholonomicconstraints,inparticularhowtoconstrain
+anglesanddihedralangles[483]. TheWilsonvectors(i. e.,derivativesofanglesanddihedralangleswithrespect
+toCartesianatompositions)aretakenfromWilson’soriginalwork[888].
+7.52 Fast Multipole Method
+The Fast Multipole Method (FMM) algorithm was proposed in the 1980s[317], to reduce the computation time
+for two-centre interactions in large systems, by moving from a quadratic relationship (O(𝑁2)) to a quasi-linear
+relationship(O(𝑁𝑙𝑜𝑔(𝑁)))ofthecomputationtimewiththenumber𝑁 ofparticles(atoms,pointcharges,etc.).
+Thisalgorithmisparticularlyusefulforlong-rangeinteractionsthataredifficulttoignore,suchastheCoulombic
+interaction(1/r)whichisfundamentaltoanysystembutgrowsquadraticallywiththenumberofcenters.
+TheFMMisusedinORCAforacceleratingQMMMcalculationsinthescopeofelectrostaticembedding: FMM-
+QMMM(cf. EmbeddingTypes).
+7.52.1 The Octree hierarchy
+Thereexistsalotofdetailedandpedagogicalliteratureonthesubject(werecommendforinstance[49]and[377]).
+Inthefollowingwewillonlydescribethemainparameters.
+Theideaofthealgorithmistodividespacetohandledifferentlyshort-andlong-rangeinteractions. Thelatterwill
+beapproximated(cf. ApproximationoftheFarFieldinteractions). Todoso,thewholesystemisplacedinacubic
+boxwhichisiterativelydividedin8childrenboxes(forminglevelsL:L=0→L=L
+max
+)soastoformastructure
+calledanOctree(seeFig. Fig.7.62).
+7.52. FastMultipoleMethod 999
+
+[... start of page 1022 ...]
+ORCAManual,Release6.0.0
+Fig.7.62: Divisionofthesystemintoboxes,schematicrepresentationin2D.
+Atthedeepestlevel,L = L max ,foreverybox,wecandefinealayerofnearestneighboursboxes(NN)whichwill
+beresponsiblefortheNear-Field(NF,i.e.short-range). Theelectrostaticpotentialduetotherestoftheboxesis
+defineastheFar-Field(FF,i.e. long-range).
+∀𝐵 , V =VNF+VFF
+𝐵 𝐵 𝐵
+AsvisibleonFigureFig.7

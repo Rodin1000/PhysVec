@@ -1,0 +1,72 @@
+[... end of page 378 ...]
+2 2
+arbitrarynumberofinteractingmolecules. Itisalsopossibletoassignonlycertainatomstoafragmentandletthe
+programdefinetheotherones:
+! dlpno-ccsd(t) cc-pvdz cc-pvdz/c cc-pvtz/jk rijk verytightscf TightPNO LED
+*xyz 0 1
+C(1) 0.18726407287156 0.08210467619149 0.19811955853244
+H(1) 1.07120465088431 -0.00229078749404 -0.46002874025040
+H(1) -0.15524644515923 1.12171178448874 0.04316776563623
+O -1.47509614629583 -1.29358571885374 2.29818864036820
+(continuesonnextpage)
+356 Chapter6. RunningTypicalCalculations
+
+--- Page 379 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H -0.87783948760158 -0.98540169212890 1.58987042714267
+H -1.22399221548771 -2.20523304094991 2.47014489963764
+*
+6.13.6 Additional Features, Defaults and List of Keywords
+Note: StartingfromORCA4.2thedefaultlocalizationschemeforthePNOshaschangedfromPM(PipekMezey)
+toFB(FosterBoys). ThismightcauseslightnumericaldifferencesintheLEDtermswithrespecttothatobtained
+frompreviousORCAversions. ToobtainresultsthatarefullyconsistentwithpreviousORCAversions,PMmust
+bespecified(seebelow).
+ThefollowingoptionscanbeusedinaccordancewithLED.
+! DLPNO-CCSD(T) cc-pVDZ cc-pVDZ/C cc-pVTZ/JK RIJK TightPNO LED TightSCF
+%mdci
+LED 1 # localization method for the PNOs. Choices:
+# 1 = PipekMezey
+# 2 = FosterBoys (default starting from ORCA 4.2)
+PrintLevel 3 # Selects large output for LED and prints the
+# detailed contribution
+# of each DLPNO-CCSD strong pair
+LocMaxIterLed 600 # Maximum number of localization iterations for PNOs
+LocTolLed 1e-6 # Absolute threshold for the localization procedure for PNOs
+Maxiter 0 # Skips the CCSD iterations and
+# the decomposition of the correlation energy
+DoLEDHF true # Decomposes the reference energy in the LED part.
+# By default, it is set to true.
+end
+Note: StartingfromORCA4.2anRIJCOSXimplementationoftheLEDschemeforthedecompositionofthe
+reference energy is also available. This is extremely efficent for large systems. For consistency, the RIJCOSX
+variantoftheLEDisusedonlyiftheunderlyingSCFtreatmentisperformedusingtheRIJCOSXapproximation,
+i.e.,ifRIJCOSXisspecifiedinthesimpleinputline. Anexampleofinputfollows.
+! dlpno-ccsd(t) def2-TZVP def2-TZVP/C def2/j rijcosx verytightscf TightPNO LED
+*xyz 0 1
+C(1) 0.18726407287156 0.08210467619149 0.19811955853244
+H(1) 1.07120465088431 -0.00229078749404 -0.46002874025040
+H(1) -0.15524644515923 1.12171178448874 0.04316776563623
+O(2) -1.47509614629583 -1.29358571885374 2.29818864036820
+H(2) -0.87783948760158 -0.98540169212890 1.58987042714267
+H(2) -1.22399221548771 -2.20523304094991 2.47014489963764
+*
+Fianlly,herearesometipsforadvancedusers.
+• TheLEDschemecanbeusedinconjuctionwithanarbitrarynumberoffragments.
+• TheLEDschemecanbeusedtodecomposeDLPNO-CCSDandDLPNO-CCSD(T)energies. Atthemo-
+ment,itisnotpossibletousethisschemetodecomposeDLPNO-MP2energiesdirectly. However,forclosed
+shellsystems,onecanobtainDLPNO-MP2energiesfromaDLPNO-CCSDcalculationbyaddingaseries
+of keywords in the %mdci block: (i) TScalePairsMP2PreScr 0 ; (ii) UseFullLMP2Guess true; (iii)
+TCutPairs 10(oranylargevalue). TheLEDcanbeusedasusualtodecomposetheresultingenergy.
+6.13. LocalEnergyDecomposition 357
+
+[... start of page 380 ...]
+ORCAManual,Release6.0.0
+• Foraclosedshellsystemoftwofragments(sayAandB),theLEDschemecanbeusedtofurtherdecompose
+theLEDcomponentsofthereferenceHFenergy(intrafragment,electrostaticsandexchange)intoasumof
+frozenstateandorbitalrelaxationcorrectioncontributions. MoreinformationcanbefoundinRef.[29].
+• Toobtainthefrozenstatetermsonehasto: (i)generatea.gbwfilecontainingtheorbitalsofbothfragments
+(AB.gbw)usingorca_mergefrag A.gbw B.gbw AB.gbw,whereA.gbwandB.gbwaretheorbitalfilesof
+isolatedfragmentsattheaductgeometry;(ii)runtheLEDasusualbyusingMOReadtoreadtheorbitalsin
+theAB.gbwfileinconjunctionwithMaxiter 0inboththe%scfblock(toskiptheSCFiterations)andthe
+%mdciblock(toskiptheunnecessaryCC

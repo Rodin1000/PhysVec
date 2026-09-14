@@ -1,0 +1,333 @@
+{
+  "query": "ORCA GridX keywords for XAS and geometry optimization dft_qc",
+  "package": "orca-manual",
+  "results": [
+    {
+      "id": "9.3.2.7_Using_the_RI_Approximation_for_Hartree-Fock_and_Hybrid_DFT_RIJCOSX__orca_manual_4_2_1-page-0436__e2fb7f5551d501b9dad690764be92495__full__0",
+      "text": "404 9 Detailed Documentation\nIn our implementation, we have deﬁned grids of increasing quality. Higher and more accurate (and more\nexpensive) grids for the COSX approximation are chosen by increasing n from 1 to 9 in\n! GridXn\nFrom version 2.9, overlap ﬁtting is used by default. This means that there might be some diﬀerences with\nrespect to previous versions. Firstly, smaller grids are used by default. The old default grid can be retained\nby typing\n! GridXOLD\nIf consistency with previous versions of ORCA is desired, overlap ﬁtting can be removed using the keyword\n!NoSFitting. Note that overlap ﬁtting yields better results as the basis and/or the grid increases. It was\nadapted as the default procedure with the smallest reliable grid, but it is compatible with all possible grids.\nGrids tested in the overlap ﬁtting paper are available as !GridXS1 and !GridXS2. [316] The latter grid is the\ndefault.\nFor expert users, the grid parameters for the exchange grids can be even more ﬁnely controlled:\n%method\nIntAccX Acc1, Acc2, Acc3\nGridX Ang1, Ang2, Ang3\nXCorrection Corr1, Corr2, Corr3\nUseFinalGridX true\nend\nThere are three grids involved: the smallest grid (Acc1, Ang1) that is used for the initial SCF iterations, the\nmedium grid (Acc2, Ang2) that is used until the end of the SCF and the largest grid (Acc3, Ang3) that is\nused for the ﬁnal energy and the gradient evaluations. UseFinalGridX turns this last grid on or oﬀ. “Accn”\nrefers to the radial integration accuracy, GridX refers to the angular grid resolution and XCorrection (=0 or\n1) refers to the method used for correcting the grid error. For “0” no one-center correction is applied, for\n“1” a one-center correction is computed analytically for the two-electron integrals. Note that in cases where\nconvergence diﬃculties arise, it is advisable to increase the smallest grid to a larger value, or even equal to\nthe medium grid using the Acc1, Ang1 parameters.\nTo modify the overlap ﬁtting parameters\n%method\nUseSFitting false # equals to NoSFitting in the simple\n# input. Default is true.\nUseQGradFit true # uses the SCF fitting matrix for\n# gradient calculations. Default\n# is false.\nend\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_title": "9.3.2.7_Using_the_RI_Approximation_for_Hartree-Fock_and_Hybrid_DFT_RIJCOSX__orca_manual_4_2_1-page-0436.txt",
+        "source_file": "9.3.2.7_Using_the_RI_Approximation_for_Hartree-Fock_and_Hybrid_DFT_RIJCOSX__orca_manual_4_2_1-page-0436.txt",
+        "section_id": "full"
+      },
+      "score": 0.8295087048467428,
+      "original_score": 0.8191758990798786,
+      "vector_score": 1.0,
+      "bm25_score": 0.09587949539939285,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "orca",
+        "gridx"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "8.2.4_Initial_Hessian_for_Minimization__orca_manual_4_2_1-page-0189__1aa2fbb929098371a6e31aba4abd12c8__part_0__0",
+      "text": "8.2 Geometry Optimizations, Surface Scans, Transition States, MECPs, Conical Intersections, IRC, NEB157\n8.2.3 Some Notes and Tricks\nNOTE\n• TightSCF in the SCF part is set as default to avoid the buildup of too much numerical noise in the\ngradients.\nTIP\n• If you want to be on the safe side with DFT it is probably advisable to use the settings ! Grid4\nNoFinalGrid although the defaults should also be o.k.\n• In rare cases the redundant internal coordinate optimization fails. In this case, you may try to use\nCOPT (optimization in Cartesian coordinates). If this optimization does not converge, you may try the\ndesperate choice to use ZOPT, GDIIS-COPT or GDIIS-ZOPT. This will likely take many more steps to\nconverge but should be stable.\n• For optimizations in Cartesian coordinates the initial guess Hessian is constructed in internal coordinates\nand thus these optimizations should converge only slightly slower than those in internal coordinates.\nNevertheless, if you observe a slow convergence behaviour, it may be a good idea to compute a Hessian\ninitially (perhaps at a lower level of theory) and use InHess read in order to improve convergence.\n• At the beginning of a TS optimization more information on the curvature of the PES is needed than\na model Hessian can give. The best choice is analytic Hessian, avialable for HF, DFT and MP2. In\nother cases (e.g. CAS-SCF), the numerical evaluation is necessary. Nevertheless you do not need to\ncalculate the full Hessian when starting such a calculation. With ORCA we have good experience\nwith approximations to the exact Hessian. Here it is recommended to either directly combine the\nTS optimization with the results of a relaxed surface scan or to use the Hybrid Hessian as the initial\nHessian, depending on the nature of the TS mode. Note that these approximate Hessians do never\nreplace the exact Hessian at the end of the optimization, which is always needed to verify the minimum\nor ﬁrst order saddle point nature of the obtained structure.\n8.2.4 Initial Hessian for Minimization\nThe convergence of a geometry optimization crucially depends on the quality of the initial Hessian. In the\nsimplest case it is taken as a unit matrix (in redundant internal coordinates we use 0.5 for bonds, 0.2 for\nangles and 0.1 for dihedrals and improper torsions). However, simple model force-ﬁelds like the ones proposed\nby Schlegel, Lindh, Swart or Alml¨ of are available and lead to much better convergence. The diﬀerent guess\nHessians can be set via the InHess option which can be either unit, Alm",
+      "metadata": {
+        "section_title": "8.2.4_Initial_Hessian_for_Minimization__orca_manual_4_2_1-page-0189.txt",
+        "section_id": "part_0",
+        "package": "orca-manual",
+        "source_file": "8.2.4_Initial_Hessian_for_Minimization__orca_manual_4_2_1-page-0189.txt"
+      },
+      "score": 0.5914226536183051,
+      "original_score": 0.5531185273950213,
+      "vector_score": 0.687369862796792,
+      "bm25_score": 0.01611318578793805,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "orca",
+        "geometry",
+        "optimization"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "9.33.1.3_Mixing_methods__orca_manual_4_2_1-page-0870__c36ec56b0a55c376032a82964d53b451__part_1__1",
+      "text": "ent coordinate systems then, Sec. 9.33.1.5).\n• Also check for RMSD between the geometries after a step. If the diﬀerence is too big, there might be\nproblems with the step.\n9.33.1.3 Mixing methods\nIn principle, it is possible to use diﬀerent methods to compute diﬀerent parts needed for the ORCA ESD module.\nYou could, for instance use (TD)DFT analytical gradients for the ground/excited state geometries and\nHessians and a more elaborate method such as STEOM-CCSD to get the energies and transition dipoles.\nIf you want to do that, just input the Hessians and use the DELE ﬂag for the energy diﬀerence between\nthe states - at their own geometry! - and TDIP x,y,z to input the transition dipole. If there is SOC and\nthe transition dipole is complex, use TDIP x.real, x.imag, y.real, y.imag, z.real, z.imag. The program will\nautomatically detect each case. If you don’t input these, they will be obtained by the module during the run,\nso you can set the excited method you want and let the program ﬁgure out DELE and TDIP.\nOBS: It is not advisable to mix diﬀerent levels of theory during a geometry step though. If you obtained a\nGS Hessian from DFT, doing a step based on a CASSCF ES numerical gradient might not lead to reasonable\nresults. The same would be problematic even for diﬀerent DFT functionals.\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_id": "part_1",
+        "section_title": "9.33.1.3_Mixing_methods__orca_manual_4_2_1-page-0870.txt",
+        "source_file": "9.33.1.3_Mixing_methods__orca_manual_4_2_1-page-0870.txt"
+      },
+      "score": 0.5335367890309819,
+      "original_score": 0.5052662913964959,
+      "vector_score": 0.6315828642456198,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "orca",
+        "geometry"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021__72e5cefb9c642f759756406daaa4db36__part_0__0",
+      "text": "XIX\nList of Tables\n6.1 Main keywords that can be used in the simple input of ORCA. . . . . . . . . . . . . 12\n6.2 Density functionals available in ORCA. . . . . . . . . . . . . . . . . . . . . . . . . . 23\n6.3 Basis sets available on ORCA. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25\n6.4 Overview of auxiliary basis sets available in ORCA. . . . . . . . . . . . . . . . . . . 30\n6.5 Overview of library keywords for ECPs and associated basis sets available in ORCA. 33\n8.1 Computer times for solving the coupled-cluster/coupled-pair equations for Serine . . 62\n8.2 Computed spectroscopic constants of N 2 with coupled-cluster methods. . . . . . . . 63\n8.2 Computed spectroscopic constants of N 2 with coupled-cluster methods. . . . . . . . 64\n8.3 Comparison of various basis sets for highly correlated calculations . . . . . . . . . . 70\n8.4 Comparison of various basis sets for correlated calculations. . . . . . . . . . . . . . . 72\n8.6 Accuracy settings for DLPNO coupled cluster (current version). . . . . . . . . . . . . 90\n8.7 Accuracy settings for DLPNO coupled cluster (deprecated 2013 version). . . . . . . . 90\n8.10 DSD-DFT parameters deﬁned in ORCA . . . . . . . . . . . . . . . . . . . . . . . . . 99\n8.12 Comparison of the performance of the MRCI and MDCI modules for a single refer-\nence calculation with the bn-ANO-DZP basis set on the zwitter-ionic form of serine. 213\n8.15 Energies of the H 2O-CH2 example for illustrating how the diﬀerent LED contri-\nbutions are evaluated. The superscript opt denotes energies of optimized structures,\nfixed denotes energies of isolated fragments in the dimer structure. In the last column\nthe energy of the dimer is reported. . . . . . . . . . . . . . . . . . . . . . . . . . . . . 311\n9.2 Predeﬁned COSX Grid keywords . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+      "metadata": {
+        "package": "orca-manual",
+        "source_file": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021.txt",
+        "section_title": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021.txt",
+        "section_id": "part_0"
+      },
+      "score": 0.5052366678994711,
+      "original_score": 0.4752510114085299,
+      "vector_score": 0.5940637642606623,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "orca",
+        "keywords"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "0_Ria__orca_manual_4_2_1-page-0519__2d693cba4cbee77958e5950e8e44a7be__part_0__0",
+      "text": "9.11 The Second Order Many Body Pertubation Theory Module (MP2) 487\n• RIJCOSX can be used to accelerate exchange evaluation substantially. However, great care needs to be\nexercised with the grid settings. We found that even GridX6 is insuﬃcient for geometry optimizations\nand may lead, for example, to non-planar distortions of planar molecules. On the other hand, GridX7\nor GridX8 appear to be suﬃciently accurate to optimize neutral main group compounds. We therefore\nrecommend these grids for general use with some careful checking in more complicated cases. Even\nwith these grids, the calculation is a lot faster than ”regular” Hartree-Fock with basis sets of triple\nzeta quality (or larger).\nUsing RIJONX is also possible.\n• Suﬃciently large grids should be used for the exchange-correlation functional of double hybrids. The\nSCF calculation takes only a fraction of the time that is needed for DLPNO-MP2, and sacriﬁcing\nquality because of an insuﬃciently accurate grid is a waste of computer time.\n• Optimization of large structures is often a challenge for the geometry optimizer. It may help to change\nthe trust radius settings, to modify the settings of the AddExtraBonds feature, or to change other\nsettings of the geometry optimizer. Sometimes it may be beneﬁcial to check the geometry optimizer\nsettings with a less demanding electronic structure method.\n• Finally, problems with a geometry optimization may in some cases indeed be caused by the DLPNO\napproximations. Using LoosePNO for accurate calculations is not recommended anyway, and diﬃculties\nwith NormalPNO settings are possibly rectiﬁed by switching to TightPNO.\nDuring the development process, a number of diﬃculties were encountered related to the orbital localization\nZ-vector equations. Great care was taken to work around these problems and to make the procedures as\nrobust as possible, but a number of settings can be changed. For more information on these aspects, we\nrecommend consulting the full paper on the DLPNO-MP2 gradient (once it has been published).\n• Several diﬀerent solvers are implemented for the orbital localization Z-vector equations. The default\nis an iterative conjugate gradient solver. As an alternative, the DIIS-accelerated Jacobi solver can\nbe used, but it tends to be inferior to the conjugate gradient solver. Moreover, a direct solver is\navailable as a fail-safe alternative for smaller systems. As the dimension of the linear equation system\nis n(n−1)/2 for n occupied orbitals, the memory requirement and FLOP count increase as O(n4) and\nO(n6), respectively, and using the direct solver becomes unfeas",
+      "metadata": {
+        "section_title": "0_Ria__orca_manual_4_2_1-page-0519.txt",
+        "section_id": "part_0",
+        "source_file": "0_Ria__orca_manual_4_2_1-page-0519.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.47445349330383657,
+      "original_score": 0.44260218986770544,
+      "vector_score": 0.5532527373346318,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "geometry",
+        "optimization"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "0_Ria__orca_manual_4_2_1-page-0514__7b71ea33cb91e3b102b58e92e8d9e122__full__0",
+      "text": "482 9 Detailed Documentation\n%mp2 KCOpt _AOBLAS # (default) AO direct with BLAS routines\n_COSX # semi-numerical evaluation using the COSX method\nKC_GridX 2 # default 2: angular Lebedev grid 110\nKC_IntAccX 3.34 # radial grid\nend\nAlternatively, all the grid settings can be deﬁned in the %method block, as discussed in section 9.3.2.8. The\nﬁrst three entries deﬁne the three SCF grids, the fourth entry the MP2 grid for basis function derivatives\n(refer to section 9.11.5) and the ﬁfth entry the grid for the four-external contribution.\n%method\nIntAccX Acc1, Acc2, Acc3, Acc4, Acc5\nGridX Ang1, Ang2, Ang3, Ang4, Ang5\nUseFinalGridX true\nend\n9.11.7 Local MP2\nIn analogy to the domain-based local pair natural orbital coupled-cluster methods, there is also a local linear\nscaling version of MP2 (DLPNO-MP2) implemented in ORCA. Its default thresholds are chosen to reproduce\nabout 99.9 % of the total RI-MP2 correlation energy, resulting in an accuracy of a fraction of 1 kcal/mol for\nenergy diﬀerences. The theory has been described in the literature. [75,76]\nFurther information of local correlation methods in ORCA can be found in section 9.12.4. The local MP2\nmethod becomes truly beneﬁcial for very large molecules and can be used to compute energies of systems\ncontaining several hundred atoms. Figure 9.2 shows the scaling behavior for linear alkane chains. Note that\nthis represents an idealized situation. For three-dimensional molecules the crossover with canonical RI-MP2\nis going to occur at a later point.\n",
+      "metadata": {
+        "source_file": "0_Ria__orca_manual_4_2_1-page-0514.txt",
+        "package": "orca-manual",
+        "section_title": "0_Ria__orca_manual_4_2_1-page-0514.txt",
+        "section_id": "full"
+      },
+      "score": 0.4461915913694647,
+      "original_score": 0.4126274453918565,
+      "vector_score": 0.5157843067398206,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "orca",
+        "gridx"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "8.2.1_Geometry_Optimizations__orca_manual_4_2_1-page-0187__b6bc98f8e0c943e127cce4cbb87d789a__full__0",
+      "text": "8.2 Geometry Optimizations, Surface Scans, Transition States, MECPs, Conical Intersections, IRC, NEB155\nWhen the analytic gradients are not available, it is possible to evaluate the ﬁrst derivatives numerically by\nﬁnite displacements. This is available for all methods.\nThe coordinate system chosen for geometry optimization aﬀects the convergence rate, with redundant internal\ncoordinates being usually the best choice.\nSome methods for locating transition states (TS) require second derivative matrices (Hessian), implemented\nanalytically for HF, DFT and MP2. Additionally, several approaches to construct an initial approximate\nHessian for TS optimization are available. A very useful feature for locating complicated TSs is the Nudged-\nElastic Band method in combination with the TS ﬁnding algorithm (NEB-TS, ZOOM-NEB-TS). An essential\nfeature for chemical processes involving excited states is the conical intersection optimizer. Another interesting\nfeature are MECP (Minimum Energy Crossing Point) optimizations.\nFor very large systems ORCA provides a very eﬃcient L-BFGS optimizer, which makes use of the orca md\nmodule. It can also be invoked via simple keywords described at the end of this section.\n8.2.1 Geometry Optimizations\nOptimizations are fairly easy as in the following example:\n! RKS B3LYP/G SV(P) TightSCF Opt\n* int 0 1\nC 0 0 0 0.0000 0.000 0.00\nO 1 0 0 1.2029 0.000 0.00\nH 1 2 0 1.1075 122.016 0.00\nH 1 2 3 1.1075 122.016 180.00\n*\nAn optimization with the RI method (the BP functional is recommend) would simply look like:\n! RKS BP RI SV(P) def2/J TightSCF Opt\n* int 0 1\nC 0 0 0 0.0000 0.000 0.00\nO 1 0 0 1.2029 0.000 0.00\nH 1 2 0 1.1075 122.016 0.00\nH 1 2 3 1.1075 122.016 180.00\n*\nAn optimization of the ﬁrst excited state of ethylene:\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_id": "full",
+        "source_file": "8.2.1_Geometry_Optimizations__orca_manual_4_2_1-page-0187.txt",
+        "section_title": "8.2.1_Geometry_Optimizations__orca_manual_4_2_1-page-0187.txt"
+      },
+      "score": 0.3844619629656062,
+      "original_score": 0.3050377001224586,
+      "vector_score": 0.32554924827209464,
+      "bm25_score": 0.2229915075239146,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "orca",
+        "keywords",
+        "geometry",
+        "optimization"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "9.3.2.4_Using_the_RI-J_Approximation_to_the_Coulomb_Part__orca_manual_4_2_1-page-0430__5aa92d87714043c8db64b36ec7470744__full__0",
+      "text": "398 9 Detailed Documentation\n• if you use a large grid (i.e. Grid=6) and forget to turn oﬀ the multigrid feature the energies you get\nare only as accurate as Grid 4.\nPost-SCF-GGA Option. For many molecules the cost of evaluating the XC energy and potential on a\nthree dimensional grid will dominate the overall computational cost. At the GGA level (functionals other than\nthe local density approximation, LSD and HFS, that incorporate the density gradient) it is often found that\nthe self-consistent electron distribution is rather similar to that obtained from a LSD calculation. However,\nLSD calculations need a little bit less time because the derivatives of the basis functions at the grid points\nare not needed. It may therefore be a sensible approach to calculate the self-consistent electron and spin\ndensities at the LSD level and then obtain the ﬁnal total energy at the GGA level. This was advocated by the\nADF developers.\nThis feature is invoked in ORCA by using:\n%method\nPostSCFGGA true\nend\nWhat this does is to use the PWLDA local approximation in the SCF iterations and obtain the ﬁnal energy at\nwhatever functional was chosen in the input ﬁle.\nMore recent test calculations reveal that the performance gain from using this feature is truly\nminimal while the errors introduced in the ﬁnal energies are large. Further use of this feature\nis therefore strongly discouraged.\nSpecialGrid Option. Sometimes you will like to increase the integration accuracy for some atoms that\nneed special care while it is not necessary to enlarge the grid generally. This situation for example arises\nwhen the basis set contains very steep functions on a few atoms that are required in order to calculate core\nproperties such as isotropic hyperﬁne couplings. ORCA provides you with a basic mechanism to increase the\nradial integration accuracy for a few atoms while maintaining the chosen grid for all others.\n%method\n# a maximum of 64 assignments can be made\n# in = 0 : no changes are made\n# in > 0 : the grid will be changed for all atoms with\n# atomic number=in to IntAcc=an\n# in < 0 : only the specific n’th atom will have its\n# IntAcc value changed to an\nSpecialGridAtoms i1, i2, i3,...,in;\nSpecialGridIntAcc a1,a2,a3,...,an;\nend\n9.3.2.4 Using the RI-J Approximation to the Coulomb Part\nA very useful approximation that greatly speeds up DFT calculations unless the molecule gets very large\nis the so called “RI-approximation” [291 –297]. RI stands for “Resolution of the identity”. In short, charge\n",
+      "metadata": {
+        "source_file": "9.3.2.4_Using_the_RI-J_Approximation_to_the_Coulomb_Part__orca_manual_4_2_1-page-0430.txt",
+        "package": "orca-manual",
+        "section_id": "full",
+        "section_title": "9.3.2.4_Using_the_RI-J_Approximation_to_the_Coulomb_Part__orca_manual_4_2_1-page-0430.txt"
+      },
+      "score": 0.3834586066143913,
+      "original_score": 0.3653250362206969,
+      "vector_score": 0.4566562952758711,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "9.6.6_Approximate_Second_Order_SCF_SOSCF__orca_manual_4_2_1-page-0483__3bbf138f8127b8c0bcc1081d834add07__full__0",
+      "text": "9.6 SCF Convergence 451\n9.6.5 An alternative DIIS algorithm: KDIIS\nAn alternative algorithm that makes use of the DIIS concept is called KDIIS in ORCA. The KDIIS algorithm\nis designed to bring the orbital gradient of any energy expression to zero using a combination of DIIS\nextrapolation and ﬁrst order perturbation theory. Thus, the method is diagonalization-free. In our hands it\nis superior to the standard DIIS algorithm in many cases, but not always. The algorithm is invoked with the\nkeyword ! KDIIS and is available for RHF, UHF and CASSCF.\n9.6.6 Approximate Second Order SCF (SOSCF)\nSOSCF is an approximately quadratically convergent variant of the SCF procedure [375, 376]. The theory is\nrelatively involved and will not be described here. In short – SOSCF computes an initial guess to the inverse\norbital hessian and then uses the BFGS formula in a recursive way to update orbital rotation angles. As\ninformation from a few iterations accumulates, the guess to the inverse orbital hessian becomes better and\nbetter and the calculation reaches a regime where it converges superlinearly. As implemented, the procedure\nconverges as well or slightly better than DIIS and takes a somewhat less time. However, it is also a lot\nless robust, so that DIIS is the method of choice for many problems (see also the description of the full\nNewton-Raphson procedure in the next section). On the other hand, SOSCF is useful when DIIS gets stuck\nat some error around ∼0.001 or 0.0001. Such cases were the primary motive for the implementation of\nSOSCF into ORCA.\nThe drawback of SOSCF is the following: in the beginning of the SCF, the orbital gradient (the derivative of\nthe total energy with respect to rotations that describe the mixing of occupied and virtual MOs) is large,\nso that one is far from the quadratic regime. In such cases, the procedure is not successful and may even\nwildly diverge. Therefore it is recommended to only invoke the SOSCF procedure in the very end of the\nSCF where DIIS may lead to “trailing” convergence. SOSCF is controlled by the variables SOSCFStart and\nSOSCFMaxIt. SOSCFStart is a threshold for the orbital gradient. When the orbital gradient, or equivalently\nthe DIIS Error, fall below SOSCFStart, the SOSCF procedure is initiated. SOSCFMaxIt is the latest iteration\nto start the SOSCF even if the orbital gradient is still above SOSCFStart.\n%scf\n# control of the SOSCF procedure\nCNVSOSCF true # default: false\nSOSCFStart 0.1 # default: 0.01\nSOSCFMaxIt 5 # default: 1000\n# more convenient:\nSOSCFStart 0.1 MaxIt 5 end\nend\nFor many calculations on transition metal complexes, it is a good idea to be conservative in the startup\ncriterion for SOSCF, it may diverge otherwise. A choice of 0.01 or lower can be recommended.\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "orca-manual",
+        "source_file": "9.6.6_Approximate_Second_Order_SCF_SOSCF__orca_manual_4_2_1-page-0483.txt",
+        "section_title": "9.6.6_Approximate_Second_Order_SCF_SOSCF__orca_manual_4_2_1-page-0483.txt"
+      },
+      "score": 0.3633392394841223,
+      "original_score": 0.3446139229983612,
+      "vector_score": 0.43076740374795147,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "3_FAQ_frequently_asked_questions__orca_manual_4_2_1-page-0031__3a7aac890c27644c9b1253cfd4346809__full__0",
+      "text": "XXIX\n– RIJ + COSX: <basis>/ J auxiliaries, COSX grid controlled by the GRIDX keyword.\n• GGA DFT functional\n– Exact J + GGA-XC: no auxiliary functions needed, DFT grid controlled by the GRID keyword.\n– RIJ + GGA-XC: <basis>/ J auxiliaries, DFT grid controlled by the GRID keyword.\n• Hybrid DFT functional\n– Exact J + exact K + GGA-XC: no auxiliary functions needed, DFT grid controlled by the GRID keyword.\n– RIJ + exact K ( RIJONX, RIJDX) + GGA-XC: <basis>/ J auxiliaries, DFT grid controlled by the GRID\nkeyword.\n– RIJ + RIK (RIJK) + GGA-XC: <basis>/ JK auxiliaries, DFT grid controlled by the GRID keyword.\n– RIJ + COSX + GGA-XC: <basis>/ J auxiliaries, COSX grid controlled by the GRIDX keyword, DFT\ngrid controlled by the GRID keyword.\nThere are a lot of basis sets! Which basis should I use when?\nORCA oﬀers a variety of methods and a large choice of basis sets to go with them. Here is an incomplete\noverview:\nMethod Approximation basis set (and auxiliaries)\nCASSCF/NEVPT2 <basis>\nCASSCF/NEVPT2 RI-JK <basis>+ <basis>/JK\nCASSCF/NEVPT2 RIJCOSX <basis>+ <basis>/J + <basis>/C\nCASSCF/NEVPT2 TrafoStep RI <basis>+ <basis>/JK or <basis>/C\nNEVPT2-F12 TrafoStep RI <basis>-F12 + <basis>-F12/CABS + <basis>/JK or <basis>/C\nTDDFT <basis>\nTDDFT Mode RIInts <basis>+ <basis>/C\nMP2 <basis>\nF12-MP2 <basis>-F12 + <basis>-F12/CABS\nRI-MP2 <basis>+ <basis>/C\nHF+RI-MP2 RIJCOSX <basis>+ <basis>/C + <basis>/J\nF12-RI-MP2 <basis>-F12 + <basis>-F12/CABS + <basis>/C\nDLPNO-MP2 <basis>+ <basis>/C\nHF+DLPNO-MP2 RI-JK <basis>+ <basis>/C + <basis>/JK\nF12-DLPNO-MP2 <basis>-F12 + <basis>-F12/CABS + <basis>/C\nCCSD <basis>\nRI-CCSD <basis>+ <basis>/C\n(D)LPNO-CCSD <basis>+ <basis>/C\nHF+(D)LPNO-CCSD RIJCOSX <basis>+ <basis>/C + <basis>/J\nF12-CCSD <basis>-F12 + <basis>-F12/CABS\nF12-RI-CCSD <basis>-F12 + <basis>-F12/CABS + <basis>/C\nHF+F12-RI-CCSD RI-JK <basis>-F12 + <basis>-F12/CABS + <basis>/C + <basis>/JK\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_title": "3_FAQ_frequently_asked_questions__orca_manual_4_2_1-page-0031.txt",
+        "source_file": "3_FAQ_frequently_asked_questions__orca_manual_4_2_1-page-0031.txt",
+        "section_id": "full"
+      },
+      "score": 0.34585425538051245,
+      "original_score": 0.3062090587369071,
+      "vector_score": 0.3827613234211339,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "orca",
+        "gridx"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "8.2.10.1_Introduction_to_Transition_State_Searches__orca_manual_4_2_1-page-0201__fad971299f4d48be0cb08c2b20183374__full__0",
+      "text": "8.2 Geometry Optimizations, Surface Scans, Transition States, MECPs, Conical Intersections, IRC, NEB169\nH 1 2 3 1.100756 105.481 238.889\nO 2 1 3 1.244156 169.257 17.024\nH 6 2 1 0.980342 100.836 10.515\n*\nNOTE:\n• You need a good guess of the TS structure. Relaxed surface scans can help in almost all cases (see also\nexample above).\n• For TS optimization (in contrast to geometry optimization) an exact Hessian, a Hybrid Hessian or a\nmodiﬁcation of selected second derivatives is necessary.\n• Analytic Hessian evaluation is available for HF and SCF methods, including the RI and RIJCOSX\napproximations and canonical MP2.\n• Check the eigenmodes of the optimized structure for the eigenmode with a single imaginary frequency.\nYou can also visualize this eigenmode with orca pltvib (section 8.15.3.5) or any other visualization\nprogram that reads ORCA output ﬁles.\n• If the Hessian is calculated during the TS optimization, it is stored as basename.001.hess, if it is\nrecalculated several times, then the subsequently calculated Hessians are stored as basename.002.hess,\nbasename.003.hess, . . .\n• If you are using the Hybrid Hessian, then you have to check carefully at the beginning of the TS\noptimization (after the ﬁrst three to ﬁve cycles) whether the algorithm is following the correct mode\n(see TIP below). If this is not the case you can use the same Hybrid Hessian again via the inhess read\nkeyword and try to target a diﬀerent mode (via the TS Mode keyword, see below).\nIn the example above the TS mode is of local nature. In such a case you can directly combine the relaxed\nsurface scan with the TS optimization with the\n! ScanTS\ncommand, as used in the following example:\n! UKS B3LYP SV(P) TightSCF SlowConv\n! ScanTS # perform a relaxed surface scan and TS optimization\n# in one calculation\n%geom scan B 1 0 = 2.0, 1.0, 15 end end\n* int 0 2\nC 0 0 0 0.000000 0.000 0.000\nH 1 0 0 1.999962 0.000 0.000\nH 1 2 0 1.095870 100.445 0.000\nH 1 2 3 1.095971 90.180 119.467\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "orca-manual",
+        "section_title": "8.2.10.1_Introduction_to_Transition_State_Searches__orca_manual_4_2_1-page-0201.txt",
+        "source_file": "8.2.10.1_Introduction_to_Transition_State_Searches__orca_manual_4_2_1-page-0201.txt"
+      },
+      "score": 0.32539381991782057,
+      "original_score": 0.26214949053511627,
+      "vector_score": 0.32768686316889534,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "orca",
+        "geometry",
+        "optimization"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0044__14a9dcbc7268879e8f6ff1bcb0a878e4__full__0",
+      "text": "12 6 General Structure of the Input File\nTable 6.1: Main keywords that can be used in the simple input of ORCA.\nKeyword Input\nblock\nVariable Comment\nHF METHOD METHOD Selects the Hartree–Fock method\nDFT Selects the DFT method (see table 6.2\non page 23 for a list of functionals)\nFOD FOD analysis (see 9.6.8.2) employ-\ning default settings (TPSS/def2-TZVP,\nTightSCF, SmearTemp = 5000 K)\nRuntypes\nENERGY or SP METHOD RUNTYP Selects a single point calculation\nOPT Selects a geometry optimization calcu-\nlation (using internal redundant coordi-\nnates)\nCOPT Optimization in Cartesian coordinates\n(if you are desperate)\nZOPT Optimization in Z-matrix coordinates\n(dangerous)\nGDIIS-COPT COPT using GDIIS\nGDIIS-ZOPT ZOPT using GDIIS\nGDIIS-OPT Normal optimization using GDIIS\nENGRAD Selects an energy and gradient calcula-\ntion\nNUMGRAD Numerical gradient (has explicitly to\nbe asked for, if analytic gradient is not\navailable)\nNUMFREQ Numerical frequencies\nNUMNACME Numerical non-adiabatic coplings (only\nfor CIS/TD-DFT)\nMD Molecular dynamic simulation\nCIM Cluster-In-Molecule calculation\nAtomic mass/weight handling\nMass2016 METHOD AMASS Use the latest (2016) atomic masses of\nthe most abundant or most stable iso-\ntopes instead of atomic weights.\nSymmetry handling\nUseSym Turns on the use of molecular symme-\ntry (see section 6.5). THIS IS VERY\nRUDIMENTARY!\nNoUseSym Turns symmetry oﬀ\nSecond order many body perturbation theory\nMP2 Selects Method=HF and DoMP2=true\nMP2RI or RI-MP2 Select the MP2-RI method\nSCS-MP2 Spin-component scaled MP2\nRI-SCS-MP2 Spin-component scaled RI-MP2\n(synonym is SCS-RI-MP2)\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_title": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0044.txt",
+        "section_id": "full",
+        "source_file": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0044.txt"
+      },
+      "score": 0.31692313328028215,
+      "original_score": 0.22878418273580245,
+      "vector_score": 0.25266291396495894,
+      "bm25_score": 0.13326925781917642,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "orca",
+        "keywords",
+        "geometry",
+        "optimization"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "9.21.1_Input_Options_and_General_Considerations__orca_manual_4_2_1-page-0634__bfa290b29b87d86824278b7798eb61a0__full__0",
+      "text": "602 9 Detailed Documentation\nmult 1,3\nnroots 3,1\nnthresh 1e-6 # removal of linear dependencies in the IC-CSFs\n# Davidson correction for the FIC-MRCI\nDavidsonOpt 0 # none (default)\n1 # Davidson correction\nend\nCurrently, the program is capable of computing total energies and vertical excitation energies. More features\nwill be available with future releases. Note that the program is not yet fully parallelized.\n9.21 Geometry Optimization\nORCA is able to calculate equilibrium structures (minima and transition states) using the quasi Newton\nupdate procedure with the well known BFGS update [160 –165], the Powell or the Boﬁll update. The\noptimization can be carried out in either redundant internal (recommended in most cases) or Cartesian\ndisplacement coordinates. As initial Hessian the user can choose between a diagonal initial Hessian, several\nmodel Hessians (Swart, Lindh, Almloef, Schlegel), an exact hessian and a partially exact Hessian (both\nrecommended for transition state optimization) for both coordinate types. In redundant internal coordinates\nseveral options for the type of step to be taken exist. The user can deﬁne constraints via two diﬀerent paths.\nHe can either deﬁne them directly (as bond length, angle, dihedral or Cartesian constraints) or he can deﬁne\nseveral fragments and constrain the fragments internally and with respect to other fragments. The ORCA\noptimizer can be used as an external optimizer, i.e. without the energy and gradient calculations done by\nORCA.\n9.21.1 Input Options and General Considerations\nThe use of the geometry optimization module is relatively straightforward. 18\n%method RunTyp Opt # use geometry optimization.\n#(equivalent is RunTyp=Geom)\nend\n# or simply \"! Opt\" in the keyword line\n18But that doesn’t mean that geometry optimization itself is straightforward! Sometimes, even when it is not expected\nthe convergence can be pretty bad and it may take a better starting structure to come to a stationary point. In\nparticular ﬂoppy structures with many possible rotations around single bonds and soft dihedral angle modes are\ntricky. It may sometimes be advantageous to compute a Hessian matrix at a “cheap” level of theory and then do\nthe optimization in Cartesian coordinates starting from the calculated Hessian.\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "orca-manual",
+        "source_file": "9.21.1_Input_Options_and_General_Considerations__orca_manual_4_2_1-page-0634.txt",
+        "section_title": "9.21.1_Input_Options_and_General_Considerations__orca_manual_4_2_1-page-0634.txt"
+      },
+      "score": 0.2627575471150471,
+      "original_score": 0.1936410671570828,
+      "vector_score": 0.18961119160154857,
+      "bm25_score": 0.20976056937921952,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "orca",
+        "geometry",
+        "optimization"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0051__d69adbf1f6aea223c5efe4e22d6bc713__full__0",
+      "text": "6.2 Keyword Lines 19\nZORA REL METHOD Selects the scalar relativistic ZORA\nHamiltonian\nZORA/RI REL METHOD Selects the scalar relativistic ZORA\nHamiltonian in RI approximation\nIORA/RI REL METHOD Selects the scalar relativistic IORA\nHamiltonian in RI approximation\nIORAmm/RI REL METHOD Selects the scalar relativistic IORA mm\n(modiﬁed metric) Hamiltonian in RI ap-\nproximation\nGrid options\nGRIDn (n= 0–7) METHOD GRID Selects the DFT integration grid no n\nFINALGRIDn Selects the DFT ﬁnal integration grid\nno n\nNOFINALGRID Turns the ﬁnal grid feature oﬀ\nGRIDXn (n= 1–9) METHOD GRIDX Grids for the COSX approximation. A\nsequence of three grids is used. Higher\naccuracy at higher cost is oﬀered by the\nhigher grids.\nNOFINALGRIDX Turn oﬀ the ﬁnal grid in COSX (not\nrecommended)\nConvergence thresholds: These keywords control how tightly the SCF and geometry\noptimizations will be converged. The program makes an eﬀort to set the convergence\nthresholds for correlation modules consistently with that of the SCF.\nNORMALSCF SCF CONVERGENCE Selects normal SCF convergence\nLOOSESCF Selects loose SCF convergence\nSLOPPYSCF Selects sloppy SCF convergence\nSTRONGSCF Selects strong SCF convergence\nTIGHTSCF Selects tight SCF convergence\nVERYTIGHTSCF Selects very tight SCF convergence\nEXTREMESCF Selects “extreme” convergence. All\nthresholds are practically reduced to nu-\nmerical precision of the computer. Only\nfor benchmarking (very expensive).\nSCFCONVn Selects energy convergence check and\nsets ETol to 10−n (n= 6–10). Also se-\nlects appropriate thresh, tcut, and bfcut\nvalues.\nVERYTIGHTOPT GEOM TolE,TolRMSG Selects very tight optimization conver-\ngence\nTIGHTOPT TolMaxG Selects tight optimization convergence\nNORMALOPT TolRMSD,TolMaxD Selects default optimization convergence\nLOOSEOPT Selects loose optimization convergence\n",
+      "metadata": {
+        "package": "orca-manual",
+        "source_file": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0051.txt",
+        "section_title": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0051.txt",
+        "section_id": "full"
+      },
+      "score": 0.2570752822686122,
+      "original_score": 0.16121402836778798,
+      "vector_score": null,
+      "bm25_score": 0.8060701418389401,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "gridx",
+        "keywords",
+        "geometry",
+        "optimization"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "8.15.2_Absorption_and_Fluorescence_Bandshapes_using_ORCA_ASA__orca_manual_4_2_1-page-0295__b3b4284e433668c9d6633c1b95279900__full__0",
+      "text": "8.15 Calculation of Properties 263\n#\n! aug-cc-pVDZ BHandHLYP TightSCF NMGrad\n%tddft nroots 5\nend\n# this is ASA specific input\n%rr states 1,2,3,4,5\nHessName \"Test-ASA-H2CO-freq.hess\"\nASAInput true\nend\n* int 0 1\nC 0 0 0 0 0 0\nO 1 0 0 1.2 0 0\nH 1 2 0 1.1 120 0\nH 1 2 3 1.1 120 180\n*\nNOTE\n• Functionals with somewhat more HF exchange produce better results and are not as prone to “ghost\nstates” as GGA functionals unfortunately are!\n• Calculations can be greatly sped up by the RI or RIJCOSX approximations!\n• Analytic gradients for the (D) correction and hence for double-hybrid functionals are NOT available\nThe ORCA run will produce a ﬁle Test-ASA-H2CO.asa.inp that is an input ﬁle for the program that\ngenerates the various spectra. It is an ASCII ﬁle that is very similar in appearance to an ORCA input ﬁle:\n#\n# ASA input\n#\n%sim model IMDHO\nmethod Heller\nAbsRange 25000.0, 100000.0\nNAbsPoints 1024\nFlRange 25000.0, 100000.0\nNFlPoints 1024\nRRPRange 5000.0, 100000.0\nNRRPPoints 1024\nRRSRange 0.0, 4000.0\nNRRSPoints 4000\n# Excitation energies (cm**-1) for which rR spectra will\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_id": "full",
+        "section_title": "8.15.2_Absorption_and_Fluorescence_Bandshapes_using_ORCA_ASA__orca_manual_4_2_1-page-0295.txt",
+        "source_file": "8.15.2_Absorption_and_Fluorescence_Bandshapes_using_ORCA_ASA__orca_manual_4_2_1-page-0295.txt"
+      },
+      "score": 0.25672259074401443,
+      "original_score": 0.23486149047177954,
+      "vector_score": 0.2935768630897244,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 52,
+    "final_results_count": 15
+  }
+}

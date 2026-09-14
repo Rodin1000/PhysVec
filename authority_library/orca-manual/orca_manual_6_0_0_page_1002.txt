@@ -1,0 +1,134 @@
+[... end of page 1001 ...]
+ 𝑥 , 𝑦 , and 𝑧 have to be specified as
+1 1 1 2 2 2
+coordinates(inthisorder). Thecellwillrangefrom(︀ 𝑥 ,𝑦 ,𝑧 )︀to(︀ 𝑥 ,𝑦 ,𝑧 )︀.
+1 1 1 2 2 2
+• Rhomb: Defines a parallelepiped-shaped cell (also termed as rhomboid sometimes). You have to specify
+twelverealvaluesintotal. Thefirstthreedefineonecornerpoint𝑝ofthecell,andtheremainingninedefine
+threecellvectors𝑣 ,𝑣 ,and𝑣 ,eachgivenasCartesianvectorcomponents. Thecellisthendefinedasthe
+1 2 3
+7.51. AbinitioMolecularDynamicsSimulations 979
+
+--- Page 1002 ---
+ORCAManual,Release6.0.0
+setofpoints{︀ 𝑝+𝑐 𝑣 +𝑐 𝑣 +𝑐 𝑣 |0 ≤ 𝑐 ,𝑐 ,𝑐 ≤ 1 }︀Thevectors𝑣 ,𝑣 ,and𝑣 donotneedtobe
+1 1 2 2 3 3 1 2 3 1 2 3
+orthogonaltoeachother,buttheymaynotallliewithinoneplane(cellvolumewouldbezero).
+• Sphere: Definesasphericalcell. Youneedtospecifyfourrealvalues𝑐 ,𝑐 ,𝑐 ,and𝑟. Thecellwillthen
+𝑥 𝑦 𝑧
+bedefinedasaspherearoundthecentralpoint(︀
+𝑐 ,𝑐 ,𝑐
+)︀withradius𝑟.
+𝑥 𝑦 𝑧
+• Ellipsoid: Definesanellipsoid-shapedcell. Asfirstthreearguments,youhavetospecifythreerealvalues
+𝑐 ,𝑐 ,𝑐 ,whichdefinethecenteroftheellipsoidtobe(︀ 𝑐 ,𝑐 ,𝑐 )︀. Asfourthargument,akeywordhasto
+𝑥 𝑦 𝑧 𝑥 𝑦 𝑧
+follow,whichmayeitherbe“XYZ”or“Vectors”. Inthe“XYZ”case,threemorerealvalues𝑟 ,𝑟 ,and𝑟
+𝑥 𝑦 𝑧
+havetobespecified,whichdefinethepartialradiioftheellipsoidalongtheX,Y,andZcoordinateaxes. If
+instead“Vectors”wasgiven,ninemorerealvalues𝑣1,𝑣1,𝑣1,𝑣2,𝑣2,𝑣2,𝑣3,𝑣3,𝑣3havetofollowafterthe
+𝑥 𝑦 𝑧 𝑥 𝑦 𝑧 𝑥 𝑦 𝑧
+keyword. Thesevaluesdefinethreevectors𝑣1 := (︀ 𝑣1,𝑣1,𝑣1)︀,𝑣2 := (︀ 𝑣2,𝑣2,𝑣2)︀,and𝑣3 := (︀ 𝑣3,𝑣3,𝑣3)︀,
+𝑥 𝑦 𝑧 𝑥 𝑦 𝑧 𝑥 𝑦 𝑧
+whicharetheprincipalaxesoftheellipsoid. Thesevectorshavetobestrictlyorthogonaltoeachother. The
+lengthofeachvectordefinesthepartialradiusoftheellipsoidalongthecorrespondingprincipalaxis.
+Allcelltypesdefineaharmonicpotential𝐸cell(𝑟) := 𝑘·𝑟2 whichactsonallatomsinthesystemoutsideofthe
+cell,where𝑟istheclosestdistancefromtheatom’scentertothedefinedcellsurface. Atomswhosecenterisinside
+ofthecellordirectlyonthecellsurfacedonotexperienceanyrepulsiveforce. Followingfromthedefinition,the
+forcewhichactsonanatomoutsideofthecellisalwaysparalleltothenormalvectorofthecellsurfaceatthepoint
+whichisclosesttotheatomcenter. Thisistrivialincaseofcubic,rectangular,rhombic,andsphericalcells,but
+notsotrivialforellipsoid-shapedcells.
+Thespringconstant𝑘 intheaboveequation(i. e.,the“steepness”ofthewall)canbespecifiedbythe“Spring”
+modifier,whichexpectsonerealvalueasargument. ThespringconstanthastobespecifiedintheunitkJmol−1
+Å−2, other units cannot be specified here. The default value is 10 kJ mol−1 Å−2. Larger spring constants re-
+ducethepenetrationdepthofatomsintothewall,butmayrequireshorterintegrationtimestepstoensureenergy
+conservation. Ifjumpsinthetotalenergyoccur,trytouseasmallerspringconstant(e. g.,thedefaultvalue).
+Thecommand“Cell None”disablesanypreviouslydefinedcell.
+Ifyouwanttoperformsimulationsunderconstantpressure,youcandefineanelasticcell. Then,ORCAaccumulates
+theforcewhichthecellexertsontheatomsineachtimestep,anddividesthistotalforcebythecellsurfacearea
+to obtain a pressure. As this momentarily pressure heavily fluctuated, a running average is used to smooth this
+quantity. If the averaged pressure is larger than the external pressure which was specified, the cell will slightly
+grow; ifitwas smaller, thecellwillslightly shrink. In thebeginningofa simulation, thecellsizewill notvary
+untilatleasttherunningaveragehistorydepthofstepshavebeenperformed.
+Anelasticcellisenabledbyusingthe“Elastic”modifierafterthecellgeometrydefinition. Subsequently,tworeal
+values𝑡avg and𝑐response arerequired. While𝑡avg definesthelengthoftherunningaveragetosmooththepressure(in
+unitsofphysicaltime,nottimesteps),the𝑐response constantcontrolshowfastthecellsizewillchangeatmost. More
+specific,𝑐response isthefractionofthecellvolumegrowthpertimestepiftheratioofaveragedandexternalpressure
+wouldbeinfinite,andatthesametimethefractionofthecellvolumereductionperstepiftheaforementionedratio
+iszero. Putintomathematicalform,thecellvolumechangepertimestepis
+⎧
+⎪⎨𝑉old· 𝑐response· 𝑝 ⟨𝑝 ex ⟩ t +1 if ⟨𝑝⟩ ≤1,
+𝑉new :=
+⎪⎩ 𝑉old· (𝑐r
+𝑐
+𝑝 ⟨
+es
+𝑝
+r
+e
+p
+e
+x ⟩
+s
+o
+t
+p
+n
++
+o
+s
+n
+e
+s
++
+𝑐
+e
+r
++
+e
+1
+sp
+)
+1
+o
+·
+n
+𝑝 ⟨
+se
+𝑝 ex ⟩ t if ⟨
+𝑝
+𝑝
+𝑝
+e
+e
+x
+x
+⟩
+t
+t
+>1,
+(7.313)
+where⟨𝑝⟩representstheaveragedpressurethesystemexertsonthewalls,and𝑝ext isthespecifiedexternalpressure.
+Goodstartingpointsare𝑡avg = 100fsand𝑐response = 0.001. Pleasenotethatlargervaluesof𝑐response orsmaller
+valuesof𝑡avg mayleadtouncontrolledfluctuationsofthecellsize. Analreadydefinedfixedcellcanbeswitched
+toelasticbythecommand“Cell Elastic ...”(thedotsrepresentthetworealarguments).
+By default, the size change of an elastic cell due to pressure is performed isotropically, i. e., the cell is scaled
+as a whole, and exactly retains its aspect ratio. By specifying the “Anisotropic” modifier after switching on
+anelasticcell,thecellpressureisbrokendownintoindividualcomponents,andthesizeofthecellisallowedto
+changeindependentlyintheindividualdirections. This,ofcourse,onlymakessenseforthecellgeometriesRect,
+Rhomb, and Ellipsoid. An already defined isotropic cell can be switched to anisotropic by simply executing
+“Cell Anisotropic”.
+Incaseofanelasticcell,theexternalpressureisdefinedbythemodifier“Pressure”,whichexpectseitheroneor
+threerealvaluesasarguments. Ifoneargumentisgiven,thisistheisotropicexternalpressure. Ifthreearguments
+are supplied, these are the components of the pressure in X, Y, and Z direction (in case of orthorhombic cells)
+980 Chapter7. DetailedDocumentation
+
+[... start of page 1003 ...]
+ORCAManual,Release6.0.0
+oralongthedirectionofthethreespecifiedvectors(incaseofparallelepiped-shapedandellipsoid-shapedcells).
+Thisallowsforanisotropicexternalpressure(probablyonlyusefulforsolidstatecomputations). Boththepressure
+andthepressurecomponentshavetospecifiedinunitsofbar(= 105 Nm−2),otherunitscannotbeused. Ifthis
+modifierisnotused, thedefaultpressurewillbesetto1.0bar(isotropic)ifanelasticcellisused. Theexternal
+pressureofanalreadydefinedcellcanbechangedbythecommand“Cell Pressure ...”(thedotsrepresent
+therealargument(s)).
+Asallcellsarenon-elasticbydefault,thereisnok

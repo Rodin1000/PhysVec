@@ -1,0 +1,73 @@
+[... end of page 826 ...]
+limitedamountoftime.
+Before starting running MC-RPA, it is recommended to converge the state specific CASSCF energy calculation
+until you hit the point of stagnating convergence. Note that property calculations in general assume vanishing
+electronicgradientsotherwisenumericalissuesintheeigenvalue/responseequationsmayoccur.
+804 Chapter7. DetailedDocumentation
+
+--- Page 827 ---
+ORCAManual,Release6.0.0
+7.32.5 Keyword List
+%mcrpa
+NRoots 0 # The number of desired roots
+TolR 1e-5 # Convergence threshold for residual norm
+TolLDP 1e-5 # linear dependency threshold for generalized eigenvalue problem
+PrintWF CFG # print CI part in (CFG (default), CSF, or DET basis)
+TolPrint 1e-2 # Threshold for printing elements of excitation vector
+MaxRed 200 # maximum size of reduces space for ALL VECTORS IN TOTAL
+MaxIter 100 # maximum number of (Davidson) iterations
+TDA false # Switch off full TD-CASSCF (Tamm-Dancoff approximation)
+DoNTO false # Generate Natural Transition Orbitals
+NTOThresh 1e-3 # Threshold for printing occupation numbers
+DoCD true #Request circular dichroism calculation
+DoDipoleLength true #Request the use of electric moments in a length formulation
+DoDipoleVelocity true #Request the use of electric moments in a velocity formulation
+DoHigherMoments true #Request the calculation of electric quadrupole and magnetic␣
+dipole moments contributions
+˓→
+DoFullSemiclassical true #Request the calculation of complete semiclassical multipolar␣
+moments
+˓→
+DecomposeFoscLength true #Request the decomposition of the oscillator strengths in a␣
+multipolar expansion under a length formulation
+˓→
+DecomposeFoscVelocity true #Request the decomposition of the oscillator strengths in a␣
+multipolar expansion under a velocity formulation
+˓→
+7.33 Excited States via EOM-CCSD
+The EOM-CCSD routine is part of the orca_mdci module of the ORCA program package. It is called after
+a successful coupled-cluster calculation, if the appropriate flags and the number of roots have been set. In the
+following chapter the general program flow and all input parameters of the EOM routine will be described in
+detail(fortypicaluse,seeExcitedStateswithEOM-CCSD).ForanRHForUHFreference,theEE-,IP-andEA-
+EOM-CCSDapproachesareavailableforthecomputationofexcitationenergies,ionizationpotentialsandelectron
+affinities,respectively. Currently,thefollowingsimpleinputkeywordsareavailable:
+!EOM-CCSD # same as !EE-EOM-CCSD
+!EE-EOM-CCSD # EOM for electronically excited states
+!IP-EOM-CCSD # IP version
+!EA-EOM-CCSD # EA version
+7.33.1 General Description
+TheEOMwavefunctionisparametrizedinthefollowingmanner
+ℛ|Ψ ⟩,
+𝐶𝐶
+i.e. viatheactionofalinearexcitationoperatorℛonthecoupled-clustergroundstatewavefunctionΨ . Here,
+𝐶𝐶
+ℛisaparticleconservingoperator,inthecaseoftheexcitationenergyproblem. However,thisisnottrueforthe
+ionization or electron attachment problems, where ℛ is a net annihilation or net creation operator, respectively.
+Thegroundstatecoupled-clusterT-amplitudesareobtainedfromaCCSDcalculation,andourtaskistoobtainℛ.
+NotethatsincetheCCHamiltonianisnonsymmetric, alefthandsolution(ℒ)wouldalsobeneededtoevaluate
+properties. Forthecalculationofexcitation, ionizationorelectronattachmentenergies, however, itisenoughto
+7.33. ExcitedStatesviaEOM-CCSD 805
+
+[... start of page 828 ...]
+ORCAManual,Release6.0.0
+obtaintherighthandsolutions(ℛ). Inprinciple,thisisdonebybuildingtheHamiltoniananddiagonalizingitin
+ordertoobtainenergyexpectationvalues.
+Inpractice,thesizeoftheCCSDHamiltonianmatrixisprohibitivelylargeandthus,variousmethodshavebeen
+devisedtoobtainitslowestfeweigenvaluesandeigenstates. Oneofthemostpopularoftheseapproachesisthe
+Davidsonmethod,whichcanbesummarizedasfollows:
+• Constructaninitialguessoforthogonaltrialvectors,𝐶.
+• Evaluatethesigmavectors𝜎 =𝐻𝐶.
+• BuildmodelHamiltonianℋ=𝐶𝑇𝜎.
+• Diagonalizeℋ: ℰ =𝒰𝑇ℋ𝒰.
+• ComputeRitzvectors𝑋 =𝐶𝒰.
+• Computeresiduals𝑅=𝑋ℰ −𝜎𝒰,checkconvergence: ifyes,pass𝑋,ℰ a

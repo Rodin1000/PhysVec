@@ -1,0 +1,80 @@
+[... end of page 546 ...]
+end
+# or simply: ! UNO
+TherearevariousprintingoptionsforUNOsdescribedintheoutputsectionPopulationAnalysesandControlof
+Output. TheUNOscanalsobeplottedasdescribedintheplotssectionOrbitalandDensityPlots. Ingeneralthe
+programstoresafileBaseName.uno,whereBaseNameisbydefaultthenameofyouinputfilewith.inpstripped
+off. Accordingly, the gbw file is named BaseName.gbw. The .uno file is a normal gbw file that contains the
+geometry,basissetandtheUNOorbitals. Itcouldbeused,forexample,tostartaROHFcalculation.
+524 Chapter7. DetailedDocumentation
+
+--- Page 547 ---
+ORCAManual,Release6.0.0
+7.8.4 Integral Handling (Conventional and Direct)
+Asthenumberofnonzerointegralsgrowsveryrapidlyandreacheseasilyhundredsofmillionsevenwithmedium
+sizedbasissetsinmediumsizedmolecules,storageofallintegralsisnotgenerallyfeasible. Thisdesperatesituation
+preventedSCFcalculationsonlargermoleculesforquitesometime,sothatAlmlöf[19,20,21]madetheinsightful
+suggestiontorepeattheintegralcalculation,whichwasalreadythedominantstep,ineverySCFcycletosolvethe
+storageproblem. Naively,onewouldthinkthatthisraisestheeffortforthecalculationto𝑛iter𝑡integrals (where𝑛iter is
+thenumberofiterationsand𝑡integrals isthetimeneededtogeneratethenonzerointegrals). However,thisisnotthe
+casebecauseonlythechangeintheFockmatrixisrequiredfromoneiterationtothenext,butnottheFockmatrix
+itself. As the calculations starts to converge, more and more integrals can be skipped. The integral calculation
+timewillstilldominatethecalculationquitestrongly,sothatwaystoreducethisburdenareclearlycalledfor. As
+integralsarecalculatedinbatches1thecostofevaluatingthegivenbatchofshells𝑝,𝑞,𝑟,𝑠maybeestimatedas:
+cost≈𝑛 𝑛 𝑛 𝑛 (2𝑙 +1)(2𝑙 +1)(2𝑙 +1)(2𝑙 +1) (7.46)
+𝑝 𝑞 𝑟 𝑠 𝑝 𝑞 𝑟 𝑠
+Here, 𝑛 is the number of primitives involved in shell 𝑝, and 𝑙 is the angular momentum for this shell. Large
+𝑝 𝑝
+integralsarealsogoodcandidatesforstorage,becausesmallchangesinthedensitythatmultiplylargeintegralsare
+likelytogiveanonzerocontributiontothechangesintheFockmatrix.
+ORCAthusfeaturestwopossibilitiesforintegralhandling,whicharecontrolledbythevariableSCFMode. Inthe
+modeConventional,allintegralsaboveagiventhresholdarestoredondisk(inacompressedformatthatsaves
+muchdiskspace). InthemodeDirect,alltwo-electronintegralsarerecomputedineachiteration.
+Twofurthervariablesareofimportance: IntheConventionalmodetheprogrammaywriteenormousamounts
+ofdatatodisk. Toensurethisstayswithinbounds,theprogramfirstperformsaso-called“statisticsrun”thatgives
+apessimisticestimateofhowlargetheintegralfileswillbe. Oftentimes,theprogramwilloverestimatetheamount
+of disk space required by a factor of two or more. The maximum amount of disk space that is allowed for the
+integralfilesisgivenbyMaxDisk(inMegabytes).
+Ontheotherhand,iftheintegralfilesinConventionalrunaresmallenoughtofitintothecentralmemory,itis
+fastertodothissinceitavoidsI/Obottlenecks. Themaximumamountofmemoryallocatedforintegralsinthis
+wayisspecifiedbyMaxIntMem(inMegabytes). IftheintegralfilesarelargerthanMaxIntMem,nointegralswill
+bereadintomemory.
+%scf
+MaxIter 100 # Max. no. of SCF iterations
+SCFMode Direct # default, other choice: Conventional
+Thresh 1e-8 # Threshold for neglecting integrals / Fock matrix contributions
+# Depends on the chosen convergence tolerance (in Eh).
+TCut 1e-10 # Threshold for neglecting primitive batches. If the prefactor
+# in the integral is smaller than TCut, the contribution of the
+# primitive batch to the total batch is neglected.
+UseCheapInts false # default: false
+DirectResetFreq 20 # default: 15
+MaxDisk 2500 # Max. amount of disk for 2 el. ints. (MB)
+MaxIntMem 400 # Max. amount of RAM for 2 el. ints. (MB)
+end
+The flag UseCheapInts has the following meaning: In a Direct SCF calculation, the oscillations in the total
+energyanddensityareinitiallyquitelarge. Highaccuracyintheintegralsisthereforenotcrucial. IfUseCheapInts
+isswitchedon,theprogramloosensthethresholdfortheintegralsandthussavesalotofcomputationaltime. After
+havingobtainedareasonableinitialconvergence,thethresholdsaretightenedtothetargetaccuracy. Onepitfallwith
+thismethodisthatthenumberofcyclesrequiredtoreachconvergencemaybelargerrelativetoacalculationwith
+fullintegralaccuracythroughout.2 Whenrestartingcalculationsthatareclosetoconvergence,itisrecommended
+toswitchUseCheapIntsoff. UseCheapIntshasnomeaninginaconventionalSCF.
+ThevalueofDirectResetFreqsetsthenumberofincrementalFockmatrixbuildsafterwhichtheprogramshould
+performafullFockmatrixbuildina DirectSCFcalculation. Topreventnumericalinstabilitiesthatarisefrom
+1Abatchisasetofintegralsthatarisesfromallcomponentsoftheshellsinvolvedintheintegral.Forexamplea⟨𝑝𝑝|𝑝𝑝⟩batchgivesrise
+to3×3×3×3=81integralsduetoallpossiblecombinationsof𝑝𝑥 ,𝑝𝑦 and𝑝𝑧 functionsinthefourshells.Computationsbasedonbatches
+leadtogreatcomputationaladvantagesbecausethe81integralsinvolvedinthe⟨𝑝𝑝|𝑝𝑝⟩batchsharemanycommonintermediatequantities.
+2Thismightbeanundesirablefeatureofthecurrentimplementation.
+7.8. ChoiceofWavefunctionandIntegralHandling 525
+
+[... start of page 548 ...]
+ORCAManual,Release6.0.0
+accumulatederrorsintherecursivelybuildFockmatrix,thevalueshouldnotbetoolarge,sincethiswilladversely
+affecttheSCFconvergence. Ifthevalueistoosmall,theprogramwillupdatemorefrequently,butthecalculation
+willtakeconsiderablylonger,sinceafullFockmatrixbuildismoreexpensivethanarecursiveone.
+ThethresholdsTCutandThreshalsodeserveacloserexplanation. Threshisathresholdthatdetermineswhento
+neglecttwo-electronintegrals. IfagivenintegralissmallerthanThreshEh,itwillnotbestoredorusedinFock
+matrixconstruction. Additionally, contributionstotheFockmatrixthataresmallerthan ThreshEhwillnotbe
+calculatedinaDirectSCF.
+Clearly, it would be wasteful to calculate an integral, then find out it is good for nothing and thus discard it. A
+usefulfeaturewouldbeanefficientwaytoestimatethesizeofth

@@ -1,0 +1,81 @@
+[... end of page 719 ...]
+ 120.000 0.000
+H 1 2 3 1.082921 120.000 180.000
+H 2 1 3 1.082921 120.000 180.000
+H 3 2 1 1.082921 120.000 180.000
+H 4 3 2 1.082921 120.000 180.000
+H 5 4 3 1.082921 120.000 180.000
+(continuesonnextpage)
+7.24. ApproximateFullCICalculationsinSubspace: ICE-CI 697
+
+--- Page 720 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H 6 5 4 1.082921 120.000 180.000
+*
+(The %cclib statement is explained below and is not mandatory here). The Auto-ICE procedure comes up with
+as many as 24 electrons in 19 orbitals, which already is a fairly heavy calculation. The procedure converges in
+fiveiterationsandprovidesindeedthecorrectstates: thegorundstate,the1B stateat6.4eV,the1B stateat
+2u 1u
+8.9eVandadegenerate1E stateat10.0eV.Theseexcitationenergiesarestillinerrorbyabout2eVrelativeto
+1u
+experiment,whichismainlyduetomissingdynamiccorrelation. However,thecorrectstatesandtheirsequence
+hasbeenfound.
+TheICE-CIcanbeusedtofindthegroundstateiftheactualgroundstateisnotknown. Tothisend,onesimply
+hastoturnofftheselectionsteps. Thismakesthecalculationsmoreexpensive,buttheywillconvergetothelowest
+state. Intheexamplebelow(again,theH Omolecule)westartfromarandomquintuplyexcitedconfiguration–
+2
+theICE-CIstillfindsthegroundstateafterfouriterations:
+%ice nel 8
+norb 23
+nroots 1
+tvar 1e-11
+tgen 1e-04
+etol 1e-06
+# selection
+SelStart false
+SelIter false
+# algorithm details
+useivos false
+integrals exact
+cimaxdim 5 #Davidson expansion space = MaxDim * NRoots
+cimode 3
+# spatial sym (buggy)
+irrep 0
+# startup (optional)
+refs { 2 1 0 1 0 2 1 0 1 }
+end
+end
+However,ifonewantstoconvergetoanexcitedstate,oneshouldturnontheselection. Intheexamplebelow(once
+more the water molecule) one can converge to the second excitated singlet state by judicious choice of the start
+configuration:
+%ice nel 8
+norb 23
+nroots 1
+tvar 1e-11
+tgen 1e-04
+etol 1e-06
+# selection
+SelStart true
+SelIter true
+# algorithm details
+useivos false
+integrals exact
+cimaxdim 5
+cimode 3
+# spatial sym (buggy)
+irrep 0
+{ #} startup (optional)
+refs { 2 2 1 2 0 1 }
+end
+(continuesonnextpage)
+698 Chapter7. DetailedDocumentation
+
+[... start of page 721 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+7.24.10 Large-scale approximate CASSCF: ICE-SCF
+ICE-CIcanbeusedasareplacementfortheCIstepinaCASSCFframework. Inthisway,muchlargerCASSCF
+calculationsthanpreviouslypossiblecanbeenvisioned. InusingtheICE-CIinthisway,theactiveorbitalsshould
+bechosenasna

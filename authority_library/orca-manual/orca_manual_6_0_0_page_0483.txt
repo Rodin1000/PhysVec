@@ -1,0 +1,136 @@
+[... end of page 482 ...]
+bleviathesimpleinput!LibXC(Keyword)
+Keyword LibXCname(s) Notes
+GGAfunctions
+B97-D gga_xc_b97_d UsesD2
+B97-D3 gga_xc_b97_d UsesD3(0)
+B97-D4 gga_xc_b97_d UsesD4
+BLYP gga_x_b88+gga_c_lyp
+BP86 gga_x_b88+gga_c_p86
+KT2 gga_xc_kt2
+KT3 gga_xc_kt3
+PBE gga_x_pbe+gga_c_pbe
+Meta-GGAfunctionals
+B97M-V mgga_xc_b97m_v UsesVV10
+B97M-D3BJ mgga_xc_b97m_v UsesD3(BJ)
+B97M-D4 mgga_xc_b97m_v UsesD4
+M06L mgga_x_m06_l+mgga_c_m06_l
+continuesonnextpage
+460 Chapter7. DetailedDocumentation
+
+--- Page 483 ---
+ORCAManual,Release6.0.0
+Table 7.4–continuedfrompreviouspage
+Keyword LibXCname(s) Notes
+MN15L mgga_x_mn15_l+mgga_c_mn15_l
+r2SCAN mgga_x_r2scan+mgga_c_r2scan
+rSCAN mgga_x_rscan+mgga_c_rscan
+SCAN mgga_x_scan+mgga_c_scan
+TPSS mgga_x_tpss+mgga_c_tpss
+HybridGGAfunctionals
+B3LYP hyb_gga_xc_b3lyp5
+B3LYP/G hyb_gga_xc_b3lyp
+B97 hyb_gga_xc_b97
+PBE0 hyb_gga_xc_pbeh
+wB97 hyb_gga_xc_wb97
+wB97X hyb_gga_xc_wb97x
+wB97X-D3 hyb_gga_xc_wb97x_d3 UsesD3(0)
+wB97X-V hyb_gga_xc_wb97x_v UsesVV10
+wB97X-D3BJ hyb_gga_xc_wb97x_v UsesD3(BJ)
+wB97X-D4 hyb_gga_xc_wb97x_v UsesD4
+Hybridmeta-GGAfunctionals
+M05 hyb_mgga_x_m05+mgga_c_m05
+M052X hyb_mgga_x_m05_2x+mgga_c_m05_2x
+M06 hyb_mgga_x_m06+mgga_c_m06
+M062X hyb_mgga_x_m06_2x+mgga_c_m06_2x
+MN15 hyb_mgga_x_mn15+mgga_c_mn15
+PW6B95 hyb_mgga_xc_pw6b95
+SCAN0 hyb_mgga_x_scan0+mgga_c_scan
+TPSS0 hyb_mgga_xc_tpss0
+TPSSH hyb_mgga_xc_tpssh
+wB97M-V hyb_mgga_xc_wb97m_v UsesVV10
+wB97M-D3BJ hyb_mgga_xc_wb97m_v UsesD3(BJ)
+wB97M-D4 hyb_mgga_xc_wb97m_v UsesD4
+Double-hybridfunctionals
+DSD-PBEB95-D3 gga_x_pbe+mgga_c_bc95 Custommixing,usesD3(BJ)
+DSD-PBEB95-D4 gga_x_pbe+mgga_c_bc95 Custommixing,usesD4
+PWPB95 gga_x_mpw91+mgga_c_bc95 CustommixingandExtParam’s
+UsingtheRI-JApproximationtotheCoulombPart
+Note: Thisisthedefaultfornon-hybridDFT!Canbeturnedoffbyusing!NORI.
+AveryusefulapproximationthatgreatlyspeedsupDFTcalculationsunlessthemoleculegetsverylargeistheso
+called“RI-approximation”[65,225,245,246,440,860,886]. RIstandsfor“Resolutionoftheidentity”. Inshort,
+chargedistributionsarisingfromproductsofbasisfunctionsareapproximatedbyalinearcombinationofauxiliary
+basisfunctions.
+∑︁
+𝜑 𝑖 (⃗𝑟)𝜑 𝑗 (⃗𝑟)≈ 𝑐𝑖 𝑘 𝑗𝜂 𝑘 (r) (7.7)
+𝑘
+There are a variety of different possibilities to determine the expansion coefficients 𝑐𝑖𝑗. A while ago, Almlöf
+𝑘
+and coworkers [858] have shown that for the approximation of electron repulsion integrals, the best choice is to
+minimizetheresidualrepulsion3.
+3ThebasictheorybehindtheRImethodhasbeenknownforalongtimeandsinceatleastthelatesixties,methodssimilartotheRI
+approximationhavebeenused—mainlyinthecontextof“approximateabinitiomethods”suchasLEDO,PDDO,andMADO,butalsoin
+densityfunctionaltheoryinthemidandlateseventiesbyBaerends,Dunlap,andothers[65,225,860,886].
+7.4. ChoiceofComputationalModel 461
+
+[... start of page 484 ...]
+ORCAManual,Release6.0.0
+Define:
+∑︁
+𝑅 𝑖𝑗 ≡𝜑 𝑖 (⃗𝑟)𝜑 𝑗 (⃗𝑟)− 𝑐𝑖 𝑘 𝑗𝜂 𝑘 (⃗𝑟) (7.8)
+𝑘
+and
+∫︁ ∫︁ 1
+𝑇 = 𝑅 (⃗𝑟) 𝑅 (⃗𝑟)𝑑3𝑟𝑑3𝑟′ (7.9)
+𝑖𝑗 𝑖𝑗 |⃗𝑟−⃗𝑟′| 𝑖𝑗
+Determiningthecoefficientsthatminimize𝑇 leadsto
+𝑖𝑗
+c𝑖𝑗 =V−1t𝑖𝑗 (7.10)
+where:
+𝑡𝑖
+𝑘
+𝑗 = ⟨︀ 𝜑
+𝑖
+𝜑
+𝑗
+⃒ ⃒𝑟
+1
+−
+2
+1⃒ ⃒𝜂
+𝑘
+⟩︀ (7.11)
+𝑉
+𝑖𝑗
+= ⟨︀ 𝜂
+𝑖
+⃒ ⃒𝑟
+1
+−
+2
+1⃒ ⃒𝜂
+𝑗
+⟩︀ (7.12)
+Thus,anordinarytwo-electronintegralbecomes
+⟨︀ 𝜑
+𝑖
+𝜑
+𝑗
+⃒ ⃒𝑟
+1
+−
+2
+1⃒ ⃒𝜑
+𝑘
+𝜑
+𝑙
+⟩︀ ≈ ∑︁ 𝑐𝑖
+𝑝
+𝑗𝑐𝑘
+𝑞
+𝑙𝑉
+𝑝𝑞
+𝑝,𝑞
+= ∑︁ 𝑉 𝑝𝑞 ∑︁(︀ V−1)︀ 𝑝𝑟 𝑡𝑖 𝑟 𝑗 ∑︁(︀ V−1)︀ 𝑞𝑠 𝑡𝑘 𝑠 𝑙 (7.13)
+𝑝,𝑞 𝑟 𝑠
+= ∑︁

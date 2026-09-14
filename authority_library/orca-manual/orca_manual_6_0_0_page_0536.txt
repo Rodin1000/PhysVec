@@ -1,0 +1,79 @@
+[... end of page 535 ...]
+RTol 2.5e-7
+VERYTIGHTSCF
+DCAS.TolG 1.0e-5
+DCAS.TolE 1.0e-8
+DMDCI.STol 1.0e-6
+DMRCI.ETol 1.0e-7
+DMRCI.RTol 1.0e-7
+DCIS.ETol 1.0e-7
+DCIS.RTol 1.0e-7
+continuesonnextpage
+7.7. SCFConvergence 513
+
+--- Page 536 ---
+ORCAManual,Release6.0.0
+Table 7.12–continuedfrompreviouspage
+EXTREMESCF
+DCAS.TolG 1.0e-9
+DCAS.TolE 1.0e-12
+DMDCI.STol 1.0e-9
+DMDCI.TCutInt 0.0
+DMRCI.ETol 1.0e-12
+DMRCI.RTol 1.0e-12
+DCIS.ETol 1.0e-12
+DCIS.RTol 1.0e-12
+If ConvCheckMode=0, all convergence criteria have to be satisfied for the program to accept the calculation
+as converged, which is a quite rigorous criterion. In this mode, the program also has mechanisms to decide
+that a calculation is converged even if one convergence criterion is not fulfilled but the others are overachieved.
+ConvCheckMode=1meansthatonecriterionisenough. Thisisquitedangerous,soensurethatnoneofthecriteria
+aretooweak,otherwisetheresultwillbeunreliable. ThedefaultConvCheckMode=2isacheckofmediumrigor
+— the program checks for the change in total energy and for the change in the one-electron energy. If the ratio
+of total energy and one-electron energy is constant, the self-consistent field does not fluctuate anymore and the
+calculationcanbeconsideredconverged. Ifyouhavesmalleigenvaluesoftheoverlapmatrix,thedensitymaynot
+beconvergedtothenumberofsignificantfiguresrequestedbyTolMaxPandTolRMSP.
+ConvForcedisaflagtopreventtimeconsumingcalculationsonnon-convergedwavefunctions. Itwilldefaultto
+ConvForced=1forPost-HFmethods,ExcitedStatesrunsandBrokenSymmetrycalculations. Youcanoverwrite
+thisdefaultbehaviorbysettingConvForced=0.
+IrrespectiveoftheConvForcedvaluethathasbeenchosen,propertiesornumericalcalculations(NumGrad,Num-
+Freq)willnotbeperformedonnon-convergedwavefunctions!
+7.7.2 Dynamic and Static Damping
+Dampingistheoldestandsimplestconvergenceaid. ItwasalreadyinventedbyDouglasHartreewhenhedidhis
+famousatomiccalculations. Dampingconsistsofmixingtheolddensitywiththenewdensityas:
+𝑃new,damped =(1−𝛼)𝑃new+𝛼𝑃old (7.45)
+where𝛼isthedampingfactor,whichmusthaveavalueoflessthan1. Thusthepermissiblerange(notchecked
+bytheprogram)is0...0.999999. For𝛼valueslargerthan1,thecalculationcannotproceedsincenonewdensity
+isadmixed. Dampingisimportantintheearlystagesofacalculationwhere𝑃old and𝑃new areverydifferentfrom
+eachotherandtheenergyisstronglyfluctuating. Manyschemeshavebeensuggestedthatvarythedampingfactor
+dynamicallytogivestrongdampinginthebeginningandnodampingintheendofanSCF.Theschemeimple-
+mentedinORCAisthatbyHehenbergerandZerner[909]andisinvokedwithCNVZerner=true. Staticdamping
+isinvokedwithCNVDamp=true. Theseconvergersaremutuallyexclusive. Theycanbeusedinthebeginningofa
+calculationwhenitisnotwithintheconvergenceradiusofDIISorSOSCF.Dampingworksreasonablywell,but
+mostotherconvergersinORCAaremorepowerful.
+IfdampingusedinconjunctionwithDIISorSOSCF,thevalueof DampErrisimportant: oncetheDIISerrorfalls
+belowDampErr,thedampingisturnedoff. IncaseSOSCFisused,DampErrreferstotheorbitalgradientvalueat
+whichthedampingisturnedoff. Thedefaultvalueis0.1Eh. Indifficultcases,however,itisagoodideatochoose
+DampErrmuchsmaller,e.g. 0.001. Thisis—tosomeextent—chosenautomaticallytogetherwiththekeyword
+! SlowConv.
+%scf
+# control of the Damping procedure
+CNVDamp true # default: true
+CNVZerner false # default: false
+(continuesonnextpage)
+514 Chapter7. DetailedDocumentation
+
+[... start of page 537 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+DampFac 0.98 # default: 0.7
+DampErr 0.05 # default: 0.1
+DampMin 0.1 # default: 0.0
+DampMax 0.99 # default: 0.98
+# more convenient:
+Damp fac 0.98 ErrOff 0.05 Min 0.1 Max 0.99 end
+end
+7.7.3 Level Shifting
+Levelshiftingisafrequentlyusedtechnique. Thebasicideaistoshifttheenergiesofthevirtualorbitalssuchthataf-
+terdiagonalizationtheoccupiedandvirtualorbitalsmixlessstronglyandthecalculationconvergesmoresmoothly
+towardsthedesiredstate. Also,levelshiftingshouldpreventflippingofelectronicstatesinnear-degeneratecases.
+Inaspecialcontextitha

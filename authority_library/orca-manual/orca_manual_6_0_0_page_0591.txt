@@ -1,0 +1,79 @@
+[... end of page 590 ...]
+orNewNCorehastoincludetheelectronsrepresentedbytheECPsaswell.
+E.g. ifanelementissupposedtohave60electronsintheECPandadditional8electronsshouldbefrozen
+inthecorrelationcalculation,NewNCoreshouldbe68.
+• The different sets of orbitals (chemical core electrons included in the correlation treatment and valence
+electrons)arelocalizedseparatelyinordertoavoidthemixingofcoreandvalenceorbitals.
+568 Chapter7. DetailedDocumentation
+
+--- Page 591 ---
+ORCAManual,Release6.0.0
+Multi-LevelCalculations
+Inmanyapplicationseventsareinvestigatedthatarelocatedinarelativelysmallregionofthesystemofinterest.
+Inthesecases,combinedquantum-mechanics/molecular-mechanics(QM/MM)approacheshavebeenprovedtobe
+extremelyuseful,especiallyinthemodelingofenzymaticreactions. ThebasicideaofanyQM/MMmethodisto
+treatasmallregionofthesystemattheQMlevelandtouseanMMtreatmentfortheremainingpartofthesystem.
+Alternatively, QM/QM methods, where different parts of a system are studied at various quantum mechanical
+levels,arealsoavailable. Quantummechanicalmethodsaremorecomputationallydemandingthanthemolecular
+mechanicstreatment,andthislimitstheapplicabilityofall-QMapproaches. Nevertheless,QM/QMmethodsretain
+somestrongadvantagesoverQM/MMschemes. Forinstance,forcefieldparametersforthemolecularmechanics
+partofthecalculationarenotnecessary,andthustherearenorestrictionsonthetypeofchemicalsystemsthatcan
+betreated. Moreover,problemsusuallycausedbyboundariesbetweenQMandMMpartsdonotoccur. Finally,
+theaccuracyofanall-QMcalculationisexpectedtobehighercomparedtotheaccuracyofQM/MMapproaches,
+thatislimitedbytheMMtreatment.
+InORCA,thedifferentmethodsthatcanbeusedinaQM/QMcalculationsare:
+• DLPNO-CCSD(T)withTightPNOthresholds
+• DLPNO-CCSD(T)withNormalPNOthresholds
+• DLPNO-CCSD(T)withLoosePNOthresholds
+• DLPNO-CCSD
+• DLPNO-MP2
+• HF
+Theusercandefineanarbitrarynumberoffragmentsintheinput,theleveloftheorytobeusedforeachfragment
+and for the interaction between different fragments. Localized molecular orbitals are then assigned to a given
+fragmentonthebasisoftheirMullikenpopulations.
+Thefollowingexampleshowsthecalculationofabenzenedimer,forwhichtheindividualmonomersarecalculated
+onMP2level,andtheinteractionbetweenthetwomonomersiscalculatedonTightPNODLPNO-CCSD(T)level.
+Morerealisticusecasesarediscussedinref.[810].
+! DLPNO-CCSD(T) Def2-SVP Def2-SVP/C
+%mdci
+UseFullLmp2Guess True
+TightPNOFragInter {1 2}
+MP2FragInter {1 1} {2 2}
+end
+*xyz 0 1
+C(1) 1.393 0.000 0.0
+H(1) 2.474 0.000 0.0
+C(1) 0.695 1.206 0.0
+H(1) 1.238 2.143 0.0
+C(1) -0.695 1.206 0.0
+H(1) -1.238 2.143 0.0
+C(1) -1.393 0.000 0.0
+H(1) -2.474 0.000 0.0
+C(1) -0.695 -1.206 0.0
+H(1) -1.238 -2.143 0.0
+C(1) 0.695 -1.206 0.0
+H(1) 1.238 -2.143 0.0
+C(2) 2.333 1.33 3.5
+H(2) 3.414 1.33 3.5
+C(2) 1.635 2.536 3.5
+H(2) 2.178 3.473 3.5
+C(2) 0.245 2.536 3.5
+H(2) -0.298 3.473 3.5
+C(2) -0.453 1.33 3.5
+(continuesonnextpage)
+7.14. TheSingleReferenceCorrelationModule 569
+
+[... start of page 592 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H(2) -1.534 1.33 3.5
+C(2) 0.245 0.124 3.5
+H(2) -0.298 -0.813 3.5
+C(2) 1.635 0.124 3.5
+H(2) 2.178 -0.813 3.5
+*
+• Forthecalculationoftheinteractionenergy,theenergyoftheindividualbenzenemonomershouldbecal-
+culatedontheaccuracylevelofthemonomerinthedimercalculation,i.e. usingMP2withfullLMP2guess
+fortheaboveexample.
+Allpossiblesettingsforthemulti-levelcalculationarelistedbelow.
+# The one-keyword line defines the default method 

@@ -1,0 +1,107 @@
+[... end of page 1034 ...]
+rcase,butwillneverensurethatforthesamesystemwithanothergeometry
+thediscontinuitiesintheSCFenergydonotshow(asitdoesnotpreventpointchargestobetooclosefrom
+eachother).
+• Increase pmin : This parameter removes those charges that are at a distance lower than pmin from each
+other. The default value for pmin is of 0.1 a.u. (≈ 0.0529 Å). Then, by incrasing pmin one removes all
+pairsofchargesthataretooclosefromeachotherintheintersectionbetweenthespheres. Note: Becareful
+whenincreasingpmin. AlthoughthispreventssuddenjumpsintheSCFenergy,itcanleadto“biasing”the
+solute-solventinteraction,asoneisremovingasignificantnumberofchargesthatrepresenttheeffectofthe
+solvent.
+1012 Chapter7. DetailedDocumentation
+
+--- Page 1035 ---
+ORCAManual,Release6.0.0
+CalculationofthefreeenergyofsolvationwithintheC-PCM
+Thesolvationfreeenergy,∆𝐺 ,isdefinedasthefreeenergyoftransferofasolutefromthegasphasetothe
+𝑠𝑜𝑙𝑣
+condensedphase. Thisquantitycanbewrittenas(seeeq27inref. [287])
+∆𝐺 =𝐸 (𝑅⃗ ,𝑅⃗ )+∆𝐺 +∆𝐺 +∆𝐺 (7.317)
+𝑠𝑜𝑙𝑣 𝑠𝑜𝑙𝑣 𝑙 𝑣 𝑒𝑙 𝑐𝑎𝑣 𝑑𝑖𝑠𝑝
+The first term, 𝐸 (𝑅⃗ ,𝑅⃗ ), corresponds to the difference between the liquid-phase expectation value of the
+𝑠𝑜𝑙𝑣 𝑣 𝑙
+gas-phaseHamiltonian,𝐸(𝑅⃗ ),andthegas-phasepotentialenergysurface𝐸(𝑅⃗ )
+𝑙 𝑣
+𝐸 (𝑅⃗ ,𝑅⃗ )=𝐸(𝑅⃗ )−𝐸(𝑅⃗ )
+𝑠𝑜𝑙𝑣 𝑣 𝑙 𝑙 𝑣
+The second term in eq (7.317) accounts for the electronic-polarization contribution to ∆𝐺 and is calculated
+𝑠𝑜𝑙𝑣
+fromthechargesspreadoverthesurfaceofthesolutecavity(vdW-typeortheSES).Finally,∆𝐺 isthecavitation
+𝑐𝑎𝑣
+energy,thatis,thereversibleworkrequiredtocreateacavityinsidethebulkofthesolventinordertoaccommodate
+thesolute,while∆𝐺 accountsforthechangesinthedispersionenergyoccuringwhensolvatingthesolute. The
+𝑑𝑖𝑠𝑝
+sumoftheselasttwotermscorrespondtothenon-electrostaticcontribution,∆𝐺 ,to∆𝐺
+𝑛𝑒𝑙 𝑠𝑜𝑙𝑣
+∆𝐺 =∆𝐺 +∆𝐺
+𝑛𝑒𝑙 𝑐𝑎𝑣 𝑑𝑖𝑠𝑝
+InORCA,ifasystemissolvatedwithintheC-PCM(defining!CPCM(solvent name) intheinputfile,within
+eitherthepointchargeschemeortheGaussianchargescheme)thereisno“non-electrostaticsolvationcontribution”
+neither to the SCF energy, nor to its derivatives. In order to have a rough idea of the value of ∆𝐺 , one can
+𝑛𝑒𝑙
+estimatethisquantitythroughempiricalequationsavailableintheliteratureobtainedfromexperimentaldata. For
+instance,∆𝐺 canbeestimatedfromthefreeenergyofhydrationforlinear-chainalkanes[851]
+𝑛𝑒𝑙
+∆𝐺nel =1.321+0.0067639×SASA (7.318)
+where SASA is the solvent-accessible surface area. However, although eq (7.318) may give a good estimation
+of ∆𝐺 for organic molecules in water, it is a bad approximation for non-electrostatic solvation effects when
+𝑛𝑒𝑙
+consideringsolventsdifferentthanwater(aswellasformanysolutesinwater). Therearetwoalternativestothis
+approximationthatonecanadoptinordertoincludenon-electrostaticsolvationeffectsinORCAcalculations:
+1. TheuseoftheSMDmodelincombinationwiththeC-PCM(seesectionTheSMDSolvationModel).
+2. TheuseofGaussianchargestocomputetheelectrostaticcontributionto∆𝐺 togetherwithanequation
+𝑠𝑜𝑙𝑣
+for∆𝐺nel calculatedfromthecontributionofthesoluteatomstotheSASA.[287]
+Focusing on the second strategy, the cavitation energy, ∆𝐺 is calculated through the equation proposed by
+𝑐𝑎𝑣
+PierottiandClaverie.[180,680]Inthiscase,∆𝐺 isexpandedinpowersoftheratioRbetweentheradiusofthe
+𝑐𝑎𝑣
+solutesphere𝑅 andthatofthesolventspheres𝑅 . Then,thecavitationenergyforthesolutespherecenteredat
+𝐼 𝑆
+atom𝐼 readsas,
+(︂
+3𝑦
+)︂ [︃
+3𝑦 9
+(︂
+𝑦
+)︂2 ]︃
+2 𝑦𝑃 3
+∆𝐺 =−ln(1−𝑦)+ R+ + R + R
+𝑐𝑎𝑣,𝐼 1−𝑦 1−𝑦 2 1−𝑦 𝜌 𝑘 𝑇
+𝑆 𝐵
+with𝑦 =8𝜋𝜌 𝑅3/6,being𝜌 thedensityofthesolvent,R=𝑅 /𝑅 ,𝑇 thetemperatureand𝑃 thepressure. If
+𝑆 𝑆 𝑆 𝐼 𝑆
+weconsiderthesolvent-accessiblesurface(SAS),then,thetotal∆𝐺 isthesumofthe∆𝐺 weightedbya
+𝑐𝑎𝑣 𝑐𝑎𝑣,𝐼
+factorthatdependsontheexposedSASA ofsphere𝐼
+𝐼
+∆𝐺 = 𝑁 ∑︁ sph SASA 𝐼∆𝐺 = ∑︁ 𝑁𝑒𝑙 SASA 𝑖∆𝐺 (7.319)
+𝑐𝑎𝑣 4𝜋𝑅2 𝑐𝑎𝑣,𝐼 4𝜋𝑅2 𝑐𝑎𝑣,𝑖
+𝑖=1 𝐼 𝑖=1 𝐼
+Here, thesummationoverthetotalnumberofspheres(𝑁 )thatconformtheSASisreplacedbyasummation
+sph
+overthetotalnumberofsurfaceelements(𝑁 )inwhichtheSASisdividedinto.
+el
+Withrespectto∆𝐺 ,thisquantityisassumedtodependlinearlyonthecontributionofeachsurfaceelementto
+𝑑𝑖𝑠𝑝
+theSASA
+∑︁
+𝑁el
+∆𝐺 = 𝜎 SASA (7.320)
+𝑑𝑖𝑠𝑝 𝐼 𝑖
+𝑖=1
+7.53. ImplicitSolvationModels 1013
+
+[... start of page 1036 ...]
+ORCAManual,Release6.0.0
+Here,thefactor𝜎 istheatomicsurfacetensionofthesphere𝐼 towhichthesurfaceelement𝑖belongsto.
+𝐼
+Thisstrategy,thatconsiderseqs(7.319)and(7.320)tocompute∆𝐺 assumestheuseofGaussianchargesfor
+𝑛𝑒𝑙
+thecalculationof∆𝐺 ineq(7.317). WhenavdW-typecavityisusedtoaccountforelectrostaticsolvationeffects,
+𝑒𝑙
+thenthesolvationapproachiscalledGVDW_nel,whilewhenaSES-typecavityisusedwerefertothesolvation
+approachasGSES_nel(“G”forGaussianchargesand“nel”becauseoftheinclusionofnon-electrostaticsolvation
+effects). DetailsontheGVDW_nelandGSES_nelmodelscanbefoundinref. [287].
+The GVDW_nel and GS

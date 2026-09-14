@@ -1,0 +1,90 @@
+[... end of page 95 ...]
+atOrbs True
+End
+*xyz 0 1
+C 0.000 0.000 0.000
+O 0.000 0.000 1.162
+O 0.000 0.000 -1.162
+*
+Theimplementationsupportsspin-componentscalingandcanbeusedtogetherwithdouble-hybriddensityfunc-
+tionals. Thelatterareinvokedwiththenameofthefunctionalprecededby“DLPNO-”. Asimplegeometryopti-
+mizationwithadouble-hybriddensityfunctionalisillustratedintheexamplebelow:
+! DLPNO-B2PLYP D3 NormalPNO def2-TZVP def2-TZVP/C Opt
+%MaxCore 1000
+*xyz 0 1
+O 0.000 0.000 0.000
+H 0.000 0.000 1.000
+H 0.000 1.000 0.000
+*
+6.1. SinglePointEnergiesandGradients 73
+
+--- Page 96 ---
+ORCAManual,Release6.0.0
+Forsmallersystems,theperformancedifferencebetweenDLPNO-MP2andRI-MP2isnotparticularlylarge,but
+very substantial savings in computational time over RI-MP2 can be achieved for systems containing more than
+approximately70-80atoms.
+SinceMP2isanexpensivemethodforgeometryoptimizations,itisgenerallyagoodideatousewell-optimized
+starting structures (calculated, for example, with a dispersion-corrected DFT functional). Moreover, it is highly
+advisabletoemployaccurateGridsforRIJCOSXortheexchange-correlationfunctional(ifapplicable),astheSCF
+iterationsaccountonlyforafractionoftheoverallcomputationalcost. Ifcalculatingcalculatingpropertieswithout
+requestingthegradient,Density Relaxedneedstobespecifiedinthe%MP2-block.
+OnlytheFoster-Boyslocalizationschemeispresentlysupportedbythederivativesimplementation. Thedefaultlo-
+calizerinDLPNO-MP2isAHFB,andchangingthissettingisstronglydiscouraged,sincetightlyconvergedlocalized
+orbitalsarenecessarytocalculatethegradient.
+Analyticalsecondderivativesforclosed-shellDLPNO-MP2areavailableforthecalculationofNMRshielding
+and static polarizability tensors.[825] The implementation supports spin-component scaling and double-hybrid
+functionals. Errorsinthecalculatedpropertiesarewellbelow0.5%when NormalPNOthresholdsareused. Re-
+fer to section Local MP2 Response Properties for more information about the DLPNO-MP2 second derivatives
+implementation,aswellastothesectionsonelectric(ElectricProperties)andmagnetic(EPRandNMRproper-
+ties) properties and CP-SCF settings (CP-SCF Options). Below is an example for a simple DLPNO-MP2 NMR
+shieldingcalculation:
+! DLPNO-MP2 def2-TZVP def2-TZVP/C TightSCF NMR
+# MP2 relaxed density is requested automatically
+*xyz 0 1
+H 0 0 0
+F 0 0 0.9
+*
+6.1.3 Coupled-Cluster and Coupled-Pair Methods
+Basics
+The coupled-cluster method is presently available for RHF and UHF references. The implementation is fairly
+efficientandsuitableforlarge-scalecalculations. Themostelementaryuseofthismoduleisfairlysimple.
+! METHOD
+# where METHOD is:
+# CCSD CCSD(T) QCISD QCISD(T) CPF/n NCPF/n CEPA/n NCEPA/n
+# (n=1,2,3 for all variants) ACPF NACPF AQCC CISD
+! AOX-METHOD
+# computes contributions from integrals with 3- and 4-external
+# labels directly from AO integrals that are pre-stored in a
+# packed format suitable for efficient processing
+! AO-METHOD
+# computes contributions from integrals with 3- and 4-external
+# labels directly from AO integrals. Can be done for integral
+# direct and conventional runs. In particular, the conventional
+# calculations can be very efficient
+! MO-METHOD (this is the default)
+# performs a full four index integral transformation. This is
+# also often a good choice
+! RI-METHOD
+# selects the RI approximation for all integrals. Rarely advisable
+! RI34-METHOD
+(continuesonnextpage)
+74 Chapter6. RunningTypicalCalculations
+
+[... start of page 97 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# selects the RI approximation for the integrals with 3- and 4-
+# external labels
+#
+# The module has many additional options that are documented
+# later in the manual.
+! RCSinglesFock
+! RIJKSinglesFock
+! NoRCSinglesFock
+! NoRIJKSinglesFock
+# Keywords to select the way the so-called singles Fock calculation
+# is evaluated. The first two keywords turn on, the second two turn off
+# RIJCOSX or RIJK, respectively.
+Note:
+• ThesameFrozenCoreoptionsasforMP2areappliedintheMDCImodule.
+• SinceORCA4.2,ana

@@ -1,0 +1,99 @@
+[... end of page 585 ...]
+ MP2, a set of PNOs is calculated for the MP2 calculation from the semicanonical
+amplitudesfirstusingthecutoffTCutPNO×LMP2ScaleTCutPNO.ThesizeoftheresultingPNOspaceshould
+be comparable with DLPNO-MP2. After the iterations have converged, a (smaller) set of PNOs for the
+CCSDdoubleexcitationamplitudesisgeneratedfromtheiteratedlocalMP2amplitudesinthe(larger)PNO
+basis. The PNOs for the single excitation amplitudes are always calculated using the semicanonical MP2
+amplitudes,astheyrequireamuchmoreconservativePNOtruncationthreshold.
+12. Capitalizing on this feature one can define generous domains and expand the PNOs in terms of the PAOs
+andauxiliaryfitfunctions(fortheRIapproximations)thatarecontainedinthesedomains. InORCAthisis
+controlledbythethirdsignificanttruncationparameter𝑇 . ThisisthebasisoftheDLPNOmethod.
+CutMKN
+IntheolderLPNOmethod,thePNOsareexpandedintermsofthecanonicalvirtualorbitalsand𝑇
+CutMKN
+7.14. TheSingleReferenceCorrelationModule 563
+
+--- Page 586 ---
+ORCAManual,Release6.0.0
+isonlyusedforalocalfittothePNOs. Inthelinear-scalingDLPNOimplementationthedomainsexpanding
+thePNOsintermsofthePAOsarecontrolledvia𝑇 .
+CutDO
+13. PNOexpansionshavetheamazingadvantagethatthePNOsconvergetoawell-definedsetasthebasissetis
+approachingcompleteness. Hence,theincreaseinthenumberofPNOsperelectronpairisverysmallupon
+enlargement of the orbital basis. In other words, correlation calculations with large basis sets are not that
+muchmoreexpensivethancorrelationcalculationswithsmallbasissets. Thus,theadvantageofPNOover
+canonical calculations increases with the size of the basis set. This is a great feature as large and flexible
+basissetsarearequirementformeaningfulcorrelationcalculations.
+14. In summary, DLPNO and LPNO calculations are controlled by only three cut-off parameters with well-
+definedmeanings:a)𝑇 ,thecut-offfortheelectronpairstobeincludedinthecoupled-pairorcoupled-
+CutPairs
+clusteriterations,b)𝑇 whichcontrolshowmanyPNOsareretainedforagivenelectronpairandc)
+CutPNO
+𝑇 thatcontrolshowlargethedomainsarethatthePNOsexpandover. Forthelinear-scalingDLPNO
+CutMKN
+calculationsthedomainsizesarecontrolledvia𝑇 .
+CutDO
+15. Itisclearthatowingtothetruncationsacertainamountoferrorisintroducedintheresults. However,having
+theLMP2resultsavailable,onecancompensatefortheerrorscomingfrom𝑇 and𝑇 . This
+CutPairs CutPNO
+isdoneinORCAandthecorrectionisaddedtothefinalcorrelationenergy,thusbringingitveryclose(to
+mEhaccuracyorbetter)tothecanonicalresult. 𝑇 isbestdealtwithbymakingitconservative(at
+CutMKN
+1e−3to1e−4thedomainsareabout20–30atomslarge,whichissufficientforanaccuratetreatment).
+16. NotethattheLPNOandDLPNOmethodsdonotintroduceanyrealspacecut-offs. Werefrainfromdoing
+soandinsistinourmethoddevelopmentbymakingalltruncationsbasedonwavefunctionorenergyparam-
+eters. Wefeelthatthisisthemostunbiasedapproachanditinvolvesnoelementof“chemicalintuition”or
+“prejudice”.
+17. IntheDLPNOmethodahighlyefficientscreeningmechanismisoperative. Inthismethodonefirstobtains
+a(quadraticallyscaling)multipoleestimateforthepaircorrelationenergythatisextremelyfasttocompute
+(afewseconds,evenforentireproteins). Onlyifthisestimateislargeenough,agivenelectronpairiseven
+consideredforaLMP2treatment. Quitetypicallypairswithenergycontributionsof1e−6Ehandsmaller
+are very well described by the dipole-dipole estimate. Specifically, we drop pairs with estimated energies
+<0.01×𝑇 andaddtheirmultipoleenergysumtothefinalcorrelationenergy. Thesecorrectionstend
+CutPairs
+tobeextremelysmall,evenforlargemoleculesandareinsignificantfortheenergy. However,importantly,the
+multipoleestimateensureslinearscalingintheMP2treatment. Thepairsthatthendonotsurvivethepair-
+prescreeningarecalled“weakpairs”intheORCAorDLPNOsense. Theystillplayaroleinthecalculation
+ofthetripleexcitationcorrection.
+18. The calculation of triple excitation contributions is more involved and one does not have a perturbative
+estimateavailablesincethe(T)contributionisperturbativeitself. Whilethe(T)contributionismuchsmaller
+thantheCCSDcorrelationenergy,theerrorsintroducedbythevariouslocalandPNOapproximationscan
+be significant. We found that one has to include triples with at least one pair being a “weak” LMP2 pair
+(withitsLMP2amplitudes)inordertoarriveatsufficientlyaccurateresults.
+Given these explanations the various cut-off parameters that can be controlled in LPNO and DLPNO calcula-
+tionsshouldbeunderstandableandarelistedbelow. Weemphasizeagainthatonlythethreethresholds𝑇 ,
+CutPairs
+𝑇 and𝑇 shouldbetouchedbytheuser,unlessveryspecificquestionsareaddressed. Therecom-
+CutPNO CutMKN
+mended way to control the accuracy of calculations is to specify “TightPNO”, “NormalPNO” or “LoosePNO”
+keywords,ratherthantochangenumericvaluesofcutoffs. Individualthresholdsshouldnormallynotbechanged,
+asthedefaultsaresensibleandleadtogoodcost/performanceratios.
+%mdci TCutPairs 1e-4 # cut-off for the pair truncation
+TCutPNO 3.33e-7 # cut-off for the PNO truncation
+TCutDO 1e-2 # cut-off for the DLPNO domain construction
+TCutMKN 1e-3 # cut-off for the local fit
+# for DLPNO2013: also domain construction
+# remaining options, tied to the three main cut-offs,
+EXPERTS ONLY!
+Localize true # flag for using localized orbitals
+LocMet AHFB # Localization method.
+# Options: PM, FB, IAOIBO, IAOBOYS, NEWBOYS, AHFB
+LocTol 1e-6 # Absolute threshold for the localization procedure
+(continuesonnextpage)
+564 Chapter7. DetailedDocumentation
+
+[... start of page 587 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# Automatically adjusted by default.
+LocTolRel 1e-8 # Relative threshold for the localization procedure
+LocMaxIter 128 # Maximum number of localization iterations
+LocRandom 1 # default, take random seed for any localization
+# For internal orbitals: choose best of 32 localizations
+# Switched off for AHFB
+0 # take constant seed for any localization (for testing)
+LocNAttempts np # number of localization attempts
+# default: number of processes, minimum 8, if
+# randomize true
+# 1, if randomize false
+# any number larger or e

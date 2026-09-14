@@ -1,0 +1,36 @@
+**Format Rules for Generating [NetKet] Codes**
+
+====================================================================================================
+## **Notation**
+
+**Function Categories:**
+- **ELEMENT functions:** Functions with tags {'hilbert', 'hamiltonian', 'observable', 'statemodel', 'compset', 'effector'}. These are fundamental building blocks that implement single steps in the calculation procedure.
+    - Other functions whose names without these tags are NOT element functions, even though their functions are similar. e.g. 'correlation_matrix' is NOT an element function. 
+- **Task functions:** Functions with tags {'run'}. These orchestrate ELEMENT functions to complete calculation tasks.
+
+====================================================================================================
+
+## **CRITICAL Format Rules**
+
+### **Rule 1: ELEMENT Functions - No Cross-Calling**
+- Functions with tags {'hilbert', 'hamiltonian', 'observable', 'statemodel', 'compset', 'effector'}. Other functions whose names do not contain these tags are NOT element functions. 
+**You are STRICTLY FORBIDDEN** to call any other ELEMENT functions within the definition of any ELEMENT function.
+    - **Instead:** Define the required preceding variables as input parameters of the function.
+- **Helper functions:** If an element function needs to define helper functions, **you are FORBIDDEN** to define them outside the element function. **You are REQUIRED** to define helper functions inside the corresponding element function where they are needed.
+
+### **Rule 2: Run Functions (have 'run'/'run_' in names) - Complete ELEMENT Call Chain**
+**You are REQUIRED** to call ALL types of ELEMENT functions (at least one of each: 'hilbert', 'hamiltonian', 'observable', 'statemodel', 'compset', 'effector').
+- **You are REQUIRED** to implement a complete calculation procedure: you MUST BEGIN from constructing hilbert space, then call other element functions ('hamiltonian', 'observable', 'statemodel', 'compset', 'effector'. Sequence of these five is NOT strictly restricted)
+- **You are FORBIDDEN** to call anthor 'run' function explicitly. 
+- **You are FORBIDDEN** to define explicitly Hilbert space, Hamiltonian, observables, NetKet drivers or use VMC directly in 'run' functions (must call ELEMENT functions instead). But you are ALLOWED to include some simple calculation/process if necessary. 
+- **You are FORBIDDEN** to use specific parameter numbers directly. You take them all as inputs. Including VMC parameters (n_samples, n_iter, ...) 
+
+### **Rule 3: Code Completeness**
+- **There MUST be** at least 1 run function (have 'run'/'run_' in names). 
+- **You are FORBIDDEN** to change existing run functions into other tags (such as illegal tags as 'task_'...)
+
+### Check scope. 
+- **You are FORBIDDEN** to check and modefy 'item', 'plot', 'main' and other functions. **
+- **You are REQUIRED** to check ALL element functions and 'run' function definitions, not their applications in other functions. 
+
+====================================================================================================

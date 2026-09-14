@@ -1,0 +1,89 @@
+[... end of page 888 ...]
+ly. Wenote
+thatinMR-EOM-TT†-h-vandMR-EOM-TT†SXD-h-vcalculations,itispossibletooverridethedefaultexcitation
+classes in the final MRCI diagonalization. This is done by specifying excitations none and then explicitly
+settingtheexcitationflagswithinagivenmultiplicityblock. Forexample,ifwewantedtohave1h,1p,1h1p,2h
+and2h1pexcitationsinthefinaldiagonalizationmanifold,wewouldspecify(i.e.herewehaverequested6singlets
+andhaveaCAS(6,4)reference):
+%mrci
+newblock 1 *
+excitations none
+Flags[is] 1
+Flags[sa] 1
+Flags[ia] 1
+Flags[ijss] 1
+Flags[ijsa] 1
+nroots 6
+refs
+cas(6,4)
+end
+end
+end
+866 Chapter7. DetailedDocumentation
+
+--- Page 889 ---
+ORCAManual,Release6.0.0
+7.43.1 The Steps Required to Run an MR-EOM Calculation
+ToillustratethevariousstepsrequiredinatypicalMR-EOMcalculation,wewillconsiderthecalculationofthe
+excitationenergiesoftheneutralFeatomattheMR-EOM-TT†SXDU-h-vleveloftheory.
+State-AveragedCASSCFCalculation
+Evidently,thefirststepistodetermineasuitablestate-averagedCASSCFreferenceforthesubsequentMR-EOM
+calculation. In choosing the state-averaged CAS for an MR-EOM calculation, we typically include a few of the
+low-lyingmultipletsthathavethesamecharacterasthe(muchlargernumberof)statesthatwewishtocompute
+inthefinalMR-EOMcalculation. FortheneutralFeatom,wetypicallyhaveelectronicstateswhichhaveeither
+4s23d6characteror4s13d7character. FromtheNISTatomicspectradatabase[1,605],wefindthatthelowestlying
+a5Dmultipletisof4s23d6characterandthehigherlyinga5Fmultipletisof4s13d7character. Hence,wecansetup
+astate-averagedCASSCF(8,6)calculation(i.e.8electronsin6orbitals(4sand3d))whichincludesthe5Dand5F
+statesandchoosetheweightssuchthattheaverageoccupationofthe4sorbitalis1.5. AsdiscussedinRef.[529],
+this is done to avoid a preference toward either of the 4s configurations in the state-averaging. We will run the
+state-averagedCASSCFcalculation,makinguseofthesecondorderDKH(seeTheDouglas-Kroll-HessMethod)
+methodfortheinclusionofrelativisticeffectsinaDef2-TZVPPbasis(i.e.theDKH-Def2-TZVPPrelativistically
+recontractedbasis,listedinsectionChoiceofBasisSet). Theinputfileforthestate-averagedCASSCF(8,6)calcu-
+lationtakestheform:
+!CASSCF DKH-Def2-TZVPP VeryTightSCF DKH
+%casscf
+nel 8
+norb 6
+mult 5
+nroots 12
+weights[0] = 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5
+end
+* xyz 0 5
+Fe 0.000000 0.000000 0.000000
+end
+Here,wehaverequested12quintetstates(thelowestlying5Dand5Fmultiplets)andwehavechosentheweights
+tobe0.7forthefive5Dstatesand0.5fortheseven5Fstates,suchthattheoveralloccupationofthe4sorbitalwill
+be1.5. Oncethecalculationhasconverged,itisimportanttoinspecttheresultsprintedinthefinalmacro-iteration
+oftheCASSCFcalculation(macro-iteration8inthiscase). Inthiscase,wehave:
+MACRO-ITERATION 8:
+--- Inactive Energy E0 = -1249.82392764 Eh
+--- All densities will be recomputed
+CI-ITERATION 0:
+-1271.258899450 0.000000000001 ( 0.00)
+-1271.258899450 0.000000000001
+-1271.258899450 0.000000000001
+-1271.258899450 0.000000000001
+-1271.258899450 0.000000000001
+-1271.186288591 0.000000000001
+-1271.186288591 0.000000000001
+-1271.186288591 0.000000000002
+-1271.186288591 0.000000000001
+-1271.186288591 0.000000000001
+-1271.186288591 0.000000000001
+-1271.186288591 0.000000000001
+CI-PROBLEM SOLVED
+DENSITIES MADE
+E(CAS)= -1271.222594021 Eh DE= -1.591616e-12
+--- Energy gap subspaces: Ext-Act = 0.276 Act-Int = 2.469
+(continuesonnextpage)
+7.43. MultireferenceEquationofMotionCoupled-Cluster(MR-EOM-CC)Theory 867
+
+[... start of page 890 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+N(occ)= 1.50000 1.30000 1.30000 1.30000 1.30000 1.30000
+||g|| = 4.669702e-05 Max(G)= 1.104493e-05 Rot=68,1
+DirectlybelowCI-ITERATION 0,thefinalCAS-CIenergiesareprinted,andoneobservesthattheyfollowthecor-
+rectdegeneracypattern(i.e.5stateswithenergy-1271.258899450and7stateswithenergy-1271.186288591).
+Furthermore, the final state-averaged CASSCF energy (E(CAS)= -1271.222594021) and occupation numbers
+(N(occ)= 1.50000 1.30000 1.30000 1.30000 1.30000 1.300

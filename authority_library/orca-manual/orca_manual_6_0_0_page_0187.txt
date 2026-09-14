@@ -1,0 +1,82 @@
+[... end of page 186 ...]
+ons, duetothemagneticfieldderivativesofdipoleintegrals. Inthecaseofadipolarelectricfield, the
+GIAOcontributionshavebeenimplemented,makingitpossibletostudye.g. theeffectofelectricfieldson
+NMRshieldings,andasaspecialcase,nucleusindependentchemicalshieldings(NICSs),whichareuseful
+toolsforanalyzingaromaticity. QuadrupolarfieldscannotbeusedinGIAOcalculationsatthemoment.
+6.2 SCF Stability Analysis
+TheSCFstabilitywillgiveanindicationwhethertheSCFsolutionisatalocalminimumorasaddlepoint.[80,778]
+ItisavailableforRHF/RKSandUHF/UKS.Inthelattercase,theSCFisrestartedbydefaultusingnewunrestricted
+startorbitalsifaninstabilitywasdetected. Forademonstration,considerthefollowinginput:
+! BHLYP def2-SVP NORI
+%scf
+guess hcore
+HFTyp UHF
+STABPerform true
+(continuesonnextpage)
+164 Chapter6. RunningTypicalCalculations
+
+--- Page 187 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+* xyz 0 1
+h 0.0 0.0 0.0
+h 0.0 0.0 1.4
+*
+TheHCOREguessleadstoasymmetric/restrictedguess,whichdoesnotyieldtheunrestrictedsolution. Thesame
+isoftentrueforotherguessoptions. Formoredetailsonthestabilityanalysis,seeSectionSCFStabilityAnalysis.
+6.3 Geometry Optimizations, Surface Scans, Transition States,
+MECPs, Conical Intersections, IRC, NEB
+The usage of analytic gradients is necessary for efficient geometry optimization. In ORCA 5.0, the following
+methodsprovideanalyticfirstderivatives
+• Hartree-Fock(HF)andDFT(includingtheRI,RIJKandRIJCOSXapproximations)
+• MP2,RI-MP2andDLPNO-MP2
+• TD-DFTforexcitedstates
+• CAS-SCF
+Whentheanalyticgradientsarenotavailable, itispossibletoevaluatethefirstderivativesnumericallybyfinite
+displacements. Thisisavailableforallmethods.
+The coordinate system chosen for geometry optimization affects the convergence rate, with redundant internal
+coordinatesbeingusuallythebestchoice.
+Somemethodsforlocatingtransitionstates(TS)requiresecondderivativematrices(Hessian),implementedana-
+lyticallyforHF,DFTandMP2. Additionally,severalapproachestoconstructaninitialapproximateHessianfor
+TS optimization are available. A very useful feature for locating complicated TSs is the Nudged-Elastic Band
+methodincombinationwiththeTSfindingalgorithm(NEB-TS,ZOOM-NEB-TS).Anessentialfeatureforchem-
+icalprocessesinvolvingexcitedstatesistheconicalintersectionoptimizer. AnotherinterestingfeatureareMECP
+(MinimumEnergyCrossingPoint)optimizations.
+ForverylargesystemsORCAprovidesaveryefficientL-BFGSoptimizer,whichmakesuseoftheorca_mdmodule.
+Itcanalsobeinvokedviasimplekeywordsdescribedattheendofthissection.
+6.3.1 Geometry Optimizations
+Optimizationsarefairlyeasyasinthefollowingexample:
+! B3LYP/G SV(P) Opt
+* int 0 1
+C 0 0 0 0.0000 0.000 0.00
+O 1 0 0 1.2029 0.000 0.00
+H 1 2 0 1.1075 122.016 0.00
+H 1 2 3 1.1075 122.016 180.00
+*
+AnoptimizationwiththeRImethod(theBPfunctionalisrecommend)wouldsimplylooklike:
+! BP SV(P) OPT
+* int 0 1
+C 0 0 0 0.0000 0.000 0.00
+O 1 0 0 1.2029 0.000 0.00
+H 1 2 0 1.1075 122.016 0.00
+(continuesonnextpage)
+6.3. GeometryOptimizations,SurfaceScans,TransitionStates,MECPs,ConicalIntersection1s6,5
+IRC,NEB
+
+[... start of page 188 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H 1 2 3 1.1075 122.016 180.00
+*
+Anoptimizationofthefirstexcitedstateofethylene:
+! BLYP SVP OPT
+%tddft
+IRoot 1
+end
+* xyz 0 1
+C 0.000000 0.000000 0.666723
+C 0.000000 0.000000 -0.666723
+H 0.000000 -0.928802 1.141480
+H -0.804366 -0.464401 -1.341480
+H 0.000000 0.928

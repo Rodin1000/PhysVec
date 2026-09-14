@@ -1,0 +1,70 @@
+[... end of page 92 ...]
+r the open shell case case the
+corresponding spin densities are also constructed and stored as JobName.rmp2ur.tmp and JobName.rmp2re.
+tmp.
+Inadditiontothedensityoptions,theuserhastheabilitytoconstructMP2naturalorbitals. Ifrelaxeddensitiesare
+available,theprogramusestherelaxeddensitiesandotherwisetheunrelaxedones. Thenaturalorbitalsarestored
+asJobName.mp2natwhichisaGBWtypefilethatcanbereadasinputforotherjobs(forexample,itissensible
+tostartCASSCFcalculationsfromMP2naturalorbitals). Thedensityconstructioncanbecontrolledseparatelyin
+theinputfile(evenwithoutrunningagradientoroptimization)by:
+70 Chapter6. RunningTypicalCalculations
+
+--- Page 93 ---
+ORCAManual,Release6.0.0
+#
+# MP2 densities and natural orbitals
+#
+%mp2 Density none # no density
+unrelaxed # unrelaxed density
+relaxed # relaxed density
+NatOrbs true # Natural orbital construction on or off
+end
+Belowisacalculationofthedipoleandquadrupolemomentsofawatermolecule:
+! RI-MP2 def2-SVP def2-SVP/C
+%mp2 density relaxed end
+%elprop dipole true
+quadrupole true
+end
+* int 0 1
+O 0 0 0 0 0 0
+H 1 0 0 0.9584 0 0
+H 1 2 0 0.9584 104.45 0
+*
+Anotherexampleisasimpleg-tensorcalculationwithMP2:
+! RI-MP2 def2-SVP def2-SVP/C TightSCF SOMF(1X) NoFrozenCore
+%eprnmr gtensor 1
+ori CenterOfElCharge
+end
+%mp2 density relaxed end
+* int 1 2
+O 0 0 0 0 0 0
+H 1 0 0 1.1056 0 0
+H 1 2 0 1.1056 109.62 0
+*
+NMRchemicalshieldingaswellasg-tensorcalculationswithGIAOsareonlyavailableforRI-MP2. Theinputfor
+NMRchemicalshieldinglooksasfollows:
+! RIJK RI-MP2 def2-SVP def2/JK def2-SVP/C TightSCF NMR NoFrozenCore
+%mp2
+density relaxed # required
+end
+* int 0 1
+O 0 0 0 0 0 0
+H 1 0 0 1.1056 0 0
+H 1 2 0 1.1056 109.62 0
+*
+NotethatbydefaultcoreelectronsarenotcorrelatedunlesstheNoFrozenCorekeywordispresent.
+Fordetails,seesectionsTheSecondOrderManyBodyPertubationTheoryModule(MP2)andMP2levelmagnetic
+properties.
+6.1. SinglePointEnergiesandGradients 71
+
+[... start of page 94 ...]
+ORCAManual,Release6.0.0
+ExplicitlycorrelatedMP2calculations
+ORCAfeaturesanefficientexplicitcorrelationmodulethatisavailableforMP2andcoupled-clustercalculations
+(sectionExplicitlyCorrelatedMP2andCCSD(T)Calculations). Itisdescribedbelowinthecontextofcoupled-
+clustercalculations.
+LocalMP2calculations
+Purely domain-based local MP2 methodology dates back to Pulay and has been developed further by Werner,
+Schützandco-workers. ORCAfeaturesalocalMP2method(DLPNO-MP2)thatcombinestheideasofdomains
+and local pair natural orbitals, so that RI-MP2 energies are reproduced efficiently to within chemical accuracy.
+Due to the intricate connections w

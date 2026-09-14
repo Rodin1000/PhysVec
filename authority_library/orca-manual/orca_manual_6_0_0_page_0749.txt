@@ -1,0 +1,98 @@
+[... end of page 748 ...]
+ation for parabolic fit, not
+# extrapolation
+Do_SD_Corr true # Apply a correction to the 1st SD step
+Scale_Displ_SD_Corr 0.333 # Scaling factor for scaling the correction step to
+# the SD step. It is multiplied by the length of the
+# final 1st SD step
+SD_Corr_ParabolicFit true # Do a parabolic fit for finding an optimal correction
+# step length
+# Convergence thresholds - similar to LooseOpt
+TolRMSG 5.e-4 # RMS gradient (a.u.)
+TolMaxG 2.e-3 # Max. element of gradient (a.u.)
+(continuesonnextpage)
+726 Chapter7. DetailedDocumentation
+
+--- Page 749 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# Output options
+Monitor_Internals # Up to three internal coordinates can be defined
+{B 0 1} # for which the values are printed during the IRC run.
+{B 1 5} # Possible are (B)onds, (A)ngles, (D)ihedrals and (I)mpropers
+end
+end
+NOTE
+• Fordirection=down(downhill)noinitialdisplacementisnecessary,andthusnoHessianisneeded.
+7.29 Nudged Elastic Band Method
+TheNudgedElasticBand(NEB)[384,416,585]methodisusedtofindaminimumenergypath(MEP)connecting
+twolocalenergyminimaonthepotentialenergysurface(PES)andtherebyanestimateoftheactivationenergyfor
+thetransition. Thetwominimaarereferredtoasthereactantandproductinthefollowingdiscussion. Thepathcan
+haveoneormoremaxima,eachonecorrespondingtoafirstordersaddlepointontheenergysurface. TheNEB
+methodoffersanadvantageovereigenvector-followingmethodsinthatitisguaranteedtofindsaddlepointsthat
+connect the given reactant and product states. The minimum energy path is often used to represent the reaction
+coordinateofthetransitionbetweenthetwostates. Themethodsandimplementationoutlinedbelowarediscussed
+furtherinRef.[4].
+Theuserneedstospecifythereactantandproductconfigurations. Thereactantenergyminimumisinsertedinto
+theregularORCAinputfilewhiletheproductshouldbeinaseparate.xyzfile(keyword: neb_end_xyzfile). The
+reactant and product configurations should be optimized a priori by relaxing to energy minima on the PES, see
+section Geometry Optimizations. This can also be achieved via the ‘preopt_ends’ keyword. It is important to
+carefully prepare the reactant and product such that the position (or index) of the atoms is the same in the two
+configurationfiles,i.e. thereshouldbeone-to-onemappingbetweenthereactantandproductconfigurations.
+Thediscretizedpathbetweenthetwominimaisrepresentedbyasetof𝑀 systemconfigurationsthatarereferred
+to as images, i.e. R = [𝑟 ,𝑟 ,...,𝑟 ]. The number of intermediate images between the end points (i.e. re-
+0 1 𝑀−1
+actant and product) is specified by the user. The general rule of thumb is to include 𝑀 = 7−12, or 5−10
+intermediateimagesperenergymaximuminordertoobtainahighenoughresolutionofthepathandthesaddle
+point. However, calculations can often converge and give accurate results with fewer images but complex paths
+withmultiplemaximaorlongtailsmayrequiremoreimages. DuringanNEBcalculationtheintermediateimages
+areiterativelyshiftedtowardstheMEPusingthecomponentoftheatomicforcethatisperpendiculartothecurrent
+pathasestimatedfromthetangenttothepathateachimage. While,theendpointimagesaretypicallykeptfixed.
+Ineachstepoftheiterativeprocess,theenergyandatomicforcesofeachintermediateimageneedtobecomputed.
+OneofthemainadvantagesoftheNEBmethodisthatthecalculationsoftheimagesarecarriedoutinparallel,
+wheretheelectronicstructurecomputationscanbedistributedovermultipleprocessors(seediscussionbelowfor
+moredetailsontheparallelization). WhiletheCPUtimeisproportionaltothenumberofimages,thenumberof
+iterationsneededforconvergencetotheMEPcanbecomesmallerwhenmoreimagesareincludedinthediscrete
+representationofthepath.
+Thetangenttothepathateachimage,𝜏ˆ,canbeestimatedintwoways(keyword: tangent),eitherbytheoriginal
+𝑖
+method[416]orbythemorenumericallystableimproved[384]estimate(defaultoption). Intheformer,thetangent
+atanimageistakentobealinearcombinationofthetwolinesegmentsthatconnecttoimage𝑖,
+𝑟 −𝑟 𝑟 −𝑟
+𝜏 = 𝑖+1 𝑖 + 𝑖 𝑖−1
+𝑖 |𝑟 −𝑟 | |𝑟 −𝑟 |
+𝑖+1 𝑖 𝑖 𝑖−1
+Intheimprovedtangentestimate,thelinesegmentfromthecurrentimagetotheadjacentimagewithhigherenergy
+isused,i.e.
+{︃
+𝜏+ ifE >E >E
+𝜏 = 𝑖+1 𝑖 𝑖−1
+𝑖 𝜏− ifE <E <E
+𝑖+1 𝑖 𝑖−1
+7.29. NudgedElasticBandMethod 727
+
+[... start of page 750 ...]
+ORCAManual,Release6.0.0
+where𝜏+ =𝑟 −𝑟 and𝜏− =𝑟 −𝑟 . Withtheexceptionofimage𝑖beingatanenergyextremumalongthe
+𝑖+1 𝑖 𝑖 𝑖−1
+path,thenanenergy-weightedaverageofthetwolinesegmentstoadjacentimagesisused,
+{︃
+𝜏+∆𝑉max+𝜏−∆𝑉min ifE >E
+𝜏 = 𝑖 𝑖 𝑖+1 𝑖−1
+𝑖 𝜏+∆𝑉min+𝜏−∆𝑉max ifE <E
+𝑖 𝑖 𝑖+1 𝑖−1
+where
+max
+∆𝑉 =max(|𝐸 −𝐸 |,|𝐸 −𝐸 |)
+𝑖 𝑖+1 𝑖 𝑖−1 𝑖
+max
+∆𝑉 =min(|𝐸 −𝐸 |,|𝐸 −𝐸 |)
+𝑖 𝑖+1 𝑖 𝑖−1 𝑖
+Thenthetangentisnormalized,𝜏ˆ =𝜏 /|𝜏 |. Withanaccurateestimateofthetangent,theperpendicularcomponent
+𝑖 𝑖 𝑖
+oftheatomforceiscomputedby,
+𝐹⊥ =𝐹 −(𝐹 ·𝜏ˆ)𝜏ˆ
+𝑖 𝑖 𝑖 𝑖 𝑖
+Inthefree-endNEBmethod,theendpointimagesareoptimizedsimultaneouslyalongwiththeintermediateim-
+ages,i.e. 𝑀 movableimagesareused. Threedifferentvariantsofthefree-endNEBmethod(keywords:free_end,
+free_end_type) are included

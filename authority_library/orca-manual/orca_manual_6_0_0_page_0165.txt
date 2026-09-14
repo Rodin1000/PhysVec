@@ -1,0 +1,73 @@
+[... end of page 164 ...]
+thedesiredactivespace(n,𝜋and𝜋* orbitals)withoutfurthermodi-
+fication(e.g. swappingorbitals). Ingeneralitisadvisedtoverifythefinalconvergedorbitals.
+! Def2-SVP TightSCF MOREAD
+%moinp "orbs.gbw"
+%casscf
+(continuesonnextpage)
+142 Chapter6. RunningTypicalCalculations
+
+--- Page 165 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+nel 4
+norb 3
+mult 1,3
+nroots 3,1
+end
+*int 0 1
+C 0 0 0 0.00 0.0 0.00
+O 1 0 0 1.20 0.0 0.00
+H 1 2 0 1.10 120.0 0.00
+H 1 2 3 1.10 120.0 180.00
+end
+Weget:
+-----------------------------
+SA-CASSCF TRANSITION ENERGIES
+------------------------------
+LOWEST ROOT (ROOT 0 ,MULT 1) = -113.805194041 Eh -3096.797 eV
+STATE ROOT MULT DE/a.u. DE/eV DE/cm**-1
+1: 0 3 0.129029 3.511 28318.5
+2: 1 1 0.141507 3.851 31057.3
+3: 2 1 0.453905 12.351 99620.7
+The triplet n → 𝜋* states is spot on with the experiment excitation energy of 3.5 eV.[724] Similarly, the singlet
+n → 𝜋* excited state is well reproduced compared to 3.79 eV and 4.07 eV reported in the literature.[724, 877]
+Onlythesinglet𝜋 → 𝜋* excitedstatestandsoutcomparedtothetheoreticalestimateof9.84eVcomputedwith
+MR-AQCC.[542]. Thegoodresultsareveryfortuitousgiventhesmallbasisset,theminimalactivespaceandthe
+completeneglectofdynamicalcorrelation.
+The state-average procedure might not do justice to the different nature of the states (n → 𝜋* versus 𝜋 → 𝜋*).
+Theagreementshouldbebetterwiththeorbitalsoptimizedforeachstate. InORCA,state-specificoptimization
+arerealizedadjustingtheweightsi.e. forthesecondsingletexcitedroot:
+Second-Singlet:
+%casscf
+nel 4
+norb 3
+mult 1
+nroots 3
+weights[0] = 0,0,1 # weights for the roots
+end
+Note,thatstate-specificorbitaloptimizationarechallengingtoconvergeandoftenpronetoroot-flipping.[511]
+Toanalyzeelectronictransitions,naturaltransitionorbitals(NTO)areavailableforstate-averagedCASSCF(and
+alsoCASCI)calculations. NTOsareswitchedonforeveryground-toexcited-statetransitionbyjustaddingDoNTO
+truetothe%casscf ... endinputblock,i.e.
+%casscf
+nel 4
+norb 3
+mult 1,3
+nroots 3,1
+DoNTO true
+end
+Foreachexcitation, themostdominantnaturaloccupationnumbers(singularvalues>1.e-4)areprintedforeach
+transition. Asetofdonororbitalsandasetofacceptororbitals,eachofdimensionNbfx(Nocc+Nact),arecreated
+6.1. SinglePointEnergiesandGradients 143
+
+[... start of page 166 ...]
+ORCAManual,Release6.0.0
+andstoredinfileswithuniquenames. WeobtainforthepreviousformamideexamplethefollowingCASSCFNTO
+output
+==========================================
+CASSCF Natural Transition Orbitals
+==========================================
+------------------------------------------------
+NATURAL TRANSITION ORBITALS FOR STATE 1 1A
+--------------------

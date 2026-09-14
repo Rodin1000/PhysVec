@@ -1,0 +1,80 @@
+[... end of page 572 ...]
+the RHF and UHF schemes, with the exception of the PNO
+truncation. Thismeansthatresultswouldmatchforclosed-shellmoleculeswith𝑇CutPNO =0(providedboth
+Hartree-Focksolutionsareidentical),butthisisnottruewheneverthePNOspaceistruncated. Therefore,
+UHF-DLPNO-MP2energiesshouldonlybecomparedtootherUHF-DLPNO-MP2energies,evenforclosed-
+shellspecies.
+• We found that it is necessary to use tighter PNO thresholds for UHF-DLPNO-MP2. With NormalPNO
+settingsthedefaultvalueis𝑇CutPNO =10−9. ForanoverviewofaccuracysettingsrefertotableTable7.17.
+AsintheRHFimplementation,thePNOcutoffforpairsinvolvingcoreorbitalsisscaledwith𝑇ScalePNO_Core .
+Table7.17: AccuracysettingsforDLPNO-MP2.
+550 Chapter7. DetailedDocumentation
+
+--- Page 573 ---
+ORCAManual,Release6.0.0
+Setting 𝑇 𝑇 (RHF) 𝑇 (UHF)
+CutDO CutPNO CutPNO
+LoosePNO 2×10−2 10−7 10−8
+NormalPNO 1×10−2 10−8 10−9
+TightPNO 5×10−3 10−9 10−10
+OptionsspecifictoDLPNO-MP2arelistedbelow.
+%mp2 DLPNO false # Do DLPNO-MP2 (also requires RI true)
+TolE 1e-6 # Energy convergence threshold. Default: TolE of SCF
+TolR 5e-6 # Residual convergence threshold. Default: 5 * TolE
+MaxPNOIter 100 # Maximum number of residual iterations
+MaxLocIter 128 # Maximum number of iterations for orbital localization
+LocMet AHFB # Localization method
+# options: FB, PM, IAOIBO, IAOBOYS, NEWBOYS, AHFB
+LocTol 1e-6 # Localization convergence tolerance
+# Default: 0.1 * TolG from SCF
+DIISStart_PNO 0 # First iteration to invoke DIIS extrapolation
+MaxDIIS_PNO 7 # length of DIIS vector
+Damp1_PNO 0.5 # Damping before DIIS is started
+Damp2_PNO 0.0 # Damping with DIIS
+MP2Shift_PNO 0.2 # level shift in amplitude update (Eh)
+# Truncation parameters:
+TCutPNO 1e-8 # PNO occupation number cutoff (RHF)
+1e-9 # PNO occupation number cutoff (UHF)
+TScalePNO_Core 1e-2 # Core PNO scaling factor
+TCutDO 1e-2 # Differential overlap cutoff for domain selection
+TCutMKN 1e-3 # Mulliken population cutoff for fitting domain selection
+FCut 1e-5 # Occupied Fock matrix element cutoff
+TCutPre 1e-6 # Energy threshold for dipole prescreening
+TCutDOij 1e-5 # Maximum differential overlap between screened MOs
+TCutDOPre 3e-2 # Cutoff to select PAOs for domains in prescreening
+TCutC 1e-3 # Cutoff for PAO coefficient truncation
+ScaleTCutC_MO 1.0 # Cutoff for MO truncation: TCutC * ScaleTCutC_MO
+PAOOverlapThresh 1e-8 # Threshold for constructing non-redundant PAOs
+end
+LocalMP2Gradient
+The analytical gradient has been implemented for the RHF variant of the DLPNO-MP2 method.[685, 686] It is
+a complete derivative of all components in the DLPNO-MP2 energy, and the results are therefore expected to
+coincidewithnumericalderivativesofDLPNO-MP2(minusthenoise). Generalremarks:
+• NogradientispresentlyimplementedfortheUHF-DLPNO-MP2variant.
+• Spin-componentscaledMP2issupportedbythegradient.
+• Double-hybriddensityfunctionalsaresupportedbythegradient.
+• Only Foster-Boys localization is presently supported. The default converger is AHFB with a convergence
+tolerance that is automatically bound by a constant factor to the SCF orbital gradient tolerance. Using a
+different converger is possible, but discouraged, as the orbital localization needs to be sufficiently tightly
+converged.
+• Whencalculatingpropertieswithoutthefullnucleargradient,therelaxedMP2densityshouldberequested.
+Anumberofpointsregardinggeometryoptimizations(notallofthemspecifictoDLPNO-MP2)areworthkeeping
+inmind:
+• Asof2018,weexpectthattheDLPNO-MP2gradientcanmostbeneficiallybeusedforgeometryoptimiza-
+tionsofsystemscontainingaround70-150atoms. ItmaybefasterthanRI-MP2evenforsystemscontaining
+50-60atomsorless,butthetimingdifferenceisprobablynotgoingtobeverylarge. Ofcourse,structures
+containing200atomsandabovecan(andhavebeen)optimized, butthismaytakelongifmanygeometry
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 551
+
+[... start of page 574 ...]
+ORCAManual,Release6.0.0
+steps are required. On the other hand, single point gradient or density calculations can be performed for
+systemscontainingmanyhundredatoms.
+• DLPNO-MP2 is a substantially more expensive method for geometry optimizations than GGA or hybrid
+DFTfunctionals. Therefore,itisgenerallyagoodideatostartageometryoptimizationwithastructurethat
+isalreadyoptimizedatdispersion-correctedDFTlevel.
+• RIJCOSXcanbeusedtoaccelerateexchangeevaluationsubstantially. However,greatcareneedstobeex-
+ercisedwiththegridsettings. Insufficientlylargegridsmaylead,forexample,tonon-planardistortionsof
+planar molecules. The updated default grids in ORCA 5 (DefGrid2-3) should be sufficiently accurate to
+optimizeneutralmaingroupcompounds. Wethereforerecommendthesegridsforgeneralusewithsome
+carefulcheckinginmorecomplicatedcases. Evenwiththesegrids,thecalculationisalotf

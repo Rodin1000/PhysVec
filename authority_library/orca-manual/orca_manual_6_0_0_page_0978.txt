@@ -1,0 +1,85 @@
+[... end of page 977 ...]
+e NOT the full width half maximum (𝐹𝑊𝐻𝑀) of these curves. However
+theyarerelatedtothemby: 𝐹𝑊𝐻𝑀 =2×𝐿𝐼𝑁𝐸𝑊 and𝐹𝑊𝐻𝑀 =2.355×𝐼𝑁𝐿𝐼𝑁𝐸𝑊.
+𝑙𝑜𝑟𝑒𝑛𝑡𝑧 𝑔𝑎𝑢𝑠𝑠
+FortheVOIGTcurve,itisalittlemorecomplicatedbutintermsoftheotherFWHMs,itcanbeaproximated
+√︁
+as𝐹𝑊𝐻𝑀 =0.5346×𝐹𝐻𝑊𝑀 + (0.2166×𝐹𝑊𝐻𝑀2 +𝐹𝑊𝐻𝑀2 ).
+𝑣𝑜𝑖𝑔𝑡 𝑙𝑜𝑟𝑒𝑛𝑡𝑧 𝑙𝑜𝑟𝑒𝑛𝑡𝑧 𝑔𝑎𝑢𝑠𝑠
+• TheresolutionofthespectrumcanbemodifiedwiththeSPECRESflag. Bydefaultitisafractionofthe
+LINEW.Pleasebeawarethathigherresolution(smallerSPECRES),meanalargergridforthecorrelation
+functionandmoretimepointstocalculateon.
+7.48. MoreontheExcitedStateDynamicsmodule 955
+
+--- Page 978 ---
+ORCAManual,Release6.0.0
+General
+• ThetemperatureisaccountedforexactlyonAbsorptionandEmission[199]andcanbesetusingtheTEMP
+flag.
+• PRINTLEVELcanbesettoHIGHinordertoprintmoredetails,includingHuang-Rhysfactorswhichare
+usefulforrationalizingthecontributionofdifferentvibrationalmodestotherate/spectrum.
+• ThefrequenciesreadfromtheHessianfilescanbescaledbyanynumberbysettingtheSCALINGflagunder
+%ESD.Thedefaultis1.0.
+• Ifnecessary,thetransitiondipolecanalsobescaledbysettingtheTDIPSCALINGflag.
+• If you just want to compute an ES PES and stop, set WRITEHESS to TRUE and the correlation function
+willbeskipped.
+• Inordertomakeuseofthefastestalgorithm,setSAMEFREQtoTRUEandtheDOmethodwillbeused,
+assumingequalHessiansbetweeninitialandfinalstatesandmaximizingtheefficiencywhencalculatingthe
+correlationfunction.
+• If you want to calculate phosphorescence rates, you MUST input the adiabatic energy difference DELE
+manually(theenergydifferencebetweeneachstateatitsowngeometry). And,ofcourse,don’tforgettoset
+theSOCmoduletotrue.
+7.48.2 Intersystem crossing rates
+GeneralAspectsoftheTheory
+Intersystemcrossing(ISC)ratesbetweenagiveninitialstate𝑖andafinalstate𝑓 canbecalculatedfromFermi’s
+Goldenrule:
+2𝜋
+𝑘(𝜔)
+𝑖𝑓
+=
+(cid:126)
+|⟨Ψ
+𝑓
+|𝐻̂︀𝑆𝑂 |Ψ
+𝑖
+⟩|2𝛿(𝐸
+𝑖
+−𝐸
+𝑓
+), (7.285)
+whichisquitesimilartotheEq. (7.275)forFluorescence,exceptforthefrequencyterm. Thesametrickusedthere
+canbeappliedheretoswtichtothetimedomain. Then,weareleftwithasimpletimeintegration,whichisnot
+anymoredifficulttosolvethantheequationsabove.
+One can use all of the infrastructure already presented to compute these ISC rates, including Duschisnky rota-
+tion,vibroniccouplingeffects,useofdifferentcoordinatesystemsandsoon. Rightnow,itsuseisoptimizedfor
+CIS/TDDFT,asexplainedinSectionISC,TD-DFTandtheHTeffect,butitcanbeappliedingeneralbycombining
+simplermethodstoobtainthegeometriesandHessianswithmoreadvancedmethodstocomputetheSOCmatrix
+elements,whenneeded.
+TipsandTricks
+• TheDELEmustbegivenwhenusingESD(ISC),itisnotautomaticallycomputed.Thatistheenergyofthe
+initialstateminustheenergyofthefinalstate,eachatitsowngeometry.
+• ASOCmatrixelementcalculatedfromanymethodcanbegivenontheinputusingtheSOCMERe,Imflag,
+wherethesearetherealandimaginarypartsofthatnumber.
+• TheSOCMEsfromTD-DFTarenotbad,maybeexceptforthosebetweenthegroundsingletandthetriplets.
+Inthatcase,amultireferencecalculationmightbethepreferredoption.
+• Ifthefinalstateishigherinenergythantheninitialstate,theDELEisanegativenumber. Inthatcase,there
+isbarriertogoupwhendoingtheISCandtheratesbecomesmoresensitivetothetemperature.
+• IncontrasttoFluorescence,theISCratesdependstronglyontheinclusionofDuschisnkyrotations,please
+takecarewhenusingUSEJFALSE.
+• The default LINES is GAUSS, and the default INLINEW of 250 𝑐𝑚−1 might be too large. One should
+alwaysinvestigateitbyvaryingthewidthabit. OtherLINEScanincreasetheerror,pleasetakecarewhen
+changingit.
+956 Chapter7. DetailedDocumentation
+
+[... start of page 979 ...]
+ORCAManual,Release6.0.0
+7.48.3 Resonant Raman Spectrum
+GeneralAspectsoftheTheory
+Raman intensities can be obtained in many different ways, depending on the experimental set up. As discussed
+extensivelybyD.A.Long[197,533],thepartofitthatis“setupindependent”istheScatteringFactor(orRaman
+activity),givenby:
+(︂ 𝐶2𝑚2 )︂
+𝑆 =45𝑎2+7𝛾 , (7.286)
+𝑎𝑚𝑢𝑉2
+wherethe𝑎isrelatedtotheisotropicpartofthe“transitionpolarizability”betweenaninitialstateandafinalstate
+withadifferentvibrationalquantumnumber⟨Ψ |𝛼ˆ|Ψ ⟩=

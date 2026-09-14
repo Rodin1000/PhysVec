@@ -1,0 +1,96 @@
+[... end of page 277 ...]
+00
+O 1 0 0 1.128 0.000 0.000
+*
+$new_job
+! aug-SVP MRACPF
+! moread
+%moinp "1.mp2nat"
+# the CASSCF is done with MP2 natural orbitals which is a good idea and
+# secondly we use a large level shift in order to help convergence
+%casscf nel 10
+norb 8
+mult 1
+nroots 1
+shiftup 2
+shiftdn 2
+end
+%mrci tsel 1e-8
+tpre 1e-6
+(continuesonnextpage)
+6.7. MultireferenceConfigurationInteractionandPertubationTheory 255
+
+--- Page 278 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+* int 0 1
+C 0 0 0 0.000 0.000 0.000
+O 1 0 0 1.128 0.000 0.000
+*
+Thisjobcomputesatthesametimeallofthebelowanddemonstratesoncemoretheagreementbetweenconsequent
+single-andmultireferencecorrelationmethods
+SCF = -112.6459
+RI-MP2 = -112.9330
+CCSD = -112.9398
+CCSD(T) = -112.9506
+CASSCF(10,8) = -112.7769
+MRACPF = -112.9514
+6.7.6 Energy Differences - Bond Breaking
+ForthecalculationofenergydifferenceswestartagainwiththereferenceCCSD(T)calculation;thismethodisone
+ofthefewwhichcanclaimchemicalaccuracyinpracticalapplications:
+Reference Total Energies for N2 at 1.0977 Angstr\"{o}m with
+The SVP basis
+E(CCSD) = -109.163 497
+E(CCSD(T))= -109.175 625
+Nitrogen Atom (4S), SVP basis, unrestricted
+E(CCSD) = -54.421 004
+E(CCSD(T))= -54.421 7183
+Energy Difference:
+Delta-E(CCSD) = -0.321 489 = 8.75 eV
+Delta-E(CCSD(T))= -0.332 188 = 9.04 eV
+Thebasissetisofcoursenotsuitableforquantitativecomparisontoexperimentalvalues. However,thisisnotthe
+pointhereinthesecalculationswhichareillustrativeinnature. TheSVPbasisisjustgoodenoughtoallowfora
+methodassessmentwithoutleadingtoexcessivelyexpensivecalculations.
+Thisisnowtobecomparedwiththecorrespondingenergydifferencescomputedwithsomesingle-referenceap-
+proaches. Atypicalinputis(thisisasomewhatold-fashionedexample–inthepresentprogramversionyouwould
+doafullvalenceCASSCF(10,8)orCASSCF(6,6)andinvoketheMR-methodswithasinglekeyword):
+! HF def2-SVP def2-TZVPP/C VeryTightSCF NoPop
+%base "1"
+* xyz 0 1
+N 0 0 0
+N 0 0 1.0977
+*
+%method
+frozencore fc_ewin
+end
+%mrci
+EWin -3,1000
+CIType MRACPF2a
+Solver DIIS
+IntMode FullTrafo
+UseIVOs true
+(continuesonnextpage)
+256 Chapter6. RunningTypicalCalculations
+
+[... start of page 279 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+AllSingles true
+TSel 1e-14
+TPre 1e-05
+TNat 0.0
+ETol 1e-10
+RTol 1e-10
+NewBlock 1 *
+NRoots 1
+Excitations CISD
+refs CAS(0,0) end
+end
+end
+$new_job
+! ROHF def2-SVP def2-TZVPP/C VeryTightSCF NoPop PModel
+%base "2"
+* xyz 0 4
+N 0 0 0
+*

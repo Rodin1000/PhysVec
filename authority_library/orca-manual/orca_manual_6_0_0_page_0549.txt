@@ -1,0 +1,61 @@
+[... end of page 548 ...]
+Thresh. InpracticeitappearsthatchoosingTCut=0.01*Thresh
+providessufficientaccuracy,buttheuserisencouragedtodeterminetheinfluenceof TCutifitissuspectedthat
+theaccuracyreachedintheintegralsisnotsufficient.
+Hint:
+• IfthedirectSCFcalculationisclosetoconvergencebutfailstofinallyconverge,thismayberelatedtoanu-
+mericalproblemwiththeFockmatrixupdateprocedure–theaccumulatednumericalnoisefromtheupdate
+procedurepreventssharpconvergence. Inthiscase, set Threshand TCutlowerand/orletthecalculation
+morefrequentlyresettheFockmatrix(DirectResetFreq).
+Note:
+• ForaDirectcalculation,thereisnowaytohaveThreshlargerthanTolE.IftheerrorsintheFockmatrix
+are larger than the requested convergence of the energy, the change in energy can never reach TolE. The
+programchecksforthat.
+526 Chapter7. DetailedDocumentation
+
+--- Page 549 ---
+ORCAManual,Release6.0.0
+• TheactualdiskspaceusedforalltemporaryfilesmayeasilybelargerthanMaxDisk. MaxDiskonlypertains
+to the two-electron integral files. Other disk requirements are not currently checked by the program and
+appeartobeuncritical.
+7.9 DeltaSCF: Converging to Arbitrary Single-Reference Wave-
+functions
+TheregularSCFprocedureissupposedtobringthewavefunctiontoastationarypoint,andmosttimesthatmeans
+a minimum. However, sometimes one might want to converge to some kind of “excited state”, that is, a higher
+ordersaddle-pointontheSCFsurface.
+UsingtheconventionalSCFtechnology,itisusuallynotenoughtostartfromanexcited-stateguess,butoneneeds
+tomakesomeextraefforttokeeptheconvergencetowardsthatstate. Thestackofsuchmethodstokeepconvergence
+toagivennon-trivialstateiscalledintheliteraturetheDeltaSCFapproach.
+ThegeneralideawasfirstintroducedbythegroupofPeterGill[299]astheMaximumOverlapMethod(MOM),
+andinORCAwealsofeaturethemorerecentPMOMfromthegroupofHrantHratchian[184]. Ithasalsobeen
+referredtoasas“orbitaloptimizedDFTforelectronicexcitedstates”[351].
+Tobeveryclear,let’sshowoneexampleinapicture:
+Fig.7.2: AsimpleschemeofaHOMO-LUMOstateusingDeltaSCF
+UsingORCA’sDeltaSCF,wecanchoosetoconvergetheSCFtoaHOMO/LUMOexcitedstate. Nowthatexcited
+statewasobtainedbyfullyrelaxingtheorbitalsandcanincludeanycontributionssuchastheVV10correlationor
+CPCMforsolvation. Wewillalsoallowforgradients,geometryoptimization,Hessian,EPR,NMR,oranything
+elsethatORCAcandofora“normal”groundstatecalculation.
+Important: Thestatesobtainedherearestillrepresentedbysingle-determinantwavefunctions,andinsomecases
+might not even have physically correct meaning. Be careful and conscious of what you are doing! These are
+relativelyreasonablewavefunctionsforcaseswhen:
+1. theexcitedstatecanbesimplydescribedbyaparticle-holeinteraction. ThatisforexampleNOTthecase
+ofabenzenemoleculeormostpi-pi*excitedstates.
+2. theoccupiedandvirtualorbitalsareorthogonalorseparatedinspacesuchthattherelevantexchangeintegral
+iszero. Eg. somen-pi*states,orthogonalorlong-distancechargeseparatedstates,etc;
+7.9. DeltaSCF:ConvergingtoArbitrarySingle-ReferenceWavefunctions 527
+
+[... start of page 550 ...]
+ORCAManual,Release6.0.0
+3. foropen-shellanddoubly-excitedstateswhichcanberepresentedbyasingle-determinantwavefunction.
+7.9.1 First Example: HOMO-LUMO Excited State of Formaldehyde
+Let’sbeginbytryingtoconvergeandoptimizetothefirstexcitedstateofformaldehyde,startingfromitsregular
+planarstructure:
+!wB97M-D4 DEF2-TZVP OPT FREQ DELTASCF UHF
+%SCF ALPHACONF 0,1 END
+* XYZ 0 1
+C 0.000000 0.000000 -0.602985
+O 0.000000 0.000000 0.605394
+H 0.000000 0.934673 -1.182175
+H 0.000000 -0.934673 -1.182175
+*
+Besidestheregularkeywordslikemethod,basisset

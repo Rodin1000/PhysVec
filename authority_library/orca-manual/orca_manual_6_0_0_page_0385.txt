@@ -1,0 +1,66 @@
+[... end of page 384 ...]
+thanol.ORCAFF.prms 580
+This feature can be useful e.g. in the case of solvating a molecule, i.e. adding multiple copies of a solvent to a
+solute. FirstthesolventcanberepeatedNtimes,andsubsequentlythesolute’sprmsfilecanbemergedtogether
+withthesolventprmsfile.
+362 Chapter6. RunningTypicalCalculations
+
+--- Page 385 ---
+ORCAManual,Release6.0.0
+Divideaforcefieldfile: splitpdb
+WhensplittingaORCAFF.prmsfile,alsosplittingofthepdbfileisrequired. Thefilecanbesplitintoanarbitrary
+numberofindividualfiles.
+Thiscanbeusefultogetherwiththesplitffcommand.
+Inputoptions:
+orca_mm -splitpdb <optional:-verbose> <PDBFILE> <A1> <optional:A2> ...
+Keywords:
+<PDBFILE> = PDB file.
+<A1> = Atom number of first atom of fragment that should belong
+to a new ORCA forcefield file
+<A2> = Atom number of first atom of fragment that should belong
+to a new ORCA forcefield file
+... = More split atoms possible
+Note that atoms start counting at 1.
+Example:
+orca_mm -splitpdb 1C1E_substrate_noH.pdb 7208
+MergePDBfiles: mergepdb
+IfseveralPDBfilesareavailableandneedtobemergedforanORCAcalculation,e.g. aproteinandaligandor
+multipleligands,oraligandthatwasfirstremovedfromacomplex,thenmodified,andfinallyshouldgetbackinto
+thecomplexPDBfile.
+Thiscanbeusefultogetherwiththemergeffcommand.
+Inputoptions:
+orca_mm -mergepdb <optional:-verbose> <1PDBFILE> <2PDBFILE> ...
+Keywords:
+<1PDBFILE> = First PDB file
+<2PDBFILE> = Second PDB file
+... = More PDB files possible
+Example:
+orca_mm -mergepdb 1C1E.pdb substrate_withH.pdb
+Createsimpleforcefield: makeff
+The orca_mm tool can generate an approximate forcefield for a molecule, storing it in ORCAFF.prms format.
+Here,theLJcoefficientsarebasedonUFFparametersandthepartialchargesarebasedonasimplePBEorXTB
+calculation. TheresultingtopologyiscertainlynotasaccurateasanoriginalCHARMMtopology,butcanstillbe
+usedforanapproximatehandlingofthemolecule. Herewith,themoleculecanbepartoftheQMregion(having
+atleastthenecessaryLJcoefficients),orpartoftheMMregionasanon-activespectator-beingnottoocloseto
+the region of interest. In the latter case it is important that the molecule is not active, since bonded parameters
+arenotavailable. However, itcanstillbeoptimizedasarigidbody, seesectionsGeometryOptimizationsusing
+theL-BFGSoptimizerandtheusageinQM/MMcalculationsinsectionOptimizationwiththeCartesianL-BFGS
+Minimizer,onMMlevel,optimizingitspositionandorientationwithrespecttothespecificenvironment.
+Inputoptions:
+6.15. ORCAMMModule 363
+
+[... start of page 386 ...]
+ORCAManual,Release6.0.0
+orca_mm -makeff <optional:-verbose> <XYZ/PDBFILE> <optional:-C CHARGE>
+<optional:-M MULT> <optional:-nproc N> <optional:-CHARGE_OPTIONS>
+Keywords:
+<CHARGE> = charge of system
+<MULT> = multiplicity of system
+<-nproc N> = number of processors (Default 1)
+<-CHARGE_OPTIONS> = Structure Charge calculation
+<-PBE> input PBE
+<-PBEOpt> PBE opt. PBE
+<-PBEOptH> PBE H-opt. PBE
+<-XTB> input XTB
+<-XTBOpt> XTB opt. XTB
+<-XTBOptH> XTB H-opt. X

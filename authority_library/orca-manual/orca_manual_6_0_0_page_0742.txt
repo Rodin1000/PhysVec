@@ -1,0 +1,76 @@
+[... end of page 741 ...]
+Ourcalculationofnormalmodesandforceconstantsformovementsalongthecrossinghyperlinedifferfromthe
+one proposed by Harvey et al. A standard frequency analysis can not be performed, but a similar procedure is
+applied:
+Letusregardthesecond-orderTaylorexpansionfortheenergyofbothsurfacesneartheMECPforadisplacement
+alongthecrossinghyperline(orthogonalto𝑥 ):
+1
+1
+E
+𝐴
+=𝐸MECP+
+2
+∆𝑞𝑇𝐻eff,𝐴 ∆𝑞 (7.217)
+7.26. GeometryOptimization 719
+
+--- Page 742 ---
+ORCAManual,Release6.0.0
+with:
+E EnergyE onPES1orE onPES2
+𝐴 1 2
+𝐻eff,𝐴 effectiveHessianforPES1orPES2
+∆𝑞 displacementalongthecrossinghyperline
+DiagonalizationofthiseffectiveHessiangivesusthenormalmodesofthecrossinghyperlineandthusallowsus
+todecidewhethertheMECPoptimizationconvergedtoaminimuminthe3𝑁 −7dimensionalsubspaceofthe
+crossinghyperline.
+TheprocedureforthecalculationoftheeffectiveHessianisnowasfollows: Foreachofbothsurfacesthesecond
+derivativematrixiscalculated. Thenthe6rotationsandtranslationsandadditionallythedirectionofthegradient
+differencevector𝑥 (thisensuresthatmovementorthogonaltothecrossinghyperline,forwhichwedoNOTsatisfy
+1
+theconditionsofastationarypoint,isexcluded)areprojectedoutfromtheHessianmatrix.
+ForMECPoptimizationsthefollowingoptionsexist:
+%mecp
+SurfCrossOpt true # switches on the MECP optimization
+# alternatively use: ! SurfCrossOpt
+SurfCrossNumFreq true # switches on the MECP effective Hessian
+# calculation
+# alternatively use: ! SurfCrossNumFreq
+# separate MO input for the second spin state (PES2)
+moinp "Myfile.gbw"# MO input for PES2
+# information on the electronic structure of PES 2
+Mult 3 # multiplicity of PES2
+brokenSym 1,1 # broken symmetry for PES2
+# CASSCF options for PES2 (also see the CASSCF chapter)
+casscf_nel 6 # number of active space electrons
+casscf_norb 6 # number of active orbitals
+casscf_mult 1,3 # multiplicities singlet and triplet
+casscf_nroots 4,2 # four singlets, two triplets
+casscf_bweight 2,1 # singlets and triplets weighted 2:1
+casscf_weights[0] = 0.5,0.2,0.2,0.2 # singlet weights
+casscf_weights[1] = 0.7,0.3 # triplet weights
+end
+7.26.4 Conical Intersections
+Theminimaintheconicalintersectionseam-spacebetweentwostates(namedhereIandJ)canbefoundbyusing
+regulargeometryoptimizationalgorithms,exceptthatthegradienttobeoptimizedis[544]:
+g=g′ +Pg
+𝑑𝑖𝑓𝑓 𝑚𝑒𝑎𝑛
+where g′ = 2(𝐸 − 𝐸 )(𝜕𝐸 /𝜕𝑞 − 𝜕𝐸 /𝜕𝑞) is parallel to the gradient difference vector; g is the
+𝑑𝑖𝑓𝑓 𝐼 𝐽 𝐼 𝐽 𝑚𝑒𝑎𝑛
+gradientmeanandPisaprojectionmatrixthatprojectsoutthegradientdifference(x)andnon-adiabaticcoupling
+(y)directioncomponents:
+P=1−xxT−yyT
+NowwehavethreeapproachestosolvethisprobleminORCA,thatwillbeexplainednext.
+Gradient Projection: This is exactly what has been described above, and will be chosen as default whenever
+NACMEsbetweenIandJareavailable. Itisinprinciplethefasterandmostaccuratemethod. Itcanbeinvoked
+bysetting:
+720 Chapter7. DetailedDocumentation
+
+[... start of page 743 ...]
+ORCAManual,Release6.0.0
+%CONICAL
+METHOD GRADIENT_PROJECTION #or simply GP
+END
+OBS.: TurningontheETF(seeSec. NACMEswithbuilt-inelectron-translationfactor)canimprovetheoptimiza-
+tionwhenusingthefullGradientProjectionmethod.
+GradientProjection(withoutNACME):Itisanapproximationtothemethodabove,thatonegetsbycompletely
+neglectingtheNACMEs. Itisessentiallyequivalenttofindingasurfacecrossingpoint, andwill

@@ -1,0 +1,79 @@
+[... end of page 798 ...]
+ultipleexpansioncontributions).
+If calculations on large molecules are conducted, the integral transformation will be the most time-consuming
+part. Thereforeitisstronglyrecommendedtousetheresolutionoftheidentity(RI)approximationinthosecases.
+It effectively reduces the computational costs of the transformation step by only introducing minor errors to the
+calculation. It has to be kept in mind that in order to keep the introduced errors small, one has to provide a
+reasonableauxiliarybasissetsalongwithyournormalbasissetinput.
+776 Chapter7. DetailedDocumentation
+
+--- Page 799 ---
+ORCAManual,Release6.0.0
+Starting from ORCA 4.0 the basis set definition on ORCA has changed. This also affects the definition of the
+auxiliarybasissetwhentheDoRIkeywordisset. ROCISwillthenonlyallowinthemainline/Cauxiliarybasis
+setstobeset(i.e. def2-TZVP/C).Asthesebasisareusuallyoptimisedonthepresenceofeffectivecorepotentials
+(ECPs)theyaregenerallynotrecommendedforcore-electroncalculations. The/Jauxiliarybasissetneedtobe
+usedandtheyarespecifiedinthefollowingway.
+%basis
+AuxC "def2/J"
+end
+! def2-TZVP def2-TZVP/C TightSCF SlowConv
+%SCF HFTyp ROHF
+ROHF_Case HighSpin
+ROHF_Nel[1] = 1
+End
+%ROCIS NROOTS 5
+DoRI true # invokes the RI approximation
+DoHigherMoments true
+end
+* xyz 0 2
+N 0 0 0
+O 0 0 1.15
+*
+Theorca_rocismoduleprovidestwowaysofchoosingtheorbitalexcitationspace: byorbitalenergyororbital
+number. Intheformercaseanenergywindowhastobespecifiedandtheprogramwillthentakeallorbitals,whose
+orbital energies lie within this window, into account. Note, that one actually has to define two orbital windows:
+Oneforthedonorandthesecondfortheacceptororbital. Theinputofthewindowsisdoneasanarray: Thefirst
+twonumbersdefinethedonorspacewhilethelasttwonumbersdefinetheacceptorspace.
+%rocis NRoots 3
+EWin = -5,5,-5,5
+end
+The default is to keep core orbitals and very high lying virtual orbitals out of their respective orbital excitation
+spaces. SincetheseorbitalsspanaspacethatisusuallynotreachablewithregularUV/Visspectroscopy,thisisa
+reasonableapproximation. Onehastokeepinmindthatanorbitalenergywindowmakesonlysenseiftheorbitals
+used in the calculation have a well-defined orbital energy. As a consequence one cannot use an orbital energy
+window for a calculation with localized orbitals. The second way to specify the excitation space is by orbital
+numbering.
+%rocis NRoots 3
+OrbWin = 1,13,9,22
+end
+In restricted calculations only one set of spatial orbitals is created. Hence it is not necessary to provide orbital
+windows for 𝛼 and 𝛽 electrons separately. Of course, only doubly or singly occupied orbitals can act as donor
+orbitalsandonlysinglyandnonoccupiedorbitalscanactasacceptororbitals. Theprogramrecognisesnonoccupied
+orbitalsinthedonorspaceanddoublyoccupiedorbitalsintheacceptorspaceandremovesboth.
+Themany-electronexpansionspaceofaROCIScalculationinORCAisdividedintofiveclasses. Usingsecond
+quantisedreplacementoperators𝐸𝑞 =𝑎ˆ↑ 𝑎ˆ +𝑎ˆ↑ 𝑎ˆ theytaketheform[725].
+𝑝 𝑞𝛼 𝑝𝛼 𝑞𝛽 𝑝𝛽
+|Φ𝑠⟩=𝐸𝑠|0⟩
+𝑖 𝑖
+|Φ𝑎⟩=𝐸𝑎|0⟩
+𝑠 𝑠
+|Φ𝑎⟩= √1 𝐸𝑎|0⟩ (7.236)
+𝑖 2 𝑖
+|Φ𝑎𝑠⟩=𝐸𝑎𝐸𝑠|0⟩
+𝑡𝑖 𝑡 𝑖
+|Φ𝑎𝑠⟩= √1 (𝐸𝑎−2𝐸𝑎𝐸𝑠)|0⟩
+𝑡𝑖 6 𝑖 𝑠 𝑖
+7.31. ExcitedStatesviaROCISandDFT/ROCIS 777
+
+[... start of page 800 ...]
+ORCAManual,Release6.0.0
+Theorbitallabel𝑖denotesadoublyoccupiedorbital,𝑠and𝑡refertosinglyoccupiedorbitalsandorbitallabel𝑎
+correspondstoavirtualorbital. Theformoftheexcitationclassesensuresthatallexcitedstatesareeigenfunctions
+ofthe𝑆ˆ2-operatorandhavethesametotalspin𝑆astheelectronicgroundstate. Eachofthefiveexcitationclasses
+canbeswitchedonoroffmanually.
+%rocis NRoots 3
+Do_is true #Include DOMO->SOMO excitations
+Do_sa true #Include SOMO->Virtual excitations
+Do_ia true #Include DOMO->Virtual excitations
+Do_ista true #Include DOMO->SOMO 

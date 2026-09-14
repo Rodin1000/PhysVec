@@ -1,0 +1,79 @@
+[... end of page 614 ...]
+d
+Itishighlyrecommendedtostartthecalculationwithsplit-localizedorbitals. Anysetofstartingorbitals(gbwfile)
+can be localized using the orca_loc program. Typing orca_loc in the shell will return a small help-file with
+details on how to setup an input for the localization. Examples for DMRG including the localization are in the
+corresponding section of the manual Density Matrix Renormalization Group. The utility program orca_loc is
+documentedinsectionorca_loc. Split-localizationreferstoanindependentlocalizationoftheinternalandvirtual
+partofthedesiredactiveorbitals.
+NOTE:
+592 Chapter7. DetailedDocumentation
+
+--- Page 615 ---
+ORCAManual,Release6.0.0
+• Letusstressagain: itisstronglyrecommendedtofirstLOOKatyourorbitalsandmakesurethattheones
+thatwillentertheactivespacearereallytheonesthatyouwanttobeintheactivespace! Manyproblemscan
+besolvedbythinkingaboutthedesiredphysicalcontentsofthereferencespacebeforestartingaCASSCF.
+Apoorchoiceoforbitalsresultsinpoorconvergenceorpooraccuracyoftheresults! Choosingtheactive
+orbitalsalwaysrequireschemicalandphysicalinsightintothemoleculesthatyouarestudying!
+• Pleasetrytheprogramwithdefaultsettingsbeforeplayingwiththemoreadvancedoptions. Ifyouencounter
+convergenceproblems,havealookintoyouroutput,readthewarningandseehowthegradientandenergy
+evolves. IncreasingMaxIterwillnothelpinmanycases.
+• Be careful with keywords such as !tightscf, !verytightscf and so on. These keywords set higher
+integralthresholds, whichisagoodidea, butalsotightentheCASSCFconvergencethresholds. Ifyoudo
+notneedatighterenergyconvergence,resetthecriteriainthecasscfblockusingETol. Formanyapplications
+anenergyconvergencebeyond10−7isunnecessary.
+7.15.2 CASSCF Densities
+The one-particle electron and spin density can be stored on disk using the keyword !KeepDens. ORCA stores
+alldensitiesinacontainer(.densitiesfileondisk),whichcanbeusedinconjunctionwithorca_plottoplotthe
+charge and spin densities. Please check Section orca_plot for more details on the procedure. The state-specific
+densitieswillhaveanamepostfixthatreflectstheroot,multiplicityandpotentiallyirreduciblerepresentationofthe
+state. Densitiesarisingfromacalculationwiththespin-orbitcoupling,willhaveanadditionalflaginthedensity
+containermarkingtheirorigin(e.g. “cas_qdsoc”or“nev_qdsoc”).
+7.15.3 CASSCF Properties
+The CASSCF program is able to calculate UV transition, CD spectra, SOC, SSC, Zeeman splittings, EPR g-
+matricesandA-matrices(thelatterimplementedinthesamewayasintheDCD-CAS(2)method[491]),magneti-
+zation,magneticsusceptibilityandMCDspectra. NotethattheresultsfortheFermicontactcontributiontoAwill
+not be reliable if the spin density is dominated by spin polarization, which is a dynamic correlation effect. The
+propertiesareexercisedinmoredetailintheCASSCFtutorial. ThetechniquesusedtocalculateSOC,andZeeman
+splittingsareidenticaltothoseimplementedintotheMRCIprogram. Inputandkeywordsmimictheonesinthe
+MRCImoduledescribedinsectionPropertiesCalculationUsingtheSOCSubmodule. Asanexample,theinput
+filetocalculateg-valuesandHFCconstantsAofCO+islistedbelow:
+!TZVPP Bohrs TightSCF #TightSCF for more accurate integrals
+%casscf nel 9
+norb 8
+nroots 9
+mult 2
+switchstep NR
+etol 1e-7 #reset energy convergence
+rel
+dosoc true #spin-orbit coupling (and ZFS)
+gtensor true
+amatrix true
+end
+end
+* xyz 1 2
+C 0 0 0.0
+O 0 0 2.3504
+*
+Inadditiontopseudo-spin1/2A-tensorsforindividualKramersdoublets,theCASSCFmodulealsofeaturesthe
+calculationof“intrinsic”HFCA-tensorsforthewholelowestnonrelativisticspinmultipletintheeffectiveHamil-
+tonianapproach.[489]
+In contrast to the MRCI module, the CASSCF module also supports the calculation of susceptibility tensors at
+non-zeromagneticfields. Thecorrespondingkeywordsare
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 593
+
+[... start of page 616 ...]
+ORCAManual,Release6.0.0
+...
+%casscf
+...
+rel
+dosoc true
+dosusceptibility true
+susctensor_nfields 2 # number of user-defined magnetic fields
+susctensor_magfields[0] = 35000,0,0 # 1st user-defined magnetic field
+susctensor_magfields[1] = 70000,0,0 # 2nd user-defined magnetic field
+end
+end
+This example input calculates the susceptibility tensor at the two (vector-valued!) magnetic fie

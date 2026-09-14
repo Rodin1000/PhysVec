@@ -1,0 +1,89 @@
+[... end of page 975 ...]
+thesametransformationfortheinitialanfinalcoordinates. Pleasenotethatthis
+mayleadtonumberslargerthan1ontheDuschinskyrotationmatrix,foritisanapproximationandthecalculated
+ratesmayvaryalittle. Thenormalmodesininternalcoordinates(L )arethenobtainedfromthoseinCartesian
+𝑠
+ones(L )as
+𝑥
+L =B′′M 1/2 L , (7.281)
+𝑠 𝑥
+andtheDuschinskyrelation((7.279))stillholds[149],withthedisplacementvectorbeingsimply
+K =L𝑇(¯s−s). (7.282)
+𝑠 𝑠
+TheoptionsavailableforcoordinatesystemscanbesetunderCOORDSYS,andcanbeCARTESIAN,INTERNAL
+(forBakerdelocalized-default), WINT(forweightedinternalsfollowingSwartandBickelhaupt[836]), FCWL
+(forceconstantweightedfollowingLindh[526])andFCWS(sameasbefore,butusingSwart’smodelHessian).
+7.48. MoreontheExcitedStateDynamicsmodule 953
+
+--- Page 976 ---
+ORCAManual,Release6.0.0
+OBS:Calculatingininternalcoordinatesisusuallybetterbutnotnecessarily. Ifsomethinggoeswrong,youmay
+alsowanttotrytheCartesianoption.
+GeometryrotationandDuschinskymatrices
+Theelectronictransitionshouldnottotakeplacesimultaneouslywithtranslationsandrotations[745]ofthemolec-
+ular structure. Before further calculations take place, the initial and final state structures are superimposed to
+satisfy Eckart’s conditions by obtaining a rotation matrix B that ensures ∑︀ 𝑚 (BR ×R¯ ) = 0 [239], with R
+𝑖 i i
+beingCartesiancoordinates. Astheinitialgeometryisrotated, somustbethecorrespondingnormalmodesL
+𝑥
+also. ThiscanbeturnedofbysettingtheflagUSEBFALSE.
+By the default the Duschinsky rotation matrix is set to Identity, to take advantage of our much faster algorithm.
+Toturnthaton,justsetUSEJTRUE.Youcancheckthe“diagonality”ofthismatrixbylookingattheDiagonality
+√︁
+Index (DI), here defined as ∑︀ J2/ ∑︀ J2 . A DI=1 would be a perfectly diagonal matrix. The amount of
+𝑖 𝑖𝑖 𝑖𝑗 𝑖𝑗
+mixingbetweenmodesisrpresentedbytheMixingIndex,withishereisgivenby⟨|𝐽 |⟩,ortheaveragevalue
+𝑚𝑎𝑥
+ofthemaximum𝐽 ofeachline. IfDI=1,itmeanseachnormalcoordinatefromtheinitialstateisequaltoamode
+𝑖
+ofthefinalstate. WhenUSEJ=TRUE,thelargestcomponentsoftheJmatrixareprintedalongwiththeKvector,
+soyoucanhaveabetterideaofhowthemixingisoccuring.
+Derivativesofthetransitiondipole
+Thederivativesofthetransitiondipoleswithrespecttothenormalcoordinatesofthefinalstatecanbeobtained
+directlyfromthederivativeswithrespecttotheCartesiancoordinatesas
+U(Q¯)=L¯𝑇M−1/2U(R¯), (7.283)
+𝑥
+Ubeingthematrixofthex,yandzcomponentsofthederivative,Ma3𝑁 ×3𝑁 matrixwiththeatomicmasses
+along the diagonal. Also, in case one already has the derivatives with respect to the initial state , those can be
+transformed into the derivatives with respect to the final state by using the Duschinsky relation, assuming that
+𝜇⃗𝑒(Q¯)+ ∑︀ 𝜕𝜇⃗𝑒 𝑄¯ =𝜇⃗𝑒(Q)+ ∑︀ 𝜕𝜇⃗𝑒 𝑄 ,sothat
+0 𝑖 𝜕𝑄¯
+𝑖
+𝑖 0 𝑖 𝜕𝑄𝑖 𝑖
+𝜕𝜇⃗𝑒 ∑︁ 𝜕𝜇⃗𝑒
+= J . (7.284)
+𝜕𝑄¯ 𝑗𝑘𝜕𝑄
+𝑘 𝑗
+𝑗
+Bydefault,thistransformationisNOTdone,sinceEq. (7.284)isanapproximation. Ifyouwanttoturniton,set
+CONVDERTRUEunder%ESD.
+OBS:Rememberthat,ifyoualreadyhavetheCartesianderivativesoverthefinalstate,likeifyouuseAHASfor
+anabsorptionspectrum, theconversionshouldbeexact(althoughtheremightbenumericalissues, alwaysusea
+largerGRADforfrequencies!).
+Alternatively,thesecanbecalculatednumericallyfromdisplacementsovereachnormalmode. Inthiscase,itis
+convenienttousethedimensionlessnormalcoordinates𝑞 =𝜔1/2𝑄 whichrepresentproportionaldisplacements
+𝑖 𝑖 𝑖
+onthePES[677]. Weuse∆𝑞 =0.01bydefault,butthiscanbechangedsettingtheDER_DELQflag.
+• Again,DONOTMIXdifferentcoordinatessystems. Ifthederivativeswerecalculatedoveronecoordinate
+set and you decide to change it, it has to be recalculated. You can manually delete them from the BASE-
+NAME.ES.hessfile.
+• Forhybridfunctionals,youcanchoosetouseDFTforthegradient,energyandtransitiondipole,andthefast
+simplifiedTDA(Sec. SimplifiedTDAandTD-DFT)onlyforthederivativesbysetingSTDATRUEunder
+%ESD.
+• A simple trick can be used to accelerate the computation of derivatives. If the first displacement gives a
+transitiondipolethatistooclosetothereference,thenthederivativecanbeassumedtobesmallandjustthe
+plusdisplacementmaybetakentocomputethederivative(withanusuallysmallerror). Ifitislargeenough,
+thentheminusdisplacementisalsodoneandcentraldifferencesisused. Thisisthedefaultmethodandcan
+beturnedoffbysettingFASTDERtoFALSE.
+• ThecentraldifferencesoptioncanbealtogetherturnedoffbysettingCENTRALDIFFFALSEunder%ESD.
+954 Chapter7. DetailedDocumentation
+
+[... start of page 977 ...]
+ORCAManual,Release6.0.0
+• Ifyouarehavingproblems,setalargerPRINTLEVELtochecktheindividualcalculationofthederivatives,
+youmightbehavingsomekindofrootflippingduringthedisplacement,orsomeotherissue.
+TheFourierTransformstep
+After the calculation ofthe correlation function, it is necessary todo a Fourier Transform (FT) step. To do that
+numerically,itisneededtocorrectlychoosethegridinwichthetimepointswillbecomputed,forthataffectshow
+theresultswillbeobtainedinthefrequencydomain. Wehavedevelopedamethodtogenerateanoptimalsetof
+parameters,dependingonthefinalspectralresoluti

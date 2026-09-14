@@ -1,0 +1,82 @@
+[... end of page 1008 ...]
+numbers from a to
+b. Ifyouwantonly,e. g.,everythirdatominarange,youcanuse“a..b..i”toaddtherangefromatobwith
+incrementi. Asanexample,“2..10..3”willexpandtothelist2, 5, 8. Youcanmixatomnumbersandranges,
+asshowninthefollowingtwoexamples(asalways,thecommasareoptional):
+Manage_Region active Define 1, 4, 5..11, 14, 17..30..2
+Manage_Region active RemoveAtoms 4, 15..17
+Insteadofanatomlist,theElementmodifiercanbeused,followedbyastringwhichrepresentsanelementlabel.
+Thiswillhavethesameeffectasspecifyinganatomlistwithallatomsofthiselementtypeinstead. Don’tforgetthe
+doublequotesaroundtheelementlabelstring. Forexample,Manage_Region active RemoveAtoms Element
+"H"removesallhydrogenatomsfromtheactiveregion.
+986 Chapter7. DetailedDocumentation
+
+--- Page 1009 ---
+ORCAManual,Release6.0.0
+Metadynamics
+MandatoryArguments: —
+OptionalArguments: —
+Modifiers: Off —
+Reset —
+Colvar colvar Integer —
+Scale scale Real ...
+Wall side Keyword {Lower,Upper}
+target Real phys. unit
+k Real kJmol−1phys. unit−2
+HillSpawn frequency Integer —
+height Real kJmol−1
+sigma Real phys. unit
+Range from Real phys. unit
+to Real phys. unit
+resolution Integer —
+Store store Integer —
+Temperature temp Real [temperature]
+WellTempered biastemp Real [temperature]
+Lagrange mass Real a.m.u.
+k Real kJmol−1scaleunit−2
+target_temp Real [temperature]
+tau Real [time]
+SetstheparametersforaMetadynamicssimulation[487]. Afterallparametershavebeenset,theactualsimulation
+can be started by a Run command. The parameters can either all be set in a single call to the Metadynamics
+command,ordistributedovermultiplesuchcallstoavoidverylonglines. Inbothcases,therearesomerulesfor
+the order of parameter settings. All Colvars for the Metadynamics need to be specified before setting any other
+parameters. ModifierswhicharerelatedtoColvars(suchasScale,Wall,orRange)onlyapplytotheColvarthat
+wasspecifiedlastbeforethemintheMetadynamicscommand.
+TheColvarmodifierspecifiesaColvartobeusedintheMetadynamicssimulation. Itexpectsoneintegerargu-
+ment,whichisthenumberoftheColvar,asdefinedbeforeviatheManage_Colvar command. TheORCAMD
+modulesupportsone-andtwo-dimensionalMetadynamics,soeitheroneortwoColvarmodifierscanbegiven.
+The number of Colvar modifiers specified defines the dimensionality of the Metadynamics simulation. Please
+note that modifiers which are related to Colvars (such as Scale, Wall, or Range) only apply to the Colvar that
+wasspecifiedlastbeforethem,soafterspecifyingthefirstColvar,theseshouldbesetbeforespecifyingthesecond
+Colvar.
+Colvars can have different physical units, such as Angstrom for distances and degree for angles. In a multi-
+dimensionalMetadynamicsrun,thedifferentnumericalmagnitudeofthecorrespondingnumberscanbeanissue:
+Anglesspanoverarangeof180degree,whiledistanceswilloftenbewithinanintervalofonly10Angstrom. To
+bringallColvarstoasimilarscale,theMetadynamicsmoduleinternallydivideseveryColvarbyauser-supplied
+constant. Theseinternalvaluesaredimensionless,theywillbereferredtoas“scaleunits”. Forapreviouslyspec-
+ified Colvar, the scale constant can be set via the Scale modifier. It expects one real argument which has to
+be specified in physical units of the Colvar (length units for distance Colvars, angle units for angle and dihedral
+Colvars). CoordinationnumberColvarsaredimensionlessanyway. Ifnotspecified,reasonabledefaultvaluesfor
+thescaleareused,whichare1.0AngstromfordistanceColvars,20.0degreeforangleanddihedralColvars,and
+0.2forcoordinationnumberColvars. NotethattheScalemodifieronlyappliestotheColvargivenlastbeforeit
+intheMetadynamicscommand.
+Asanexample,considerthefollowingcommandstosetupatwo-dimensionalMetadynamicssimulation:
+Manage_Colvar Define 1 Distance Atom 0 Atom 1
+Manage_Colvar Define 2 Angle Atom 0 Atom 1 Atom 2
+Metadynamics Colvar 1 Scale 1.0_A Colvar 2 Scale 10.0_Deg
+7.51. AbinitioMolecularDynamicsSimulations 987
+
+[... start of page 1010 ...]
+ORCAManual,Release6.0.0
+TokeepColvarswithintheregionofinterestduringMetadynamicssimulations,harmonicwallscanbeimposed
+on Colvars. This is achieved via the Wall modifier. As a first argument, it expects the direction of the wall,
+whichcanbeLoweror Upper. Thesecondargumentisthepositionofthiswall–giveninphysicalunitsofthe
+Colvar(e. g., AngstromfordistanceColvars), not inscaleunits. Asanoptionalthirdrealargument, thespring
+constantoftheharmonicwallcanbespecifiedinkJmol−1 unit−2, whereunitisthedefaultphysicalunitofthe
+Colvar(Angstromfordistances,degreeforangles). Ifomitted,aspringconstantof50kJmol−1 Angstrom−2 for
+distances,0.5kJmol−1 degree−2 forangles,and250.0kJmol−1 forcoordinationnumbersisused(areasonable
+choice). BothlowerandupperwallcanbedefinedafteroneWallmodifier,suchasin“Metadynamics Colvar
+1 Wall Lower 3.0_A 50.0 Upper 10.0_A 50.0”. Notethatone-sidedharmonicwallscanalsobeimposed
+onColvarsviatheRestraint command. ForstandardMetadynamics,thisisredundant. However,forextended
+LagrangianMetadynamics(seebelow),itmakesadifference: RestraintsactontheColvarandthereforeonthereal
+atomistic system, w

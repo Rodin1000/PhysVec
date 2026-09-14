@@ -1,0 +1,49 @@
+[... end of page 751 ...]
+tionengine(FIRE)[108]andL-BFGS[635]. VPOandFIRE
+aremorerobustforregionsthatarefarfromtheMEP,whileL-BFGSconvergesfasterwhentheimagesareclose
+to the MEP. FIRE and VPO both have a local and global implementation (keyword:local). In the local variant,
+alloftheimagesaretreatedindividuallywhentakinganoptimizationstep, whileinthelatterthewholebandis
+treatedasasinglepoint. Aconstant‘trust-radius’isusedforalloptimizationmethods,whereifthemagnitudeof
+7.29. NudgedElasticBandMethod 729
+
+--- Page 752 ---
+ORCAManual,Release6.0.0
+themaximumCartesiancomponentofanoptimizationstepexceedsauser-suppliedthreshold(keyword:maxmove),
+thewholedisplacementisscaleddownaccordingly. ThenumberofstepsstoredintheL-BFGSoptimizationfor
+theconstructionoftheapproximateHessianmatrixcanbeadjustedbytheuser(keyword:lbfgs_memory). Fora
+more conservative optimization with L-BFGS, the memory can also be erased if a large step is attempted (key-
+word:lbfgs_restart_on_maxmove).
+The convergence of the intermediate images is gauged from the maximum Cartesian component of the perpen-
+dicularatomforceaswellastheroot-mean-square, i.e. max(|F⊥|),RMS(F⊥). Theatomicforceontheimages
+perpendiculartothepathvanishesastheimagesarelocatedontheMEP.Atypicalvalueofthetoleranceforthe
+maximumcomponentoftheatomicforceperpendiculartothepathis1·10−3 Eh/Bohr. Typicallythetolerance
+fortheroot-mean-squarevalueischosentobesmallerbyafactorof1/2or1/3. Sometimesatightertolerancefor
+the maximum component of the force is needed, for example 5·10−4 Eh/Bohr or even 2·10−4 Eh/Bohr. The
+maximumnumberofoptimizationstepsallowedissetbythekeyword‘maxiter’.
+The configuration of each image after each iteration is written to a ‘_trj.xyz’ file (see file:
+basename_MEP_ALL_trj.xyz). Thisfileisusefulfortroubleshootingnon-convergentcalculations.
+7.29.3 Climbing image NEB
+Inordermakethehighestenergyimageconvergemoreaccuratelytothe(highest)energymaximumalongtheMEP,
+theclimbingimagevariantoftheNEBmethod(CI-NEB)canbeused.[385]IntheCI-NEBmethod,theeffective
+force𝐹NEBactingontheclimbingimage(i.e. 𝑖=ci)istransformedto:
+NEB
+𝐹
+ci
+=𝐹ci−2(𝐹ci·𝜏ˆci)𝜏ˆci
+wheretheclimbingimageispushedup-hillalongthepathandrelaxeddown-hillperpendiculartothepath. Thatis,
+theenergyismaximizedwithrespecttoonedegreeoffreedomcorrespondingtothedirectionofthetangentwhile
+theenergyisminimizedwithrespecttoallotherdegreesoffreedom. Theeffectiveforceontheclimbingimage
+doesnotincludeanyspringforceandthedensityofimagesthenbecomesdifferentoneithersideoftheclimbing
+image. Aslongasthetangentestimateisaccurateenoughtheclimbingimagewillconvergerigorouslytothepoint
+ofhighestenergyalongthepath. AnillustrationofhowtheclimbingimageNEBmethodworksisshowninFig.
+7.22forasimpletwo-dimensionalenergyfunction.
+730 Chapter7. DetailedDocumentation
+
+[... start of page 753 ...]
+ORCAManual,Release6.0.0
+Fig. 7.22: Illustration of how the CI-NEB method works on a two-dimensional Müller-Brown energy surface,
+𝐸(𝑥,𝑦).[539]Thecalculationisstartedfromalinearinterpolationbetweenthereactant(R)andproduct(P)energy
+minima,using𝑀 = 10. Theimagesaredisplacedintheorthogonaldirectiontothepath(redcurves),untilthey
+converge to the minimum energy path (white dashed curve). The climbing image accurately locates the higher
+energyfirstordersaddlepointalongthepath(denotedbySP).Theoptimizationprofileisshownasaninset. In
+s

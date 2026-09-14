@@ -1,0 +1,71 @@
+[... end of page 480 ...]
+dbyORCAisprintedatthebeginningoftheoutput. TheLibXCreferenceshouldbecitedwhenLibXC
+isusedaspartofyourcalculations. Forreference,see[506].
+ThecompletelistoffunctionalsavailableviatheLibXCinterfacecanalwaysbeinspectedbytypingatthecommand
+line
+orca -libxcfunctionals
+Thelistoffunctionalshasthefollowingform:
+Functionals available via LibXC:
+No.: ID / Keyword - Name
+(continuesonnextpage)
+2https://libxc.gitlab.io
+458 Chapter7. DetailedDocumentation
+
+--- Page 481 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+0: 18 / lda_c_1d_csc - Casula, Sorella & Senatore
+1: 26 / lda_c_1d_loos - P-F Loos correlation LDA
+2: 15 / lda_c_2d_amgb - AMGB (for 2D systems)
+3: 16 / lda_c_2d_prm - PRM (for 2D systems)
+4: 552 / lda_c_br78 - Brual & Rothstein 78
+...
+Thelistisgroupedby“level”offunctional(LDA,GGA,meta-GGA,etc.) andthenbypartoftheenergyitmodels
+(correlation, exchange, exchange-correlation). Correlation functionals carry a ’_c_’ in their names, exchange
+functionals an ’_x_’, and combined exchange-correlation functionals an ’_xc_’. Additional information for a
+specificfunctionalcanberequestedusing
+orca -libxcinfo [functional name]
+wherethefunctionalnameisthekeywordintheabovelist.
+SpecificationofLibXCfunctionalsintheORCAinputfollowsthestandardformat:
+%method
+method dft
+functional hyb_gga_xc_b3lyp
+end
+orinthecaseofseparateexchangeandcorrelationspecifications:
+%method
+method dft
+exchange mgga_x_m06_l
+correlation mgga_c_m06_l
+end
+CAM-typerange-separatedfunctionalsaresupportedthroughtheLibXCinterfacesinceORCA5.0. Soarefunc-
+tionalsthatincludenon-local(VV10)correlation(seeDFTCalculationswiththeNon-Local,DensityDependent
+DispersionCorrection(VV10): DFT-NL).TheVV10partiscomputedinternallybyORCA.Othernon-localfunc-
+tionals,suchasBEEF-vdW,arenotsupported. Meta-GGAfunctionalsthatdependonthekineticenergydensity
+𝜏 aresupported,butnotthosethatdependontheLaplacianofthedensity∇2𝜌.
+Double-hybrid functionals can be constructed with LibXC components as described in section DFT Calcu-
+lations with Second Order Perturbative Correction (Double-Hybrid Functionals), but only with separate ex-
+changeandcorrelationcomponents. Soexchange=gga_x_pbeandcorrelation=gga_c_pbecanbeused,but
+functional=hyb_gga_xc_pbehcannotbeusedinadouble-hybridformulation. Bewarethattheexchangeand
+correlationcontributionscalculatedbyLibXCaresimplyscaledbyScalDFXandScalGGAC,respectively,andno
+careistakentoseparatelyscaleLDAcomponentsoralterotherinternalparameters!
+ScreeningThresholds
+When the density is smaller than a certain threshold, LibXC skips the evaluation of the functional and instead
+setsalltheoutputquantitiestozeroinordertoavoidunder-and/oroverflows. Thedefaultthresholdsfordifferent
+functionals are set by the LibXC developers, but may sometimes be too low. We have not performed extensive
+testing, but allow the user to set the threshold. Similarly, there are thresholds for minimum values of 𝜁 and 𝜏
+in order to avoid division by zero. The default values are functional-independent and can be changed using the
+followingkeywords.
+%method
+LibXCDensityThreshold 1e-12 # seems to be reasonable
+LibXCZetaThreshold 2e-16 # default value in LibXC
+LibXCTauThreshold 1e-20 # default value in LibXC
+end
+7.4. ChoiceofComputationalModel 459
+
+[... start of page 482 ...]
+ORCAManual,Release6.0.0
+ModifyingLibXCFunctionalParameters
+Starting with ORCA 5.1 it is possible to modify the “external parameters” of a functional that the LibXC in-
+terface provides. The available parameters and their default values can be seen in the output or with the orca
+-libxcinfo command above. Please exercise caution when using this interface and if using a published func-
+tionalreparametrization,makesureyoucanreproduceresultsfromtheoriginalpublication

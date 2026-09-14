@@ -1,0 +1,58 @@
+[... end of page 305 ...]
+stofkeywordsandmorediscussionsonthetopiccanbefoundatthelatersectionMoreontheORCA
+SOLVATOR
+6.10. ORCASOLVATOR:AutomaticPlacementofExplicitSolventMolecules 283
+
+--- Page 306 ---
+ORCAManual,Release6.0.0
+6.11 Relativistic Calculations
+ORCAfeaturesthreedifferentapproximationstocoverrelativisticeffects:
+1. The„Exact2component“(X2C)Hamiltonian
+2. TheDouglas-Kroll-Hess(DKH)Hamiltoniantosecondorder
+3. The0thorderregularapproximation(ZORA)withamodelpotential
+EarlierversionsofORCAsupportedanumberofadditionalapproximations,whicharenolongersupported.
+ThemainrelativisticHamiltonianthatwillbepursuedinfurtherdevelopmentistheX2CHamiltonian. Ofthethree
+alternatives,webelievethatX2Chasthebestfeaturesetandwerecommendtoallofouruserstopreferentiallyuse
+thismethod.
+All three relativistic model Hamiltonians are implemented for scalar relativistic energy calculations and these
+arecarriedthroughconsistentlythroughtheentireprogram. Scalarrelativityshowsupasanadditionaleffective
+potential that is added to the one-electron matrix. Scalar relativistic corrections to the two-electron interaction
+arenotavailableinORCA.Furthermore,self-consistentfieldcalculations(HF,DFT,CASSCF)withinclusionof
+spin-orbit-coupling(SOC)arealsonotavailableinORCAbutwewillnotexcludethepossibilitytoaddthisfeature
+inafutureversionoftheprogram.
+Ageneraloverviewandsomepracticalrecommendationsaregiveninthenextsections. Fordetaileddocumentation
+andallavailableoptionsseeRelativisticOptions.
+6.11.1 Basis sets for relativistic calculations
+The different scalar relativistic potentials have different shapes in the core region. Consequently, each one of
+them requires specialized all electron basis sets that are optimized for the Hamiltonian at hand. The most com-
+monchoicesarelistedinthesectionsRelativisticallyrecontractedKarlsruhebasissetsandSARCbasissetswith
+all available options listed in Built-in Basis Sets. An uncontracted basis set of sufficient size will always work.
+Likewise,uncontractedfittingbasissetsinallformsofRIcalculationsarealwaysappropriate.
+Hint: Use the !Decontract keyword to decontract the chosen (all-electron) basis set and make it suitable for
+anyrelativisticHamiltonian,aswellascomparisonsbetweenthem.
+Iflarge,uncontractedbasissetsareusedinscalarrelativisticcalculations,thereisadistinctdangerofvariational
+collapse. Thisbehaviorisrelatedtothefactthattherelativisticorbitalswilldivergeforapointnucleus. ORCA
+featurestheGaussianfinitenucleusmodelofDyallandVisscherforDKHandX2C.Werecommendtoalwaysuse
+thisfeature(FiniteNuc)inrelativisticcalculations.
+Giventhefactrelativisticall-electroncalculationsonheavyelementcompoundsfeatureverysteepcorebasisfunc-
+tions,numericintegration,suchasinDFTandCOSX,maybechallenging. ORCAfeaturesautomaticprocedures
+thatadapttheintegrationgridsforthepresenceofsteepbasisfunctions. However,incaseyouexperiencestrange
+results, the numeric integration is one potential source of problem. The cure is to go to larger integration grids
+and,inparticular,increasetheradialintegrationaccuracy(IntAcc).
+6.11.2 Scalar-relativistic gradients and properties
+OfthethreemodelHamiltonians,onlyX2Cfeaturesanalyticgradients. Hence,forgeometryoptimizationsthisis
+alsothepreferredmethods. ForDKHandZORA,theprogramautomaticallyswitchestotheone-centerapprox-
+imation. Thisrequiressomeattentionbytheuserssincefinalsinglepointenergiesobtainedwiththeone-center
+approximationareinconsistentwithenergiesobtainedwithoutit. Theone-centerapproximationisusuallyofsuffi-
+cientaccuracybutwehaveobservedcasesinactualapplicationswhereitleadstoclearlywronggeometries. Hence,
+westronglyrecommendtousetheX2CHamiltonianinthisrealm.
+284 Chapter6. RunningTypicalCalculations
+
+[... start of page 307 ...]
+ORCAManual,Release6.0.0
+Caution: Geometry optimizations with DKH and ZORA (but not X2C) automatically use the one-center
+approximation. Whencomputingrelativeenergies,donotmixenergiesfromsingle-pointcalculationswithout
+theone-centerapproximationwiththosefromgeometryoptimizationsthatdomakeuseofthisfeature.
+If relativistic calculations are used for molecular properties there is a potential mismatch between non-
+relativisticallycalculatedpropertyintegralsandtherelativisticHamiltonian. Theproceduretoremovetheseincon-
+sistenciesisreferredtoas„picturechange“. Thepicturechangeisusuallycarriedthroughtothesamelevelofap

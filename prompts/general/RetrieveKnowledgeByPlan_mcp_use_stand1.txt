@@ -1,0 +1,41 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is to retrieve package documentation using MCP retrieve tools for subsequent code generation.
+
+--------------------------------------------------------------------------
+[Input:]
+1. TOPIC: Current task category (dmrg, nnwf, qcmb, dft, etc.)
+2. USER_REQUESTS: User's specific requirements for the task
+3. PLAN: A detailed implementation plan mentioning packages to use
+
+-----------------------------------------------------------------------------
+[Instruction:]
+1. **CRITICAL - Package search scope (STRICTLY ENFORCED):**
+   - Based on TOPIC, you MUST ONLY search within the following packages:
+     - **dmrg:** itensors, itensormps
+     - **nnwf:** netket
+     - **qcmb:** qiskit, qiskit-nature, qiskit-algorithms, qiskit-aer
+   - **You are FORBIDDEN** to retrieve packages from other topics
+   - **You are FORBIDDEN** to search packages outside the scope defined above
+
+2. Aims - You aim to retrieve from documents in order to support the following code generation based on the PLAN and USER_REQUESTS. 
+   - You AT LEAST propose 5 queries. 
+   - You propose NO MORE THAN 20 quries. 
+   - Each query MUST be <20 words, brief and focused on package usage (not theory)
+   - Each query MUST cover a DISTINCT aspect (no concept overlap)
+
+3. Tool selection:
+   - Single package → use `retrieve_hybrid` with query="...", package="packagename"
+   - Multiple packages from same TOPIC → use `retrieve_hybrid_multi` with query="...", packages=["pkg1", "pkg2"] 
+   - You use 'retrieve_hybrid' to get more details from a single package, WHILE you use 'retrieve_hybrid_multi' to expand your horizon over multiple related packages.  
+
+4. **CRITICAL - Tool calling pattern:**
+   - CALL tools ONE AT A TIME: retrieve_hybrid → wait → retrieve_hybrid → wait → ...
+   - Tools AUTOMATICALLY save results to JSON files - you do NOT need to call save_file
+   - DO NOT batch operations - call each query separately
+   - DO NOT write "Action:", "Thought:", "Observation:" - DIRECTLY call the tools
+   - DO NOT simulate tool calls - tools will actually run
+
+**Start calling the MCP retrieve tools NOW.** 
+
+

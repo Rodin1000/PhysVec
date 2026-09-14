@@ -1,0 +1,62 @@
+[... end of page 756 ...]
+the user) a warning is issued to the user that a possible
+intermediateminimummayexistalongthepath. Itisagoodideatocheckthestatusofthecalculation,thepathand
+theconvergencebehaviour. Ifthecalculationappearstobeproceedingnormallyandheadingforconvergence,the
+bestcourseofactionistoallowthecalculationtofinish. However,itisingeneralbettertocarryoutseparateNEB
+calculationsforsegmentsoftheMEPoneithersideoftheintermediateminimum. Especially,iftheintermediate
+minimumisdeepw.r.ttothereactantandproductstateenergyminima.
+Insuchcases, theimageclosesttotheapparentintermediateminimumisselectedandastructuralminimization
+carried out. The resulting configuration is then used as the initial state or final state in the subsequent CI-NEB
+calculations.
+734 Chapter7. DetailedDocumentation
+
+--- Page 757 ---
+ORCAManual,Release6.0.0
+7.29.9 Parallel execution
+If the number of processes (NProcs) specified in the input is larger than 1, NEB will automatically start up in
+multi-processesmode:
+NProcs<=NImages
+NProcs processes will handle NProcs images independently with 1 process per image. Choose NProcs =
+X*NImages(e.g. X=1or0.5)
+NProcs>NImages
+NProcsprocesseswillhandleNImageimages, eachimagebeingtreatedby(NProcs/NImages)processes.
+Ifyouwanttodedicatemorethan1processtoeachsingleimage-calculation,chooseNProcs=X*NImages
+(e.g. X=2,3,4,...).
+Note: Ifinthesecondcasemultiplecompute-nodesareinvolved,theuserwillneedtodefinetheORCAspecific
+environmentvariableRSH_COMMAND,whichtellstheNEBdriverhowtoconnecttotheindividualnodes(set
+ittoeither‘rsh’or‘ssh’). However,thismaynotworkwithallqueueingsystems.
+Iftheenergyandforcecalculationsarefast(e.g. withsemiempiricalmethods),thereisnogaininusingmultiple
+processesperimage. StartingupandfinalizingMPImayconsumemoretimethanthegainfromparallelprocessing.
+7.29.10 zoomNEB
+ApreliminaryversionoftheZoom-NEB(Z-NEB)methodhasbeenincludedthisimplementation,wheretheob-
+jective of the method is to locate a saddle point more accurately with a better resolution compared to CI-NEB
+calculations. TheZ-NEBmethodisanautomatictwostepprocedure,whereinthefirststepaCI-NEBcalculation
+is carried out to obtain a rough convergence towards the MEP. Then, the region surrounding the highest energy
+maximumalongthepathisidentifiedandanewsetofimagesdistributedalongthisregion. Inthesecondstep,a
+free-endCI-NEBcalculationisstartedfromthisnewpath. Inthiscalculation,theendpointsareoptimizedaccord-
+ingtotheatomforceactingperpendiculartothepath. ThiswillensurethattheendpointsofthesecondCI-NEB
+calculationwillconvergetotheMEP,aswell. Furthermore,tomaintaintheparallelizationoftheCI-NEBmethod,
+samenumberofmovableimagesareusedinthefirstandsecondCI-NEBcalculations.
+7.29.11 NEB-TS
+Probably the most efficient saddle point search methods are obtained when double ended methods (e.g. NEB)
+arecombinedwithsingleendedmethods(e.g.,eigenvector-following). Inthecurrentimplementation,acombina-
+tionofEW-CI-NEBandEFP-RFO(eigenvector-followingpartitionedrationalfunctionoptimization)methodsis
+presentedandreferredtoastheNEB-TSmethod[4].
+In NEB-TS, the EW-CI-NEB method is used to partially converge to the MEP and hence saddle point, i.e., the
+optimizationoftheimagesalongtheMEPishaltedoncetheclimbingimageisconvergedtoaprescribedtolerance.
+Then,theclimbingimageisusedtoprovideasubsequenteigenvector-followingcalculationwithanaccurateinitial
+guessconfiguration,asisshowninFig.7.23andthetangentattheCIisusedtoselecttheeigenvectortobefollowed.
+Thetangentestimateshouldalreadyprovideanaccurateapproximationtotheunstablemodeatthesaddlepoint.
+The initial Hessian matrix needed for the eigenvector-following calculation can either be computed analytically
+(if available) or taken as the Almlöf empirical Hessian matrix [264]. If the Almlöf Hessian matrix is used, the
+curvatureattheCIisestimatedbyusingafinitedifferenceapproximation(i.e. usingtheatomforceactingonthe
+neighboringimagestoCI)andusedtoscalethecorrespondingeigenvalueoftheselectedeigenvector,allowingthe
+eigenvector-followingcalculationtobestartedfromaHessianmatrixofcorrectform. Thetypical‘%geom’block
+canbeusedtomodifythesettingsoftheeigenvector-followingcalculation.
+7.29. NudgedElasticBandMethod 735
+
+[... start of page 758 ...]
+ORCAManual,Release6.0.0
+Fig. 7.23: Illustration of how the NEB-TS method works on a two-dimensional Müller-Brown energy surface,
+𝐸(𝑥,𝑦) [539]. The calculation is started from a linear interpolation between the reactant and product energy
+minima,using𝑀 = 10. Theimagesaredisplacedintheorthogonaldirectiontothepath(redcurve

@@ -1,0 +1,86 @@
+[... end of page 541 ...]
+releaseswilllikelymakemoreuseofthem. Theprogramprintsawarningwheneveritusesfractional
+occupationnumbers. Thefractionallyoccupiedorbitalsshouldbecheckedtoensuretheyareactuallytheintended
+ones.
+Note:
+• UsingGuessMode = CMatrixwillcauseproblemsbecausetherearenoorbitalenergiesfortheinitialguess
+orbitals. Theprogramwillthenaverageoverallorbitals—whichmakesnosenseatall.
+7.7. SCFConvergence 519
+
+--- Page 542 ---
+ORCAManual,Release6.0.0
+FractionalOccupationNumberWeightedElectronDensity(FOD)
+ManyapproximateQCmethodsdonotyieldreliableresultsforsystemswithsignificantstaticelectroncorrelation
+(SEC) but it is often difficult to predict if the system in question suffers from SEC or not. Existing scalar SEC
+diagnostics (e.g., the 𝑇 diagnostic) do not provide any information where the SEC is located in the molecule.
+1
+Furthermore,oftenquiteexpensivecalculationshavetobeperformedfirst(e.g.,CCSD)inordertojudgethereli-
+abilityoftheresultsbasedonasinglenumber. MolecularsystemswithstrongSEC(e.g.covalentbond-breaking,
+biradicals, open-shell transition metal complexes) are usually characterized by small energy gaps between fron-
+tierorbitals,andhence,theappearanceofmanyequallyimportantdeterminantsintheirelectronicwavefunction.
+ThisfindingisusedintheFODanalysis[327]whichisbasedonfinitetemperatureKS-DFTwherethefractional
+occupationnumbersaredeterminedfromtheFermidistribution(“Fermismearing”)
+1
+𝑓 =
+𝑖 𝑒(𝜀𝑖−𝐸𝐹)/𝑘𝑇𝑒𝑙 +1
+ThecentralquantityoftheFODanalysisisthefractionaloccupationnumberweightedelectrondensity(𝜌𝐹𝑂𝐷),a
+real-spacefunctionofthepositionvector𝑟:
+𝑁
+∑︁
+𝜌𝐹𝑂𝐷(𝑟)= (𝛿 −𝛿 𝑓 )|𝜙 (𝑟)|2
+1 2 𝑖 𝑖
+𝑖
+(𝛿 and 𝛿 are unity if the level is lower than 𝐸 while they are 0 and −1, respectively, for levels higher than
+1 2 𝐹
+𝐸 ). The𝑓 representthefractionaloccupationnumbers(0≤𝑓 ≤1;sumoverallelectronicsingle-particlelevels
+𝐹 𝑖 𝑖
+obtainedbysolvingself-consistentlytheKS-SCFequationsminimizingthefree-electronicenergy).
+𝜌𝐹𝑂𝐷(𝑟) can be plotted using a pre-defined contour surface value (see FOD plots). FOD plots only show the
+contributionofthe‘hot’(stronglycorrelated)electronsandcanthusbeusedtochooseasuitableQCmethodfor
+thesysteminquestionbasedonsomerulesofthumb(seeFODplots). Mullikenreducedorbitalchargesbasedon
+𝜌𝐹𝑂𝐷(𝑟)(seeMullikenPopulationAnalysis)offerafastalternativetogettheinformationoftheFODplot.
+The integration of 𝜌𝐹𝑂𝐷 over all space yields as additional information a single size-extensive number termed
+𝑁 whichcorrelateswellwithotherscalarSECdiagnosticsandcanbeusedtogloballyquantifySECeffects
+𝐹𝑂𝐷
+inthemolecule.
+𝜌𝐹𝑂𝐷 (and𝑁 )stronglydependontheorbitalenergygapwhichitselfdependsalmostlinearlyontheamount
+𝐹𝑂𝐷
+ofthenon-localFockexchangeadmixture𝑎 . Thefollowing(empirical)functionoftheoptimalelectronictem-
+𝑥
+perature𝑇 on𝑎
+𝑒𝑙 𝑥
+𝑇 =20000K×𝑎 +5000K
+𝑒𝑙 𝑥
+isusedtoensurethatsimilarresultsoftheFODanalysisareobtainedwithvariousfunctionals. Forexample,the
+SmearTemphastobe5000KforTPSS(𝑎 =0),9000KforB3LYP(𝑎 =20%),10000KforPBE0(𝑎 =25%),and
+𝑥 𝑥 𝑥
+15800KforM06-2x(𝑎 =54%). TheresultoftheFODanalysisisnotstronglydependentontheemployedbasis
+𝑥
+set(seesupplementaryinformationoftheoriginalpublication[327]). TPSS/def2-TZVP/TightSCFwaschosenas
+thedefaultsinceitisfastandrobust. TheFODanalysisisaveryefficientandpracticabletooltogetinformation
+abouttheamountandlocalizationofSECinthesystemofquestion. Itiscalledbyasimplekeyword:
+# ground state of p-benzyne
+! FOD
+* xyz 0 1
+C 0.0000000 1.2077612 0.7161013
+C 0.0000000 0.0000000 1.3596219
+C 0.0000000 -1.2077612 0.7161013
+C 0.0000000 -1.2077612 -0.7161013
+C 0.0000000 0.0000000 -1.3596219
+C 0.0000000 1.2077612 -0.7161013
+H 0.0000000 2.1606260 1.2276695
+H 0.0000000 -2.1606260 1.2276695
+H 0.0000000 -2.1606260 -1.2276695
+H 0.0000000 2.1606260 -1.2276695
+*
+520 Chapter7. DetailedDocumentation
+
+[... start of page 543 ...]
+ORCAManual,Release6.0.0
+Therespectiveoutputreads:
+-------------------------------------------------------------------------------------------
+ORCA LEAN-SCF
+memory conserving SCF solver
+-------------------------------------------------------------------------------------------
+----------------------------------------D-I-I-S--------------------------------------------
+Iteration Energy (Eh) D

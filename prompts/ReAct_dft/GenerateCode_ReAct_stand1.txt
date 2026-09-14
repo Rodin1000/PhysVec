@@ -1,0 +1,62 @@
+Your task is to generate an ORCA input file (.inp) for DFT/quantum chemistry workflows to reproduce results of a research paper according to the given task plan.
+
+**This prompt is for ORCA input files only.** The output must be a complete, executable ORCA .inp file containing ! keywords, % blocks, and * xyz geometry.
+
+-----------------------------------------------------------------------------------------------
+[ORCA .inp structure - you MUST follow]:
+1. **First block (keywords):** #Tags_keywords, then # Scientific problem: <brief description>, then # Elements used: <comma-separated list>, then optional purpose/provenance comments, then exactly one ! line (all keywords on that single line; do NOT add a second ! line). Blank line.
+2. **Input blocks (%...):** Before each %... block: #Tags_inputblocks_<name> (e.g. #Tags_inputblocks_scf, #Tags_inputblocks_basis, #Tags_inputblocks_pal), then purpose and provenance comments, then the %... block. **There must be ONLY ONE block per % type** (e.g. one %scf block containing all SCF options; do NOT output two separate %scf blocks). Blank line after each block.
+3. **Block order:** All %... input blocks MUST appear before the geometry block. Do NOT place any % block after the geometry block.
+4. **Geometry block:** Before the geometry: #Tags_geometryblocks, then purpose and provenance comments, then * xyz Charge Mult and only coordinate lines (element x y z) until *; no # lines between * xyz and *.
+5. **Geometry must be inline:** Use * xyz Charge Mult followed by full coordinate lines. Do NOT use * xyzfile * or * gzmtfile * or reference external geometry files.
+6. **Serial only:** Use %pal nprocs 1 (or equivalent). Do NOT use parallel options (nprocs > 1).
+
+-----------------------------------------------------------------------------------------------
+[Instructions]:
+1. Read PLAN_INFO to understand the calculation requirements (method, basis set, geometry, job type).
+2. If QUERY_SUMMARY is provided, read it to understand ORCA keyword syntax and block usage before generating.
+3. Generate a complete, executable ORCA .inp file that reproduces the target subplot/calculation.
+4. Use only ORCA keywords and block options confirmed from the manual or QUERY_SUMMARY; do not invent keywords.
+
+-----------------------------------------------------------------------------------------------
+[Critical constraints]:
+- **TOPIC / ALLOWED_LANGUAGE / ALLOWED_PACKAGES:** When provided in the input, you MUST strictly obey them (e.g. ORCA keywords, basis sets, functionals). The generated input must use the listed packages and follow the domain constraints.
+- **Basis sets:** Use def2-TZVP (not def2-TZVP(-f)); use def2-SVP in %basis (not ZORA-def2-SVP). For ZORA calculations use keyword ZORA and basis names def2-SVP, def2-TZVP, or ZORA-def2-TZVP as appropriate.
+- **No invention:** Do NOT invent ORCA keywords or block options. If uncertain, use QUERY_SUMMARY or omit and rely on defaults with a comment.
+
+-----------------------------------------------------------------------------------------------
+[Input]:
+1. TOPIC / ALLOWED_LANGUAGE / ALLOWED_PACKAGES: Provided in the AGGREGATED INPUT below; you must strictly follow them.
+2. PLAN_INFO: Task plan containing subplot_name, User_requests, scientific problem, elements used, and detailed plan with parameter values.
+3. QUERY_SUMMARY (optional): Summary of ORCA manual or documentation. If provided, use it for correct keyword syntax and block format; otherwise rely on PLAN_INFO only.
+
+The actual content will be provided below.
+
+-----------------------------------------------------------------------------------------------
+[Output]:
+Your output MUST consist of two parts:
+
+1. **JSON block**: A JSON object (valid for json.loads()) enclosed in ```json and ```. The dictionary MUST contain ONLY metadata:
+   - "subplot_name": The subplot name from the plan.
+   - "code_type": "orca" (lowercase; ORCA input files only).
+   Do NOT put code_content in the JSON.
+
+2. **Code block**: The full ORCA .inp source inside XML-style fences: <CODE> and </CODE>. Put the code directly between these tags; no JSON escaping.
+
+**CRITICAL:** You MUST NOT include this prompt itself (including the example below) anywhere in your output. This prevents the example from being mistakenly extracted as generated code.
+
+**CRITICAL:** Use real newline characters (actual line breaks) between lines in the code block. Do NOT use the two-character sequence backslash-n (\n) to represent newlines—ORCA requires actual line breaks in the input file. Each line of the ORCA input (e.g. ! line, %block, * xyz coordinates) must be on its own line.
+
+**CRITICAL:** Use <CODE> to start and </CODE> to end the code block. Do NOT use <CODE> again as the closing tag.
+
+Example output (format only; do not copy into your output):
+```json
+{
+  "subplot_name": "example_figure",
+  "code_type": "orca"
+}
+```
+
+<CODE>
+...full ORCA .inp content here...
+</CODE>

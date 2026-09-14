@@ -1,0 +1,44 @@
+[... end of page 432 ...]
+utline. Itisimportanttonotethatbydefault,
+we calculate the “Scattering Factor” or “Raman Activity,” as described by D. A. Long [533] (see Sec. General
+AspectsoftheTheoryformoreinformation).
+Whenusingthismodule,thelaserenergycanbecontrolledbytheLASEREflag. Ifnolaserenergyisspecified,the
+0-0energydifferenceisusedbydefault. YoucanselectmultipleenergiesbyusingLASERE10000,15000,20000,
+etc.,andifmultipleenergiesarespecified,aseriesoffilesnamedBASENAME.spectrum.LASEREwillbesaved.
+Additionally,itispossibletospecifyseveralstatesofinterestusingtheSTATESflag,butnotbothsimultaneously.
+410 Chapter6. RunningTypicalCalculations
+
+--- Page 433 ---
+ORCAManual,Release6.0.0
+Asanexample,let’spredicttheresonantRamanspectrumofthephenoxylradical. Youneedatleastagroundstate
+geometryandHessian,andthenyoucaninitiatetheESDcalculationusing:
+!PBE0 DEF2-SVP TIGHTSCF ESD(RR)
+%TDDFT
+NROOTS 5
+IROOT 3
+END
+%ESD
+GSHESSIAN "PHE.hess"
+LASERE 28468
+END
+* XYZFILE 0 2 PHE.xyz
+Important: TheLASEREusedintheinputisNOTnecessarilythesameastheexperimentalone. Itshouldbe
+proportionaltothetheoreticaltransitionenergy. Forexample,iftheexperimental0-0∆Eis30000cm−1 andthe
+laserenergyusedis28000cm−1,thenforatheoretical∆Eof33000cm−1,youshouldusealaserenergyof31000
+cm−1toobtainthecorrespondingtheoreticalresult. AttheendoftheESDoutput,thetheoretical0-0∆Eisprinted
+foryourinformation.
+Fig. 6.67: The theoretical (solid black - vacuum and solid blue - water) and experimental (dashed red - water)
+resonantRamanspectrumforthephenoxylradical.
+OBS.: TheactualRamanIntensitycollectedwithanypolarizationat90degrees,theI(𝜋/2;‖𝑠 + ⊥𝑠,⊥𝑖)[533],
+canbeobtainedbysettingRRINTEStoTRUEunder%ESD.
+AndtheresultisshowninFig.6.67. Inthiscase,thedefaultmethodVGwasused. Ifonewantstoincludesolvent
+effects,thenCPCM(WATER)shouldbeadded. Ascanbeseen,thereisanoticeabledifferenceinthemainpeak
+6.18. ExcitedStateDynamics 411
+
+[... start of page 434 ...]
+ORCAManual,Release6.0.0
+whencalculatedinwater.
+It is important to clarify some differences from the ORCA_ASA usage here. Using the ESD module, you do not
+needtoselectwhichmodesyouwillaccountforinthespectra;weincludeallofthem. Additionally,wecanonly
+operateat0K,andthemaximum“RamanOrder”is2. Thismeansweaccountforallfundamentaltransitions,first
+overtones,andcombinationbands,withoutincludinghotbands

@@ -1,0 +1,76 @@
+[... end of page 636 ...]
+
+RIXSSOC true # Request RIXS calculation (with SOC)
+Elastic true # Request RIXS calculation (Elastic)
+PleaseconsultsectionResonantInelasticScatteringSpectroscopyforprocessingandanalyzingthegeneratedspec-
+tra.
+614 Chapter7. DetailedDocumentation
+
+--- Page 637 ---
+ORCAManual,Release6.0.0
+7.15.6 CASCI-XES
+Starting from ORCA 5.0 likewise to RASCI-XES (see section X-ray Spectroscopy) orca features a CASCI-XES
+protocol.
+LikewisetotheRASCI-XEStheCASCI-XEScalculationsrequirestwosteps:
+• In a first step one needs to optimize the valence active space orbitals in the framework of SA-CASSCF
+calculations,e.g. includingvalenceexcitedstatesintherangebetween6to15eV.
+• In a second step the relevant core orbitals e.g metal 1s and 3p are rotated into the active space and the
+CASCIproblemissolvedfortheionizedsystembysaturatingtheexcitationspacewithsinglycore-excited
+electronicconfigurationsusingthepreviouslyoptimizedsetsoforbitals. InCASCI-XESthiscanbeacheived
+bydefiningreferenceconfigurations. orviatheRASfunctionality.
+TheXESSOCcalculationiscalledbyspeciyfingthefollowingkeywordsintherelblock:
+rel
+XESSOC true
+XASMOs Number of the rotated 1s MO
+end
+FollowingaSA-CASSCFcalculation:
+! def2-SVP def2-SVP/C ZORA CPCM PAL8
+! NormalPrint
+! NoLoewdin NoMulliken
+%casscf
+nel 5
+norb 5
+nroots 1, 24
+mult 6, 4
+#rel
+#dosoc true
+#end
+end
+* xyz -3 6
+Fe 0 0 0
+Cl 2.40 0 0
+Cl -2.40 0 0
+Cl 0 2.40 0
+Cl 0 -2.40 0
+Cl 0 0 2.40
+Cl 0 0 -2.40
+*
+ArelevantinputforFeXEScalculationofaFe(III)complexlikeFeCl isgivenbelow:
+6
+! def2-SVP def2-SVP/C ZORA CPCM PAL8
+! NormalPrint
+! MOREAD
+! NoLoewdin NoMulliken
+%moinp "FeCl6_casscf.gbw"
+%scf
+#Rotate the 1s and 3p orbitals below the SOMOs by using the rotate option
+rotate {0,59,90} {36,60,90} {37,61,90} {38,62,90} end
+end
+(continuesonnextpage)
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 615
+
+[... start of page 638 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%casscf
+nel 12
+norb 9
+nroots 1000, 1000
+mult 7, 5
+maxiter 1
+refs
+1 2 2 2 0 0 1 2 2
+1 2 2 2 0 0 2 1 2
+1 2 2 2 0 0 2 2 1
+1 2 2 2 0 1 0 2 2
+1 2 2 2 0 1 1 1 

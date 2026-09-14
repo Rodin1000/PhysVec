@@ -1,0 +1,91 @@
+[... end of page 729 ...]
+gles, doubles)
+FIC-MRCEPA(0) # CEPA0 version of FIC-MRCI
+FIC-MRACPF # ACPF version of FIC-MRCI
+FIC-MRAQCC # AQCC version of FIC-MRCI
+FIC-DDCI3 # FIC-MRCI without the IJAB excitation
+# CAS-CI reference wavefunction
+nel 2
+norb 2
+mult 1,3
+nroots 3,1
+nthresh 1e-6 # removal of linear dependencies in the IC-CSFs
+D3TPre 1e-14 # default density truncation of the 3-RDM
+D4TPre 1e-10 # default density truncation of the 4-RDM
+# Davidson correction for the FIC-MRCI
+DavidsonOpt 0 # none (default)
+1 # Davidson correction
+end
+7.25. CImethodsusinggeneratedcode 707
+
+--- Page 730 ---
+ORCAManual,Release6.0.0
+Currently,theprogramiscapableofcomputingtotalenergiesandverticalexcitationenergies. Morefeatureswill
+beavailablewithfuturereleases.
+7.25.7 Fully Internally Contracted MRCC
+Several approaches have been taken towards extending CC theory to work with genuinely multiconfigurational
+reference wave functions [538], yet none of these approaches has found widespread adoption. As of 2011, the
+internallycontractedMRCCtheoryhashadarevival,witharigoroustheoreticalinvestigationofseveralapproxi-
+mationsthatalsoproveditsorbitalinvariance[249]andafirstreportofapolynomial-scalingcodeobtainedthrough
+automaticequationgeneration[357].
+OurimplementationinORCAisakintothepreviouslypublishedformulationsinRefs.[249, 357], althoughev-
+erythingisformulatedrigorouslyintermsofthespin-freeexcitationoperators𝐸ˆ𝑝 = 𝑎ˆ𝑝𝛼𝑎ˆ +𝑎ˆ𝑝𝛽𝑎ˆ ,usingan
+𝑞 𝑞𝛼 𝑞𝛽
+improvedversionoftheORCA-AGEcodegenerator.[500]Tobeginwith,theansatzforthewavefunctionis
+|Ψ⟩=e𝑇^
+|0⟩,
+(7.189)
+where |0⟩ denotes a zeroth order CASSCF reference wave function and the cluster operator can be written as
+(Einstein’ssummationconventionimplied)
+1 1
+𝑇ˆ = 𝑡𝑖𝑗𝐸ˆ𝑎𝐸ˆ𝑏+𝑡𝑖𝑡𝐸ˆ𝑎𝐸ˆ𝑏+ 𝑡𝑡𝑢𝐸ˆ𝑎𝐸ˆ𝑏 +𝑡𝑖𝑗𝐸ˆ𝑎𝐸ˆ𝑡+𝑡𝑖𝑡 𝐸ˆ𝑎𝐸ˆ𝑢
+2 𝑎𝑏 𝑖 𝑗 𝑎𝑏 𝑖 𝑡 2 𝑎𝑏 𝑡 𝑢 𝑎𝑡 𝑖 𝑗 𝑎𝑢 𝑖 𝑡
+1
++𝑡𝑖𝑡 𝐸ˆ𝑢𝐸ˆ𝑎+𝑡𝑡𝑢𝐸ˆ𝑎𝐸ˆ𝑣+ 𝑡𝑖𝑗𝐸ˆ𝑡𝐸ˆ𝑢+𝑡𝑖𝑡 𝐸ˆ𝑢𝐸ˆ𝑣 .
+𝑢𝑎 𝑖 𝑡 𝑎𝑣 𝑡 𝑢 2 𝑡𝑢 𝑖 𝑗 𝑢𝑣 𝑖 𝑡
+Notethatwedonotusenormalorderintheclusteroperator.
+InsertingtheansatzfromEq.(7.189)intotheSchrödingerequationandpre-multiplyingwiththeinverseexponen-
+tial,weobtainthesimilaritytransformedHamiltonianandtheenergyexpression,
+𝐻¯|0⟩=e−𝑇^ 𝐻ˆe𝑇^
+|0⟩=𝐸|0⟩.
+Inourcode,thesimilarity-transformedHamiltonianistruncatedafterthequadratictermssincethatapproximation
+hasbeenfoundtoonlyhaveminorimpactontheaccuracyofthemethod[249],
+1
+𝐻¯ ≈𝐻ˆ +[𝐻ˆ,𝑇ˆ]+ [[𝐻ˆ,𝑇ˆ],𝑇ˆ].
+2
+Theresidualconditionsaresubsequentlyobtainedbyprojectingwithcontravariantexcitedfunctions⟨Φ˜ |ontothe
+𝑃
+Schrödingerequation,
+𝑟 =⟨Φ˜ |𝐻¯|0⟩.
+𝑃 𝑃
+Foradefinitionofthecontravariantprojectionfunctions,werefertoRef.[804]sincethisfic-MRCCimplementation
+uses the same contravariant functions as the published fic-MRCI implementation. Despite using contravariant
+projection functions, this is not sufficient to remove all linear dependencies from the set of projection functions
+{Φ˜ },i.e.themetricmatrix
+𝑃
+𝑆 =⟨Φ˜ |Φ˜ ⟩≠ 𝛿
+𝑃𝑄 𝑃 𝑄 𝑃𝑄
+has off-diagonal elements within excitation classes and between classes with the same number of inactive and
+virtual indices (ITAU and ITUA). Hence, the set of projection functions needs to be orthonormalized, which is
+achievedwithLöwdin’scanonicorthogonalizationintheAUTOCImodule.1
+1ThisissimilartoschemeAfromRef.[357].
+708 Chapter7. DetailedDocumentation
+
+[... start of page 731 ...]
+ORCAManual,Release6.0.0
+InputExample
+The fic-MRCC module can be started by specifying the CIType keyword in the %autoci block or by adding
+fic-MRCC to the simple input line of an ORCA input file. The following example computes the singlet ground
+stateenergyoffourhydrogenatomsarrangedasasquarewithasidelengthof2𝑎 ,whichiscommonlyknownas
+0
+theH4model[418].
+! cc-pVTZ Bohrs # it is possible to add the (cid:96)fic-MRCC' keyword here
+# and omit the %autoci block below
+%maxcore 10000
+%casscf
+nel 2
+norb 2
+mult 1
+nroots 1
+end
+%autoci # CAS settings are automatically copied from the CASSCF blo

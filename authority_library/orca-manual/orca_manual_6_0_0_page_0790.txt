@@ -1,0 +1,83 @@
+[... end of page 789 ...]
+o(4+4+1)(5+5+1)=99.
+𝑚𝑖 𝑚𝑖
+𝑚𝑖
+The ddnc parameter specifies increments 𝛿𝑞 for respective normal modes in the list in terms of dimensionless
+𝛼
+normalcoordinates(DNC’s). Thetrajectoriesareconstructedsothatcorrespondingnormalcoordinatesarevaried
+intherangefrom−𝑙 𝛿𝑞 to𝑟 𝛿𝑞 . ThemeasureofnormalmodedisplacementsintermsDNC’sisappropriate
+𝛼 𝛼 𝛼 𝛼
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 767
+
+--- Page 790 ---
+ORCAManual,Release6.0.0
+choicesinceinspectroscopicalapplicationsthepotentialenergyfunction𝑈 isusuallyexpressedintermsofthe
+DNC’s. Inparticular,intheharmonicapproximation𝑈(𝑞 )hasaverysimpleformaroundequilibriumgeometry:
+𝛼
+𝑈 =𝑈 +
+3
+∑︁
+𝑁−6(cid:125)𝜔
+𝛼𝑞2 (7.232)
+0 2 𝛼
+𝛼
+where𝜔 isthevibrationalfrequencyofthe𝛼-thmode.
+𝛼
+Dimensionlessnormalcoordinate𝑞 canberelatedtothevectorofatomicCartesiandisplacements𝛿Xasfollows:
+𝛼
+𝑞 = (︁𝜔 𝛼 )︁1 2 ∑︁ 3𝑁 𝐿 𝛿𝑋 √︀ 𝑀 (7.233)
+𝛼 (cid:125) 𝑘𝛼 𝑘 𝑘
+𝑘=1
+where {𝐿 } is the orthogonal matrix obtained upon numerical diagonalization of the mass-weighted Hessian
+𝑘𝛼
+matrix,andMisthevectorofatomicmasses. Accordingly,theatomicCartesiandisplacementscorrespondingto
+agivendimensionlessnormalcoordinate𝑞 aregivenby:
+𝛼
+(︂ (cid:125) )︂1
+𝛿𝑋 𝑘 = 𝜔 2 𝐿 𝑘𝛼 𝑞 𝛼 (𝑀 𝑘 )− 2 1 (7.234)
+𝛼
+Alternatively,itispossibletospecifyintheinputtheCartesianincrementforeachnormalmode. Insuchacase,
+insteadoftheddncparameteroneshouldusethedxyzkeywordfollowedbythevaluesofCartesiandisplacements,
+forexample:
+%mtr
+HessName "ethene.hess"
+modetype normal
+MList 9,13
+RSteps 4,5
+LSteps 4,5
+dxyz 0.01, 0.02 # increments in the Cartesian basis
+# are given in angstrom units
+end
+For a given Cartesian increment 𝑑 along the 𝛼–th normal mode the atomic displacements are calculated as
+𝑋,𝛼
+follows:
+𝑑
+𝛿𝑋 𝑘 = ‖T 𝑋,𝛼 ‖ 𝐿 𝑘𝛼 (𝑀 𝑘 )− 2 1 (7.235)
+𝛼
+ThevectorT 𝛼 intheCartesianbasishascomponents𝑇 𝑖𝛼 =𝐿 𝑘𝛼 (𝑀 𝑘 )− 2 1 andlength(norm)‖T 𝑘 ‖.
+Theincrementlengthcanalsobeselectedonthebasisofanestimatefortheexpectedchangeinthetotalenergy
+∆𝐸duetothedisplacementaccordingtoeq.(7.118). Thevalueof∆𝐸canbespecifiedviatheEnStepparameter:
+%mtr
+HessName "ethene.hess"
+modetype normal
+MList 9,13
+RSteps 4,5
+LSteps 4,5
+EnStep 0.001, 0.001 # the values are given in Eh
+end
+Allquantumchemicalmethodshavetotolerateacertainamountofnumericalnoisethatresultsfromfinitecon-
+vergencetolerancesorothercutoffsthatareintroducedintothetheoreticalprocedures. Hence,itisreasonableto
+choose∆𝐸 suchthatitisabovethecharacteristicnumericalnoiselevelforthegivenmethodofcalculation.
+AtthebeginningoftheprogramrunthefollowingtrajectoryfileswhichcanbevisualizedingOpenMolwillbe
+created:
+• BaseName.m9.xyz and BaseName.m13.xyz contain trajectories along normal modes 9 and 13, respec-
+tively.
+768 Chapter7. DetailedDocumentation
+
+[... start of page 791 ...]
+ORCAManual,Release6.0.0
+• BaseName.m13s1.m9.xyz - BaseName.m13s5.m9.xyzcontaintrajectoriesalongnormalmode9fordif-
+ferent fixed displacements along mode 13, so that the file BaseName.m13sn.m9.xyz corresponds to the
+𝑛-thstepinthepositivedirectionalongmode13.
+• BaseName.m13s-1.m9.xyz - BaseName.m13s-5.m9.xyzcontaintrajectoriesalongnormalmode9for
+different fixed displacements along mode 13, so tha

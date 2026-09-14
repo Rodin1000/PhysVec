@@ -1,0 +1,72 @@
+[... end of page 120 ...]
+s on open-shell species, it is always better to have UCO option: If preceding
+SCFconvergestobroken-symmetrysolutions,itisnotguaranteedthattheDLPNO-CCSDgivesphysically
+meaningfulresults.
+98 Chapter6. RunningTypicalCalculations
+
+--- Page 121 ---
+ORCAManual,Release6.0.0
+• Besides the closed-shell version which uses a RHF or RKS reference determinant there is an open-shell
+versionoftheLPNO-CCSDforhigh-spinopen-shellmolecules(seeoriginalpaper)usinganUHForUKS
+referencedeterminantbuiltfromquasi-restrictedorbitals(QROs,seesectionOpen-ShellEquations). Since
+theresultsofthecurrentopen-shellversionareslightlylessaccuratethanthatoftheclosed-shellversionitis
+mandatorytospecifyifyouwanttousetheclosed-shelloropen-shellversionforcalculationsofclosed-shell
+systems,i.e. alwaysputthe“RHF”(“RKS”)or“UHF”(“UKS”)keywordinthesimplekeywordline. Open-
+shell systems can be of course only treated by the open-shell version. Do not mix results of the closed-
+andopen-shellversionsofLPNOmethods(e.g. ifyoucalculatereactionenergiesofareactioninwhich
+bothclosed-andopen-shellmoleculestakepart,youshouldusetheopen-shellversionthroughout). Thisis
+becausetheopen-shellLPNOresultsfortheclosed-shellspeciescertainlydifferfromthoseofclosed-shell
+implementations. Thisdrawbackoftheopen-shellLPNOmethodshasledtothedevelopmentofabrandnew
+open-shellDLPNOapproachwhichconvergestotheRHF-DLPNOintheclosed-shelllimit. Importantly,
+onecanmixtheresultsofclosed-andopen-shellversionsofDLPNOapproaches.
+• Theopen-shellversionoftheDLPNOapproachusesadifferentstrategytotheLPNOvarianttodefinethe
+open-shellPNOs. Thisensuresthat,unliketheopen-shellLPNO,thePNOspaceconvergestotheclosed-
+shellcounterpartintheclosed-shelllimit. Therefore,intheclosed-shelllimit,theopen-shellDLPNOgives
+identicalcorrelationenergytotheRHFvariantuptoatleastthethirddecimalplace. Theperturbativetriples
+correctionreferredtoas,(T),isalsoavailablefortheopen-shellspecies.
+• Whenperformingacalculationontheopen-shellspecieswitheitherofcanonical/LPNO/DLPNOmethods
+ontopoftheSlaterdeterminantconstructedfromtheQROs,specialattentionshouldbepaidontheorbitals
+energiesofthoseQROs. Insomecases,theorbitalsenergyofthehighestSOMOappeartobehigherthan
+that of the lowest VMO. Similarly to this, the orbital energy of the highest DOMO may appear to higher
+than that of the lowest SOMOs. In such cases, the CEPA/QCISD/CCSD iteration may show difficulty in
+convergence. Intheworstcase,itjustdiverges. Mostlikely,insuchcases,onehastosuspectthechargeand
+multiplicitymightbewrong. Iftheyarecorrect, youmayneedmuchprettierstartingorbitalsandabitof
+goodluck! Apartfromacarefulchoiceofstartingorbitals(inparticular,DFTorbitalscanbeusedinplace
+ofthedefaultHForbitalsifthelatterhavequalitativedeficiencies,includingbutnotlimitedtoseverespin
+contamination),changingthemaximumDIISexpansionspacesize(MaxDIIS)andthelevelshift(LShift)
+inthe%mdciblockmayalleviatetheconvergenceproblemstosomeextent.
+• DLPNO-CCSD(T)-F12 and DLPNO-CCSD(T1)-F12 (iterative triples) are available for both closed- and
+open-shell cases. These methods employ a perturbative F12 correction on top of the DLPNO-CCSD(T)
+correlationenergycalculation. TheF12partofthecodeusestheRIapproximationinthesamespiritasthe
+canonicalRI-F12methods(refertosectionExplicitlyCorrelatedMP2andCCSD(T)Calculations). Hence,
+they should be compared with methods using the RI approximation for both CC and F12 parts. The F12
+correction takes only a fraction (usually 10-30%) of the total time (excluding SCF) required to calculate
+the DLPNO-CCSD(T)-F12 correlation energy. Thus, the F12 correction scales the same (linear or near-
+linear) as the parent DLPNO method. Furthermore, no new truncation parameters are introduced for the
+F12procedure,preservingtheblack-boxnatureoftheDLPNOmethod. TheF12Dapproximationishighly
+recommendedasitiscomputationallycheaperthantheF12approachwhichinvolvesadoubleRIsumma-
+tion. Keywords: DLPNO-CCSD(T)-F12D, DLPNO-CCSD(T)-F12, DLPNO-CCSD(T1)-F12D, DLPNO-
+CCSD(T1)-F12,DLPNO-CCSD-F12D,DLPNO-CCSD-F12.
+• Parallelizationisdone.
+• Therearethreethresholdsthatcanbeusercontrolledthatcanallbeadjustedinthe%mdciblock: (a)𝑇CutPNO
+controlsthenumberofPNOsperelectronpair. Thisisthemostcriticalparameterandhasadefaultvalueof
+3.33×10−7. (b)𝑇CutPairs controlsaperturbativeselectionofsignificantpairsandhasadefaultvalueof10−4.
+(c)𝑇CutMKN isatechnicalparameterandcontrolsthesizeofthefitsetforeachelectronpair. Ithasadefault
+value of 10−3. All of these default values are conservative. Hence, no adjustment of these parameters is
+necessary. AllDLPNO-CCSDtruncationsareboundtothesethreetruncationparametersandshouldalmost
+notbetouched(Hencetheyarealsonotdocumented:) ).
+• Thepreferredwaytoadjustaccuracywhenneededistousethe“LoosePNO/NormalPNO/TightPNO”key-
+words. In addition, “TightPNO” triggers the full iterative (DLPNO-MP2) treatment in the MP2 guess,
+whereastheotheroptionsuseasemicanonicalMP2calculation. Table6.5andTable6.6containthethresh-
+oldsusedbythecurrent(2016)andold(2013)implementations,respectively.
+• LPNO-VCEPA/n(n=1,2,3)methodsareonlyavailableintheopen-shellversionyet.
+6.1. SinglePointEnergiesandGradients 99
+
+[... start of page 122 ...]
+ORCAManual,Release6.0.0
+• LPNOvariantsoftheparameterizedcoupled-clustermethods(pCCSD,seesectionTheory)arealsoavailable
+(e.g. LPNO-pCCSD/1aandLPNO-pC/2a).
+• The LPNO methods reproduce the canonical energy differences to typically better than 1 kcal/mol. This
+accuracy exists over large parts of the potential energy surface. Tightening TCutPairs to 1e-5 gives more
+accurateresultsbutalsoleadstosignificantlylongercomputationtimes.
+• Potential energy surfaces are virtually but not perfectly smooth (like any method that 

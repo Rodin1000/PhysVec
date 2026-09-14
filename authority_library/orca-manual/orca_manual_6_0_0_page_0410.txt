@@ -1,0 +1,76 @@
+[... end of page 409 ...]
+tainsthefollowingentriesinitsoccupancycolumn.
+0
+MMatomsmimickedbysurroundingpointcharges.
+1
+QMcoreregionatoms
+2
+HFLayeratoms
+3
+cECPs
+4
+OuterPCLayeratoms(subsetofMMatoms)ifdefined,aretheonlyatomsthatareusedinthechargeshift
+procedureforenforcingthetotalcharge.
+6.16. ORCAMultiscaleImplementation 387
+
+--- Page 410 ---
+ORCAManual,Release6.0.0
+6.16.5 Additional Keywords
+Herewelistadditionalkeywordsandoptionsthatareaccessiblefromwithinthe%qmmmblockandthatarerelevant
+toQM/MMcalculations. Someofthesekeywordscanalsobeaccessedviathe%mmblock,seesectionAvailable
+KeywordsfortheMMmodule.
+!QMMM
+%qmmm
+# Charge alteration scheme preventing overpolarization.
+ChargeAlteration CS # CS (Default)
+# RCD
+# Z0
+# Z1
+# Z2
+# Z3
+# Parameters for placing the shifted and redistributed charges for RCD and CS schemes.
+Scale_RCD 0.5 # Defines where on the bond between MM1 and MM2 the
+# shifted charge is positioned. Default: midpoint.
+Scale_CS 0.06 # Defines where on the bond between MM2 and MM1/MM3 the
+# shifted charge is positioned. Default: 0.06 x bond.
+# The extended active region, activeRegionExt, contains the atoms surrounding the
+# active atoms.
+ExtendActiveRegion distance # rule to choose the atoms belonging to activeRegionExt.
+# no - do not use activeRegionExt atoms
+# cov_bonds - add only atoms bonded covalently to
+# active atoms
+# distance (default) - use a distance criterion (VDW
+# distance plus Dist_AtomsAroundOpt)
+Dist_AtomsAroundOpt 0.0 # in Angstrom (Default 0). Meaning only freeze atoms
+# which touch the active atoms by their VDW spheres.
+# only needed for ExtendActiveRegion distance
+OptRegion_FixedAtoms {27 1288:1290 4400} end # manually define the activeRegionExt
+# atoms. Default: empty list.
+# Printing options. All are true by default.
+PrintLevel 1 # Can be 0 to 4, 0=nothing, 1=normal, ...
+PrintOptRegion true # Additionally print xyz and trj for opt region
+PrintOptRegionExt false # Additionally print xyz and trj for extended opt region
+PrintQMRegion true # Additionally print xyz and trj for QM region
+PrintFullTRJ true # Print trajectory of full system. Default true.
+PrintPDB true # Additionally print pdb file for entire system, is
+# updated every iteration for optimization
+# Computing MM nonbonded interactions within non-active region.
+Do_NB_For_Fixed_Fixed true # Compute MM-MM nonbonded interaction also for
+# non-active atom pairs. Default true.
+# Treats all active water molecules that are treated on MM level as rigid bodies
+# in optimization and MD simulation, see section "Rigid Water".
+Rigid_MM_Water false # Default false.
+end
+*pdbfile 0 1 ubq.pdb # structure input via pdb file, but also possible via xyz file
+388 Chapter6. RunningTypicalCalculations
+
+[... start of page 411 ...]
+ORCAManual,Release6.0.0
+6.17 QM/MM via Interfaces to ORCA
+ORCAiseasytointerfaceasaQMengineinprettymuchanyQM/MMenvironment,asitwillacceptasetofpoint
+charges from an external file (see section Inclusion of Point Charges) and it will return, in a transparent format,
+alltherequiredinformationforcomputingenergiesandgradientstothedrivingprogram. Inourresearchgroup
+wehaveexperiencewithfourdifferentQM/MMenvironments: ChemShell,Gromacs,pDynamoandNAMD.In
+thefollowingeachoftheinterfacesaredescribed. Isbeyondthescopeofthemanualtobeexhaustive, andonly
+minimalworkingexamplesaregoingtobepresented. Thesewillcovermainlythetechnicalaspectswithrespect
+to the QM part of the QM/MM calculatio

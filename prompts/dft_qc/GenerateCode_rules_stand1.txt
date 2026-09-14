@@ -1,0 +1,204 @@
+DETAILED RULES FOR GENERATING A COMPLETE ORCA INPUT FILE
+================================================================================
+Purpose
+- Generate ONE executable ORCA input that reproduces ONE calculation step from a paper.
+- Output MUST be valid ORCA input syntax only (no scripts, no multiple jobs).
+- Follow the block-format rules below; the examples are REFERENCE ONLY—adapt to your case, do not copy verbatim.
+
+================================================================================
+A) ORCA INPUT FILE BLOCK FORMAT (GUIDELINES)
+================================================================================
+
+A0) File-level description (first block only) — STRICT ORDER
+The very first block of the file MUST be the keywords block and MUST appear in this exact order:
+1) First line:  #Tags_keywords
+2) Next line:   # Scientific problem: <brief description>
+3) Next line:   # Elements used: <comma-separated list, e.g. Cu, C, F>
+4) Optional:    purpose and provenance comment lines for the keywords block
+5) Then:        exactly one keyword line starting with '!' (all keywords on that single line; do NOT use a second ! line).
+Use PLAN_INFO.scientific_problem and PLAN_INFO.elements_used when provided; otherwise infer from the calculation. Do NOT put # Scientific problem: or # Elements used: in any other block (e.g. not in the geometry block).
+
+A1) Comment section (every block)
+Before each ORCA block, add brief comments that convey:
+1) Block type: #Tags_{block_type}_{sub_block_type}
+   - block_type: keywords, inputblocks, or geometryblocks
+   - sub_block_type: for inputblocks, match the block name after '%' (e.g. "basis", "scf", "cpcm", "pal", "maxcore"); optional for keywords/geometryblocks
+
+2) Purpose: what the block does and how it relates to the scientific problem
+
+3) Provenance: where parameters come from (paper, assumption, or manual)
+
+The exact phrasing is flexible; clarity and relevance matter more than strict template wording.
+
+A2) Reference examples (NOT to be followed literally—adapt to your case)
+#Tags_keywords
+# Scientific problem: Core-level XAS K-edge (Cu) via core-TDDFT; ZORA for scalar relativity.
+# Elements used: Cu, C, F, N
+# Method keywords for XAS calculation; density functional and basis from paper.
+# B3LYP/def2-TZVP from paper; def2/JK, RIJK assumed for fitting.
+! B3LYP def2-QZVP def2/JK RIJK
+
+#Tags_inputblocks_basis
+# Aux-basis customization for XAS computation (paper-specified or justified).
+# AutoAux tuning assumed if not explicitly given.
+%basis
+  AutoAuxB[0] 2.0
+end
+
+A3) Code block syntax rules (MANDATORY)
+1) keywords:
+   - Every input MUST contain exactly one keyword line starting with '!' in the keywords block. Put ALL keywords on that single line (e.g. ! BP86 ZORA def2-TZVP Grid7). Do NOT add a second line starting with '!' (e.g. do NOT write !Grid7 on the next line).
+   - Ordering of keywords on the line is mostly flexible, but later basis keywords override earlier ones.
+2) inputblocks:
+   - Any block that starts with '%' is an input block (e.g. %scf, %basis, %cpcm, %geom, %method, %pal, %output, %rel, %tddft, etc.). The list in C2 below is NOT exhaustive.
+   - MUST start with '%' and end with 'end' (case-insensitive)
+3) geometryblocks:
+   Exactly ONE geometry specification method must be used:
+   (i) Inline star section (required in this workflow):
+       Before * xyz you MUST have: #Tags_geometryblocks, then a purpose line, then a provenance line. Then * xyz Charge Mult, then only coordinate lines (element x y z), then *.
+       **No # comment lines are allowed between * xyz and the closing *.** Only lines of the form "Element x y z" are allowed there.
+   (ii) %coords ... end block (less common):
+       %coords
+         ... (as defined in manual) ...
+       end
+   - **Do NOT use external geometry files.** * xyzfile * and * gzmtfile * are strictly forbidden. All coordinates must appear inline in the input as * xyz Charge Mult followed by the full list of coordinate lines (element x y z per line). Do not reference any .xyz or .gzmt filename in the geometry block.
+
+A4) Separation (A6 in format checks)
+- Separate different blocks (keywords, inputblocks, geometryblocks) with blank lines for readability.
+- Use '# ...' for non-ORCA explanatory comments.
+
+A5) STRICT BLOCK ORDER AND TAGS (output from the start)
+- First block: #Tags_keywords, then # Scientific problem:, then # Elements used:, then optional purpose/provenance, then exactly one ! line (all keywords on that line). Blank line.
+- **Block order:** All %... input blocks (e.g. %pal, %maxcore, %basis, %method, %scf, %cpcm) MUST appear **before** the geometry block. The geometry block (* xyz ... *) must be the last substantive block. Do NOT place any % block after the geometry block (no input blocks at the back of the file).
+- Before **each** input block (%pal, %maxcore, %basis, %scf, %cpcm, %method, %geom, etc.): add #Tags_inputblocks_<name> (e.g. #Tags_inputblocks_pal, #Tags_inputblocks_maxcore, #Tags_inputblocks_method), then purpose and provenance comments, then the %... block. This applies to every % block without exception, including %method. Blank line after each block.
+- Before the geometry block: #Tags_geometryblocks, then purpose comment, then provenance comment, then * xyz Charge Mult, then only coordinate lines (element x y z), then *. No # lines between * xyz and *.
+
+A6) KEYWORD AND BASIS RULES (mandatory in generated code)
+- Do NOT use def2-TZVP(-f) in the output; use def2-TZVP.
+- Do NOT use ZORA-def2-SVP or ZORA-def2-TZVP(-f) as basis set names in the ! line or in %basis. For ZORA calculations use the keyword ZORA (or %rel block) and basis names def2-SVP, def2-TZVP, or ZORA-def2-TZVP as appropriate; ZORA is not a valid basis modifier inside %basis for def2-SVP — use def2-SVP there.
+
+================================================================================
+B) BLOCK DECOMPOSITION PRINCIPLE
+================================================================================
+- inputblocks may depend on keywords: an inputblock is only active if the corresponding method is enabled via keywords.
+- Ensure keywords and inputblocks are compatible and refer to the same level of theory.
+- Use keyword lines for overall method selection; use inputblocks only for fine control supported by the manual.
+
+================================================================================
+C) NOTATION / ALLOWED BLOCK CATEGORIES (REFERENCE)
+================================================================================
+
+C1) keywords (examples; NOT exhaustive)
+Core method selection: HF, DFT, FOD
+Job / run type: ENERGY (SP), OPT, COPT, ZOPT, ENGRAD, NUMGRAD, NUMFREQ, MD, CIM
+Symmetry handling: UseSym, NoUseSym
+MP2 family: MP2, RI-MP2 (MP2RI), SCS-MP2, RI-SCS-MP2, OO-RI-MP2, OO-RI-SCS-MP2, MP2-F12, MP2-F12-RI, MP2-F12D-RI
+MDCI / high-level correlation: CCSD, CCSD(T), CCSD-F12, CCSD(T)-F12, CCSD-F12/RI, CCSD-F12D/RI, QCISD, QCISD(T), CPF/1, CEPA/1, MP3, SCS-MP3
+
+Density functionals (examples)
+GGA: BP86 (BP), BLYP, OLYP, GLYP, XLYP, PW91, PBE, RPBE, REVPBE
+Hybrids: B3LYP (B3LYP/G), PBE0, BHANDHLYP, PW6B95
+Meta-GGA / hybrid meta-GGA: TPSS, TPSSh, TPSS0, M06L, M06, M062X, SCANfunc, B97M-V, B97M-D3BJ
+Range-separated hybrids: wB97, wB97X, wB97X-D3
+
+Basis sets (examples). In generated code: use def2-TZVP (never def2-TZVP(-f)); use def2-SVP in basis (not ZORA-def2-SVP).
+def2 family: def2-SVP, def2-SV(P), def2-TZVP, def2-TZVPP, def2-QZVPP
+Older "def" family: SV, SV(P), SVP, TZV, TZV(P), TZVP, TZVPP, QZVP, QZVPP
+Diffuse/augmented def2: ma-def2-SVP, ma-def2-TZVP, ma-def2-QZVPP, def2-SVPD, def2-TZVPD, def2-TZVPPD, def2-QZVPD, def2-QZVPPD
+Relativistic recontracted families: -ZORA-TZVP, -SARC-DKH-TZVP (as used)
+
+Auxiliary basis sets (examples)
+Coulomb/exchange fitting: def2/J, def2/JK
+Correlation fitting: Def2-SVP/C, Def2-TZVP/C, Def2-TZVPP/C, Def2-QZVPP/C, cc-pVnZ/C, aug-cc-pVnZ/C, cc-pwCVnZ/C, aug-cc-pwCVnZ/C, cc-pVnZ-PP/C
+Automatic generation: AutoAux
+
+ECP library keywords (examples)
+def2-ECP, SK-MCDHF-RSC, HayWadt2
+
+C2) inputblocks (categories; NOT exhaustive)
+- **Rule: Anything that starts with '%' is an input block.** Use #Tags_inputblocks_<name> where <name> is the part after '%' (e.g. %scf → #Tags_inputblocks_scf, %geom → #Tags_inputblocks_geom). Options inside the block must be confirmed from the ORCA manual.
+- The following are examples only; ORCA supports additional blocks (e.g. %pointcharges, %embedding, %cosmo, %orcafile, etc.).
+1) Electronic-structure modules:
+   %method, %scf, %mp2, %mdci, %casscf, %mrcc, %mrci, %cis/%tddft, %rocis, %autoci, %cipsi, %cim, %esd
+2) Structure/geometry/derivatives:
+   %coords, %geom, %freq, %numgrad
+3) Basis/parameterization:
+   %basis, %paras
+4) Solvation/environment:
+   %cpcm
+5) Properties & spectroscopy:
+   %elprop, %eprnmr, %rr, %plots, %nbo
+6) Dynamics:
+   %md
+7) Infrastructure/output/performance:
+   %pal, %output, %loc, %rel
+   - For %pal: use only single-process (e.g. nprocs 1); parallel computation is not allowed in this workflow.
+
+Note: %cis and %tddft are synonyms in some ORCA versions.
+
+================================================================================
+D) STRICT RULES (NO INVENTION)
+================================================================================
+1) You MUST NOT invent new ORCA keywords or blocks.
+2) You MUST NOT guess inputblock options:
+   - Every option used inside an inputblock must be confirmed to exist in the ORCA manual
+   - If uncertain, use MCP lookups first; otherwise omit the option and record it as unresolved
+3) The keyword lists above are guidance only; they are NOT exhaustive.
+
+================================================================================
+E) REQUIRED OUTPUT: SINGLE JSON OBJECT (NO MARKDOWN)
+================================================================================
+
+CRITICAL output format:
+- Return a single JSON object ONLY (no markdown fences, no comments).
+- Use ASCII or escape all non-ASCII characters.
+- Keys and types:
+  {
+    "subplot_name": "<string>",
+    "code_type": "orca",
+    "learnedfacts": ["<string>", "..."],
+    "remainingunclearfactors": [
+      {"item": "<string>", "why_it_matters": "<string>", "needed_to_resolve": "<string>", "assumption_used": "<string>"}
+    ],
+    "code_content": "<entire ORCA .inp content>"
+  }
+
+
+E1) code_content requirements
+- Must contain exactly ONE complete ORCA input (single job).
+- Must be runnable as-is assuming referenced external files exist.
+- If the job requires previous outputs (e.g., *.gbw, *.hess, *.xyz), reference them explicitly by filename using valid ORCA syntax.
+- Any explanatory text that is NOT literal ORCA syntax MUST be commented using '# ...' or '##### ...'.
+
+E2) learned_facts requirements
+- List concise facts learned from MCP/library lookups that influenced the input (syntax rules, allowed keywords, defaults, best practices).
+- No filenames or provenance text.
+
+E3) remaining_unclear_factors requirements
+- Include every unresolved ambiguity AFTER MCP lookup.
+- For each unresolved but required-for-execution item, set assumption_used to a non-null explicit assumption
+  AND add a matching comment in code_content stating that assumption.
+- If not required for execution, assumption_used may be null.
+
+================================================================================
+F) MCP-ASSISTED PRE-LOOKUP (MANDATORY WORKFLOW)
+================================================================================
+Before writing code_content, you MUST use MCP (filesystem server only) to retrieve guidance from the local reference library.
+
+Allowed MCP rules (STRICT):
+- Use ONLY MCP server "filesystem"
+- Read ONLY from the designated reference-project folder(s) that store prior query JSON results
+- Do NOT browse unrelated directories
+- Do NOT write/modify any files
+- MCP arguments must be a JSON object (never a JSON string)
+
+If a needed detail is not found, keep executability via an explicit assumption and record it in remaining_unclear_factors.
+
+================================================================================
+G) GLOBAL CONSTRAINTS
+================================================================================
+- Output must contain ASCII characters only.
+- Do not output scripts/wrappers/job files.
+- Do not output multiple ORCA inputs.
+- Do not include any text outside the single JSON object.
+- **Serial execution only (no parallelization):** Because of resource limitations, the generated ORCA input must run in serial only. Do NOT use %pal with nprocs > 1. If %pal is present, it must be %pal nprocs 1 end (or equivalent single-process setting). Do not add MPI, multi-thread, or other parallel options.

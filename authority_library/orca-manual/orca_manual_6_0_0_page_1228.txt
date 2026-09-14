@@ -1,0 +1,75 @@
+[... end of page 1227 ...]
+ then
+New_Step
+! cc-pVDZ VeryTightSCF Conv
+%base "atom_&{Element[el]}_&{Charge[el]}_&{Mult[el]}"
+%casscf nel = &{Nact[el]};
+norb = &{Norb[el]};
+nroots = &{Nroots[el]};
+mult = &{Mult[el]};
+end
+(continuesonnextpage)
+7.60. CompoundExamples 1205
+
+--- Page 1228 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+* xyz &{Charge[el]} &{Mult[el]}
+&{Element[el]} 0.0 0.0 0.0
+*
+Step_end
+else
+New_Step
+! &{HFTyp[el]} cc-pVDZ VeryTightSCF Conv
+%base "atom_&{Element[el]}_&{Charge[el]}_&{Mult[el]}"
+* xyz &{Charge[el]} &{Mult[el]}
+&{Element[el]} 0.0 0.0 0.0
+*
+Step_end
+endif
+endfor
+endrun;
+Comments
+Here,it’sinterestingtonotethatdependingontheselectedatom,thescripteitherperformsaCASSCFcalculation,
+whichprovidesdetailssuchasthenumberofelectronsandnumberofroots,amongotherparameters,oritcarries
+outasimpleHartree-Fockcalculation.
+7.60.12 GoTo
+Introduction
+ThisisabriefexampledemonstratinghowtheGoTocommandcanbeusedinCompound.
+Filename
+goTo_Example.inp
+SCRIPT
+# Compound Example on GoTo usage
+# Efficient ON/OFF switch
+%Compound
+Variable switch="OFF";
+Variable turnOff, turnOn, loopEnd;
+Variable maxIter = 10;
+for i from 0 to maxIter do
+if (switch="ON") then
+GoTo turnOff;
+else
+GoTo turnOn;
+endIf
+turnOff:
+print("Switch: %s\n", switch);
+switch="OFF";
+GoTo loopEnd;
+turnON:
+print("Switch: %s\n", switch);
+switch="ON";
+GoTo loopEnd;
+loopEnd:
+EndFor
+End
+1206 Chapter7. DetailedDocumentation
+
+[... start of page 1229 ...]
+ORCAManual,Release6.0.0
+7.61 orca_2json
+ThisutilityprogramsupportstheexchangeofexternalORCAdatalikegeometry,orbitalsandbasisetsbutalsoof
+internalORCAdatalike1-electronand2-electronintegalswithotherprograms.
+7.61.1 Export ORCA data
+Theprogramreadsinformationlikegeometries,basissets,MOsetc. storedinthe.gbwfileorotherequivalentones
+as.uno,.mp2nat,.qroetc. andcalculatesintegralstoexporttheminJSONstandardoutputformats. Fordensity
+informationthe.

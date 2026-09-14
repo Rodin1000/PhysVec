@@ -1,0 +1,89 @@
+[... end of page 828 ...]
+ation for 4 external terms contribution
+# to 3 external intermediate
+DoRootwise false # solves for each root separately,
+# more stable for large number of roots
+DoTDM false # option for calculation of default transition moment
+Doleft false # calculation of exact left vector
+NRootsPerBatch 1 # no of roots calculated together
+FOLLOWCIS false # follows the initial singles guess
+DoCore true # initiates ionization or excitation from core orbital
+CoreHole 0 # core orbital from which ionization or excitation is needed
+CVSEP false # separates core orbital from valence,
+(continuesonnextpage)
+806 Chapter7. DetailedDocumentation
+
+--- Page 829 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+DTol 1e-5 # default for EOM residual threshold
+#keywords which affect EOM parameters, but do not belong to the routine itself
+NRoots 9 # number of roots
+OTol 1e-14 # orthogonalization threshold
+KCOpt KC_MO # method for external exchange formation
+KC_AOX # when asked for exact TDM calculation
+KC_AOBLAS # most efficient
+PrintLevel 3 # the amount of information to be printed
+MaxCore 500 # total amount of memory
+end
+InthecaseoftheUHFEOM-CCSDimplementation,theparametersthatinfluenceagivencalculationareprovided
+below.
+%mdci
+#UHF EOM parameters - defaults displayed
+DoEOM false # whether to perform EOM
+DoAlpha false # removal/attachment of an alpha electron (IP/EA calculations)
+DoBeta false # removal/attachment of a beta electron (IP/EA calculations)
+NDav 20 # maximum size of reduced space (i.e. 20*NRoots)
+UseQROs false
+CheckEachRoot true # check convergence for each root separately
+RootHoming true # apply root homing
+DoLanczos false # use the Lanczos procedure rather than Davidson
+DoOlsen false # use the Olsen procedure rather than Davidson
+UseCISUpdate true # use diagonal CIS for updating
+NInits 0 # number of roots in the initial guess, if 0, use preset value
+DOCOSXEOM false # use COSX approximation for external exchange term in EOM
+DOAOX3E false # use COSX approximation for 4 external terms contribution
+# to 3 external intermediate
+DoRootwise false # solves for each root separately,
+# more stable for large number of roots
+NRootsPerBatch 1 # no of roots calculated together
+FOLLOWCIS true # follows the initial singles guess
+DTol 1e-5 # default for EOM residual threshold
+#keywords which affect EOM parameters, but do not belong to the routine itself
+NRoots 9 # number of roots
+OTol 1e-14 # orthogonalization threshold
+KCOpt KC_AOX # AO exchange for the four external contributions
+# (the only option available at present)
+PrintLevel 3 # the amount of information to be printed
+MaxCore 500 # total amount of memory
+end
+7.33.2 Memory Management
+Themostimportantdatacomingfromthecoupled-clusterroutinearethegroundstateenergyandwavefunction,
+andthemolecularintegrals. Theintegralsarethenusedtocreate“dressed”integralcontainers,whichallowsforan
+efficientfactorizationoftheEOMequations,sincethesedressedquantitiesdonotchangeduringthecalculation.
+Most of these are written on disk, with the possible exception of the integral container which has three external
+labels. This,andthesolverfilesmayremainincoreifenoughmemoryisavailable. Theprogramsequentiallytries
+toallocatememoryforthefilesintheorderoftheirimportance,andwhatcannotbekeptincore,goesondisk. The
+orderofallocationisasfollows: 1. residualvectors,2. Ritzvectors,3. threeexternalintegrals,4. sigmavectors
+and5. state(trial)vectors,asseenintheexamplebelow:
+--------------------------------
+AUTOMATIC CHOICE OF INCORE LEVEL
+--------------------------------
+(continuesonnextpage)
+7.33. ExcitedStatesviaEOM-CCSD 807
+
+[... start of page 830 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Memory available ... 6512.00 MB
+Memory needed for Residual-vectors ... 71.27 MB
+Memory needed for Ritz-vectors ... 71.27 MB
+Memory needed for 3-ext integrals ... 92.05 MB
+Memory needed for Sigma-vectors ... 1425.31 MB
+Memory needed for State-vectors ... 1425.31 MB
+-> Final InCoreLevel ... 5
+Halfofthememoryspecifiedwiththekeyword MaxCoreisdistributedamongthefivecandidates. Intheabove
+case, everything fits in memory. Note that these are only the largest contributors to memory consumption, and
+thereshouldideallybeasafetymarginwhenallocatingmemory.
+Inordertoestimatetheamountofnecessarymemory,itshouldbekeptinmindthat,intheclosedshellcase,the
+memoryrequirementsoftheresidu

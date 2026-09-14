@@ -1,0 +1,87 @@
+[... end of page 1224 ...]
+-------------------------------
+# 1. Run the driver ORCA input file that calls the
+# External optimizer
+# --------------------------------------------------
+New_Step
+!ExtOpt Opt
+*xyzfile &{charge} &{mult} &{baseFilename}_Compound_1_EXT.xyz
+%method
+ProgExt "./&{driverScriptName}"
+End
+Step_End
+End
+Comments
+Theinitialstructureshouldcontainsomeghostatoms.
+1202 Chapter7. DetailedDocumentation
+
+--- Page 1225 ---
+ORCAManual,Release6.0.0
+7.60.10 Umbrella script
+Introduction
+Thisscriptcalculatesthepotentialforthe“umbrellaeffect”inNH_3. Inadditionitlocatestheminimaandmaxima
+inthepotentialsurface.
+Filename
+Umbrella.cmp
+SCRIPT
+# ----------------------------------------------
+# Umbrella coordinate mapping for NH3
+# Author: Frank Neese
+# ----------------------------------------------
+variable JobName = "NH3-umbrella";
+variable amin = 50.0;
+variable amax = 130.0;
+variable nsteps = 21;
+Variable energies[21];
+Variable angle;
+Variable JobStep;
+Variable JobStep_m;
+variable step;
+Variable method = "BP86";
+Variable basis = "def2-SVP def2/J";
+step = 1.0*(amax-amin)/(nsteps-1);
+# Loop over the number of steps
+# ----------------------------
+for iang from 0 to nsteps-1 do
+angle = amin + iang*step;
+JobStep = iang+1;
+JobStep_m= JobStep-1;
+if (iang>0) then
+Read_Geom(JobStep_m);
+New_step
+! &{method} &{basis} TightSCF Opt
+%base "&{JobName}.step&{JobStep}"
+%geom constraints
+{A 1 0 2 &{angle} C}
+{A 1 0 3 &{angle} C}
+{A 1 0 4 &{angle} C}
+end
+end
+Step_End
+else
+New_step
+! &{method} &{basis} TightSCF Opt
+%base "&{JobName}.step&{JobStep}"
+%geom constraints
+{A 1 0 2 &{angle} C}
+{A 1 0 3 &{angle} C}
+{A 1 0 4 &{angle} C}
+end
+end
+* int 0 1
+(continuesonnextpage)
+7.60. CompoundExamples 1203
+
+[... start of page 1226 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+N 0 0 0 0.0 0.0 0.0
+DA 1 0 0 2.0 0.0 0.0
+H 1 2 0 1.06 &{angle} 0.0
+H 1 2 3 1.06 &{angle} 120.0
+H 1 2 3 1.06 &{angle} 240.0
+*
+Step_End
+endif
+energies[iang].readProperty(propertyName="SCF_ENERGY");
+print(" index: %3d Angle %6.2lf Energ

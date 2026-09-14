@@ -1,0 +1,107 @@
+[... end of page 753 ...]
+tude
+ofthemaximum(Cartesian)componentoftheatomforcearemonitored,i.e. max(|Fci|),RMS(Fci). Whengauging
+theconvergenceofallimagesinaCI-NEBcalculationitistypicallyacceptabletoconvergetheregularimagesmore
+looselythantheclimbingimage. Bydefault,thetolerancefortheregularimagesisafactorof10largerthanthatof
+theclimbingimage. Thisscalingofthetolerancesisaparameterthatcanbesetbytheuser(keyword: tol_scale).
+Typicallyforanacceptableconvergencetothesaddlepoint,thetolerancethresholdforthemaximummagnitude
+7.29. NudgedElasticBandMethod 731
+
+--- Page 754 ---
+ORCAManual,Release6.0.0
+ofanatomicforcecomponentoftheclimbingimagecanbesetto5·10−4Eh/Bohr.
+7.29.4 Generation of the initial path
+One of the most important aspects of any NEB or CI-NEB calculation is the generation of the initial path
+between the reactant and product energy minima (keyword: interpolation. The recommended method is
+the image-dependent pair potential (IDPP) method [806]. An alternative and simpler method is linear inter-
+polation in Cartesian coordinates. In either case, the user should always inspect the initial path (see file:
+basename_initial_path_trj.xyz)tomakecertainthatitisacceptable.
+By default, the endpoint structures are scanned for covalently linked fragments. If two fragments are detected
+in either of the endpoint structures, the structure is automatically prepared such that the distance between the
+fragmentsisnolargerthanamaximumdistancedefaultedto3.5Angstrom.
+The linear interpolation in Cartesian coordinates may result in overlap of atoms leading to large, initial, atomic
+forcesandevendivergenceintheSCFcycles. TheIDPPmethodsolvestheseproblemsbyinterpolatingpairwise
+distancesbetweenneighboringatomsinthereactantandproductenergyminimum. Then,apathisgeneratedto
+matchthosedistancesascloselyaspossible. Sincetherearemanymorepairwisedistancesthanatomcoordinates,
+theinitialpathisfoundbyminimizingtheobjectivefunction,
+𝑀 𝑀
+𝑆 IDPP (𝑟 )= ∑︁ ∑︁ 𝑤(𝑑 )(𝑑𝜅 −𝑑 )2 (7.218)
+𝜅 𝑖 𝐴𝐵 𝐴𝐵 𝐴𝐵
+𝐴 𝐵>𝐴
+where𝑑 isthepairwisedistancebetweenatoms𝐴and𝐵forintermediateimage𝑖. 𝑑𝜅 istheidealinterpolated
+𝐴𝐵 𝐴𝐵
+distancebetweenatoms𝐴and𝐵 ofthesameimage. 𝑤 isaweight-functiontogiveshorterbonddistancesmore
+weightandmakeunnecessarybond-breakingunfavorable. Theweightfunctionisgivenas𝑤 =(𝑑AB)−4. TheIDPP
+pathavoidstheoverlapofatomsandcanalsogenerateapaththatisclosertotheMEPthanthelinearinterpolation
+in Cartesian coordinates[806]. The IDPP path is obtained from an NEB calculation using the IDPP objective
+functionstartingfromalinearinterpolationoftheCartesiancoordinatesbetweentheendpointstructures,butthis
+calculationrequireslittlecomputationaleffortsinceitdoesnotrequireanyelectronicstructurecomputations. Note
+thatitispossiblethattheinitialpathbreakscovalentbondsandthatitcanbefarfromtheoptimalMEP,sotheuser
+shouldalwaysinspecttheinitialpathbeforestartinganNEBcalculation. Theusercanadjustthesettingsofthe
+IDPP calculations using the ‘idpp’ related keywords, but the default values should suffice for most applications.
+NotethattheunitsoftheIDPPareinÅngströmsinsteadofatomicunits. Thematrixofidealinterpolateddistance
+betweentheatoms𝐴and𝐵atimage𝑖,𝑑𝜅 ,ismostsimplyobtainedbylinearinterpolationas
+𝐴𝐵,𝑖
+(︁ )︁
+𝑑𝜅 =𝑑𝑖𝑛𝑖𝑡𝑖𝑎𝑙+𝑃 * 𝑑𝑓𝑖𝑛𝑎𝑙−𝑑𝑖𝑛𝑖𝑡𝑖𝑎𝑙 ,
+𝐴𝐵,𝑖 𝐴𝐵 𝑖 𝐴𝐵 𝐴𝐵
+where 𝑃 = 𝑖 is the position of image 𝑖 on the path between 0, corresponding to the initial image, and 1,
+correspo
+𝑖
+nding
+𝑛𝑖t𝑚o −
+th
+1
+efinalimage,and𝑛 isthetotalnumberofimages.
+𝑖𝑚
+Asthislineardistanceinterpolationmaynotbeideal,onecanalternativelychooseabilineardistanceinterpolation
+scheme thattakes atomicbonds intoaccount. Bondsbetween theatoms 𝐴 and 𝐵 in theinitial andfinal images
+areidentified iftheirdistance 𝑑 < 𝑡 = 𝑡 (𝑅𝑐𝑜𝑣+𝑅𝑐𝑜𝑣) , where 𝑡 isan inputfactorimpacting atwhat
+𝐴𝐵 𝑏𝑜𝑛𝑑 𝑐 𝐴 𝐵 𝑐
+distances a bond is detected by default taken to be 1.2, and 𝑅𝑐𝑜𝑣 is the covalent radius of atom 𝑋. If a bond is
+𝑋
+detected in one of the endpoint structures but not the other, two linear distance interpolations are performed to
+obtain𝑑𝜅 . Thefirstinterpolatesthedistancebetweentheendpointstructureinwhichtheatomsarebondedand
+𝐴𝐵,𝑖
+𝑡 ,thesecondinterpolatesthedistancebetween𝑡 andtheendpointstructureinwhichthebondisbroken.
+𝑏𝑜𝑛𝑑 𝑏𝑜𝑛𝑑
+Thetwolineardistanceinterpolationsarejoinedatthepathposition𝑃 defaultedto0.5,correspondingtothe
+𝑗𝑜𝑖𝑛
+midpointonthepathbetweentheendpointimages. Iftheatomsarebondedintheinitialstructurebutnotinthe
+finalstructure,theinterpolationis
+⎧ ⎨𝑑𝑖𝑛𝑖𝑡𝑖𝑎𝑙+ 𝑃𝑖 (𝑡𝑏𝑜𝑛𝑑−𝑑𝑖 𝐴 𝑛 𝐵 𝑖𝑡𝑖𝑎𝑙) , if𝑃 <𝑃
+𝑑𝜅 = 𝐴𝐵 𝑃𝑗𝑜𝑖𝑛 𝑖 𝑗𝑜𝑖𝑛
+𝐴𝐵,𝑖
+⎩𝑑𝑓𝑖𝑛𝑎𝑙−
+(1−𝑃𝑖)(𝑑𝑓
+𝐴
+𝑖
+𝐵
+𝑛𝑎𝑙−𝑡𝑏𝑜𝑛𝑑 )
+, if𝑃 ≥𝑃 .
+𝐴𝐵 (1.0−𝑃𝑗𝑜𝑖𝑛) 𝑖 𝑗𝑜𝑖𝑛
+Iftheatomsarebondedinthefinalstructurebutnotintheinitialstructure,theinterpolationis
+⎧ ⎨𝑑𝑖𝑛𝑖𝑡𝑖𝑎𝑙− 𝑃𝑖 (𝑑𝑖 𝐴 𝑛 𝐵 𝑖𝑡𝑖𝑎𝑙−𝑡𝑏𝑜𝑛𝑑 ) , if𝑃 <1−𝑃
+𝑑𝜅 = 𝐴𝐵 1−𝑃𝑗𝑜𝑖𝑛 𝑖 𝑗𝑜𝑖𝑛
+𝐴𝐵,𝑖
+⎩𝑑𝑓𝑖𝑛𝑎𝑙+
+(1−𝑃𝑖)(𝑡𝑏𝑜𝑛𝑑−𝑑𝑓
+𝐴
+𝑖
+𝐵
+𝑛𝑎𝑙)
+, if𝑃 ≥1−𝑃 .
+𝐴𝐵 𝑃𝑗𝑜𝑖𝑛 𝑖 𝑗𝑜𝑖𝑛
+732 Chapter7. DetailedDocumentation
+
+[... start of page 755 ...]
+ORCAManual,Release6.0.0
+Thisbilinearinterpolationleadstoaslowerincreaseoftheatomdistanceinthebondedregioncomparedtothe
+non-bondedregioninmostcases,emphesizingthebondbreakingprocessandthustheregionwheretheenergyis
+changedmostbyachangeinthebonddistance. Ifthechangeinthebonddistanceinthenon-bondedregionisslower
+thanthechangeinthebondedregion,theimplementationfallsbacktotheregularlineardistanceinterpolation.
+Inchallengingcases,eventheIDPPNEBcalculationstartingfromalinearinterpolationoftheCartesiancoordi-
+natesbetweentheendpointstructuresmaynotprovideareasonableinitialpath. Thismayhappenwhenthelinear
+interpolationpathhasatomscomeveryclosetoeachotherinintermediateimages,whichleadstobondbreaking
+even after NEB optimization using the IDPP objective function. In such cases, a reasonable initial path can of-
+tenbeobtainedbyavoidingthelinearinterpolationbysequentia

@@ -1,0 +1,79 @@
+[... end of page 730 ...]
+ection functions, this is not sufficient to remove all linear dependencies from the set of projection functions
+{Φ˜ },i.e.themetricmatrix
+𝑃
+𝑆 =⟨Φ˜ |Φ˜ ⟩≠ 𝛿
+𝑃𝑄 𝑃 𝑄 𝑃𝑄
+has off-diagonal elements within excitation classes and between classes with the same number of inactive and
+virtual indices (ITAU and ITUA). Hence, the set of projection functions needs to be orthonormalized, which is
+achievedwithLöwdin’scanonicorthogonalizationintheAUTOCImodule.1
+1ThisissimilartoschemeAfromRef.[357].
+708 Chapter7. DetailedDocumentation
+
+--- Page 731 ---
+ORCAManual,Release6.0.0
+InputExample
+The fic-MRCC module can be started by specifying the CIType keyword in the %autoci block or by adding
+fic-MRCC to the simple input line of an ORCA input file. The following example computes the singlet ground
+stateenergyoffourhydrogenatomsarrangedasasquarewithasidelengthof2𝑎 ,whichiscommonlyknownas
+0
+theH4model[418].
+! cc-pVTZ Bohrs # it is possible to add the (cid:96)fic-MRCC' keyword here
+# and omit the %autoci block below
+%maxcore 10000
+%casscf
+nel 2
+norb 2
+mult 1
+nroots 1
+end
+%autoci # CAS settings are automatically copied from the CASSCF block!
+citype fic-mrcc
+end
+* int 0 1
+H 0 0 0 0.0 0.0 0.0
+H 1 0 0 2.0 0.0 0.0
+H 2 1 0 2.0 90.0 0.0
+H 1 2 3 2.0 90.0 0.0
+*
+Inthisexample,ORCAwillfirstrunastate-specificCASSCFcalculation,andthenimmediatelycontinuewiththe
+fic-MRCCcalculationontopoftheCASSCFsolutionfromthefirststep. Itis,however,notrequiredtoalwaysruna
+CASSCFcalculationbeforetheautocimodule. AnyORCAgbw/mp2nat/... fileisacceptedthrough%moinp,
+althoughthatrouterequirestheusertospecifytheactivespaceintheautociblock. autociwillthencomputea
+CASCIsolutionwiththeprovidedinputorbitalsandusethatinformationtodrivethecorrelatedcalculations.
+Notethatinthecurrentimplementation,autoci_fic_mrccrequireslargestacksizes,whichmayleadtosegmen-
+tationfaultsimmediatelyafterstartingtheprogram. Werecommendastacksizeofatleast16MiB.OnUnix-like
+systems, this can be achieved by issuing the command ulimit -s 16384 in the terminal or in the submission
+scriptpriortorunningthefic-MRCCmodule.
+Please be aware that fic-MRCC is a very extensive theory, which leads to long run times. The computational
+effort depends mainly on the number of orbitals, the number of total electrons and the size of the active space.
+Onmodestlymodernhardware,calculationsof∼300orbitalswithaCAS(2,2)shouldbereadilyachievable. For
+largeractivespaces,suchasaCAS(6,6),calculationswithatotalof∼200orbitalswillalsocompletewithinaday.
+7.26 Geometry Optimization
+ORCA is able to calculate equilibrium structures (minima and transition states) using the quasi Newton update
+procedurewiththewellknownBFGSupdate[67,241,399,761,762,763],thePowellortheBofillupdate. The
+optimizationcanbecarriedoutineitherredundantinternal(recommendedinmostcases)orCartesiandisplacement
+coordinates. As initial Hessian the user can choose between a diagonal initial Hessian, several model Hessians
+(Swart,Lindh,Almloef,Schlegel),anexactHessianandapartiallyexactHessian(bothrecommendedfortransition
+stateoptimization)forbothcoordinatetypes. Inredundantinternalcoordinatesseveraloptionsforthetypeofstep
+tobetakenexist. Theusercandefineconstraintsviatwodifferentpaths. Hecaneitherdefinethemdirectly(as
+bondlength,angle,dihedralorCartesianconstraints)orhecandefineseveralfragmentsandconstrainthefragments
+internallyandwithrespecttootherfragments. TheORCAoptimizercanbeusedasanexternaloptimizer,i.e.the
+energyandgradientcalculationsdonebyORCA.
+7.26. GeometryOptimization 709
+
+[... start of page 732 ...]
+ORCAManual,Release6.0.0
+7.26.1 Input Options and General Considerations
+Theuseofthegeometryoptimizationmoduleisrelativelystraightforward.1
+%method RunTyp Opt # use geometry optimization.
+#(equivalent is RunTyp=Geom)
+end
+# or simply "! Opt" in the keyword line
+# details of the optimization are controlled here
+%geom
+MaxIter 50 # max. number of geometry iterations
+# (default is 3N (N = number of atoms), at least 50 )
+# coordinate type control
+coordsys redundant # redundant internal coords (2022)
+cartesian # Cartesian c

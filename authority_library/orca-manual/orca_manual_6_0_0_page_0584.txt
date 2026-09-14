@@ -1,0 +1,83 @@
+[... end of page 583 ...]
+erencewavefunctionsuffersfromspin-contaminationwhich
+can spoil the results and lead to convergence problems. This can be avoided if quasi-restricted orbitals (QROs)
+areused[391,611]sincethecorrespondingzeroth-orderwavefunctionisaneigenfunctionofthe𝑆ˆ2operatorand
+thus,noseverespin-contaminationwillappear. Thecoupled-pairandcoupled-clusterequationswillbestillsolved
+in a spin-unrestricted formalism but the energy will be slightly higher compared to the results obtained with a
+spin-polarizedUHFreferencedeterminant. Furthermore,especiallyformoredifficultsystemslikee.g. transition
+metalcomplexes,itisoftenadvantageoustouseKohn-Sham(KS)orbitalsinsteadofHForbitals.
+7.14. TheSingleReferenceCorrelationModule 561
+
+--- Page 584 ---
+ORCAManual,Release6.0.0
+7.14.4 Local correlation
+Asdescribedinprevioussectionsofthemanual,ORCAfeaturestheextremelypowerfulLPNOandDLPNOmeth-
+ods. “LPNO”standsfor“localpairnaturalorbital”approximationandDLPNOfor“domainbasedLPNO”. These
+methodsaredesignedtoprovideresultsascloseaspossibletothecanonicalcoupled-clusterresultswhilegaining
+ordersofmagnitudeofefficiencythroughaseriesofwell-controlledapproximations. Infact,typicallyabout99.8%
+to99.9%ofthecanonicalcorrelationenergyisrecoveredinsuchcalculations. Evenhigheraccuracyisachievable
+butwillultimatelycomeatmuchhighercomputationalcost. Thedefaultcut-offsaresetsuchthatthevastmajor-
+ityofchemicallymeaningfulenergydifferencesarereproducedtobetterthan1kcal/molrelativetothecanonical
+resultswiththesamebasisset. OftheLPNOandDLPNOmethods,theLPNOistheolderoneandwilleventually
+bediscardedfromORCA.Ithassomehigherorderscalingsteps(upto𝑁5)whileDLPNOislinearscalingand
+ofsimilaraccuracy. AmongsttheDLPNOmethods,thefirstgenerationimplementationoftheDLPNOmethods
+(DLPNO2013)isonlynear-linearscaling,whiletheDLPNOimplementationsinceORCA4.0islinearscaling.
+ItisimportanttounderstandthattheLPNOandDLPNOimplementationsareintimatelytiedtotheRIapproxima-
+tion. Hence, inthesecalculationsonemust specifyafittingbasisset. ThesamerulesasforRI-MP2apply: the
+auxiliarybasissetsoptimizedforMP2arejustfineforPNOcalculations. Youcanspecifyseveralauxbasesfor
+thesamejobandtheprogramwillsortitoutcorrectly.
+ThetheoryoftheLPNOmethodshasbeenthoroughlydescribedintheliteratureinanumberoforiginalresearch
+papers.[616,622,719,721]
+Hence,itissufficienttoonlypointtoafewsignificantdesignprinciplesandfeaturesofthesemethods:
+1. The correlation energy of any molecule can be written as a sum over the correlation energies of pairs of
+electrons, labelled by the internal indices (𝑖𝑗) of pairs of orbitals that are occupied in the reference deter-
+minant. If the orbitals (𝑖) and (𝑗) are localized, the pair correlation energy 𝜖 falls off very quickly with
+𝑖𝑗
+distance,quitetypicallybyaboutanorderofmagnitudeperchemicalbondthatisseparatingorbitals(𝑖)and
+(𝑗). Hence,byusingasuitablecut-offforareasonablepaircorrelationenergyestimatemanyelectronpairs
+canberemovedfromthehigh-leveltreatmentandonlyalinearscalingnumberofelectronpairswillmake
+asignificantcontributiontothecorrelationenergy.
+2. Thenaturalestimateforthepaircorrelationenergycomesfromsecondordermanybodyperturbationtheory
+(MP2). However, canonical MP2 is scaling with the fifth power of the molecular size and hence, is not
+reallyattractivefromatheoreticalnorcomputationalpointofview. Owingtothesmallpre-factorRI-MP2
+goesalongwaytoprovidereasonablycheapestimatesforpaircorrelationenergies. However, ifoneuses
+localizedinternalorbitals,thentheMP2energyexpressionmustbecastinformoflinearequations. Onthe
+other hand, if one uses canonical virtual orbitals together with localized internal orbitals and neglects the
+couplingtermscomingfrompurelyinternalFockmatrixelementsF(𝑖,𝑘)andF(𝑘,𝑗)thenoneendsupwith
+afairapproximationthatistermed“semi-canonicalMP2”inORCA.ItservesasaguessintheolderLPNO
+method. ForDLPNOthismethodisalsonotattractive.
+3. InDLPNO,theguessismoresophisticated. Herethevirtualspaceisspannedbyprojectedatomicorbitals
+(PAOs) that are assigned to domains of atoms that are associated with each local internal orbital (𝑖) and
+with the union of two such domains (𝑖) and (𝑗) for the electron pair (𝑖𝑗). If one applies the semi-local
+approximation,oneobtainsanexcellentapproximationtothesemi-canonicalMP2energy. Thisiscalledthe
+“semi-local”approximationanditscaleslinearlywithrespecttocomputationaleffort. Ifoneiteratesthese
+equationstoself-consistencytoeliminatethecouplingtermsF(𝑖,𝑘)andF(𝑘,𝑗)thenoneobtainsthefulllocal
+MP2method(LMP2orL-MP2). Bymakingthedomainslargeenoughtheresultsapproachthecanonical
+MP2energytoarbitraryaccuracywhilestillbeinglinearscalingwithrespecttocomputationalresources.
+ThismethodisthedefaultfortheDLPNOmethod.
+4. Basically,thehigh-spinopen-shellversionoftheDLPNOusesthesamestrategyastheclosed-shellvariant
+toefficientlygeneratetheopen-shellPNOsinaconsistentmannertotheclosed-shellformalism. Throughthe
+developmentoftheUHF-LPNO-CCSDmethod,wehaverealizedthatuseoftheunrestrictedMP2(UMP2)
+approach to define the open-shell PNOs introduces a few complexities; (1) the PNOs for 𝛽 spin orbitals
+cannotbedefinedfor𝛼-𝛼electronpairsandviceversa,(2)thediagonalPNOsforsinglyoccupiedorbitals
+cannot be properly defined, and (3) the PNO space does not become identical to that in the closed-shell
+LPNO framework in the closed-shell limit. However, to program all the unrestricted CCSD terms in the
+LPNO basis, those PNOs are certainly necessary. Therefore, in the UHF-LPNO-CCSD implementation,
+severalterms,which,inmanycases,giveratherminorcontributionsinthecorrelationenergyareomitted.
+Due tothese facts, theUHF-LPNO-CCSD does notgive identical resultsto that ofRHF-LPNO-CCSD in
+562 Chapter7. DetailedDocumentation
+
+[... start of page 585 ...]
+ORCAManual,Release6.0.0
+the closed-shell limit. In addition, screening of the weak pairs on the basis of the semi-canonical UMP2
+pair-energy results in somewhat unbalanced treatment of the closed- and open-shell states in some cases,
+leading to rather larger errors in the reaction energies. To overcome those issues, in the high-spin open-
+shellDLPNO-CCSDmethod,thePNOsaregeneratedintheframeworkofsemi-canonicalNEVPT2which
+smoothlyconvergestotheRHF-MP2counterpartintheclosed-shelllimit. Theopen-shellDLPNO-CCSD,
+whichismadeavailablefromORCA4.0,includesafullsetoftheopen-shellCCSDequationsandisdesigned
+asanaturalextensiontotheRHF-DLPNO-CCSD.
+5. Screeningoftheelectronpairsaccordingtoatruncationparameter(inORCAitiscalled𝑇 )isnot
+CutPairs
+sufficienttoobtainahighlyperforminglocalelectronicstructuremethod. TheoriginalworkofPulaysug-
+gestedtolimitexcitationsoutoftheinternalorbitals(𝑖)and(𝑗)tothedomainassociatedwiththepair(𝑖𝑗).
+Whilethisworkswellandhasbeeni

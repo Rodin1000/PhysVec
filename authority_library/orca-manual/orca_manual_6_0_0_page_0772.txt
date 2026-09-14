@@ -1,0 +1,67 @@
+[... end of page 771 ...]
+F-TDA,let’stakeacloserlookatthepicture
+representingsomepossibleexcitations:
+Fig. 7.26: Effect of the spin-flip operator on a UHF (𝑀𝑆 = 3) wavefunction. The “spin-complete” states are
+eigenvectorsofthe𝑆2operator,whilethe“spin-incomplete”arenot. Alphaandbetaorbitalsherearerepresented
+withthesameenergy,justtosimplifytheimage. Adaptedfromthepreviouslymentionedreview.
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 749
+
+--- Page 772 ---
+ORCAManual,Release6.0.0
+ItisimportanttonotethatnoallSF-excitationsleadtodeterminantsthatareeigenvaluesofthe𝑆2 operator. That
+means,dependingonhowmuchofthese“spinincomplete”excitationsarepresentinthefinalSF-state,thespin-
+contaminationcouldbehigh,andinthiscase,stateswith⟨𝑆2⟩≃1wouldbepredicted. Theseareundefinedstates
+withintheSFtheoryandshouldbetreatedcarefully.
+OBS.: AnySFmethodcanonlybeusedstartingfromaUHFwavefunction,withamultiplicityofatleast3!
+Firstexample: methyleneandSF-CIS
+Onesimpleexampleisthecalculationoftheverticalsinglet-tripletsplittingofthemethyleneradicalwithinCIS,
+usingthefollowinginputwithsymmetryincluded:
+!HF 6-31G USESYM
+%TDDFT SF TRUE END
+* XYZ 0 3
+C 0 0 0.1058
+H 0 0.9910 -0.3174
+H 0 -.9910 -.3174
+*
+Thegeometrywastakenfromahigh-levelCCSD(T)/cc-pVQZ(𝑋3𝐵 )optimizedgeometry,andaftertheregular
+1
+UHFSCF,theSF-CISresultis:
+---------------------
+SF-CIS EXCITED STATES
+---------------------
+the weight of the individual excitations are printed if larger than 1.0e-02
+(SPIN-FLIP GROUND STATE)
+STATE 1: E= 0.004953 au 0.135 eV 1087.0 cm**-1 <S**2> = 2.044208 Sym: B1
+1a -> 3b : 0.018853 (c= 0.13730475)
+3a -> 3b : 0.474153 (c= -0.68858776)
+3a -> 10b : 0.015096 (c= -0.12286571)
+4a -> 4b : 0.451519 (c= 0.67195159)
+4a -> 9b : 0.023981 (c= 0.15485668)
+STATE 2: E= 0.065212 au 1.774 eV 14312.3 cm**-1 <S**2> = 0.019616 Sym: A1
+3a -> 4b : 0.126253 (c= 0.35532096)
+4a -> 3b : 0.833446 (c= -0.91293269)
+4a -> 10b : 0.017089 (c= -0.13072354)
+STATE 3: E= 0.085608 au 2.330 eV 18788.7 cm**-1 <S**2> = 0.028873 Sym: B1
+3a -> 3b : 0.461538 (c= 0.67936623)
+3a -> 10b : 0.010687 (c= 0.10337584)
+4a -> 4b : 0.497210 (c= 0.70513090)
+4a -> 9b : 0.018632 (c= 0.13649832)
+Now, it is very important to consider that the SF ground state is not the UHF ground state anymore, the
+“new”groundstatewithintheSFschemeisactuallySTATE1. YoucanthinkoftheUHFasbeingonlyaninitial
+model,onthebasisofwhichtheSFstatesarebuilt. ThefinalenergyofthenewgroundstateisactuallytheSCF
+energy+energyoftheSTATE1(whichistheonegivenastheFINALSINGLEPOINTENERGYisnoIROOT
+isgiven). Thislastcontributioncanbeeitherpositiveornegative,dependingonthecase.
+Anyway,thegroundstateispredictedtobeatripletstate(herewith𝑀 =0),asexpectedforthiscarbene,andthe
+𝑆
+S-Tspitingenergyis1.774−0.135eV= 1.639eV.ThefullCIresultsforthatis1.50eV,soitisalreadyalmost
+there! Of course, in this case computing the RHF singlet - UHF triplet makes no sense, since the RHF singlet
+wouldnothavethenecessaryopen-shellsingletcharacter.
+750 Chapter7. DetailedDocumentation
+
+[... start of page 773 ...]
+ORCAManual,Release6.0.0
+BenzyneandSF-TDA
+Benzyneisaclassicdiradicalthatcanbegeneratedfrombenzenebyhydrogenabstraction(Fig.7.27). Itisknown
+tohaveanopen-shellsingletgroundstate,andhasitsadiabaticsinlget-tripletsplittingmeasuredexperimentally.
+Let’strytocomputethisvalueusingSF-TDAwithORCA.
+Fig. 7.27: Lewis representation of the benzene and benzyne molecules, indica

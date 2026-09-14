@@ -1,0 +1,81 @@
+[... end of page 130 ...]
+to get the final energy
+Read_MOs 1
+New_Step
+! wB97M(2) SCNL NoFrozenCore def2-TZVP def2-TZVP/C
+%scf
+MaxIter 1
+IgnoreConv 1 # prevent the "not converged" error
+end
+Step_End
+Read EwB97MV = DFT_Total_En[1]; # wB97M-V energy
+Read EwB97M2 = MP2_Total_Energy[2]; # wB97M(2) energy
+End
+108 Chapter6. RunningTypicalCalculations
+
+--- Page 131 ---
+ORCAManual,Release6.0.0
+DFTCalculationswithAtom-pairwiseDispersionCorrection
+ItiswellknownthatmanyDFTfunctionalsdonotincludedispersionforces. Itispossibletouseasimpleatom-
+pairwisecorrectiontoaccountforthemajorpartsofthiscontributiontotheenergy[131,321,324,326]. Wehave
+adoptedthecodeandmethoddevelopedbyStefanGrimmeinthisORCAversion. Themethodisparameterizedfor
+manyestablishedfunctionals(e.g. BLYP,BP86,PBE,TPSS,B3LYP,B2PLYP).7 Forthe2010modeltheBecke-
+Johnsondampingversion(! D3BJ)isthedefaultandwillautomaticallybeinvokedbythesimplekeyword! D3.
+Thechargedependentatom-pairwisedispersioncorrection(keyword! D4)isusingtheD4(EEQ)-ATMdispersion
+model[132],otherD4versions,usingtight-bindingpartialcharges,arecurrentlyonlyavailablewiththestandalone
+DFT-D4program.
+! BLYP D3 def2-QZVPP Opt
+%paras R= 2.5,4.0,16
+end
+%geom Constraints
+{ C 0 C }
+{ C 1 C }
+end
+end
+* xyz 0 1
+Ar 0.0000000 0.0000000 {R}
+H 0.0000000 0.0000000 0.0000000
+C 0.0000000 0.0000000 -1.0951073
+H 0.5163499 0.8943443 -1.4604101
+H 0.5163499 -0.8943443 -1.4604101
+H -1.0326998 0.0000000 -1.4604101
+*
+Inthisexample,aBLYPcalculationwithoutdispersioncorrectionwillshowarepulsivepotentialbetweentheargon
+atomandthemethanemolecule. UsingtheD3dispersioncorrectionasshownabove, thepotentialcurveshows
+a minimum at about 3.1−3.2 Å. The atom-pairwise correction is quite successful and Grimme’s work suggests
+that this is more generally true. For many systems like stacked DNA base pairs, hydrogen bond complexes and
+otherweakinteractionstheatom-pairwisedispersioncorrectionwillimprovesubstantiallytheresultsofstandard
+functionalsatessentiallynoextracost.
+Note:
+• Dispersioncorrectionsdonotonlyaffect non-covalentcomplexes, but alsoaffectconformationalenergies
+(andconformerstructures)whichareheavilyinfluencedbyintramoleculardispersion. Therefore,forlarge
+and/or flexible molecules, including the dispersion correction is almost always recommended or even re-
+quired (except for a handful of cases where it cannot, should not or need not be used, see below). For
+smallsystems,thedipersioncorrectionmayresultinbasicallynoimprovementoftheresults,butisusually
+harmlessanyway.
+• DFTcalculationswithsmallbasissets(suchasdoublezetabasissets)oftenyieldattractivepotentialenergy
+surfacesevenwithoutthedispersioncorrection. However,thisisduetobasissetsuperpositionerror(BSSE),
+andtheinteractionenergybroughtaboutbytheBSSEfrequentlydoesnotmatchthetrueinteractionenergy
+duetodispersion(becausetheyhavecompletelydifferentorigins). Therefore,althoughaDFTdoublezeta
+calculationwithoutthedispersioncorrectionmayappeartogivequalitativelycorrectresults,oroccasionally
+evenbetterresultsthanadoublezetacalculationwithdispersioncorrections(becauseinthelattercaseone
+typically overestimates the total attraction), it is still highly recommended to “get the right answer for the
+rightreason”byreducingtheBSSEandturningonthedispersioncorrection. TheBSSEcanbecorrected
+byavarietyofmeans,forexample(1)byusingalargerbasisset;(2)byusingthecounterpoisecorrection
+7Forexpertusers: ThekeywordD2,D3ZERO,D3BJandD4selecttheempirical2006,theatom-pairwise2010model,respectively,with
+eitherzero-dampingorBecke-Johnsondamping,orthepartialchargedependentatom-pairwise2018model.Thedefaultisthemostaccurate
+D3BJmodel. Theoutdatedmodelfrom2004[319]isnolongersupportedandcanonlybeinvokedbysettingDFTDOPT = 1. TheC6-scaling
+coefficientcanbeuserdefinedusinge.g.“%method DFTDScaleC6 1.2 end”
+6.1. SinglePointEnergiesandGradients 109
+
+[... start of page 132 ...]
+ORCAManual,Release6.0.0
+(CounterpoiseCorrection); or(3)byusingthegeometricalcounterpoisecorrection(sectionDFTandHF
+CalculationswiththeGeometricalCounterpoiseCorrection: gCP).Ofthese,(3)isavailableatalmostno
+cost(includinganalyticgradientcontributions),andisespeciallysuitableforgeometryoptimizationoflarge
+molecules. Otherwise(1)(oritscombinationwith(2))maybemoreappropriateduetoitshigheraccuracy.
+• FunctionalsthatcontainVV10-typenon-localdispersion(ingeneral,thesearethefunctionalswhosenames
+endwith“-V”)donotneed(andcannotbeusedtogetherwith)dispersioncorrections. Thesameholdsfor
+post-HFandmultireferencemethods,likeMP2,CCSD(T),CASSCFandNEVPT2. However,onecanadd
+adispersioncorrectionontopofHF.
+• Certainfunctionals,es

@@ -1,0 +1,67 @@
+[... end of page 479 ...]
+true for
+CAM-B3LYP,LC-BLYP,andLC-PBE.ItispossibletouseafixedamountofHartree-Fockexchange(EXX)and/or
+a fixed amount of DFT exchange in this ansatz. Here are some examples of range-separated hybrid functionals
+availableinORCAandtheirparameters:
+7.4. ChoiceofComputationalModel 457
+
+--- Page 480 ---
+ORCAManual,Release6.0.0
+Functional Keyword fixedEXX variablepart 𝜇/bohr−1 fixedDFT-X Reference
+𝜔B97 WB97 — 100% 0.40 — [151]
+𝜔B97X WB97X 15.7706% 84.2294% 0.30 — [151]
+𝜔B97X-D3 WB97X-D3 19.5728% 80.4272% 0.25 — [525]
+𝜔B97X-V WB97X-V 16.7% 83.3% 0.30 — [554]
+𝜔B97X-D3BJ WB97X-D3BJ 16.7% 83.3% 0.30 — [602]
+CAM-B3LYP CAM-B3LYP 19% 46% 0.33 35% [898]
+LC-BLYP LC-BLYP — 100% 0.33 — [844]
+LC-PBE LC-PBE — 100% 0.47 — [410]
+The currently available speed-up options are RIJONX and RIJCOSX. Integral-direct single-point calculations,
+calculations involving the first nuclear gradient (i.e. geometry optimizations), frequency calculations, TDDFT,
+TDDFT nuclear gradient, and EPR/NMR calculations are the supported job types with range-separated hybrid
+functionalsthusfar.
+Inprinciple,itispossibletochangetheamountoffixedHartree-Fockexchange(ACM-A),theamountofvariable
+exchange(RangeSepScal),and𝜇,thoughthisisnotrecommended. TheamountoffixedDFTExchange(ACM-B)
+canonlybechangedforCAM-B3LYPandLC-BLYP.Inotherwords,ACM-Bisignoredbythe𝜔B97approaches
+asnocorresponding𝜇-independentexchangefunctionalhasbeendefined.
+! RKS CAM-B3LYP DEF2-SVP
+# default parameters for CAM-B3LYP:
+%method
+RangeSepEXX True # must be set
+RangeSepMu 0.33 # should not be set to 0.0 or below
+RangeSepScal 0.46 # should sum to 1 with ACM-A and ACM-B
+ACM 0.19, 0.35, 0.81 # ACM-A, ACM-B, ACM-C(same as B3LYP)
+end
+* xyz 0 1
+H 0.0 0.0 0.0
+H 0.0 0.0 0.7
+*
+Note: ForinformationontheACMformalism,seeprecedingsectioncalled“SpecifyingExchangeandCorrelation
+approximations individually”. While it is technically possible to choose an exchange functional that has no 𝜇-
+dependence,thismakesnosenseconceptually.
+LibXCFunctionals
+SinceORCA4.2,itispossibletousethefunctionalsprovidedbyLibXC2withintheORCAframework. TheLibXC
+versionusedbyORCAisprintedatthebeginningoftheoutput. TheLibXCreferenceshouldbecitedwhenLibXC
+isusedaspartofyourcalculations. Forreference,see[506].
+ThecompletelistoffunctionalsavailableviatheLibXCinterfacecanalwaysbeinspectedbytypingatthecommand
+line
+orca -libxcfunctionals
+Thelistoffunctionalshasthefollowingform:
+Functionals available via LibXC:
+No.: ID / Keyword - Name
+(continuesonnextpage)
+2https://libxc.gitlab.io
+458 Chapter7. DetailedDocumentation
+
+[... start of page 481 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+0: 18 / lda_c_1d_csc - Casula, Sorella & Senatore
+1: 26 / lda_c_1d_loos - P-F Loos correlation LDA
+2: 15 / lda_c_2d_amgb - AMGB (for 2D systems)
+3: 16 / lda_c_2d_prm - PRM (for 2D systems)
+4: 552 / lda_c_br78 - Brual & Rothstein 78
+...
+Thelistisgroupedby“level”offunctional(LDA,GGA,meta-GGA,etc.) andthenbypartoftheenergyitmodels
+(correlation, exchange, exchange-correlation). Correlation functionals carry a ’_c_’ in their names, exchange
+functionals an ’_x_’, and combined exchange-correlation func

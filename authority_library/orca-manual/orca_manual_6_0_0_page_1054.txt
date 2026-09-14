@@ -1,0 +1,101 @@
+[... end of page 1053 ...]
+c -1
+hfcgaugecorrection_prunegrid -1
+hfcgaugecorrection_bfcutoff -1
+hfcgaugecorrection_wcutoff -1
+Nuclei = all type { flags }
+# Calculate nuclear properties. Here the properties
+# for all nuclei of "type" are calculated ("type" is
+# an element name, for example Cu.)
+# Flags can be the following:
+# aiso - calculate the isotropic part of the HFC
+# adip - calculate the dipolar part of the HFC
+# aorb - 2nd order contribution to the HFC from SOC
+# fgrad - calculate the electric field gradient
+(continuesonnextpage)
+7.54. CalculationofProperties 1031
+
+--- Page 1054 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# rho - calculate the electron density at the
+# nucleus
+# shift - NMR shielding tensor (orbital contribution)
+# srot - spin-rotation tensor
+# ssdso - spin-spin coupling constants, diamagnetic spin orbit term
+# sspso - spin-spin coupling constants, paramagnetic spin orbit term
+# ssfc - spin-spin coupling constants, Fermi contact term
+# sssd - spin-spin coupling constants, spin dipole term
+# ssall - spin-spin coupling constants, calculate all above contributions
+# In addition you can change several parameters
+# e.g. for a different isotope.
+Nuclei = all N { PPP=39.1, QQQ=0.5, III=1.0 };
+# PPP - the HFC proportionality factor for this nucleus
+# = ge*gN*betaE*betaN
+# QQQ - the quadrupole moment for this nucleus
+# III - the spin for this nucleus
+# ist - isotope
+# ssgn - nuclear g-factor for spin-spin coupling
+# and spin-rotation constants (overrides ist)
+# For example:
+# calculates the hyperfine coupling for all nitrogen atoms
+Nuclei = all N { aiso, adip, fgrad, rho};
+# calculates the spin-spin coupling constants for all carbon atoms
+# assuming all carbon atoms are 13C
+Nuclei = all C { ssall, ist = 13};
+# You can also calculate properties for individual atoms
+# as in the following example:
+Nuclei = 1,5,8 { aiso, adip};
+# NOTE: Counting starts with atom 1!
+# WARNING: All the nuclei, mentioned in one line
+# as above will be assigned the same parameters !
+# For spin-spin coupling constants, a distance threshold is
+# applied in the eprnmr block to restrict the number of couplings
+# to be computed, given in Angstroms:
+SpinSpinRThresh 5.0 # default
+# Coupling can be restricted to certain element pairs
+# (if they are added to the "Nuclei" list and are within RThresh).
+# The syntax accepts multiple pairs of element symbols or
+# atomic numbers or "*" as a wildcard
+SpinSpinElemPairs {C C} {H *} {6 7} # default is {* *}, i.e. all
+# Similarly, coupling can be restricted to certain atom pairs
+# (if they are added to the "Nuclei" list and are within RThresh).
+# The syntax accepts multiple pairs of indices (starting at 0!)
+# or "*" as a wildcard
+SpinSpinAtomPairs {1 0} {5 *} # default is {* *}, i.e. all
+# whether to print reduced spin-spin coupling constants
+PrintReducedCoupling false
+end
+1032 Chapter7. DetailedDocumentation
+
+[... start of page 1055 ...]
+ORCAManual,Release6.0.0
+HyperfineandQuadrupoleCouplings
+Thehyperfinecouplinghasfourcontributions:
+(a)TheisotropicFermicontacttermthatarisesfromthefinitespindensityonthenucleusunderinvestigation. It
+iscalculatedfornucleus𝑁 from:
+(︂ 4 )︂ (︁ )︁
+𝑎iso(𝑁)=
+3
+𝜋⟨𝑆
+𝑧
+⟩−1 𝑔
+𝑒
+𝑔
+𝑁
+𝛽
+𝑒
+𝛽
+𝑁
+𝜌 𝑅⃗
+𝑁
+(7.348)
+Here, ⟨𝑆 ⟩istheexpectationvalueofthez-componentofthetotalspin, 𝑔 and𝑔 aretheelectronandnuclear
+𝑧 𝑒 𝑁
+(︁ )︁
+g-factorsand𝛽 and𝛽 aretheelectronandnuclearmagnetonsrespectively. 𝜌 𝑅⃗ isthespindensityatthe
+𝑒 𝑁 𝑁
+nucleus. Theproportionalityfactor𝑃 = 𝑔 𝑔 𝛽 𝛽 iscommonlyusedandhasthedimensionsMHzbohr3 in
+𝑁 𝑒 𝑁 𝑒 𝑁
+ORCA.
+(b)Thespindipolepartthatarisesfromthemagneticdipoleinteractionofthemagneticnucleuswiththema

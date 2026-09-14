@@ -1,0 +1,84 @@
+[... end of page 70 ...]
+ueisused.
+Considerthefollowing(bad)example:
+! def2-TZVP UKS
+%method
+functional BP86
+correlation C_LYP
+SpecialGridAtoms[1] 26, 27
+SpecialGridIntacc 8, 8, 8
+SpecialGridAtoms 28, 29
+end
+! PBE def2-SVP RKS
+Usingtherulesabove,onecanfigureoutwhyitisequivalenttothisone:
+! UKS BLYP def2-SVP
+%method
+SpecialGridAtoms 28, 29, 27
+SpecialGridIntacc 8, 8, 8
+end
+48 Chapter4. GeneralStructureoftheInputFile
+
+--- Page 71 ---
+ORCAManual,Release6.0.0
+4.6 ORCA and Symmetry
+Formostofitslife,ORCAdidnottakeadvantageofmolecularsymmetry. Startingfromversion2.8(releasedin
+September2010),therehasbeenatleastlimiteduse. Onrequest(usingthesimplekeywordUseSymforinstance,
+see below), the program detects the point group, orients the molecule, cleans up the coordinates and produces
+symmetry-adaptedmolecularorbitals.
+Onlyforgeometrycleanupthefullpointgroupistakenintoaccount. Forallotherpurposessuchastheconstruction
+ofsymmetry-adaptedmolecularorbitalsandortodescribeelectronicstates,only𝐷 andsubgroupsarecurrently
+2ℎ
+supported. Heretheuseofsymmetryhelpstocontrolthecalculationandtheinterpretationoftheresults.
+4.6.1 Getting started
+UtilizationofsymmetryisturnedonbythesimplekeywordUseSymmetry(whichmaybeabbreviatedbyUseSym),
+orifa%Symmetry(or%Sym)inputblockispresentintheinput. ORCAwillthenautomaticallydeterminethepoint
+group,reorientandcenterthemoleculetoalignitssymmetryelementswiththecoordinatesystem,andreplacethe
+inputstructurebyageometrythatcorrespondsexactlytothispointgroupandwhichminimizesthesumofsquare
+distancesbetweentheatomsofbothstructures.
+Anyprogramthatattemptstofindthepointgroupofanarbitraryatomclustermustbepreparedtocopewithsome
+amountofnumericalnoiseintheatomcoordinates. ORCAbydefaultallowseachatomtodeviateatmost10−4
+atomicunitsfromtheidealpositionthatisconsistentwiththepointgroupbeingexamined. Therationalebehind
+thisvalueistheroundingerrorthatoccurswhentheuserfeedsCartesiancoordinateswithfivesignificantdigits
+after the decimal point into the program which otherwise represent an exact (symmetry-adapted) geometry. A
+thresholdthatisaboutoneorderofmagnitudehigherthanthenumericalnoiseinthecoordinatesisusuallyvery
+safe.
+IfthemaximumerrorintheCartesiancoordinatesexceedsthese10−4atomicunits,thesymmetrymoduleinORCA
+willfailtorecognizetheexpectedpointgroup. Theuserisstronglyadvisedtoalwaysmakesurethatthedetected
+pointgroupmeetstheirexpectations. Ifthepointgroupreportedbythesymmetrymoduleappearstobetoolow,
+the user may try to increase the detection threshold to 10−3 or 10−2 Bohr radii using option SymThresh in the
+%Symmetryinputblock:
+%Sym SymThresh 0.01 End
+Agreatmethodtoobtainastructurewithperfectsymmetryavoidinganyexpensivecalculationistousethesimple
+keywords! NoIter XYZFilewithanappropriatethreshold. Thestructureintheresultingfilewiththeextension
+.xyzmaythenbeusedasinputfortheactualcalculation.
+To give an illustrative example, coordinates for staggered ethane have been obtained by geometry optimization
+without using symmetry. If symmetry is turned on, point group 𝐶 is recognized instead of the expected point
+𝑖
+group𝐷 duetotheremainingnumericalnoise. Tocounterthis,thedetectionthresholdisincreasedto10−2 a.
+3𝑑
+u. andacoordinatefilewithperfectsymmetryisproducedbythefollowinginput:
+! RHF SVP NoIter XYZfile
+%sym SymThresh 1.0e-2 end
+*xyz 0 1
+C -0.002822 -0.005082 -0.001782
+C -0.723141 -1.252323 -0.511551
+H 0.017157 0.029421 1.100049
+H 1.042121 0.030085 -0.350586
+H -0.495109 0.917401 -0.350838
+H -0.743120 -1.286826 -1.613382
+H -0.230855 -2.174806 -0.162495
+H -1.768085 -1.287489 -0.162747
+*
+If ORCA fails to find the expected point group even though a value of 10−2 atomic units has been selected for
+SymThresh,theuserisstronglyadvisedtotakeacarefullookatthestructurebymeansoftheirfavoritevisualization
+toolbeforeincreasingthisvalueanyfurther. Lookforanyobviousdistortionsorevenmissingatoms. Anespecially
+4.6. ORCAandSymmetry 49
+
+[... start of page 72 ...]
+ORCAManual,Release6.0.0
+trickypointmaybetheorientationofmethylgroupsortheconformationoffloppysidechains. Asmallrotation
+aboutasinglebondmaybeenoughtopushsomeatompositionsabovethelimit. Iftheconformationaldeviations
+cannot be fixed using a molecular editor or modelling program, a possible alternative may be to pre-optimize
+the structure without symmetry using a less expensive method like PB86 and a small basis set like def2-SVP.
+Even several passes of pre-optimization and structure editing may be considered until all symmetry-equivalent
+sidechainsarelockedin

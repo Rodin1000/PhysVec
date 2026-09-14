@@ -1,0 +1,71 @@
+[... end of page 408 ...]
+esupercell)canconsistofanunequalnumberofatomsof
+eachatomtype. Asaresultofthat,theQMregionmayhavenon-zeronetcharge. Consequently,whenassigning
+the atomic point charges to the MM atoms during the charge convergence scheme, the sum of the charge of the
+QMregion,oftheECPlayer,andoftheatomicchargesoftheMMatoms,candeviatefromtheidealchargeofthe
+supercell. Inordertoenforcetheidealchargeofthesupercell,thetotalchargeoftheentiresystemisenforcedby
+equallyshiftingthechargesofallMM(includingboundary)atoms.
+386 Chapter6. RunningTypicalCalculations
+
+--- Page 409 ---
+ORCAManual,Release6.0.0
+%qmmm
+Charge_Total 0 # default 0. Total charge of the supercell
+EnforceTotalCharge true # enforce the total charge by shifting MM charges
+end
+The charge shifting procedure can be restricted to the MM atoms on the outer parts of the supercell by defin-
+ing the numberof OuterPCLayers. If OuterPCLayers is set to1, only the atomsof the most outerlayer of the
+supercell (recognized based on the connectivity of the atoms) are included in the charge shifting procedure. If
+OuterPCLayers is larger than 2, the atoms connected to the most outer layer are additionally included in the
+chargeshiftingprocedure,etc.
+%qmmm
+OuterPCLayers 0 # default 0, i.e. charge shifting for all MM atoms
+end
+Note:
+• ThechargeoftheQMcoreregioncanbechosentobeassignedautomatically. Thisoverwritesthecharge
+providedinthexyzorpdbsection.
+%qmmm
+AutoDetectQCCharge false # default is false
+end
+ExampleInput
+AminimalexampleforanIONIC-CRYSTAL-QMMMcalculationlooksasfollows:
+! IONIC-CRYSTAL-QMMM
+! NMR
+! PBE pcSseg-2 def2/JK def2-svp/C
+%qmmm
+QMAtoms {0:6} end
+ORCAFFFilename "nacl6.ORCAFF.prms"
+CHARGE_TOTAL 0
+end
+*xyzfile -5 1 nacl6.xyz
+DifferentQMandMMregionsStoredinthePDBfile
+ThestoredPDBfilecontainsthefollowingentriesinitsoccupancycolumn.
+0
+MMatomsmimickedbysurroundingpointcharges.
+1
+QMcoreregionatoms
+2
+HFLayeratoms
+3
+cECPs
+4
+OuterPCLayeratoms(subsetofMMatoms)ifdefined,aretheonlyatomsthatareusedinthechargeshift
+procedureforenforcingthetotalcharge.
+6.16. ORCAMultiscaleImplementation 387
+
+[... start of page 410 ...]
+ORCAManual,Release6.0.0
+6.16.5 Additional Keywords
+Herewelistadditionalkeywordsandoptionsthatareaccessiblefromwithinthe%qmmmblockandthatarerelevant
+toQM/MMcalculations. Someofthesekeywordscanalsobeaccessedviathe%mmblock,seesectionAvailable
+KeywordsfortheMMmodule.
+!QMMM
+%qmmm
+# Charge alteration scheme preventing overpolarization.
+ChargeAlteration CS # CS (Default)
+# RCD
+# Z0
+# Z1
+# Z2
+# Z3
+# Parameters for placing the shifted and redistributed charges for RCD and CS sc

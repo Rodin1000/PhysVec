@@ -1,0 +1,79 @@
+[... end of page 108 ...]
+𝑋) (6.3)
+corr corr corr corr
+ThisassumesthatthebasissetdependenceofMP2andCCSD(T)issimilar. Onecanthenextrapolateasbefore.
+Alternatively,thestandardway—asextensivelyexercisedbyHobzaandco-workers—istosimplyuse:
+𝐸(CCSD(T);CBS) ≈𝐸(𝑌) +𝐸(CCSD(T);𝑋)+𝐸(MP2;∞)−𝐸(MP2;𝑋) (6.4)
+total SCF corr corr corr
+Theappropriatekeywordis:
+! ExtrapolateEP2(2/3,ANO,MP2) TightSCF Conv Bohrs
+* int 0 1
+O 0 0 0 0 0 0
+H 1 0 0 1.81975 0 0
+H 1 2 0 1.81975 105.237 0
+*
+86 Chapter6. RunningTypicalCalculations
+
+--- Page 109 ---
+ORCAManual,Release6.0.0
+Thiscreatesthefollowingoutput:
+Alpha : 5.410 (SCF Extrapolation)
+Beta : 2.430 (correlation extrapolation)
+SCF energy with basis ano-pVDZ: -76.059178452
+SCF energy with basis ano-pVTZ: -76.064774379
+Extrapolated CBS SCF energy : -76.065995735 (-0.001221356)
+MP2 energy with basis ano-pVDZ: -0.219202871
+MP2 energy with basis ano-pVTZ: -0.267058634
+Extrapolated CBS correlation energy : -0.295568604 (-0.028509970)
+CCSD(T) correlation energy with basis ano-pVDZ: -0.229478341
+CCSD(T) - MP2 energy with basis ano-pVDZ: -0.010275470
+Estimated CBS total energy : -76.371839809
+Theestimatedcorrelationenergyisnotreallybad—within3mEhfromthebasissetlimit.
+UsingtheExtrapolateEP2(n/m,bas,[method, method-details]) keywordonecanuseageneralization
+oftheabovemethodwhereinsteadofMP2anyavailablecorrelationmethodcanbeusedasdescribedinRef. [519].
+methodisoptionalandcanbeeitherMP2orDLPNO-CCSD(T),thelatterbeingthedefault. Incasethemethod
+isDLPNO-CCSD(T)inthemethod-detailsoptiononecanaskforLoosePNO,NormalPNOorTightPNO.
+𝐸(CCSD(T);𝐶𝐵𝑆) ≈𝐸(CCSD(T);𝑋)+𝐸(M;𝐶𝐵𝑆)(𝑋,𝑋+1)−𝐸(M;𝑋) (6.5)
+corr corr corr corr
+HereMrepresentsanycorrelationmethodonewouldliketouse. Forthepreviouswatermoleculetheinputofa
+calculationthatusesDLPNO-CCSD(T)(whichisthedefaultnow)insteadofMP2wouldlooklike:
+! ExtrapolateEP2(2/3,cc,DLPNO-CCSD(T)) TightSCF Conv Bohrs
+* int 0 1
+O 0 0 0 0 0 0
+H 1 0 0 1.81975 0 0
+H 1 2 0 1.81975 105.237 0
+*
+anditwouldproducethefollowingoutput:
+Alpha : 4.420 (SCF Extrapolation)
+Beta : 2.460 (correlation extrapolation)
+SCF energy with basis cc-pVDZ: -76.026430944
+SCF energy with basis cc-pVTZ: -76.056728252
+Extrapolated CBS SCF energy : -76.066581429 (-0.009853177)
+MDCI energy with basis cc-pVDZ: -0.214429497
+MDCI energy with basis cc-pVTZ: -0.275299699
+Extrapolated CBS correlation energy : -0.310868368 (-0.035568670)
+CCSD(T) correlation energy with basis cc-pVDZ: -0.214548320
+CCSD(T) - MDCI energy with basis cc-pVDZ: -0.000118824
+Estimated CBS total energy : -76.377568621
+whichislessthan2mEhfromthebasissetlimit. Finallyitwasshown[519]thatinsteadofextrapolatingthecheap
+method,M,usingcardinalnumbers𝑋 and𝑋+1itisbettertousecardinalnumbers𝑋+1and𝑋+2.
+𝐸(CCSD(T);𝐶𝐵𝑆) ≈𝐸(CCSD(T);𝑋)+𝐸(M;𝐶𝐵𝑆)(𝑋+1,𝑋+2)−𝐸(M;𝑋) (6.6)
+corr corr corr corr
+ThiscanbedoneusingtheExtrapolateEP3(bas,[method,method-details]) keyword:
+6.1. SinglePointEnergiesandGradients 87
+
+[... start of page 110 ...]
+ORCAManual,Release6.0.0
+! ExtrapolateEP3(CC) TightSCF Conv Bohrs
+andthecorrespondingoutputwouldbe:
+Alpha : 5.460 (SCF Extrapolation)
+Beta : 3.050 (correlation extrapolation)
+SCF energy with basis cc-pVDZ: -76.026430944
+SCF energy with basis cc-pVTZ: -76.056728252
+SCF energy with basis cc-pVQZ: -76.064381269
+Extrapolated CBS SCF energy : -76.066687152 (-0.002305884)
+MDCI energy with basis cc-pVDZ: -0.214429497
+MDCI energy with basis cc-pVTZ: -0.275299699
+MDCI energy with basis cc-pVQZ: -0.295229871
+Extrapolated CBS correlation energy : -0.309417951 (-0.014188080)
+CCSD(T) correlation energy with basis 

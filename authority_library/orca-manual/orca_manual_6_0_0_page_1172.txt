@@ -1,0 +1,79 @@
+[... end of page 1171 ...]
+ligatory.
+propertyName: Astringaliasthatdefinesthevariabletheuserwantstoread.
+step: Thestepfromwhichwewanttoreadtheproperty. Ifnotgiventhepropertyfilefromthelaststepwillbe
+read.
+filename: Afilenameofapropertyfile. Ifafilenameandatthesametimeastepareprovidedtheprogramwill
+ignorethestepandtrytoreadthepropertyfilewiththegivenfilename.
+7.59. CompoundMethods 1149
+
+--- Page 1172 ---
+ORCAManual,Release6.0.0
+NOTEpleasenotethatintheendoffilenametheextension.property.txtwillbeadded.
+baseProperty: A true/false boolean. The default value is set to false. If the value is set to true then a generic
+propertyofthetypeaskedwillberead. Thismeansifdipolemomentisasked,itwillreturnthelastdipolemoment,
+irrelevantifandMP2orSCFonewaddefined.
+Example
+# ----------------------------------------------------
+# This is an example script for readProperty
+# -----------------------------------------------------
+%Compound
+Variable enDirect=0.0;
+Variable enFilename=0.0;
+Variable myProperty="DFT_Total_en";
+Variable basename="compound_example_properertFile_readProperty";
+Variable newBasename ="newFilename";
+Variable res = -1;
+New_Step
+!BP86
+*xyz 0 1
+H 0.0 0.0 0.0
+H 0.0 0.0 0.8
+*
+Step_End
+# First read the energy directly (returning res)
+res = enDirect.ReadProperty(propertyName=myProperty);
+print("res : %d\n", res);
+# Now read the same energy through filename (not returning res)
+sys_cmd("cp %s_Compound_1.property.txt %s.property.txt", basename, newBasename);
+enFilename.ReadProperty(propertyName=myProperty, filename=newBasename);
+print("Difference between 2 energies : %.12lf\n", enDirect-enFilename);
+End
+Displace
+Theideabehind“Displace’”istohaveastructure,performananalyticalfrequncycalculationonit(currentlywe
+donotstorenumericalfrequenciesinthepropertyfile)andthenreadtheHessianfromthiscalculationtoadjust
+thegeometrybasedonanormalmodeofvibrationthatwechoose. Thesyntaxofthiscommandis:
+syntax: New_Geom=(Displace,step,hessian,frequency,scaling)
+where:
+stepisthestepfromwhichwechoosetheoriginalgeometry
+hessianisthehessianreadfromapropertyfile
+frequencydefineswhichnormalmodewewilluseand
+scalingisafactorofhowseverewewantthedisplacementtobe.
+We should note that Displace is the only command of the new_geom family of commands that will not store a
+geometryondiskbutonlyinternallypassthenewgeometrytothenextcalculation. Anexampleoftheusageof
+thiscommandcanbefoundinthescript‘iterativeOptimization’thatisgivenwithORCA.Therelevantpartisas
+follows: example:
+# Define variables
+Variable MaxNTries = 25;
+Variable CutOff = -50;
+Variable displacement = 0.6;
+Variable NNegative = 0;
+Variable freqs[];
+Variable modes[];
+Variable NFreq;
+Variable limit;
+(continuesonnextpage)
+1150 Chapter7. DetailedDocumentation
+
+[... start of page 1173 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Variable done;
+Variable FinalEnergy;
+# ===========================================================
+# Start a for loop over number of tries
+# ===========================================================
+For itry From 1 To maxNTries Do
+# ----------------------------------
+# Run a geometry optimization
+# -------------------

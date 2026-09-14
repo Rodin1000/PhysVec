@@ -1,0 +1,85 @@
+[... end of page 686 ...]
+e CASPT2 iterations
+TSmallDenom 1e-2 # printing thresh for small denominators
+# general settings
+NThresh 1e-6 # FIC-CASPT2 cut off for linear dependencies
+D4Tpre 1e-10 # truncation of the 4-pdm
+D3Tpre 1e-14 # trunaction of the 3-pdm
+EWIN -3,1000 # Energy window for the frozencore setting fc_ewin
+# Option to skip the PT2 correction for a selected multiplicity blocks and roots
+# (same input structure as weights in %casscf)
+selectedRoots[0]=0,1 # skip the first roots of MULT=1
+selectedRoots[1]=0,0 # skip MULT=3 roots
+#CASPT2-K specific options
+(continuesonnextpage)
+664 Chapter7. DetailedDocumentation
+
+--- Page 687 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+TReg 1e-2 # default for the Tikhonov reguralization
+end
+end
+CASPT2canalsobesetusingthesimplekeywordsontopofanyvalidCASSCFinput.
+!CASPT2 # FIC-CASPT2
+!CASPT2K # FIC-CASPT2-K
+!RI-CASPT2 # FIC-CASPT2 with RI approximation
+!RI-CASPT2-K # FIC-CASPT2-K with RI approximation
+%casscf ...
+7.21 Dynamic Correlation Dressed CAS
+DCD-CAS(2)isapost-CASSCFMRPTmethodoftheperturb-then-diagonalizekind,i.e. itcanmodifytheCAS
+wavefunctioncomparedtothepreviousCASSCF.[652]IncaseswhereCASSCFalreadyprovidesagood0thorder
+wavefunction,DCD-CAS(2)energiesarecomparabletoNEVPT2.
+7.21.1 Theory of Nonrelativistic DCD-CAS(2)
+TheDCD-CAS(2)methodisbasedonsolvingtheeigenvalueproblemofaneffectiveHamiltonianoftheform
+𝐻 DCD,𝑆 =⟨Φ𝑆𝑆|𝐻|Φ𝑆𝑆⟩− ∑︁ ⟨Φ𝑆 𝐼 𝑆|𝐻|Φ˜𝑆 𝐾 𝑆⟩⟨Φ˜𝑆 𝐾 𝑆|𝐻|Φ𝑆 𝐽 𝑆⟩
+𝐼𝐽 𝐼 𝐽 𝐸𝑆 −𝐸𝑆
+𝐾∈FOIS 𝐾 0
+foreachtotalspin𝑆 separately. The0thorderenergies𝐸𝑆 oftheperturbers|Φ˜𝑆𝑆⟩areobtainedbydiagonalizing
+𝐾 𝐾
+the Dyall’s Hamiltonian in the first-order interacting space (FOIS). The effective Hamiltonian has the form of a
+CASCI Hamiltonian that is dressed with the effect of dynamic correlation (dynamic correlation dressed, DCD),
+hencethenameforthemethod. 𝐸𝑆 ischosentobethegroundstateCASSCFenergyfortherespectivetotalspin
+0
+𝑆. Sincethischoiceisworseforexcitedstatesthanforthegroundstate,excitationenergiessufferfroma“ground
+statebias”.
+Forthecontributioncomingfromperturbersinwhichelectronsareexcitedfromtwoinactive(𝑖𝑗)totwovirtual
+(𝑎𝑏)orbitals,weuse(whenwritingtheDCDHamiltonianinabasisofCASCIstates)thealternativeexpression
+⟨Ψ𝑆
+𝐼
+𝑆|𝐻 DCD (𝑖𝑗 →𝑎𝑏)|Ψ𝑆
+𝐽
+𝑆⟩=−𝛿
+𝐼𝐽
+𝐸MP2
+∑︁(𝑖𝑏|𝑗𝑎)2−(𝑖𝑏|𝑗𝑎)(𝑖𝑎|𝑗𝑏)+(𝑖𝑎|𝑗𝑏)2
+𝐸MP2 =
+𝜖 +𝜖 −𝜖 −𝜖
+𝑎 𝑏 𝑖 𝑗
+𝑖𝑗𝑎𝑏
+Sinceinthisversionthe𝑖𝑗 →𝑎𝑏perturberclassdoesnotcontributeatalltoexcitationenergies(likeitisassumed
+inthedifference-dedicatedconfigurationinteractionmethod),wecallthisthedifference-dedicatedDCD-CAS(2)
+method. Sincethe𝑖𝑗 → 𝑎𝑏classcontributesthelargestpartofthedynamiccorrelationenergy,thisalsoremoves
+thelargestpartofthegroundstatebias. ThisoptionisusedasdefaultinDCD-CAS(2)calculations. Inorderto
+alsoremovethegroundstatebiasfromtheotherperturberclasses,wefurthermoreapplyaperturbativecorrection
+tothefinalenergies. Atfirstorder(whichischosenasdefault),ittakestheform
+∆𝐸 =−∆ ∑︁ ⟨Ψ˜ 𝐼 |𝐻|Φ˜ 𝐾 ⟩⟨Φ˜ 𝐾 |𝐻|Ψ˜ 𝐼 ⟩
+𝐼 𝐼 (𝐸 −𝐸 )2
+𝐾∈FOIS 𝐾 0
+∆ =⟨Ψ˜ |𝐻|Ψ˜ ⟩−𝐸
+𝐼 𝐼 𝐼 0
+forthecorrection∆𝐸 tothetotalenergyofthe𝐼thDCD-CAS(2)root|Ψ˜ ⟩.
+𝐼 𝐼
+7.21. DynamicCorrelationDressedCAS 665
+
+[... start of page 688 ...]
+ORCAManual,Release6.0.0
+7.21.2 Treatment of spin-dependent effects
+Thetheorysofarisvalidforanonrelativisticorscalar-relativisticHamiltonian𝐻. IfwemodifyittoaHamiltonian
+𝐻+𝑉,where𝑉 containseffectsthatarepossiblyspin-dependent,thisleadsustoatheory[491]whichhasasimilar
+formasQDPTwithallCASrootsincluded. Theformofthespin-dependentDCD-CAS(2)effectiveHamiltonian
+is
+⟨Φ𝑆𝑀|𝐻 DCD |Φ𝑆′𝑀′ ⟩=𝛿 𝛿 𝐻 DCD,𝑆,corr +⟨Φ𝑆𝑀|𝑉|Φ𝑆′𝑀′ ⟩.
+𝐼 𝐽 𝑆𝑆′ 𝑀𝑀′ 𝐼𝐽 𝐼 𝐽
+H DCD,𝑆,corr =C DCD E(C DCD )𝑇.
+Inordertoconstructit,wefi

@@ -1,0 +1,107 @@
+[... end of page 219 ...]
+nd∆𝑆 canbechangedviaspecifickeywordsshownatthelistbelow. Ahighertemperature
+conf
+willmakethe∆𝑆 moresensitivetochangesinhighenergyconformationalregionsandshouldmakethesearch
+conf
+evenmorecomplete.
+6.4. GOAT:globalgeometryoptimizationandensemblegenerator 197
+
+--- Page 220 ---
+ORCAManual,Release6.0.0
+Beingmoreexplicit,theconformationalentropy,enthalpyandGibbsfreeenergyarecalculatedaccordingto:
+𝑆
+conf
+=𝑅 [︂ ln ∑︁ 𝑔
+𝑖
+′𝑒−𝐸𝑖/𝛽 + ∑︀
+∑︀
+𝑔
+𝑔
+𝑖
+𝑖
+′
+′
+(
+(
+𝐸
+𝐸
+𝑖
+𝑖
+𝛽
+𝛽
+)
+)
+𝑒
+𝑒
+−
+−
+𝐸
+𝐸
+𝑖
+𝑖
+𝛽
+𝛽
+]︂
+[︀ 𝐻(𝑇)−𝐻(0) ]︀ =𝑅𝑇 ∑︀ 𝑔 𝑖 (𝐸 𝑖 𝛽)𝑒−𝐸𝑖𝛽
+conf ∑︀ 𝑔
+𝑖
+(𝐸
+𝑖
+𝛽)𝑒−𝐸𝑖𝛽
+where𝛽 = 1 and𝑔 isthe“degeneracy”ofconformer𝑖,i.e. itsnumberofrotamers. Thisisthecorrectapproach
+todealwith 𝑘 d𝐵e 𝑇 generat 𝑖 estates[699]. Theonlydifferencefromthereferenceaboveisthat𝑔′ isalwaysoneandwe
+𝑖
+don’tdiscriminateanyfactorfor“geometricalenantiomers”.
+6.4.5 More on the Δ𝑆
+conf
+Itisimportanttosaythat,bydefault,the∆𝑆 isnotthesameasthatfoundbyadefaultCRESTrun. There
+conf
+itincludesalsotherotamerdegeneracyonthecalculationoftheentropy,whileherethatis1. Thereasonsforthat
+are:
+1. Thereareformalargumentsforusingonlyone,assumingthatrotamersareindistinguishable. Pleasecheck
+Grimme’sreference[699]fordetails.
+2. Forsystemswithmanyrotamers, e.g. moleculeswith3tert-butylgroupswhichgiverisetoatleast(273)
+19683rotamersperconformer,thealgorithmwillneverfindalloftheseanyway.
+3. WhencallingGOAT-ENTROPY,itistheentropyoftheconformersthatwillbemaximized,notoftheensem-
+ble. Thatguaranteesthemaximaldistributionofdifferentconformersduringthesesearches.
+Oncethefinalensembleisfoundandifyouknowhowmanyrotamersperconformeryouhave(assumingaconstant
+number,likethetert-butylcase),onecanresetthatnumberbyusingREADENSEMBLE "ensemble.xyz"toreadit
+and CONFDEGENtosetadegeneracy. Inthepreviousexamplethatwouldbe CONFDEGEN 19683andwouldgive
+youthedesired∆𝐺 forthatgivenensemble.
+conf
+Findingrotamersautomatically
+It is always possible to switch on the automatic search for rotamers and their degeneracy by setting CONFDEGEN
+AUTOifthatiswhatyouwant. Theywillbeaddedtotheensembleinsteadofbeingfilteredoutandthefullensemble
+willbesavedinfilesnamed.confrot.xyz.
+Anotherapproachwouldbetoassumethat,sincethealgorithmmightfindallrotamersforsomeconformersbut
+notforall,onemightsetthedegeneracyofallequaltothemaximumvaluefoundsofar(CONFDEGEN AUTOMAX).
+Let’stakeasanexampleasystemwithatert-butyl+amethylgroupwith81rotamersperconformer. GOATwill
+hardlyfind81rotamersforeverysingleconformer,butifitfindsthemforoneconformer,alltheotherswillalso
+havethatsamenumber.
+Please be aware that there are cases where different conformers might have different numbers of rotamers (e.g.
+decaneorlongalkylchains),andthesecasesshouldbetreatedwithcare.
+6.4.6 GOAT-EXPLORE: global minima of atomic clusters or topology-free free
+PES searches
+Incaseyouwanttofindthelowestenergyconformerforaclusterordon’twanttokeeptheinitialtopologyatall,
+you can use the !GOAT-EXPLORE option instead. This will possibly break all bonds and find the lowest energy
+structureforthatgivensetofatoms,bethatananoparticleoranorganicmolecule.
+For instance, let’s find the minimum of an Au nanoparticle on the GFN1 PES, starting from just a random ag-
+8
+glomerationofgoldatoms:
+198 Chapter6. RunningTypicalCalculations
+
+[... start of page 221 ...]
+ORCAManual,Release6.0.0
+!XTB1 GOAT-EXPLORE PAL16 #XTB version 6.4.0
+%GOAT NWORKERS 16 END
+* xyz 0 1
+Au -1.39858 2.62611 -0.79278
+Au -2.50552 -0.07122 0.67538
+Au -0.52174 -2.57892 -0.02415
+Au 0.78881 0.39733 0.21816
+Au 1.21116 1.90621 -2.64617
+Au -1.19205 -0.30099 -2.30429
+Au -0.33808 -1.07129 2.90822
+Au -0.85565 2.15342 2.41956
+*
+Please note t

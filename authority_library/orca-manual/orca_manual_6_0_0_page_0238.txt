@@ -1,0 +1,56 @@
+[... end of page 237 ...]
+ublehybridsinRef. [145].
+• Forspin-adaptedtriplets(TRIPLETSTRUE),theonlyoptionavailablecurrentlyisDCORR1.
+• Spin-component and spin-opposite scaling techniques for double-hybrids within the TD- and TDA-DFT
+frameworks,asdefinedbySchwabeandGoerigk[770],canbeevokedinthesamewayinthe%tddftblock
+asdescribedforSCS-CIS(D)above. Whileuser-definedparameterscanbeenteredinsuchaway,aseriesof
+newfunctionalsareavailablethroughnormalkeywords,whichusethehereinpresentedSCS/SOS-CIS(D)
+implementation. [147]SeeSec. ChoiceofFunctionalforalistofthosefunctionals.
+6.6. ExcitedStatesCalculations 215
+
+--- Page 238 ---
+ORCAManual,Release6.0.0
+Spin-orbitcoupling
+Italsopossibletoincludespin-orbitcouplingbetweensingletsandtripletscalculatedfromTD-DFTbyusingquasi-
+degenerateperturbationtheory(pleaserefertotherelevantpublication[198]),similarlytowhatisdoneinROCIS.
+Inordertodothat,theflagDOSOCmustbesettoTRUE.Thereducedmatrixelementsareprintedandthenew
+transitiondipolesbetweenallSOCcoupledstatesarealsoprintedaftertheregularones. Thisoptioniscurrently
+stillnotcompatiblewithdoublehybrids,butworksforallothercasesincludingCPCM.Alltheoptionsregarding
+theSOCintegralscanbealteredinthe%relblock,asusual.
+%CIS DOSOC TRUE END
+Please havein mindthat, asit is, you canonly calculatethe SOCbetween excitedsinglets andthe spin-adapted
+triplets. ThereisnoSOCstartingfromaUHF/UKSwavefunction. Ifyouwantmoreinformationprintedsuchas
+thefullSOCmatrixortriplet-tripletcouplings,pleasesetahigherPRINTLEVEL.
+SOCandECPs
+ORCAcurrentlydoesnothaveSOCintegralsforECPs,andthesearebydefaultignoredintheSOCmodule. If
+youtrytouseORCAtogetherwithECPs,anabortmessagewillbeprinted. IfyouabsolutelyneedtouseECPs,
+forinstanceforembeddedpotentials,pleaseuse:
+%TDDFT FORCEECP TRUE END
+OBS.: Do not use ECPs in atoms where SOC might be important. In that case, always use all-electron basis
+functionsortheresultswillnotmakesense.
+GeometryOptimizationofSOCStates
+If you want to compute geometries for the SOC states, just choose SOCGRAD TRUE and a given IROOT. The
+weigthed “unrelaxed” gradient will then be calculated after selecting the CIS/TD-DFT states with contribution
+larger than 0.01%. Each gradient will be calculated separately and, after that, the final SOC gradient will be
+computedasaweightedsum. SettingIROOT0inthiscasecorrespondstoaskfortheSOCgroundstate,whichis
+NOTnecessarilyequaltothegroundstatefromHF/DFT.
+Transientspectra
+If one wants to compute transient spectra, or transition dipoles starting from a given excited state, the option
+DOTRANSmustbesettoTRUEandanIROOTshouldbegivenfortheinitialstate(thedefaultis1). If DOTRANS
+ALLisrequestedinstead, thetransitiondipolesbetweenallstatesarecomputed. Thetransienttransitiondipoles
+willthenbeprintedafterthenormalspectra. ThisoptioniscurrentlyonlyavailableforCIS/TDAandisdoneusng
+theexpectationvalueformalism,astheothertransitiondipolemomentsinORCA.
+%cis
+DOTRANS TRUE
+#or
+DOTRANS ALL
+end
+216 Chapter6. RunningTypicalCalculations
+
+[... start of page 239 ...]
+ORCAManual,Release6.0.0
+Non-adiabaticcouplingmatrixelements
+The CIS module can compute the non-adiabatic coupling matrix elements (NACME) between ground and an
+excited state given by an IROOT, ⟨Ψ | 𝜕 |Ψ ⟩ [781]. These can also include LR-CPCM effects if
+!CPCM(solvent) is chosen in the main 𝐺𝑆 inp 𝜕 u 𝑅 t𝑥, ZO 𝐼 R 𝑅𝑂 A 𝑂 e 𝑇 ffects and will make use of RIJ and COSX, if they are
+ch

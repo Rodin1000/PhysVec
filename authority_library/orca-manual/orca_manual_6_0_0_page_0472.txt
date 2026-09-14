@@ -1,0 +1,81 @@
+[... end of page 471 ...]
+lGridOption. Sometimes, youmightwanttoincreasetheintegrationaccuracyforsomeatomsthat
+needspecialcare,whileitisnotnecessarytoenlargethegridgenerally. ORCAprovidesyouwithabasicmecha-
+nismtoincreasetheradialintegrationaccuracyforafewatomswhilemaintainingthechosengridforallothers.
+%METHOD
+# a maximum of 64 assignments can be made
+# in = 0 : no changes are made
+# in > 0 : the grid will be changed for all atoms with
+# atomic number=in to IntAcc=an
+# in < 0 : only the specific n'th atom will have its
+# IntAcc value changed to an
+(continuesonnextpage)
+7.3. Detailsonthenumericalintegrationgrids 449
+
+--- Page 472 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+SpecialGridAtoms i1, i2, i3,...,in;
+SpecialGridIntAcc a1,a2,a3,...,an;
+END
+OBS.: StartingfromORCA5.0itisnotnecessarytousethisoptionanymoreunlessyouhaveveryspecificreasons.
+Thebasissetisconsideredduringthegridconstructionandthatisautomaticallyextendedifneeded.
+7.3.5 SCF grid keyword list
+AcompletedescriptionoftheSCFgridoptionsisgivenbelow. TherearekeywordsspecifictotheXCintegration,
+COSXintegrationandageneralpartthatappliestoall:
+%METHOD
+# XC grids
+AngularGrid 1 #Lebedev50
+2 #Lebedev110
+3 #Lebedev194
+4 #Lebedev302
+5 #Lebedev434
+6 #Lebedev590
+7 #Lebedev770
+0 #SimpleGrid
+IntAcc 5.0 # determines no. of radial points
+# COSX grids
+AngularGridX 1,1,2,4,5 # the first three are used in the SCF
+# the 4th in the MP2 gradient and
+# the 5th for MP2 second derivatives
+IntAccX 3.56,-1,4.5 # if a -1 is given, the default IntAcc is used.
+# General
+NThetaMax 0.4 # only for AngularGrid=0, multiplier for nr
+GridPruning Unpruned # no Pruning
+OldPruning # the old pruning
+Adaptive # default (and recommended)
+HGridReduced true # Reduce grids for H and He by one
+# unit (default and recommended)
+BFCut 1e-10 # basis fcn. cut. Is adjusted according to
+# convergence tolerances
+WeightCut 1e-14 # grid weight cut. default: 1e-14
+END
+7.3.6 Changing TD-DFT, CP-SCF and Hessian grids
+TD-DFT.ThegridsusedinCISorTD-DFTcanbechangedintheirrespectiveblock:
+%TDDFT # or %CIS, they are equivalent
+# XC grids
+IntAccXC 3.467
+GridXC 1
+#COSX grids
+IntAccX 3.076
+GridX 1
+END
+CP-SCF.TheCP-SCFgridsarechangedinthe%METHODblock:
+450 Chapter7. DetailedDocumentation
+
+[... start of page 473 ...]
+ORCAManual,Release6.0.0
+%METHOD
+# XC grids
+Z_IntAccXC 3.467
+Z_GridXC 1
+#COSX grids
+Z_IntAccX 3.076
+Z_GridX 1
+Z_GridX_RHS 2
+END
+OBS.: TheZ_Grid_RHSisonlyusedinMP2andthenumberherehasadifferentmeaning. Itreferstowhichof
+the COSX grids used in the SCF will be chosen, rather than an AngularGrid scheme. The default is to use the
+secondCOSXgrid.
+Hessian. The XC grids used to compute the DFT terms in the Hessian are automatically chosen to be one unit
+hi

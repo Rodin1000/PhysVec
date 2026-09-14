@@ -1,0 +1,102 @@
+[... end of page 1055 ...]
+vierthanNe).
+Youshouldprobablylookintotailoringthebasissetaccordingtoyourneeds. Whileitislikelythatalater
+release will provide one or two special basis sets for “core-property” calculations at this time you have to
+makesureyourselfthatthebasissethasenoughflexibilityinthecoreregion,forexamplebyuncontracting
+core basis functions and adding s-primitives with large exponents (or using the “decontraction feature”,
+section Choice of Basis Set). If you add these tight functions and use DFT make sure that the numerical
+integrationisstillsatisfactory. Usethe“SpecialGrid”featuretoenlargegridsforindividualatomswithout
+increasingthecomputationalefforttoodrastically.
+7.54. CalculationofProperties 1033
+
+--- Page 1056 ---
+ORCAManual,Release6.0.0
+• For heavy nuclei you may want to consider the possibility of relativistic effects. Scalar relativistic effects
+canbehandledwithseveralquasi-relativisticHamiltoniansinORCA,anoverviewofthepossibilitiesand
+somerecommendationscanbefoundinRelativisticCalculations. Notethatrelativisticcalculationsmayhave
+specialrequirementsonbasissets,andinthecontextofpropertycalculations,youshouldbeespeciallyaware
+of the importance of using picture change corrections (see Relativistic Calculations and Picture-Change
+Effects). Inquasi-relativisticcalculationswithDFT,oneshouldalsobeverycautiousaboutaccuracyofthe
+numericalintegration,especiallyforheavier(transitionmetal)nuclei.
+Second order HFCs require the calculation of the spin-orbit coupling contributions which in turn requires the
+calculationofthecoupledperturbedSCFequations. Theseeffectscanbequitesignificantforheaviernucleiand
+shoulddefinitelybeincludedfortransitionmetalcomplexes. Thespin-orbitcouplingtreatmentusedisthesame
+asdescribedunderTheSpin-OrbitCouplingOperator.
+Theg-Tensor
+TheEPRg-tensorisapropertythatcanbecalculatedasasecondderivativeoftheenergyanditisimplementedas
+suchinORCAfortheSCFmethods—e.g. HFandDFT—,CASSCF,aswellasall-electronMP2(orRI-MP2)and
+double-hybridDFT.Thefollowingfourcontributionsarisefortheg-tensor(SZ=spinZeeman,RMC=relativistic
+masscorrection,DSO=diamagneticspin-orbitcorrection,PSO=orbitalZeeman/SOCterm):
+𝑔(SZ) =𝛿 𝑔 (7.353)
+𝜇𝜈 𝜇𝜈 𝑒
+𝑔(RMC) =− 𝛼2𝑔 𝑒 ∑︁ 𝑃𝛼−𝛽 ⟨ 𝜑 ⃒ ⃒𝑇ˆ ⃒ ⃒𝜑 ⟩ (7.354)
+𝜇𝜈 2𝑆 𝑘𝑙 𝑘⃒ ⃒ 𝑙
+𝑘,𝑙
+⟨ ⃒ ⃒ ⟩
+𝑔(DSO) = 𝛼2𝑔 𝑒 ∑︁ 𝑃𝛼−𝛽 𝜑 ⃒ ⃒ ∑︁ 𝜉(𝑟 )[r r −r r ] ⃒ ⃒𝜑 (7.355)
+𝜇𝜈 4𝑆 𝑘𝑙 𝑘⃒ 𝐴 𝐴 𝑂 𝐴,𝜇 𝑂,𝜈 ⃒ 𝑙
+⃒ ⃒
+𝑘,𝑙 𝐴
+𝑔
+𝜇
+(P
+𝜈
+SO) =−
+2
+𝑔
+𝑆
+𝑒 ∑︁𝜕
+𝜕
+𝑃
+𝐵
+𝑘 𝛼 𝑙 −𝛽 ⟨︀ 𝜑
+𝑘
+⃒ ⃒ℎ S
+𝜈
+OC⃒ ⃒𝜑
+𝑙
+⟩︀ (7.356)
+𝜇
+𝑘,𝑙
+Here,𝑔 isthefree-electrong-value(=2.002319...),𝑆isthetotalspin,𝛼thefinestructureconstant,𝑃𝛼−𝛽 isthe
+𝑒
+spindensitymatrix,𝜑isthebasisset,𝑇ˆisthekineticenergyoperator,𝜉(𝑟 )anapproximateradialoperator,ℎSOC
+𝐴
+thespatialpartofaneffectiveone-electronspin-orbitoperatorand𝐵 isacomponentofthemagneticfield. The
+𝜇
+calculationofthederivativeofthespin-densitydependsonthechosenleveloftheory. FortheSCF-levelitisdone
+basedonthecoupled-perturbedSCFtheorywithrespecttoamagneticfieldperturbation.
+Accuracy. g-tensorcalculationsattheSCFlevelarenothighlydemandingintermsofbasissetsize. Basissets
+that give reliable SCF results (at least valence double-zeta plus polarization) usually also give reliable g-tensor
+results. For many molecules the Hartree-Fock approximation will give reasonable predictions. In a number of
+cases,however,itbreaksdowncompletely. DFTismorerobustinthisrespectandthenumberofmoleculeswhere
+itfailsismuchsmaller. Amongthedensityfunctionals,thehybridfunctionalsseemtobethemostaccurate. Inmy
+handsPBE0isperhapsthebestalthoughPWP1andB3LYParenotmuchworse. TheGGAfunctionalssuchasBP,
+PW91,BLYPorPBEareequallygoodforsmallradicalsbutaresignificantlyinferiortotheirhybridcounterparts
+fortransitionmetalcomplexes.
+Gaugedependence. Unfortunately,theg-tensorisagaugedependentproperty,i.e. theresultsdependonwherethe
+originischosenwithinthemolecule. Unlessfullyinvariantprocedures(suchasGIAOs)areused,thisundesirable
+aspectisalwayspresentinthecalculations. GIAOsarenowavailableforcalculationsontheSCF-levelinORCA.
+However,ifthechoiceofgaugeoriginisnotoutrageouslypoor,thegaugedependenceisusuallysosmallthatit
+can be ignored for all practical purposes, especially if large basis sets are used. ORCA gives you considerable
+freedominthechoiceofgaugeorigin. Itcaneitherbethecenterofmass,thecenterofnuclearcharge,thecenterof
+electroniccharge,GIAOs(recommendedifavailable),aspecialatomorauser-definedpointinspace. Itiswiseto
+checkthesensitivityoftheresultswithrespecttothechoiceoforigin,especiallywhensmallg-shiftsontheorder
+ofonlyafewhundredppmarecalculated.
+Spin-orbitcouplingoperator. Inpreviousversionsofthecode, theg-tensormoduleusedtheparameterization
+of Koseki et al. [462, 463, 464] for the spin-orbit operator. This is expected to be a reasonable approximation
+for the 2p and 3d elements and less satisfactory for heavier main group or transition metal containing systems.
+1034 Chapter7. DetailedDocumentation
+
+[... start of page 1057 ...]
+ORCAManual,Release6.0.0
+Thus,themaintargetmoleculeswiththesimpleoperatorsareradicalsmadeoflightatomsandfirstrowtransition
+metalcomplexes. MoreaccurateSOCoperators(atonlymoderatelyincreasedcomputationalcost)havenowbeen
+implemented and are described in section The Spin-Orbit Coupling Operator. With these operators there are
+fewer restrictions. However, for very heavy elements they will suffer from the shortcomings of the Breit-Pauli
+approximationandfuturereleaseswillmodifytheseoperatorstotakeintoaccounttheZORAorDKHcorrections
+totheSOC.
+Zero-Field-Splitting
+ItiswellknownthattheZFSconsistsofafirstordertermarisingfromthedirectspin-spininteraction[364]:
+⃒ ⃒
+𝐷 𝐾 (S 𝐿 S) = 2 1 𝑆(2 𝛼 𝑆 2 −1) ⟨ 0𝑆𝑆 ⃒ ⃒ ⃒ ⃒ 

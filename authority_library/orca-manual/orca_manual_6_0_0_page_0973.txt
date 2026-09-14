@@ -1,0 +1,74 @@
+[... end of page 972 ...]
+𝜇⃗𝑒⃒
+⃒ ⃒ ⃒ 𝑄 𝑖 +..., (7.278)
+𝑖 𝑖 Q=0
+we can even include vibronic coupling or the so-called Herzberg-Teller (HT) effect. The Frank-Condon (FC)
+approximationkeepsonlythecoordinate-independentterm. ThecorrelationfunctionfortheHTcasescanthenbe
+derivedrecursivelyfromtheFConeandthecalculationisdonequiteefficiently. Itisimportanttosaytheonemust
+chooseONEsetofcoordinatesinordertoexpandthetransitiondipole. Inourformulation,itisalwaysthatofthe
+FINALstateandthathassomeimplicationsdiscussedbelow.
+950 Chapter7. DetailedDocumentation
+
+--- Page 973 ---
+ORCAManual,Release6.0.0
+Other important aspect of this theory is that, in order to solve the path integrals, one has to work in one set of
+coordinates, the initial (Q) or the final state ones (Q¯, with the bar indicating final coordinates). As we have a
+transitionmatrixelement,onesetofcoordinateshavetobetransformedintotheotheranditiseasytoshowthat
+theyarerelatedby
+Q=JQ¯ +K. (7.279)
+That was first proposed by Duschinsky in the late 1930s[228] with the Duschinsky rotation matrix J and the
+displacementvectorKdefinedas
+J=L T L¯ , K=L T (q¯ −q ),
+𝑥 𝑥 𝑥 0 0
+withL beingthematrixcontainingthenormalmodes,heredescribedinCartesiancoordinates(𝑥),andq begin
+𝑥 √ 0
+massweightedcoordinates(𝑞 = 𝑚 𝑥 ).
+𝑖 𝑖 𝑖
+TheprogramrunsbyfirstreadingandobtainingtheinitialandfinalstategeometriesandHessians,thencomputes
+the Duschinsky rotation matrix and displacement vector, calculates the derivatives for the transition dipoles and
+computesthecorrelationfunction. Afterthat,theDFTisdoneandtheratesareobtainedandprintedwhennec-
+essary. As the intensities observed experimentally are proportional to the rates, the spectrum is also calculated
+andprintedonaBASENAME.spectrumfile. IfPRINTLEVELHIGHisrequestedunder%ESD,thecorrelation
+functionisalsoprintedonaBASENAME.corrfuncfile.
+OBS:TheunitsfortheEmissionspectraareratherarbitrary,butforAbsorptiontheyaretheexperimental“molar
+absorptivity(𝜀)”inLmol−1cm−1[199]. Beawarethatthesearedependentonthelinewidthofthecurves.
+ApproximationstotheexcitedstatePES
+AsalreadymentionedinSec. ExcitedStateDynamics,inordertopredicttheratesweneedatleastagroundstate
+(GS)andanexcitedstate(ES)geometryandHessian. InORCA,wehavesevendifferentwaystoapproximatethis
+ESPES:AHAS,VH,VG,HHBS,HHAS,UFBSandUFAS.ThosecancanbechoosenbysettingtheHESSFLAG
+under %ESD. If you actually optimize the ES geometry and input the Hessian, that will be called an Adiabatic
+Hessian(AH)methodannokeywordmustbegivenontheinput.
+OBS:Inthepresentversion, theseapproximationsareonlyavailableforAbsorption, Fluorescenceandresonant
+Raman. They cannot be directly used for phosphorescence and ISC rate calculations. However, one can do the
+lattercalculationsbygeneratingapproximateESHessiansfrom“fake”fluorescenceorabsorptionruns,andthen
+usingtheESHessiansinAHcalculations(videinfra).
+The idea behind these approximations is to do a geometry update step (ΔS=−gH−1 for Quasi-Newton and
+ΔS=−g(H+S)−1forAugmentedHessian)toobtaintheESstructureandsomehowapproximatetheESHes-
+sian. The gradient (g) and Hessian (H) used on the step are on column Step of Table Table 7.28 below, with a
+descriptionofthefinalESHessian:
+Table7.28: MethodsusedtoestimatetheESPES
+Method Step ESHessian
+AHAS ESgrad+GSHessian calculatedontheESgeometry
+VH ESgrad+ESHessianatGSgeometry calculatedontheGSgeometry
+VG (de- ESgrad+GSHessian equaltoGSHessian
+fault)
+VGFC ESgrad+GSHessian equal to GS Hessian (+ APPROXADEN
+TRUE)
+HHBS ESgrad+HybridESHessianonGSgeometry HybridHessianonGSgeometry
+HHAS ESgrad+GSHessian HybridHessianonESgeometry
+UFBS ESgrad+UpdatedfrequenciesESHessianonGS Updated frequencies ES Hessian on GS
+geometry geometry
+UFAS ESgrad+GSHessian UpdatedfrequenciesESHessianonESge-
+ometry
+7.48. MoreontheExcitedStateDynamicsmodule 951
+
+[... start of page 974 ...]
+ORCAManual,Release6.0.0
+OBS:AlwaysusetheGSgeometryontheinputfile,equaltotheoneintheGSHESSIAN!IfyouaskedforOPT
+FREQattheinput,a.xyzfileisgeneratedwiththesamegeometryfoundonthe.hess. Ifyoupickedthegeometry
+fromthe.hessfile,rememberthatitisinatomicunits,soyouhavetouseBOHRSonthemaininput.
+AfterthecalculationoftheESPES,afilenamedBASENAME.ES.hessisprintedandcanbeusedinfuturecalcu-
+lations. Forexample,onecanuseitinaseparateAHcalculation,asifthefilecontainstheoptimizedESgeometry
+andtheexactESHessian(ofcourse,inrealitybothareapproximate). Thisallowsonetoperforme.g. phosphores-
+cenceandISCratecalculationswithapproximateESPESseventhoughESDdoesnotsupportthesecalculations
+directly. Forexample,thephosphorescenceratefromatripletstatetothe𝑆 state,withtheVGap

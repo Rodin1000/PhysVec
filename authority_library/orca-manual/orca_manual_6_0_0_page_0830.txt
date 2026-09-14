@@ -1,0 +1,86 @@
+[... end of page 829 ...]
+th the possible exception of the integral container which has three external
+labels. This,andthesolverfilesmayremainincoreifenoughmemoryisavailable. Theprogramsequentiallytries
+toallocatememoryforthefilesintheorderoftheirimportance,andwhatcannotbekeptincore,goesondisk. The
+orderofallocationisasfollows: 1. residualvectors,2. Ritzvectors,3. threeexternalintegrals,4. sigmavectors
+and5. state(trial)vectors,asseenintheexamplebelow:
+--------------------------------
+AUTOMATIC CHOICE OF INCORE LEVEL
+--------------------------------
+(continuesonnextpage)
+7.33. ExcitedStatesviaEOM-CCSD 807
+
+--- Page 830 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Memory available ... 6512.00 MB
+Memory needed for Residual-vectors ... 71.27 MB
+Memory needed for Ritz-vectors ... 71.27 MB
+Memory needed for 3-ext integrals ... 92.05 MB
+Memory needed for Sigma-vectors ... 1425.31 MB
+Memory needed for State-vectors ... 1425.31 MB
+-> Final InCoreLevel ... 5
+Halfofthememoryspecifiedwiththekeyword MaxCoreisdistributedamongthefivecandidates. Intheabove
+case, everything fits in memory. Note that these are only the largest contributors to memory consumption, and
+thereshouldideallybeasafetymarginwhenallocatingmemory.
+Inordertoestimatetheamountofnecessarymemory,itshouldbekeptinmindthat,intheclosedshellcase,the
+memoryrequirementsoftheresidualandRitzvectorsareproportionalto𝑁 𝑁 𝑁2,thethreeexternalintegrals
+𝑅 𝑃 𝑉
+to𝑁 𝑁 𝑁3 andthesigmaandtrialvectorsto𝑁 𝑁 𝑁 𝑁2, where𝑁 and𝑁 arethenumberofoccupied
+𝑅 𝑂 𝑉 𝐷 𝑅 𝑃 𝑉 𝑂 𝑉
+and virtual orbitals, 𝑁 = 𝑁𝑂(𝑁𝑂+1) is the number of occupied pairs, 𝑁 is the number of roots, and 𝑁 is
+𝑃 2 𝑅 𝐷
+themaximumsizeofthereducedspace. ThekeywordNRootssets𝑁 ,whileNDavdetermines𝑁 . Luckily,the
+𝑅 𝐷
+contributionsthat,inourexperience,arethemostimportanttokeepinmemory,arealsotheonesthatrequirethe
+smallestamountofit. ItisadvisabletouseKCOpt AOBLAS,asithasthelowestmemoryrequirements.
+NotethatintheUHFEE-EOM-CCSDimplementation,thememoryrequirementsoftheresidualandRitzvectors
+areproportionalto𝑁 (𝑁 𝑁2 +𝑁 𝑁2 +𝑁 𝑁 𝑁 𝑁 ),thethreeexternalintegralsto𝑁 (𝑁 𝑁2 +
+𝑅 𝑃𝛼 𝑉𝛼 𝑃𝛽 𝑉𝛽 𝑂𝛼 𝑂𝛽 𝑉𝛼 𝑉𝛽 𝑅 𝑂𝛼 𝑉𝛼
+𝑁 𝑁2 +𝑁 𝑁 𝑁2 +𝑁 𝑁 𝑁2 )andthesigmaandtrialvectorsmemoryrequirementsareproportional
+𝑂𝛽 𝑉𝛽 𝑂𝛼 𝑉𝛼 𝑉𝛽 𝑂𝛽 𝑉𝛽 𝑉𝛼
+to 𝑁 𝑁 (𝑁 𝑁2 + 𝑁 𝑁2 + 𝑁 𝑁 𝑁 𝑁 ), where 𝑁 , 𝑁 , 𝑁 and 𝑁 are respectively, the
+𝐷 𝑅 𝑃𝛼 𝑉𝛼 𝑃𝛽 𝑉𝛽 𝑂𝛼 𝑂𝛽 𝑉𝛼 𝑉𝛽 𝑂𝛼 𝑂𝛽 𝑉𝛼 𝑉𝛽
+number of occupied alpha, occupied beta, virtual alpha and virtual beta orbitals and 𝑁
+𝑃𝛼
+= 𝑁𝑂𝛼 (𝑁
+2
+𝑂𝛼 −1) and
+𝑁 = 𝑁𝑂𝛽 (𝑁𝑂𝛽 −1) arethenumberofalphaandbetaoccupiedpairs,respectively.
+𝑃𝛽 2
+7.33.3 Initial Guess
+ThepresentinitialguessintheRHFEOMimplementationconsistsofconstructingaCISHamiltonianofacertain
+dimension,anddiagonalizingit. Therootsarepreselectedbasedontheenergeticorderingofthediagonalelements
+oftheHamiltonian. IntheUHFcase,theguessisconstructedfromthesolutionsofaUHFCIScalculation. The
+number of roots in the initial guess is determined as 20 times the number of roots desired in EOM (NRoots) if
+NDav is 20 or smaller, otherwise it is set to NDav times the number of EOM roots. If the parameter NInits is
+largerthanzero,thenthenumberofinitialguessrootswillbesettothisparametertimesNRoots. Themaximum
+possiblenumberofrootsisthefullCISdimension,(𝑁 𝑁 (RHF)or𝑁 𝑁 +𝑁 𝑁 (UHF)).Oneshould
+𝑂 𝑉 𝑂𝛼 𝑉𝛼 𝑂𝛽 𝑉𝛽
+keepinmind,whileincreasingthenumberofinitialguessvectors,thatthiscorrespondstodiagonalizingamatrix
+ofincreasingdimension. If,forexampleNRootsis10,thenbydefault200rootsareconsideredintheinitialguess
+(unlessitexceedsthesizeoftheCISspace),orif NInitsissetto100,thentherewillbe1000rootsintheguess.
+Insomecases,therootscalculatedusingEOMmaynotbethelowestones,butafewofthesemaybereplacedby
+somehigherrootswhichare“easier”tofind. Insuchcases,itmayhelptoincreaseNRootsorNInitstoconverge
+totheproperroots. TheprogramcanbemadetofollowtheinitialCISguessbysettingFollowCIStotrueand
+is necessary if we wish to ionize or excite from inner-valence or core orbitals. In the RHF implementation, the
+core orbital, from which the ionization or excitation originates, can be specified using the keyword CoreHole,
+inadditiontosettingDoCoreand FollowCIStotrue. TheCoreHolekeywordisquitegeneralandinprinciple,
+ionizationorexcitationprocessesfromanyoccupiedorbitalcanbespecifiedusingthiskeyword.
+808 Chapter7. DetailedDocumentation
+
+[... start of page 831 ...]
+ORCAManual,Release6.0.0
+7.33.4 Hamiltonian Construction
+TheHamiltonianconstructionbeginsbycallingthesigmaroutines. Inthecaseoftheclosed-shellcode,thelogical
+variablesUseEOMOptSandUseEOMOptDchoosetheroutinestobeusedintheevaluationofthesinglesanddoubles
+sigmavectors,respectively. Iftrue,theoptimizedsigmaroutine,usingdressedintegrals,willbeused. Thisshould
+notbechanged,theoptionistheremainlyfordebuggingpurposes. Ifsettofalse,anautomaticallygenerated,and
+muchslowerserialcodewillbeusedinstead. Inthecaseoftheopen-shellUHFimplementation,optimizedsigma
+routines have been generated using the ORCA Automated Generator Environment (AGE) [474]. In each early
+iteration,𝑁 sigmavectorswillbedetermined,exceptinthecaseofarestart,wherethenumberofsigmavectors
+𝑅
+is2𝑁 . Forfurtherdetailsonconvergence,seeConvergence,Restart,PreconditioningandSubspaceExpansion
+𝑅
+below.
+Themosttimeconsumingpartofthesigmavector

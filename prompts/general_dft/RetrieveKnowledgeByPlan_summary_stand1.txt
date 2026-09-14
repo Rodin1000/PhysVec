@@ -1,0 +1,66 @@
+Your task is to create a concise summary of all retrieved query results for subsequent code generation or input-file generation (e.g. ORCA .inp).
+
+--------------------------------------------------------------------------
+[Input:]
+1. ALL_QUERY: A collection of all query results retrieved from package documentation (or from software manuals, e.g. ORCA manual, with input syntax and keywords). Each query contains:
+   - query: The original query string
+   - packages: List of packages queried
+   - results: Retrieved documentation snippets with relevant information
+
+-----------------------------------------------------------------------------
+[Instruction:]
+
+
+**CRITICAL - No hallucination (STRICTLY ENFORCED for ORCA / software manual sources):**
+   - Only describe a keyword's placement (e.g. "keyword X goes in %block") if you see an EXPLICIT example in the retrieved text showing that keyword INSIDE that block (between `%block` and `end`).
+   - Do NOT infer or guess where a keyword should be placed. If a keyword appears on a manual page but is NOT shown inside a `%block ... end` example, state: "Usage context unclear from retrieved documentation."
+   - If a keyword only appears as a command-line option (e.g. for `orca_mapspc`), do NOT claim it is an input-file keyword. State: "This is a post-processing / command-line option, not an input-file keyword."
+   - Quote the exact block structure from the manual when available, rather than paraphrasing.
+
+
+1. Read through ALL_QUERY carefully to understand all retrieved information.
+
+2. For each query in ALL_QUERY, extract and summarize the key information from its results:
+   - Focus on practical usage information: function names, parameters, code examples (for API docs); or for software manuals (e.g. ORCA): input syntax (keywords, block structure such as %pal, %method, %scf), correct input format, and relevant manual snippets
+   - Extract the most relevant and useful documentation snippets
+   - Combine information from multiple results if they complement each other
+   - Remove redundant or less relevant information
+   - **Structure queries (package xyz-structure):** If the query targeted package xyz-structure and has results, the summary entry for that query MUST: (a) include the **complete** molecular structure as full XYZ coordinates (every atom line: element x y z, no omission or "... other atoms")—do not give only a path/filename; the code generator requires the full coordinates to inline them—and (b) state clearly: "USE THIS EXACT STRUCTURE IN THE ORCA GEOMETRY BLOCK AS INLINE * xyz <charge> <mult> FOLLOWED BY THE COORDINATE LINES ABOVE, THEN * . * xyzfile * is NOT allowed; the full coordinates must appear in the input."
+
+3. Create a summary entry for each query with:
+   - "query": The original query string (keep as is)
+   - "answer": A concise summary of the key information extracted from the query's results. The answer should:
+     * Be practical and focused on code implementation, or on input-file syntax when the source is a software manual
+     * Include important function names, parameters, and usage patterns; or for manual documentation (e.g. ORCA): include keywords, block names, correct syntax, and input-file examples where relevant
+     * Include relevant code examples if available
+     * Be clear and structured for easy reference during code or input-file generation
+
+4. Ensure the summary covers all queries in ALL_QUERY.
+
+-----------------------------------------------------------------------------
+[Output:]
+You MUST return a JSON object (dictionary), which can be transferred to a python dict by json.loads(). The output MUST be wrapped in "```json" and "```".
+
+The output must be a JSON object with a single key:
+- "summary": A JSON array where each element is a dictionary with keys:
+  - "query": The original query string (string)
+  - "answer": A concise summary of key information extracted from the query's results (string)
+
+Example output format:
+```json
+{
+  "summary": [
+    {
+      "query": "... the original query string ...",
+      "answer": "... corresponding answer here ..."
+    },
+    {
+      "query": "... the original query string ...",
+      "answer": "... corresponding answer here ..."
+    }
+  ]
+}
+```
+
+**CRITICAL: Your output MUST be a valid JSON object. Do NOT include any text outside the JSON code fence.**
+

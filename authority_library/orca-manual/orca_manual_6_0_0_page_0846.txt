@@ -1,0 +1,69 @@
+[... end of page 845 ...]
+mputationalcost[234]. So,useofbt-PNOschemeisalwayspreferable
+overcanonicalcalculations.
+• InthecaseofanRHFreference,oneshouldset‘DLPNOLINEARtrue’and‘NEWDOMAINStrue’inthe
+mdciblock input touse the2015 fullylinear scalingimplementation, whichis morerobust thanthe 2013
+implementationusedasdefaultinbt-PNOscheme.
+• Thetransitionmomentinbt-PNO-EOM(RHFonly)andbt-PNO-STEOM(RHF,UHF(QROs)orROHF)
+isonlyavailableusingthelinearapproximation.
+7.36. ExcitedStatesusingPNO-basedcoupledcluster 823
+
+--- Page 846 ---
+ORCAManual,Release6.0.0
+7.37 Excited States via DLPNO-STEOM-CCSD
+7.37.1 PNO dressing (experimental keyword)
+InSTEOM-DLPNO-CCSDmethodmostofthestepsaredoneusingthepowerfulPNOapproximationexceptthe
+lastonecorrespondingtotheSTEOM-CCSDcalculationitself. Inthecanonicalversionofthedressing(defaultin
+ORCA)alltheamplitudespreviouslycomputedatthePNOlevelarerecanonicalizedwhichincreasesthecalculation
+cost.PNOdressingusessomeofthePNOintermediatestoreducethedressingtime. Ithashowevernoeffecton
+thestoragesize.
+UsingthisPNOdressingwillreducethecalculationtimingbutatareduceaccuracyfortheexcitationenergies. We
+thusrecommendthisoptiononlyforspecificlargesystems(>2500basisfunctions).
+ThekeywordDirectDressSTEOMsettotrueenablethisoption.
+7.37.2 Keywords from STEOM-CCSD
+Most of the keywords from STEOM-CCSD can be used within the DLPNO version, except for core excitation.
+MoreinformationontheExcitedStatesviaSTEOM-CCSDsection.
+7.37.3 Tips and Tricks
+Aswritteninthetypicalcalculationsectionofthe manualwewouldrecommendthisinput forstandardorganic
+molecules.
+Asageneralguidelinewewilldiscusssomeofthekeywordsusedthere:
+! STEOM-DLPNO-CCSD def2-TZVP def2-TZVP/C def2/J TightSCF
+%mdci
+NRoots 6
+DoRootWise true
+OThresh 0.005
+VThresh 0.005
+TCutPNOSingles 1e-11
+NDAV 400
+DoStoreSTEOM true
+DoSimpleDens false
+AddL2Term True
+DTol 1e-5
+end
+* xyz 0 1
+C 0.016227 -0.000000 0.000000
+O 1.236847 0.000000 -0.000000
+H -0.576537 0.951580 -0.000000
+H -0.576537 -0.951580 -0.000000
+*
+• TIGHTSCFisamustforanyCCSDcalculation.
+• WewillrecommendusingTIGHTPNOforallmoleculesasitisnotalotmoreexpensiveandhelpsachieving
+abetterconvergence.
+• TheOTHRESH,VTHRESHandTCutPNOSingleskeywordshelpwithconvergingthecalculations,increas-
+ingthepercentageactiveofeachroot. IncontrarytostandardSTEOM-CCSD,wewouldacknowledgethat
+therootsareconvergedwhenthepercentageactivecharacterisatleast96%. Ofcourseyouhavetocheck
+that the amplitude and orbitals associated with the excitation are correct (and what you expect). Tighten-
+ingthe3keywordsmentionedwillincreasethispercentageactivecharacter. Themostimportantbeingthe
+TCutPNOSinglesone. Becareful,thecomputationalcostincreasesexponentiallywhentightened. Inmore
+824 Chapter7. DetailedDocumentation
+
+[... start of page 847 ...]
+ORCAManual,Release6.0.0
+case10−12or5×10−12shouldbeenough. ForOTHRESHandVTHRESHyoushouldnotgobelow10−3,
+asthebenefitsarenotsoobvious.Atricktoachieveabetterconvergenceistoplaywiththenumberofroots.
+Itisoftennotnecessarytocomputealotofrootsifyouareonlyinterestedinthefirst3forexample. Ifsome
+highenergyrootshavesomelowpercentageactivecharacter,removingthemcanhelpfortheconvergence
+ofotherroots.
+• Asshownintherelatedpaper[298],theSTEOMdensitywiththeL2termisnowthedefaultforcomputing
+theexcitedstateproperties.
+• Thech

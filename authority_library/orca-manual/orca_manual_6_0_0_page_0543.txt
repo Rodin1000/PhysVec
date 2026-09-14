@@ -1,0 +1,72 @@
+[... end of page 542 ...]
+noftheoriginalpublication[327]). TPSS/def2-TZVP/TightSCFwaschosenas
+thedefaultsinceitisfastandrobust. TheFODanalysisisaveryefficientandpracticabletooltogetinformation
+abouttheamountandlocalizationofSECinthesystemofquestion. Itiscalledbyasimplekeyword:
+# ground state of p-benzyne
+! FOD
+* xyz 0 1
+C 0.0000000 1.2077612 0.7161013
+C 0.0000000 0.0000000 1.3596219
+C 0.0000000 -1.2077612 0.7161013
+C 0.0000000 -1.2077612 -0.7161013
+C 0.0000000 0.0000000 -1.3596219
+C 0.0000000 1.2077612 -0.7161013
+H 0.0000000 2.1606260 1.2276695
+H 0.0000000 -2.1606260 1.2276695
+H 0.0000000 -2.1606260 -1.2276695
+H 0.0000000 2.1606260 -1.2276695
+*
+520 Chapter7. DetailedDocumentation
+
+--- Page 543 ---
+ORCAManual,Release6.0.0
+Therespectiveoutputreads:
+-------------------------------------------------------------------------------------------
+ORCA LEAN-SCF
+memory conserving SCF solver
+-------------------------------------------------------------------------------------------
+----------------------------------------D-I-I-S--------------------------------------------
+Iteration Energy (Eh) Delta-E RMSDP MaxDP DIISErr Damp Time(sec)
+-------------------------------------------------------------------------------------------
+*** Starting incremental Fock matrix formation ***
+1 -230.8982516003082139 0.00e+00 5.01e-03 1.01e-01 1.12e-01 0.700 1.7
+Warning: op=0 Small HOMO/LUMO gap ( -0.021) - skipping pre-diagonalization
+Will do a full diagonalization
+2 -230.9463607195993120 -4.81e-02 1.15e-03 2.59e-02 4.06e-02 0.700 1.6
+***Turning on AO-DIIS***
+... etc.
+12 -231.0033984839932089 -5.02e-09 3.33e-07 7.37e-06 7.95e-06 0.000 1.1
+**** Energy Check signals convergence ****
+FOD:
+Fermi smearing:E(HOMO(Eh)) = -0.201252 MUE = -0.179318 gap= 1.119 eV
+N_FOD = 0.920364
+ThedefaultfunctionalandbasissetareTPSSanddef2-TZVPrespectively. IftheFODanalysisshouldbedone
+employingadifferentfunctional,onehastoexplicitlyspecifythefunctionalandbasissetinthesimplekeyword
+lineandadjusttheSmearTempaccordingly.
+# ozone molecule
+! B3LYP def2-TZVP TightSCF
+%scf
+SmearTemp 9000
+end
+* xyz 0 1
+O 0.00000000017911 0.00000000000000 0.43702029765776
+O -1.09512651993192 0.00000000000000 -0.21851064888325
+O 1.09512651975281 0.00000000000000 -0.21851064877451
+*
+TheFODanalysismayalsobeusefulforfindingasuitableactivespacefore.g. CASSCFcalculations.
+Note:
+• The FOD analysis will be always printed (including Mulliken reduced orbital charges based on 𝜌𝐹𝑂𝐷) if
+SmearTemp>0K𝜌𝐹𝑂𝐷 isstoredondiskinthefileBasename.scfp_fodwhichisincludedinthegeneral
+Basename.densitiescontainer).
+• Sincethe𝑆ˆ2expectationvalueisnotdefinedforfractionaloccupationnumbers,itsprintoutisomitted.
+7.7. SCFConvergence 521
+
+[... start of page 544 ...]
+ORCAManual,Release6.0.0
+7.8 Choice of Wavefunction and Integral Handling
+7.8.1 Choice of Wavefunction Type
+ThebasicvariablethatcontrolsthetypeofwavefunctiontobecomputedisthevariableHFTypinthe%scfblock. If
+nothingisspecifiedforHFTyp,theprogramwillcheckthemultiplicitygivenintheinput:forclosed-shellmolecules
+withmultiplicity1,RHF/RKSisassumed;foropenshellmoleculeswithmultiplicitylargerthan1,UHF/UKSis
+invoked. RHFwillleadtoaspinrestrictedclosed-shelltypecomputation[838]. ForDFTcalculations,RKS,UKS
+andROKScanbeusedassynonymsforRHF,UHFand

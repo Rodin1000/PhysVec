@@ -1,0 +1,221 @@
+**Detailed Rules for Generating [Qiskit] Codes for Many-Body Physics**
+
+====================================================================================================
+
+## **CRITICAL: Function Format Requirements (MANDATORY)**
+
+**Every function MUST follow this exact format:**
+
+```
+# Input dependency: ...(elements needed as input, from user or other functions. Format: "name"[brief description, data format])
+# Output results: ...(output variables of this function)
+def FUNCTION_NAME(parameters):
+```
+
+**Key Requirements:**
+1. **Function naming:** MUST be in form of `"tag_xxx"` (e.g., `hamiltonian_XXZchain`, `circinit_ground_state`, `circevol_trotter`)
+2. **Type annotations:** MUST use Python type hints (e.g., `int`, `float`, `QuantumCircuit`) for ALL function INPUT parameters
+3. **Common Qiskit data types:**
+   - `H` (hamiltonian): `SparsePauliOp` or `PauliSumOp` (for spin-1/2) or `SecondQuantizedOp` (for fermion/boson via qiskit-nature)
+   - `qc` (quantum circuit): `QuantumCircuit`
+   - `psi` (quantum state): `Statevector` or `QuantumCircuit`
+   - `num_qubits`: `int`
+   - `observable`: `SparsePauliOp` or `PauliSumOp`
+
+**CRITICAL:** You MUST STRICTLY FOLLOW this format for ALL functions.
+
+====================================================================================================
+
+## **Function Decomposition Principle**
+
+**You MUST avoid monolithic functions.** Decompose logic into smaller units using different tags (listed below).
+
+====================================================================================================
+
+## **Notation**
+
+**Function Categories:**
+- **ELEMENT functions:** Functions with tags {'hamiltonian', 'circinit', 'circevol', 'effector', 'observable'}. These are fundamental building blocks that implement single steps in the calculation procedure.
+- **Task functions:** Functions with tags {'run', 'item', 'plot'}. These orchestrate ELEMENT functions to complete calculation tasks.
+- **Entry point:** the main function
+
+**Terminology:**
+- **"task"**: The whole reproduction process of the specified subplot/table
+- **"item"**: Individual elements in a subplot (e.g., curves, lines, point sets)
+
+**CRITICAL RULE:** 
+  - **You are FORBIDDEN** to combine multiple tags for one function. For example, `"hamiltonian_circinit_"` is **FORBIDDEN**. 
+
+====================================================================================================
+
+## **Element function rules**
+
+### **General rules for ALL element functions**
+
+1. **Purpose:** Functions with ELEMENT tags aim to implement a SINGLE function/step in the whole calculation procedure
+
+2. **You are REQUIRED** to create ALL tags in 'ELEMENT' (you are FORBIDDEN to skip any)
+  - You check if {'hamiltonian', 'circinit', 'circevol', 'effector', 'observable'} tags have ALL been defined. 
+
+3. **You are FORBIDDEN** to absorb some 'ELEMENT' function definitions into other ELEMENT function definitions
+
+4. **You are STRICTLY FORBIDDEN** to call any other 'ELEMENT' functions in the definition of any function in 'ELEMENT'
+   - **Instead:** Define the required preceding variables as the input parameters of the function
+
+5. **You are FORBIDDEN** to use global parameters or specific values directly
+  - **You are REQUIRED** to include every parameter used in each function definition in the input parameters of this function and DO NOT include specific values.
+
+6. **Helper functions:** If an element function needs to define helper functions, **you are FORBIDDEN** to define them outside the element function. **You are REQUIRED** to define helper functions inside the corresponding element function where they are needed.
+
+
+### **Detailed rules for each ELEMENT TAG:**
+
+#### **1. "hamiltonian"** - Hamiltonian Definition
+- **Purpose:** Define the Hamiltonian of the model (realizing "phy_model" in task plan)
+- **CRITICAL RULES:**
+  - **For spin-1/2 systems:** You are REQUIRED to define the Hamiltonian directly on qubits using `SparsePauliOp` or `PauliSumOp` from Qiskit
+  - **For other systems (higher spin, boson, fermion):** You are REQUIRED to use qiskit-nature to define the Hamiltonian, then map it to qubits using appropriate mappers (e.g., `JordanWignerMapper`, `ParityMapper`, `BravyiKitaevMapper` for fermions)
+- **Input dependency:** Number of qubits/sites and model parameters
+
+#### **2. "circinit"** - Initial State Circuit Definition
+- **Purpose:** Define the quantum circuit that initializes the quantum state
+- **CRITICAL RULES:**
+  - **You are REQUIRED** to return a `QuantumCircuit` object that prepares the initial state
+  - **You are FORBIDDEN** to include evolution or measurement operations in this function
+- **Input dependency:** Number of qubits and initial state parameters
+- **Example:** Function that creates a circuit with Hadamard gates, or prepares a specific product state
+
+#### **3. "circevol"** - Evolution Circuit Definition
+- **Purpose:** Define the quantum circuit for quantum state evolution
+- **CRITICAL RULES:**
+  - **You are REQUIRED** to return a `QuantumCircuit` object that implements the evolution
+  - This includes:
+    - **Trotter evolution:** Time evolution using Trotter decomposition (e.g., `TrotterQRTE`, `Trotter` from qiskit.algorithms)
+    - **IQPE evolution:** Evolution part for Iterative Quantum Phase Estimation
+    - **VQE ansatz:** Parameterized circuit ansatz for Variational Quantum Eigensolver
+  - **You are FORBIDDEN** to include initialization or measurement operations in this function
+- **Input dependency:** Hamiltonian, evolution time/parameters, and circuit parameters (for VQE ansatz)
+
+#### **4. "effector"** - Main Calculation Operations
+- **Purpose:** Define main calculation operations that combine circuits and execute quantum algorithms
+- **CRITICAL RULES:**
+  - **You are REQUIRED** to call relevant Qiskit interfaces to perform calculations
+  - **You are REQUIRED** to combine initial state circuit (`circinit`) and evolution circuit (`circevol`) if necessary
+  - **You are FORBIDDEN** to name functions without any quantum calculation operation as 'effector'
+  - **You are FORBIDDEN** to name functions with calculations for observables or post-process as 'effector'
+  - **Common operations include:**
+    - `Statevector.from_instruction()`: Convert circuit to statevector
+    - `IterativePhaseEstimation`: Perform IQPE algorithm
+    - `VQE`: Perform Variational Quantum Eigensolver
+    - `NumPyMinimumEigensolver`: Classical eigensolver for comparison
+- **Input dependency:** Results from 'hamiltonian', 'circinit', 'circevol' functions, and calculation parameters
+
+#### **5. "observable"** - Observable Definition
+- **Purpose:** Define and calculate observables needed in the research (according to "dependent" term in task plan)
+- **CRITICAL RULES:**
+  - **You are FORBIDDEN** to do quantum calculations (VQE, IQPE, etc.) directly in this function, you ONLY process the calculations AFTER the effector calculations
+  - **You are FORBIDDEN** to split a measurement into an 'observable' function and another 'measure' function
+  - **You are REQUIRED** to wrap ALL commands in an 'observable' function for a single targeted observable
+  - **You are REQUIRED** to define observables as `SparsePauliOp` or `PauliSumOp` for measurement
+- **Example:** Function that defines correlation operators (e.g., "X_i X_j", "Z_i Z_j") or magnetization operators
+- **Note:** If multiple observables exist, each should correspond to a separate function
+
+
+====================================================================================================
+
+## **Task function rules**
+
+### **1. "run"** - Complete Calculation for Single Parameter Set
+- **Purpose:** Implement calculation for a SINGLE set of inputs, DO NOT scan parameters here (Scanning process all in 'item' functions). 
+- **CRITICAL RULES:**
+  - **You are REQUIRED** to call 'hamiltonian'/'circinit'/'circevol'/'effector'/'observable' tagged functions (AT LEAST ONE for each). You are REQUIRED** to implement a complete calculation procedure: you MUST BEGIN from constructing hamiltonian, then call other element functions
+  - **You are FORBIDDEN** to define explicitly hamiltonian, circuits, observables in this function. You are FORBIDDEN to difine calculation provess (such as Statevector.from_instruction) explicitly here. 
+  - **You are STRICTLY FORBIDDEN** to use other 'run' functions in the definition
+  - **You are STRICTLY FORBIDDEN** to include specific parameter values in 'run' functions
+  - **You DO NOT** include complex iteration codes here. Scanning of paramters (including evolving time) part SHOULD be included later in 'item' functions. HERE 'run' functions ONLY applies to a calculation unit.  
+- **Note:** You are ALLOWED to define multiple 'run' functions (e.g., run_state_1, run_state_2 for independent calculations)
+
+### **2. "item"** - Data Generation/Parameter scanning for Task Items
+- **Purpose:** Generate data/Scan parameters needed in this task
+- **CRITICAL RULES:**
+  - **You are REQUIRED** to call 'run' tagged functions directly. You MUST include at least ONE 'run' function. You are REQUIRED** to ONLY explicitly call 'run' functions to scan parameters
+  - **You are FORBIDDEN** to call explicitly hamiltonian/circinit/circevol/observable/effector functions
+  - **You are FORBIDDEN** to call another 'item' function explicitly. 
+  - **You are STRICTLY FORBIDDEN** to include specific parameter values in 'item' functions
+- **Example:** Function that calculates a correlation-interaction dependency in the targeted figure
+- **Note:** You are ALLOWED to define different 'item' functions for different items needed in the task
+
+### **3. "plot"** - Data Visualization
+- **Purpose:** Demonstrate given data
+- **You are REQUIRED** to include plot function if your task is to reproduce a figure
+- **Note:** You are ALLOWED to define multiple 'plot' functions
+
+
+====================================================================================================
+
+## **Entry point rules**
+
+### ** "main"** - Entry Point
+- **Purpose:** Serve as the entry point
+- **CRITICAL RULES:**
+  - **You are FORBIDDEN** to call explicitly hamiltonian/circinit/circevol/observable/effector functions
+  - **You are FORBIDDEN** to call 'run' functions
+  - **You are REQUIRED** to call 'item' functions and 'plot' functions DIRECTLY and EXPLICITLY to fulfill the reproduction task
+  - **You are REQUIRED** to include specific parameter values in the 'main' definition
+  - **You are FORBIDDEN** to define GLOBAL parameters
+- **Note:** You MUST choose parameter values according to the target research paper. Choose values according to your own preferences ONLY WHEN the original paper does NOT provide related parameter values.
+
+**CRITICAL:** You are FORBIDDEN to define functions with other tags.
+
+====================================================================================================
+
+## **Other Coding Requirements**
+
+### **1. Package Usage**
+- **You are REQUIRED** to import Qiskit, Qiskit-nature, Qiskit-algorithms, and Qiskit-aer. (ALL four of them). 
+  - Qiskit for basic use, Qiskit-nature for physical systems, Qiskit-algorithms for quantum algorithms, Qiskit-aer for simulations.   
+
+### **2. Plotting**
+- Results from different data_sets and tasks are plotted in a single figure
+
+### **3. Character Encoding (CRITICAL)**
+- **You are REQUIRED** to generate code that contains only ASCII characters
+- **You are FORBIDDEN** to use Unicode letters, symbols, or punctuation
+- **Forbidden examples (non-exhaustive):**
+  - Greek letters: ψ, Δ, ω, φ, μ, λ
+  - Math/logic symbols: ÷, ≤, ≥, ≠, ∈, →, ←
+  - Typographic quotes: " " ' '
+  - Primes: ′
+  - Ellipsis: …
+  - Nonbreaking/zero-width spaces
+- **Use ASCII equivalents instead:**
+  - ψ → psi, φ → phi, ω → omega, μ → mu, λ → lambda, Δ → Delta
+  - a ÷ b → div(a, b), ≤ → <=, ≥ → >=, ≠ → !=, ∈ → in
+  - Use straight quotes " ' and plain ASCII punctuation only
+
+====================================================================================================
+
+## **Output Format**
+
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+
+- **"subplot_name"**: the subplot name specified in task plan
+- **"code_type"**: either "python" or "julia" (lowercase string)
+- **"code_content"**: the full source code as a string (plain source, do not include ``` fences)
+
+**CRITICAL:** You MUST NOT include this prompt itself (including the example below) in your output, in order to avoid the case that the example code itself is extracted as your generated code.
+
+**Example output** (exact dictionary form, shown here for clarity. You MUST add a "```json" right before the dict and "```" right after the dict! (not shown here) Beside from this dict, NO other information should be output (e.g. this prompt itself should NOT be included in your final response)):
+{{
+"subplot_name": "Fig. 2(a)",
+"code_type": "python",
+"code_content": "from qiskit import QuantumCircuit ...(The whole code here)"
+}}
+
+====================================================================================================
+
+## **Final Checklist**
+
+1. **Output format:** Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'. Even you fail to generate a complete code_content, you must KEEP this output format.
+
+2. **Python syntax:** If the code_type is 'python', you MAKE SURE that in the code you use 'def' to define all functions, and follow Python conventions.

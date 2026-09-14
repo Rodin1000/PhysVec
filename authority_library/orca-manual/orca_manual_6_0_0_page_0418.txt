@@ -1,0 +1,72 @@
+[... end of page 417 ...]
+sotothetransitionrateconstants,aswill
+bediscussedlater). TheycanberequestedbysettingPRINTLEVELinthe%ESDmoduleto3orabove.
+Ofcourse, itisnotalwayspossibletoobtaintheexcitedstate(ES)geometryduetorootflipping, oritmightbe
+toocostlyforlargersystems. Therefore,someapproximationstotheESPotentialEnergySurface(PES)havebeen
+developed.
+6.18. ExcitedStateDynamics 395
+
+--- Page 418 ---
+ORCAManual,Release6.0.0
+Thesimplestmodel,VerticalGradient(VG)
+Theminimalapproximation,knownasVerticalGradient(VG),assumesthattheexcitedstate(ES)Hessianequals
+thegroundstate(GS)HessianandextrapolatestheESgeometryfromtheESgradientandthatHessianusingsome
+step(Quasi-NewtonorAugmentedHessian,whichisthedefaulthere). Additionally,inthisscenario,thesimplest
+DisplacedOscillator(DO)modelisemployed,ensuringfastcomputation[199]. Tousethislevelofapproximation,
+simplyprovideaninputlike:
+!B3LYP DEF2-SVP TIGHTSCF ESD(ABS)
+%TDDFT
+NROOTS 5
+IROOT 1
+END
+%ESD
+GSHESSIAN "BEN.hess"
+DOHT TRUE
+HESSFLAG VG #DEFAULT
+END
+* XYZFILE 0 1 BEN.xyz
+OBS:IfnoGSHESSIANisgiven,itwillautomaticallylookforanBASENAME.hessfile.
+ChoosingoneofthemethodsinORCAtocomputeexcitedstateinformationisessential. Here,weutilizeTD(A)-
+DFT with IROOT 1 to compute properties for the first excited state. TD(A)-DFT is currently the sole method
+offeringanalyticgradientsforexcitedstates;selectinganyothermethodwillautomaticallyenforceNUMGRAD.
+Important: Pleasenotethatcertainmethods,suchasSTEOM-DLPNO-CCSD,requiresignificanttimetocom-
+putenumericalgradients. Insuchcases,werecommendusingDFT/TD-DFTHessiansandemployingthehigher-
+levelmethodsolelyforsinglepoints.
+Ifeverythingissetcorrectly,aftertheregularsinglepointcalculation,theESDmoduleinORCAwillinitiate. It
+proceedstoobtaintheexcitedstate(ES)geometry,computederivatives,andpredictthespectrum. Theresulting
+normalizedspectrumcanbeobservedinFig.6.58,depictedinred. Duetosuchsimplemodel,thespectrumisalso
+simplified. Whilethissimplicityislesscriticalforlargermolecules,ithighlightthepotentialbenefitofemploying
+anintermediatemodel.
+Abettermodel,AdiabaticHessianAfteraStep(AHAS)
+A reasonable compromise between a full geometry optimization and a simple step with the same Hessian is to
+performastepandthenrecalculatetheESHessianatthatgeometry. ThisapproachisreferredtohereasAdiabatic
+HessianAfterStep(AHAS).Inourtests,itcanbeinvokedwiththefollowinginput:
+!B3LYP DEF2-SVP TIGHTSCF ESD(ABS)
+%TDDFT
+NROOTS 5
+IROOT 1
+END
+%ESD
+GSHESSIAN "BEN.hess"
+DOHT TRUE
+HESSFLAG AHAS
+END
+* XYZFILE 0 1 BEN.xyz
+The spectrum obtained corresponds to the green line in Fig. 6.58. As shown, it closely resembles the spectrum
+obtained using AH, where a full geometry optimization was performed. Although not set as the default, this
+methodcomeshighlyrecommendedbasedonourexperience[199]. Anotheradvantageofthisapproachisthatthe
+derivativesofthetransitiondipolearecomputedsimultaneouslyoverCartesiandisplacementsontheESstructure
+usingthenumericalHessian. Subsequently,thesemodesarestraightforwardlyconverted.
+396 Chapter6. RunningTypicalCalculations
+
+[... start of page 419 ...]
+ORCAManual,Release6.0.0
+OBS:ThetransitiondipolesusedinourformulationarealwaysthoseoftheFINALstategeometry. Forabsorption,
+thiscorrespondstotheES,soinAHAS,thederivativesarecomputedoverthisgeometry. Forfluorescence, the
+defaultbehavioristorecomputethederivativesovertheGSgeometry. Alternatively,youcanchoosetosavetime
+and convert directly from ES to GS by setting CONVDER TRUE (though this is an approximation). For more
+details,refertoSec. MoreontheExcitedStateDynamicsmodule.
+OtherPESoptions
+TherearealsoafewotheroptionsthatcanbesetusingHESSFLAG.Forexample,youcancalculatethevertical
+ESHessianovertheGSgeometryandperformastep,knownastheVerticalHessian(HESSFLAGVH)method.
+This method has the advantage that the geometry step is expected 

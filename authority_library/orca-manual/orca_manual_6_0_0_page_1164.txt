@@ -1,0 +1,89 @@
+[... end of page 1163 ...]
+------
+*xyz 0 1
+O -1.69296787 -0.05579265 0.00556629
+H -2.01296504 0.84704339 -0.01586469
+H -0.73325076 0.04238910 0.00084302
+*
+%Compound
+Geometry myGeom;
+Variable res=-1;
+New_Step
+!BP86
+Step_End
+myGeom.Read();
+res = myGeom.WriteXYZFile(filename="myGeom.xyz");
+End
+7.59. CompoundMethods 1141
+
+--- Page 1164 ---
+ORCAManual,Release6.0.0
+GetNumOfInstances
+TheGetNumOfInstancesreturnsthenumberofinstancesofaspecificobjectinapropertyfile.
+Syntax:
+[res=] GetNumOfInstances(propertyName=myName, [step=myStep], [filename=myFilename], [baseProp-
+erty=true/false])
+Where:
+res: Anintegerthatreturnsthenumberofinstancesoftherequiredpropertyinthepropertyfile.
+propertyName: Astringaliasthatdefinesthevariabletheuserwantstoread.
+step: Thestepfromwhichwewanttoreadtheproperty. Ifnotgiventhepropertyfilefromthelaststepwillbe
+read.
+filename: Afilenameofapropertyfile. Ifafilenameandatthesametimeastepareprovidedtheprogramwill
+ignorethestepandtrytoreadthepropertyfilewiththegivenfilename.
+NOTEpleasenotethatintheendoffilenametheextension.property.txtwillbeadded.
+baseProperty: A true/false boolean. The default value is set to false. If the value is set to true then a generic
+propertyofthetypeaskedwillberead. Thismeansifdipolemomentisasked,itwillreturnthelastdipolemoment,
+irrelevantifandMP2orSCFonewaddefined.
+Example
+# ----------------------------------------------------
+# This is an example script for readNumOfInstances
+# -----------------------------------------------------
+%Compound
+Variable res = 0;
+Variable myProperty="MP2_DIPOLE_TOTAL";
+Variable myBaseProperty="DIPOLE_MOMENT_TOTAL";
+New_Step
+!MP2
+#%mp2
+# density relaxed
+#end
+*xyz 0 1
+H 0.0 0.0 0.0
+H 0.0 0.0 0.8
+*
+Step_End
+# First read the MP2 dipole moment
+res = GetNumOfInstances(propertyName=myProperty);
+print("Num of MP2 dipole moments : %d\n", res);
+res = GetNumOfInstances(propertyName=myBaseProperty, Property_Base=true);
+print("Num of total dipole moments : %d\n", res);
+End
+GoTo
+TheGoTocommandallowsthe‘jump’insidethenormalflowofacompound script. Thesyntaxofthecommand
+canbebestpresentedthroughanexample.
+Example:
+# ----------------------------------------------------
+# This is an example script for GoTo
+# (It should print only 0,1,2,3)
+# -----------------------------------------------------
+(continuesonnextpage)
+1142 Chapter7. DetailedDocumentation
+
+[... start of page 1165 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%Compound
+Variable TCut=3;
+Variable Done;
+for i from 0 to 6 Do
+print("Index: %d\n", i);
+if (i >= TCut) then
+GoTo Done;
+EndIf
+EndFor
+Done:
+print("Done\n");
+End
+PleasenotethatthevariableweuseasalabelfortheGoTocommandshouldbepreviouslydefinedlikeanormal
+variable.
+If

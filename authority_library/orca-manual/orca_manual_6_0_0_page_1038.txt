@@ -1,0 +1,85 @@
+[... end of page 1037 ...]
+plicable to any charged or uncharged solute in any solvent
+or liquid medium for which a few key descriptors are known. In particular, these descriptors are the dielectric
+constant,refractiveindex,bulksurfacetension,andacidityandbasicityparameters. Neglectingtheconcentration
+contribution,themodelseparatestheobservablesolvationfreeenergyintotwomaincomponents,
+∆𝐺 =∆𝐺 +∆𝐺 . (7.321)
+S ENP CDS
+In ORCA, the first component is the bulk electrostatic contribution arising from a self-consistent reaction field
+treatment that involves the electrostatic interaction using the Conductor-like Polarizable Continuum Model (C-
+7.53. ImplicitSolvationModels 1015
+
+--- Page 1038 ---
+ORCAManual,Release6.0.0
+PCM).However,theradiiaresetto“intrinsicatomicCoulombradii”. Thesecondcomponent,calledthecavity-
+dispersion solvent-structure (CDS) term, is the contribution resulting from short-range interactions between the
+soluteandsolventmoleculesinthefirstsolvationshell. Thiscontributionisasumoftermsthatareproportional
+(withgeometry-dependentproportionalityconstantscalledatomicsurfacetensions)tothesolvent-accessiblesur-
+face areas of the individual atoms of the solute. The CDS contribution to the free energy of solvation is given
+by
+atoms atoms
+∑︁ ∑︁
+∆𝐺 = 𝜎 𝐴 (R,𝑅 +𝑟 )+𝜎[M] 𝐴 (R,𝑅 +𝑟 ),
+CDS 𝑘 𝑘 𝑍𝑘 𝑠 𝑘 𝑍𝑘 𝑠
+𝑘 𝑘
+where𝜎 and𝜎[M] aretheatomicsurfacetensionofatom𝑘 andthemolecularsurfacetension,respectively,and
+𝑘
+𝐴 isthesolvent-accessiblesurfacearea(SASA).TheSASAdependsonthegeometryR,theset𝑅 ofallatomic
+𝑘 𝑍𝑘
+van der Waals radii, and the solvent radius 𝑟 , which is added to each of the atomic van der Waals radii. In the
+𝑠
+programBondiradiiareusedforCDScontribution.
+More details can be found in the original paper of Marenich et al. [558], which should be cited in publications
+usingresultsofSMDcalculations.
+SMDcanbeemployedinsinglepointcalculationsandgeometryoptimizations,usingsingle-determinantSCF(HF
+andDFT)andCASSCFmethods. Inpost-SCFmethodstheresultiscorrectedinthereferencewavefunction. The
+SMDsolvationmodelisinvokedintheinputfilevia
+! SMD(solvent)
+wheresolventisoneofthe179solventsintheSMDlibrary(seeTableTable7.29). Alternatively,onecanrequest
+theSMDmodelviathe%cpcmblockbywriting:
+%cpcm smd true # turn on SMD
+SMDsolvent "solvent" # specify the name of solvent from the list
+end
+IndependentlyonthewaytheuserinvokestheSMDmodel,ORCAautomaticallysetsanumberofdefaultSMD
+parametersforthechosensolvent. Ifrequired,theusercanalsomanuallyspecifythesolventdescriptorsusedin
+anSMDcalculationinthe%cpcmblock.
+%cpcm soln # index of refraction at optical frequencies at 293 K
+soln25 # index of refraction at optical frequencies at 298 K
+sola # Abraham's hydrogen bond acidity
+solb # Abraham's hydrogen bond basicity
+solg # relative macroscopic surface tension
+solc # aromaticity, fraction of non-hydrogenic solvent atoms
+# that are aromatic carbon atoms
+solh # electronegative halogenicity, fraction of non-hydrogenic
+# solvent atoms that are F, Cl, or Br
+end
+Let’sconsiderthefollowinginputforawatermoleculesolvatedbywater,
+! B3LYP def2-SVP tightscf SMD(water)
+* xyz 0 1
+O -0.00000018976103 0.00606010894837 0.00000000004527
+H 0.76098169249695 -0.58891312953082 -0.00000000000022
+H -0.76098151333900 -0.58891299029372 -0.00000000000022
+*
+BeforetheSCFpartstarts,theprogramprintstheSMDinformation. Thispartreadsas:
+--------------------
+CPCM SOLVATION MODEL
+--------------------
+(continuesonnextpage)
+1016 Chapter7. DetailedDocumentation
+
+[... start of page 1039 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+CPCM parameters:
+Epsilon ... 78.3550
+Refrac ... 1.3328
+Rsolv ... 1.3000
+Surface type ... GAUSSIAN VDW
+Discretization scheme ... Constant charge density
+Threshold for H atoms ... 5.0000 (charges/Ang^2)
+Threshold for non-H atoms ... 5.0000 (charges/Ang^2)
+Epsilon function type ... CPCM
+Solvent: ... WATER
+SMD-CDS solvent descriptors:
+Soln ... 1.3328
+Soln25 ... 1.3323

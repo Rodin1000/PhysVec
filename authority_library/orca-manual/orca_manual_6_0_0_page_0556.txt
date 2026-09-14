@@ -1,0 +1,89 @@
+[... end of page 555 ...]
+es. Forconvenience,thekeywordsinthe%elpropinputblockarestillavailablebut
+they modify the same internal variables as those in %method. For magnetic response properties, the solver and
+convergencetolerancearesetseparatelyin%eprnmr,becausetheconvergencebehaviorofthemagneticresponse
+CP-SCFequationsissometimesdifferent.
+%elprop
+Solver # Alias, see: %method Z_Solver
+Tol # Alias, see: %method Z_Tol
+MaxIter # Alias, see: %method Z_MaxIter
+MaxDIIS # Alias, see: %method Z_MaxDIIS
+LevelShift # Alias, see: %method Z_Shift
+(continuesonnextpage)
+7.10. CP-SCFOptions 533
+
+--- Page 556 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+%eprnmr
+Solver # Solver for magnetic response, see options at: %method Z_Solver
+Tol # Convergence tolerance for magnetic response
+MaxIter # Alias, see: %method Z_MaxIter
+MaxDIIS # Alias, see: %method Z_MaxDIIS
+LevelShift # Alias, see: %method Z_Shift
+end
+The keywords Z_GridX and Z_IntAccX are applicable if the RIJCOSX approximation is chosen for the treat-
+ment of two-electron integrals. They determine the angular and radial COSX integration grids, as discussed in
+sectionChangingTD-DFT,CP-SCFandHessiangrids. Analogously,thekeywordsZ_GridandZ_IntAccdeter-
+minetheintegrationgridforDFTXCfunctionals.
+IntegralsontheRHSareevaluateddifferentlyfordifferentperturbations-refertosectionsUsingtheRIApprox-
+imationforHartree-FockandHybridDFT(RIJCOSX),EPRandNMRproperties,RIJCOSX-RI-MP2Gradients,
+and MP2 and RI-MP2 Second Derivatives and RI-MP2 and Double-Hybrid DFT Response Properties for SCF-
+level gradients, EPR/NMR calculations with GIAOs, MP2 gradients, and MP2 second derivatives, respectively.
+For MP2 Z-vector equations, the RIJCOSX Fock-response terms in the RHS are evaluated with the COSX grid
+specifiedbyZ_GridX_RHS.NotethatitisuseddifferentlytoZ_GridX:instead,itselectsoneofthethreegridsused
+intheSCF(seeSectionsUsingtheRIApproximationforHartree-FockandHybridDFT(RIJCOSX),COSXGrid
+andConvergenceIssues,andDetailsonthenumericalintegrationgridsfordetails)anditisnotrecommendedto
+changethedefaultvalueof2.
+IftheRIJONXorRIJKapproximationisusedintheSCF,thesameisalsoemployedintheCP-SCF.Note,however,
+thattheRI-Kapproximationisnotefficientfortheseterms.
+7.11 SCF Stability Analysis
+TheSCFstabilityanalysisevaluatestheelectronicHessian(withrespecttoorbitalrotations)atthepointindicated
+bytheSCFsolutiontodeterminethelowesteigenvaluesoftheHessian. Ifoneormorenegativeeigenvaluesare
+found, the SCF solution corresponds to a saddle point and not a true local minimum in the space considered in
+theanalysis. Atypicalcasearestretchedbondsofdiatomics, wherethesymmetryoftheinitialguessleadstoa
+restrictedsolutioninsteadoftheoftenpreferredunrestrictedone. Severalspacesaretheoreticallypossible[778].
+However, ORCA limits itself to the analysis RHF/RKS in the space of UHF/UKS or UHF/UKS in the space of
+UHF/UKS. As such, it is on the available for the SCF parts of DFT and HF.[80] We mention passing, that a
+stability analysis is also available for the CASSCF type wave function and is described elswhere in more detail
+(SectionDetectingCASSCFInstabilities). Inthefollowing,HFisusedtoindicatebothHFandKS.Considerthe
+followinginput(unlessindicatedotherwise,defaultvaluesareshown):
+! BHLYP def2-SVP NORI
+%scf
+guess hcore # for illustrative purposes only
+HFTyp UHF # default based on spin multiplicity
+STABPerform true # default false
+STABRestartUHFifUnstable true # restart the UHF-SCF if unstable
+STABNRoots 3 # number of eigenpairs sought
+STABMaxDim 3 # Davidson expansion space = MaxDim * NRoots
+STABMaxIter 100 # maximum number of Davidson iterations
+STABNGuess 4096 # size of initial guess matrix: 4096 x 4096
+STABDTol 0.0001 # convergence criterion from iteration to iteration
+STABRTol 0.0001 # convergence criterion max residual norm
+STABlambda +0.5 # mixing parameter
+STABORBWIN -1, -1, -1, -1, -1, -1, -1, -1 # defines the donor / acceptor spaces
+# 4 parameters for RHF
+# 8 paramters for UHF (4 alpha, 4 beta)
+(continuesonnextpage)
+534 Chapter7. DetailedDocumentation
+
+[... start of page 557 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# orbital window, -1 refers to automatic determination
+STABEWIN -5.0, 5.0 # lower and upper cutoff in Eh for automatic freezing
+#---------------------------------------------------------------------------------
+# alternative specification using a sub-block:
+stab
+NRoots 3
+MaxDim 3 # etc.
+end
+end
+* xyz 0 1
+h 0.0 0.0 0.0
+h 0.0 0.0 1.4
+*
+ThedeterminationoftheelectronicHessianisstructurallycomparabletotheTDHF/CIS/TDDFTprocedure. Thus,
+manyoptionsareverysimilarandtheuserisencouragedtoreadthesectiononTDDFT(SectionExcitedStatesvia
+RPA,

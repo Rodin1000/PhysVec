@@ -1,0 +1,91 @@
+[... end of page 106 ...]
+on,asystematicseriesofbasissetsisrequired. Thisis,forexample,providedbythecc-pV𝑛Z,aug-cc-pV𝑛Zor
+thecorrespondingANObasissets. Here𝑛isthe“cardinalnumber”thatis2forthedouble-zetabasissets,3for
+triple-zeta,etc.
+TheconvergenceoftheHFenergytothebasissetlimitisassumedtobegivenby:
+(︁ √ )︁
+𝐸(𝑋) =𝐸(∞) +𝐴exp −𝛼 𝑋 (6.1)
+SCF SCF
+Here,𝐸(𝑋) istheSCFenergycalculatedwiththebasissetwithcardinalnumber𝑋,𝐸(∞) isthebasissetlimit
+SCF SCF
+SCF energy and 𝐴 and 𝛼 are constants. The approach taken in ORCA is to do a two-point extrapolation. This
+means that either 𝐴 or 𝛼 have to be known. Here, we take 𝐴 as to be determined and 𝛼 as a basis set specific
+constant.
+84 Chapter6. RunningTypicalCalculations
+
+--- Page 107 ---
+ORCAManual,Release6.0.0
+Thecorrelationenergyissupposedtoconvergeas:
+𝐸(∞) =
+𝑋𝛽𝐸
+c
+(
+o
+𝑋
+rr
+)−𝑌𝛽𝐸
+c
+(
+o
+𝑌
+r
+)
+r (6.2)
+corr 𝑋𝛽 −𝑌𝛽
+Thetheoreticalvaluefor𝛽is3.0. However,itwasfoundbyTruhlarandconfirmedbyus,thatfor2/3extrapolations
+𝛽 =2.4performsconsiderablybetter.
+Foranumberofbasissets,wehavedeterminedtheoptimumvaluesfor𝛼and𝛽[606]:
+𝛼 𝛽 𝛼 𝛽
+23 23 34 34
+cc-pVnZ 4.42 2.46 5.46 3.05
+pc-n 7.02 2.01 9.78 4.09
+def2 10.39 2.40 7.88 2.97
+ano-pVnZ 5.41 2.43 4.48 2.97
+saug-ano-pVnZ 5.48 2.21 4.18 2.83
+aug-ano-pVnZ 5.12 2.41
+Sincethe𝛽 valuesfor2/3arecloseto2.4,wealwaystakethisvalue. Likewise,all3/4andhigherextrapolations
+aredonewith𝛽 =3. However,theoptimizedvaluesfor𝛼aretakenthroughout.
+Usingthekeyword! Extrapolate(X/Y,basis),whereXandYarethecorrespondingsuccessivecardinalnum-
+bersandbasisisthetypeofbasissetrequested(=cc,aug-cc,cc-core,ano,saug-ano,aug-ano,def2)ORCA
+willcalculatetheSCFandoptionallytheMP2orMDCIenergieswithtwobasissetsandseparatelyextrapolate.
+Thekeywordworksalsointhefollowingway:! Extrapolate(n,basis)wherenistheisthenumberofenergies
+tobeused. Inthiswaytheprogramwillstartfromadouble-zetabasisandperformcalculationswith ncardinal
+numbersandthenextrapolatethedifferentpairsofbasissets. Thusforexamplethekeyword! Extrapolate(3,
+CC)willperformcalculationswithcc-pVDZ,cc-pVTZandcc-pVQZbasissetsandthenestimatetheextrapolation
+resultsofbothcc-pVDZ/cc-pVTZandcc-pVTZ/cc-pVQZcombinations.
+LetustaketheexampleoftheH2OmoleculeattheB3LYP/TZVPoptimizedgeometry. Thereferencevalueshave
+been determined from a HF calculation with the decontracted aug-cc-pV6Z basis set and the correlation energy
+wasobtainedfromthecc-pV5Z/cc-pV6Zextrapolation. Thisgives:
+E(SCF,CBS) = -76.066958 Eh
+EC(CCSD(T),CBS) = -0.30866 Eh
+Etot(CCSD(T),CBS) = -76.37561 Eh
+Nowwecanseewhatextrapolationcanbringin:
+!CCSD(T) Extrapolate(2/3) TightSCF Conv Bohrs
+* int 0 1
+O 0 0 0 0 0 0
+H 1 0 0 1.81975 0 0
+H 1 2 0 1.81975 105.237 0
+*
+NOTE:
+• TheRI-JKandRIJCOSXapproximationsworkwelltogetherwiththisoptionandRI-MP2isalsopossible.
+Auxiliarybasissetsareautomaticallychosenandcannotbechanged.
+• All other basis set choices, externally defined bases etc. will be ignored — the automatic procedure only
+workswiththedefaultbasissets!
+• Thebasissetswiththe“core”postfixcontaincorecorrelationfunctions. Bydefaultitisassumedthatthis
+meansthatthecoreelectronsarealsotobecorrelatedandthefrozencoreapproximationisturnedoff. How-
+ever,thiscanbeoverriddeninthemethodblockbychoosing,e.g. %method frozencore fc_electrons
+end!
+6.1. SinglePointEnergiesandGradients 85
+
+[... start of page 108 ...]
+ORCAManual,Release6.0.0
+• Sofar,theextrapolationisonlyimplementedforsinglepointsandnotforgradients. Hence,geometryopti-
+mizationscannotbedoneinthisway.
+• The extrapolation method should only be used with very tight SCF convergence criteria. For open shell
+methods,additionalcautionisadvised.
+Thisgives:
+Alpha(2/3) : 4.420 (SCF Extrapolation)
+Beta(2/3) : 2.460 (correlation extrapolation)
+SCF energy with basis cc-pVDZ: -76.026430944
+SCF energy with basis cc-pVTZ: -76.056728252
+E

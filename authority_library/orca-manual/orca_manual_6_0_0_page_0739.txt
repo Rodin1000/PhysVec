@@ -1,0 +1,90 @@
+[... end of page 738 ...]
+narypointwith
+𝑖
+therequiredcharacteristics(Hessianwithexactlyonenegativeeigenvalue). Thetransitionstatesearchisseparated
+intotwodifferentoptimizationproblems. TheenergyismaximizedalongoneHessianeigenmodeandminimized
+along the remaining 3𝑁 −7(6) eigenmodes. We introduce two different shift parameters 𝜆 and 𝜆 , where 𝜆
+𝑝 𝑛 𝑝
+is the shift parameter for the eigenmode being maximized and 𝜆 shifts the Hessian eigenvalues of the modes
+𝑛
+beingminimized. Thismethodallowsustomaximizealonganymode,notonlytheonewithsmallesteigenvalue.
+StartingfromtwodifferentRFO-matricesforthedifferentoptimizationproblems(seedescriptionabove)weget
+for𝜆 and𝜆 :
+𝑝 𝑛
+1 1√︁ ∑︁ 𝐹2
+𝜆 = 𝑏 + 𝑏2 +4𝐹2 and 𝑖 =𝜆 (7.207)
+𝑝 2 𝑘 2 𝑘 𝑘 𝜆 −𝑏 𝑛
+𝑛 𝑖
+𝑖̸=𝑘
+716 Chapter7. DetailedDocumentation
+
+--- Page 739 ---
+ORCAManual,Release6.0.0
+whereas𝐹 =𝑉+𝑔isthecomponentof𝑔alongtheHessianeigenmode𝑉 and𝜆 hastogetsolvediteratively. The
+𝑖 𝑖 𝑖 𝑛
+solutionfor𝜆 hastobenegativeandlowerthan𝑏 (orlowerthan𝑏 ,ifnotthelowestmodeisbeingfollowed). If
+𝑛 2 1
+theHessianhasmorethanonenegativeeigenvalue,thesepropertiesmightnotbefulfilled,andtheHessianwould
+havetobemodified. InourimplementationtheHessiandiagonalelementsareeithershiftedorreversedinsucha
+case.
+OncetheshiftparametersareknowntheP-RFOstepℎiscalculatedasfollows:
+𝐹¯ 𝑉 𝐹¯𝑉
+∆𝑞 =− 𝑘 𝑘 and ∆𝑞 =− 𝑖 𝑖 with 𝑖=1...𝑛, 𝑖̸=𝑘 (7.208)
+𝑘 𝑏 −𝜆 𝑖 𝑏 −𝜆
+𝑘 𝑝 𝑖 𝑛
+𝑛
+∑︁
+∆𝑞 = ∆𝑞 (7.209)
+𝑗
+𝑗=1
+ScanTSoption
+ForTSmodesofratherlocalnature(involvingonlyonebondoranangle;noconcertedmovementsovermultiple
+atoms) we implemented the ScanTS feature. Here the user can carry out a relaxed surface scan and a TS opti-
+mizationinonecalculation. Aftertherelaxedsurfacescanthealgorithmchoosestheoptimizedstructureofthe
+scanwithhighestenergyasinitialguessstructureandthetwoneighbouringstructuresforthecalculationofthe
+second derivative of the scanned coordinate (e.g., if scan step number 4 gives the structure with highest energy,
+thenstructurebasename.004.xyzistheinitialguessfortheTSoptimization;thestructuresbasename.003.xyz
+and basename.005.xyz are used for the calculation of the second derivative). Before the first step of the sub-
+sequentTSoptimizationtheenergiesandgradientsforallthreestructuresarecalculated. Thegradientsarethen
+transformedtointernalcoordinates. ThediagonalHessianvalueofthescannedcoordinateisthencalculatedvia
+finitedifferenceoftheinternalgradientsofthetwogivenstructures(003and005inourexample).
+FortheconstructionoftheinitialHessianamodelforcefieldHessianisbuiltup(thisHessianhasgotonlydiagonal
+entriesandzerosasoff-diagonalelements). TheexactlycalculateddiagonalHessianvaluereplacesthemodelforce
+fieldHessianentryfortherespectiveinternalcoordinate.
+IftheuseralreadyperformedaregularrelaxedsurfacescanwithoutthesubsequentTSoptimization,thenhecan
+neverthelessusethesestructuresforthesameprocedure. Arelaxedsurfacescanalwaysgivesyouthexyz-filesand
+gbw-filesoftheoptimizedstructuresofeachscanstep. AseparateTSoptimizationcanbecarriedoutwherethe
+structurewithhighestenergyisthestartingstructure. Additionallythetwofileswiththetwoadjacentstructures
+(asexplainedabove)havetobeprovided(viatheHess_Internalkeyword, seebelow). Furthermore, theinternal
+coordinate, for which the diagonal Hessian value has to be calculated, has to be given (the previously scanned
+coordinate). ThisexactHessiancalculationisonlypossibleforoneinternalcoordinate:
+%geom
+Hess_Internal
+{B 1 0 C} # previously scanned coordinate
+XYZ1 "scanName.003.xyz" # the xyz-files of the structures
+XYZ2 "ScanName.005.xyz" # next to the highest energy point
+GBW1 "ScanName.003.gbw" # the gbw-files of the structures
+GBW2 "ScanName.005.xyz" # next to the highest energy
+# the gbw-files are optional
+end
+end
+AdditionallythemanipulationofthediagonalHessianvaluesoftheinternalHessianispossibleforfurtherinternal
+coordinates,butwithoutanextracalculation. Heretheusercanjustdefineavalue(inEh/Bohr2).
+Hess_Internal
+{A 3 2 1 D 2.0} # define a diagonal Hessian value of
+# 2 Eh/Bohr2 for the angle between
+# atoms 3 2 1
+{B 1 0 D -0.5} # define a diagonal Hessian value of
+# -0.5 Eh/Bohr2 for the bond between
+# atoms 1 and 0
+end
+7.26. GeometryOptimization 717
+
+[... start of page 740 ...]
+ORCAManual,Release6.0.0
+ThedefinitionofsuchHessian(diagonal)elementsispossibleformultipleinternalcoordinates. Thesejustreplace
+thevaluesoftheforcefieldmodelHessian.
+HybridHessian
+We implemented the calculation of a “Hybrid Hessian” as an alternative to the full Hessian calculation for TS
+optimization. Here only those parts of the Hessian, that are important for the TS optimization, are calculated
+exactly. Forthiscalculationwedefinetwokinds

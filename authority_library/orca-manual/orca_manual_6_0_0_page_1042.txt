@@ -1,0 +1,86 @@
+[... end of page 1041 ...]
+sdone,thefreeenergyofsolvation(∆𝐺 )ofthesoluteinthesolventisprintedintheORCAoutput
+S
+file. InORCA6.0theuseofopenCOSMO-RSisrestrictedtothecalculationof∆𝐺 .
+S
+HowtoRunaORCA/COSMO-RSCalculation
+ORCA/COSMO-RScalculationsarecontrolledthroughthe%cosmorsblock. Thesetypeofcalculationsrequire
+twoinputstructures,oneforthesoluteandoneforthesolvent. Thesolutecoordinatesareprovidedintheinputfile
+asdoneforanyothertypeofcalculation. However,regardingthestructureforthesolvent,therearetwooptions:
+1. Retrievethestructureofthesolventfromadatabase
+2. Providethestructureinaseparatefile
+Tousestrategy1,weneedtorequestthesolventvia:
+COSMORS(Solvent)
+7.53. ImplicitSolvationModels 1019
+
+--- Page 1042 ---
+ORCAManual,Release6.0.0
+inthesimpleinputorusingthe%cosmorsblock:
+%cosmors
+solvent "Solvent"
+end
+ThelistofinternalsolventsavailableinORCAareshowninTable7.29. Forinstance,forawatermoleculesolvated
+byacetonitrile,theinputfilelookslike:
+!COSMORS(Acetonitrile)
+* xyz 0 1
+O 0.00000006589375 0.00157184228646 0.00000000004493
+H 0.77316868532439 -0.58666889665624 -0.00000000000005
+H -0.77316876182122 -0.58666895650640 -0.00000000000005
+*
+Iftheuserwantstoprovideastructureforthesolvent(strategy2),thenaseparatefilewithextension.cosmorsxyz
+shouldbeavailable. Thenameofthisfile(withoutextension)iscontrolledbythetagsolventfilenameinthe
+%cosmorsblock. Forinstance,ifwewanttocalculatethefreeenergyofsolvationofacetoneinwater,theORCA
+inputfilewouldlooklikethis:
+%cosmors
+solventfilename "water"
+end
+* xyz 0 1
+H 1.99757808828569 0.25022586507917 0.72957579847856
+C 1.44666788654273 0.06088176074125 -0.18975506731892
+H 1.67115809398389 0.82690156694531 -0.93346420198265
+H 1.76410010378270 -0.89580894800398 -0.61702931492419
+C -0.03218812888253 -0.00668250402989 0.08117960952503
+O -0.47126229461002 -0.06383203315654 1.21590571064657
+C -0.93671505604705 -0.00759565576779 -1.12174123739234
+H -0.88761294036774 0.97611724740670 -1.59852429171257
+H -0.58940208311204 -0.73299176093053 -1.85998395179737
+H -1.96332366957567 -0.22151553828368 -0.83026305352213
+*
+Thestructureofthesolvent(water)istheoneinthewater.cosmorsxyzfile:
+3
+0 1
+O 0.00000006589375 0.00157184228646 0.00000000004493
+H 0.77316868532439 -0.58666889665624 -0.00000000000005
+H -0.77316876182122 -0.58666895650640 -0.00000000000005
+where the first line corresponds to the number of atoms, and in the second line the charge and multiplicity are
+provided.
+The output for COSMO-RS is printed in the ORCA output file after the line that reads OPENCOSMO-RS
+CALCULATION. First of all, the information regarding the level of theory, the solute and the solvent is printed.
+Fortheexampleabove(acetoneinwater),itreadsas,
+------------------------------------------------------------------------------
+OPENCOSMO-RS CALCULATION
+------------------------------------------------------------------------------
+----------------------
+GENERAL INFORMATION
+----------------------
+Calculation method ... DFT
+Functional ... BP86
+(continuesonnextpage)
+1020 Chapter7. DetailedDocumentation
+
+[... start of page 1043 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Basis set ... DEF2-TZVPD
+----------------------
+SOLUTE INFORMATION
+----------------------
+Number of atoms ... 10
+Total charge ... 0
+Multiplicity ... 1
+CARTESIAN COORDINATES (ANGSTROEM)
+H 1.997578 0.250226 0.729576
+C 1.446668 0.060882 -0.189755
+H 1.671158 0.826902 -0.933464
+H 1.764100 -0.895809 -0.617029
+C -0.032188 -0.006683 0.08

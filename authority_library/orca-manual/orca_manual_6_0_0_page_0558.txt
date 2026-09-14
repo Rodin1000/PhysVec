@@ -1,0 +1,69 @@
+[... end of page 557 ...]
+susefulnesscannot
+bedenied,butitiscertainlynotblack-box.
+AnSCFstabilityanalysiswithdefaultsettingscanberequestedviaSTABILITY,SCFSTABILITY,SCFSTABor
+STABonthesimpleinputline.
+7.12 Frozen Core Options
+Thefrozencore(FC)approximationisusuallyappliedincorrelatedcalculationandconsistsinneglectingcorre-
+lationeffectsforelectronsinthelow-lyingcoreorbitals. TheFCapproximationandthenumberofcoreelectrons
+perelementcanbeadjustedinthe%methodblock. Thedefaultnumberofcoreelectronsperelementislistedin
+Table7.16.
+Table7.16: Defaultvaluesfornumberoffrozencoreelectrons.
+7.12. FrozenCoreOptions 535
+
+--- Page 558 ---
+ORCAManual,Release6.0.0
+H He
+0 0
+Li Be B C N O F Ne
+0 0 2 2 2 2 2 2
+Na Mg Al Si P S Cl Ar
+2 2 10 10 10 10 10 10
+K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr
+10 10 10 10 10 10 10 10 10 10 10 10 18 18 18 18 18 18
+Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe
+18 18 28 28 28 28 28 28 28 28 28 28 36 36 36 36 36 36
+Cs Ba Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn
+36 36 46 46 46 46 46 46 46 46 46 46 68 68 68 68 68 68
+Fr Ra Lr Rf Db Sg Bh Hs Mt Ds Rg Cn
+68 68 68 100 100 100 100 100 100 100 100 100
+Lan- La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb
+thanides
+36 36 36 36 36 36 36 36 36 36 36 36 36 36
+Ac- Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No
+tinides
+68 68 68 68 68 68 68 68 68 68 68 68 68 68
+Forsystemscontainingheavyelements,coreelectronsmighthavehigherorbitalenergiescomparedtotheorbital
+energiesofvalenceMOsofsomelighterelements. Inthatcase,coreelectronsmightbeincludedinthecorrelation
+calculation,whichultimatelyleadstolargeerrorsincorrelationenergy. Inordertopreventthis,theMOordering
+ischecked: DoalllowerenergyMOsinthecoreregionhavecoreelectroncharacter,i.e. aretheystronglylocalized
+on the individual elements? For post-(CAS)SCF calulations, this check is always performed both after the SCF
+calculation, andaftertheinitialguess(becausetheSCFmaybeskippedwith !NoIter). Forothercalculations,
+thecheckisoffbydefaultbutmaybeswitchedonwiththe CheckFrozenCorekeywordinthe %methodblock.
+Ifcoreorbitalsarefoundinthevalenceregion,whilemoredelocalizedorbitalsarefoundinthecoreregion,the
+correspondingMOpairsareswapped. ThisbehaviorcanbedisabledusingtheCorrectFrozenCorekeyword.
+%method
+FrozenCore FC_ELECTRONS #Freeze all core electrons
+FC_EWIN #Freeze selected core electrons via an energy window
+#e.g. for MP2: %mp2 EWin EMin,EMax
+FC_NONE #No frozencore approximation
+-n #Freeze a total of n electrons
+NewNCore Bi 68 end #Set the number of core electrons for Bi to 68
+CheckFrozenCore true #Check whether frozen core orbitals are ordered correctly
+#Default: true only for post-(CAS)SCF calculations
+CorrectFrozenCore true #Whether to rotate valence orbitals out of the core region
+end
+536 Chapter7. DetailedDocumentation
+
+[... start of page 559 ...]
+ORCAManual,Release6.0.0
+Note:
+• TheFrozenCoreoptionsareappliedtoallpostHartree-Fockmethods.
+• Ifincludingallelectronsisdesired,the!NoFrozenCorekeywordcanbesimplyinserted. ForMP2: Frozen
+virtualorbitalsarenotallowedingradientrunsorgeometryoptimization!
+• IfECPsareused,thenumberforNewNCorehastoincludetheelectronsrepresentedbytheECPsaswell.
+E.g. ifanelementissupposedtohave60electronsintheECPandadditional8electronsshouldbefrozen
+inthecorrelationcalculation,NewNCoreshouldbe68.
+• InORCAweuseratherconservativefrozencoresettings, i. e. alargenumberofelectronsareincludedin
+thecorrelationtreatment. Therefore,werecommendtouseproperlyoptimizedcorrelatingbasisfunctions
+inallcases,suchasthecc-pwCVXZbasisset

@@ -1,0 +1,83 @@
+[... end of page 380 ...]
+------------- --------------------
+ThetotalHFLDenergyoftheadductisthus-114.932878050741a.u.. Tocomputeinteractionenergies,wehaveto
+substractfromthisvaluetheHartree-Fockenergiesofthemonomersinthegeometrytheyhaveinthecomplex,i.e.,
+-38.884413525377and-76.040412827089a.u. forCH andH O,respectively. Thetotalinteractionenergyisthus
+2 2
+-0.00805a.u. or-5.1kcal/mol(thecorrespondingDLPNO-CCSD(T)/TightPNO/CBSvalueis-5.3kcal/mol.[33]).
+Notethat,toobtainbindingenergies,thegeometricpreparationshouldbeaddedtothisvalue. Thiscanbecomputed
+usingastandardcomputationalmethod,e.g,DFTorDLPNO-CCSD(T).
+Someofthemostimportantaspectsofthemethodaresummarizedbelow:
+358 Chapter6. RunningTypicalCalculations
+
+--- Page 381 ---
+ORCAManual,Release6.0.0
+• Accuracy and Recommended Settings.Fornoncovalentinteractions,HFLDtypicallyprovidesanac-
+curacycomparabletothatoftheDLPNO-CCSD(T)methodifdefaultPNOsettingsareused. FortheHFLD
+scheme, these are defined as TCutPNO = 3.3e-7 and TCutPairs 1e-5. If used in conjuction with a def2-
+TZVP(-f)basisset,thesesettingsaretypicallydenotedas“HFLD*”andarerecommededforstandardappli-
+cationsonlargesystems.[24]Forexample, HFLD*settingswereusedinRef.[25]toelucidatethecomplex
+pattern of interactions responsible for the stability of the DNA duplex. If great accuracy is required, it is
+recommenedtouseTightPNOsettingsinconjuctionwithTCutPNO1e-8andtwo-pointbasissetextrapo-
+lation(aug-cc-pVTZ/aug-cc-pVQZ)toapproachtheCBSlimit. Thesesettingsaretypicallydenotedasthe
+“gold”HFLDsettings.[24]
+• Reference determinant in the Open shell HFLD scheme.Intheopenshellcase,HFLDrelieson
+arestrictedreferencedeterminantforthecalculationoftheLDenergy. IftheQROdeterminantisusedas
+reference,thereferenceinteractionenergycaninprinciplebecomputedattheUHForQROlevels. Thisleads
+totwodifferentschemes,namelytheQRO/HFLDandUHF/HFLD.Alternatively,therestrictedopen-shell
+HF(ROHF)determinantcanbeusedasreferenceinHFLDcalculations,whichleadstotheROHF/HFLD
+approach. Theenergyvaluereportedas“FINALSINGLEPOINTENERGY”intheoutputcorrespondsto
+theUHF/HFLDschemebydefault,whichistypicallyslightlymoreaccurate. SeeRef. [24]fordetails.
+• Efficency.ThecalculationofthedispersioncorrectiontypicallyrequiresthesametimeasanHFcalcu-
+lation. Thisistrueforsmallaswellasforlargesystems.
+• Analysis of Intermolecular Interactions. The HFLD method can be combined with the Local
+EnergyDecomposition(LED)tostudyintermolecularinteractionsingreatdetail. TheLEDdispersionen-
+ergy obtained with HFLD is often very close to that obtained from a full DLPNO-CCSD(T) calculation.
+Hence,HFLDcanbeusedasacost-effectivealternativetoDLPNO-CCSD(T)tostudy,amongotherthings,
+theimportanceofLondondispersioninmolecularchemistry.
+• Additional considerations.(i)Onecanspecify“NormalPNO”or“TightPNO”settingsinthesimple
+input line. The corresponding DLPNO tresholds would be in this case fully consistent with those used in
+the DLPNO-CCSD(T) method. (ii) The dispersion energy in the HFLD approach slightly depends by the
+choiceofthelocalizationschemeusedforoccupiedorbitalsandPNOs. Defaultsettingsarerecommended
+for all intent and purposes. However, it is important to note that the localization iterations for occupied
+and virtual orbitals must be fully converged in order to obtain consistent results. To achieve this goal, it
+mightbenecessarytoincrease“LocMaxIter”or“LocMaxIterLed”(seebelow). However,thisistypically
+necessaryonlyifverylargebasissets(e.g. aug-cc-pV5Z)areused. (iii)Importantly, themethodbenefits
+fromtheuseoftightlyconvergedSCFsolutions. Forclosed-shellsystems,ausefuldiagnosticinthiscontext
+isthe“Singlesenergy”termthatisprintedintheLEDpartoftheoutput. Thistermmustbesmallerthan1e-6
+forclosedshellspecies. Ifthisisnotthecase, oneshouldchangethesettingsusedfortheSCFiterations.
+NotealsothatallthefeaturesoftheLEDscheme(e.g. automaticfragmentation)arealsoavailableforthe
+HFLDmethod.
+Notethat,asHFLDreliesonboththeDLPNO-CCSD(T)andLEDmethods,theoptionsofbothschemescanbe
+usedinprincipleinconjuctionwithHFLD.Someexamplesareshownbelow:
+! HFLD aug-cc-pVDZ aug-cc-pVDZ/C aug-cc-pVTZ/JK RIJK TightSCF
+%mdci
+LED 1 # localization method for the PNOs. Choices:
+# 1 = PipekMezey
+# 2 = FosterBoys (default, recommeded for the HFLD method)
+PrintLevel 3 # Selects large output for LED and prints the
+# detailed contribution
+# of each DLPNO-CCSD strong pair
+LocMaxIterLed 600 # Maximum number of localization iterations for PNOs
+LocMaxIter 300 # Maximum number of localization iterations for
+# occupied orbitals
+LocTolLed 1e-6 # Absolute threshold for the localization procedure for PNOs
+DoLEDHF true # Decomposes the reference energy in the LED part.
+# By default, it is set to false in HFLD for efficency reasons.
+TCutPNO 3.33e-7 # cutoff for PNO occupation numbers.
+TCutPairs 1e-5 # cutoff for estimated pair correlation energies
+(continuesonnextpage)
+6.14. TheHartree-FockplusLondonDispersion(HFLD)methodforthestudyofNoncovalen3t59
+Interactions
+
+[... start of page 382 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# to be included in the CC treatment
+end
+6.15 ORCA MM Module
+Sinceversion4.2ORCAfeaturesitsownindependentMMimplementation.
+TheminimuminputnecessaryforaMMtreatmentlooksasfollows.
+!MM
+%mm
+ORCAFF

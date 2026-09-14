@@ -1,0 +1,93 @@
+[... end of page 349 ...]
+-------------
+# -------------- Rest of the variables --------------------------------
+Variable D_Free, D_Minus, D_Plus, a[3][3]; #dipole moment and polarizability
+Variable aEigenValues[3], aEigenVectors[3][3], a_iso;
+Variable FFieldStringPlus, FFieldStringMinus;
+Variable res = -1;
+# ----------------------------------------------------------------------
+# Field Free
+# ----------------------------------------------------------------------
+(continuesonnextpage)
+6.12. CalculationofProperties 327
+
+--- Page 350 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+New_Step
+!&{method} &{basis} &{restOfInput}
+%Method
+z_tol 1e-8
+End
+%MP2
+Density Relaxed
+End
+#*xyzFile &{charge} &{mult} &{molecule}
+Step_End
+res = D_Free.readProperty(propertyName=myProperty, property_Base=true);
+# ------------------------------------------------------------------
+# Loop over the x, y, z directions and create the appropriate string
+# ------------------------------------------------------------------
+for direction from 0 to 2 Do
+#Create the appropriate direction oriented field string
+if (direction = 0) then #( X direction)
+write2String(FFieldStringPlus, " %lf, 0.0, 0.0", E_Field);
+write2String(FFieldStringMinus, "-%lf, 0.0, 0.0", E_Field);
+else if (direction = 1) then #( Y direction)
+write2String(FFieldStringPlus, " 0.0, %lf, 0.0", E_Field);
+write2String(FFieldStringMinus, " 0.0, -%lf, 0.0", E_Field);
+else #( Z direction)
+write2String(FFieldStringPlus, " 0.0, 0.0, %lf", E_Field);
+write2String(FFieldStringMinus, " 0.0, 0.0, -%lf", E_Field);
+EndIf
+# ----------------------------------------
+# Perform the calculations.
+# First the plus (+) one
+# ----------------------------------------
+ReadMOs(1);
+New_Step
+!&{method} &{basis} &{restOfInput}
+%SCF
+EField = &{FFieldStringPlus}
+End
+%Method
+z_tol 1e-8
+End
+%MP2
+Density Relaxed
+End
+Step_End
+res = D_Plus.readProperty(propertyName=myProperty, property_Base=true);
+# ----------------------------------------
+# And the minus (-) one
+# ----------------------------------------
+ReadMOs(1);
+New_Step
+!&{method} &{basis} &{restOfInput}
+%SCF
+EField = &{FFieldStringMinus}
+End
+%Method
+z_tol 1e-8
+End
+%MP2
+Density Relaxed
+End
+(continuesonnextpage)
+328 Chapter6. RunningTypicalCalculations
+
+[... start of page 351 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Step_End
+res = D_Minus.readProperty(propertyName=myProperty, property_Base=true);
+# ------------------------------------------
+# Construct and store SCF polarizability
+# ------------------------------------------
+a[direction][0] = (D_Plus[0]-D_Minus[0])/(2*E_Field);
+a[direction][1] = (D_Plus[1]-D_Minus[1])/(2*E_Field);
+a[direction][2] = (D_Plus[2]-D_Minus[2])/(2*E_Field);
+EndFor
+# -----------------------------------------
+# Diagonalize
+# -------

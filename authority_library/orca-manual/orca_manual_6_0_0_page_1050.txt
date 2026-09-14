@@ -1,0 +1,117 @@
+[... end of page 1049 ...]
+1-electron terms
+# = 1 - do include 1-electron terms
+# Flag 2 = 0 - do not include Coulomb terms
+# = 1 - compute Coulomb terms fully numeric
+# = 2 - compute Coulomb term seminumeric
+# = 3 - compute Coulomb term with RI approx
+# = 4 - compute Coulomb term exactly
+# Flag 3 = 0 - do not include exchange terms
+# = 1 - do include local X-alpha exchange
+# the X-Alpha parameter can be chosen via
+# % rel Xalpha 0.7 (default)
+# = 2 - same as 1 but with sign reversed
+# = 3 - exchange via one-center exact
+(continuesonnextpage)
+7.54. CalculationofProperties 1027
+
+--- Page 1050 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# integrals including the spin-other
+# orbit interaction
+# = 4 - all exchange terms full analytic
+# (this is expensive)
+# Flag 4 = 0 - do not include DFT local correlation
+# terms
+# = 1 - do include local DFT correlation (here
+# this is done with VWN5)
+#
+SOCMaxCenter 4 # max. number of centers to include in
+# the integrals (not fully consistently
+# implemented yet; better leave equal to 4)
+# The following simple input equivalents can also be used:
+# SOMF(1X) = SOCType 3, SOCFlags 1,2,3,0 and SOCMaxCenter 4
+# RI-SOMF(1X) = SOCType 3, SOCFlags 1,3,3,0 and SOCMaxCenter 4
+# VEFF-SOC = SOCType 3, SOCFlags 1,3,1,1 and SOCMaxCenter 4
+# VEFF(-2X)-SOC = SOCType 3, SOCFlags 1,3,2,1 and SOCMaxCenter 4
+# AMFI = SOCType 3, SOCFlags 1,4,3,0 and SOCMaxCenter 1
+# AMFI-A = SOCType 4, SOCFlags 1,4,3,0 and SOCMaxCenter 1
+# (AMFI-like approach that uses pre-calculated atomic densities;
+# this can be combined with the SOCOff option
+# to exclude contributions from specific atoms)
+# NOTE: If you choose the RI option you need to specify an auxiliary basis set
+# even if the underlying SCF calculation does not make use of any form
+# of RI!
+# -----------------------------------------------
+# For the effective nuclear charge SOC operator
+# the nuclear charges can be adjusted.
+# -----------------------------------------------
+Zeff[26] 0.0 # set the effective nuclear charge
+# of iron (Z = 26) to zero
+# -----------------------------------------------
+# Neglecting SOC contributions from particular
+# atoms
+# -----------------------------------------------
+SOCOff 0,5 # turn off the SOC for atoms 0 and 5
+# this makes sense if the SOC operator
+# has only one center contributions
+# (e.g. effective nuclear charge)
+Simpleinputequivalentsaredescribedinmoredetailin[610]. MoredetailsontheAMFI-Aapproachwhichuses
+pre-calculatedatomicdensitiescanbefoundin[284].
+TheBreit-Paulispin-orbitcouplingoperatorisgivenby:
+𝐻ˆ
+SOC
+=𝐻ˆ
+S
+(
+O
+1)
+C
++𝐻ˆ
+S
+(
+O
+2)
+C
+withtheone-andtwo-electroncontributions
+𝐻ˆ(1) = 𝛼2 ∑︁∑︁ 𝑍 (r 𝑖 −R 𝐴 )×p 𝑖𝑠ˆ ≡ 𝛼2 ∑︁∑︁ 𝑍 𝑟−3^l ^s (7.344)
+SOC 2 𝐴 |r −R |3 𝑖 2 𝐴 𝑖𝐴 𝑖𝐴 𝑖
+𝑖 𝐴 𝑖 𝐴 𝑖 𝐴
+𝐻ˆ(2) =−
+𝛼2 ∑︁∑︁(r
+𝑖
+−r
+𝑗
+)×p
+𝑖 (^s +2^s ) (7.345)
+SOC 2 |r −r |3 𝑖 𝑗
+𝑖 𝑗̸=𝑖 𝑖 𝑗
+≡−
+𝛼2 ∑︁∑︁^l
+𝑟−3(^s +2^s ) (7.346)
+2 𝑖𝑗 𝑖𝑗 𝑖 𝑗
+𝑖 𝑗̸=𝑖
+This operator would be hard to handle exactly; therefore it is common to introduce mean field and/or effective
+potentialapproachesinwhichtheoperatoriswrittenasaneffectiveone-electronoperator:
+𝐻ˆ
+SOC
+∼
+=
+∑︁ h^(
+𝑖
+eff)^s
+𝑖 (7.347)
+𝑖
+1028 Chapter7. DetailedDocumentation
+
+[... start of page 1051 ...]
+ORCAManual,Release6.0.0
+The simplest approximation is to simply use the one-electron part and regard the nuclear charges as adjustable
+parameters. Reducingtheirvaluesfromtheexactnuclearchargeissupposedtoaccountinanaveragewayforthe
+screening of the nuclear charge by the electrons. In our code we use the effective nuclear charges of Koseki et
+al. This approximationintroduceserrors whichareusually smallerthan 10%butsometimes arelargerandmay
+approach20%insomecases. Theapproximationisbestforfirstrowmaingroupelementsandthefirsttransition
+row(2pand3delements). Forheavierelementsitbecomesunreliable.
+Amuchbetterapproximationistotakethetwo-electrontermsintoaccountprecisely. Withoutgoingintodetails
+here–thesituationisasinHa

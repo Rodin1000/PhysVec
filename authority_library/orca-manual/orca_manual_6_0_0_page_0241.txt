@@ -1,0 +1,88 @@
+[... end of page 240 ...]
+ationstartswithanUHF/UKScalculation,itwillautomaticallyproducethequasi-restrictedorbitalswhich
+willthenbeusedforthesubsequentROCIScalculations. NotethatifthereferencefunctionisaRHF/RKSfunction
+themethodproducestheCISresults. Themoduleisinvokedbyprovidingthenumberofrootssoughtinthe%rocis
+blockoftheinputfile:
+! SVP TightSCF
+%rocis NRoots 2
+MaxDim 5 #Davidson expansion space = MaxDim * NRoots
+end
+* xyz -2 2
+Cu 0.00 0.00 0.00
+(continuesonnextpage)
+218 Chapter6. RunningTypicalCalculations
+
+--- Page 241 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Cl 2.25 0.00 0.00
+Cl -2.25 0.00 0.00
+Cl 0.00 2.25 0.00
+Cl 0.00 -2.25 0.00
+*
+InthisexampletheMaxDimparameterisgiveninadditiontothenumberofrootstobecalculated. Itcontrolsthe
+maximumdimensionoftheexpansionspaceintheDavidsonprocedurethatisusedtosolvetheCIproblem.
+TheuseofROCISisexplainedingreaterdetailinsectionExcitedStatesviaROCISandDFT/ROCIS.
+Starting from ORCA 6.0, the General-Spin ROCIS (GS-ROCIS) implementation is available. This new imple-
+mentationcanhandlearbitraryCSFsasreferences. Forthis, onewouldusethe CSF-ROHFmethodtoobtainthe
+referencewavefunctionforwhichROCISwillbeperformed. TheGS-ROCIScalculationcanbeinvokedasfollows:
+%scf
+HFTyp ROHF
+ROHF_CASE USER_CSF or AF_CSF
+etc.
+end
+%rocis
+DoGenROCIS true # Turns the General-Spin ROCIS procedure on
+ReferenceMult 1 # The reference wavefunction multiplicity (it needs to agree with the ROHF␣
+solution)
+˓→
+etc.
+end
+Currently,thereisnoDFT/ROCISimplementedfortheGeneral-Spinprocedure. Spin-Orbitcouplingisalsonot
+availableinthepresentversion.
+6.6.2 Excited States for Open-Shell Molecules with CASSCF Linear Response
+(MC-RPA)
+ORCAhasthepossibilitytocalculateexcitationenergies,oscillatorandrotatorystrengthsforCASSCFwavefunc-
+tionswithintheresponsetheory(MC-RPA)formalism.[380,417,900]ThemainscopeofMC-RPAistosimiulate
+UV/VisandECDabsorptionspectraofopen-shellmoleculesliketransitionmetalcomplexesandorganicradicals.
+MC-RPAabsorptionspectraareusuallymoreaccuratethanthoseobtainedfromthestate-averagedCASSCFansatz
+asorbitalrelaxationeffectsforexcitedstatesaretakenintoaccount. Thecomputationalcostsareususallylarger
+thanthoseofSA-CASSCFandshouldbecomparabletoaTD-DFTcalculationforfeasibleactivespacesizes.
+GeneralUse
+MC-RPAneedsaconvergedstate-specificCASSCFcalculationoftheelectronicgroundstate. Theonlynecessary
+information that the user has to provide is the desired number of excited states (roots). All other keywords are
+justneededtocontroltheDavidsonalgorithmorpostprocesstheresults. Aminimalinputforcalculatingthefour
+lowestsingletexcitedstatesofethylenecouldlikethefollowing:
+#
+# CASSCF + MCRPA for C2H4
+#
+! DEF2-SVP DEF2-TZVP/C VeryTightSCF
+%casscf
+nel 2
+norb 2
+mult 1
+nroots 1
+(continuesonnextpage)
+6.6. ExcitedStatesCalculations 219
+
+[... start of page 242 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+gtol 1e-6
+etol 1e-10
+end
+%mcrpa
+nroots 8
+end
+* int 0 1
+C 0 0 0 0 0 0
+C 1 0 0 1.3385 0 0
+H 1 2 0 1.07 120 0
+H 1 2 3 1.07 120 180
+H 2 1 3 1.07 120 0
+H 2 1 3 1.07 120 180
+*
+Aftertheresidualnormisbelowauser-giventhresholdTolRwegetthefollowinginformation
+Final Eigenvalues
+State Eigenvalue RMSD error Converged
+0 0.3352792

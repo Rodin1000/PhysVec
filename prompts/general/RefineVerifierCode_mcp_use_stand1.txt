@@ -1,0 +1,110 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is to refine verifier code by running programs, analyzing execution results, and fixing errors iteratively until the program runs without errors.
+
+**PURPOSE: Execute the program file, analyze stdout/stderr for errors, and iteratively fix the code until it runs successfully or reaches the maximum iteration limit.**
+
+--------------------------------------------------------------------------
+[Input:]
+1. TYPE: {type} (e.g., boson, fermion)
+2. TOPIC: {topic} (the package/library topic, e.g., dmrg, netket, dft)
+3. PROGRAM_FILE: {program_file} (filename of the program to refine)
+4. PROGRAM_PATH: {program_path} (full path to the program file)
+5. FILE_EXT: {file_ext} (file extension: "py" or "jl")
+6. MAX_ITERATIONS: {max_iterations} (maximum number of refinement iterations)
+   **CRITICAL: This is a HARD LIMIT. Each iteration = Run program → Analyze → Fix code → Run again. After {max_iterations} iterations, you MUST stop even if errors remain. This is different from the MCP agent's tool call limit.**
+
+Note: The filesystem-mcp working directory is set to the directory containing the program file. The program-mcp is configured with program_path pointing to the program file.
+
+-----------------------------------------------------------------------------
+[Instruction:]
+1. **Determine execution tool based on file extension:**
+   - If {file_ext} is "py": Use program-mcp `run_python_file` tool
+   - If {file_ext} is "jl": Use program-mcp `run_julia_file` tool
+   - Parameter: `file_path` should be "{program_file}" (just the filename, relative to program-mcp's program_path directory)
+
+2. **Iterative refinement workflow (repeat up to {max_iterations} times):**
+   
+   **Step 1: Run the program**
+   - Call the appropriate program-mcp tool (run_python_file or run_julia_file) with file_path="{program_file}"
+   - Wait for the tool to return execution results
+   - The tool returns: exitcode, stdout, stderr, timeout
+
+   **Step 2: Analyze execution results**
+   - Check exitcode: 0 means success, non-zero means error
+   - Check stderr: Empty or no error messages means success
+   - Check timeout: True means execution timed out
+
+   **Step 3: Determine next action**
+   - **CRITICAL: If you have already completed {max_iterations} iterations, you MUST stop immediately and proceed to FINAL STEP.**
+   
+   - **If success (exitcode=0 AND stderr is empty/contains no errors):**
+     * Stop the refinement process - task complete
+     * Do NOT make any further changes to the code
+   
+   - **If error (exitcode≠0 OR stderr contains errors):**
+     * Analyze the error messages in stderr
+     * Identify the root cause of the error
+     * **If iteration count < {max_iterations}:** Proceed to Step 4 to fix the code
+     * **If iteration count >= {max_iterations}:** Stop immediately, proceed to FINAL STEP
+   
+   - **If timeout:**
+     * Analyze why the program timed out
+     * Consider optimizing the code or reducing computational complexity
+     * **If iteration count < {max_iterations}:** Proceed to Step 4 to fix the code
+     * **If iteration count >= {max_iterations}:** Stop immediately, proceed to FINAL STEP
+
+   **Step 4: Fix the code (only if error/timeout and iterations < {max_iterations})**
+   - **First: Read the program file**
+     * Use filesystem-mcp `read_file(file_path="{program_file}")` to read the current program code
+     * **CRITICAL: file_path MUST be ONLY "{program_file}" (no directories, no `..\\`, no absolute paths)**
+     * Review the code to understand the current implementation and identify where the errors occur
+   
+   - **Second: Create a modification plan**
+     * Based on the error messages from stderr and the current code, create a clear plan for what needs to be changed
+     * Identify the specific lines or sections that need modification
+     * Plan the exact changes needed to fix the errors
+   
+   - **Third: Apply the fixes using edit_file**
+     * Use filesystem-mcp `edit_file` tool to modify the program
+     * Parameter: `file_path` should be "{program_file}" (just the filename)
+     * **CRITICAL: file_path MUST be ONLY "{program_file}" (no directories, no `..\\`, no absolute paths)**
+     * Parameter: `edits` should be a list of edit operations, each containing:
+       * `old_text`: Exact text to find and replace (must match exactly, case-sensitive, whitespace-sensitive)
+       * `new_text`: Replacement text
+     * Make precise edits according to your modification plan
+     * **CRITICAL: The old_text must match EXACTLY (including whitespace, indentation, case)**
+   - After editing, return to Step 1 to run the program again
+
+3. **FINAL STEP (MANDATORY, run ONCE at the end): Create refinement report JSON**
+   - After the refinement process ends (either success OR max iterations reached), create ONE report JSON file in the same directory as the program file (filesystem-mcp working directory).
+   - Use filesystem-mcp `save_file` tool to create the report.
+   - Report filename (use ONLY filename, no paths): `report_{{program_stem}}_{{file_ext}}.json`
+     * **CRITICAL: Do NOT use `..\\` or absolute paths**
+     * Where `program_stem` is "{program_file}" without its extension (e.g., "integ_verifier_basic" from "integ_verifier_basic.jl")
+     * Example: program_file="integ_verifier_basic.jl", file_ext="jl" -> report file: "report_integ_verifier_basic_jl.json"
+   - The JSON content MUST be:
+     `{{ "refine_summary": "<your concise summary>" }}`
+   - `refine_summary` should briefly include:
+     * the main errors/issues encountered (from stderr),
+     * what changes you made (high-level, not full diffs),
+     * final status: success / still failing at max iterations.
+
+4. **CRITICAL - How to call tools:**
+   - You have REAL MCP tools available - when you call them, they EXECUTE and return results
+   - DO NOT write "Action:", "Thought:", "Observation:" - this is NOT ReAct format
+   - DO NOT describe what you will do - DIRECTLY call the tools
+   - DO NOT simulate tool calls - tools will actually run
+   - Wait for tool execution to complete before proceeding
+
+5. **Workflow sequence (MANDATORY):**
+   Step 1: Call program-mcp run_python_file or run_julia_file with file_path="{program_file}"
+   Step 2: Analyze the returned exitcode, stdout, stderr, timeout
+   Step 3: If error/timeout and iterations < {max_iterations}, use filesystem-mcp read_file to read the program file
+   Step 4: Create a modification plan based on the errors and current code
+   Step 5: Use filesystem-mcp edit_file to fix the code according to the plan
+   Step 6: Repeat from Step 1 until success or max_iterations reached
+   Step 7: Create the final report JSON via filesystem-mcp save_file (exactly once), then STOP
+
+**Start executing the workflow NOW. Run the program, analyze results, and fix errors iteratively.**
+

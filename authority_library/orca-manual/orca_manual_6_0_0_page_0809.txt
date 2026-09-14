@@ -1,0 +1,88 @@
+[... end of page 808 ...]
+on.
+𝑧 𝑦𝑧
+Fig. 7.33: DFT/ROCIS calculated L3 XAS spectrum of [Fe(Cl) ]2− together with NDO analysis for state 14.
+4
+Constantbroadening0.5eVandisovaluefortheorbitalplots0.03a.u. isusedthroughout
+786 Chapter7. DetailedDocumentation
+
+--- Page 809 ---
+ORCAManual,Release6.0.0
+7.31.4 Resonant Inelastic Scattering Spectroscopy
+General
+StartingfromORCAversion4.0ROCISmodulecanbeusedtocalculateRIXSspectra
+ThepresentimplementationisdirectlybasedontheKramersHeisenergDirac(KDH)expressionformulafornear
+resonantandresonantconditions
+⃒ ⃒2{︃ }︃
+|𝛼 (𝐸 ,𝐸 )|2 =
+∑︁⃒
+⃒
+∑︁⟨𝐹|𝑚
+𝜌
+|𝑉⟩⟨𝑉|𝑚
+𝜆
+|𝐼⟩⃒
+⃒
+Γ
+𝐹
+𝜌𝜆 𝑒𝑥 𝑠𝑐 𝑇𝑜𝑡𝑎𝑙 𝐹 ⃒ ⃒ 𝑉 𝐸 𝑉𝐼 −𝐸 𝑒𝑥 −𝑖1 2 Γ 𝑉 ⃒ ⃒ (𝐸 𝐹𝑉 −𝐸 𝑒𝑥 +𝐸 𝑠𝑐 )2+ 4 1Γ 𝐹 2
+|𝛼 (𝐸 ,𝐸 ,𝑉)|2 = ∑︁ |⟨𝐹|𝑚 |𝑉⟩|2|⟨𝑉|𝑚 |𝐼⟩|2𝑓(𝐸 ,𝐸 ,𝐸 ,𝐸 ,Γ ,Γ )
+𝜌𝜆 𝑒𝑥 𝑠𝑐 𝑟𝑒𝑠𝑜𝑛𝑎𝑛𝑡 𝜌 𝜆 𝑉𝐼 𝐹𝑉 𝑒𝑥 𝑠𝑐 𝑉 𝐹
+𝐹
+|𝛼 (𝐸 ,𝐸 )|2 = ∑︁ |𝛼 (𝐸 ,𝐸 ,𝑉)|2
+𝜌𝜆 𝑉𝐼 𝑠𝑐 𝐷𝑖𝑟𝑒𝑐𝑡 𝜌𝜆 𝑉𝐼 𝑠𝑐 𝑟𝑒𝑠𝑜𝑛𝑎𝑛𝑡
+𝑉
+Theresonancescatteringcrosssectionfortotalanddirectcases,averagedoverallorientationsofthemoleculeand
+integratedoveralldirectionsandpolarizationsofscatteredradiationisgiveninequations:
+𝜎𝑇𝑜𝑡𝑎𝑙(𝐸 ,𝐸 )= 8𝜋𝐸 𝑠 3 𝑐 𝐸 𝑒𝑥 ∑︁ |𝛼 (𝐸 ,𝐸 )|2
+𝑅𝑋𝐸𝑆 𝑒𝑥 𝑠𝑐 9𝑐4 𝜌𝜆 𝑒𝑥 𝑠𝑐 𝑇𝑜𝑡𝑎𝑙
+𝜌,𝜆=𝑥,𝑦,𝑧
+𝜎𝐷𝑖𝑟𝑒𝑐𝑡(𝐸 ,𝐸 )= 8𝜋𝐸 𝑠 3 𝑐 𝐸 𝑒𝑥 ∑︁ |𝛼 (𝐸 ,𝐸 )|2
+𝑅𝑋𝐸𝑆 𝑒𝑥 𝑠𝑐 9𝑐4 𝜌𝜆 𝑒𝑥 𝑠𝑐 𝐷𝑖𝑟𝑒𝑐𝑡
+𝜌,𝜆=𝑥,𝑦,𝑧
+Interferenceeffectscanbethenderivedinastraightforwardwayfromequation:
+𝜎𝑖𝑛𝑡𝑒𝑟𝑓𝑒𝑟𝑒𝑛𝑐𝑒(𝐸 ,𝐸 )=𝜎𝑇𝑜𝑡𝑎𝑙 (𝐸 ,𝐸 )−𝜎𝐷𝑖𝑟𝑒𝑐𝑡(𝐸 ,𝐸 )
+𝑅𝑋𝐸𝑆 𝑒𝑥 𝑠𝑐 𝑅𝑋𝐸𝑆 𝑒𝑥 𝑠𝑐 𝑅𝑋𝐸𝑆 𝑒𝑥 𝑠𝑐
+InordertoaccessRIXSspectroscopyintheROCISmoduleoneneedsinadditiontospecifya2nddonorspace.
+ThisisspecifiedbydefininganOrbWinarraywith6elements: Thefirstfourelementsdefinetherangesofthetwo
+donorspaceswhilethelasttwoelementstherespectiveacceptorspacerange.
+OrbWin = 0,0,2,4,45,60
+AnimportantdifferencewithrespecttotheconventionalROCISorDFT/ROCIScalculationsisthefactthattwo
+donorspacesofverydifferentenergyrangesareinvolved(e.g. K-edge,L-edge)whichrequirestorestrictsomewhat
+theacceptorspaceandsaturateitwithasmanystatesaspossible.
+ThemaincallingcommandsinordertoperformaRIXScalculationwithinbothROCISandCASSCFblocksare
+thefollowing:
+• RIXStrue. Similartoabsorptionspectroscopy,thisrequeststheRIXScalculationtobeperformedbasedon
+thecalculatednon-relativisticgroundstatemultiplicityStates
+• RIXSSOC true. By turning-on this flag the RIXS is calculated by taking in account the relativistically
+correctedMsStates.
+• Elastictrue. ThisflagindicateswhethertheresonantconditioninwhichtheinitialandFinalstatescoincide
+should be taken into account. Note that the intensity of this spectral feature might be overestimated as
+presentlythenonresonanttermsarenottreated
+TherespectiveROCISinputreadsthenasfollows:
+!B3LYP def2-TZVP SlowConv
+%Basis
+AuxC "def2/J"
+end
+(continuesonnextpage)
+7.31. ExcitedStatesviaROCISandDFT/ROCIS 787
+
+[... start of page 810 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%ROCIS
+NRoots 200
+PrintLevel 3
+MaxCore 4000
+DoRI true
+DoHigherMult true
+SOC true
+RIXS true #Request RIXS calculation (NoSOC)
+RIXSSOC true #Request RIXS calculation (with SOC)
+Elastic true #Request RIXS calculation (Elastic)
+DoDFTCIS true
+DFTCIS_c =0.18,0.20,0.40
+OrbWin = 2,4,25,33,0,100
+end
+* xyzfile 2 2 test.xyz
+Whenrunningthecalculationonecanmonitorifthere

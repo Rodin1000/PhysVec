@@ -1,0 +1,120 @@
+[... end of page 476 ...]
+8 exchange for range-separated functionals
+X_G96 # Gill '96 gradient exchange
+X_PW91 # Perdew-Wang (PW) '91 gradient exchange
+X_mPW # Adamo-Barone modification of PW exchange
+X_PBE # Perdew-Burke-Ernzerhof (PBE) exchange
+X_RPBE # Revised PBE exchange
+X_OPTX # Hoe/Cohen/Handy's optimized exchange
+X_X # Xu/Goddard exchange
+X_TPSS # TPSS meta-GGA exchange
+X_B97D # Grimme's modified exchange for the B97-D GGA
+X_B97BECKE # Becke's original exchange for the B97 hybrid
+X_SCAN # Perdew's constrained exchange for the SCAN meta-GGA
+X_RSCAN # Perdew's constrained exchange for the rSCAN meta-GGA
+X_R2SCAN # Perdew's constrained exchange for the r2SCAN meta-GGA
+Correlation
+(continuesonnextpage)
+454 Chapter7. DetailedDocumentation
+
+--- Page 477 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+C_NOC # No correlation
+C_VWN5 # Local Vosko-Wilk-Nusair correlation (parameter set "V")
+C_VWN3 # Local Vosko-Wilk-Nusair correlation (parameter set "III")
+C_PWLDA # Local PW correlation
+C_P86 # Perdew '86 correlation
+C_PW91 # PW '91 correlation
+C_PBE # PBE correlation
+C_LYP # LYP correlation
+C_TPSS # TPSS meta-GGA correlation
+C_B97D # Grimme's modified correlation for the B97-D GGA
+C_B97BECKE # Becke's original correlation for the B97 hybrid
+C_SCAN # Perdew's constrained correlation for the SCAN meta-GGA
+C_RSCAN # Perdew's constrained correlation for the rSCAN meta-GGA
+C_R2SCAN # Perdew's constrained correlation for the r2SCAN meta-GGA
+# Parameters for hybrid functionals
+ACM ACM-A, ACM-B, ACM-C
+# ACM-A: fraction of HF exchange in hybrid DFT
+# ACM-B: scaling of GGA exchange part of DFT
+# ACM-C: scaling of GGA correlation part of DFT
+# Parameters for "extended" hybrid functionals
+ScalLDAC 1.0 # scaling of the LDA correlation part
+ScalMP2C 0.0 # fraction of MP2 correlation mixed into the density functional
+end
+HybridDensityFunctionals. ThehybridDFs[87,88]areinvokedbychoosinganonzerovalueforthevariable
+ACM.(ACMstandsfor“adiabaticconnectionmodel”). Specifically,thesefunctionalshavethefollowingform:
+𝐸XC =𝑎𝐸
+H
+X
+F
++(1−𝑎)𝐸
+L
+X
+SD
++𝑏𝐸
+G
+X
+GA
++𝐸
+L
+C
+SD
++𝑐𝐸
+G
+C
+GA
+(7.1)
+Here,𝐸XC isthetotalexchange/correlationenergy,𝐸
+H
+X
+F
+istheHartree-Fockexchange,𝐸
+L
+X
+SD
+isthelocal(Slater)ex-
+change,𝐸X isthegradientcorrectiontotheexchange,𝐸C isthelocal,spin-densitybasedpartofthecorrelation
+GGA LSD
+energy,and𝐸C isthegradientcorrectiontothecorrelationenergy.
+GGA
+Thisbringsustoaslightlyawkwardsubject: severalhybridfunctionalswiththesamenamegivedifferentvalues
+indifferentprograms. Thereasonforthisisthattheychooseslightlydifferentdefaultvaluesfortheparameters𝑎,
+𝑏,and𝑐and/ordifferinthewaytheytreatthelocalpartofthecorrelationenergy.
+Different parametrizations exist. The most popular example of this is due to Vosko, Wilk, and Nusair (VWN,
+[872]). VWNintheirclassicpapergivetwosetsofparameters—oneinthemainbody(parametrizationofRPA
+results;knownasVWN-III)andoneintheirtable5ofcorrelationenergies(parametrizationoftheCeperley/Alder
+MonteCarloresults;knownasVWN-V).SomeprogramsuseVWN-III,whileothersuseVWN-V.Additionally,a
+slightlybetterfittotheuniformelectrongashasbeenproducedbyPerdewandWang[667]. Theresultsfromthis
+fitareverysimilartothoseusingVWN5,whereasVWN3yieldsquitedifferentvalues.
+In ORCA, almost all functionals choose PWLDA as the underlying LDA functional. A special situation arises if
+LYPisthecorrelationfunctional[502]sinceLYPisnotacorrectiontothecorrelation,butratherincludesthefull
+correlation. ItisthereforeusedintheB3LYPfunctionalas:
+𝐸 C =𝐸 C +𝑐 (︀ 𝐸 C −𝐸 C )︀ (7.2)
+B3LYP LSD LYP LSD
+InORCA,VWN5ischosenforthelocalcorrelationpartofB3LYP.ThischoiceisconsistentwiththeTurboMole
+program[12,13,14],butnotwiththeGaussianprogram[278]. However,theuserhasfullcontroloverthissetting.
+TheunderlyinglocalpartofanycorrelationfunctionalcanbesetintheinputwiththevariableLDAOpt:
+%method
+LDAOpt C_PWLDA
+C_VWN5
+C_VWN3
+end
+7.4. ChoiceofComputationalModel 455
+
+[... start of page 478 ...]
+ORCAManual,Release6.0.0
+Specifying C_VWN3 for LDAOpt together with Functional=B3LYP should give results very close to the B3LYP
+functionalasimplementedintheGaussianseriesofprograms1. DuetothepopularityoftheB3LYPfunctional,
+thefollowingaliasesaredefinedinordertofacilitatecomparisonswithothermajorelectronicstructurepackages:
+%method
+Functional B3LYP # consistent with TurboMole
+B3LYP_TM # := Functional B3LYP
+# LDAOpt C_VWN5
+B3LYP_G # consistent with Gaussian
+# := Functional B3LYP
+# LDAOpt C_VWN3
+end
+One-Parameter Hybrid Density Functionals. The underlying LDA-dependence of the three-parameter (i.e.
+ACM) hybrids causes slightly different results from program

@@ -1,0 +1,99 @@
+[... end of page 1064 ...]
+rint orbital pair contributions (lots of output!)
+LocOrbGBW "H2CO_NMR_PM.loc" # use these orbitals
+end
+!xyzfile # store the coordinates
+*gzmt 0 1
+O
+C 1 1.2078
+H 2 1.1161 1 121.74
+H 2 1.1161 1 121.74 3 180
+*
+# read the localized orbitals and print them in the output
+# for easy visualization with Avogadro
+$new_job
+! HF pcSseg-1 NoRI MORead NoIter PrintBasis PrintMOs
+%moinp "H2CO_NMR_PM.loc"
+*xyzfile 0 1 H2CO_NMR_PM.xyz
+1042 Chapter7. DetailedDocumentation
+
+--- Page 1065 ---
+ORCAManual,Release6.0.0
+TreatmentofTauinMeta-GGAFunctionals
+ForGIAO-basedcalculationswithmeta-GGAs,differentoptionsareavailableforthekineticenergydensity𝜏. The
+current-independent𝜏 isnotgauge-invariant. Ignoringtheterms,whichproducethegauge-dependence,leadsto
+0
+anad-hocgauge-invarianttreatment(thiswasthedefaultuptoORCA5). Agauge-invariantdefinition𝜏MS ,con-
+taininganexplicitdependenceonthemagneticfield,wasproposedbyMaximoffandScuseria.[566]However,this
+ansatz produces unphysical paramagnetic contributions to the shielding tensor.[756] The last option, introduced
+byDobson,[216]isgauge-invariantbutrequiresthesolutionoftheCP-SCFequations,evenforpuredensityfunc-
+tionals. Foradiscussionandcomparisonofthesealternativesseerefs[79](inthecontextofTDDFT)and[713,
+756] (in the context of NMR shielding). Note that the calculated shieldings can differ substantially between the
+differentapproaches! SomeotherelectronicstructureprogramsusetheMSansatzbydefault,sobecarefulwhen
+comparingresultsbetweendifferentcodes. InORCAthetreatmentof𝜏 inGIAO-basedcalculationsischosedas
+follows
+%eprnmr
+Tau 0 # gauge-variant
+GI # ad-hoc gauge-invariant
+MS # field-dependent, gauge-invariant version of Maximoff and Scuseria
+Dobson # (default) current density-dependent, gauge-invariant version of Dobson
+end
+7.54.4 Paramagnetic NMR shielding tensors
+Forsystemswithspin𝑆 > 0,thenuclearshieldingcontainsacontributionwhicharisesfromtheparamagnetism
+oftheunpairedelectrons.1 Thiscontributionistemperature-dependentandiscalledthe“paramagneticshielding”
+(𝜎p). Itaddstothetemperature-indendentcontributiontotheshielding,alsocalledthe“orbital”contribution:
+𝜎 =𝜎orb+𝜎p.
+ORCAcurrentlysupportsthecalculationof𝜎pforsystemswhoseparamagnetismcanbedescribedbytheeffective
+EPRspinHamiltonian
+𝐻 =SDS+𝛽 BgS+SAI. (7.404)
+𝑆 𝑒
+ThetheoreticalbackgroundcanbefoundinRefs. [808,861]. Wereproduceherethemainequations.
+ForaspinstatedescribedbyEq. (7.404),theparamagneticshieldingtensorisgivenby
+𝛽 𝑆(𝑆+1)
+𝜎p =− 𝑒 gZA, (7.405)
+𝑔 𝛽 3𝑘𝑇
+𝑁 𝑁
+whereZisadimensionless3×3matrixwhichisdeterminedbytheZFSandthetemperature,asfollows: Diago-
+nalizationoftheZFSHamiltonianSDSyieldsenergylevels𝐸 andeigenstates|𝑆𝜆𝑎⟩,where𝑎labelsdegenerate
+𝜆
+statesif𝐸 isdegenerate. ThenZisdefinedas(𝑖,𝑗 =𝑥,𝑦,𝑧)
+𝜆
+[︃
+3 1 ∑︁ ∑︁
+𝑍
+𝑖𝑗
+=
+𝑆(𝑆+1)𝑄
+𝑒−𝐸𝜆/𝑘𝑇 ⟨𝑆𝜆𝑎|𝑆
+𝑖
+|𝑆𝜆𝑎′⟩⟨𝑆𝜆𝑎′|𝑆
+𝑗
+|𝑆𝜆𝑎⟩
+0
+𝜆 𝑎,𝑎′
+]︃
++2𝑘𝑇 ∑︁ ∑︁⟨𝑆𝜆𝑎|𝑆 𝑖 |𝑆𝜆′𝑎′⟩⟨𝑆𝜆′𝑎′|𝑆 𝑗 |𝑆𝜆𝑎⟩ ,
+𝐸 −𝐸
+𝜆′ 𝜆
+𝜆′̸=𝜆𝑎,𝑎′
+where 𝑄
+0
+= ∑︀
+𝜆′,𝑎
+𝑒−𝐸𝜆/𝑘𝑇 denotes the partition function. An important property of the Z matrix as defined
+aboveisthatitgoestotheidentitymatrixasD/𝑘𝑇 goestozero.
+Theorbitalpartoftheshielding,𝜎orb,iscalculatedinthesamemannerasforclosed-shellmolecules. Itisavailable
+inORCAfortheunrestrictedHFandDFTmethodsandforMP2(seeSectionMP2levelmagneticpropertiesfor
+moreinformationonthelatter).
+Theorca_pnmrtoolusesEq. (7.407)tocalculate𝜎p. Usageof orca_pnmrisdescribedinSectionorca_pnmr.
+1ForacomprehensivereviewonparamagneticNMR,seee.g.[657].
+7.54. CalculationofProperties 1043
+
+[... start of page 1066 ...]
+ORCAManual,Release6.0.0
+7.54.5 Calculating properties from existing densities
+Occasionally,onemaycalculateadensitymatrixusinganexpensivecorrelatedmethodsuchasCCSDandrealize
+afterwardsthatacertainpropertysuchasthequadrupolemomentorahyperfinecouplingconstant(HFCC)isalso
+required. Rather than start the whole calculation from scratch, one may wish to use the existing density matrix
+to calculate the properties. For this purpose, we have experimentally introduced a “properties only” calculation
+mode,wherebytheMOsarereadfromanexistingBaseName.gbwfilean

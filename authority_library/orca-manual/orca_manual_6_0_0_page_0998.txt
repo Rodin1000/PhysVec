@@ -1,0 +1,79 @@
+[... end of page 997 ...]
+3_au # identical
+Timestep 1.0 # identical, as default time unit in MD module is fs
+end
+In the following, all units which are currently known to the MD module’s parser are listed, sorted by physical
+quantities. Thedefaultunitforeachquantityisprintedinbold letters. Additiveconstantandfactorareapplied
+to convert a unit into the default unit. The additive constant is applied before the factor. A “−” means that the
+constant/factorisnotapplied. Moreunitswillbeprobablyaddedinthefuture.
+7.51. AbinitioMolecularDynamicsSimulations 975
+
+--- Page 998 ---
+ORCAManual,Release6.0.0
+UnitSymbol AdditiveConstant Factor
+—LengthUnits—
+Angstrom − −
+A − −
+Bohr − 0.5291
+pm − 0.01
+nm − 10.0
+—TimeUnits—
+fs − −
+ps − 1000
+au − 0.02419
+—TemperatureUnits—
+Kelvin − −
+K − −
+Celsius 273.15 −
+C 273.15 −
+—AngleUnits—
+Deg − −
+Rad − 180/𝜋
+7.51.5 Discussion of Features
+RestartingSimulations
+Ab initio molecular dynamics simulation are computationally expensive, and will typically run for a long time
+even in the case of medium-sized systems. Often, it is desirable to perform such a simulation as a combination
+ofmultipleshortruns(e. g.,ifthequeuingsystemoftheclusterimposesamaximumjobtime). TheORCAMD
+module writes a restart file in each simulation step, which allows for the seamless continuation of simulations.
+Thisrestartfilehasthename“basename.mdrestart”,wherebasenameistheproject’sbasename. Toloadan
+existingrestartfile,usetheRestartcommand(seecommandlistbelow).
+Inthefirstrunofaplannedsequenceofruns,norestartfileexistsyet. forthiscase,theRestartcommandoffers
+the IfExists modifier. The restart file is only loaded if it exists. If not, the restart is simply skipped, and no
+erroristhrown. Byusingthismodifier,youcanhavetheRestartcommandalreadyinplaceinthefirstrunofa
+sequence(wherenorestartfileexistsinthebeginning),anddonotneedtomodifytheinputafterthefirstrunhas
+finished.
+ConcerningtheDumpcommand,itisgoodtoknowthattrajectoryfilesareappended(notoverwritten)bydefault.
+IfyoueverwanttooverwriteanexistingtrajectoryfilebyaDumpcommand,usetheReplacemodifier.
+Pleasenotethat onlythepositions,velocities,thermostatinternalstate(onlyforNHC),Metadynamicshills,and
+timestepcountersarerestartedwhenexecutingaRestartcommand. Allotherproperties(thermostats,regions,
+trajectorydumps,constraints,cells,etc.) arenotrestarted. Theyshouldallremainintheinputfile,asexecutedin
+thefirstrunofasequence. JustaddtheRestartcommandafterallotherrelevantcommandshavebeenexecuted,
+directlybeforetheRun command.
+Toconcludethisdiscussion,ashortexampleisgiven. IftheMDinputfile
+%md
+Timestep 0.5_fs
+Initvel 300_K
+Thermostat NHC 300_K Timecon 10.0_fs
+Dump Position Stride 1 Filename "trajectory.xyz"
+(continuesonnextpage)
+976 Chapter7. DetailedDocumentation
+
+[... start of page 999 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Restart IfExists
+Run 100
+end
+issubsequentlyexecutedtentimes(withoutanymodification),theresultingtrajectoryfilewillbeidentical(apart
+fromnumericalnoise)tothatobtainedifthefollowinginputisexecutedonce:
+%md
+Timestep 0.5_fs
+Initvel 300_K
+Thermostat NHC 300_K Timecon 10.0_fs
+Dump Position Stride 1 Filename "trajectory.xyz"
+Run 1000
+end
+Regions
+IntheORCAMDmodule,regionscanbedefined. Thisconceptdoesnot refertoregionsinspace,butratherto
+subsetsofatomsinthesystem. Aregionisnothingmorethanalistofatoms. Regionsmayoverlap,i. e.,atoms
+canbepartofmorethanoneregionatatime. Theatomswhicharepartofacerta

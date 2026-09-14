@@ -1,0 +1,99 @@
+[... end of page 1050 ...]
+1) = 𝛼2 ∑︁∑︁ 𝑍 (r 𝑖 −R 𝐴 )×p 𝑖𝑠ˆ ≡ 𝛼2 ∑︁∑︁ 𝑍 𝑟−3^l ^s (7.344)
+SOC 2 𝐴 |r −R |3 𝑖 2 𝐴 𝑖𝐴 𝑖𝐴 𝑖
+𝑖 𝐴 𝑖 𝐴 𝑖 𝐴
+𝐻ˆ(2) =−
+𝛼2 ∑︁∑︁(r
+𝑖
+−r
+𝑗
+)×p
+𝑖 (^s +2^s ) (7.345)
+SOC 2 |r −r |3 𝑖 𝑗
+𝑖 𝑗̸=𝑖 𝑖 𝑗
+≡−
+𝛼2 ∑︁∑︁^l
+𝑟−3(^s +2^s ) (7.346)
+2 𝑖𝑗 𝑖𝑗 𝑖 𝑗
+𝑖 𝑗̸=𝑖
+This operator would be hard to handle exactly; therefore it is common to introduce mean field and/or effective
+potentialapproachesinwhichtheoperatoriswrittenasaneffectiveone-electronoperator:
+𝐻ˆ
+SOC
+∼
+=
+∑︁ h^(
+𝑖
+eff)^s
+𝑖 (7.347)
+𝑖
+1028 Chapter7. DetailedDocumentation
+
+--- Page 1051 ---
+ORCAManual,Release6.0.0
+The simplest approximation is to simply use the one-electron part and regard the nuclear charges as adjustable
+parameters. Reducingtheirvaluesfromtheexactnuclearchargeissupposedtoaccountinanaveragewayforthe
+screening of the nuclear charge by the electrons. In our code we use the effective nuclear charges of Koseki et
+al. This approximationintroduceserrors whichareusually smallerthan 10%butsometimes arelargerandmay
+approach20%insomecases. Theapproximationisbestforfirstrowmaingroupelementsandthefirsttransition
+row(2pand3delements). Forheavierelementsitbecomesunreliable.
+Amuchbetterapproximationistotakethetwo-electrontermsintoaccountprecisely. Withoutgoingintodetails
+here–thesituationisasinHartree-Fock(ordensityfunctional)theoryandonegetsCoulomb,exchangeandcor-
+relationterms. Thecorrelationterms(evaluatedinalocalDFTfashion)arenegligibleandcanbesafelyneglected.
+Theyareoptionallyincludedandarenotexpensivecomputationally. TheCoulombtermsis(aftertheone-electron
+term)thesecondlargestcontributionandisexpensivetoevaluateexactly. ThesituationissuchthatintheCoulomb-
+partthespin-otherorbitinteraction(thesecondterminthetwo-electronpart)doesnotcontributeandoneonlyhas
+todealwiththespin-own-orbitcontribution. Theexactevaluationisusuallytooexpensivetoevaluate. TheRIand
+seminumeric approximation are much more efficient and introduce only minimal errors (on the order of usually
+notmorethan1ppming-tensorcalculationsforexample)andarethereforerecommended. TheRIapproximation
+iscomputationallymoreefficient. Pleasenotethatyouhavetospecifyanauxiliarybasissettotakeadvantageof
+theRIapproximation,eveniftheprecedingSCFcalculationdoesnotmakeuseofanyformofRI.Theone-center
+approximationtotheCoulombtermintroducesmuchlargererrors. Thefullynumericmethodisbothslowerand
+lessaccurateandisnotrecommended.
+The exchange term has contributions from both the spin-own-orbit and spin-other-orbit interaction. These are
+taken both into account in the mean-field approximation which is accessed by Flag 3 = 3. Here a one-center
+approximationismuchbetterthanfortheCoulombtermsinceboththeintegralsandthedensitymatrixelements
+areshortranged. TogetherwiththeCoulombtermthisgivesaveryaccurateSOCoperatorwhichisrecommended.
+TheDFT-Veffoperatorsuffersfromnottreatingthespin-other-orbitpartintheexchangewhichgivessignificant
+errors (also, local DFT underestimates the exchange contributions from the spin-same-orbit interaction by some
+10%relativetoHFbutthisisnotamajorsourceoferror). However,itisinterestingtoobservethatintheprecise
+analyticalevaluationoftheSOMFoperator,thespin-other-orbitinteractionisexactly-2timesthespin-own-orbit
+interation. Thus,intheDFTframeworkonegetsamuchbetterSOCoperatorifthesignoftheDFTexchangeterm
+issimplyreversed! Thisisaccessedby Flag 3 = 2.
+ExclusionofAtomicCenters
+In ORCA it is possible to change the spin-orbit coupling operator in order to exclude contributions from user-
+defined atoms. This approach can be useful, for example, in quantifying the contribution of the ligands to the
+zero-fieldsplitting(ZFS);foranapplicationofthismethodseeRef. [833].
+ThisisillustratedforthecalculationoftheSOCcontributiontotheZFSofthetripletoxygenmolecule. Usingthe
+inputbelowwestartbyanormalcalculationoftheZFS,includingbothoxygenatoms. Notethatweuseherethe
+effectivenuclearchargeoperator. ThisisrequiredasnotallimplementedSOCoperatorsarecompatiblewiththe
+decompositionintermsofindividualcenterscontributions.
+! def2-TZVP def2-TZVP/c
+%casscf nel 8
+norb 6
+mult 3,1
+nroots 1,3
+rel dosoc true
+end
+end
+%rel
+SOCType 1
+end
+*xyz 0 3
+O 0 0 0
+(continuesonnextpage)
+7.54. CalculationofProperties 1029
+
+[... start of page 1052 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+O 0 0 1.207
+*
+The calculated value of the D parameter is approximately 2.573 cm−1. In a second calculation we exclude the
+contributionfromthefirstoxygenatom. Forthiswechangethe%relblocktotheonebelow.
+%rel
+SOCType 1
+SOCOff 0
+end
+NowtheDparameteriscalculatedtobeapproximately0.643cm−1,aresultthatdeviatesquitesignificantlyfrom
+halfofthevaluecalculatedpreviously,implyingthatnon-additiveeffectsare

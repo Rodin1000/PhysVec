@@ -1,0 +1,85 @@
+[... end of page 735 ...]
+ after the first
+# point. The default is MORead. The MOs of the pre-
+# vious point will in many cases be a very good guess
+# for the next point. In some cases however, you may
+# want to be more conservative and use a general guess.
+OptGuess = OneElec # the one electron matrix
+= Hueckel # the extended Hueckel guess
+= PAtom; # the PAtom guess
+= Pmodel # the PModel guess
+= MORead # MOs of the prev. point (default)
+end
+7.26. GeometryOptimization 713
+
+--- Page 736 ---
+ORCAManual,Release6.0.0
+RedundantInternalCoordinates
+There are three types of internal coordinates: redundant internals, old redundant internals (redundant_old) and
+a new set of redundant internals (redundant_new, with improved internals for nonbonded systems). All three
+setsworkwiththesame“primitive”spaceofinternalcoordinates(stretches,bends,dihedralanglesandimproper
+torsions). Onlytheredundantinternalsworkswithonemoretypeofbendsincaseswhereanormalbendwould
+havebeenapproximately180∘. InredundantinternalcoordinatesthefullprimitivesetiskeptandtheHessianand
+gradientaretransformedintothis–potentiallylarge–space. Ageometryoptimizationsteprequires,dependingon
+themethodusedforthegeometryupdate,perhapsadiagonalizationorinversionoftheHessianofdimensionequal
+tothenumberofvariablesintheoptimization. Inredundantinternalcoordinatesthisspacemaybe2-4timeslarger
+than the nonredundant subspace which is of dimension 3𝑁 −6(5). Since the diagonalization or inversion
+atoms
+scalescubicallythecomputationaloverheadovernonredundantspacesmayeasilyreachafactorof8–64. Thus,in
+redundantinternalcoordinatestherearemanyunnecessarystepswhichmaytakesomerealtimeifthenumberof
+primitiveinternalsisgreaterthan2000orso(whichisnotsounusual). Thetimingproblemmaybecomeacutein
+semiempiricalcalculationswheretheenergyandgradientevaluationsarecheap.
+Webrieflyoutlinethetheoreticalbackgroundwhichisnotdifficulttounderstand:
+Suppose,wehaveasetof𝑛 (redundant)primitiveinternalcoordinatesqconstructedbysomerecipeandasetof
+𝐼
+𝑛 =3𝑁 Cartesiancoordinatesx. TheB-matrixisdefinedas:
+𝐶 atoms
+𝜕𝑞
+𝐵 = 𝑖 (7.190)
+𝑖𝑗 𝜕𝑥
+𝑗
+Thismatrixisrectangular. Inordertocomputetheinternalgradientoneneedstocomputethe“generalizedinverse”
+ofB. However,sincethesetofprimitiveinternalsisredundantthematrixisrank-deficientandonehastobecareful.
+Inpraticeonefirstcomputesthe𝑛 ×𝑛 matrixG:
+𝐼 𝐼
+G=BB𝑇 (7.191)
+ThegeneralizedinverseofGisdenotedG−andisdefinedintermsoftheeigenvaluesandeigenvectorsofG:
+G− = (︂ U )︂𝑇 (︂ Λ−1 0 )︂(︂ U )︂ (7.192)
+R 0 0 R
+HereUaretheeigenvectorsbelongingtothenonzeroeigenvaluesΛwhichspanthenonredundantspaceandR
+aretheeigenvectorsoftheredundantsubspaceoftheprimitiveinternalspace. Ifthesetofprimitiveinternalsis
+carefullychosen,thenthereareexactly3𝑁 −6(5)nonzeroeigenvaluesofG. Usingthismatrix,thegradient
+atoms
+ininternalcoordinatescanbereadilycomputedfromthe(known)Cartesiangradient:
+g =G−Bg (7.193)
+𝑞 𝑥
+TheinitialHessianisformeddirectlyintheredundantinternalspaceandthenitselforitsinverseisupdatedduring
+thegeometryoptimization.
+BeforegeneratingtheNewtonstepwehavetoensurethatthedisplacementstakeplaceonlyinthenonredundant
+partoftheinternalcoordinatespace. Forthispurposeaprojector𝑃′:
+P′ =GG− =G−G (7.194)
+isappliedonboththegradientandtheHessian:
+g˜ =P′g (7.195)
+q q
+H˜ =P′H P′+𝛼(1−P′) (7.196)
+q q
+Thesecondtermfor𝐻˜ setsthematrixelementsoftheredundantpartoftheinternalcoordinatespacetoverylarge
+values(𝛼=1000).
+714 Chapter7. DetailedDocumentation
+
+[... start of page 737 ...]
+ORCAManual,Release6.0.0
+Coordinatesteps
+AQuasi-Newton(QN)stepisthesimplestchoicetoupdatethecoordinatesandisgivenby:
+Δq=−H˜−1g˜ (7.197)
+q q
+Amoresophisticatedstepistherationalfunctionoptimizationstepwhichproceedsbydiagonalizingtheaugmented
+Hessian:
+(︂ )︂(︂ )︂ (︂ )︂
+H g ∆q ∆q
+𝑞 𝑞 =𝑣 (7.198)
+g 0 1 1
+𝑞
+Thelowesteigenvalue𝜈 approacheszeroastheequilibriumgeometryisapproachedandthenicesideeffectof
+0
+theoptimizationisastepsizec

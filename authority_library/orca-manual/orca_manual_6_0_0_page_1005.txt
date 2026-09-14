@@ -1,0 +1,78 @@
+[... end of page 1004 ...]
+alsospecifiestherateatwhichtheconstrainttargetismodified. Aftertheramphas
+beencompletedonce,thefinal(constant)targetvalue(s)willbeusedforallsubsequentRun commands.
+Ifanalreadydefinedconstraintisdefinedagain,itisoverwritten,i. e.,theoldversionoftheconstraintisautomat-
+icallydeletedfirst.
+ConstraintsareremovedwiththeRemovekeyword. Youcaneitherremovesingleconstraints,e. g.,Constraint
+Remove Distance 3 5, or groups of similar constraints. To remove all angle constraints, use Constraint
+Remove Angle All. Toremoveallrestraints,enterConstraint Remove All.
+TheListargumentprintsallcurrentlyactiveconstraintstothescreenandlogfile. Noadditionalargumentscan
+bespecified.
+Bydefault,theexternalforceactingoneachconstraintiscomputedineveryMDstepandwrittentoafilenamed
+“basename-constraints.csv”(onecolumnperconstraint). Thiscanbeuseful–theaverageforceactingona
+constraintcanbe,e. g.,usedforthermodynamicintegration[430]. Ifalargenumberofconstraintsisdefined,this
+982 Chapter7. DetailedDocumentation
+
+--- Page 1005 ---
+ORCAManual,Release6.0.0
+mightwastecomputertimeifitisnotrequired. Inthesecases, theconstraintscanbedefinedwiththeNoprint
+modifier. Forsuchconstraints,theactingforcesarenotcomputedandnotwrittentothefile. Notethatconstraints
+whichhavebeenpre-defined(e. g.,bytheforcefieldforrigidmoleculessuchasTIP3Pwater)automaticallyhave
+thismodifier.
+Pleasenotethateachconstraintdecreasesthenumberofthesystem’sdegreesoffreedom(DoF)byone. Thiseffect
+isincluded,e. g.,inthetemperaturecomputation,wheretheDoFcountenters. Fromthisconsideration,itcanalso
+beunderstoodthataconstraintbehavessignificantlydifferentfromarestraintwithverylargespringconstant: In
+theformercase,theDoFisremovedfromthesystem;inthelattercase,theDoFisstillthere,butcanonlymovein
+atinyinterval.
+ItiscomputationallyinefficienttodefinealargenumberofCartesianconstraintsifasubsetofatomssimplyshallbe
+fixed. Amoreefficientapproachistodefineanactiveregionwhichonlycontainstheatomswhichshallbemovable
+(seeManage_Regioncommand). Allatomsoutsideoftheactiveregionwillnotbesubjecttotimeintegrationand
+thereforekeeptheirpositions. However,pleasenotethattheseatomsmaynotbeinvolvedinanyother(distance,
+angle,dihedral)constraint.
+Dump
+MandatoryArguments: quantity Keyword {Position,Velocity,Force,GBW,EnGrad}
+OptionalArguments: —
+Modifiers: Format fmt Keyword {XYZ,PDB,DCD}
+Stride n Integer —
+Filename fname String —
+Region region ... ...
+Replace —
+None —
+Specifieshowtowritetheoutputtrajectoryofthesimulation. Thequantityargumentcanbeoneofthekeywords
+Position,Velocity,Force,GBW,andEnGrad. WhilethevelocitiesarewritteninAngstrom/fs,theunitofthe
+forcesisHartree/Angstrom. Thefollowingparagraphsonlyapplytothefirstthreequantities. DumpingGBWand
+EnGradfilesworksdifferently,andisdescribedattheveryendofthissection.
+TheStridemodifierspecifiestowriteonlyevery𝑛-thtimesteptotheoutputfile(defaultis𝑛 = 1,i. e.,every
+step). AstridevalueofzeroonlywritesoneframetothetrajectoryatthetimewhentheDumpcommandiscalled
+–nofurtherframeswillbewrittenduringtherun. Thiscanbehelpful,e. g.,towriteaninitialPDBsnapshotfor
+DCDtrajectories,ortokeepasingleGBWfileatsomepoint.
+The Format modifier sets the format of the output file. Currently, only the XYZ, PDB, and DCD formats are im-
+plemented. PleasenotethattheDCDformatisnotwell-defined,anddifferentprogramsusedifferentformatswith
+thisextension. Furthermore,DCDfilesdonotstoreatomtypeinformationandareonlyvalidtogetherwithaPDB
+snapshotofthesystem(asinglePDBsnapshotcanbewrittenvia“Dump Position Format PDB Stride 0”).
+Ifnotspecified,ORCAtriestodeducetheformatfromthefileextensionofthespecifiedfilename. Ifalsonofile
+nameisgiven,trajectorieswillbewritteninXYZformatbydefault.
+The Filename modifier sets the output file name. If not specified, the default file name will have the form
+“proj-qty-rgn.ext”, where proj is the base name of the ORCA project, qty is one of postrj, veltrj, or
+frctrj,rgnspecifiesthenameornumberoftheregionforwhichthedumpisactive,andextisthefileextension
+selectedbytheFormatmodifier.
+If the trajectory file already exists at the beginning of a Run command, new frames will be appended to its end
+by default. If you want to overwrite the existing file instead, use the Replace modifier. The old existing file is
+erasedonlyonceafteradumpwiththismodifierhasbeenspecified. IfmultipleRun commandsfollowafterthe
+dumpdefinition,thetrajectorywillnotbereplacedbeforeeachoftheseruns,onlybeforethefirstoneamongthem.
+Tooverwritethefileanothertime,simplyre-definethedumpwiththeReplacemodifier. Ifthefiledoesnotyet
+existatthebeginningofarun,thismodifierhasnoeffect. AppendingframestoDCDtrajectoriesisnotpossible
+(becausetheystorethetotalframecountintheheader). Therefore,Replaceisautomaticallyswitchedonifthe
+formatisDCD.
+7.51. AbinitioMolecularDynamicsSimulations 983
+
+[... start of page 1006 ...]
+ORCAManual,Release6.0.0
+WiththeRegionmodifier,thetrajectoryoutputcanberestrictedtoaspecificregion(i. e.,subsetofatoms). This
+modifierexpectsoneargument,whichiseitherthenameofapre-definedregionorthenumberofauser-defined
+region(seeabove). Ifnotspecified,thetrajectoryofthewholesystemwillbewritten. Multipledumpcommands
+formultipleregionscanbeactiveatthesametime,buteachpairofregionandquantity(position/velocity/force)
+canhaveonlyoneattacheddumpcommandatatime(re-definingwilloverwritethedumpsettings).
+UsetheNonemodifiertodisablewritingthisquantitytoanoutputfile. Thecommand“Dump Position None”
+willdisablewritingofallpositiontrajectoriesforallregions. Todisableonlythedumpforaspecificregion,use
+“Dump Position Region r None”,where

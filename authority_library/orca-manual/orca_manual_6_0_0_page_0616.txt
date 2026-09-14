@@ -1,0 +1,81 @@
+[... end of page 615 ...]
+roots 9
+mult 2
+switchstep NR
+etol 1e-7 #reset energy convergence
+rel
+dosoc true #spin-orbit coupling (and ZFS)
+gtensor true
+amatrix true
+end
+end
+* xyz 1 2
+C 0 0 0.0
+O 0 0 2.3504
+*
+Inadditiontopseudo-spin1/2A-tensorsforindividualKramersdoublets,theCASSCFmodulealsofeaturesthe
+calculationof“intrinsic”HFCA-tensorsforthewholelowestnonrelativisticspinmultipletintheeffectiveHamil-
+tonianapproach.[489]
+In contrast to the MRCI module, the CASSCF module also supports the calculation of susceptibility tensors at
+non-zeromagneticfields. Thecorrespondingkeywordsare
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 593
+
+--- Page 616 ---
+ORCAManual,Release6.0.0
+...
+%casscf
+...
+rel
+dosoc true
+dosusceptibility true
+susctensor_nfields 2 # number of user-defined magnetic fields
+susctensor_magfields[0] = 35000,0,0 # 1st user-defined magnetic field
+susctensor_magfields[1] = 70000,0,0 # 2nd user-defined magnetic field
+end
+end
+This example input calculates the susceptibility tensor at the two (vector-valued!) magnetic fields (35000,0,0)
+and(70000,0,0)(inGauss). Notethatforpracticalreasonsitisnecessarytospecifythenumberofuser-defined
+magneticfieldsusingthekeywordsusctensor_nfields.
+UntilORCA4.0itwaspossibletoaccessspin-spincouplingsonlyviarunningCAS-CItypecalculationsinMRCI.
+ConvergedCASSCForbitalscanbereadsettingthefollowingflags
+!MOREAD NOITER ALLOWRHF TZVPP TightSCF Bohrs
+%moinp "convergedCASSCF.gbw"
+%mrci
+...
+TPre 0.0
+citype mrci
+newblock 2 *
+excitations none
+refs CAS(9,8) end
+end
+soc
+DoSSC true # spin-spin coupling
+DoSOC true # spin-orbit coupling
+...
+end
+end
+* xyz 1 2
+C 0 0 0.0
+O 0 0 2.3504
+*
+StartingwithORCA4.1,spin-spincouplingsarealsodirectlyaccessibleintheCASSCFmoduleviathekeyword
+DoSSC true in the rel subblock. Note that the calculation of SSC requires the definition of an auxiliary basis
+set (AuxC auxiliary basis set slot), since it is only implemented in conjunction with RI integrals. A common
+waytointroducedynamicalcorrelationforthepropertycomputation,istoreplacetheenergiesenteringthequasi-
+degenerateperturbationtheory. IftheNEVPT2energycorrectioniscomputedinCASSCF,therewillbeadditional
+printingswhereCASSCFenergiesarereplacedbythemoreaccurateNEVPT2values. Alternatively,thesediagonal
+energies can be taken from the input file similarly how it is described for the MRCI module. A more detailed
+documentationispresentedintheMRCIpropertysection.
+Note:
+• TheprogramdoesNOTprinttheSOCmatrixbydefault! ToobtainSOCMEsattheCASSCF/NEVPT2/...
+levels,pleasesetthePrintLevelintherelblocktoatleast2.
+594 Chapter7. DetailedDocumentation
+
+[... start of page 617 ...]
+ORCAManual,Release6.0.0
+7.15.4 1- and 2-shell Abinitio Ligand Field Theory
+StartingfromORCA5.0,ORCAfeaturesa1-and2-shellAILFTmodule. AILFTwasoriginallydevelopedfor1-
+shelld-andf-LFTproblems[57,490]. InORCA5.0anextenionto2-shellAILFTprovidesaccesstoallcommon
+1-and2-shellAILFTproblemsnamely:
+1. ValenceLFTproblems,involvingthed-,f-,sp-,ds-anddf-shells
+2. CoreLFTproblemsinvolvingthesd-,pd-,sf-andpf-shellsbecomereadil

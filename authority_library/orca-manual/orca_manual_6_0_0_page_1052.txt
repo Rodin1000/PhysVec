@@ -1,0 +1,92 @@
+[... end of page 1051 ...]
+butions from user-
+defined atoms. This approach can be useful, for example, in quantifying the contribution of the ligands to the
+zero-fieldsplitting(ZFS);foranapplicationofthismethodseeRef. [833].
+ThisisillustratedforthecalculationoftheSOCcontributiontotheZFSofthetripletoxygenmolecule. Usingthe
+inputbelowwestartbyanormalcalculationoftheZFS,includingbothoxygenatoms. Notethatweuseherethe
+effectivenuclearchargeoperator. ThisisrequiredasnotallimplementedSOCoperatorsarecompatiblewiththe
+decompositionintermsofindividualcenterscontributions.
+! def2-TZVP def2-TZVP/c
+%casscf nel 8
+norb 6
+mult 3,1
+nroots 1,3
+rel dosoc true
+end
+end
+%rel
+SOCType 1
+end
+*xyz 0 3
+O 0 0 0
+(continuesonnextpage)
+7.54. CalculationofProperties 1029
+
+--- Page 1052 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+O 0 0 1.207
+*
+The calculated value of the D parameter is approximately 2.573 cm−1. In a second calculation we exclude the
+contributionfromthefirstoxygenatom. Forthiswechangethe%relblocktotheonebelow.
+%rel
+SOCType 1
+SOCOff 0
+end
+NowtheDparameteriscalculatedtobeapproximately0.643cm−1,aresultthatdeviatesquitesignificantlyfrom
+halfofthevaluecalculatedpreviously,implyingthatnon-additiveeffectsareimportant. Inadditiontotheeffective
+nuclearchargeoperator,theAMFI-Aoperatordescribedpreviouslycanbeused. Giventhatthisisbasedonpre-
+calculatedatomicdensities,itmightbepreferredforheavierelementswheretheeffectivenuclearchargeoperator
+becomesunreliable. The methodisnot limitedtoCASSCFcalculations asdescribedabove, andcanbe usedin
+DFT,MRCIandROCIScalculations.
+7.54.3 EPR and NMR properties
+CalculationofEPRandNMRresponsepropertiescanberequestedinthe%eprnmrinputblock. Theindividual
+flagsaregivenbelow.
+%eprnmr
+# Calculate the g-tensor using CP-KS theory
+gtensor true
+# Calculate and print one- and two-electron contributions to the g-tensor
+gtensor_1el2el true
+# Calculate the D-tensor
+DTensor so # spin orbit part
+ss # spin-spin part
+ssandso # both parts
+DSOC qro # quasi-restricted method; must be done with the keyword !uno
+pk # Pederson-Khanna method.
+# NOTE: both approximations are only valid for
+# pure functionals (no HF exchange)
+cp # coupled-perturbed method (default)
+cvw # van W\"ullen method
+DSS direct # directly use the canonical orbitals for the spin density
+uno # use spin density from UNOs
+PrintLevel n # Amount of output (default 2)
+# whether to calculate and print the Euler angles via (cid:96)orca_euler(cid:96) if the
+# calculation of the g-tensor or the D-tensor is requested
+PrintEuler false
+# For the solution of the CP-SCF equations:
+Solver Pople # Pople solver (default)
+CG # conjugate gradient
+DIIS # DIIS type solver
+MaxIter 64 # maximum number of iterations
+MaxDIIS 10 # max. number of DIIS vectors (only DIIS)
+Tol 1e-3 # convergence tolerance
+LevelShift 0.05 # level shift for DIIS (ignored otherwise)
+Ori CenterOfElCharge # center of electronic charge
+CenterOfNucCharge # center of nuclear charge
+(continuesonnextpage)
+1030 Chapter7. DetailedDocumentation
+
+[... start of page 1053 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+CenterOfSpinDens # center of spin density
+CenterOfMass # center of mass
+GIAO # use the GIAO formalism (default)
+N # number of the atom to put the origin
+X,Y,Z # explicit position of the origin
+# in coordinate input units (Angstrom by default)
+# Calculate the NMR shielding tensor
+NMRShielding 1 # for chosen nuclei - specified with the Nuclei keyword
+2 # for all nuclei - equivalent to the 'NMR' simple input keyword
+# treatment of 1-electron integrals in the RHS of the CPSCF equations
+giao_1el =

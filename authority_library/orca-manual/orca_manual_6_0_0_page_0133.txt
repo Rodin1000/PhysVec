@@ -1,0 +1,63 @@
+[... end of page 132 ...]
+perD3correction(employingthezero-dampingscheme)should
+becalculatedautomatically. TheD3BJcorrectionisusedautomaticallyfor𝜔B97X-D3BJand𝜔B97M-D3BJ(as
+wellasforthemeta-GGAB97M-D3BJ).ThesameistruefortheD4-basedvariants𝜔B97M-D4and𝜔B97X-D4.
+TheD3BJandD4variantshavealsobeenshowntoperformwellforgeometryoptimizations[603].
+Severalrestrictionsapplytothesefunctionalsatthemoment. Theyhaveonlybeenimplementedandtestedforuse
+withthelibintintegralpackageandforRHFandUHFsingle-point,groundstatenucleargradient,groundstate
+nuclearHessian,TDDFT,andTDDFTnucleargradientcalculations. Onlythestandardintegralhandling(NORI),
+RIJONX,andRIJCOSXaresupported. Donotusethesefunctionalswithanyotheroptions.
+110 Chapter6. RunningTypicalCalculations
+
+--- Page 133 ---
+ORCAManual,Release6.0.0
+DFTCalculationswithRange-SeparatedDoubleHybridFunctionals
+For the specifics of the range-separated double-hybrid functionals the user is referred to sections DFT Calcula-
+tions with Second Order Perturbative Correction (Double-Hybrid Functionals), DFT Calculations with Range-
+Separated Hybrid Functionals and Doubles Correction. The first range-separated double hybrids available in
+ORCAwere𝜔B2PLYPand𝜔B2GP-PLYP[146]. Bothwereoptimizedforthecalculationofexcitationenergies,
+buttheyhaverecentlyalsobeentestedforground-stateproperties[601].
+Alargevarietyofrange-separateddoublehybridswithandwithoutspin-component/oppositescalinghavebecome
+availableinORCA5. Somehavebeendevelopedwithground-statepropertiesinmind,mostforexcitationenergies.
+SeeSectionChoiceofFunctionalformoredetailsandcitations.
+6.1.5 Quadratic Convergence
+The standard SCF implementation in ORCA uses the DIIS algorithm[702, 703] for initial and an approximate
+second-orderconvergerforfinalconvergence[264,607]. Thisapproachconvergesquicklyformostchemicalsys-
+tems. However, there are many interesting systems with a more complicated electronic structure for which the
+standardSCFprotocolconvergeseither slowly(“creeping”),convergestoanexcitedstate,or diverges. Inthose
+cases,anewlydevelopedtrust-regionaugmentedHessian(TRAH)SCFapproach[64,349,381,733]shouldbeused.
+TheTRAH-SCFmethodalwaysconvergestoalocalminimumandconvergesquadraticallynearthesolution.
+YoucanrunTRAHfromthebeginningbyadding
+! TRAH
+tothesimpleinputlineifyouexpectconvergencedifficulties. Open-shellmoleculesnotoriouslyhaveSCFcon-
+vergenceissues,inparticular,iftheyarecomposedofmanyopen-shellatoms. InFig.6.10,theconvergenceofa
+TRAH-SCFcalculationisshownforahigh-spinRhclusterforwhichthestandardSCFdiverges. Theerrorsofthe
+electronicgradientorresidualvectorconvergealmoststeadilybelowthedefaultTRAHaccuracyof10−6.
+Rh +cluster(M = 36)
+12 s
+Fig.6.10:TRAH-SCFgradientnormofaPBE/def2-TZVPcalculationforaRh+ clusterinhigh-spinconfiguration
+12
+(M =36). ThestructurewastakenfromRef. [362].
+s
+Alternatively,TRAHislaunchedautomaticallyifstandardSCF(DIIS/SOSCF)showsconvergeproblems(default),
+anapproachwhichiscalledAutoTRAH.
+%scf
+AutoTRAH true
+end
+Youcanswitchofftheautomaticstartof TRAHbyadding
+6.1. SinglePointEnergiesandGradients 111
+
+[... start of page 134 ...]
+ORCAManual,Release6.0.0
+! NOTRAH
+tothesimpleinputlineor
+%scf
+AutoTRAH false
+end
+Convergenceproblemsaredetectedbycomparingthenormoftheelectronicgradientatmultipleiterationswhich
+isexplainedinmoredetailinSec. Trust-RegionAugmentedHessian(TRAH)SCF.
+TRAH-SCFiscurrentlyimplementedforrestrictedclosed-shell(RHFandRKS)andunrestrictedopen-shelldeter-
+minants(UHFandUKS)andcanbeacceleratedwithRIJ,RIJONX,RIJK,orRIJCOSX.Solvationeffectscanalsobe
+accountedforwiththeC-PCMandSMDmodels. Restrictedopen-shellcalculationsarenotpossibleyet.
+TRAH-SCFcanalsobeappliedtolargemoleculesasitisparallelizedandworkswithAOFockmatrices. However,
+forsystemsw

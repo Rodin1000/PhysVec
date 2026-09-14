@@ -1,0 +1,87 @@
+[... end of page 362 ...]
+nt Print[p_basis] 2 in the %output block
+(orPrintBasisinthesimpleinputline)theprogramwillprinttheactualbasissetininputformat(forthebasis
+block). Youcanthenaddorremoveprimitives,uncontractcorebasesetc. Forexample,hereisaprintoutofthe
+carbonbasisDZPininputformat:
+# Basis set for element : C
+NewGTO 6
+s 5
+1 3623.8613000000 0.0022633312
+2 544.0462100000 0.0173452633
+3 123.7433800000 0.0860412011
+4 34.7632090000 0.3022227208
+(continuesonnextpage)
+340 Chapter6. RunningTypicalCalculations
+
+--- Page 363 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+5 10.9333330000 0.6898436475
+s 1
+1 3.5744765000 1.0000000000
+s 1
+1 0.5748324500 1.0000000000
+s 1
+1 0.1730364000 1.0000000000
+p 3
+1 9.4432819000 0.0570590790
+2 2.0017986000 0.3134587330
+3 0.5462971800 0.7599881644
+p 1
+1 0.1520268400 1.0000000000
+d 1
+1 0.8000000000 1.0000000000
+end;
+The“s 5”,forexample,standsfortheangularmomentumandthenumberofprimitivesinthefirstbasisfunction.
+Then there follow five lines that have the number of the primitive, the exponent and the contraction coefficient
+(unnormalized) in it. Remember also that when you add very steep functions you must increase the size of
+theintegrationgridifyoudoDFTcalculations! Ifyoudonotdothatyourresultswillbeinaccurate. Youcan
+increasetheradialgridsizebyusingIntAccintheMethodblockorforindividualatoms(sectionOtherdetails
+andoptions explainshowtodothisindetail). Inthepresentexamplethechangescausedbylargerbasissetsin
+thecoreregionandmoreaccurateintegrationarerelativelymodest–ontheorderof3%,whichis,however,still
+significantifyouarealittlepuristic.
+Theprogramcanalsocalculatethespin-orbitcouplingcontributiontothehyperfinecouplingtensorasdescribedin
+sectionEPRandNMRproperties.ToextracttheAtensorfromaoligonucleartransitionmetalcomplex,theA(iso)
+valueintheoutputistobeprocessedaccordingtothemethoddescribedinref. [644].
+For the calculation of HFCCs using DLPNO-CCSD it is recommended to use the tailored truncation settings !
+DLPNO-HFC1 or !DLPNO-HFC2 in the simple keyword line which correspond to the “Default1” and “Default2”
+settinginRef. [741].
+IfalsoEPRg-tensororD-tensorcalculations(seenextsection)arecarriedoutinthesamejob,ORCAautomatically
+prints the orientation between the hyperfine/quadrupole couplings and the molecular g- or D-tensor. For more
+informationonthisseesectionorca_euler.
+6.12.10 The EPR g-Tensor and the Zero-Field Splitting Tensor
+The EPR g-tensor is a property that can be well calculated at the SCF level with ORCA through solution of the
+coupled-perturbed(CP-)SCFequations(seeCP-SCFOptions)andattheCASSCFlevelviatheCP-CASSCFequa-
+tions(seeCASSCFLinearResponse). Asanexample,considerthefollowingsimpleg-tensorjob:
+! BP86 Def2-SVP TightSCF g-tensor SOMF(1X)
+* int 1 2
+O 0 0 0 0 0 0
+H 1 0 0 1.1056 0 0
+H 1 2 0 1.1056 109.62 0
+*
+Thesimplestwayistocalltheg-tensorpropertyinthesimpleinputlineasshownabove,butitcanalsobespecified
+in the %eprnmr block with gtensor true. Starting from ORCA 5.0 the default treatment of the gauge is the
+GIAOapproach,butthiscanbemodifiedbythekeywordori. OtheroptionsaredefinedinsectionEPRandNMR
+properties. SOMF(1X) definesthechosenspin-orbitcoupling(SOC)operator. ThedetailsoftheSOCoperator
+aredefinedinsectionTheSpin-OrbitCouplingOperator. Otherchoicesandadditionalvariablesexistandcanbe
+setasexplainedindetailinsectionTheSpin-OrbitCouplingOperator.
+The output looks like the following. It contains information on the contributions to the g-tensor (relativistic
+mass correction, diamagnetic spin-orbit term (= gauge-correction), paramagnetic spin-orbit term (= OZ/SOC)),
+6.12. CalculationofProperties 341
+
+[... start of page 364 ...]
+ORCAManual,Release6.0.0
+theisotropicg-valueandtheorientationofthetotaltensor.
+-------------------
+ELECTRONIC G-MATRIX
+-------------------
+The g-matrix:
+2.0104321 -0.0031354 -0.0000000
+-0.0031354 2.0081968 -0.0000000
+-0.0000000 -0.0000000 2.0021275
+Breakdown of the contributions
+gel 2.0023193 2.0023193 2.0023193
+gRMC -0.0003174 -0.0003174 -0.0003174
+gDSO(tot) 0.0000808 0.0001539 0.0001515
+gPSO(tot) 0.0000449 0.0038301 0.0104898
+---------- ---------- -----

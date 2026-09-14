@@ -1,0 +1,82 @@
+[... end of page 343 ...]
+0000000000
+*
+%Compound "NH2.cmp"
+andthecorrespondingcompoundscriptNH2.cmp:
+New_Step
+!UHF def2-SVP VeryTightSCF
+%vpt2
+VPT2 On
+end
+%method
+Z_Tol 1e-12
+end
+* xyz 0 2
+N 0.00312611577632 0.00395297373474 0.00000000000000
+(continuesonnextpage)
+6.12. CalculationofProperties 321
+
+--- Page 344 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H 1.01930353842041 0.00049997276783 0.00000000000000
+H -0.23400058507735 0.99208221922117 0.00000000000000
+*
+Step_End
+New_Step
+!UHF def2-SVP VeryTightSCF
+%geom inhess read
+inhessname "NH2_Compound_1.hess"
+end
+%vpt2
+VPT2 On
+AvgProp Atensor
+end
+*xyz 0 2
+N 0.00312611577632 0.00395297373474 0.00000000000000
+H 1.01930353842041 0.00049997276783 0.00000000000000
+H -0.23400058507735 0.99208221922117 0.00000000000000
+*
+%eprnmr
+Nuclei = all N { aiso, adip }
+Nuclei = all H { aiso, adip }
+end
+Step_End
+END
+asimilarresultcanbeobtainedinonecalculation.
+Note: MakesurethecorrecthessianfilenamesaregivenandtheinputfilesMUSTnotcontainacompoundblock.
+YoucanalsoreruntheVPT2analysisusingorca_vpt2directly. Ifyouhaveananharmonicforcefieldcalculation
+namedmyjob_ffandapropertyderivativecalculationnamedmyjob_propjustcallorca_vpt myjob_ff.vpt2
+myjob_prop.vpt2.
+6.12.6 Electrical Properties
+AfewbasicelectricpropertiescanbecalculatedinORCAalthoughthishasneverbeenafocalpointofdevelopment.
+Thepropertiescanbeaccessedstraightforwardlythroughthe%elpropblock:
+! B3LYP DEF2-SVP TightSCF
+%elprop Dipole true # dipole moment
+Quadrupole true # quadrupole moment
+Polar true # dipole-dipole polarizability
+1 # equivalent to true (for backward compatibility)
+# Note: the flags "polar 2" and "polar 3" for seminumeric
+# and fully numeric polarizabilities are not supported
+# anymore! For numerical polarizability calculations
+# please use the respective compound scripts
+PolarVelocity true # polarizability w.r.t. velocity perturbations
+PolarDipQuad true # dipole-quadrupole polarizability
+(continuesonnextpage)
+322 Chapter6. RunningTypicalCalculations
+
+[... start of page 345 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+PolarQuadQuad true # quadrupole-quadrupole polarizability
+end
+* int 0 1
+C 0 0 0 0 0 0
+H 1 0 0 1.09 109.4712 0
+H 1 2 0 1.09 109.4712 0
+H 1 2 3 1.09 109.4712 120
+H 1 2 3 1.09 109.4712 240
+*
+The polarizability (dipole-dipole, dipole-quadrupole, quadrupole-quadrupole) is calculated analytically through
+solutionofthecoupled-perturbed(CP-)SCFequationsforHFandDFTruns(seeCP-SCFOptions)andthrough
+theCP-CASSCFequations

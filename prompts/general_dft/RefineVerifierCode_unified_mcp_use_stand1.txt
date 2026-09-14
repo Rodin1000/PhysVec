@@ -1,0 +1,199 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is to refine an ORCA input file by running it, capturing errors, retrieving documentation to fix errors, and iteratively improving the file until it runs successfully.
+
+**PURPOSE: Execute the ORCA input file, use error feedback to retrieve documentation, apply fixes, and re-execute until ORCA accepts the input without errors or MAX_ITERATIONS is reached. Output ONE JSON file that accumulates incrementally - after each iteration, append a new entry to the JSON array.**
+
+--------------------------------------------------------------------------
+[Input:]
+1. TYPE: {type} (e.g., mostly fermion, unless specified for phonon calculations)
+2. TOPIC: {topic} (the package/library topic, e.g., dft_qc)
+3. PROGRAM_FILE: {program_file} (filename of the ORCA input file to refine, e.g., cosmo_verifier_dft.inp)
+   **CRITICAL REQUIREMENT: The program filename indicates which input block MUST be present in the final file.**
+   - If filename contains "cosmo" (e.g., cosmo_verifier_dft.inp) → MUST include COSMO-related blocks (e.g., %cpcm, %cosmo)
+   - If filename contains "geometry" (e.g., geometry_verifier_dft.inp) → MUST include geometry block (* xyz ... *)
+   - If filename contains "keywords" (e.g., keywords_verifier_dft.inp) → MUST include keywords in ! line
+   - If filename contains "scf" (e.g., scf_verifier_dft.inp) → MUST include %scf block
+   - **The final program file MUST contain the input block indicated by the filename, otherwise the refinement is incomplete.**
+4. PROGRAM_PATH: {program_path} (full path to the program file)
+5. FILE_EXT: {file_ext} (extension without dot, e.g., inp)
+6. MAX_ITERATIONS: {max_iterations}
+   **CRITICAL: This is a HARD LIMIT. After MAX_ITERATIONS iterations, you MUST stop even if errors remain.**
+7. QUERY_NUM: {query_num} (number of retrieval queries to generate when errors occur)
+8. LIBRARY_NAMES: {library_names} (packages for retrieval, typically ["orca-manual"])
+9. QUERY_DIR: {query_dir} (where retrieval results are stored; subdir of OUTPUT_FOLDER)
+10. OUTPUT_FOLDER: {output_folder} (working directory; program file lives here)
+
+Note:
+- Filesystem-mcp working directory = {output_folder}. Use ONLY filenames or paths relative to it.
+- program-dft-mcp is configured with the ORCA input path. Use run_orca with file_path="{program_file}" (filename only).
+- retrieve-mcp saves results into {query_dir} (= {output_folder}/query).
+
+-----------------------------------------------------------------------------
+[Execution tool:]
+- If FILE_EXT is "inp": use program-dft-mcp `run_orca` with file_path="{program_file}" (and optionally timeout).
+- If FILE_EXT is "jl": use program-mcp `run_julia_file` with file_path="{program_file}".
+
+-----------------------------------------------------------------------------
+[Unified workflow – repeat until SUCCESS or MAX_ITERATIONS]
+
+**STEP 1: Run the program**
+- **MANDATORY: Start by calling run_orca** (or run_julia_file for .jl) with file_path="{program_file}".
+- **CRITICAL: file_path MUST be ONLY "{program_file}"** (no directories, no "..", no absolute paths).
+- Wait for: exitcode, stdout, stderr, timeout.
+
+**STEP 2: Analyze execution results and update JSON incrementally (MANDATORY after every run)**
+- **Success conditions (ANY of these means success):**
+  - exitcode=0 AND ("ORCA TERMINATED NORMALLY" in output or stderr empty)
+  - timeout=True AND running_successfully=True (ORCA started and was running when timeout occurred)
+  - exitcode=0 AND timeout=True AND no fatal parser errors in output
+- **Error conditions:**
+  - exitcode≠0 (non-zero exit code)
+  - stderr contains errors (fatal errors, parser errors, syntax errors)
+  - timeout=True AND running_successfully=False
+  - "ORCA aborted" or fatal errors in output
+
+- **CRITICAL: Update refinement log JSON incrementally (MANDATORY after every run)**
+  - Filename: `refinement_log_<program_stem>_<file_ext>.json`
+  - **On first iteration:** 
+    * Check if file exists. If not, create it with an empty array `[]`.
+    * If file exists, read it to get existing iterations.
+  - **On all iterations (including first):**
+    * Read the current input file content using `read_file(file_path="{program_file}")` to get `new_input`.
+    * Extract error messages from stderr/stdout (first 500 chars, focus on ERROR/FATAL/ABORT lines).
+    * Create iteration entry:
+      ```json
+      {{
+        "iteration_num": <current_iteration_number>,
+        "queries_made": [<array of query strings made in this iteration, empty [] if none>],
+        "errors_of_software": [<array of error messages, empty [] if success>],
+        "new_input": "<complete content of input file after this iteration>"
+      }}
+      ```
+    * Read existing JSON file (if exists) or start with empty array `[]`.
+    * Append the new iteration entry to the array.
+    * Save the updated JSON file.
+  - **CRITICAL: Use only the filename; no ".." or absolute paths.**
+  - **CRITICAL: You MUST update this file after EVERY run, even if it's the first iteration.**
+  - **CRITICAL: Track queries made during STEP 4 (fix loop) so you can include them when updating JSON here.**
+
+**STEP 3: Decide next action**
+- **If SUCCESS:** 
+  * **CRITICAL: Verify the required input block is present**
+    - Read the input file using `read_file(file_path="{program_file}")`.
+    - Check if the input block indicated by the filename is present in the file.
+    - If the required block is MISSING, this is NOT a true success - go to STEP 4 to add the required block.
+    - If the required block IS present, proceed to FINAL STEP (JSON already updated in STEP 2).
+  * Do not change the file further (unless required block is missing).
+- **If ERROR and iteration < MAX_ITERATIONS:** Go to STEP 4 (fix loop).
+- **If ERROR and iteration >= MAX_ITERATIONS:** 
+  * Proceed to FINAL STEP (JSON already updated in STEP 2).
+
+**STEP 4: Fix loop (only when error and iterations left)**
+
+  **4a. Read the program file**
+  - Use filesystem-mcp `read_file(file_path="{program_file}")`.
+  - **CRITICAL: file_path MUST be ONLY "{program_file}".**
+
+  **4b. Generate error-based queries**
+  - Analyze stderr/stdout and identify specific errors, failure patterns, and what must be fixed.
+  - Generate exactly {query_num} queries (or 3–6 if unsure). Each:
+    * < 20 words, focused on fixing the specific errors.
+    * Distinct (no overlap). Incorporate {type} and {topic} where relevant.
+  - Prioritize: error resolution, correct ORCA input syntax, parameter requirements, common pitfalls.
+
+  **4c. Retrieve documentation (MANDATORY when errors occur)**
+  - For EACH query, call `retrieve_hybrid` or `retrieve_hybrid_multi`.
+  - **CRITICAL: Use only packages from LIBRARY_NAMES: {library_names}.**
+  - Call tools ONE AT A TIME: retrieve → wait → next retrieve.
+  - Results are saved as JSON files in {query_dir}.
+  - **CRITICAL: Track all queries made** - you MUST include them in the `queries_made` array when updating JSON in STEP 2 of the next iteration.
+
+  **4d. Read retrieval results**
+  - Use filesystem-mcp `list_directory(file_path="query")` to see all JSON files in the query directory.
+  - Read relevant query result files based on error messages using `read_file(file_path="query/<filename>.json")`.
+  - Focus on query files that match the specific errors you're trying to fix.
+
+  **4e. Use RAG results + errors to plan fixes**
+  - Combine: (1) error-fixing guidance from retrieved documentation, (2) error messages from stderr/stdout, (3) current program content.
+  - Plan precise edits.
+
+  **4f. Apply fixes**
+  - Use filesystem-mcp `edit_file(file_path="{program_file}", edits=[...])`.
+  - **CRITICAL: file_path MUST be ONLY "{program_file}".**
+  - **CRITICAL: old_text must match EXACTLY** (whitespace, indentation, case).
+  - Then **return to STEP 1** and run the program again.
+
+**FINAL STEP (run ONCE at the end)**
+- **CRITICAL: Verify required input block is present before finalizing**
+  - Read the final input file using `read_file(file_path="{program_file}")`.
+  - Check if the input block indicated by the filename is present:
+    - Extract the element name from filename (e.g., "basis" from "basis_verifier_dft.inp")
+    - Verify the corresponding block exists in the file:
+      * "basis" → %basis block
+      * "cosmo" → COSMO-related blocks (%cpcm, %cosmo, etc.)
+      * "geometry" → geometry block (* xyz ... *)
+      * "keywords" → keywords in ! line
+      * "scf" → %scf block
+      * "output" → %output block
+  - **If the required block is MISSING, you MUST add it before finalizing.**
+    - This is a CRITICAL requirement - the verifier file is incomplete without its target block.
+    - Add the required block, then re-run to verify it works (which will update JSON in STEP 2), then proceed.
+- **CRITICAL: Verify the JSON file is complete**
+  - The JSON file `refinement_log_<program_stem>_<file_ext>.json` should already exist and contain all iterations (updated incrementally in STEP 2 after each run).
+  - Read the JSON file to verify it contains all iterations from start to finish.
+  - **Expected structure:** JSON array `[{{...}}, {{...}}, ...]` where each object has:
+    * `iteration_num`: The iteration number (1, 2, 3, ...)
+    * `queries_made`: Array of query strings (empty array `[]` if no queries were made)
+    * `errors_of_software`: Array of error messages (empty array `[]` if no errors, i.e., success)
+    * `new_input`: Complete content of input file after this iteration
+  - If the JSON file doesn't exist or is incomplete, create/update it now with all iterations.
+  - **Important notes:**
+    * The JSON should have been accumulating incrementally after each iteration in STEP 2
+    * For successful iterations, `errors_of_software` should be empty array `[]`
+    * For iterations without queries, `queries_made` should be empty array `[]`
+    * The last entry should have the final `new_input` content
+- Then STOP.
+
+-----------------------------------------------------------------------------
+[Tool usage]
+- Tools are REAL and EXECUTE when called. Do not simulate.
+- Do NOT use "Action:", "Thought:", "Observation:" – this is not ReAct.
+- Call tools directly; wait for completion before proceeding.
+
+-----------------------------------------------------------------------------
+[Mandatory workflow sequence]
+1. Call run_orca (or run_julia_file) with file_path="{program_file}".
+2. Analyze results AND update refinement_log_<program_stem>_<file_ext>.json incrementally (MANDATORY after every run).
+   - Extract errors, queries made (from previous iteration's STEP 4), read current input file content.
+   - Append new iteration entry to JSON array.
+   - If success → verify required block → FINAL STEP; if error and iterations left → 3; else → FINAL STEP.
+3. Read program file → generate {query_num} error-based queries → retrieve for each (one at a time).
+   - Track all queries made - they will be included in JSON update in STEP 2 of next iteration.
+4. Read relevant query results → plan fixes → edit_file.
+5. Return to step 1 (JSON will be updated incrementally in step 2 of next iteration).
+6. When done: verify JSON is complete → FINAL STEP → STOP.
+
+**CRITICAL REMINDERS**
+- **Always** start by running the program.
+- **CRITICAL REQUIREMENT: The final program file MUST include the input block indicated by the filename**
+  * If filename contains "basis" → MUST have %basis block
+  * If filename contains "cosmo" → MUST have COSMO-related blocks
+  * If filename contains "geometry" → MUST have geometry block
+  * If filename contains "keywords" → MUST have keywords in ! line
+  * If filename contains "scf" → MUST have %scf block
+  * If filename contains "output" → MUST have %output block
+  * **This is a MANDATORY requirement - check this before considering refinement complete.**
+- **On errors:** 
+  * You MUST retrieve from orca-manual (generate queries and call retrieve tools)
+  * Track all queries made for the JSON output
+  * Extract all error messages for the JSON output
+  * Then fix using both error feedback and retrieved RAG results
+- **After each iteration:**
+  * Track: iteration number, queries made, errors encountered
+  * Read the input file content after fixes (or after success) for the `new_input` field
+  * Verify the required input block (from filename) is still present
+- **Final output:** ONE JSON file with array of all iterations, each containing iteration_num, queries_made, errors_of_software, and new_input.
+- **Re-run** after each fix; iterate until the verifier runs without errors AND contains the required input block, or MAX_ITERATIONS is reached.
+
+**Start now. Run the program, use error feedback and queried results to improve the input, and execute run_orca after each fix until ORCA accepts it without errors. Update the JSON file incrementally after each iteration in STEP 2.**

@@ -1,0 +1,288 @@
+-----------------------------------------------------------------------------------------------
+Overall Goal
+-----------------------------------------------------------------------------------------------
+Generate executable, practical *native input files* that reproduce (or best-effort approximate)
+the computational results of a solid-state / periodic condensed-matter research paper using the
+provided information.
+
+This workflow may target one or more periodic electronic-structure packages, selected ONLY from
+the input field "software_packages" (examples: Quantum ESPRESSO, VASP, Yambo).
+
+“Sketch-mode” emphasis (MANDATORY):
+- The output MUST be syntactically valid and best-effort runnable as-is for every package you
+  actually emit inputs for, assuming required pseudopotentials / potentials and directories exist.
+- If the paper omits required parameters (including geometry/cell), you MAY make reasonable guesses
+  to keep the workflow runnable, but you MUST disclose every guess (see “Uncertainty + guessing policy”).
+- You MUST consult the local documentation/library via MCP before writing any input blocks.
+
+-----------------------------------------------------------------------------------------------
+[Input]
+-----------------------------------------------------------------------------------------------
+You are given:
+
+1) plan
+   A detailed plan describing currently available information for reproducing the calculations:
+   - Intended calculation steps (relaxations, phonons, NEB, band structure, GW/BSE, optics, etc.)
+   - Theoretical methods/models used (XC functional, DFT+U, SOC, vdW, etc.)
+   - Constraints/approximations/expectations
+   - Post-processing needed to recreate the target subplot/table
+
+2) summary of the calculation setup
+   A concise description of:
+   - Computation types (relax/vc-relax, scf, nscf, DOS, bands, phonons, NEB, GW/BSE, optics, etc.)
+   - Levels of theory and physical approximations (XC, DFT+U, SOC, vdW, etc.)
+   - Known numerical settings (k-mesh, cutoffs, smearing, convergence thresholds, supercells, etc.)
+
+3) subplot_name
+   The figure/table element being reproduced.
+
+4) software_packages
+   The ONLY packages you are allowed to generate inputs for (e.g., ["qe_manual","vasp_manual","yambo_manual"]).
+
+-----------------------------------------------------------------------------------------------
+[Package selection rule (MANDATORY)]
+-----------------------------------------------------------------------------------------------
+- You MUST generate inputs ONLY for packages explicitly listed in "software_packages".
+- If multiple DFT engines are listed (e.g., QE and VASP) and the plan/paper does not uniquely specify
+  which one was used for a given step, generate BOTH alternatives, clearly separated by file headers,
+  and mark the non-paper choice with GUESS.
+- If Yambo is listed and MBPT/optics (GW/BSE/dielectric) is required, include a DFT-to-Yambo
+  preparation stage. Prefer the interface explicitly stated in the plan/paper; otherwise consult MCP.
+  If the interface is still unclear, choose a conservative default pathway and mark as GUESS.
+
+-----------------------------------------------------------------------------------------------
+[Coding language constraint]
+-----------------------------------------------------------------------------------------------
+The “coding language” is the native input syntax of the selected package(s):
+- Quantum ESPRESSO: pw.x / ph.x / neb.x input syntax
+- VASP: INCAR / POSCAR / KPOINTS (POTCAR assumed available externally)
+- Yambo: yambo input-file syntax
+
+You are NOT allowed to use general-purpose programming languages (Python/Julia/C++/etc.).
+Do NOT output wrappers, scripts, or pseudocode.
+
+Notes:
+- It is acceptable to include required CLI glue commands ONLY as comments inside code_content
+  (e.g., conversion/initialization commands between steps), as long as they do not break parsers.
+- Any CLI commands must be clearly marked as comments and must not appear inside namelists/variable blocks.
+
+-----------------------------------------------------------------------------------------------
+[MCP usage: REQUIRED pre-lookup]
+-----------------------------------------------------------------------------------------------
+Before generating any input blocks, you MUST use MCP to retrieve relevant guidance from the local library.
+
+Local library note:
+- Prior RAG/manual lookups are stored as JSON files named after specific questions.
+- These files contain questions + retrieved results (examples/rules/keywords).
+
+Allowed MCP usage:
+1) You MAY use MCP to read ONLY from the designated reference-project folder(s) storing the prior
+   retrieval JSON results.
+2) You are NOT allowed to browse unrelated directories/files.
+3) You are NOT allowed to write/modify/append/move/delete any files.
+
+Use MCP especially for:
+- Required keyword groups and minimal runnable templates per calculation type and per package.
+- Best-practice defaults (cutoffs, smearing, convergence knobs, k-mesh conventions).
+- Package-specific syntax for SOC/noncollinear, DFT+U, vdW, dipole corrections (slabs), Coulomb truncation (if relevant).
+- QE↔Yambo (or other supported) interface requirements: consistent prefixes/outdirs, wavefunction saving, band counts, NSCF needs.
+- Yambo: minimal variable sets for GW/BSE/optics; screening/self-energy choices; k/q meshes; frequency treatments.
+
+If a needed detail is not found via MCP, proceed using the guessing policy and record the ambiguity.
+
+-----------------------------------------------------------------------------------------------
+[Sketch-mode definition for periodic solids]
+-----------------------------------------------------------------------------------------------
+A “sketch workflow” means:
+- The workflow is complete and runnable in structure (even if some inputs are guessed).
+- Every emitted input block is self-contained and syntactically valid for its package.
+
+Minimum completeness expectations (package-specific):
+
+A) Quantum ESPRESSO (pw.x / ph.x / neb.x), when used:
+- Each pw.x input contains at minimum:
+  &CONTROL / &SYSTEM / &ELECTRONS (and &IONS / &CELL when applicable)
+  ATOMIC_SPECIES, ATOMIC_POSITIONS, CELL_PARAMETERS (or ibrav + celldm/a,b,c), and K_POINTS
+  Reasonable ecutwfc/ecutrho, smearing/occupations, and convergence thresholds
+- Each ph.x/neb.x input is complete for the requested task (assuming required preceding databases exist).
+
+B) VASP, when used:
+- Provide a complete set for each step:
+  INCAR (all required tags), POSCAR (structure), KPOINTS (sampling).
+  POTCAR is assumed available externally and is not generated.
+- Use step-specific settings (e.g., relaxation vs static vs band/DOS runs) with valid VASP tag syntax.
+
+C) Yambo, when used:
+- Each Yambo input file is complete for the requested task (GW/BSE/optics), assuming required
+  Yambo databases exist.
+
+
+-----------------------------------------------------------------------------------------------
+[DEFINT OUTPUT]
+-----------------------------------------------------------------------------------------------
+
+A) The output must be specified inthe format with suffix ".input" or ".inp"
+
+
+-----------------------------------------------------------------------------------------------
+[Uncertainty + guessing policy (MANDATORY)]
+-----------------------------------------------------------------------------------------------
+If any required information is missing from the paper AND cannot be found via MCP (including geometry):
+1) Choose a conservative, widely used default or a physically reasonable guess that keeps the input runnable.
+2) Mark the guess inside the input using native comments with the tag "GUESS:".
+3) Add a matching entry in "remaining_unclear_factors" with:
+   - item: what is missing/unclear
+   - why_it_matters: impact on reproducibility/accuracy/physical meaning
+   - needed_to_resolve: the exact missing information needed
+   - assumption_used: the explicit guess you used (NOT null)
+
+Priority for choosing guessed values:
+paper-stated values > MCP/library guidance > community defaults > conservative best-practice guess
+
+Hard rules:
+- You MUST NOT leave required fields blank.
+- You MUST NOT output “TODO” placeholders for required parameters.
+- You MAY guess geometry/cell ONLY if missing; the guessed geometry MUST still be syntactically valid.
+
+Comment conventions for GUESS tags (use the correct one per block):
+- QE: lines starting with "!"
+- Yambo: lines starting with "#"
+- VASP: use an explicit comment field where valid (e.g., POSCAR/KPOINTS first line comment;
+  in INCAR, place "GUESS:" as an inline trailing comment if supported by the documented syntax).
+
+Geometry guessing rules (when needed):
+- If structure is unknown, provide a minimal plausible periodic cell and atomic basis consistent with
+  composition and any symmetry/prototype hints; label as GUESS.
+- If the paper references a known prototype (e.g., rock-salt, perovskite, wurtzite), use that prototype
+  with a typical lattice constant guess; label as GUESS.
+- If dimensionality is known (bulk vs 2D slab), include vacuum for 2D slabs (e.g., 15–20 Å) as GUESS.
+
+-----------------------------------------------------------------------------------------------
+[Instructions: input-file generation]
+-----------------------------------------------------------------------------------------------
+You will generate one combined multi-step workflow containing multiple native input files, as clearly separated blocks.
+
+Multi-step workflows (MANDATORY rules):
+1) Clear separation of steps/files
+   - Each computational step must be a separate input file OR a clearly separated block.
+   - Use explicit headers that include the intended executable and filename, using native comments.
+
+   QE header example:
+   ! Step 1: VC-Relax (pw.x) | FILE: step1_vc-relax.in
+
+   Yambo header example:
+   # Step 5: G0W0 (yambo)    | FILE: step5_gw.in
+
+   VASP header examples (use per-file conventions):
+   - POSCAR: first line is a comment; include step + filename there
+   - KPOINTS: first line is a comment; include step + filename there
+   - INCAR: include "SYSTEM = ..." describing step + filename
+
+2) Self-consistency of each step
+   - Each step must be executable standalone for its package (complete keywords + structure + sampling).
+   - If a step depends on a previous one (e.g., GW after NSCF), include the dependency as commented glue commands.
+
+3) Correct dependency wiring between steps (especially DFT → MBPT)
+   - Keep identifiers consistent across DFT steps (e.g., QE prefix/outdir; VASP directory conventions).
+   - If Yambo is used, include the required DFT preparation step(s) and initialization commands as comments
+     (e.g., p2y/yambo initialization), based on MCP guidance.
+
+4) No cross-program syntax
+   - Inside a QE block, only QE syntax is allowed.
+   - Inside a Yambo block, only Yambo syntax is allowed.
+   - Inside each VASP file block, only that file’s native format is allowed.
+   - CLI commands must be comments and must not be embedded inside namelists/variable blocks.
+
+5) No incomplete blocks
+   - Every block must be runnable (given external potentials and directories exist).
+   - If a critical detail is missing, use a disclosed GUESS and record it in remaining_unclear_factors.
+
+-----------------------------------------------------------------------------------------------
+[Coverage expectations (periodic DFT/DFPT + common beyond-DFT)]
+-----------------------------------------------------------------------------------------------
+For each relevant method requested by the plan/paper, include the necessary inputs for the chosen package(s):
+
+Ground-state / structure:
+- XC functional and variants; vdW corrections; magnetism; noncollinear + SOC; symmetry constraints
+- DFT+U settings (species/orbitals, U/J, double counting) if applicable
+- Pseudopotential/potential assumptions (UPF for QE; POTCAR assumed for VASP)
+- Cutoffs and convergence thresholds; k-point sampling rules; smearing/occupations
+- Structural relax settings: force/stress thresholds; cell constraints
+
+Lattice dynamics / pathways (if relevant):
+- Phonons (DFPT or finite displacement): q-mesh, LO–TO, Born charges (if needed)
+- NEB/string: images, climbing image, springs, convergence thresholds
+
+Excited-state / MBPT / optics (if relevant):
+- GW and/or BSE: band ranges, screening cutoff, self-energy parameters, frequency treatment
+- Optical spectra: broadening, spectral range, meshes; starting-point consistency with DFT
+
+If any of these are not applicable to the target subplot, do not include them.
+
+-----------------------------------------------------------------------------------------------
+[REQUIRED: Learned facts + remaining unclear factors]
+-----------------------------------------------------------------------------------------------
+In addition to executable input blocks, you MUST return two extra fields in the output JSON:
+
+A) "learned_facts"
+- Concise list of concrete actionable facts learned from MCP lookups that affected your inputs
+  (syntax rules, required keyword groups, best practices, constraints).
+
+B) "remaining_unclear_factors"
+- List unresolved ambiguities after MCP lookup.
+- Each entry MUST include:
+  - item
+  - why_it_matters
+  - needed_to_resolve
+  - assumption_used (null if none, otherwise the explicit GUESS used)
+
+-----------------------------------------------------------------------------------------------
+[Output format]
+-----------------------------------------------------------------------------------------------
+Return a JSON object parsable by json.loads() with exactly these keys:
+
+{
+  "subplot_name": "...",
+  "code_type": "qe_yambo",
+  "learned_facts": [
+    "..."
+  ],
+  "remaining_unclear_factors": [
+    {
+      "item": "...",
+      "why_it_matters": "...",
+      "needed_to_resolve": "...",
+      "assumption_used": null
+    }
+  ],
+  "code_content": "..."
+}
+
+- subplot_name:
+  The subplot/result identifier from the plan (figure/table element being reproduced).
+
+- code_type:
+  Must be exactly: "inputs for periodic electronic-structure packages (QE/VASP/Yambo)".
+
+- code_content:
+  A single plain-text string containing the full workflow content:
+  - Multiple QE and/or VASP and/or Yambo input files separated by native headers with explicit FILE names
+  - Each block executable standalone (copy-paste runnable), assuming referenced potentials and directories exist
+  - Any required CLI glue steps included only as comments
+
+Do NOT include markdown fences.
+
+-----------------------------------------------------------------------------------------------
+[Response constraints]
+-----------------------------------------------------------------------------------------------
+- Return ONLY the single JSON object (no extra prose).
+- Use EXACT keys:
+  - "subplot_name"
+  - "code_type"
+  - "learned_facts"
+  - "remaining_unclear_factors"
+  - "code_content"
+- Put assumptions/guesses ONLY in:
+  - "remaining_unclear_factors" (assumption_used), and/or
+  - native comments inside "code_content" using "GUESS:" tags.
+- Ensure each step block is executable standalone (given referenced external files exist).

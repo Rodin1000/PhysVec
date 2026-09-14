@@ -1,0 +1,71 @@
+[... end of page 723 ...]
+cientscanbepre-tabulated. ThisisnormallydoneinaCIrunatthebeginningoftherun. However,
+inICE-CIitmayhavetoberepeatedseveraldozentimesandforlargenumbersofopenshells(say14),theprocess
+istimeandmemoryconsuming.
+In order to ease the computational burden, we have provided a small utility program that tabulates the coupling
+coefficientsforagiventotalspin𝑆 (ratherthemultiplicity𝑀 = 2𝑆 +1)andmaximumnumberofopenshells.
+Thisprogramiscalledorcacclib. Itiscalledlike:
+7.24. ApproximateFullCICalculationsinSubspace: ICE-CI 701
+
+--- Page 724 ---
+ORCAManual,Release6.0.0
+orca_cclib Mult MaxNOpen
+or-ifyouwanttospeedupthegenerationofthecclib:
+mpirun -np 4 /full_path/orca_cclib_mpi Mult MaxNOpen cclib # using 4 processes
+It will produce a series of files orcacc.el.mult.nopen (electron density coupling coefficients) and or-
+cacc.sp.mult.nopen(spin-densitycouplingcoefficients)inthecurrentdirectory. Thesefilesarebinaryfiles. They
+canbecopiedtoanarbitrarydirectory. Youinstructtheprogramtoreadthesecoefficients(ratherthantorecalculate
+themallthetime)bysettingthepathtothisdirectory:
+# My Job
+! def2-SVP Auto-ICE
+%cclib "/user/me/orca/cclib/orcacc"
+Theremainingpartofthefilenamewillbeautomaticallyaddedbytheprogram. Thisoptioncansavehumongous
+amountsoftime. Thecouplingcoefficientlibraryneedstobemadeforthedesiredmultiplicitiesonlyonce. The
+practicallimitwillbe14-16openshells. Ifyouarerunningthecalculationonaclusterusingsomesubmitscript,
+youhavetoensurethattheprovidedcclibpathisaccessiblefromthecomputenode.
+7.25 CI methods using generated code
+TheAUTOCImoduleisareplacementoftheorca_mdciforcases,wheremanualimplementationofthemethod
+wouldbetediousorpracticallyimpossible. Themoduleworkswithalltypesofreferencewavefunctionavailablein
+ORCA,i.e.,RHF,ROHF,UHFandCASSCFandoffersCIandrelatedmethods. Allthemethodsareimplemented
+incanonicalorbitalbasisandstoringallintegralsondisk.
+7.25.1 Introduction
+AllthetheoriesareobtainedbythemeansofautomatedprogrammingwithintheORCA-AGE(AutomatedGenera-
+torEnvironmentforORCA).[474,500]TheCImodulereadsintheSCFwavefunctionandoptimizesthecoefficient
+oftheCIexpansion. Conceptually,themoduleissimilartoorca_mdci,thereforetheinputandoutputdohavea
+lotincommon.
+7.25.2 Input
+AllparametersapplicabletotheAUTOCImoduleareshownbelow.
+%autoci
+# Algorithm selection
+citype # Type of the CI expansion to be applied (one of following)
+CID # Configuration Interaction with double substitutions
+CISD # Configuration Interaction with singles and doubles
+CISDT # Configuration Interaction with singles, doubles and triples
+CCD # Coupled Cluster with double substitutions
+CCSD # Coupled Cluster with single and double substitutions
+CCSDT # Coupled Cluster with single, double and triple substitutions
+CEPA(0) # Linearized CCSD
+QCISD # Quadratic CISD
+CC2 # Approximate CCSD
+CC3 # Approximate CCSDT
+CCSD[T] # CCSD with perturbative [T] correction
+CCSD(T) # CCSD with perturbative (T) correction
+CCSDT-1 # Approximate CCSDT, CCSDT-1
+CCSDT-2 # Approximate CCSDT, CCSDT-2
+CCSDT-3 # Approximate CCSDT, CCSDT-3
+(continuesonnextpage)
+702 Chapter7. DetailedDocumentation
+
+[... start of page 725 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+CCSDT-4 # Approximate CCSDT, CCSDT-4
+FIC-MRCI # Fully internally contracted MRCI
+FIC-MRCEPA(0) # Fully internally contracted CEPA(0)
+FIC-MRACPF # Fully internally contracted ACPF
+FIC-MRAQCC # Fully internally contracted AQCC
+FIC-DDCI3 # FIC-MRCI without the IJAB excitation
+FIC-MRCC # Fully internally contracted MRCC
+MP2 # Second order Moeller-Plesset perturbation theory
+MP3 # Third order Moeller-Plesset perturbation theory
+MP

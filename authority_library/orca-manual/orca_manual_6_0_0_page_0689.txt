@@ -1,0 +1,70 @@
+[... end of page 688 ...]
+ence-dedicated DCD-CAS(2) for the
+# ij->ab class
+corrorder 1 # Maximum order for the perturbative bias correction
+# (lower orders come for free)
+dcd_ritrafo false # Use RI approximation for electron repulsion integrals
+dcd_soc false # Relativistic DCD-CAS(2) with spin orbit coupling
+dcd_ssc false # Relativistic DCD-CAS(2) with direct electronic
+# spin-spin coupling
+dcd_domagfield 0 # Number of user-specified finite magnetic fields
+(continuesonnextpage)
+666 Chapter7. DetailedDocumentation
+
+--- Page 689 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+dcd_dtensor false # Calculate an effective Hamiltonian D-tensor
+dcd_nmultd 1 # The number of nonrelativistic multiplets for which the
+# D-tensor is calculated
+dcd_gmatrix false # Calculate an effective Kramers pair Zeeman g-matrix
+dcd_amatrix false # Calculate an effective Kramers pair Hyperfine A-matrix
+dcd_kramerspairs 1 # The number of Kramers pairs for which g and/or A
+# is calculated
+dcd_magnetization false # Calculate the magnetization of the molecule in an
+# external magnetic field
+dcd_cascimode false # Run relativistic calculation in CASCI mode, i.e.
+# without the dynamic correlation dressing
+dcd_natorbs false # Calculate natural orbitals for each state and write
+# them to disk
+dcd_populations false # Perform population analysis on the DCD-CAS(2) states
+end
+Note that the calculation of SSC requires the definition of an auxiliary basis set, since it is only implemented
+in conjunction with RI integrals. If dcd_magnetization is requested, the values for magnetic flux density
+and temperature to be used can be specified via the keywords MAGTemperatureMIN, MAGTemperatureMAX,
+MAGTemperatureNPoints, MAGFieldMIN, MAGFieldMAX, MAGNpoints of the rel subblock of the %casscf
+block(seesectionMagnetizationandMagneticSusceptibility). Ifthekeyworddcd_domagfieldissettoanum-
+berdifferentthan0,themagneticfieldscanbeenteredasamatrixofxyzcoordinates(inGauss),e.g.
+%casscf
+dcdcas true
+...
+dcd_domagfield 2
+dcd_magneticfields[0] = 10000, 0, 0
+dcd_magneticfields[1] = 0, 10000, 0
+end
+Furthermore,thereisthekeywordDCD_EDIAGthatwhenrunningtheDCD-CAS(2)codeinCASCImodeworks
+analogouslytothekeywordEDiaginthesocsubblockofthe%mrciblock(seesectionZero-FieldSplitting). The
+onlydifferenceisthattheenergiesshouldbeenteredinatomicunits,notinwavenumbers,e.g.
+%casscf
+...
+dcdcas true
+dcd_cascimode true
+dcd_soc true
+DCD_EDIAG[0] -2220.920028
+DCD_EDIAG[1] -2220.834377
+DCD_EDIAG[2] -2220.835871
+DCD_EDIAG[3] -2220.810290
+DCD_EDIAG[4] -2220.812293
+DCD_EDIAG[5] -2220.756732
+end
+7.21. DynamicCorrelationDressedCAS 667
+
+[... start of page 690 ...]
+ORCAManual,Release6.0.0
+7.22 Density Matrix Renormalization Group
+TheBLOCKcodeinORCAisonlyavailableontheLinuxplatform!
+BLOCKisanimplementationofthedensitymatrixrenormalizationgroup(DMRG)algorithmfromtheChangroup.
+[156,157,158,296,787]Thereferencesgivenshouldbecitedwhenusingthispartoftheprogram.
+TheDMRGisavariationalwavefunctionmethod. Itcanbeviewedas(i)anefficientmethodforstrongcorrelation
+in large complete active spaces, (ii) a brute force method to systematically approach FCI for a large number of
+electronsandorbitals,(iii)apolynomialcostroutetoexactcorrelation

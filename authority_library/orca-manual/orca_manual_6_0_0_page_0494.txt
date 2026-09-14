@@ -1,0 +1,120 @@
+[... end of page 493 ...]
+𝑑𝑟′𝜌(𝑟′)𝜙(𝑟,𝑟′) (7.36)
+C-NL
+2
+where𝜌isthetotalelectrondensity,andthedefinitionsofthekernel𝜙(𝑟,𝑟′)and𝛽 areasfollows(ina.u.):
+3
+𝜙(𝑟,𝑟′)=− (7.37)
+2𝑔𝑔′(𝑔+𝑔′)
+1
+[︂
+3
+]︂3/4
+(7.38)
+𝛽 =
+32 𝑏2
+with
+𝑔(𝑟)=𝜔 (𝑟)𝑅2+𝜅(𝑟)
+0
+𝑅=|𝑟−𝑟′|
+√︃
+⃒ ⃒∇𝜌(𝑟) ⃒ ⃒ 4 4𝜋
+𝜔 0 (𝑟)= 𝐶⃒ ⃒ 𝜌(𝑟) ⃒ ⃒ + 3 𝜌(𝑟)
+3𝜋
+[︂
+𝜌(𝑟)
+]︂1/6
+𝜅(𝑟)=𝑏
+2 9𝜋
+Intheoriginaldefinition,theshort-rangeattenuationparameter𝑏appearingin𝜅and𝛽wasfittedtotheS22set[429]
+ofnon-covalentinteractions(𝑏=5.9fortherPW86PBEGGA).Theotherparameter𝐶 =0.0093,appearingin𝜔 ,
+0
+7.4. ChoiceofComputationalModel 471
+
+--- Page 494 ---
+ORCAManual,Release6.0.0
+determinesthelong-rangebehavior,andwassettoitsoriginalvalue. OtherDFT-NLfunctionalsareconstructed
+analogously. Foradetaileddiscussionofthederivationoftheformulasandtheirphysicalmeaningandbasis,see
+thereferencesgivenabove.
+The defined energy of the non-local DFT-NL exchange-correlation functional can be computed in two ways: as
+a post-SCF addition based on a converged SCF density or in a self-consistent treatment. We take B3LYP as an
+example.
+Inourimplementationofthenon-self-consistentB3LYP-NLfunctional,aself-consistentB3LYPcomputationis
+performed as the first step. In the second step, the optimized electron density from the B3LYP computation is
+taken as input for the energy calculation of the non-local part. This procedure is invoked by the combination
+ofthekeywords!B3LYP NL.Theuseofthekeywords!B3LYP SCNLwouldrequestaself-consistenttreatmentin
+whichorbitalsanddensityareoptimizedinthepresenceofthefullB3LYP+VV10exchange-correlationpotential.
+Accordingtomanytestcalculations,anSCNLtreatmentisrarelynecessaryfornormalenergyevaluations.
+Thecomputationofthedoubleintegralgivenineq. (7.36)requiresusinganintegrationgrid,justlikefornormal
+exchange-correlationfunctionals. ThisgridisbuiltsimilarlytotheregulargridsavailableintheORCA,seeSec.
+Detailsonthenumericalintegrationgrids.
+In the following, we compute the energy of the argon dimer at a distance of 3.76 Å with the def2-TZVP basis
+setandusingtheB3LYPhybridfunctionalasanexample. Here,wechoosethenon-self-consistentvariantofthe
+DFT-NLdispersioncorrection.
+! B3LYP NL
+! def2-TZVP def2/JK RIJK
+*xyz 0 1
+Ar 0.0 0.0 0.0
+Ar 0.0 0.0 3.76
+*
+TheDFT-NLoutputforthisexampleisshownbelow:
+-------------------------------------------------------------------------------
+post-SCF DFT-NL dispersion correction
+-------------------------------------------------------------------------------
+SCF Energy: -1054.960547980
+NL Energy: 0.209449625
+SC+NL Energy: -1054.751098355
+NL done in : 0.1 sec
+-------------------------------------------------------------------------------
+----------------
+TOTAL SCF ENERGY
+----------------
+(...)
+DFT components:
+N(Alpha) : 17.999996327923 electrons
+N(Beta) : 17.999996327923 electrons
+N(Total) : 35.999992655845 electrons
+E(X) : -47.880990295917 Eh
+E(C) : -1.761924720763 Eh
+NL Energy, E(C,NL) : 0.209449624689 Eh
+E(XC) : -49.433465391991 Eh
+Here,wefindtheB3LYPtotalenergy(”SCF Energy”),thenon-localcontribution(”NL Energy”),andtheirsum
+(”SC+NL Energy”),whichisthefinaltotalenergy. Inthe“DFT components”section,thenon-localcontribution
+islistedseparately(”NL Energy, E(C,NL)”)inordertobeconsistentwiththe!SCNLoutput.
+InthecurrentversionofORCA,thereareseveralfunctionalswithpre-fitted𝑏parameters(theparameter𝐶 isnot
+changed),availableforusebythekeyword!DF NLor!DF SCNL,whereDFstandsforoneofthefollowingdensity
+472 Chapter7. DetailedDocumentation
+
+[... start of page 495 ...]
+ORCAManual,Release6.0.0
+functionalkeywords:
+DFkeyword
+(meta-)GGA
+BLYP
+PBE
+REVPBE
+RPBE
+RPW86PBE
+SCANfunc
+TPSS
+hybrid
+B3LYP
+B3LYP/G
+B3P86
+B3PW91
+mPW1PW
+PBE0
+PW1PW
+PW6B95
+REVPBE0
+REVPBE38
+TPSSh
+TPSS0
+R2SCANh(see[128])
+R2SCAN0(see[128])
+R2SCAN50(see[128])
+range-separatedhybrid
+WR2SCAN50(see[889])
+double-hybrid
+B2PLYP(see[51])
+DSD-BLYP(se

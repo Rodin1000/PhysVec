@@ -1,0 +1,91 @@
+[... end of page 492 ...]
+0.000000 0.000000 -1.400000
+*
+Asstatedabove,theparameters𝑠 ,𝑟𝑠 ,𝑠 and𝛼 canbedefinedbytheuser. Thenextexampleshowsthisalong
+6 6 8 6
+withthecallforthethree-bodycorrection(!ABC):
+! pbe svp d3zero abc
+%method
+D3S6 1.0000
+D3RS6 1.2170
+D3S8 0.7220
+D3ALPHA6 14.0
+end
+(continuesonnextpage)
+470 Chapter7. DetailedDocumentation
+
+--- Page 493 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+*xyz 0 1
+C 0.000000 0.000000 0.000000
+O 0.000000 0.000000 1.400000
+O 0.000000 0.000000 -1.400000
+*
+DFTCalculationswiththeNon-Local,DensityDependentDispersionCorrection(VV10): DFT-NL
+Accounting for the missing van der Waals (vdW, dispersion) forces in standard Kohn-Sham Density Functional
+Theory(DFT)hasbecomeessentialinmanystudiesofchemicalandphysicalelectronicstructureproblems. Com-
+monapproachesuseatompair-wiseadditiveschemessuchasthepopularDFT-D3[324,326]method,whichisalso
+availableinORCAbyinvokingthekeyword!D3(seesectionTreatmentofDispersionInteractionswithDFT-D3),
+butthesearenotself-consistent,andthusdonotcorrecttheMOsoranycomputedpropertybesidestheenergies.
+A different route is followed by the van der Waals Density Functional (vdW-DF) as pioneered by Langreth and
+Lundquist[503]. Thesemethodsuseonlytheelectrondensitytoincludesuchdispersion/correlationeffects. The
+vdW correlation functional VV10 of Vydrov and Van Voorhis [874] currently seems to be the most promising
+candidateforageneralandaccurateelectronicstructuremethod.
+WeusethetermDFT-NLforanydensityfunctionalincombinationwiththenon-localpartoftheVV10functional
+withanoptimizedparameter𝑏,whichwillbedefinedbelow. Theperformanceofthesemethodshasbeenevaluated
+inRef. [400]usingtheGMTKN30[307,308,309]databaseandtheS66set[6]. Theperformanceofweakhydrogen
+bondswereevaluatedinRef. [401].
+DFT-NL and DFT-D3 perform very similarly, but NL is to be preferred for metallic systems or when the basic
+electronic structure changes significantly (e.g. oxidations or ionizations). As a recent example, Janes and Iron
+showed that for functionals such as wB97X-V, including VV10 correlation results in very high quality reaction
+barrierswhenmetalsareinvolved[411].
+Thetotalexchange-correlation(XC)energyofVV10-typefunctionalsisdefinedineq. (7.35). Itiscomposedof
+standardexchange(X)andcorrelation(C)partsandthenon-local(NL)term, whichcovers(mainly)long-range
+dispersiveenergy:
+𝐸 DFT-NL =𝐸 (hybrid)GGA +𝐸 GGA +𝐸 VV10 (7.35)
+XC X C C-NL
+TheNLtermisgivenbythefollowingdoubleintegral:
+∫︁ [︂ 1∫︁ ]︂
+𝐸 VV10 = 𝑑𝑟𝜌(𝑟) 𝛽+ 𝑑𝑟′𝜌(𝑟′)𝜙(𝑟,𝑟′) (7.36)
+C-NL
+2
+where𝜌isthetotalelectrondensity,andthedefinitionsofthekernel𝜙(𝑟,𝑟′)and𝛽 areasfollows(ina.u.):
+3
+𝜙(𝑟,𝑟′)=− (7.37)
+2𝑔𝑔′(𝑔+𝑔′)
+1
+[︂
+3
+]︂3/4
+(7.38)
+𝛽 =
+32 𝑏2
+with
+𝑔(𝑟)=𝜔 (𝑟)𝑅2+𝜅(𝑟)
+0
+𝑅=|𝑟−𝑟′|
+√︃
+⃒ ⃒∇𝜌(𝑟) ⃒ ⃒ 4 4𝜋
+𝜔 0 (𝑟)= 𝐶⃒ ⃒ 𝜌(𝑟) ⃒ ⃒ + 3 𝜌(𝑟)
+3𝜋
+[︂
+𝜌(𝑟)
+]︂1/6
+𝜅(𝑟)=𝑏
+2 9𝜋
+Intheoriginaldefinition,theshort-rangeattenuationparameter𝑏appearingin𝜅and𝛽wasfittedtotheS22set[429]
+ofnon-covalentinteractions(𝑏=5.9fortherPW86PBEGGA).Theotherparameter𝐶 =0.0093,appearingin𝜔 ,
+0
+7.4. ChoiceofComputationalModel 471
+
+[... start of page 494 ...]
+ORCAManual,Release6.0.0
+determinesthelong-rangebehavior,andwassettoitsoriginalvalue. OtherDFT-NLfunctionalsareconstructed
+analogously. Foradetaileddiscussionofthederivationoftheformulasandtheirphysicalmeaningandbasis,see
+thereferencesgivenabove.
+The defined energy of the non-local DFT-NL exchange-correlation functional can be computed in two ways: as
+a post-SCF addition based on a converged SCF density or in a self-consistent treatment. We take B3LYP as an
+example.
+Inourimplementationofthenon-self-consistentB3LYP-NLfunctional,aself-consistentB3LYPcomputationis
+pe

@@ -1,0 +1,57 @@
+You are an expert in numerical calculations of quantum many-body physics. 
+Your task here is to generate a code integration guideline according to the input 'run' function. 
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. A 'run' function in the targetted repository. 
+    - The function is named in the form of 'run_xxx' (xxx is for the specific case). e.g. 'run_BoseHubbard1D'. 
+    - This function will be mentioned as 'run-function' in the following. 
+
+-------------------------------------------------------------------------------------------------------
+[Generation Rules]
+For ITensors/ITensorMPS usage, you MUST follow instructions bellow: 
+1. The input run-function is an integrated function in which several other functions (called element-functions) are called sequently. 
+    - Example: 
+        function run_ground_state(L, Nmax, t, U, V, mu, nsweeps, maxdim, cutoff)
+            sites = site_BoseHubbard1D(L, Nmax)
+            H = hamiltonian_BoseHubbard1D(sites, t, U, V, mu)
+            psi0 = initialstate_BoseHubbard1D(sites, 1.0)  # Density = 1 for Mott insulator
+            energy, psi = effector_dmrg_groundstate(H, psi0, nsweeps, maxdim, cutoff)
+            
+            N_op = observable_particle_number(sites)
+            total_particles = inner(psi', N_op, psi)
+            density = total_particles / L
+            
+            return energy, psi, density
+        end
+    - Your task is to generate a guideline about how to construct this run-function by the element-functions step-by-step. 
+
+2. Your generated guideline MUST satisfies:
+    - is a dict
+    - each key in this dict represents a construct level. 
+    - in each level, you include different numbers of element functions. 
+        - you MUST select element-functions from top to bottom, and you are FORBIDDEN to skip any element-function. 
+        - you are FORBIDDEN to change the order of the element-functions. 
+        - you add ONLY ONE element-function every time. You DO NOT simply include the name of the added element-function, you give a brief summary/explanation about the purpose of this part of code. 
+        - for Level-1, you MUST ONLY include ONE element-function (and the code part related). 
+        - for the highest level, you MUST include ALL element-functions (and hence the whole run function). 
+
+
+
+------------------------------------------------------------------------------------------------------
+[Output]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- "run_function": you copy the name of the run-function here. You can find the name in the input run-function definition. 
+- "integration_guideline": the generated guideline. 
+
+Example output ("```json" right before the dict and "```" right after the dict MUST be included! Beside from this dict, no other information should be output):
+```json
+{
+"run_function": "run_BoseHubbard1D",
+"integration_guideline": {
+    "Level-1": "Implement site_xxx function, which constructs a 1D Bose lattice", 
+    "Level-2": "Firstly implement site_xxx function,  which constructs a 1D Bose-Hubbard lattice. Secondly implement hamiltonian_xxx function, which defines the specific Bose-Hubbard model. ",
+    ...
+},
+}
+```

@@ -1,0 +1,67 @@
+[... end of page 306 ...]
+rticular,increasetheradialintegrationaccuracy(IntAcc).
+6.11.2 Scalar-relativistic gradients and properties
+OfthethreemodelHamiltonians,onlyX2Cfeaturesanalyticgradients. Hence,forgeometryoptimizationsthisis
+alsothepreferredmethods. ForDKHandZORA,theprogramautomaticallyswitchestotheone-centerapprox-
+imation. Thisrequiressomeattentionbytheuserssincefinalsinglepointenergiesobtainedwiththeone-center
+approximationareinconsistentwithenergiesobtainedwithoutit. Theone-centerapproximationisusuallyofsuffi-
+cientaccuracybutwehaveobservedcasesinactualapplicationswhereitleadstoclearlywronggeometries. Hence,
+westronglyrecommendtousetheX2CHamiltonianinthisrealm.
+284 Chapter6. RunningTypicalCalculations
+
+--- Page 307 ---
+ORCAManual,Release6.0.0
+Caution: Geometry optimizations with DKH and ZORA (but not X2C) automatically use the one-center
+approximation. Whencomputingrelativeenergies,donotmixenergiesfromsingle-pointcalculationswithout
+theone-centerapproximationwiththosefromgeometryoptimizationsthatdomakeuseofthisfeature.
+If relativistic calculations are used for molecular properties there is a potential mismatch between non-
+relativisticallycalculatedpropertyintegralsandtherelativisticHamiltonian. Theproceduretoremovetheseincon-
+sistenciesisreferredtoas„picturechange“. Thepicturechangeisusuallycarriedthroughtothesamelevelofap-
+proximationasthedecouplingoftherelativisticHamiltonianintotwo-componentandeventuallytoone-component
+form. Westronglyrecommendtousepicturechangeinallrelativisticpropertycalculationsandconsequently,this
+isalsothedefault. Relativisticpropertycalculationswithoutpicturechangearewildlyinaccurate,inparticularif
+operatorsareinvolvedthatcarryinversepowersoftheelectorn-nucleusdistance. Picturechangeeffectsareimple-
+mentedforDKHandX2CandtosomeextentalsoforZORA.However,theyarenotimplementedforallproperties
+thatORCAcancalculate. Pleasepayattentiontotheoutputofthepropertyintegralandpropertyprograms. Both
+programswillexplicitlystatewhichpicturechangeeffectsareincludedinthemolecularintegrals.
+%rel
+FiniteNuc true # Invoke the Gaussian finite nucleus model.
+PictureChange 1 or 2 # First or second order picture change effects.
+# Second order is potentially more accurate and more expensive.
+end
+6.11.3 Exact two-component method (X2C)
+Despitethename,theX2CmethodisimplementedinORCAonlyasascalar-relativistic,effectiveone-component
+method. The theory and implementation are discussed in Exact Two-Component Theory (X2C), together with
+appropriatereferencestociteinyourwork. Inthesimplestcase,itissufficienttoaddtheX2Csimplekeywordto
+theinputandchooseanappropriatebasisset:
+! X2C X2C-TZVPall X2C/J
+The DLU approximation,[659] discussed in DLU approximation, is the recommended way to reduce the cost of
+theX2Ctransformation,particularlyforgradient/Hessiancalculations,withminorlossofaccuracy. Itisavailable
+viathesimpleinputkeywordDLU-X2C.
+6.11.4 Douglas-Kroll-Hess (DKH)
+The first- or second-order DKH method be requested via the simple input keywords DKH1 or DKH2, respectively
+(DKHisanaliasforthelatter),togetherwithappropriatebasissets:
+! DKH DKH-def2-TZVP SARC/J
+Formostcalculations,noothersettingsareneeded. SeeTheDouglas-Kroll-HessMethod foranoverviewofthe
+underlyingtheory.
+6.11.5 ZORA and IORA
+The 0th order regular approximation (ZORA; pioneered by van Lenthe et al., see Ref. [862] and many follow
+up papers by the Amsterdam group) implementation in ORCA essentially follows van Wüllen [865] and solves
+the ZORA equations with a suitable model potential and a model density derived from accurate atomic ZORA
+calculations. SeeRelativisticOptionsforexplanationoftheModelPotandModelDenskeywordsusedtocontrol
+thesemodels. Iftherelevantprecautionsaretaken(seebelow),theuseoftheZORAorIORAmethodsisaseasy
+asintheDKH/X2Ccase. Forexample:
+6.11. RelativisticCalculations 285
+
+[... start of page 308 ...]
+ORCAManual,Release6.0.0
+! ZORA ZORA-def2-TZVP SARC/J
+# for more detail use
+%rel
+ModelPot 1,1,1,1
+ModelDens rhoZORA
+end
+Attention: TheZORAmethodishighlydependentonnumericalintegrationanditisveryimportanttopay
+attentiontothesubjectofradialintegrationaccuracy! Bydefault,fromORCA5.0weconsiderthatduringthe
+grid construction and the defaults should work very well. Only for very problematic cases, consider using a
+higher IntAccparameterorat

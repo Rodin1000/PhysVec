@@ -1,0 +1,75 @@
+[... end of page 780 ...]
+125.0 0.021172 0.019486 -22.874039 -23.258574 0.81 ( 13-> 20) ...
+13 9.945 124.7 0.001403 0.001498 6.301469 6.510456 0.79 ( 12-> 20) ...
+sTD-DFT done
+Total run time: 0.326 sec
+*** ORCA-CIS/TD-DFT FINISHED WITHOUT ERROR ***
+fL,fV,RLandRVarethelengthandvelocityexpressionsoftheoscillatorandrotatorystrengths,respectively. They
+maybeconvolutedbyaspectrumprocessingprogramtoyieldtheUV/VisabsorptionandECDspectra.
+758 Chapter7. DetailedDocumentation
+
+--- Page 781 ---
+ORCAManual,Release6.0.0
+7.30.8 Double-hybrid functionals and Doubles Correction
+TheprogramcancomputeadoublescorrectiontotheCISexcitationenergies. ThetheoryisduetoHead-Gordon
+and co-workers.[371] The basic idea is to compute a perturbative estimate (inspired by EOM-CCSD theory) to
+the CIS excited states that is compatible with the MP2 ground state energy. In many cases this is a significant
+improvement over CIS itself and comes at a reasonable cost since the correction is computed a posteriori. Of
+course,iftheCISpredictionoftheexcitedstateispoor,the(D)correction–beingperturbativeinnature–cannot
+compensateforqualitativelywrongexcitedstatewavefunctions.
+Inaddition–andperhapsmoreimportantly–the(D)correctioniscompatiblewiththephilosophyofthedouble-
+hybridfunctionalsandshouldbeusedifexcitedstatesaretobecomputedwiththesefunctionals. Theresultsare
+usuallymuchbetterthanthosefromTD-DFTsinceduetothelargefractionHFexchange,theself-interactionerror
+ismuchsmallerthanforotherfunctionalsandafterthe(D)correctiontheresultsdonotsufferfromtheoveresti-
+mationoftransitionenergiesthatusuallycomeswithincreasedamountsofHFexchangeinTD-DFTcalculations.
+Sincethecalculationswouldrequireafairlysubstantialintegraltransformationthatwouldlimitittofairlysmall
+molecules if no approximation are introduced we have decided to only implement a RI version of it. With this
+approximationsystemswithmorethan1000basisfunctionsarereadilywithinthereachoftheimplementation.
+Since one always has a triad of computational steps: MP2-CIS solution-(D) correction, we have implemented
+severalalgorithmsthatmayeachbecomethemethodofchoiceundercertaincircumstances. Thechoicedepends
+onthesizeofthesystem, thenumberofroots, theavailablemainmemoryandtheavailablediskspacetogether
+withtheI/Orateofthesystem. Theformalcostofthe(D)correctionis𝑂(𝑁5)anditsprefactorishigherthanthat
+ofRI-MP2. Inthebestcasescenario,theratelimitingstepwouldbethecalculationofthepair-contributioninthe
+“U-term”whichrequires(foraclosed-shellsystem)twicetheeffortofaRI-MP2calculationperstate.
+Theuseofthe(D)-correctionissimple. Simplywrite:
+! HF DEF2-SVP DEF2-SVP/C TightSCF
+%cis dcorr n # n=1-4. The meaning of the four algorithms is
+# explained below.
+# algorithm 1 Is perhaps the best for small systems. May use a
+# lot of disk space
+# algorithm 2 Stores less integrals
+# algorithm 3 Is good if the system is large and only a few
+# states are calculated. Saves disk and main
+# memory.
+# algorithm 4 Uses only transformed RI integrals. May be the
+# fastest for large systems and a larger number
+# of states
+end
+Table 7.23: Integral handling in various implementations of the (D) correction (i,j=occupied MOs, a,b=virtual
+MOs,Q=auxfunction;NumInt=numericalintegration).
+DCORR= 1 2 3 4
+(ia|jb)integrals Stored Stored Notstored Notstored
+(ij|ab)integrals Stored Notmade Notmade Notmade
+(ab|Q)integrals Stored Notmade Notmade Stored
+(ij|Q)integrals Stored Stored Stored Stored
+(ia|Q)integrals Stored Stored Stored Stored
+CoulombCIS From(ia|jb) From(ia|jb) From(ia|Q) From(ia|Q)
+ExchangeCIS From(ij|ab) RI-AO-direct RI-AO-direct From(ab|Q)
+XC-CIS Num. Int. Num. Int. Num. Int. Num. Int.
+V-termin(D) From(ia|jb) From(ia|jb) From(ia|Q) From(ia|Q)
+U-termin(D) From(ab|Q) RI-AO-direct RI-AO-direct From(ab|Q)
+NOTE:
+• In all three involved code sections (MP2, CIS, (D)) the storage format FLOAT is respected. It cuts down
+useofdiskandmainmemorybyafactoroftwocomparedthedefaultdoubleprecisionversion. Thelossof
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 759
+
+[... start of page 782 ...]
+ORCAManual,Release6.0.0
+accuracyshouldbenegligible;howeveritis–asalwaysinscience–bettertodoublecheck.
+• The (ab|Q) list of integrals may be the largest for many systems and easily occupies several GB of disk
+space(hencealgorithms2and3). However, thatdisk-spaceisoftenwellinvestedunlessyourunintoI/O
+bottlenecks.
+• The(ia|jb)and(ij|ab)listsofintegralsisalsoquitelargebutisrelativelyefficientlyhandled. Nevertheless,
+I/Omaybeaproblem.
+• Making the exchange contribution to the CIS residual vector in an RI-AO direct fashion becomes quite
+expensiveforalargernumberofstates. Itmaybeagoodchoiceif

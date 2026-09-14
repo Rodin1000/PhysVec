@@ -1,0 +1,70 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is Phase 3 of a 3-phase refinement workflow: modify the code based on RAG summary and error information. **DO NOT run the program - only modify the code.**
+
+**PURPOSE: Read RAG summary from Phase 2 and error information, then modify the program code to fix errors. This phase does NOT execute the program.**
+
+--------------------------------------------------------------------------
+[Input:]
+1. TYPE: {type} (e.g., boson, fermion)
+2. TOPIC: {topic} (the package/library topic, e.g., dmrg, netket, dft)
+3. PROGRAM_FILE: {program_file} (filename of the program to refine)
+4. FILE_EXT: {file_ext} (file extension: "py" or "jl")
+5. QUERY_DIR: {query_dir} (reference directory containing refine_summary.json)
+6. REFINING_DIR: {refining_dir} (working directory containing the program file)
+
+Note: The filesystem-mcp working directory is set to {refining_dir} (contains the program file).
+A reference project "query" is available, containing refine_summary.json from Phase 2.
+
+-----------------------------------------------------------------------------
+[Instruction:]
+1. **Read reference information (MANDATORY):**
+   - First call filesystem-mcp `get_reference_projects` and confirm reference "query" exists
+   - **From reference "query", read refine_summary.json:**
+     * Use filesystem-mcp `list_reference_directory(reference_name="query")` to list files
+     * Use filesystem-mcp `read_reference_file(reference_name="query", file_path="refine_summary.json")`
+     * **CRITICAL: file_path MUST be the exact RELATIVE path returned by list_reference_directory**
+   - **From working directory, read run_log (if exists):**
+     * Use filesystem-mcp `read_file(file_path="run_log_{{program_stem}}_{{file_ext}}.json")` to read error information
+     * **CRITICAL: file_path must be ONLY the filename (no directories, no `..\\`, no absolute paths)**
+     * Extract error information from "stderr" field
+   - **After reading references, analyze the information:**
+     * Understand error-fixing guidance from refine_summary.json
+     * Understand errors from run_log (stderr field)
+
+2. **Read the current program code:**
+   - Use filesystem-mcp `read_file(file_path="{program_file}")` to read the current program code
+   - **CRITICAL: file_path MUST be ONLY "{program_file}" (no directories, no `..\\`, no absolute paths)**
+   - Review the code to understand the current implementation and identify where errors occur
+
+3. **Modify the program code based on RAG summary and errors:**
+   - **CRITICAL: You MUST modify the program file in the filesystem-mcp working directory ({refining_dir})**
+   - Use filesystem-mcp `edit_file` tool to modify the program
+   - Parameter: `file_path` should be "{program_file}" (just the filename)
+   - **CRITICAL: file_path MUST be ONLY "{program_file}" (no directories, no `..\\`, no absolute paths)**
+   - Parameter: `edits` should be a list of edit operations, each containing:
+     * `old_text`: Exact text to find and replace (must match exactly, case-sensitive, whitespace-sensitive)
+     * `new_text`: Replacement text
+   - **Apply fixes based on:**
+     * Error-fixing guidance from refine_summary.json (from reference "query")
+     * Error messages from run_log (stderr field)
+     * Current code structure and context
+   - Make precise edits according to the guidance
+
+4. **CRITICAL - How to call tools:**
+   - You have REAL MCP tools available - when you call them, they EXECUTE
+   - DO NOT write "Action:", "Thought:", "Observation:" - this is NOT ReAct format
+   - DO NOT describe what you will do - DIRECTLY call the tools
+   - DO NOT use program-mcp tools - this phase does NOT run programs
+   - Wait for tool execution to complete before proceeding
+
+5. **Workflow sequence (MANDATORY):**
+   Step 1: Call filesystem-mcp get_reference_projects → list_reference_directory(reference_name="query") → read_reference_file(reference_name="query", file_path="refine_summary.json")
+   Step 2: Use filesystem-mcp read_file to read run_log_{{program_stem}}_{{file_ext}}.json (if exists)
+   Step 3: Use filesystem-mcp read_file to read the program file
+   Step 4: Analyze refine_summary.json, run_log errors, and current code
+   Step 5: Use filesystem-mcp edit_file to modify the program code based on the analysis
+   Step 6: STOP (do NOT run the program)
+
+**Start executing the workflow NOW. Read references, analyze errors, and modify the code (do NOT run the program).**
+

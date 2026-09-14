@@ -1,0 +1,89 @@
+[... end of page 1088 ...]
+efinallytransformtheMOcoefficients
+bythefollowingtransformation:
+c =S+1/2U−1c
+𝐿
+Fortheprojectors,operatingwiththetwoMOsiandjgives:
+⟨𝑖|𝑃 |𝑗⟩= ∑︁ ∑︁ ⟨︀ 𝜅𝐵|𝜇𝐴⟩︀⟨︀ 𝜇𝐴|𝜏𝐶⟩︀ 𝑐𝐿𝑐𝐿
+𝐴 𝐿 𝐿 𝐿 𝐿 𝜅𝑖 𝜏𝑗
+𝜇 𝐿 ∈𝐴𝜅𝐵 𝐿 𝜏 𝐿 𝐶
+∑︁ ∑︁
+= 𝛿 𝛿 𝛿 𝛿 𝑐𝐿𝑐𝐿
+𝐴𝐵 𝐴𝐶 𝜅𝜇 𝜏𝜇 𝜅𝑖 𝜏𝑗
+𝜇 𝐿 ∈𝐴𝜅𝐵 𝐿 𝜏 𝐿 𝐶
+1066 Chapter7. DetailedDocumentation
+
+--- Page 1089 ---
+ORCAManual,Release6.0.0
+∑︁
+= 𝑐𝐿𝑐𝐿
+𝜇𝑖 𝜇𝑗
+𝜇 ∈𝐴
+𝐿
+Herrmann et al. (Herrmann, C.; Reiher, M.; Hess, B.A. J. Chem. Phys. 2005, 122, 34102) give the correct
+expressionoftheexpectationvaluesforasinglespin-unrestricteddeterminant
+{︃ }︃
+∑︁ ∑︁
+⟨S S ⟩= 3𝛿 𝑃𝐴+ 𝑃𝐴
+𝐴 𝐵 4 𝐴𝐵 𝑖𝑖 ¯𝑖¯𝑖
+𝑖 ¯𝑖
+⎧ ⎫
+⎨∑︁ ∑︁ ∑︁ ∑︁ ∑︁ ∑︁ ⎬
++ 1 𝑃𝐴𝑃𝐵 + 𝑃𝐴𝑃𝐵 − 𝑃𝐴𝑃𝐵 − 𝑃𝐴𝑃𝐵 − 𝑃𝐴𝑃𝐵 − 𝑃𝐴𝑃𝐵
+4 𝑖𝑖 𝑗𝑗 ¯𝑖¯𝑖 ¯𝑗¯𝑗 𝑖𝑗 𝑖𝑗 ¯𝑖¯𝑗 ¯𝑖¯𝑗 ¯𝑖¯𝑖 𝑗𝑗 𝑖𝑖 ¯𝑗¯𝑗
+⎩ ⎭
+𝑖𝑗 ¯𝑖¯𝑗 𝑖𝑗 ¯𝑖¯𝑗 ¯𝑖𝑗 𝑖¯𝑗
+∑︁
+− 𝑃𝐴𝑃𝐵
+𝑖¯𝑗 𝑖¯𝑗
+𝑖¯𝑗
+WhichisusedintheOrcaimplementation.
+TheuseoftheLocalspin-implementationisveryeasy. Allthatisrequiredistodividethemoleculeintofragments.
+Theresthappensautomatically. Forexample,letusconsidertwonitrogenatomsatthedissociationlimit. While
+thetotalspinstateisS=0,thetownitrogenatomslocalexistinhigh-spinstates(S=3/2). Considerthefollowing
+testjob:
+! HF def2-SVP UHF TightSCF PModel
+%scf brokensym 3,3 end
+* xyz 0 1
+N(1) 0 0 0
+N(2) 0 0 1094
+*
+andtheoutput:
+-------------------
+LOCAL SPIN ANALYSIS (Loewdin* projector)
+-------------------
+(1) A.E. Clark; E.R. Davison J. Chem. Phys. (2001), 115(16), pp 7382-7392
+(2) C. Herrmann, M. Reiher, B.A. Hess J. Chem. Phys. (2005) 122, art 034102-1
+Number of fragments = 2
+Number of basis functions = 28
+Number of atoms = 2
+... Fragment AO indices were mapped
+... intra-fragment orthogonalization completed
+... Global Loewdin orthogonalizer constructed
+... Loewdin orthogonalized occupied orbitals constructed
+<SA*SB> 1 2
+----------------------------------
+1 : 3.7568
+2 : -2.2500 3.7568
+<SzA> Seff(A)
+--------------------------
+1 : 1.5000 1.5017
+2 : -1.5000 1.5017
+thusperfectlycorrespondingtotheexpectations. ThesamecanbedoneattheCASSCFlevel:
+7.56. PopulationAnalysesandControlofOutput 1067
+
+[... start of page 1090 ...]
+ORCAManual,Release6.0.0
+! HF def2-SVP UHF TightSCF PModel
+%casscf nel 6 norb 6 nroots 1 end
+* xyz 0 1
+N(1) 0 0 0
+N(2) 0 0 1094
+*
+Withtheresult:
+<SA*SB> 1 2
+----------------------------------
+1 : 3.7500
+2 : -3.7500 3.7500
+<SzA>* Seff(A)
+-------

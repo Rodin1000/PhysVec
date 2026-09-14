@@ -1,0 +1,89 @@
+[... end of page 1214 ...]
+][1],␣
+aEigenVectors[i][2]);
+˓→
+EndFor
+print( "\n a isotropic value : %.5lf\n", (aEigenValues[0]+aEigenValues[1]+aEigenValues[2])/3.
+0);
+˓→
+print( " -------------------------------------------------------\n");
+print("\n\n");
+#
+#
+# ---------------------------------------------------
+# Maybe remove unneccesary files
+# ---------------------------------------------------
+if (removeFiles) then
+sys_cmd("rm *_Compound_* *.bas* ");
+(continuesonnextpage)
+1192 Chapter7. DetailedDocumentation
+
+--- Page 1215 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+EndIf
+#
+End
+Comments
+InthisscriptwealsousethelinearalgebradiagonalizefunctionthatisavailableinCompound.
+7.60.7 Iterative optimization
+Introduction
+Thisisascriptthatwillperformageometryoptimization,thenrunafrequencycalculationandincasethereare
+negativefrequenciesitwilladjustthegeometry,basedontheHessian,andoptimizeagain.
+Filename
+iterativeOptimization.cmp
+SCRIPT
+# Author: Dimitrios G. Liakos and Franke Neese
+# Date : May/June of 2024
+#
+# *************************************** DESCRIPTION␣
+***********************************************
+˓→
+# iterative Optimization protocol to find structure with no negative
+# frequencies (e.g. real minima)
+#
+# Step 1. Run a single point calculation (we need it for the first property file)
+#
+# Step 1. Loop and perform calculations with (optimization and frequencies)
+#
+# Step 2. Check the frequencies. If there are negative ones use the hessian
+# of the appropriate normal mode to adjust the geometry
+#
+# ------ Variables to adjust (e.g. using 'with') -------------------
+Variable method = "HF"; #"HF-3c";
+Variable MaxNTries = 25; # Number of maximum tries
+Variable CutOff = -10.0; # CutOff for a negative frequency
+Variable scaling = 0.6; # Scaling factor for normal mode
+Variable NNegativeTarget = 0; # Number of negative frequencies we allow
+Variable myFilename = "xyzInput.xyz";
+Variable charge = 0;
+Variable multiplicity = 2;
+# ------------------------------------------------------------------
+# ------ Rest of variables -------------------
+Geometry myGeom;
+Variable freqs, modes;
+Variable res = -1;
+Variable NNegative = 0;
+Variable OptDone;
+# -----------------------------------------------------------
+# Perform a single point calculation. We need it for
+# the initial geometry from the property file
+# -----------------------------------------------------------
+New_Step
+!&{method}
+Step_End
+myGeom.Read();
+myGeom.WriteXYZFile(filename=myFilename);
+(continuesonnextpage)
+7.60. CompoundExamples 1193
+
+[... start of page 1216 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# -----------------------------------------------------------
+# Start a for loop over number of tries
+# ----------------------------------------------------------
+For itry From 1 To maxNTries Do
+# --------------------------------------------
+# Perform a geometry optimization/Frequency calculation
+# -----------------------------------------

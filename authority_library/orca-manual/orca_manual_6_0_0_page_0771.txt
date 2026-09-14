@@ -1,0 +1,71 @@
+[... end of page 770 ...]
+
+A B X 𝜔 0 X
+= (7.219)
+B* A* Y 0 −𝜔 Y
+TheTDAisthesameapproximationthatleadsfromRPAtoCIS(i.e. neglectoftheso-called“B”matrix,seeeq.
+(7.220)). Theresultsforverticalexcitationenergiesareusuallyverysimilarbetweenthetwoapproaches.
+AXTDA =𝜔TDAXTDA (7.220)
+748 Chapter7. DetailedDocumentation
+
+--- Page 771 ---
+ORCAManual,Release6.0.0
+Ingeneral,theelementsofmatrix“A”and“B”forsinglet-singletexcitationsinthespin-restrictedcasearegiven
+byeqs. (7.221)and(7.222).
+𝐴
+𝑖𝑎,𝑗𝑏
+=𝛿
+𝑖𝑗
+𝛿
+𝑎𝑏
+(𝜖
+𝑎
+−𝜖
+𝑖
+)+2(𝑖𝑎|𝑗𝑏)−𝑎X(𝑖𝑗|𝑎𝑏)
+(7.221)
++(1−𝑎X)(𝑖𝑎|𝑓XC|𝑗𝑏)
+and
+𝐵
+𝑖𝑎,𝑗𝑏
+=2(𝑖𝑎|𝑏𝑗)−𝑎X(𝑖𝑏|𝑎𝑗)+(1−𝑎
+𝑥
+)(𝑖𝑎|𝑓XC|𝑏𝑗). (7.222)
+Here, 𝑖,𝑗 denote occupied and 𝑎,𝑏 virtual orbitals. 𝑎X is the amount of non-local Fock exchange in the density
+functional. If𝑎X isequaltoone,eqs. (7.219)and(7.220)correspondtotheRPAandCIScase,basedonaHartree-
+Fockgroundstatedeterminant.
+TheTDAisactuallythedefaultmethodforTD-DFT,andcanbeturnedoffby:
+%tddft
+TDA false
+end
+Therearesituationswherehybridfunctionalsgivesignificantlybetterresultsthanpurefunctionalssincetheysuffer
+less from the self-interaction error. In those cases, the RIJCOSX procedure[623] [415][383] leads to very large
+speedupsinsuchcalculationsatvirtuallynolossinaccuracy[675],andisturnedonbydefaultwhenevertheSCF
+usesthattoo.
+7.30.5 Collinear Spin-Flip TDA (SF-TD-DFT)
+AnotherapproachtoobtainexcitedstatesviaCIS/TD-DFTarethesocalledspin-flipmethods(foragoodreview,
+pleasecheckref[144]). TheideaistostartfromanUHFstate,andthen“flip”oneofthealphaelectronstogenerate
+stateswith𝑀𝑆 = 𝑀𝑆 −1. Inordertodothat,welookforexcitationsfromalpha-to-betaorbitalsonly,
+𝑆𝐹 𝑈𝐻𝐹
+andthatmakestheAmatrixfromTDAevensimpler:
+𝐴𝑆 𝑖𝑎¯ 𝐹 ,𝑗¯𝑏 =𝛿 𝑖𝑗 𝛿 𝑎¯¯𝑏 (𝜖 𝑎¯ −𝜖 𝑖 )−𝑎X(𝑖𝑗|𝑎¯¯𝑏) (7.223)
+wheretheoverbarrepresentbetaorbitals,andno-overbarsalphaorbitals.
+OBS.: PleasenotethatforpureDFT(with𝑎 =0,andnoHFcontribution),theAmatrixisbasedsimplyinthe
+𝑋
+orbitalenergies,andthusitisalwaysgoodtohaveagoodamountofHFonthefunctional!
+InordertofacilitatethediscussionontheresultsonegetsfromtheSF-TDA,let’stakeacloserlookatthepicture
+representingsomepossibleexcitations:
+Fig. 7.26: Effect of the spin-flip operator on a UHF (𝑀𝑆 = 3) wavefunction. The “spin-complete” states are
+eigenvectorsofthe𝑆2operator,whilethe“spin-incomplete”arenot. Alphaandbetaorbitalsherearerepresented
+withthesameenergy,justtosimplifytheimage. Adaptedfromthepreviouslymentionedreview.
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 749
+
+[... start of page 772 ...]
+ORCAManual,Release6.0.0
+ItisimportanttonotethatnoallSF-excitationsleadtodeterminantsthatareeigenvaluesofthe𝑆2 operator. That
+means,dependingonhowmuchofthese“spinincomplete”excitationsarepresentinthefinalSF-state,thespin-
+contaminationcouldbehigh,andinthiscase,stateswith⟨𝑆2⟩≃1wouldbepredicted. Theseareundefinedstates
+withintheSFtheoryandshouldbetreatedcarefully.
+OBS.: AnySFmethodcanonlybeusedstartingfromaUHFwavefunction,withamultiplicityofatleast3!
+Firstexample: methyleneandSF-CIS
+Onesimpleexamplei

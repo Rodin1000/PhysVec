@@ -1,0 +1,64 @@
+[... end of page 230 ...]
+D), ROCIS and TD-DFT
+ORCAfeaturesamoduletoperformTD-DFT,single-excitationCI(CIS)andRPA.Themoduleworkswitheither
+closed-shell(RHForRKS)orunrestricted(UHForUKS)referencewavefunctions. ForDFTmodelsthemodule
+automaticallychoosesTD-DFTandforHFwavefunctionstheCISmodel. IftheRIapproximationisusedinthe
+SCF part it will also be used in the excited states calculation. A detailed documentation is provided in section
+ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA.
+208 Chapter6. RunningTypicalCalculations
+
+--- Page 231 ---
+ORCAManual,Release6.0.0
+GeneralUse
+Initssimplestformitisonlynecessarytoprovidethenumberofrootssought:
+! B3LYP DEF2-SVP
+%TDDFT NROOTS 10
+TRIPLETS TRUE
+END
+* int 0 1
+C 0 0 0 0.00 0.0 0.00
+O 1 0 0 1.20 0.0 0.00
+H 1 2 0 1.08 120 0.00
+H 1 2 3 1.08 120 180.00
+*
+Thetripletsparameterisonlyvalidforclosed-shellreferences. Ifchosenastruetheprogramwillalsodeterminethe
+tripletexcitationenergiesinadditiontothesinglets. Wewilldiscussmanymoreoptionsinthefollowingsections.
+Spin-Flip
+The collinear spin-flip version of CIS/TDA (always starting from an open-shell reference!) can be invoked in a
+similarmanner,using:
+%tddft
+nroots 5
+sf true
+end
+PleasecheckSec. CollinearSpin-FlipTDA(SF-TD-DFT)formoredetailsonhowtouseit,andhowtounderstand
+itsresults.
+Populationanalysis
+Ifyouwanttoprintexcited-statechargesandbondorders, youcanuseUPOPTRUEunder%TDDFTtogetthe
+analysisfromtheunrelaxeddensityand!ENGRADifyouwanttousetherelaxeddensity. Multiplestatescanbe
+indicatedbytheIROOTLISTandTROOTLISTkeywords. FormoredetailspleasecheckSec. PopulationAnalysis
+ofExcitedStates.
+UseofTD-DFTfortheCalculationofX-rayAbsorptionSpectra
+InprincipleX-rayabsorptionspectraare“normal”absorptionspectrathatarejusttakeninaspecialhigh-energy
+wavelengthrange. Duetothehighenergyoftheradiationemployed(severalthousandeV),core-electronsrather
+thanvalenceelectronsareexcited. Thishastwoconsequences: a)themethodbecomeselementspecificbecause
+thecore-levelenergiesdividerathercleanlyintoregionsthatarespecificforagivenelement. b)thewavelengthof
+theradiationissoshortthathigher-ordertermsintheexpansionofthelight-matterinteractionbecomeimportant.
+Mostnoticeably,quadrupoleintensitybecomesimportant.
+X-rayabsorptionspectracanbegenerallydividedintothreeregions: a)thepre-edgethatcorrespondstotransitions
+of core electrons into low lying virtual orbitals that lead to bound states. b) the rising edge that corresponds to
+excitations to high-lying states that are barely bound, and c) the extended X-ray absorption fine structure region
+(EXAFS)thatcorrespondstoelectronsbeingejectedfromtheabsorberatomandscatteredatneighbouringatoms.
+WiththesimpleTD-DFTcalculationsdescribedhere, onefocusestheattentiononthepre-edgeregion. Neither
+the rising edge nor the EXAFS region are reasonably described with standard electronic structure methods and
+nocomparisonshouldbeattempted. Inaddition,thesecalculationsarerestrictedtoK-edgesasthecalculationof
+L-edgesismuchmorelaboriousandrequiresadetailedtreatmentofthecoreholespinorbitcoupling.
+6.6. ExcitedStatesCalculations 209
+
+[... start of page 232 ...]
+ORCAManual,Release6.0.0
+It is clearly hopeless to try to calculate enough states to cover all transitions from the valence to the pre-edge
+region. Hence, instead one hand-selects the appropriate donor core orbitals and only allows excitations out of
+these orbitals into the entire virtual space. This approximation has been shown to be justified.[200] One should
+distinguishtwosituations: First,thecoreorbitalinquestionmaybewellisolatedandunambiguouslydefined. This
+is usually the case for metal 1s orbitals if there is only one metal of the given type in the molecule. Secondly,
+theremaybeseveralatomsofthesamekindinthemoleculeandtheirco

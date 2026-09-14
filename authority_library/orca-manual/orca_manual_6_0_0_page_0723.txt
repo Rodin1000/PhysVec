@@ -1,0 +1,75 @@
+[... end of page 722 ...]
+s for methylene and ozone (cc-pVDZ basis set, default
+parameters).
+700 Chapter7. DetailedDocumentation
+
+--- Page 723 ---
+ORCAManual,Release6.0.0
+7.24.11 The entire input block explained
+Forcompleteness,theparametersthatcanbespecifiedintheinputblockaresummarizedbelow:
+%ice
+nel 8 # number of active electrons
+norb 23 # number of active orbitals
+nroots 1 # number of roots
+mult 1 # requested multiplicity
+irrep 0 # requested irrep (buggy :-()
+tgen 1e-04 # generator threshold
+tvar -1e-7 # negative -> 1e-7*tgen
+etol 1e-06 # convergence tolerance
+icetype CFGs # The configuration based ICE-CI
+CSFs # The CSF based ICE-CI
+DETs # The CSF determinant based ICE-CI
+# algorithm details
+useMP2nat false # use MP2 natural orbitals
+useivos false # use improved virtual orbitals
+useQROs false # For UHF: use quasi-restricted MOs?
+integrals exact # exact or ri transformation
+cimaxdim 10 # max. size of expansion space in Davidson procedure
+cimode 3 # default=accelerated CI, other settings not recommended
+CSFCIwithRI 1 # 1=with RI, 0=without RI, use withour RI when norb >> nel (e.g. (30e,
+120o))
+˓→
+CIBufferLength 10240 # Size (in elements) of the buffer list. Should be increased␣
+according to
+˓→
+# the size of RI space.
+CIPSIOrbSweepWindow 1 # Use in case of large size of the S+D list and small available␣
+memory.
+˓→
+# MOs can be divided into chunks (e.g. MOblock = MO/
+CIPSIOrbSweepWindow)
+˓→
+# startup configurations(optional)
+refs { 2 2 2 2 0 }
+{ 2 2 2 0 2 }
+end
+end
+# natural orbitals with the ICE ansatz
+NatOrbs 1 # generates the .cipsi.nat GWB file containing the natural orbitals
+7.24.12 A Technical Note: orcacclib
+Weshouldfinallymentionatechnicalaspect. TheCIprocedureinICE-CIisbasedaroundtheso-calledoneparticle
+couplingcoefficients
+𝐴𝐼𝐽 = ⟨︀ 𝐼|𝐸𝑞|𝐽 ⟩︀
+𝑝𝑞 𝑝
+where 𝐴𝐼𝐽 is a coupling coefficient, 𝐼 and 𝐽 are configuration state functions (CSFs) and 𝐸𝑞 is the spin-free
+𝑝𝑞 𝑝
+excitationoperatorthatpromotesanelectronfromorbital𝑝toorbital𝑞. Thevaluesofthesecouplingcoefficients
+onlydependonthelogicalrelationshipbetweentheCSFs𝐼 and𝐽 butnotontheabsolutevaluesof𝐼,𝐽,𝑝,𝑞. In
+fact,theyonlydependonthenumberofunpairedelectronsin𝐼andthetotalspin𝑆thatbothCSFsreferto. Hence,
+prototypecoefficientscanbepre-tabulated. ThisisnormallydoneinaCIrunatthebeginningoftherun. However,
+inICE-CIitmayhavetoberepeatedseveraldozentimesandforlargenumbersofopenshells(say14),theprocess
+istimeandmemoryconsuming.
+In order to ease the computational burden, we have provided a small utility program that tabulates the coupling
+coefficientsforagiventotalspin𝑆 (ratherthemultiplicity𝑀 = 2𝑆 +1)andmaximumnumberofopenshells.
+Thisprogramiscalledorcacclib. Itiscalledlike:
+7.24. ApproximateFullCICalculationsinSubspace: ICE-CI 701
+
+[... start of page 724 ...]
+ORCAManual,Release6.0.0
+orca_cclib Mult MaxNOpen
+or-ifyouwanttospeedupthegenerationofthecclib:
+mpirun -np 4 /full_path/orca_cclib_mpi Mult MaxNOpen cclib # using 4 processes
+It will produce a series of files orcacc.el.mult.nopen (electron density coupling coefficients) and or-
+cacc.sp.mult.nopen(spin-densitycouplingcoefficients)inthecurrentdirectory. Thesefilesarebinaryfiles. They
+canbecopiedtoanarbitrarydirectory. Youinstructtheprogramtoreadthesecoefficients(ratherthantorecalculate
+themallthetime)bys

@@ -1,0 +1,84 @@
+[... end of page 183 ...]
+e case of the beta
+orbitals,theorbitalswithindexes0,1,2,3and5willbefrozen. Upto5intervals(2*5numbers)areallowed.
+#
+# Example of LSCF Calculation
+#
+! UKS B3LYP/G SVP TightSCF
+%scf
+LSCFalpha 0,4,5,6,10,10
+LSCFbeta 0,3,5,5
+end
+Forthesakeofuser-friendliness,twootherkeywordsareavailablewithintheLSCFmethod. Theycanbeusedto
+modifytheorbitalfirstguess,asreadfromthegbwfilewiththesamenameoranothergbwfilewiththe“MOInp”
+keyword.
+The“LSCFCopyOrbs”keywordallowstocopyoneorbitalintoanotherone. Theinputworksbyintervalslikethe
+LSCFalpha/LSCFbetaselections. However,beawarethatspin-uporbitalindexesrangefrom0toM-1(whereM
+6.1. SinglePointEnergiesandGradients 161
+
+--- Page 184 ---
+ORCAManual,Release6.0.0
+isthesizeofthebasisset),whilespin-downorbitalindexesrangefromMto2M-1. Inthefollowingexample,with
+M=11,theusercopiesthefifthspin-uporbitalinthefifthspin-downorbital.
+%scf
+LSCFalpha 0,4,5,6,10,10
+LSCFbeta 0,3,5,5
+LSCFCopyOrbs 4,15
+end
+Thesecondkeywordis“LSCFSwapOrbs”andallowstoswaptheindexesofsubsetsmadeoftwoorbitals. Inthe
+followingexample,stillwithM=11,theuserswapsthefifthspin-uporbitalwiththefifthspin-downorbital.
+%scf
+LSCFalpha 0,4,5,6,10,10
+LSCFbeta 0,3,5,5
+LSCFSwapOrbs 4,15
+end
+Caution: DuringtheLSCFprocedure,frozenoccupiedorbitalsenergiesarefixedat-1000Hartreesand
+frozenvirtualorbitalsenergiesat1000Hartrees. Thismeansthatthefrozenoccupiedorbitalsandthe
+frozenvirtualorbitalsareplacedrespectivelyatthebeginningandattheendoftheindexation.
+6.1.14 Adding finite electric field
+Electricfieldscanhavesignificantinfluencesontheelectronicstructureofmolecules. Ingeneral,whenanelec-
+tric field is applied to a molecule, the electron cloud of the molecule will polarize along the direction of the
+field. The redistribution of charges across the molecule will then influence the wavefunction of the molecule.
+Evenwhenpolarizationeffectsarenotsignificant, theelectricfieldstillexertsadragonthenegativelyandpos-
+itivelychargedatomsofthemoleculeinoppositedirections,andthereforeaffecttheorientationandstructureof
+the molecule. The combination of electrostatic and polarization effects make electric fields a useful degree of
+freedom in tuning e.g. reactivities, molecular structures and spectra [784]. Meanwhile, the energy/dipole mo-
+ment/quadrupolemomentchangesofthesysteminthepresenceofsmalldipolarorquadrupolarelectricfieldsare
+useful for calculating many electric properties of the system via numerical differentiation, including the dipole
+moment,quadrupolemoment,dipole-dipolepolarizability,quadrupole-quadrupolepolarizability,etc. Suchfinite
+differencepropertycalculationscanbeconvenientlydoneusingcompoundscriptsintheORCACompoundScripts
+Repository(https://github.com/ORCAQuantumChemistry/CompoundScripts/tree/main/Polarizabilities).
+InORCA,auniform(orequivalentlyspeaking,dipolar)electricfieldcanbeaddedtoacalculationviathefollowing
+keyword:
+%scf
+EField 0.1, 0.0, 0.0 # x, y, z components (in au) of the electric field
+end
+Although the keyword is in the %scf block, it applies the electric field to all other methods (post-HF methods,
+multireferencemethods, TDDFT,etc.) aswell, exceptXTBandforcefieldmethods(aswellasanymethodthat
+involvesXTBorforcefields,e.g. QM/XTBandQM/MM)forwhichtheelectricfieldcontributionsarenotimple-
+mentedandwillresultinanabort. Analyticgradientcontributionsoftheelectricfieldareavailableforallmethods
+(exceptXTBandMM)thatalreadysupportanalyticgradients,butanalyticHessiancontributionsarenot.
+Thesignconventionoftheelectricfieldischoseninthefollowingway:supposethattheelectricfieldisgeneratedby
+apositivechargeinthenegativezdirection,andanegativechargeinthepositivezdirection,thenthezcomponent
+oftheelectricfieldispositive. Thisconventionisconsistentwithmostbutnotallotherprograms[784],socare
+mustbetakenwhencomparingtheresultsofORCAwithotherprograms.
+Another important aspect is the gauge origin of the electric field. The gauge origin of the electric field is the
+point(ormoreaccuratelyspeaking,oneofthepoints-asthereareinfinitelymanysuchpoints)wheretheelectric
+potential due to the electric field is zero. Different choices of the gauge origin do not affect the geometry and
+wavefunctionofthemolecule,astheydonotchangetheelectricfieldfeltbythemolecule,buttheydochangethe
+162 Chapter6. RunningTypicalCalculations
+
+[... start of page 185 ...]
+ORCAManual,Release6.0.0
+energyofthemolecule. Thedefaultgaugeoriginisthe(0,0,0)pointoftheCartesiancoordinatesystem,butitis
+possibletochooseothergaugeorigins:
+%scf
+EFieldOrigin CenterOfMass # use center of mass
+CenterOfNucCharge # use center of nuclear charge
+0.0, 0.0, 0.0 # use given X,Y,Z as origin (default: 0,0,0)
+# in the units chosen for the coordinates (Angstrom/Bohr)
+end
+NotethedefaultgaugeoriginoftheelectricfieldisdifferentfromthedefaultgaugeoriginoftheELPROPmod-
+ule,whichisthecenterofmass. Iftheuserchoosesthecenterofmass/nuclearchargeasthegaugeoriginofthe
+electric field, the gauge origin will move as the molecule translates; this has important consequences. For ex-
+ample, in an MD s

@@ -1,0 +1,98 @@
+[... end of page 696 ...]
+an localize them in the next step)
+!cc-pvdz moread noiter
+%moinp "porphine.gbw"
+%scf
+rotate
+# Swap orbitals
+{70, 72}
+{65, 71}
+{61, 70}
+{59, 69}
+{56, 68}
+{88, 84}
+{92, 85}
+{93, 86}
+{96, 87}
+{99, 88}
+{102, 89}
+{103, 90}
+{104, 91}
+end
+end
+* xyz 0 1
+[...]
+*
+674 Chapter7. DetailedDocumentation
+
+--- Page 697 ---
+ORCAManual,Release6.0.0
+3. Afterrotatingtheorbitals, welocalizethe13occupied𝜋-orbitals. Thisisperformedusingthe orca_loc
+code. Theinputfilefollows.
+porphine_rot.gbw
+porphine_loc.gbw
+0
+68
+80
+120
+1e-3
+0.9
+0.9
+1
+4. Afterlocalizingtheoccuppiedorbitals,welocalizethe11virtual𝜋-orbitalsusingtheorca_loccodeonce
+again. Theinputfilefollows.
+porphine_loc.gbw
+porphine_loc2.gbw
+0
+81
+91
+120
+1e-3
+0.9
+0.9
+1
+5. After these steps are complete, we run a CASSCF-DMRG calculation. The standard input file is shown
+below
+!cc-pvdz moread pal4
+%moinp "porphine_loc2.gbw"
+%MaxCore 16000
+%casscf nel 26
+norb 24
+nroots 1
+CIStep DMRGCI
+end
+* xyz 0 1
+[...]
+*
+7.23 Relativistic Options
+The relativistic methods in ORCA are implemented in a fairly straightforward way but do require some caution
+fromtheuser. Theoptionsarecontrolledthroughthe%relblockwhichfeaturesthefollowingvariables:
+%rel
+#----------------------------------------------------
+# Basic scalar relativistic method
+#----------------------------------------------------
+method DKH # Douglas-Kroll-Hess
+ZORA # ZORA (numerical integration)
+IORA # IORA (numerical integration)
+IORAmm # IORA with van Wuellens
+# modified metric
+X2C # Exact two-component
+# ---------------------------------------------------
+(continuesonnextpage)
+7.23. RelativisticOptions 675
+
+[... start of page 698 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# Choice of the model potential for ALL methods
+# ---------------------------------------------------
+ModelPot VeN, VC, VXa, VLDA, VPC
+# Flags for terms in the model potential
+# =0 not included =1 included
+# WARNING: default is currently 1,1,1,1 for ZORA and IORA and
+# VeN = nuclear attraction term
+# VC = model Coulomb potential (ZORA/IORA only)
+# VXa = model Xalpha potential (ZORA/IORA only)
+# VLDA= VWN-5 local correlation model pot. (ZORA/IORA only)
+# VPC = external point charges (X2C only)
+Xalpha 0.7 # default value for the X-Alpha pote

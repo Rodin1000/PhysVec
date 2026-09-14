@@ -1,0 +1,73 @@
+[... end of page 1148 ...]
+tep = Range/numOfSteps;
+Variable distance;
+Variable Energies[numOfSteps];
+Variable simpleInput = "BP86 def2-SVP def2/J";
+For index from 0 to numOfSteps-1 Do
+Distance = distStart+ index*Step;
+New_Step
+!&{simpleInput}
+(continuesonnextpage)
+1126 Chapter7. DetailedDocumentation
+
+--- Page 1149 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+*xyz 0 1
+H 0.0 0.0 0.0
+H 0.0 0.0 &{Distance}
+*
+Step_End
+Alias currStep;
+print("Current step: %d\n", currStep);
+Read Energies[index] = JOB_INFO_TOTAL_EN[currStep];
+EndFor
+print("--------------------------------------\n");
+print(" Compound Printing \n");
+print("%s %12s %16s \n","Step", "Distance", "Energy");
+print("--------------------------------------\n");
+For index from 0 to numOfSteps - 1 Do
+Distance = distStart + index*Step;
+print("%4d %12.4lf %16.8lf \n", index, Distance, Energies[index]);
+EndFor
+End
+NOTEfortheAliascommandthefinal‘;’isoptional.
+Break
+Break canbeusedinsideaFor loop(see(seeFor))whenoneneedstobreaktheloopundercertainconditions.
+Thesyntaxisthefollowing:
+Syntax:
+ForvariableFromStartvalueToEndvalueDo
+commands
+break;
+commands
+EndFor;
+NOTEbothversionsbreakandbreak;arelegal.
+What break actually does is to set the running index of the loop to the last allowed value and then jump to the
+EndFor(seeEndFor)).
+Example:
+#
+# This a script to check Compound 'break' command
+#
+%Compound
+print(" Test for 'break'\n");
+print(" It should print 0, 1 and 2\n");
+for i from 0 to 6 Do
+if (2*i > 4) then
+break
+endIF
+print("index: %d\n", i);
+EndFor
+print("Continued outside the 'for' loop\n");
+End
+7.59. CompoundMethods 1127
+
+[... start of page 1150 ...]
+ORCAManual,Release6.0.0
+CloseFile
+WhenafileisopenedinCompoundusingtheopenFilecommand(seeOpenFile),thenitmustbeclosedusingthe
+closeFilecommand.
+Syntax:
+closeFile(file);
+fileisthefilepointercreatedfromtheopenFilecommand. ForanexampleseeparagraphOpenFile.
+Continue
+Continue can be used inside a For loo

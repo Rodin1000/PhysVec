@@ -1,0 +1,83 @@
+[... end of page 83 ...]
+H 1.10490 0.53546 -2.67754
+H 0.76075 -0.97866 -1.78666
+H -0.95741 1.54560 -2.07170
+H -1.42795 -0.17916 -2.14055
+H -2.34640 0.48232 -0.04725
+H -1.04144 1.66089 0.28731
+H -0.66608 -1.39636 0.31480
+H -0.89815 -0.39708 1.78184
+H 1.25353 0.59796 1.63523
+(continuesonnextpage)
+61
+
+--- Page 84 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H 1.57519 -1.01856 0.93954
+H 2.58691 0.40499 -0.67666
+H 1.39420 1.71843 -0.44053
+*
+BasisSetOptions
+ThereisextensiveflexibilityinthespecificationofbasissetsinORCA.Firstofall,youarenotonlyrestrictedtothe
+basissetsthatarebuiltinORCA,butcanalsoreadbasissetdefinitionsfromfiles. Inadditionthereisaconvenient
+waytochangebasissetsoncertaintypesofatomsoronindividualatoms. Considerthefollowingexample:
+# CuCl$_4$
+! HF
+%basis basis "SV"
+newGTO Cl "DUNNING-DZP" end
+end
+* xyz -2 2
+Cu 0 0 0 newGTO "TZVPP" end
+Cl 2.25 0 0
+Cl -2.25 0 0
+Cl 0 2.25 0
+Cl 0 -2.25 0
+*
+InthisexamplethebasissetisinitializedastheAhlrichssplitvalencebasis. Thenthebasissetonallatomsoftype
+ClischangedtoSVPandfinallythebasissetforonlythecopperatomischangedtothemoreaccurateTZVPPset.
+Inthiswayyoucouldtreatdifferentatomtypesorevenindividualgroupsinamoleculeaccordingtothedesired
+accuracy. Similarfunctionalityregardingper-elementorper-atomassignmentsexistsforeffectivecorepotentials.
+MoredetailsareprovidedinsectionChoiceofBasisSet.
+Sometimesyouwillliketochangetheorderingofthestartingorbitalstoobtainadifferentelectronicstateinthe
+SCFcalculation. Forexample,ifwetakethelastinputandwanttoconvergetoaligandfieldexcitedstatethiscan
+beachievedby:
+! HF SV
+%basis newGTO Cl "Dunning-DZP" end
+end
+%scf rotate {48, 49, 90, 1, 1} end
+end
+* xyz -2 2
+Cu 0 0 0 newGTO "TZVPP" end
+Cl 2.25 0 0
+Cl -2.25 0 0
+Cl 0 2.25 0
+Cl 0 -2.25 0
+*
+Inthepresentcase,MO48isthespin-downHOMOandMO49thespin-downLUMO.Sincewedoacalculation
+onaCu(II)complex(d9electronconfiguration)thebetaLUMOcorrespondswiththe“SOMO”. Thus,bychanging
+theSOMOweproceedtoadifferentelectronicstate(inthiscasetheonewiththe“hole”inthe“d ”orbitalinstead
+𝑥𝑦
+ofthe“d ”orbital). TheinterchangeoftheinitialguessMOsisachievedbythecommandrotate {48, 49,
+𝑥2−𝑦2
+90, 1, 1}end. Whatthisdoesisthefollowing: taketheinitialguessMOs48and49androtatethembyanangle
+of90degree(thisjustinterchangesthem). Thetwolastnumbersmeanthatbothorbitalsarefromthespin-down
+set. ForRHForROHFcalculationstheoperatorwouldbe0. Ingeneralyouwouldprobablyfirsttakealookatthe
+initialguessorbitalsbeforechangingthem.
+62 Chapter6. RunningTypicalCalculations
+
+[... start of page 85 ...]
+ORCAManual,Release6.0.0
+SCFandSymmetry
+Uponrequest,theSCFprogramproducessymmetryadaptedorbitals. ThiscanhelptoconvergetheSCFonspecific
+excitedstatesofagivensymmetry. TakeforexamplethecationH O+: Wefirstrunthesimplejob:
+2
+! SVP UseSym
+* xyz 1 2
+O 0.000000 0.000000 0.068897
+H 0.000000 0.788011 -0.546765
+H 0.000000 -0.788011 -0.546765
+*
+TheprogramwillrecognizetheC symmetryandadapttheorbitalstothis:
+2𝑣
+--------------

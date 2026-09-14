@@ -1,0 +1,68 @@
+[... end of page 1121 ...]
+nmr will attempt to extract 𝑔, 𝐷, and 𝐴 tensors from the property file
+BaseName.property.txtandusethesetocalculatetheparamagneticshieldingsat298K.Notethatthisfunction-
+alityisnotsophisticated: itonlyrecognizesEPRtensorscalculatedbytheEPRNMRmodule. Amoreflexibleway
+tousethecapabilitiesoforca_pnmristomanuallyeditthetextfileBaseName.pnmr.inpandthenrunorca_pnmr
+withthe-ioption. Thefilehasthefollowingformat:
+7.58. UtilityPrograms 1099
+
+--- Page 1122 ---
+ORCAManual,Release6.0.0
+3 # Spin multiplicity (2S+1)
+298 # Temperature range minimum [K]
+300 # Temperature range maximum [K]
+1 # Temperature step [K]
+1 # Have g-tensor? 0 or 1
+2.004689 0.000000 -0.000000 # Cartesian g-tensor
+0.000000 2.004689 0.000000 # (if available)
+0.000000 0.000000 2.002123
+1 # Have D-tensor? 0 or 1
+-0.514341 -0.000000 -0.000000 # Cartesian D-tensor [cm-1]
+-0.000000 -0.514341 -0.000000 # (if available)
+-0.000000 -0.000000 1.028682
+2 # Number of A-tensors
+0O # First nucleus (index,element)
+-72.358765 # Prefactor [MHz]
+-78.989514 0.000000 -0.000000 # Cartesian A-tensor [MHz]
+0.000000 -78.989514 -0.000000
+-0.000000 -0.000000 53.478581
+1O # Next nucleus (index,element)
+-72.358765 # Prefactor [MHz]
+-78.989516 0.000000 -0.000000 # Cartesian A-tensor [MHz]
+0.000000 -78.989516 -0.000000
+-0.000000 -0.000000 53.478580
+# ... Further nuclei
+• 𝐷 and 𝑔 tensors are optional: if they are not supplied orca_pnmr will assume the isotropic free-electron
+valuefor𝑔,and𝐷tobezero.
+• 𝐴tensors,however,arenotoptional;withoutan𝐴tensorforagivennucleus,thepNMRshieldingcannot
+becalculatedforthatnucleus.
+7.58.15 orca_lft
+StartingfromORCA5.0,ORCAfeaturesastandalonemultipletprogramcalledorca_lft.
+• Orca_lftisdedicatedtoexperimentalspectroscopists.
+• ItisabletorunanarbitrarynumberofspectrasimulationswithemphasisonX-rayspectroscopies.
+Inthissectionwebrieflyreviewthemainfunctionalitiesoforca_lft. Foramoredetaildescriptionandexamples
+discussionpleaserefertotheorca_lfttutorial.
+1. The goal is to be able to compute various spectroscopic properties of a given LFT center (ion) if one can
+manuallypasstheinformationof1and2electronintegralsintheformofe.gthediagonalelementsofthe
+LFTmatrix(LFTorbitalenergies)andtheSlater-CondonparametersofagivenLFTproblem.
+2. Thiswillallowtheexperimentalspectroscopisttoperformamassiveamountofspectrasimulationsduring
+theactualrunningexperiments
+AnyLFTproblemcanbeparametrizedinterms1-electron𝐻 matrixelementsandtheSlater-Condon2-electron
+𝐿𝐹
+integralsF0,F2,F4,(ortheRacahparametersA,B,C,ofthed-shell). (Figure: Fig.7.70)
+Fig.7.70: DefinitionofanLFTproblemintermsof1-electronenergiesandSlaterCondonparameters(SCPs)
+Inpracticeweneedtoknow:
+1100 Chapter7. DetailedDocumentation
+
+[... start of page 1123 ...]
+ORCAManual,Release6.0.0
+1. theSlaterCondonparametersofagivenLFTproblem
+2. the𝐻 matrixelementsortherelationofthem(ligandfieldsplitting,10Dq,AOMmodel)
+𝐿𝐹
+Thedesignworkflowoforca_lftisthefollowing:
+• SolvetheGeneralCIproblemonaUser-specifiedLFTproblem: TypeofIon,NumberofElectrons,Involved
+Shells,InvolvedMultiplicities
+• ComputeAllpossibleNonRelativisticStates/Multiplicity
+• ComputetheTransitionDensitiesontheCSFsbasis
+• ComputetheNeededtransitionMomentsinthegivenLFTbasis(i.e. 2p3d)
+• ComputevariouspropertieswithemphasistoX-rayspectroscopy(ABS,XAS,XES,R

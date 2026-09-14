@@ -1,0 +1,93 @@
+[... end of page 733 ...]
+e redundant internal coordinates
+# Cartesian coordinates are not affected by invertConstraints
+invertConstraints true # step type control
+Step qn # quasi-Newton step
+rfo # Rational function step (Default for !Opt)
+prfo # partitioned RFO step (Default for !OptTS)
+# Step size control
+MaxStep 0.3 # maximum step length in internal coordi-
+# nates. Default is 0.3 au
+Trust -0.3 # Initial trust radius. Default is -0.3 au
+# Trust <0 - use fixed trust radius
+(continuesonnextpage)
+7.26. GeometryOptimization 711
+
+--- Page 734 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# of size -trust. I.e. -0.3 means fix
+# the trust radius at 0.3
+# Trust >0 - use trust radius update. I.e. 0.3
+# means start with trust radius 0.3 and update
+# the trust radius after each optimization step
+# Convergence tolerances. Note that the calculation is
+# only converged if all criteria are fullfilled. All
+# values given are default values.
+TolE 5e-6 # Energy change (a.u.)
+TolRMSG 1e-4 # RMS gradient (a.u.)
+TolMaxG 3e-4 # Max. element of gradient (a.u.)
+TolRMSD 2e-3 # RMS displacement (a.u.)
+TolMaxD 4e-3 # Max. displacement (a.u.)
+# keyword for frequently used sets of convergence thresholds
+Convergence normal # Default
+loose
+tight
+ProjectTR false # project translation and rotation
+# default is false. MUST be false for
+# redundant internals
+end
+KeywordsforthecontroloftheHessian(especiallyimportantfortheTSoptimization):
+# initial Hessian control
+inhess unit # unit matrix
+Read # Hessian in a .hess file (e.g. from
+# a previous NumFreq run), this command
+# comes with the following:
+InHessName "filename.hess" # filename of
+# Hessian input file
+# a previous .opt file
+# or a previous .carthess file
+# these only for redundants
+Lindh # Lindh's model Hessian
+Almloef # Almloef's model Hessian
+Schlegel # Schlegel's model Hessian
+Swart # Swart and Bickelhaupt(cid:96)s model Hessian
+XTB0 # GFN0-xTB Hessian
+XTB1 # GFN1-xTB Hessian
+XTB2 # GFN2-xTB Hessian
+GFNFF # GFN-FF Hessian
+# additional Hessian control for TS optimization
+Calc_Hess true # calculate the Hessian numerically at the beginning
+Recalc_Hess 5 # calculate the Hessian at the beginning
+# and recalculate it after 5,10,.. cycles
+Hybrid_Hess {0 1 5 6} end # calculates a Hybrid Hessian
+# exact calculation for
+# atoms 0, 1, 5 and 6; works also
+# with Calc_Hess and Recalc_Hess
+NumHess true # requests use of numerical Hessian
+# modification of the internal Hessian
+Hess_Internal
+{A 3 2 1 D 2.0} # define a diagonal Hessian value of
+# 2 Eh/Bohr2 for the angle between
+# atoms 3 2 1. This can also be done for
+# bonds, dihedrals and Cartesian
+# coordinates.) The Hessian values of
+# multiple coordinates can be modified
+reset 5 # reset the modified internal Hessian values
+# after 5 cycles
+(continuesonnextpage)
+712 Chapter7. DetailedDocumentation
+
+[... start of page 735 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# The following is only recommended
+# after a relaxed surface scan
+# in this example of the scan coordinate B 1 0;
+# "basename.004.xyz" contains the optimized structure
+# of the scan step with highest energy
+{B 1 0 C}
+XYZ1 "scanName.003.xyz" # the xyz-files of the structures
+XYZ2 "ScanName.005.xyz" # next to the highest energy point
+GBW1 "ScanName.003.gbw" # the gbw-files of the structures
+GBW2

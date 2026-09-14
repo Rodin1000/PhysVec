@@ -1,0 +1,104 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is Phase 2 of a 3-phase refinement workflow: generate queries based on ORCA/DFT runtime errors and retrieve ORCA manual documentation to help fix the ORCA input file.
+
+**PURPOSE: Generate queries from Phase 1 ORCA stdout/stderr, retrieve relevant ORCA manual sections, and write a Q-A summary JSON that Phase 3 will use to correct the ORCA input (.inp). The summary is ACCUMULATIVE: append new Q-A to existing {output_summary_file} if it exists; otherwise create it.**
+
+--------------------------------------------------------------------------
+[Input:]
+1. TYPE: {type} (a concise scientific classification label for this ORCA/DFT task—covering the calculation kind, material/system class, and the physics/wavefunction focus you care about, e.g., molecule_dft_fermion, td_dft_excited_states, spin_polarized_magnetism, relativistic_soc, solvation_cpcm_smd, periodic_solid_state.)
+2. TOPIC: {topic} (the package/library topic, e.g., dft_qc)
+3. LIBRARY_NAMES: {library_names} (MUST include "orca-manual"; retrieval is FORBIDDEN from libraries not listed)
+4. QUERY_NUM: {query_num} (number of queries to generate)
+5. QUERY_DIR: {query_dir} (directory where retrieval results will be saved)
+6. OUTPUT_SUMMARY_FILE: {output_summary_file} (filename for final summary JSON; ACCUMULATIVE across refinement iterations)
+7. STDERR_INFO: {stderr_info} (ORCA stderr from Phase 1)
+8. STDOUT_INFO: {stdout_info} (ORCA stdout from Phase 1; may contain warnings, parser messages, or hints)
+
+**CRITICAL:** Use the ORCA output above (STDERR_INFO and STDOUT_INFO) to identify errors and generate queries. If STDERR_INFO or STDOUT_INFO show "(EMPTY - you MUST read...)" or are empty, you MUST do Step 0 first.
+
+Note: The filesystem-mcp and retrieve-mcp working directories are both set to {query_dir}.
+IMPORTANT: For filesystem-mcp `read_file` / `save_file`, ALWAYS use ONLY filenames (relative paths).
+DO NOT include {query_dir} in file_path. DO NOT use `..\\` or absolute paths.
+
+-----------------------------------------------------------------------------
+[Instruction:]
+0. **If STDERR_INFO and STDOUT_INFO are empty or show "(EMPTY - you MUST read...)":**
+   - BEFORE any other step: call filesystem-mcp `list_directory` in the query directory, then `read_file` on the run_log JSON file (e.g. run_log_*_iter*.json or run_log_*_inp.json).
+   - Use the "stderr" and "stdout" fields from that JSON as the ORCA output for all following steps. Do NOT proceed to query generation without real error/output content.
+
+1. **Understand ORCA issues from STDOUT and STDERR:**
+   - Analyze BOTH {stdout_info} (stdout) and {stderr_info} (stderr) from the ORCA run.
+   - Stderr: errors, abort messages. Stdout: warnings, parser output, "unknown keyword", "deprecated", block/syntax hints, etc.
+   - Analyze the ORCA error/warning messages in both
+   - Identify failing keyword(s), input block(s) (e.g., `%scf`, `%basis`, `%cpcm`, `%tddft`), geometry, or syntax issues.
+   - Categorize: unknown keyword, deprecated feature, malformed block, missing `end`, invalid option value, incompatible methods/basis/auxbasis, version-specific restriction, etc.
+   - CRITICAL: Only treat as “needs fixing” what is evidenced by STDOUT_INFO and/or STDERR_INFO (and CODE_RULES if present).
+
+2. **Generate {query_num} ORCA-manual queries based on stdout+stderr:**
+   - Base queries on actual ORCA text in STDOUT_INFO and STDERR_INFO (quote key tokens).
+   - Each query <20 words, focused on ONE error aspect. Each covers a DISTINCT aspect (no overlap).
+   - Incorporate {type} and {topic} where useful (e.g., “{type} {topic}”, method family, solvation/relativistic/TDDFT)
+   - Query focus examples: “replacement for deprecated keyword X”, “correct syntax for %block Y”, “valid options for keyword Z”, “how to set parameter P”, “common causes of error message ...”
+
+3. **Retrieve documentation using retrieve-mcp (MANDATORY - MUST use orca_manual):**
+   - For EACH query, you MUST call `retrieve_hybrid` with package="orca_manual"
+   - **CRITICAL REQUIREMENT: EVERY query MUST use package="orca_manual"**
+     * You MUST use: `retrieve_hybrid(query="...", package="orca_manual")` for EVERY single query
+     * You are FORBIDDEN to skip retrieval for any query
+     * You are FORBIDDEN to use packages other than "orca_manual" unless "orca_manual" is not in LIBRARY_NAMES (which should never happen)
+   - Tool parameters (MANDATORY format):
+     * For EVERY query: `retrieve_hybrid(query="<your query>", package="orca_manual")`
+     * DO NOT use retrieve_hybrid_multi unless explicitly required for cross-package comparison
+     * If "orca_manual" is in LIBRARY_NAMES (which it should be), use ONLY "orca_manual"
+   - Tools AUTOMATICALLY save results to JSON files in {query_dir}
+   - Call tools ONE AT A TIME: retrieve → wait for confirmation → next retrieve → ...
+   - **VERIFICATION: After all retrievals, you must have exactly {query_num} JSON files from retrieve_hybrid calls, all using package="orca_manual"**
+
+4. **Read all retrieval results using filesystem-mcp:**
+   - After all retrievals complete, call filesystem-mcp `list_directory` to list files in the current working directory ({query_dir})
+   - Identify the JSON files saved by retrieve-mcp tools
+   - Use filesystem-mcp `read_file(file_path="...")` to read each retrieval result JSON file
+   - CRITICAL: file_path must be ONLY the filename (no directories, no `..\\`, no absolute paths)
+
+5. **Generate summary JSON file for Phase 3 (ACCUMULATIVE):**
+   - **If {output_summary_file} already exists** in the working directory: read it first (list_directory → read_file). It contains Q-A pairs from prior refinement iterations. You will APPEND new Q-A to this array.
+   - **If it does not exist:** create a new JSON array.
+   - Create/update a summary file named {output_summary_file} in the current working directory ({query_dir})
+   - Purpose: Phase 3 uses this as the reference to correct the ORCA input. The file is ACCUMULATIVE across iterations (old + new Q-A).
+   - For EACH *new* query (from this run's stdout+stderr), extract and refine an actionable answer from the retrieval result:
+     * Provide the correct ORCA syntax (keywords/blocks) and valid option values
+     * If a feature is deprecated/removed, provide the supported replacement (e.g., COSMO → CPCM/SMD, as applicable)
+     * Include any required block structure details (start/end, nesting, ordering) and minimal example lines
+     * Keep answers tightly scoped: ONLY what is needed to resolve the corresponding STDOUT_INFO/STDERR_INFO issue
+     * **CRITICAL: When providing fix guidance, emphasize that all comments in the input file MUST be preserved as they are. Do NOT delete or modify any comment lines.**
+   - Format: JSON array with Q-A pairs, each containing:
+     * "query": the original query text
+     * "answer": refined, actionable fix guidance grounded in ORCA manual content
+   - **ACCUMULATIVE SAVE:** Output JSON = existing Q-A array (if any) + new Q-A pairs from this run. Use filesystem-mcp `save_file(file_path="{output_summary_file}", content=<json>)` to write the combined array.
+   - CRITICAL: file_path must be ONLY "{output_summary_file}" (no directories, no `..\\`, no absolute paths)
+   - **MANDATORY VERIFICATION: After saving, you MUST verify the file was created by calling `list_directory` and confirming "{output_summary_file}" exists. If it doesn't exist, retry save_file with corrected file_path/content.**
+
+6. **CRITICAL - How to call tools:**
+   - You have REAL MCP tools available - when you call them, they EXECUTE and return results
+   - DO NOT write "Action:", "Thought:", "Observation:" - this is NOT ReAct format
+   - DO NOT describe what you will do - DIRECTLY call the tools
+   - Wait for tool execution to complete before proceeding
+
+7. **Workflow sequence (MANDATORY):**
+   Step 1: Analyze errors/warnings from STDOUT_INFO and STDERR_INFO
+   Step 2: If {output_summary_file} exists → read it (accumulative). Generate {query_num} queries based on current ORCA stdout+stderr, incorporating {type} and {topic}
+   Step 3: For EACH of the {query_num} queries → call retrieve_hybrid(query="...", package="orca-manual") → wait for result → next query
+   Step 4: After all {query_num} retrievals complete → list_directory → read_file(...) for all retrieval JSON files
+   Step 5: Write ACCUMULATIVE summary Q-A JSON (existing + new) → save_file(file_path="{output_summary_file}")
+   Step 6: VERIFY the file was created → list_directory → confirm "{output_summary_file}" exists → if missing, retry save_file
+   **CRITICAL: You must make exactly {query_num} retrieve_hybrid calls, each with package="orca-manual" (with hyphen, NOT underscore)**
+   **CRITICAL: You MUST successfully create "{output_summary_file}" - Phase 3 depends on this file existing**
+
+8. **Example summary JSON format:**
+   [
+     {{"query": "ORCA error: 'COSMO not supported' replacement in {type} {topic}?", "answer": "ORCA removed COSMO; use CPCM/SMD. Example: ..."}},
+     {{"query": "ORCA 'Unknown identifier Grid7' correct keyword or block syntax?", "answer": "Grid settings belong to ... Use ..."}}
+   ]
+
+**Start executing the workflow NOW.**

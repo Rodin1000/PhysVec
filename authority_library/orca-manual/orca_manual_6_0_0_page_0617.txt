@@ -1,0 +1,78 @@
+[... end of page 616 ...]
+ateNEVPT2values. Alternatively,thesediagonal
+energies can be taken from the input file similarly how it is described for the MRCI module. A more detailed
+documentationispresentedintheMRCIpropertysection.
+Note:
+• TheprogramdoesNOTprinttheSOCmatrixbydefault! ToobtainSOCMEsattheCASSCF/NEVPT2/...
+levels,pleasesetthePrintLevelintherelblocktoatleast2.
+594 Chapter7. DetailedDocumentation
+
+--- Page 617 ---
+ORCAManual,Release6.0.0
+7.15.4 1- and 2-shell Abinitio Ligand Field Theory
+StartingfromORCA5.0,ORCAfeaturesa1-and2-shellAILFTmodule. AILFTwasoriginallydevelopedfor1-
+shelld-andf-LFTproblems[57,490]. InORCA5.0anextenionto2-shellAILFTprovidesaccesstoallcommon
+1-and2-shellAILFTproblemsnamely:
+1. ValenceLFTproblems,involvingthed-,f-,sp-,ds-anddf-shells
+2. CoreLFTproblemsinvolvingthesd-,pd-,sf-andpf-shellsbecomereadilyaccesible.
+RequestinganCAS-AILFTcalcultionwithingtheCASSCFmoduleisprovidedintwoways:
+1. ThroughtheActOrbsxOrbskeywords(e.g. xOrbs: dOrbs,fOrbsspOrbs,psOrbs,sdOrbs,dsOrbs,sfOrbs,
+fsOrbs,pdOrbs,dpOrbs,pfOrbs,fpOrbs,dfOrbs,fdOrbs)
+2. ThroughtheLFTCasekeywordwhereparticularLFTproblemscanberequestedaccordingtotheabove1-
+and2-shellcombinations(e.g. LFTCase3d,LFTCase4f,LFTCase1s3d,LFTCase2p3d...)
+Note: that the LFTCase keyword overwrites the ActOrbs keyword and as it will be discussed below provides a
+particularutilitythatsimplifiesthe2-shellAILFTinput.
+AsimpleinputfortheNi2+𝑑8ionisprovidedbelow:
+!NEVPT2 def2-SVP def2-SVP/C
+%casscf
+nel 8
+norb 5
+ActOrbs dOrbs
+mult 3,1
+nroots 10,15
+rel
+dosoc true
+end
+end
+*xyz 2 3
+Ni 0.0000000000 0.0000000000 0.0000000000
+*
+TheprogrammaftertheCASSCFconvergencewillundergofewimportantstepsandsanitycheckswhichinvolve
+1. anOrbitalpurificationstep
+2. aPhasecorrectionofthe1and2-electronintegrals
+Itisthenimportantfromtheuser’sperspectivetomonitorthatthesestepshavebeensuccesfullyperformed. The
+relevantpartsoftheoutputareprovidedbelow:
+---- THE CAS-SCF GRADIENT HAS CONVERGED ----
+--- FINALIZING ORBITALS ---
+---- DOING ONE FINAL ITERATION FOR PRINTING ----
+--- d-orbitals (depends on the molecular axis frame)
+L-Center: 0 Ni [0.000, 0.000, 0.000]
+--- The active space contains 5 d Orbitals : OK
+Setting 9 active MO to AO dz2 (11)
+Setting 10 active MO to AO dxz (12)
+Setting 11 active MO to AO dyz (13)
+Setting 12 active MO to AO dx2y2 (14)
+Setting 13 active MO to AO dxy (15)
+--- Canonicalize Internal Space
+--- Canonicalize External Space
+...
+(continuesonnextpage)
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 595
+
+[... start of page 618 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+=============================
+AB INITIO LIGAND FIELD THEORY
+d8 configuration
+2 CI blocks
+MOs 9 to 13
+=============================
+Metal/Atom center is atom 0
+orbital phases = 1.0 1.0 1.0 1.0 1.0
+Metal/Atom d-orbital parts of active orbitals
+Shell 7
+9 10 11 12 13
+dz2 : 0.848522 -0.000000 0.000000 -0.000000 -0.000000
+dxz : -0.000000 0.848522 0.000000 -0.000000 0.000000
+dyz : 

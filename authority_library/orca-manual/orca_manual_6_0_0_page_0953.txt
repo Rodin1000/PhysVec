@@ -1,0 +1,90 @@
+[... end of page 952 ...]
+00
+C 1.187413 2.850514 0.000000
+H 0.254386 3.420500 0.000000
+H 2.116263 3.422544 0.000000
+C 0.002759 -0.680006 0.000000
+H 0.966741 -1.204366 0.000000
+C -1.187413 -1.500920 0.000000
+(continuesonnextpage)
+930 Chapter7. DetailedDocumentation
+
+--- Page 953 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H -2.146702 -0.969304 0.000000
+C -1.187413 -2.850514 0.000000
+H -0.254386 -3.420500 0.000000
+H -2.116263 -3.422544 0.000000
+*
+The file containing the Hessian matrix ("hexatriene_bp86.hess") was obtained from the BP86/TZVP fre-
+quency calculations. The keyword NMList provides the list of the normal modes to be scanned. These should
+beonlythetotallysymmetricvibrations, sinceonlytheycanbesignificantforabsorptionandresonanceRaman
+spectrawithintheconstraintsoftheIMDHOmodel. TheFreqAlterflagindicateswhetherfrequencyalterations
+are assumed in the post-scan potential surface fit. The Parameter EnStep is used to select the appropriate step
+duringthescancalculations. Thevalueischosensuchthattheaverageenergychange(inEh)inbothdirectionsis
+notlessthanthisparameter.
+7.45 One Photon Spectroscopy
+7.45.1 General Description
+Introduced in Orca 6.0, the One Photon Spectroscopy (OPS) tool now takes charge of computing one-photon
+absorption (OPA), emission (OPE), and natural electric circular dichroism (ECD) intensities. In each of these
+processes,theintensityofthespectrum(𝐼(𝜔))resultingfromatransitionbetweenaninitialstate𝐼andafinalstate
+𝐽 isdeterminedbythesquaremodulusofthetransitionmoment𝑇 =⟨Ψ |𝐻ˆ |Ψ ⟩,weightedbythepopulations
+𝐼𝐽 𝐼 1 𝐽
+𝑁 and𝑁 ofstates𝐼 and𝐽,respectively.
+𝐼 𝐽
+𝐼(𝜔)=𝛼𝜔−1 ∑︁ (𝑁 𝐼 −𝑁 𝐽 )|⟨Ψ 𝐼 |𝐻ˆ 1 |Ψ 𝐽 ⟩|2𝛿(𝐸 𝐽𝐼 ±(cid:125)𝜔) (7.256)
+𝐼𝐽
+Inthiscontext,𝛼representsapositiveconstant,𝜔 standsforphotonenergy,andtheexpressionfor𝐻ˆ hingeson
+1
+thespecificmodelingofphoton-matterinteraction.
+7.45.2 Light-matter interaction approaches
+Expressionsfor𝐻ˆ canbederivedfromdifferenttheoreticalperspectives. Forinstructionalpurposes,aclassical
+1
+electrodynamic approach is adopted here. By representing light classically through a vector potential (A) and a
+scalarpotential(𝜑=0),theradiationcanbeintegratedintotheHamiltonianthatmodelsthemolecularsystem.
+𝑁 𝑁
+𝐻ˆ = ∑︁ 1 [︁ pˆ − 𝑒 A(r ,𝑡) ]︁2 − 𝑔𝑒 ∑︁ B(r ,𝑡)·𝑠ˆ +𝑉(r ,...,r )
+2𝑚 𝑖 𝑐 𝑖 2𝑚 𝑐 𝑖 𝑖 1 𝑁
+𝑒 𝑒
+𝑖=1 𝑖=1
+Bydisregardingthecouplingbetweenthemagneticfieldoflightandthespin,aswellasthe|A|2term,andapplying
+Fermi’sgoldenrule,anexpressionfor⟨Ψ |𝐻ˆ |Ψ ⟩undertheFull-SemiclassicalLight-Matterinteractioncanbe
+𝐼 1 𝐽
+derived.
+𝑁
+𝑒 ∑︁ [︁ ]︁
+𝑇𝐹𝐹𝑀𝐼𝑂 = ⟨𝐼|ℰ · 𝑒𝑖k·r𝑖pˆ |𝐽⟩ (7.257)
+𝐼𝐽 𝑚 𝑖
+𝑒
+𝑖=1
+Where𝑇𝐹𝐹𝑀𝐼𝑂 isthetransitionmomentfortheFull(semiclassical)Field-MatterInteractionOperator,while𝑘
+𝐼𝐽
+andℰ denotethewaveandpolarizationvectorsdescribingthelight,respectively. r andp representtheposition
+𝑖 𝑖
+andlinearmomentumoperatorsforthei-thelectron.
+Proceedingfromeq. (7.257)andapproximatingtheexponentialtermof𝑇𝐹𝐹𝑀𝐼𝑂 withaTaylorexpansionyields
+𝐼𝐽
+variousordersofinteraction. Thezerothorder(𝑇[0])resultsintheelectricdipolarvelocityformulation(𝐸𝐷𝑣𝑒𝑙),
+𝐼𝐽
+which,uponmolecularorientationalaveraging,yields:
+∑︁ 2
+𝜖 (𝜔)= (𝑁 −𝑁 ) |⟨Ψ |𝑝ˆ|Ψ ⟩|2𝛿(𝐸 ±(cid:125)𝜔) (7.258)
+𝐸𝐷𝑣𝑒𝑙 𝐼 𝐽 3𝐸 𝐼 𝐽 𝐽𝐼
+𝐽𝐼
+𝐼𝐽
+7.45. OnePhotonSpectroscopy 931
+
+[... start of page 954 ...]
+ORCAManual,Release6.0.0
+ForexactsolutionsoftheHamiltonian,orintheoriesthatsatisfytheHypervirialtheorembyconstruction,equation
+(7.258)canbetransformedintoalengthformulation(7.259)(𝐸𝐷𝑙𝑒𝑛).
+𝜖 (𝜔)= ∑︁ (𝑁 −𝑁 ) 2𝐸 𝐽𝐼|⟨Ψ |𝜇ˆ|Ψ ⟩|2𝛿(𝐸 ±(cid:125)𝜔) (7.259)
+𝐸𝐷𝑙𝑒𝑛 𝐼 𝐽 3 𝐼 𝐽 𝐽𝐼
+𝐼𝐽
+Theabsorptionspectrumunder𝐸𝐷 𝑙𝑒𝑛and𝐸𝐷 𝑣𝑒𝑙formulationscanbeobtainedinallOrcamodulesutilizing
+OPSbysettingDoDipoleLengthandDoDipoleVelocitytotrue,respectively,inthecorrespondingmodule’sblock.
+Theresultsarethenpresentedinthefollowingtables:
+-----------------------------------------------------------------------------------------------
+-----
+˓

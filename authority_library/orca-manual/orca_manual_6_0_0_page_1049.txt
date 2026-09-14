@@ -1,0 +1,90 @@
+[... end of page 1048 ...]
+ quadrupole-quadrupole polarizability
+freq_r 0.00 # purely real frequency (default: static calculation)
+freq_i 0.00 # purely imaginary frequency (default: static calculation)
+Solver CG # CG(conjugate gradient)
+# other options: DIIS or POPLE(default)
+MaxDIIS 5 # max. dimension of DIIS method
+Shift 0.2 # level shift used in DIIS solver
+Tol 1e-3 # Convergence of the CP-SCF equations
+# (norm of the residual)
+(continuesonnextpage)
+1026 Chapter7. DetailedDocumentation
+
+--- Page 1049 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+MaxIter 64 # max. number of iterations in CPSCF
+PrintLevel 2
+Origin CenterOfElCharge # center of electronic charge
+CenterOfNucCharge # center of nuclear charge
+CenterOfSpinDens # center of spin density
+CenterOfMass # center of mass (default)
+N # position of atom N (starting at 0)
+X,Y,Z # explicit position of the origin
+# in coordinate input units (Angstrom by default)
+end
+Themostefficientandaccuratewaytocalculatethepolarizabilityanalyticallyistousethecoupled-perturbedSCF
+method. Themosttimeconsumingandleastaccuratewayisthenumericalsecondderivativeofthetotalenergy.
+Notethatthenumericaldifferentiationrequires: (a)tightlyorevenverytightlyconvergedSCFcalculationsand(b)
+carefullychosenfieldincrements. Ifthefieldincrementistoolargethenthetruncationerrorwillbelargeandthe
+valueswillbeunreliable. Ontheotherhand,ifthefieldincrementistoosmallthenumericalerrorassociatedwith
+thefinitedifferencedifferentiationwillgetunacceptablylargeuptothepointwherethewholecalculationbecomes
+useless.
+7.54.2 The Spin-Orbit Coupling Operator
+Severalvariantsofspin-orbitcouplingoperatorscanbeusedforpropertycalculations[610]. Theyarebasedon
+effectivepotentialandmean-fieldapproaches,andhavevariousparametersthatcanbeselectedviathe%relblock.
+NotethattheSOMFoperatordependsonthedensitymatrix,sotheoperatoritselfcandifferforexamplebetween
+aCASSCFandanMRCIcalculation.
+Note: ThedefaultshaveslightlychangedinORCA5.0,seeSOCFlagsinthefollowing.
+%rel
+# ---------------------------------------------------
+# SPIN ORBIT COUPLING OPERATORS
+# ---------------------------------------------------
+SOCType 0 # none
+1 # effective nuclear charge
+2 # mean-field with atomic densities read from
+# disk; similar to SOCType=4
+3 # mean-field/effective potential (default)
+4 # mean-field with atomic densities generated
+# on the fly; see bellow
+# ---------------------------------------------------
+# Flags for construction of potential; operative
+# only for SOCType 3.
+# ---------------------------------------------------
+SOCFlags 1,4,3,0 # default if nothing is specified
+# 1,3,3,0 default if RI is applied and AuxJ available
+# e.g. when using !RIJCOSX (default for DFT) or !RIJONX
+# Flag 1 = 0 - do not include 1-electron terms
+# = 1 - do include 1-electron terms
+# Flag 2 = 0 - do not include Coulomb terms
+# = 1 - compute Coulomb terms fully numeric
+# = 2 - compute Coulomb term seminumeric
+# = 3 - compute Coulomb term with RI approx
+# = 4 - compute Coulomb term exactly
+# Flag 3 = 0 - do not include exchange terms
+# = 1 - do include local X-alpha exchange
+# the X-Alpha parameter can be chosen via
+# % rel Xalpha 0.7 (default)
+# = 2 - same as 1 but with sign reversed
+# = 3 - exchange via one-center exact
+(continuesonnextpage)
+7.54. CalculationofProperties 1027
+
+[... start of page 1050 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# integrals including the spin-other
+# orbit interaction
+# = 4 - all exchange terms full analytic
+# (this is expensive)
+# Flag 4 = 0 - do not include DFT local correlation
+# terms
+# = 1 - do include local DFT correlation (here
+# this is done with VWN5)
+#
+SOCMaxCenter 4 # max. number of centers to include in
+# the integrals (not fully consistently
+# implemented yet; better leave equal to 4)
+# The following simple input equivalents can also be used:
+# S

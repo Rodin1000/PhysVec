@@ -1,0 +1,76 @@
+[... end of page 470 ...]
+shownabove.
+OneimportantthingtonoteisthateachincreaseofIntAccby1,adds15radialpointstotheatomicgrids,asinthe
+previousgridscheme. TheseIntAccvalueswereoptimizedforeachangulargrid:
+Table7.2: OptmimizedIntAccparametersfortheexchange-correlationandCOSXgrids.
+AngularGrid XC COSX
+1 4.004 3.816
+2 4.004 4.020
+3 4.159 4.338
+4 4.388 4.871
+5 4.629 4.871
+6 4.959 4.871
+7 4.959 4.871
+448 Chapter7. DetailedDocumentation
+
+--- Page 471 ---
+ORCAManual,Release6.0.0
+After defining the number of radial points 𝑛 , the actual radial grid is then defined from a Gauss-Chebyschev
+𝑟
+quadratureusingtheso-calledM3mappingfromTreutlerandAhlrich:
+𝜉 2
+𝑟 = 𝑙𝑛
+𝑙𝑛2 1−𝑥
+where−1≤𝑥≤1,andthecenterofthegrid(𝑥=0)coincideswiththevalueof𝜉. These𝜉parameterswerealso
+optimizedforeachatomtype.
+7.3.3 The DEFGRIDs
+Withallthatinmind,wecannowpresenthowtheDEFGRIDsarebuiltintermsoftheirAngularGridschemeand
+IntAccs,whichdefinetheangularandradialpartsoftheatomicgrids. MoredetailscanbefoundinRef.[383].
+Table7.3: AngulargridschemesusedindifferentpartofORCA.TheXCandCOSXgridsareseparatedbyaslash,
+andmultipleCOSXgridschemesareseparatedbyacomma.
+GridName SCF TD-DFT CP-SCF MP2grad MP22ndder
+DEFGRID1 3/1,1,2 1/1 1/1 3 1
+DEFGRID2 4/1,2,3 1/1 1/1 4 4
+DEFGRID3 6/2,3,4 3/2 3/2 5 4
+OBS.: The IntAccs for TD-DFT and the CP-SCF are 3.467 for the XC and 3.067 for the COSX instead of the
+default. Thesenumberscanbesmallerhereandweexploitthistoincreasetheoverallspeed.
+From the Table 7.3 one can see, for instance, that the default SCF XC grid now is defined from AngularGrid 4
+(withnoextrafinalintegrationintheend). ThedefaultCOSXusesa1,2,3gridscheme,withtheCOSXthirdgrid
+beingusedtoupdatetheenergyaftertheSCFconvergesandforthegradients.
+7.3.4 Other details and options
+Thenewadaptivepruning. Thecurrentpruningschemeuseslowergridsclosetothenucleus,andfarawayfrom
+thebondingregion. However,ifthebasissethaspolarizedfunctionsclosetothenuclei,ordiffuseGaussians,this
+mightnotbesufficient.
+To improve the grids for these problems, we now use by default an adaptive pruning scheme, that detects core-
+polarization,diffusefunctionsandsteepbasissetorbitalsbyanalyzingtheexpectationvalueofthepositionopera-
+tor,⟨𝑟ˆ⟩,andfixesthegridaccordingly. Thiscanincreasethegridsinthesecasesby10-20%,butgivessignificantly
+betterresults. Tousethenon-adaptivescheme,justset%METHODGRIDPRUNINGOLDPRUNINGEND.For
+acompletelyunprunedgrid,setGRIDPRUNINGtoUNPRUNED.
+A simpler Gauss-Legendre angular grid. By setting AngularGrid to 0, instead of using the Lebedev grids, a
+Gauss-Legendreangulargridwillbebuilt,assuggestedbyTreutlerandAhlrich[849]. Thenumberof𝜃pointsis
+definedas0.4𝑛 bydefaultandthenumberof𝜑pointsischosenastoavoidcrowdingclosetothepoles.
+𝑟
+ThesegridsareingenerallessefficientthantheLebedev’s,butareusefulifoneneedstoconstructextremelylarge
+gridsforspecificapplications.
+TheSpecialGridOption. Sometimes, youmightwanttoincreasetheintegrationaccuracyforsomeatomsthat
+needspecialcare,whileitisnotnecessarytoenlargethegridgenerally. ORCAprovidesyouwithabasicmecha-
+nismtoincreasetheradialintegrationaccuracyforafewatomswhilemaintainingthechosengridforallothers.
+%METHOD
+# a maximum of 64 assignments can be made
+# in = 0 : no changes are made
+# in > 0 : the grid will be changed for all atoms with
+# atomic number=in to IntAcc=an
+# in < 0 : only the specific n'th atom will have its
+# IntAcc value changed to an
+(continuesonnextpage)
+7.3. Detailsonthenumericalintegrationgrids 449
+
+[... start of page 472 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+SpecialGridAtoms i1, i2, i3,...,in;
+SpecialGridIntAcc a1,a2,a3,...,an;
+END
+OBS.: StartingfromORCA5.0itisnotnecessarytousethisoptionanymoreunlessyouhaveveryspecificreasons.
+Thebasissetisconsideredduringthegridconstructionandthatisautomaticallyextendedifneeded.
+7.3.5

@@ -1,0 +1,94 @@
+**Code Format Requirements for Verifier Functions**
+-----------------------------------------------------------------------------
+[Function Naming:]
+- Format: `{element}_verifier_{type}`
+- Examples: `hamiltonian_verifier_spin0.5`, `circinit_verifier_spin0.5`, `circevol_verifier_spin0.5`, `effector_verifier_spin0.5`, `observable_verifier_spin0.5`
+
+[Package usage:]
+- You MUST import Qiskit, Qiskit-nature, Qiskit-algorithms, and Qiskit-aer packages explicitly
+
+-----------------------------------------------------------------------------
+[Comment Style:]
+1. **Element separator (before function):**
+   - Use separator comment: `# {element}-----------------------------------------------------------------------------------------`
+
+2. **Function description (first line after function definition):**
+   - Format: `# a verifier {element} for {type} system: <brief description>`
+   - Use lowercase for first word (unless proper noun)
+   - Keep description concise and specific
+
+3. **Parameter documentation:**
+   - One line per parameter: `# param_name: description`
+   - Include all parameters (positional and keyword)
+   - Describe parameter purpose clearly
+
+-----------------------------------------------------------------------------
+[Code Structure:]
+1. **Function signature:**
+   - Use Python type hints (e.g., `num_qubits: int = 6`)
+   - Default values for common parameters
+   - Keyword arguments with default values (e.g., `pbc: bool = True`)
+   - **CRITICAL: All prerequisite variables/dependencies needed by this {element} function MUST be input parameters**
+     * Do NOT create prerequisite objects (e.g., hamiltonian, circuits) inside the function
+     * All dependencies should be passed as function parameters
+     * Example: `hamiltonian_verifier_spin0.5(num_qubits: int, J: float, h: float, pbc: bool = True)` - num_qubits is an input parameter, not created inside
+
+2. **Function body:**
+   - Keep implementation concise and practical
+   - Use clear variable names
+   - Add inline comments for complex logic if needed
+
+3. **Return statement:**
+   - Always use explicit `return` statement
+   - Return the main result object
+
+-----------------------------------------------------------------------------
+[Language and Style:]
+- For {topic} (qcmb): Use Python (`.py` extension)
+- Follow Python syntax conventions and PEP 8 style
+- Keep code simple and readable
+- Focus on practical implementation, not theoretical details
+- All parameters MUST be treated as variable, NOT specific numbers. 
+
+-----------------------------------------------------------------------------
+[File Content:]
+- File should contain ONLY the verifier function code
+- **CRITICAL: `using`/`import` statements MUST be placed OUTSIDE the function definition, at the top of the file**
+- Include necessary `using`/`import` statements at the top of the file (before function definition)
+- No extra explanations, examples, or reference code
+- One function per file
+
+-----------------------------------------------------------------------------
+[Element Scope:]
+- **ELEMENT_NOTE: {element_note}**
+- **CRITICAL: Your verifier function MUST implement ONLY what is described in ELEMENT_NOTE**
+- Do NOT add functionality beyond what ELEMENT_NOTE specifies
+- Keep the function minimal and focused on the specific task described in ELEMENT_NOTE
+- If ELEMENT_NOTE mentions specific operations (e.g., "Statevector.from_instruction()", "VQE", "Trotter evolution"), implement ONLY those operations
+- **CRITICAL: All prerequisite variables/dependencies MUST be input parameters, NOT created inside the function**
+  * For hamiltonian_verifier: num_qubits must be an input parameter (do NOT create hamiltonian or qubits inside the function)
+  * For circinit_verifier: num_qubits must be an input parameter
+  * For circevol_verifier: hamiltonian (SparsePauliOp/PauliSumOp) must be an input parameter
+  * For effector_verifier: hamiltonian, circinit (QuantumCircuit), circevol (QuantumCircuit) must all be input parameters
+  * For observable_verifier: num_qubits must be an input parameter
+  * Only hamiltonian_verifier can create the base hamiltonian object (as it is the first element in the chain) 
+
+-----------------------------------------------------------------------------
+[Example Structure:]
+```python
+import xxx
+
+# {element}-----------------------------------------------------------------------------------------
+def {element}_verifier_{type}(param1: type1, param2: type2, keyword1: type3 = default):
+    # a verifier {element} for {type} system: <brief description>
+    # param1: <description>
+    # param2: <description>
+    # keyword1: <description> (default value)
+    
+    # implementation code
+    
+    return result
+```
+
+**Follow these rules strictly when generating verifier code.**
+

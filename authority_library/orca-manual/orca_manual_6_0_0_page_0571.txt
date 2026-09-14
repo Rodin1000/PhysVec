@@ -1,0 +1,61 @@
+[... end of page 570 ...]
+e.[653,684]
+FurtherinformationoflocalcorrelationmethodsinORCAcanbefoundinsectionLocalcorrelation. Thelocal
+MP2methodbecomestrulybeneficialforverylargemoleculesandcanbeusedtocomputeenergiesofsystems
+containing several hundred atoms. Fig. 7.3 shows the scaling behavior for linear alkane chains. Note that this
+representsanidealizedsituation. Forthree-dimensionalmoleculesthecrossoverwithcanonicalRI-MP2isgoing
+tooccuratalaterpoint.
+548 Chapter7. DetailedDocumentation
+
+--- Page 571 ---
+ORCAManual,Release6.0.0
+Fig.7.3: ScalingoftheDLPNO-MP2methodwithdefaultthresholdsforlinearalkanechainsindef2-TZVPbasis.
+ShownarealsothetimesforthecorrespondingHartree-FockcalculationswithRIJCOSXandforRI-MP2.
+Inthefollowing,themostimportantdesignprinciplesoftheRHF-DLPNO-MP2arepointedout.
+• Unlike in the 2013 version of the DLPNO methodology, domains are selected by means of the differen-
+√︁
+tialoverlap ∫︀ 𝑖2(r)𝜇˜′2(r)𝑑rbetweenlocalizedMOs𝑖andprojectedatomicorbitals(PAOs)𝜇˜′ whichare
+normalizedtounity. Thedefaultvalueforthecorrespondingcutoffis𝑇CutDO =10−2.
+• MP2amplitudesforeachpairoflocalizedorbitals𝑖𝑗areexpressedinabasisofpairnaturalorbitals(PNOs)
+𝑎˜ . PNOs are obtained from diagonalization of an approximate, “semicanonical” MP2 pair density D𝑖𝑗.
+𝑖𝑗
+OnlyPNOswithanoccupationnumber> 𝑇CutPNO areretained,withadefaultvalueof𝑇CutPNO = 10−8 for
+DLPNO-MP2. Thepairdensityisgivenby:
+(𝑖𝜇˜|𝑗𝜈˜)
+𝑇𝑖𝑗 =−
+D𝑖𝑗 =T𝑖𝑗†T˜𝑖𝑗 +T𝑖𝑗T˜𝑖𝑗† where 𝜇˜𝜈˜ 𝜀 +𝜀 −𝐹 −𝐹
+𝜇˜ 𝜈˜ 𝑖𝑖 𝑗𝑗
+T˜𝑖𝑗 =(1+𝛿 )−1(︀ 4T𝑖𝑗 −2T𝑖𝑗†)︀
+𝑖𝑗
+• Since the occupied block of the Fock matrix is not diagonal in the basis of localized orbitals, the MP2
+amplitudesT𝑖𝑗 areobtainedbysolvingthefollowingsetofresidualequationsiteratively(wheresubscripts
+ofPNOshavebeendropped):
+𝑅𝑖𝑗 = (︁ 𝑖𝑎˜ ⃒ ⃒𝑗˜𝑏 )︁ + (︀ 𝜀 +𝜀 −𝐹 −𝐹 )︀ 𝑇𝑖𝑗 − ∑︁∑︁ 𝐹 𝑆𝑖𝑗,𝑘𝑗𝑇𝑘𝑗𝑆𝑘𝑗,𝑖𝑗 − ∑︁∑︁ 𝐹 𝑆𝑖𝑗,𝑖𝑘𝑇𝑖𝑘𝑆𝑖𝑘,𝑖𝑗 =0
+𝑎˜˜𝑏 ⃒ 𝑎˜ ˜𝑏 𝑖𝑖 𝑗𝑗 𝑎˜˜𝑏 𝑖𝑘 𝑎˜𝑐˜ 𝑐˜𝑑˜ 𝑑˜˜𝑏 𝑘𝑗 𝑎˜𝑐˜ 𝑐˜𝑑˜ 𝑑˜˜𝑏
+𝑘̸=𝑖 𝑐˜𝑑˜ 𝑘̸=𝑗 𝑐˜𝑑˜
+• ThelargestpartoftheerrorrelativetocanonicalRI-MP2iscontrolledbythedomain(TCutDO)andPNO
+(TCutPNO) thresholds, which should be adequate for most applications. If increased accuracy is needed
+(e.g. forstudyingweakinteractions),tightertruncationcriteriacanbeinvokedbymeansofthe! TightPNO
+keyword. Conversely,alessaccuratebutfastercalculationcanbeperformedwiththe! LoosePNOkeyword.
+FormoredetailsrefertotableTable7.17.
+• FittingdomainsaredeterminedbymeansoforbitalMullikenpopulationswithathreshold𝑇CutMKN =10−3.
+Thisthresholdresultsinanerrorcontributionthatistypicallyaboutanorderofmagnitudesmallerthanthe
+overalltotalenergydeviationfromRI-MP2.
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 549
+
+[... start of page 572 ...]
+ORCAManual,Release6.0.0
+• PriortoperformingthelocalMP2calculation,pairsoflocalizedmolecularorbitals𝑖𝑗areprescreenedusing
+anMP2energyestimatewithadipoleapproximation,andthedifferentialoverlapintegralbetweenorbitals
+𝑖and𝑗. Thisprocedurehasbeenchosenconservativelyandleadstominimalerrors.
+• Residual evaluation can be accelerated significantly by neglecting terms with associated Fock matrix ele-
+ments𝐹
+𝑖𝑘
+and𝐹
+𝑘𝑗
+below𝐹Cut =10−5. Errorsresultingfromthisapproximationaretypicallybelow1𝜇E
+h
+andthusnegligible.
+• SparsityoftheMOandPAOcoefficientmatricesinatomicorbitalbasisisexploitedtoaccelerateintegral
+transformationsforlargesystems. Truncationofthecoefficientsiscontrolledbyaparameter𝑇CutC . Neglect
+oft

@@ -1,0 +1,72 @@
+[... end of page 181 ...]
+UseCCLib=0 MaxCore=2000
+PASS 1 completed. NCFG= 2808 NCFGK= 8416 MaxNSOMOI=4 MaxNSOMOK=4
+PASS 2 completed.
+PASS 3 completed.
+Memory used for RI tree = 2.99 MB (av. dim= 35)
+Memory used for ONE tree = 1.32 MB (av. dim= 46)
+Memory used for coupling coefficients= 0.01 MB
+done ( 0 sec)
+Now calling CI solver (4095 CSFs)
+****Iteration 0****
+Maximum residual norm : 0.000000471011
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 159
+
+--- Page 182 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+****Iteration 1****
+*** CONVERGENCE OF ENERGIES REACHED ***
+CI problem solved in 0.1 sec
+CI SOLUTION :
+STATE 0 MULT= 1: E= -8.0481340245 Eh W= 1.0000 DE= 0.000 eV 0.0 cm**-1
+0.97249 : 22000000000000000000
+With Hartree-Fock orbitals and the default settings, the ICE converges in 3 macro iterations to an energy of
+−8.048134047513𝐸h . Thedeviationfromtheexactsolutionisjust3.8×10−6𝐸h inthisexample.
+6.1.12 Efficient Calculations with Atomic Natural Orbitals
+Atomicnaturalorbitalsareaspecialclassofbasissets. Theyarerepresentedbytheorthonormalsetoforbitalsthat
+diagonalizesasphericallysymmetric,correlatedatomicdensity. Theideaistoputasmuchinformationaspossible
+intoeachbasisfunctionssuchthatoneobtainsthebestpossibleresultwiththegivennumberofbasisfunctions.
+Thisisparticularlyimportantforcorrelatedcalculationswherethenumberofprimitivesislessanissuethanthe
+numberofbasisfunctions.
+Usually,ANObasissetsare“generallycontracted”whichmeansthatforanygivenangularmomentumallprim-
+itives contribute to all basis functions. Since the concept of ANOs only makes sense if the underlying set of
+primitivesislarge,thecalculationsreadilybecomeveryexpensiveunlessspecialprecautionistakenintheintegral
+evaluation algorithms. ORCA features special algorithms for ANO basis sets together with accurate ANO basis
+setsfornon-relativisticcalculations. However,eventhentheintegralevaluationissoexpensivethatefficiencycan
+onlyberealizedifallintegralsarestoredondiskandarere-usedasneeded.
+In the first implementation, the use of ANOs is restricted to the built-in ANO basis sets (ano-pV𝑛Z, saug-ano-
+pV𝑛Z,aug-ano-pV𝑛Z,𝑛 =D,T,Q,5). Thesearebuiltuponthecc-pV6Zprimitivesandhence,thecalculations
+takesignificanttime.
+Note:
+• GeometryoptimizationswithANOsarediscouraged;theywillbeveryinefficient.
+TheuseofANOsisrecommendedinthefollowingway:
+! ano-pVTZ Conv TightSCF CCSD(T)
+%maxcore 2000
+* int 0 1
+C 0 0 0 0 0 0
+O 1 0 0 1.2 0 0
+H 1 2 0 1.1 120 0
+H 1 2 3 1.1 120 180
+*
+Thisyields:
+ano-pVTZ:
+E(SCF) = -113.920388785
+E(corr)= -0.427730189
+Comparetothecc-pVTZvalueof:
+cc-pVTZ:
+E(SCF) = -113.911870901
+E(corr)= -0.421354947
+160 Chapter6. RunningTypicalCalculations
+
+[... start of page 183 ...]
+ORCAManual,Release6.0.0
+Thus,theANO-basedSCFenergyisca. 8–9mEhlowerandthecorrelationenergyalmost2mEhlowerthanwith
+thecc-basissetofthesamesize. Usually,theANOresultsaremuchclosertothebasissetlimitthanthecc-results.
+Also,ANOvaluesextrapolateverywell(seesectionAutomaticextrapolationtothebasissetlimit)
+Importantly, the integrals are all stored in this job. Depending on your system and your patience, this may be
+possibleupto300–500basisfunctions. TheORCAcorrelationmoduleshavebeenrewrittensuchthattheydeal
+efficiently with these stored integrals. Thus, we might as well have used ! MO-CCSD(T) or ! AO-CCSD(T) ,
+bothofwhichwouldperformwell.
+Yet,thebu

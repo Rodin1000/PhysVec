@@ -1,0 +1,35 @@
+[... end of page 213 ...]
+st local minimum (blue ball), and from there start pushing “uphill” on a random direction until a barrier
+is crossed. Then a new minimum is found and the process is restarted, with another uphill push followed by an
+optimization. After several of these GOAT iterations (uphill + downhill), if no new global minimum was found
+betweenthetwolastglobaliterations.
+6.4. GOAT:globalgeometryoptimizationandensemblegenerator 191
+
+--- Page 214 ---
+ORCAManual,Release6.0.0
+Fig.6.24: Asimpledepictionofthedifferencebetweenaregulargeometryoptimization(above),andtheGOAT
+global optimizer (below). By using the latter, one finds not only one local minimum but the global one and the
+conformationalensemblearoundit.
+Sincestructuresarecollectedalongthewaytotheglobalminimum,wehaveintheendnotonlytheglobalminimum,
+butalsotheconformationalensembleforthatmolecule,meaningalltheconformationsitcanhaveandtheirrelative
+energies. ThisisalsousefullatertocomputeBoltzmann-averagedspectraandproperties.
+TheideaissimilartowhatisdonewithCRESTfromthegroupofProf. Grimme[697],exceptthatnometadynamics
+isrequiredandthusmuchlessgradientrunsareneeded. Itisthussuitablenotonlyforsuperfastmethodssuchas
+XTBandforce-fields,butcanalsobeuseddirectlyusingDFTorwithanymethodavailableinORCA.
+Please note that there is no ab initio way to find global minima for arbitrary unknown functions, and stochastic
+methodsarethemostefficientonfindingthese. Thedrawbackisthatitisbasedonrandomchoices,sothatmany
+geometryoptimizationsareneeded-hereintheorderof100×thenumberofatoms. Goodnewsis: thesecanbe
+efficientlyparallelized(evenmultinode)andthisnumbercanbebroughtdowntolessthan3×thenumberofatoms
+(seebelow)!
+192 Chapter6. RunningTypicalCalculations
+
+[... start of page 215 ...]
+ORCAManual,Release6.0.0
+6.4.1 GOAT simple usage example - Histidine
+Let’sstartwithasimpleexample,theaminoacidhistidine:
+Fig.6.25: Ahistidinemolecule.
+BysimplylookingatitsLewisstructure,itisnotatallevidentthatthereareactuallyatleast20conformersinthe
+3kcal/molrangefromtheglobalminimumontheXTBPES!Inordertofindthem,onecanrun:
+!XTB GOAT #XTB version 6.4.0
+* xyz 0 1
+N -0.13033 -

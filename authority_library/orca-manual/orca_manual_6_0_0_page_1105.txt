@@ -1,0 +1,67 @@
+[... end of page 1104 ...]
+musesthreeadjustableparameters,whichcanalsobesetinaseparatechelpginputblock
+%chelpg
+GRID 0.3 # Spacing of the regular grid in Angstroems
+RMAX 2.8 # Maximum distance of all atoms to any gridpoint in Angstroems
+VDWRADII COSMO # VDW Radii of Atoms, COSMO default
+BW # Breneman, Wiberg radii
+DIPOLE FALSE # If true, then the charges also reproduce the total dipole moment
+end
+1082 Chapter7. DetailedDocumentation
+
+--- Page 1105 ---
+ORCAManual,Release6.0.0
+Inthiscase,ORCAautomaticallycalculatestheCHELPGchargesattheendofthecalculation. Automaticcalcu-
+lationofCHELPGchargesusingthedefaultvaluescanalsobeachievedbyspecifying
+! CHELPG
+inthesimpleinputsection. BydefaulttheprogramusestheCOSMOVDWradiifortheexclusionofgridpoints
+nearthenuclei, asthesearedefinedforallatoms. TheBWradiiaresimilar, butonlydefinedforveryfewatom
+types.
+Thechargesmayexhibitsomedependenceonthemolecule’sorientationinspace,orsomeartificialvariationsin
+symmetricmolecules. TheseeffectscanbeminimizedbyincreasingtheCHELPGgridsize,eitherbysettingthe
+GRIDparameterintheCHELPGblock,orintheone-linervia
+! CHELPG(LARGE)
+IfonewantsthatthecalculatedCHELPGchargesreproducethetotaldipolemomentofthemolecule,aswellas
+theelectrostaticpotential,thenthefollowingtaghastobeaddedtothe%chelpgblock:
+%chelpg
+DIPOLE TRUE # The default is set to FALSE
+end
+Inparticular,theconstraintaffectsthe𝑥,𝑦,𝑧componentsofthetotaldipolemoment,sotheyreproducetheexact3
+componentsofthetotaldipolemomentcalculatedviaone-electronintegrals.
+7.58.3 orca_pltvib
+ThisprogramisusedinconjunctionwithgOpenMol(orxmol)toproduceanimationsorplotsofvibrationalmodes
+following a frequency run. The usage is again simple and described in section Animation of Vibrational Modes
+togetherwithashortdescriptionofhowtoproducetheseplotsingOpenMol.
+Theprogramproduces20framesofanimation,wherefirstandlastframecorrespondtotheTS,allotherscalculated
+as𝑠𝑖𝑛(2𝜋𝑓𝑟𝑎𝑚𝑒/20−1)*𝑑𝑖𝑠𝑝𝑙𝑎𝑐𝑒𝑚𝑒𝑛𝑡.
+7.58.4 orca_vib
+Thisisasmall“standalone”programtoperformvibrationalanalysis. Theideaisthattheuserhassomecontrol
+overthingsliketheatomicmassesthatenterthepredictionofvibrationalfrequenciesbutareindependentofthe
+electronicstructurecalculationassuch.
+The program takes a “.hess” file as input and produces essentially the same output as follows the frequency
+calculation. The point is that the “.hess” is a user-editable textfile that can be manually changed to achieve
+isotopeshiftpredictionsandthelike. TheusagetogetherwithanexampleisdescribedinsectionIsotopeShifts. If
+youpipetheoutputfromthescreenintoatextfileyoushouldalsobeabletouseorca_mapspctoplotthemodified
+IR,RamanandNRVSspectra.
+7.58.5 orca_loc
+Localizationisawidelyusedtechniquenowadays. Bydefiningdifferentfunctionals,variouslocalizationmethods
+are established. The most favorable localization methods are developed by Foster-Boys and Pipek-Mezey. In
+ORCA there are four different localization methods available, the Pipek-Mezey method (PM), the Foster-Boys
+method(FB),theintrinsicatomicorbitals(IAO)basedPMmethodandtheIAObasedFBmethod.
+For Foster-Boys localization there are three different algorithms: first there is the conventional algorithm (FB).
+Second,thereisanalternativealgorithm(NEWBOYS),whichisfasterandcouldbeused,forexample,tolocalize
+thevirtualMOsofalargesystem.
+The third Foster-Boys algorithm is based on an augmented Hessian procedure (AHFB). It is particularly suited
+to obtain very tightly converged orbitals if an appropriate tolerance is requested (useful for local correlation).
+7.58. UtilityPrograms 1083
+
+[... start of page 1106 ...]
+ORCAManual,Release6.0.0
+Furthermore,itsystematicallyconvergestowardsalocalminimum,ratherthanadifferenttypeofstationarypoint.
+Themethodproceedsinthreestages. AninitialsetoflocalizedorbitalsisobtainedthroughtheNEWBOYSmethod.
+ThisisfollowedbyanaugmentedHessianmaximization(rationalfunctionoptimization)eitherwithdirectorwith
+Davidson diagonalization, depending on the number of orbitals. Efficiency is therefore achieved for small and
+largesystemsalike. IftheoptimizationfailstoproceedbuttheaugmentedHessianhasgotthecorrecteigenvalue
+structure, a Newton-Raphson maximization is triggered as the third stage. Currently, the only user-adjustable
+parameter of the AHFB method is the tolerance Tol. Convergence is signalled when the eigenvalue structure is
+correct,andthelargestelementoftheorbitalgradient,4⟨𝑖|r|𝑗⟩(⟨𝑗|r|𝑗⟩−⟨𝑖|r|𝑖⟩),

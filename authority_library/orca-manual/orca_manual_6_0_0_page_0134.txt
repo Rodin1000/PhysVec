@@ -1,0 +1,75 @@
+[... end of page 133 ...]
+steadilybelowthedefaultTRAHaccuracyof10−6.
+Rh +cluster(M = 36)
+12 s
+Fig.6.10:TRAH-SCFgradientnormofaPBE/def2-TZVPcalculationforaRh+ clusterinhigh-spinconfiguration
+12
+(M =36). ThestructurewastakenfromRef. [362].
+s
+Alternatively,TRAHislaunchedautomaticallyifstandardSCF(DIIS/SOSCF)showsconvergeproblems(default),
+anapproachwhichiscalledAutoTRAH.
+%scf
+AutoTRAH true
+end
+Youcanswitchofftheautomaticstartof TRAHbyadding
+6.1. SinglePointEnergiesandGradients 111
+
+--- Page 134 ---
+ORCAManual,Release6.0.0
+! NOTRAH
+tothesimpleinputlineor
+%scf
+AutoTRAH false
+end
+Convergenceproblemsaredetectedbycomparingthenormoftheelectronicgradientatmultipleiterationswhich
+isexplainedinmoredetailinSec. Trust-RegionAugmentedHessian(TRAH)SCF.
+TRAH-SCFiscurrentlyimplementedforrestrictedclosed-shell(RHFandRKS)andunrestrictedopen-shelldeter-
+minants(UHFandUKS)andcanbeacceleratedwithRIJ,RIJONX,RIJK,orRIJCOSX.Solvationeffectscanalsobe
+accountedforwiththeC-PCMandSMDmodels. Restrictedopen-shellcalculationsarenotpossibleyet.
+TRAH-SCFcanalsobeappliedtolargemoleculesasitisparallelizedandworkswithAOFockmatrices. However,
+forsystemswithlargeHOMO-LUMOgapsthatconvergewell,thedefaultSCFconvergerisusuallyfasterbecause
+thescreeninginTRAHislesseffectiveandmoreiterationsarerequired.
+ForamoredetaileddocumentationwerefertoSec. Trust-RegionAugmentedHessian(TRAH)SCF.
+Note:
+• TRAHismathematicallyguaranteedtoconvergewithasufficientnumberofiterations,providedthatthere
+isnonumericalnoise(e.g. round-offerror,truncationerror)inthecalculation. Therefore,ifTRAHfailsto
+converge, this means that either the default number of iterations is not large enough, or certain numerical
+thresholds are not tight enough. One can verify whether the former possibility is operative by checking
+whether the error still decreases steadily towards zero in the last SCF iterations. If yes, one can increase
+thenumberofiterations;otherwiseitmaybeworthwhiletotryincreasingtheintegrationgrid,tightenthe
+integralthresholds,etc.
+• Forsomefunctionals(e.g. PWPB95),thenativeORCAimplementationsupportsonlytheirXCenergiesand
+potentials,butnottheirXCkernels. InthiscaseoneshouldswitchtotheLibXCimplementationinstead,e.g.
+replacePWPB95byLIBXC(PWPB95). OtherwisethecalculationabortsuponenteringtheTRAHprocedure.
+6.1.6 Counterpoise Correction
+Incalculatingweakmolecularinteractionsthenastysubjectofthebasissetsuperpositionerror(BSSE)arises. It
+consistsofthefactthatifonedescribesadimer,thebasisfunctionsonAhelptolowertheenergyoffragmentBand
+viceversa. Thus,oneobtainsanenergythatisbiasedtowardsthedimerformationduetobasisseteffects. Sincethis
+isunwanted,theBoysandBernardiprocedureaimstocorrectforthisdeficiencybyestimatingwhattheenergies
+ofthemonomerswouldbeiftheyhadbeencalculatedwiththedimerbasisset. Thiswillstabilizethemonomers
+relativetothedimers. Theeffectcanbeaquitesizablefractionoftheinteractionenergyandshouldthereforebe
+takenintoaccount. TheoriginalBoysandBernardiformulafortheinteractionenergybetweenfragmentsAandB
+is:
+∆𝐸 =𝐸𝐴𝐵(𝐴𝐵)−𝐸𝐴(𝐴)−𝐸𝐵(𝐵)− [︀ 𝐸𝐴𝐵(𝐴𝐵)−𝐸𝐴𝐵(𝐴)+𝐸𝐴𝐵(𝐴𝐵)−𝐸𝐴𝐵(𝐵) ]︀ (6.8)
+𝐴𝐵 𝐴 𝐵 𝐴 𝐴 𝐵 𝐵
+Here𝐸𝑌 (𝑍)istheenergyoffragmentXcalculatedattheoptimizedgeometryoffragmentYwiththebasissetof
+𝑋
+fragmentZ.Thus,youneedtodoatotalthefollowingseriesofcalculations:
+1. optimizethegeometryofthedimerandthemonomerswithsomebasissetZ.Thisgivesyou𝐸𝐴𝐵(𝐴𝐵),
+𝐴𝐵
+𝐸𝐴(𝐴)and𝐸𝐵(𝐵)
+𝐴 𝐵
+2. deletefragmentA(B)fromtheoptimizedstructureofthedimerandre-runthesinglepointcalculationwith
+basissetZ.Thisgivesyou𝐸𝐴𝐵(𝐵)and𝐸𝐴𝐵(𝐴).
+𝐵 𝐴
+3. Now,thefinalcalculationconsistsofcalculatingtheenergiesofAandBatthedimergeometrybutwiththe
+dimerbasisset. Thisgivesyou𝐸𝐴𝐵(𝐴𝐵)and𝐸𝐴𝐵(𝐴𝐵).
+𝐴 𝐵
+112 Chapter6. RunningTypicalCalculations
+
+[... start of page 135 ...]
+ORCAManual,Release6.0.0
+Inordertoachievethelaststepefficiently, aspecialnotationwasputintoORCAwhichallowsyoutodeletethe
+electronsandnuclearchargesthatcomewithcertainatomsbutretaintheassignedbasisset. Thistrickconsistsof
+puttinga“:”afterthesymboloftheatom. Hereisanexampleofhowtorunsuchacalculationofthewaterdimer
+attheMP2level(withfr

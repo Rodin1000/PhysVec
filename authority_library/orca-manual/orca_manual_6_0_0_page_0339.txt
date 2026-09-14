@@ -1,0 +1,79 @@
+[... end of page 338 ...]
+elvin
+Pressure 1.0, 2.0, 3.0 # in atm
+end
+• OnceaHessianisavailableyoucanrerunthethermochemistryanalysisatseveraluserdefinedtemperatures
+/pressuresbyprovidingthekeywordPrintThermoChemandprovidingthenameoftheHessianfile:
+! PrintThermoChem
+%geom
+inhessname "FreqJob.hess" # default: job-basename.hess
+end
+%freq Temp 290, 295, 300 # in Kelvin
+Pressure 1.0, 2.0, 3.0 # in atm
+end
+316 Chapter6. RunningTypicalCalculations
+
+--- Page 339 ---
+ORCAManual,Release6.0.0
+6.12.5 AnharmonicAnalysisandVibrationalCorrectionsusingVPT2/GVPT2and
+orca_vpt2
+Building upon (analytical) harmonic calculations of the Hessian, it is possible to calculate the cubic plus semi-
+quarticforcefieldaswellashigher-orderpropertyderivatives. Forthispurpose,theVPT2modulewillcompute
+the Hessian and then generate two displaced geometries for each degree of freedom and for each displacement
+another Hessian (and another property in case of vibrational corrections) will be computed. These are required
+forananharmonicanalysisaccordingtosecond-ordervibrationalperturbationtheory. Sooverall,usingVPT2is
+costlyduetothenumberofcalculationsrequiredforthenumericalderivativesandisverysensitivetonumerical
+noiseduetoconvergence,approximationsandothersettings. TheVPT2calculationcanbeinitiatedeitherviathe
+simpleinputcommand!VPT2orviatheVPT2keywordinthe%vpt2block. Finercontrolcanbeachievedthrough
+the%VPT2block,asexemplifiedinthisanalysisofwater.
+# VPT2 Analysis of H2O
+!RHF def2-SVP ExtremeSCF VPT2
+%vpt2
+VPT2 On # do a VPT2 analysis, same as !VPT2 (see above)
+AnharmDisp 0.05 # anharmonic displacement factor, default is 0.05
+HessianCutoff 1e-12 # cut-off for Hessian elements, default is $10^{-10}$
+PrintLevel 1 # VPT2 print level [1, 2, 3, 4]
+MinimiseOrcaPrint True # Minimises the remaining orca output
+end
+%method
+Z_Tol 1e-14
+end
+* xyz 0 1
+O 0.00000000000000 0.06256176106279 0.06256176106280
+H 0.00000000000000 -0.06185639479702 0.99929463373422
+H 0.00000000000000 0.99929463373424 -0.06185639479703
+*
+After the analysis, a <basename>.vpt2 file should be present in the working directory. Within that file all the
+forcefieldandpropertyderivativesaresaved. Itisusedasaninputfortheorca_vpt2programmewhichiscalled
+automatically after the initial displacement calculations. The programme can also be called separately with the
+commandorca_vpt2 <basename>.vpt2.
+Note: AfewremarksaboutVPT2calculations:
+• AVPT2startinggeometryshouldalwaysbetightlyconverged. Forsmallmoleculesthe!TightOPToption
+isnotgoodenough! Dependingonyourstructure,youmightwanttoexperimentwiththeTolE,TolRMSG
+andTolMaxGkeywordsofthe%geomblock.
+• Similarly,awellconvergedSCFisrequired. TheuseoftheExtremeSCFkeywordoratleastVeryTightSCF
+isrecommended.
+• TheCP-SCFequationsshouldbeconvergedtoatleast10−12(modifiedviatheZ_Tolsettinginthe%method
+block.
+• ForDFTcalculations,tightgridslikeDEFGRID3arestronglyrecommended.
+• Linearmoleculesarenotsupportedyet
+• Currently, only methods for which analytical Hessians are available are supported. Furthermore, VPT2
+calculationswithDFTfunctionalswhichdonotprovideanalyticalHessianscannotbecarriedout.
+• Bydefault,updatedatomicmassesareusedtogeneratethesemi-quarticforcefield(seeMassdependencies).
+Themassesarealsoprintedinthe<basename>.vpt2file
+• AVPT2analysiscanberepeatedonapreviouscalculationbyrunningorca_vpt2 <basename>.vpt2.
+6.12. CalculationofProperties 317
+
+[... start of page 340 ...]
+ORCAManual,Release6.0.0
+• VPT2doeshavelimitedrestartcapabilities. IfthedirectoryinwhichtheVPT2runiscarriedoutalready
+contains <basename>.hess or <basename>_eprnmr.property.txt files, the program will skip these
+pointsandusetheinformationprovidedinthefiles.
+VPT2providesavibrationalanalysisandthusaccessto:
+• meanandmeansquaredisplacementexpectationvalues
+• centrifugaldistortionconstants
+• Watson’ssymmetricallyandasymmetricallyreducedHamiltonianparameters
+• anharmonicconstants
+• Fermiresonanceanalysis
+• rotationalandvibrational-rotationalconstants
+• fundamentaltrans

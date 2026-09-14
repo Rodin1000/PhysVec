@@ -1,0 +1,96 @@
+[... end of page 260 ...]
+block 1 0
+nroots 3
+refs cas(4,4) end
+end
+newblock 1 2
+nroots 5
+refs cas(4,4) end
+end
+newblock 3 1
+nroots 1
+(continuesonnextpage)
+1Dependingonwhetheronewantstotakeapessimisticoranoptimisticviewonecouldeithersaythatthisresultshowswhatcanbeachieved
+withacodethatisdedicatedtoasingledeterminantreference.Alternativelyonecould(andperhapsshould)complainaboutthehighpriceone
+paysforthegeneralityoftheMRCIapproach.Inanycase,thenameofthegamewouldbetodevelopMRapproachesthatareequallyefficient
+tosinglereferenceapproaches.SeeFIC-MRCIchapterformoreinformation.
+238 Chapter6. RunningTypicalCalculations
+
+--- Page 261 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+refs cas(4,4) end
+end
+Inthisexample,wewouldcalculate3singletrootsintheirrep“0”(whichisA ),thenfiverootsinirrep“2”(which
+1
+isB )andthen1tripletrootinirrep1(whichisB ).
+1 2
+Obviously,theresultswithandwithoutsymmetrywilldifferslightly. Thisisduetothefactthatwithoutsymmetry
+the reference space will contain references that belong to “wrong” symmetry but will carry with them excited
+configurationsof“right”symmetry. Hence,thecalculationwithoutuseofsymmetrywillhavemoreselectedCSFs
+andhenceaslightlylowerenergy. Thisappearstobeunavoidable. However,theeffectsshouldnotbeverylarge
+forwelldesignedreferencespacessincetheadditionalCSFsdonotbelongtothefirstorderinteracingspace.
+6.7.2 A Tutorial Type Example of a MR Calculation
+Perhaps, the most important use of the MR-CI module is for the calculation of transition energies and optical
+spectra. LetusfirstcalculatethefirstexcitedsingletandtripletstateoftheformaldehydemoleculeusingtheMR-
+CI method together with the Davidson correction to approximately account for the effect of unlinked quadruple
+substitutions. Wedeliberatelychooseasomewhatsmallbasissetforthiscalculationwhichisalreadyreasonable
+sinceweonlylookatavalenceexcitedstateandwanttodemonstratetheprinciple.
+Suppose that we already know from a ground state calculation that the HOMO of H CO is an oxygen lone pair
+2
+orbitalsandtheLUMOthe𝜋*MO.Thus,wewanttocalculatethesingletandtripletn→𝜋*transitionsandnothing
+else. Consequently,weonlyneedtocorrelatetwoelectronsintwoorbitalssuggestingaCAS(2,2)referencespace.
+# A simple MRCI example
+! def2-SVP def2-SVP/C UseSym
+%method frozencore fc_ewin
+end
+%mrci ewin -3,1000
+CIType MRCI
+EUnselOpt FullMP2
+DavidsonOpt Davidson1
+UseIVOs true
+tsel 1e-6
+tpre 1e-2
+MaxMemInt 256
+MaxMemVec 32
+IntMode FullTrafo
+AllSingles true
+Solver Diag
+# ground state 1A1
+NewBlock 1 0
+NRoots 1
+Excitations cisd
+Refs CAS(2,2) end
+End
+# HOMO LUMO transition 1A2
+NewBlock 1 1
+NRoots 1
+Excitations cisd
+Refs CAS(2,2) end
+End
+# HOMO LUMO triplet transition 3A2
+NewBlock 3 1
+NRoots 1
+Excitations cisd
+Refs CAS(2,2) end
+end
+(continuesonnextpage)
+6.7. MultireferenceConfigurationInteractionandPertubationTheory 239
+
+[... start of page 262 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+* int 0 1
+C 0 0 0 0.000000 0.000 0.000
+O 1 0 0 1.200371 0.000 0.000
+H 1 2 0 1.107372 121.941 0.000
+H 1 2 3 1.107372 121.941 180.000
+*
+Thisinput–whichismuchmorethanwhatisreallyrequired-needssomeexplanations: Firstofall,wechoosea
+standardRHFcalculationwiththeSVPbasissetandweassigntheSV/Cfittingbasisalthoughitisnotusedinthe
+SCFprocedureatall. Inthe%mrciblockalldetailsoftheMR-CIprocedurearespecified. First,EWin(%method
+frozencore fc_ewin) selects the MOs within the given orbital energy range to be included in the correlation
+treatment. TheCITypevariableselectsthetypeofmultireferencetreatment. Numerouschoicesarepossibleand
+MRCIisjusttheoneselectedforthisapplication.
+Note: TheCITypestatementselectsseveraldefaultvaluesforothervariables

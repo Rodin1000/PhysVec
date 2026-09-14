@@ -1,0 +1,82 @@
+[... end of page 1011 ...]
+unthesameinputagaintocontinuethesimulationwhereitendedlast). The
+twoColvarsaredefinedasdistancesbetweenatoms. Youneedtoadaptallparametersinbluetoyourquestionand
+system:
+Timestep 0.5_fs
+Initvel 350_K
+Thermostat NHC 350_K Timecon 100.0_fs
+Dump Position Stride 1 Filename "trajectory.xyz"
+Manage_Colvar Define 1 Distance Atom 0 Atom 1
+Manage_Colvar Define 2 Distance Atom 2 Atom 3
+Metadynamics Colvar 1 Scale 1.0_A Wall Lower 3.0 50.0 Upper 10.0 50.0 Range 0.0 15.0 100
+Metadynamics Colvar 2 Scale 1.0_A Wall Lower 1.0 50.0 Upper 8.0 50.0 Range 0.0 13.0 100
+Metadynamics HillSpawn 40 0.5 0.5 Store 2000
+Metadynamics WellTempered 6000_K
+Metadynamics Lagrange 100.0 10.0 200.0_K 10.0_fs
+Restart IfExists
+Run 100000
+7.51. AbinitioMolecularDynamicsSimulations 989
+
+--- Page 1012 ---
+ORCAManual,Release6.0.0
+Minimize
+MandatoryArguments: —
+OptionalArguments: method Keyword {Combined,LBFGS,Anneal}
+Modifiers: Steps n Integer —
+MaxGrad thres Real [kJmol−1Å−1]
+RMSGrad thres Real [kJmol−1Å−1]
+TempConv thres Real [temperature]
+Accel value Real —
+Damp value Real —
+StepLimit value Real [length]
+History n Integer —
+Noise value Real [length]
+OnlyH —
+PerformsaCartesianenergyminimizationofthesystem. Formolecules,thisislessefficientthanORCA’sbuilt-in
+geometry optimization in internal coordinates (i. e., requires more steps to converge). However, the algorithms
+employedherealsoworkwithlargeatomcounts(e. g.,50000)assometimesencounteredinQM/MMsimulations,
+which is absolutely out of scope of ORCA’s primary optimization module. Furthermore, the minimization also
+worksunderalltypesofconstraints(whichsomelimitationsinthecaseofL-BFGS)thathavebeensetwiththe
+Constraint command, and also includes the effect of the repulsive simulation cell if activated. Only atoms
+containedintheactiveregionaredisplaced,whileallotheratomsarekeptattheirpositions.
+The simplest way of performing a minimization is simply calling the Minimize command without arguments.
+ThisdefaultstotheL-BFGSmethod,whichisfairlyrobustandefficient. Iftheminimizationseemsunstable,tryto
+reducetheHistoryorStepLimitparameters. L-BFGSmaysometimesshowpoorperformancewithconstraints
+otherthanCartesiantype. Apartfromthat, thereisalsoasimulatedannealingmethodimplemented, whichcan
+beselectedbyspecifyingAnnealasthefirstargument. IncontrasttoL-BFGS,thesimulatedannealingmethod
+works equally well with all types of constraints. There is also a Combined method, which is a combination of
+someL-BFGSstepsinthebeginning, followedbyasimulatedannealingrununtilthetemperaturefallsbelowa
+threshold,andanotherfinalL-BFGSrununtiltheconvergencecriteriaarereached.
+WiththeStepsmodifier,themaximumnumberofminimizationstepscanbespecified. Ifthisnumberofstepshas
+beenperformed, theminimizationfinishes, nomatteriftheconvergencecriteriaarefulfilledornot. Thedefault
+valueis500.
+TheMaxGradandRMSGradmodifierscontroltheconvergencethresholdsforthelargestgradientonsomeatomand
+therootmeansquareaverageofthegradients. Thedefaultvaluesarecurrentlysetto5.0and1.0kJmol−1 Å−1,
+respectively,whichisaboutthesamecriterionasthedefaultsettingintheprimaryORCAgeometryoptimization.
+If the TempConv modifier is given, a simulated annealing run finished after the temperature was monotonously
+decreasing within 5 successive steps, and dropped below the specified value. Note that the simulated annealing
+runwillfinishifeitherthisconditionisreached,orthegradientthresholdsareobserved. Itisnotrequiredtofulfill
+bothcriteria.
+TheAccelmodifierspecifiestheaccelerationfactorforsimulatedannealingruns(hasnoeffectonL-BFGS).As
+longastheanglebetweenvelocityvectorandgradientvectorofsomeatomisbelow90degrees, thegradientis
+multiplied by this factor and the velocity is multiplied by a fraction of this factor. This helps to enforce a faster
+movementingradientdirection. Thedefaultvalueis4.0. Ifthisfeatureisnotdesired,useAccel 1.0toswitchit
+off(1.0means“noartificialacceleration”).
+TheDampmodifieristhedampingfactorforsimulatedannealingruns(hasnoeffectonL-BFGS).Atomvelocities
+are multiplied by this factor in every integration step. The default value is 0.98. Smaller values will make the
+algorithmmorestableandlesspronetooscillationsandovershoots,butwillalsorequiresignificantlymoresteps
+toconverge. Don’tusevalues≥1,asthenitwon’tbean“annealing”anymore:-)
+The StepLimit modifier specifies the maximum displacement of any atom (in length units) that can happen in
+onestepofaminimizationrun. Thiscanhelptoavoidlarge,unreliablestepswhichcouldleadtoabruptjumpsin
+geometryandveryhighpotentialenergies. ThismodifierconcernsbothL-BFGSandsimulatedannealingruns.
+990 Chapter7. DetailedDocumentation
+
+[... start of page 1013 ...]
+ORCAManual,Release6.0.0
+Negativevaluesdisablethesteplimit. Thesteplimitisdisabledbydefault. Ifyouneedtoswitchiton,trysomething
+intheorderof0.1Å.
+TheHistorymodifiercontrolsthedepthofgradientandpositionvectorhistorythatisusedintheL-BFGSmethod
+toapproximatetheinverseHessian. Thedefaultvalueis20. Smallervaluescanhelptostabilizethealgorithm.
+WiththeNoisemodifier,smallrandomnumberscanbeaddedtotheatompositionsbeforetheminimizationstarts.
+Thiscanhelptoescapelocalmaximaandsaddlepointsintheminimization. Forexample,aminimizationofan
+initiallylinearwatermoleculewouldnotbea

@@ -1,0 +1,90 @@
+[... end of page 182 ...]
+
+• GeometryoptimizationswithANOsarediscouraged;theywillbeveryinefficient.
+TheuseofANOsisrecommendedinthefollowingway:
+! ano-pVTZ Conv TightSCF CCSD(T)
+%maxcore 2000
+* int 0 1
+C 0 0 0 0 0 0
+O 1 0 0 1.2 0 0
+H 1 2 0 1.1 120 0
+H 1 2 3 1.1 120 180
+*
+Thisyields:
+ano-pVTZ:
+E(SCF) = -113.920388785
+E(corr)= -0.427730189
+Comparetothecc-pVTZvalueof:
+cc-pVTZ:
+E(SCF) = -113.911870901
+E(corr)= -0.421354947
+160 Chapter6. RunningTypicalCalculations
+
+--- Page 183 ---
+ORCAManual,Release6.0.0
+Thus,theANO-basedSCFenergyisca. 8–9mEhlowerandthecorrelationenergyalmost2mEhlowerthanwith
+thecc-basissetofthesamesize. Usually,theANOresultsaremuchclosertothebasissetlimitthanthecc-results.
+Also,ANOvaluesextrapolateverywell(seesectionAutomaticextrapolationtothebasissetlimit)
+Importantly, the integrals are all stored in this job. Depending on your system and your patience, this may be
+possibleupto300–500basisfunctions. TheORCAcorrelationmoduleshavebeenrewrittensuchthattheydeal
+efficiently with these stored integrals. Thus, we might as well have used ! MO-CCSD(T) or ! AO-CCSD(T) ,
+bothofwhichwouldperformwell.
+Yet,theburdenofgeneratingandstoringallfour-indexintegralsquicklybecomesratherheavy. Hence,thecom-
+binationofANObasissetswiththeRI-JKtechniqueisparticularlypowerfulandefficient. Forexample:
+! ano-pVTZ cc-pVTZ/JK RI-JK Conv TightSCF RI-CCSD(T)
+FortheSCF,thisworksverywellandallowsformuchlargerANObasedcalculationstobedoneefficiently. Also,
+RI-MP2canbedoneveryefficientlyinthisway. However,forhigherordercorrelationmethodssuchasCCSD(T)
+the logical choice would be RI-CCSD(T) which is distinctly less efficient than the AO or MO based CCSD(T)
+(roughlyafactoroftwoslower). Hence,ORCAimplementsahybridmethodwheretheRIapproximationisused
+togenerateallfourindexintegrals. Thisisdoneviathe“RI-AO”keyword:
+! ano-pVTZ cc-pVTZ/JK RI-AO Conv TightSCF AO-CCSD(T)
+InthiscaseeitherAO-CCSD(T)orMO-CCSD(T)wouldbothworkwell. Thisdoesnotsolvethestoragebottleneck
+withrespecttothefourindexintegralsofcourse. Ifthisbecomesarealissue,thenRI-CCSD(T)ismandatory. The
+errorinthetotalenergyislessthan0.1mEhinthepresentexample.
+Note:
+• WithconventionalRIcalculationstheuseofasecondfitbasissetisnotpossibleandinconsistentresults
+willbeobtained. Hence,sticktooneauxiliarybasis!
+6.1.13 Local-SCF Method
+The Local-SCF (LSCF) method developed by X. Assfeld and J.-L. Rivail ([55]) allows to optimize a single de-
+terminantwavefunctionundertheconstraintofkeepingfrozen(i.e. unmodified)asubsetoforbitals. Also, op-
+timizedorbitalsfulfilltheconditionoforthogonalitywiththefrozenones. TheLSCFmethodcanbeappliedto
+restricted/unrestrictedHartree-FockorDFTKohn-Shamwavefunctions.
+TousetheLSCFmethod,onechoosesthespin-upandspin-downfrozenorbitalswiththe“LSCFalpha”and“LSCF-
+beta” keywords, respectively. Frozen orbitals are specified using intervals of orbital indexes. In the following
+example, the selection “0,4,5,6,10,10” for the alpha frozen orbitals means that the orbitals ranging from 0 to 4
+(0,4,5,6,10,10), 5 and 6 (0,4,5,6,10,10) and the orbital 10 (0,4,5,6,10,10) will be frozen. In the case of the beta
+orbitals,theorbitalswithindexes0,1,2,3and5willbefrozen. Upto5intervals(2*5numbers)areallowed.
+#
+# Example of LSCF Calculation
+#
+! UKS B3LYP/G SVP TightSCF
+%scf
+LSCFalpha 0,4,5,6,10,10
+LSCFbeta 0,3,5,5
+end
+Forthesakeofuser-friendliness,twootherkeywordsareavailablewithintheLSCFmethod. Theycanbeusedto
+modifytheorbitalfirstguess,asreadfromthegbwfilewiththesamenameoranothergbwfilewiththe“MOInp”
+keyword.
+The“LSCFCopyOrbs”keywordallowstocopyoneorbitalintoanotherone. Theinputworksbyintervalslikethe
+LSCFalpha/LSCFbetaselections. However,beawarethatspin-uporbitalindexesrangefrom0toM-1(whereM
+6.1. SinglePointEnergiesandGradients 161
+
+[... start of page 184 ...]
+ORCAManual,Release6.0.0
+isthesizeofthebasisset),whilespin-downorbitalindexesrangefromMto2M-1. Inthefollowingexample,with
+M=11,theusercopiesthefifthspin-uporbitalinthefifthspin-downorbital.
+%scf
+LSCFalpha 0,4,5,6,10,10
+LSCFbeta 0,3,5,5
+LSCFCopyOrbs 4,15
+end
+Thesecondkeywordis“LSCFSwapOrbs”andallowstoswaptheindexesofsubsetsmadeoftwoorbitals. Inthe
+followingexample,stillwithM=11,theuserswapsthefifthspin-uporbitalwiththefifthspin-downorbital.
+%scf
+LSCFalpha 0,4,5,6,10,10
+LSCFbeta 0,3,5,5
+LSCFSwapOrbs 4,15
+end
+Caution: DuringtheLSCFprocedure,frozenoccupiedorbitalsenergiesarefixedat-1000Hartreesand
+frozenvirtualorbitalsenergiesat1000Hartrees. Thismeansthatthefrozenoccupiedorbitalsandthe
+frozenvirtualorbitalsare

@@ -1,0 +1,58 @@
+[... end of page 113 ...]
+ space for a given electron pair (ij) is local and located in the same region of space as the
+electronpair(ij). InLPNO-CCSDthislocalitywaspartiallyusedinthelocalfittingtothePNOs(controlledbythe
+parameterTCutMKN).However,thePNOswereexpandedincanonicalvirtualorbitalswhichledtosomehigher
+orderscalingsteps. InDLPNO,thePNOsareexpandedinthesetofprojectedatomicorbitals:
+(︁ ∑︁ )︁
+|𝜇˜⟩= 1− |𝑖⟩⟨𝑖| |𝜇⟩
+𝑖
+where |𝜇⟩ is an atomic orbital and |𝑖⟩ refers to an occupied molecular orbital. Such projected orbitals are an
+overcompleterepresentationofthevirtualspace. Theprojectedorbital|𝜇˜⟩islocatedinthesameregionofspace
+as|𝜇⟩andhencecanbeassignedtoatomiccenters. ThishasfirstbeeninventedandusedbyPulayandSaebo[704]
+intheirpioneeringworkonlocalcorrelationmethodsandwidelyexploitedbyWerner,Schützandco-workersin
+6.1. SinglePointEnergiesandGradients 91
+
+--- Page 114 ---
+ORCAManual,Release6.0.0
+theirlocalcorrelationapproaches. [753,754]DLPNO-CCSDgoesonestepfurtherinexpandingthePNOs⃒ ⃒𝑎˜ ⟩︀
+𝑖𝑗
+ofagivenpair(𝑖𝑗)as:
+⃒ ⃒𝑎˜ ⟩︀ = ∑︁ 𝑑𝑖𝑗 |𝜇˜⟩
+𝑖𝑗 𝜇˜𝑎˜
+𝜇˜∈{𝑖𝑗}
+where𝜇˜ ∈{𝑖𝑗}isthedomainofatoms(rangeof𝜇˜)thatisassociatedwiththeelectronpairij. Theadvantageofthe
+PNOmethodis,thatthesedomainscanbechosentobelarge(>15-20atoms)withoutcompromisingtheefficiency
+ofthemethod.
+ThecomparisonbetweenLPNO-CCSDandDLPNO-CCSDisshowninFig.6.5. ItisobviousthatDLPNO-CCSD
+is(almost)neverslowerthanLPNO-CCSD.However,itstrueadvantagesdobecomemostapparentformolecules
+withmorethanapproximately60atoms. Thetriplescorrection,thatwasaddedwithoursecondpaperfrom2013,
+shows a perfect linear scaling, as is shown in part (a) of Fig. 6.5. For large systems it adds about 10%–20% to
+theDLPNO-CCSDcomputationtime,henceitsadditionispossibleforallsystemsforwhichthelattercanstillbe
+obtained. Since2016,theentireDLPNO-CCSD(T)algorithmislinearscaling. Theimprovementsofthelinear-
+scalingalgorithm,comparedtoDLPNO2013-CCSD(T),starttobecomesignificantatsystemsizesofabout300
+atoms,asbecomesevidentinpart(b)ofFig.6.5.
+(b)(b)DLPNOScaling
+(a)(a)DLPNO2013Scaling
+Fig. 6.5: a) Scaling behavior of the canonical CCSD, LPNO-CCSD and DLPNO2013-CCSD(T) methods. It is
+obvious that only DLPNO2013-CCSD and DLPNO2013-CCSD(T) can be applied to large molecules. The ad-
+vantagesofDLPNO2013-CCSDoverLPNO-CCSDdonotshowbeforethesystemhasreachedasizeofabout60
+atoms. b)ScalingbehaviorofDLPNO2013-CCSD(T),DLPNO-CCSD(T)andRHFusingRIJCOSX.Itisobvious
+thatonlyDLPNO-CCSD(T)canbeappliedtotrulylargemolecules,isfasterthantheDLPNO2013version,and
+evenhasacrossoverwithRHFatabout400atoms.
+Using the DLPNO-CCSD(T) approach it was possible for the first time (in 2013) to perform a CCSD(T) level
+calculation on an entire protein (Crambin with more than 650 atoms, Fig. 6.6). While the calculation using a
+double-zeta basis took about 4 weeks on one CPU with DLPNO2013-CCSD(T), it takes only about 4 days to
+completewithDLPNO-CCSD(T).WithDLPNO-CCSD(T)eventhetriple-zetabasiscalculationcanbecompleted
+withinreasonabletime,taking2weekson4CPUs.
+92 Chapter6. RunningTypicalCalculations
+
+[... start of page 115 ...]
+ORCAManual,Release6.0.0
+Fig.6.6: StructureoftheCrambinprotein-thefirstproteintobetreatedwithaCCSD(T)levelabinitiomethod
+TheuseoftheLPNO(andDLPNO)methodsissimpleandrequireslittlespecialattentionfromtheuser:
+# Local Pair Natural Orbital Test
+! cc-pVTZ cc-pVTZ/C LPNO-CCSD TightSCF
+# or
+! cc-pVTZ cc-pVTZ/C DLPNO-CCSD TightSCF
+%maxcore 2000
+# these a

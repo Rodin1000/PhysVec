@@ -1,0 +1,91 @@
+[... end of page 1026 ...]
+lventmodelsareabletomimictheeffectofaspecificsolventon
+thesolute.
+TheimplicitsolventmodelsavailableinORCAare
+1. C-PCM[76]: TheConductor-likeContinuumPolarizationModel
+2. SMD[558]: TheSolvationModelbasedonDensity
+3. OpenCOSMO-RS[293]: InterfacetotheopensourceimplementationoftheCOSMO-RSmodel
+1004 Chapter7. DetailedDocumentation
+
+--- Page 1027 ---
+ORCAManual,Release6.0.0
+4. ALPB/ddCOSMO/CPCM-X:ThesolvationmodelsavailableinXTB
+RegardingC-PCMandSMD,theyarenativelyimplementedinORCA.Points1,2and3arecoveredinthissection.
+Formoreinformationonpoint4,checkSectionONIOMMethods.
+7.53.1 The Conductor-like Polarizable Continuum Model (C-PCM)
+The conductor-like polarizable continuum model (C-PCM) is an implementation of the conductor-like apparent
+surfacechargemethods. Inthesemodelsthesoluteisplacedinacavityofroughlymolecularshape. Thesolvent
+reactionfieldisdescribedbyapparentpolarizationchargesonthecavitysurface,whichareinturndeterminedby
+thesolute. Thesechargescanbetreatedaspunctual(pointcharges)orbemodelledassphericalGaussians[903].
+ThecavityinORCAisconstructeddifferentlydependingonhowthechargesaretreated. Inthecaseofusingpoint
+charges,thecavityisgeneratedthroughtheGEPOL[649,650,651]algorithm,eitherassolvent-excludingsurface
+(SES),orsolvent-accessiblesurface(SAS).WhenGaussianchargesareconsidered,theusercanchoosebetweena
+scaledvdWsurfaceortheGEPOLSES,andthechargepositionsaredeterminedfollowingaLebedevquadrature
+approach. ThisschemeisknownasGaussianChargeScheme[287]andmoredetailsonhowtouseitaregivenin
+SectionUseoftheGaussianChargeScheme.
+The ORCA C-PCM implementation closely follows the C-PCM[76] paper. The molecular Hamiltonian of the
+isolatedsystemisperturbedbythesolvent:
+𝐻ˆ =𝐻ˆ0+𝑉ˆ
+where𝐻ˆ0istheHamiltonianoftheisolatedmolecule,whereas𝑉ˆ describesthesolute–solventinteractions. The
+SCFprocedureleadstothevariationalminimizationofthefreeenergyofthesolute,𝐺:
+⟨ ⃒ ⃒ ⟩ 1⟨ ⃒ ⃒ ⟩
+𝐺= Ψ⃒𝐻ˆ0⃒Ψ + Ψ⃒𝑉ˆ⃒Ψ
+⃒ ⃒ 2 ⃒ ⃒
+Usingtheconductor-likeboundaryconditiontheelectrostaticpotentialcanbedeterminedby
+𝑁𝑞
+∑︁
+𝑉(⃗𝑟)+ 𝑉 (⃗𝑟)=0
+𝑞𝑖
+𝑖
+where 𝑉 and 𝑉 are the electrostatic potential due to the solute and to the polarization charges,⃗𝑟 is a point on
+𝑞𝑖
+thecavitysurface,and𝑁 isthetotalnumberofsolvationcharges. Thevectorofpolarizationchargecanthenbe
+𝑞
+determinedby
+AQ=−V (7.314)
+wherethevectorVcontainstheelectrostaticpotentialduetothesoluteatthepositionofthecharges. Theelements
+ofthematrixAhaveadifferentfunctionalformdependingonhowthechargesaretreated. Ifweusepointcharges:
+√︂
+4𝜋
+𝐴 =1.07
+𝑖𝑖 𝑆
+𝑖
+1
+𝐴 = (7.315)
+𝑖𝑗 𝑟
+𝑖𝑗
+inwhich𝑆 istheareaofthesurfaceelement𝑖,and𝑟 =|⃗𝑟 −⃗𝑟 |. WhenGaussianchargesareconsidered:
+𝑖 𝑖𝑗 𝑖 𝑗
+√︀
+𝜁 2/𝜋
+𝑖
+𝐴 =
+𝑖𝑖 𝐹
+𝑖
+erf(𝜁 𝑟 )
+𝐴 = 𝑖𝑗 𝑖𝑗
+𝑖𝑗 𝑟
+𝑖𝑗
+Here, 𝜁 is the exponent of the Gaussian charge 𝑖 (𝑖 belongs to sphere 𝐼). This quantity is calculated as 𝜁 =
+√𝑖 𝑖
+𝜁/(𝑅 𝑤 ),where𝑅 istheradiusofsphere𝐼,𝑤 istheweightoftheLebedevpoint𝑖,and𝜁isawidthparameter
+𝐼 𝑖 𝐼 𝑖
+√︁
+optimized for each particular Lebedev grid [903]. On the other hand, 𝜁 = 𝜁 𝜁 / 𝜁2+𝜁2. The function 𝐹 ,
+𝑖𝑗 𝑖 𝑗 𝑖 𝑗 𝑖
+7.53. ImplicitSolvationModels 1005
+
+[... start of page 1028 ...]
+ORCAManual,Release6.0.0
+known as switching function, measures the contribution of the Gaussian charge 𝑖 to the solvation energy. This
+functioniscalculatedas
+atoms
+𝐹 = ∏︁ 𝑔(⃗𝑟 ,𝑅⃗ )
+𝑖 𝑖 𝐽
+𝐽,𝑖∈/𝐽
+where𝑔(⃗𝑟 ,𝑅⃗ )istheelementaryswitchingfunction. InORCAweusetheimprovedSwitching/Gaussian(ISWIG)
+𝑖 𝐽
+functionfor𝑔(⃗𝑟 ,𝑅⃗ )proposedinref. [494]:
+𝑖 𝐽
+1
+𝑔(⃗𝑟 ,𝑅

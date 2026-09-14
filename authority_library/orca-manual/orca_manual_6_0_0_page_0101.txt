@@ -1,0 +1,70 @@
+[... end of page 100 ...]
+vergesomewhat
+betterthanthenon-linearamplitudeequations).
+ORCA features the calculation of the unrelaxed coupled-cluster density on the basis of the Lambda equations
+forclosed-andopen-shellsystems. Ifafullyrelaxedcoupled-clusterdensityisdesiredthenORCAstillfeatures
+theorbital-optimizedcoupled-clusterdoublesmethod(OOCCD).Thisisnotexactlyequivalenttothefullyrelaxed
+CCSDdensitymatrixbecauseoftheoperator𝜅ˆinsteadof𝑇ˆ . However,resultsareverycloseandorbitaloptimized
+1
+coupled-clusterdoublesisthemethodofchoiceiforbitalrelaxationeffectsarepresumedtobelarge.
+IntermsofORCAkeywords,thecoupled-clusterdensityisobtainedthroughthefollowingkeywords:
+#
+# coupled-cluster density
+#
+(continuesonnextpage)
+78 Chapter6. RunningTypicalCalculations
+
+--- Page 101 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%mdci density none
+linearized
+unrelaxed
+orbopt
+end
+whichwillworktogetherwithCCSDorQCISD(QCISDandCCSDareidenticalinthecaseofOOCCDbecause
+oftheabsenceofsingleexcitations). Note,thatanunrelaxeddensityforCCSD(T)isNOTavailable.
+Insteadofusingthedensityoption“orbopt”inthemdci-block,OOCCDcanalsobeinvokedbyusingthekeyword:
+! OOCCD
+StaticversusDynamicCorrelation
+Havingsaidthat,letuslookatan“abuse”ofthesinglereferencecorrelationmethodsbystudying(verysuperfi-
+cially)asystemwhichisnotwelldescribedbyasingleHFdeterminant. Thisalreadyoccursforthetwistingof
+thedoublebondofC H . Ata90∘ twistanglethesystembehaveslikeadiradicalandshouldbedescribedbya
+2 4
+multireferencemethod(seesectionCompleteActiveSpaceSelf-ConsistentFieldMethod)
+Fig. 6.1: A rigid scan along the twisting coordinate of C H . The inset shows the T diagnostic for the CCSD
+2 4 1
+calculation.
+AscanbeseeninFig.6.1, thereisasteepriseinenergyasoneapproachesa90∘ twistangle. TheHFcurveis
+actually discontinuous and has a cusp at 90∘. This is immediately fixed by a simple CASSCF(2,2) calculation
+whichgivesasmoothpotentialenergysurface. DynamiccorrelationistreatedontopoftheCASSCF(2,2)method
+withtheMRACPFapproachasfollows:
+#
+# twisting the double bond of C2H4
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 79
+
+[... start of page 102 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+#
+! SV(P) def2-TZVP/C SmallPrint NoPop MRACPF
+%casscf nel 2
+norb 2
+mult 1
+nroots 1
+TrafoStep RI
+end
+%mrci tsel 1e-10
+tpre 1e-10
+end
+%method scanguess pmodel
+end
+%paras R= 1.3385
+Alpha=0,180,18
+end
+* int 0 1
+C 0 0 0 0 0 0
+C 1 0 0 {R} 0 0
+H 1 2 0 1.07 120 0
+H 1 

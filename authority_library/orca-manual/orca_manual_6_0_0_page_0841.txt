@@ -1,0 +1,66 @@
+[... end of page 840 ...]
+imental)
+In STEOM-CCSD, the excitation energies and densities can be corrected using the CPCM solvation scheme in
+ORCA.
+Touseit,thekeywordDoSolvhastobesettotrueinthe%mdciblockandthesimplekeywordCPCM(or SMD)+
+nameofthesolventhastobegiven.
+!CPCM(ethanol) STEOM-CCSD TightSCF def2-TZVP def2-TZVP/C def2/J
+%mdci
+Nroots 5
+DoSolv true
+end
+818 Chapter7. DetailedDocumentation
+
+--- Page 841 ---
+ORCAManual,Release6.0.0
+7.34.9 Spin-Orbit Coupling (Experimental)
+Youcancomputethespin-orbitcouplingbetweensingletandtripletsstatesinSTEOM-CCSDusingthekeyword
+STEOMSOC true. PleasenotethatallSOCmatrixelementsandpropertiesarecurrentlycomputedfromtheright
+vectoronly!
+7.34.10 Core excitation
+TheSTEOM-CCSD(andbt-PNO-STEOM-CCSD)methodcanalsobeusedtocomputetheK-edgecore-excitation
+energyofmolecules. SeeCore-Excitationformoredetails.
+7.34.11 Transient absorption
+TransientabsorptionspectracanbecomputedusingthekeywordDoTrans true. TheIRootkeywordwillselect
+thetargetedexcitedstate.
+7.35 Excited States via IH-FSMR-CCSD
+Analternativeapproachfordecouplingthesinglesexcitationspacefromthespaceofdoubleandhigherexcitations
+istousethesocalledFockspacemulti-referencecoupledcluster(FSMRCC)method. Themethodissimilarto
+STEOM-CCSD,butmuchmoreflexibleintermsofformulation.
+7.35.1 General Description
+FSMRCC is originally based on an effective Hamiltonian (EH). The basic idea of EH theory is to obtain some
+selectiveeigenvaluesoftheHamiltonianoperatorfromthetotaleigenvaluespectrum. Forthispurpose,theentire
+configuration space is divided into a model and an outer space with projection operators 𝑃 and 𝑄 , respec-
+𝑀 𝑀
+tively(seeFig.7.38). ThediagonalizationoftheEHtakescareofthenon-dynamiccorrelationcomingfromthe
+interactionsbetweenthemodelspaceconfigurations. Ontheotherhand,thedynamiccorrelationarisesduetothe
+interactionsofthemodelspaceconfigurationswiththeouterspaceconfigurations. Thisinteractionisintroduced
+throughauniversalwaveoperatorΩ, whichisparametrizedsuchthatitgeneratestheexactwavefunctionwhen
+actingonthemodelspace. ThevalenceuniversalwaveoperatorΩhastheform
+Ω=𝑒𝑆˜(𝑝,ℎ)
+wherethebracesindicatenormalorderingoftheclusteroperatorsand𝑆˜(𝑝,ℎ)isdefinedas
+𝑝 ℎ
+𝑆˜(𝑝,ℎ) = ∑︁∑︁ 𝑆˜(𝑘,𝑙)
+𝑘=0𝑙=0
+The cluster operator 𝑆˜(𝑘,𝑙) is capable of destroying exactly k active particles and l active holes, in addition to
+creationofholesandparticles. The𝑆˜(𝑝,ℎ) subsumesalllowersectorFockspace 𝑆˜(𝑘,𝑙) operators. The𝑆˜(0,0) is
+equivalenttostandardsingle-referencecoupledcluster𝑇ˆoperator. TheEHfor(p,h)valencesystemcanbedefined
+as
+𝐻ˆ =𝑃(𝑝,ℎ)Ω−1𝐻ˆΩ𝑃(𝑝,ℎ)
+𝑒𝑓𝑓 𝑀 𝑀
+However,Ω−1maynotbewelldefinedinallthecases. Therefore,theabovedefinitionfortheEHisseldomused.
+Instead,theBlock-Lindgrenapproachisgenerallyusedforsolvingtheequations,whichisdefinedby
+[︁ ]︁
+𝑃(𝑝,ℎ) 𝐻ˆΩ−Ω𝐻ˆ 𝑃(𝑝,ℎ) =0
+𝑀 𝑒𝑓𝑓 𝑀
+[︁ ]︁
+𝑄(𝑝,ℎ) 𝐻ˆΩ−Ω𝐻ˆ 𝑃(𝑝,ℎ) =0
+𝑀 𝑒𝑓𝑓 𝑀
+7.35. ExcitedStatesviaIH-FSMR-CCSD 819
+
+[... start of page 842 ...]
+ORCAManual,Release6.0.0
+Fig.7.38: DivisionoftheconfigurationspaceintomodelandouterspaceineffectiveHamiltonian(EH)theoryand
+intomodel,intermediate,andouterspaceinintermediateHamiltonian(IH)theory. 𝑃 and𝑄denotetherespective
+projectionoperators.
+Whenthemodelspaceisnotenergeticallywellseparatedf

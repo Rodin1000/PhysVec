@@ -1,0 +1,72 @@
+[... end of page 469 ...]
+bytheMMprogram. Theseprogramstypicallyuseanexternalpointchargefile
+when generating the ORCA input. To add the interaction of the point charges to the nuclear energy, the DoEQ
+keywordisusedeitherinthesimpleinputorthe%methodblockasshownbelow.
+# A non QM/MM pointcharge calculation
+! DoEQ
+%pointcharges "pointcharges.pc"
+%method
+DoEQ true
+end
+7.2. MoreonCoordinateInput 447
+
+--- Page 470 ---
+ORCAManual,Release6.0.0
+7.3 Details on the numerical integration grids
+Asinallotherpopulargridschemes,ourgridsareconstructedfromassemblingasetofatomicgridsintoamolec-
+ular one, using Becke’s approach. Each individual atomic grid is build based on optimized parameters for that
+atom,andarecomposedofanangularandaradialpart,thataredefinedseparately.
+ThewholeschemewasupdatedfromORCA5.0,butwetriedtokeepthingsascloseaspossibletotheprevious
+one. First,theoverallconstructionofthesegridsneedstobeexplained.
+7.3.1 The angular grid scheme
+Insteadofusingasingleangulargridthroughoutthewholeatom,mostschemesapplyaso-calledgridpruningin
+ordertoreducethenumberofgridpointsoutsideofthemostimportantregions,aswedoinORCA.Inthecurrent
+scheme,wesplittheatomicgridsintofiveregions,usingLebedevgridswiththefollowingnumberofpointson
+eachofthose:
+Table7.1: DifferentangulargridschemesusedinORCA.ThenumbersindicatetheLebedevgridsused.
+AngularGrid Region1 Region2 Region3 Region4 Region5
+1 14 26 50 50 26
+2 14 26 50 110 50
+3 26 50 110 194 110
+4 26 110 194 302 194
+5 26 194 302 434 302
+6 50 302 434 590 434
+7 110 434 590 770 590
+Theidealcutoffsbetweenthoseregionsweresubjectedtooptimization,andaredefinedforallatoms. Whenever
+werefertoaAngularGridflaginORCA,oneoftheseschemesischosen.
+7.3.2 The radial grid scheme
+Thenumberofradialpoints(𝑛 )foragivenatomissimplydefinedusingtheequationfirstdefinedbyKrackand
+𝑟
+Köster:
+𝑛 =(15×𝜀−40)+𝑏×𝑅𝑂𝑊
+𝑟
+where𝜀iscalledtheIntAccofthatgridinORCA,bisanynumberandROWreferstotherowoftheperiodictable
+forthatatom. Initsoriginalformulation,𝑏wassetto5,buthereitasnowoptimizedandvariesslightlydepending
+ontheAngularGridschemesshownabove.
+OneimportantthingtonoteisthateachincreaseofIntAccby1,adds15radialpointstotheatomicgrids,asinthe
+previousgridscheme. TheseIntAccvalueswereoptimizedforeachangulargrid:
+Table7.2: OptmimizedIntAccparametersfortheexchange-correlationandCOSXgrids.
+AngularGrid XC COSX
+1 4.004 3.816
+2 4.004 4.020
+3 4.159 4.338
+4 4.388 4.871
+5 4.629 4.871
+6 4.959 4.871
+7 4.959 4.871
+448 Chapter7. DetailedDocumentation
+
+[... start of page 471 ...]
+ORCAManual,Release6.0.0
+After defining the number of radial points 𝑛 , the actual radial grid is then defined from a Gauss-Chebyschev
+𝑟
+quadratureusingtheso-calledM3mappingfromTreutlerandAhlrich:
+𝜉 2
+𝑟 = 𝑙𝑛
+𝑙𝑛2 1−𝑥
+where−1≤𝑥≤1,andthecenterofthegrid(𝑥=0)coincideswiththevalueof𝜉. These𝜉parameterswerealso
+optimizedforeachatomtype.
+7.3.3 The DEFGRIDs
+Withallthatinmind,wecannowpresenthowtheDEFGRIDsarebuiltintermsoftheirAngularGridschemeand
+IntAccs,whichdefinetheangularandradialpartsoftheatomicgrids. MoredetailscanbefoundinRef.[383].
+Table7.3: AngulargridschemesusedindifferentpartofORCA.TheXCand

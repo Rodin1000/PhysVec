@@ -1,0 +1,74 @@
+[... end of page 89 ...]
+for RI-JK:
+! RHF RI-MP2 RI-JK def2-TZVP def2/JK def2-TZVP/C TightSCF
+TheMP2modulecanalsodoGrimme’sspin-componentscaledMP2[318]. Itisasemi-empiricalmodification
+of MP2 which applies different scaling factors to same-spin and opposite-spin components of the MP2 energy.
+TypicallyitgivesfairlybitbetterresultsthanMP2itself.
+#
+# Spin-component scaled MP2 example
+#
+! SCS-MP2 def2-TZVPP TightSCF
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 67
+
+--- Page 90 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%paras rCO = 1.20
+ACOH = 120
+rCH = 1.08
+end
+* int 0 1
+C 0 0 0 0.00 0.0 0.00
+O 1 0 0 {rCO} 0.0 0.00
+H 1 2 0 {rCH} {ACOH} 0.00
+H 1 2 3 {rCH} {ACOH} 180.00
+*
+Energy differences with SCS-MP2 appear to be much better than with MP2 itself according to Grimme’s de-
+tailedevaluationstudy. Forthesakeofefficiency, itisbeneficialtomakeuseoftheRIapproximationusingthe
+RI-SCS-MP2keyword. Theopposite-spinandsame-spinscalingfactorscanbemodifiedusingPSand PTinthe
+%mp2block,respectively. Bydefault,PS=6/5andPT=1/3.
+NOTE
+• InverylargeRI-MP2runsyoucancutdowntheamountofmainmemoryusedbyafactoroftwoifyouuse
+thekeyword ! FLOAT.Thisismoreimportantingradientrunsthaninsinglepointruns. Deviationsfrom
+doubleprecisionvaluesforenergiesandgradientsshouldbeinthe𝜇Ehandsub-𝜇Ehrange. However,we
+havemetcaseswherethisoptionintroducedalargeandunacceptableerror,inparticularintransitionmetal
+calculations. Youarethereforeadvisedtobecarefulandcheckthingsoutbeforehand.
+AwordofcautionisdueregardingMP2calculationswithalinearlydependentbasis. Thiscanhappen,forexample,
+withverydiffusebasissets(seeLinearDependenceformoreinformation). Ifsomevectorswereremovedfrom
+thebasisintheSCFprocedure,thoseredundantvectorsarestillpresentas“virtual”functionswithazeroorbital
+energyintheMP2calculation. Whenthenumberofredundantvectorsissmall,thisisoftennotcritical(andwhen
+theirnumberislarge,oneshouldprobablyuseadifferentbasis). However,itisbettertoavoidlinearlydependent
+basis sets in MP2 calculations whenever possible. Moreover, in such a situation the orbitals should not be read
+withtheMOReadandNoIterkeywords,asthatisgoingtoproducewrongresults!
+FrozenCoreOptions
+InMP2energyandgradientrunstheFrozenCore(FC)approximationisappliedbydefault. Thisimpliesthatthe
+coreelectronsarenotincludedintheperturbationtreatment,sincetheinclusionofdynamiccorrelationinthecore
+electronsusuallyeffectsrelativeenergiesorgeometryparametersinsignificantly.
+The frozen core option can be switched on or off with FrozenCore or NoFrozenCore in the simple input line.
+Furthermore,frozenorbitalscanbeselectedbymeansofanenergywindow:
+%method FrozenCore FC_EWIN end
+%mp2 ewin -1.5, 1.0e3 end
+MoreinformationandthedifferentoptionscanbefoundinsectionFrozenCoreOptions
+OrbitalOptimizedMP2Methods
+BymakingtheHylleraasfunctionalstationarywithrespecttotheorbitalrotationsoneobtainstheorbital-optimized
+MP2methodthatisimplementedinORCAincombinationwiththeRIapproximation(OO-RI-MP2). Oneobtains
+fromthesecalculationsorbitalsthatareadjustedtothedynamiccorrelationfieldatthelevelofsecondordermany-
+body perturbation theory. Also, the total energy of the OO-RI-MP2 method is lower than that of the RI-MP2
+methoditself. OnemightthinkofthismethodasaspecialformofmulticonfigurationalSCFtheoryexceptforthe
+factthattheHamiltonianisdividedintoa0thordertermandaperturbation.
+The main benefit of the OO-RI-MP2 method is that it “repairs” the poor Hartree–Fock orbitals to some extent
+whichshouldbeparticularlybeneficialforsystemswhichsufferfromtheimbalanceintheHartree-Focktreatment
+oftheCoulombandtheExchangehole. Basedontheexperiencegainedsofar,theOO-RI-MP2methodisnobetter
+thanRI-MP2itselfforthethermochemistryoforganicmolecules. However,forreactionsbarriersandradicalsthe
+68 Chapter6. RunningTypicalCalculations
+
+[... start of page 91 ...]
+ORCAManual,Release6.0.0
+benefitsofOO-MP2overMP2aresubstantial. Thisisparticularlytruewithrespecttothespin-componentscaled
+variantofOO-RI-MP2thatisOO-RI-SCS-MP2. Furthermore,theOO-RI-MP2methodsubstantiallyreducesthe
+spincontaminationinUHFcalculationsonradicals.
+SinceeveryiterationoftheOO-MP2methodisasexpensiveasaRI-MP2relaxeddensitycalculation,thecompu-
+tationalcostismuchhigherthanforRI-MP2itself. Oneshouldestimateaboutafactorof10increaseincomputa-
+tionaltimewithrespecttotheRI-MP2timeofanormalcalculation. Thismaystillbefeasibleforcalculationsin
+therangeof1000–2000basisfunctions(

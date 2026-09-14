@@ -1,0 +1,70 @@
+[... end of page 177 ...]
+rintedtogetherwiththeDCD-CAS(2)statecompositionaretheonesthatareobtainedfromdiagonalizationof
+the DCD-CAS(2) dressed Hamiltonian. For excited states, these energies suffer from what we call ground state
+bias(seetheoriginalpaperforadiscussion[652]). Aperturbativecorrectionhasbeendevisedtoovercomethis
+problem. Ourstandardchoiceisfirst-orderbiascorrection. Thecorrectedenergiesarealsoprintedintheoutput
+fileandthoseenergiesshouldbeusedinproductionuseoftheDCD-CAS(2)method:
+6.1. SinglePointEnergiesandGradients 155
+
+--- Page 178 ---
+ORCAManual,Release6.0.0
+---------------------------------------------------------
+BIAS-CORRECTED (ORDER 1) STATE AND TRANSITION ENERGIES
+=========================================================
+ROOT Energy/a.u. DE/a.u. DE/eV DE/cm**-1
+=========================================================
+0: -107.093214435 0.000000 0.000 0.0
+1: -107.084988306 0.008226 0.224 1805.4
+Lastbutnotleast,spinorbitcoupling(SOC)andspinspincoupling(SSC)areimplementedinconjunctionwiththe
+DCD-CAS(2)methodinaQDPT-likeprocedureandavarietyofdifferentmagneticandspectroscopicproperties
+canbealsocalculated. Werefertothedetaileddocumentation(SectionDynamicCorrelationDressedCAS)for
+furtherinformation.
+Warning: NotethatthecomputationalcostofaDCD-CAS(2)calculationscalesasroughlythe3rdpowerof
+thesizeoftheCASCIspace. Thismakescalculationswithactivespacescontainingmorethanafewhundred
+CSFsveryexpensive!
+6.1.11 Full Configuration Interaction Energies
+ORCAprovidesseveralexactandapproximateapproachestotacklethefullconfigurationinteraction(FCI)prob-
+lem. ThesemethodsareaccessibleviatheCASSCFmodule(seeSectionGeneralDescription)ortheICEmodule
+(describedinSectionApproximateFullCICalculationsinSubspace: ICE-CI).
+Inthefollowing,wecomputetheFCIenergyofthelithiumhydridemoleculeusingtheCASSCFmodule,where
+a typical input requires the declaration of an active space. The latter defines the number of active electron and
+orbitals, which are evaluated with the FCI ansatz. In the special case that all electrons and orbitals are treated
+withtheFCIansatz,wecanusethekeywordDoFCIinthe%CASSCFblockandlettheprogramsettheactivespace
+accordingly. Inthisexample,wefocusonthesingletgroundstate. Notethatexcitedstatesforarbitrarymultiplicities
+canbecomputedwiththekeywordsMultandNRoots. TheFCIapproachisinvarianttoorbitalrotationsandthus
+orbitaloptimizationisskippedintheCASSCFmodule. Nevertheless,itisimportanttoemployasetofmeaningful
+orbitals,e.g.fromaconvergedHartree-Fockcalculation,toreducethenumberofFCIiterations.
+# Hartree-Fock orbitals
+!def2-tzvp RHF
+*xyz 0 1
+Li 0 0 0
+H 0 0 1.597
+*
+TheoutputoftheHartree-Fockcalculationalsoreportsonthetotalnumberofelectronsandorbitalsinyoursystem
+(seesnippetbelow).
+Number of Electrons NEL .... 4
+Basis Dimension Dim .... 20
+Inthegivenexample, thereare4electronsin20orbitals, whichisa“CAS(4,20)”. ReadingtheconvergedRHF
+orbitals,wecanstarttheFCIcalculation.
+!def2-tzvp extremescf
+!moread
+%moinp "RHF.gbw"
+%maxcore 2000
+%casscf
+DoFCI true # sets NEL 4 and NORB 20 in this example.
+(continuesonnextpage)
+156 Chapter6. RunningTypicalCalculations
+
+[... start of page 179 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+*xyz 0 1
+Li 0 0 0
+H 0 0 1.597
+*
+The output reports on the detailed CI settings, the number of configuration state functions (CSFs) and the CI
+convergencethresholds.
+CI-STEP:
+CI strategy ... General CI
+Number of multiplicity blocks ... 1

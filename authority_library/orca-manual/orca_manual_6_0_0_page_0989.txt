@@ -1,0 +1,73 @@
+[... end of page 988 ...]
+ault
+HIGH # will print many extra files!
+NREPEATGUEST 1 # number of times to repeat the content of the "GUEST" file
+CUMULATIVE TRUE # add the contents of the "GUEST" file one on
+# top of each other?
+# default is FALSE, meaning each will be done independently.
+GUESTCHARGE 0 # can be used to defined a charge for the guest (default 0)
+GUESTMULT 3 # same for multiplicty (default 1)
+(continuesonnextpage)
+966 Chapter7. DetailedDocumentation
+
+--- Page 989 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# both can also be given via the comment line of the
+# "filename.xyz", see above.
+RAMDOMSEED TRUE # whether to allow for the process to be trully random and
+# will give different results everytime (default FALSE)
+FIXHOST TRUE # freeze coordinatef for the HOST during all steps?
+# (default FALSE)
+CHECKGUESTTOPO FALSE # make sure that the topolgy of the GUEST is always kept
+# (default TRUE)
+#
+# evolution step
+#
+MAXITER 10 # maximum number of iterations
+MINITER 3 # minimum number to check for convergence
+# and minimum required of equal steps
+# to signal convergence
+POPDENSITY 0.5 # the population density based on the HOST grid
+POPSIZE 150 # a fixed number for the swarm population size
+EVOPTLEVEL NORMALOPT # use default optimization criteria during the evolution step
+# instead of the !SLOPPYOPT? more accurate, but slower.
+EVPES GFNFF # which PES to use **only** during the evolution step.
+GFN0XTB # can be different from the final optimization.
+GFN1XTB
+GFN2XTB
+#
+# final optimization
+#
+NOPT 10 # a fixed number of structures to be optimized
+NOOPT FALSE # do not optimize any structure at all? (default FALSE)
+7.50 More on the ORCA SOLVATOR
+Here we will present a few more technical details about the SOLVATOR that were too specific to be presented
+onthemoregeneralsection. ThissectionpresumesthatthesectionORCASOLVATOR:AutomaticPlacementof
+ExplicitSolventMoleculeswasalreadyread. Ifnot,pleasereturnhereafterthat.
+7.50.1 The Simpler Stochastic Mode
+The CLUSTERMODE STOCHASTIC,asthenamesuggests, usesrandomtrialanderrortoassigntheplacingofthe
+solvents. Well,itisactuallymorecomplicatedthanthat.
+Thealgorithmactuallyusesinformationfromself-consistentEEQcharges[132]aspartofanextremelysimplistic
+potentialtoguidetheplacingofpolarmoleculesinamorereasonableway.
+Aftertryingtodistributethesolventmoleculesomewhereandcheckingforclashes,wefirstcomputetheelectro-
+staticenergybetweensolventandsolute:
+𝑠𝑜𝑙𝑢𝑡𝑒𝑠𝑜𝑙𝑣𝑒𝑛𝑡
+𝐸 = ∑︁ ∑︁ 𝑄 𝐴 𝑄 𝐵 , (7.311)
+𝑒𝑙𝑒𝑐 𝑅 4𝜋𝜖
+𝐴𝐵 𝑠𝑜𝑙𝑣
+𝐴 𝐵
+7.50. MoreontheORCASOLVATOR 967
+
+[... start of page 990 ...]
+ORCAManual,Release6.0.0
+anddefineourtargetfunctiontobeminimized(𝑉)asadampedversionofthat,usingtheminimumdistance𝑅
+𝑚𝑖𝑛
+betweenthesoluteandsolventatoms:
+𝑉 =𝐸 𝑒𝑙𝑒𝑐 𝑒−𝑅 𝑚 2 𝑖𝑛 if𝐸 𝑒𝑙𝑒𝑐 <0 (7.312)
+=𝑅 otherwise,
+𝑚𝑖𝑛
+TheSTOCHASTICmodethenconsistsoffindingthecorrectsolventplacementthatminimizes𝑉 foragivensolute.
+Thedampingfunctionistheretoensurethat:
+1. Theelectrostaticinteractiondecaysstronglywithdistance,
+2. Repu

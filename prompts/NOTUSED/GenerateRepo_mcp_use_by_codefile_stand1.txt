@@ -1,0 +1,50 @@
+Your task is to generate a whole repository according to a given code file (.py or .jl file). 
+
+-------------------------------------------------------------------------------------------------
+Input: you will be given information as follows:
+1. A code file: a complete implementation of the targetted task. Usually in .py or .jl formats. 
+    - The code file will include parts like importing packages, various functions, a main function,...
+
+
+-------------------------------------------------------------------------------------------------
+Output: you will generate a repository based on the given code file. 
+1. You MUST use the filesystem-mcp to write and save files in the specified directory. 
+2. You split the original code file into many functions. Each function should be extracted and saved as a seperate file in the repository (named as a 'function file'). 
+    - In each 'function file', you should include all the package imports in the original code file to achieve high robustness. 
+    - You are NOT ALLOWED to modify the content of the definitions of the functions. Your only task is to split them into seperate files. 
+3. The 'main' function should also be seperated as a function. And the name MUST still be 'main'.  
+    - In this 'main' file, you give specific parameter values. 
+    - You are FORBIDDEN to treat this 'main' function as the repository entry point (NOT needed in this task), you MERELY copy the main function in the input code file.  
+4. You MUST include a 'README.txt' file in the repository. This README should include following parts:
+    - Part 1: you should list all functions (names, input dependency, output results) of this repository. 
+    - Part 2: you should list all packages needed. 
+    - Part 3: you should list all input parameter definitions and values taken in this task. 
+        - the parameter valued MUST be the same with that in the input code file. DO NOT change any of them. 
+        - you get those values first from the 'main' function part in the input code file. 
+        - if you cannot find values in the 'main' part, you go to other parts to look for default values. 
+        - you MUST label information source ('main', other functions) after the values. 
+    
+--------------------------------------------------------------------------------------------------
+Other requests:
+1. Tool arguments must be a JSON object, not a JSON string. Never wrap the arguments object in quotes.
+2. Allowed keys for filesystem.save_file are exactly: file_path (string) and content (string). Do not add, rename, or localize keys (no filepath, path, 文件路径, 极_path, etc.).
+3. JSON escaping: only these escapes are allowed inside strings: \, ", \n, \t, \r, \b, \f, \uXXXX. Do not emit any other backslash escapes. Do NOT write sequences like _, \Δ, \ψ, or backslash before ordinary characters.
+4. file_path must be a relative path that uses forward slashes (/) only. Do not use backslashes () and do not use absolute paths. Do not include .. path traversal segments.
+5. Pre‑flight self‑check before sending the tool call: 
+    - verify that the arguments object is valid JSON and that no backslash appears before a character outside the allowed escape set. If found, replace that backslash with a double backslash (\) or remove it.
+    - verify arguments is a JSON object with exactly two string properties: file_path and content.
+    - Verify file_path does not start with “/”, contain “\”, or contain “..”.
+6. Do not serialize the arguments twice. Do not place the entire JSON object inside a string field or code block.
+7. Keep identifiers and prose ASCII‑only if instructed (optional but recommended for robustness): no non‑ASCII letters or symbols in code; use ASCII equivalents (psi, omega, Delta; <=, >=, !=; div(a,b) instead of ÷).
+8. Content must be the raw source text only. Do not include Markdown code fences (```), YAML front matter, or any explanatory prose.
+9. One file per call: each save_file invocation must write exactly one file. If multiple files are required, make separate calls, one per file.
+10. file_path must be a relative path that uses forward slashes (/) only. Do not use backslashes () and do not use absolute paths. Do not include .. path traversal segments.
+11. If content contains non-ASCII or suspicious tokens like r'(极速赛车|官网|[a-z0-9-]+.(com|cn)\b)' and you’re in ASCII-only mode, reject and ask the agent to regenerate.
+
+--------------------------------------------------------------------------------------------------
+Example: the generated repository should contain files:
+site_BHM1D.jl
+hamiltonian_BHM1D.jl
+...
+main.jl
+README.txt

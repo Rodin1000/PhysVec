@@ -1,0 +1,82 @@
+[... end of page 575 ...]
+deeffortstochoosereasonableandrobustde-
+faults,howeverweencouragetheusertobecriticaloftheresultsandtoproceedwithcaution,especiallyif
+diffusebasissetsornumericalintegration(DFT,COSX)areused. Inthelattercase, DefGrid3isrecom-
+mended.
+• In particular, the near-redundancy of PAO domains introduces numerical instabilities in the algorithm.
+Hence, these should be truncated at PAOOverlapThresh=1e-5, which is higher than the default for the
+energyandgradient. Therefore,theenergyandgradientinjobs,whichincluderesponsepropertycalcula-
+tions,maydeviatefromjobs,whichdonot. Thedifferenceismuchsmallerthantheaccuracyofthemethod
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 553
+
+--- Page 576 ---
+ORCAManual,Release6.0.0
+(vsRI-MP2)butitisstilladvisabletousethesamevalueof PAOOverlapThreshinallcalculations,when
+calculating,e.g.,relativeenergies.
+• Forthesamereason,ifdiffusebasissetsareused,itisadvisedtosetSThresh=1e-6inthe%scfblock.
+• Another instability arises due to small differences between the occupation number of kept and discarded
+PNOsandmayresultinverylargeerrors. ThesmallestdifferenceisprintedduringtheDLPNO-MP2relaxed
+densitycalculation:
+SmallestoccupationnumberdifferencebetweenPNOsandcomplementaryPNOs. Absolute: 3.10e-10Rel-
+ative: 3.28e-02
+Wefoundthatarelativedifferenceunder10−3,whichisnotuncommon,maybecauseforconcern. Toregu-
+larizetheunstableequations,alevelshiftisapplied,whichisequalto𝑇CutPNO multipliedby𝑇ScalePNO_LShift .
+Areasonablevalueof TScalePNO_LShift=0.1issetbydefaultforresponsepropertycalculationsbutnot
+forgradient(orenergy)calculations,asthesewerenotfoundtosufferfromthisissue,sothesameconsider-
+ationsasaboveapply.
+• TheoptionDLPNOGrad_Opt=BUFFEREDisnotimplementedforresponseproperties.
+AsummaryoftheadditionaloptionsusedforDLPNO-MP2responsepropertiesisgivenbelow:
+%mp2
+PAOOverlapThresh 1e-5 # Threshold for constructing non-redundant PAOs
+# Default is 1e-8 for energy/gradient calculations!
+TScalePNO_LShift 0.1 # Level shift for PNO constraint equations:
+# TScalePNO_LShift * TCutPNO
+# Default is 0 for energy/gradient calculations!
+end
+AnexampleinputforaDSD-PBEP86calculationoftheNMRshieldinganddipolepolarizabilitytensorsemploying
+DLPNO-MP2 is given below. Note that the def2-TZVP basis set is not necessarily ideal for either shielding or
+polarizability.
+! DLPNO-DSD-PBEP86/2013 D3BJ def2-TZVP def2-TZVP/C TightSCF NoFrozenCore
+! RIJCOSX def2/J DefGrid3 # Use RIJCOSX with tighter grid settings
+! NMR # Request NMR shielding
+%elprop Polar 1 end # Request polarizability
+%mp2 # These settings are default for response properties
+Density Relaxed
+PAOOverlapThresh 1e-5
+TScalePNO_LShift 0.1
+end
+%eprnmr
+GIAO_2el GIAO_2el_RIJCOSX # Also use RIJCOSX for GIAO integrals
+end # (This is the default for !RIJCOSX)
+*xyzfile 0 1 geometry.xyz
+NumericalDLPNO-MP2derivatives
+The various truncations in local correlation methods introduce small discontinuities in the potential energy sur-
+face. Forexample,asmalldisplacementmaychangethesizesofcorrelationdomains,leadingtoaslightlylarger
+or smaller error from the domain approximation. The default DLPNO-MP2 truncation thresholds are conserva-
+tive enough, so that these discontinuities should not cause problems in geometry optimizations using analytic
+gradients.[686] However, if one wishes to calculate (semi-)numerical derivatives of the DLPNO-MP2 energy,
+gradient, or properties using finite differences, large errors can occur. Therefore, in these cases it is advisable
+to keep the pair lists and correlation domains fixed upon displacement. Currently, this can be achieved using
+thefollowingprocedure: first,thecalculationatthereferencegeometryiscarriedoutwiththeadditionalsetting
+StoreDLPNOData=true:
+! DLPNO-MP2 def2-SVP def2-SVP/C VeryTightSCF
+%base "calc0"
+(continuesonnextpage)
+554 Chapter7. DetailedDocumentation
+
+[... start of page 577 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%mp2
+StoreDLPNOData true
+end
+*xyzfile 0 1 geom0.xyz
+Thiswillproducetheadditionalfilescalc0.MapDLPNO00.tmp,calc0.MapDLPNOPre0.tmp,calc0.IJLIST.0.tmp,
+calc0.IJLISTSCR.0.tmp, and calc0.IJNPNO.0.tmp, which are needed in the working directory for the next step
+togetherwiththelocalizedorbitalsincalc0.loc. Thecalculationatthedisplacedgeometryisthenrequestedas:
+! DLPNO-MP2 def2-SVP def2-SVP/C VeryTightSCF
+%mp2
+RefBaseName "calc0"
+end
+*xyzfile 0 1 geom1.xyz
+The program will use the orbitals from calc0.loc as a starting guess for the localization and map

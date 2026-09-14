@@ -1,0 +1,82 @@
+[... end of page 1047 ...]
+𝑖 𝑎 𝑎𝑖
+𝑎𝑖 𝑎𝑖 (7.343)
+(︃ )︃ (︃ )︃
+∑︁ 1∑︁ (︁ )︁ 1 ∑︁ ∑︁
+=𝐸 + 𝐹 𝑡𝑖 + ⟨𝑖𝑗||𝑎𝑏⟩ 𝑡𝑖𝑗 +2𝑡𝑖𝑡𝑗 + 𝑡𝑖q · 𝑡𝑖v
+0 𝑖𝑎 𝑎 4 𝑎𝑏 𝑎 𝑏 2 𝑎 𝑎𝑖 𝑎 𝑎𝑖
+𝑖𝑎 𝑖𝑗𝑎𝑏 𝑎𝑖 𝑎𝑖
+ThisschemeisthedefaultCCSD/C-PCMapproachinORCAandisavailableinORCAforcanonical-CCSD(RHF
+andUHF)andDLPNO-CCSD(RHFandUHF).Inthiscase,thetag“CPCMccm”inthe%cpcmblockisequalto2.
+However,asthePTESschemeisthedefaultinORCA,theuserjustneedstoaddtheinformationaboutthesolvent
+intheinputfile,inordertousethisapproach.
+7.53. ImplicitSolvationModels 1025
+
+--- Page 1048 ---
+ORCAManual,Release6.0.0
+! DLPNO-CCSD cc-pVTZ cc-PVTZ/C TightSCF CPCM(Water)
+* xyz 0 1
+O -0.00000018976103 0.00606010894837 0.00000000004527
+H 0.76098169249695 -0.58891312953082 -0.00000000000022
+H -0.76098151333900 -0.58891299029372 -0.00000000000022
+*
+NotesregardingtheuseoftheCCSD/C-PCMschemes:
+• ForcalculationswithinthePTE(S)andthePTESschemes,theexplicitC-PCMcontributiontothetotalen-
+ergy(seeeqs. (7.339)and(7.343))isprintedinthe“COUPLED CLUSTER ENERGY”blockaftertheequations
+forthe“T”amplitudesconverge. Inthiscase,thisenergyislabelledas“C-PCM corr. term”andisalready
+includedinthecorrelationenergy,“E(CORR) “. Fortheinputexamplefromabove,thisinformationlooks
+like:
+----------------------
+COUPLED CLUSTER ENERGY
+----------------------
+E(0) ... -76.066903687
+E(CORR)(strong-pairs) ... -0.267203798
+E(CORR)(weak-pairs) ... -0.000106106
+E(CORR)(corrected) ... -0.267309904
+C-PCM corr. term (included in E(CORR)) ... -0.000003158
+E(TOT) ... -76.334213591
+Singles Norm <S|S>**1/2 ... 0.017784967
+T1 diagnostic ... 0.006287935
+This contribution does not represent the whole C-PCM contribution to the correlation energy, as this one
+alsooccurs,implicitly,throughthe“T”amplitudes.
+• TheC-PCMcontributiontotheΛequationsisimplementedinORCAforthePTE(S)andPTESschemes.
+Then,theusercanrequestunrelaxeddensities.
+7.54 Calculation of Properties
+7.54.1 Electric Properties
+Calculation of first order (electric dipole and quadrupole moments) and second order (polarizabilities) electric
+propertiescanberequestedinthe%elpropinputblock. Thesecondorderpropertiescanbecalculatedthroughthe
+solutionoftheCP-SCF(seeCP-SCFOptions)orCP-CASSCF(seeCASSCFLinearResponse)equations. Details
+areshownbelow:
+%elprop
+Dipole true
+Quadrupole true
+Polar true
+PolarVelocity true # polarizability w.r.t. velocity perturbations
+PolarDipQuad true # dipole-quadrupole polarizability
+PolarQuadQuad true # quadrupole-quadrupole polarizability
+freq_r 0.00 # purely real frequency (default: static calculation)
+freq_i 0.00 # purely imaginary frequency (default: static calculation)
+Solver CG # CG(conjugate gradient)
+# other options: DIIS or POPLE(default)
+MaxDIIS 5 # max. dimension of DIIS method
+Shift 0.2 # level shift used in DIIS solver
+Tol 1e-3 # Convergence of the CP-SCF equations
+# (norm of the residual)
+(continuesonnextpage)
+1026 Chapter7. DetailedDocumentation
+
+[... start of page 1049 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+MaxIter 64 # max. number of iterations in CPSCF
+PrintLevel 2
+Origin CenterOfElCharge # center of electronic charge
+CenterOfNucCharge # center of nuclear charge
+CenterOfSpinDens # center of spin density
+CenterOfMass # center of mass (default)
+N # position of atom N (starting at 0)
+X,Y,Z # explicit position of the origin
+# in coordinate input units (Angstrom by default)
+end
+Themostefficientandaccuratewaytocalculatethepolarizabilityanalyticallyistousethecoupled-perturbedSCF
+method. Themosttimeconsuming

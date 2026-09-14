@@ -1,0 +1,88 @@
+[... end of page 747 ...]
+(ifDo_SD_Corristrue): Correctiontothesteepestdescentstep:
+1. Basedongrad0andgrad1avectoriscomputedwhichrepresentsacorrectiontothefirstSD(SD1or
+SD3)step. ThiscorrectionbringsthegeometryclosertotheIRC.
+2. Thisvectorisnormalized, scaledbyScale_Displ_SD_CorrtimesthelengthofSD1orSD3, andthe
+resultingdisplacementvector(SDC1)isappliedtoG1.
+3. Optional(ifSD_Corr_ParabolicFitistrue):
+1. IftheenergyincreasesafterapplyingstepSDC1,SDC1isscaledby0.5(SDC2=0.5xSD1),if
+theenergydecreases,SDC1isscaledby2(SDC2=2xSD1). SDC2isthenaddedtoG1.
+7.28. IntrinsicReactionCoordinate 725
+
+--- Page 748 ---
+ORCAManual,Release6.0.0
+2. Aparabolicfitforfindingthedisplacementvector(SDC3)whichleadstominimalenergyiscarried
+outusingthethreeSPenergies(G1, geometryafterSDC1andafterSDC2step). SDC3hasthe
+samedirectionasSDC1andSDC2,butcanhaveadifferentlength.
+3. ThekeywordInterpolate_onlycontrolswhetherthelengthofSDC3hastobeinbetween0andand
+thelengthofSDC1. Ifthatisthecase,themaximumlengthisdeterminedbySDC1,theminimum
+lengthiszero.
+4. AttheresultinggeometryG2(G1+SDC1orG1+SDC3)thegradientiscalculated(grad2).
+3. Thegradientatthenewgeometryischeckedforconvergence.
+4. Optional(ifAdapt_Scale_Displistrue):
+1. Iftheresultingoverallstepsizeissmallerthan0.5timesScale_Displ_SD,Scale_Displ_SDismultiplied
+by0.5.
+2. Iftheresultingoverallstepsizeislargerthan2timesScale_Displ_SD,Scale_Displ_SDismultiplied
+by2.
+3. Scale_Displ_SD may not become smaller than 1/16 times the initial Scale_Displ_SD and not larger
+than4timestheinitialScale_Displ_SD.
+Thefollowingkeywordsareavailable:
+! IRC
+%irc
+MaxIter 20
+PrintLevel 1
+Direction both # both - default
+# forward
+# backward
+# down
+# Initial displacement
+InitHess read # by default ORCA uses the Hessian from AnFreq or NumFreq, or
+# computes a new one
+# read - reads the Hessian that is defined via Hess_Filename
+# calc_anfreq - computes the analytic Hessian
+# calc_numfreq - computes the numeric Hessian
+Hess_Filename "h2o.hess" # input Hessian for initial displacement, must be used
+# together with InitHess = read
+hessMode 0 # Hessian mode that is used for the initial displacement. Default 0
+Init_Displ DE # DE (default) - energy difference
+# length - step size
+Scale_Init_Displ 0.1 # step size for initial displacement from TS. Default 0.1 a.u.
+DE_Init_Displ 2.0 # energy difference that is expected for initial displacement
+# based on provided Hessian (Default: 2 mEh)
+# Steps
+Follow_CoordType cartesian # default and only option
+Scale_Displ_SD 0.15 # Scaling factor for scaling the 1st SD step
+Adapt_Scale_Displ true # modify Scale_Displ_SD when the step size becomes
+# smaller or larger
+SD_ParabolicFit true # Do a parabolic fit for finding an optimal SD step
+# length
+Interpolate_only true # Only allow interpolation for parabolic fit, not
+# extrapolation
+Do_SD_Corr true # Apply a correction to the 1st SD step
+Scale_Displ_SD_Corr 0.333 # Scaling factor for scaling the correction step to
+# the SD step. It is multiplied by the length of the
+# final 1st SD step
+SD_Corr_ParabolicFit true # Do a parabolic fit for finding an optimal correction
+# step length
+# Convergence thresholds - similar to LooseOpt
+TolRMSG 5.e-4 # RMS gradient (a.u.)
+TolMaxG 2.e-3 # Max. element of gradient (a.u.)
+(continuesonnextpage)
+726 Chapter7. DetailedDocumentation
+
+[... start of page 749 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# Output options
+Monitor_Internals # Up to three internal coordinates can be defined
+{B 0 1} # for which the values are printed during the IRC run.
+{B 1 5} # Possible are (B)onds, (A)ngles, (D)ihedrals and (I)mpropers
+end
+end
+NOTE
+• Fordirection=down(downhill)noinitialdisplacementisnecessary,andthusnoHessianisneeded.
+7.29 Nudged Elastic Band Method
+TheNudgedElasticBand(NEB)[384,416,585]methodisusedtofindaminimumenergypath(MEP)connecting
+twolocalenergyminimaonthepotentialenergysurface(PES)andtherebyanestimateoftheactivationenergyfor
+thetransition. Thetwominimaarereferredtoasthereactantandproductinthefollowingdiscussion. Thepathcan
+haveoneormoremaxima,each

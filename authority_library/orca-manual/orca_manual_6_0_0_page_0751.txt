@@ -1,0 +1,52 @@
+[... end of page 750 ...]
+bylinesegment𝑖
+𝑖
+and𝐸ref istheenergyofthehigherenergyminimum. Theenergy-weightedspringswilltypicallyservetoimprove
+thetangentestimateinthebarrierregionandhencestabilizethecalculations. Theinclusionofenergy-weighted
+springscanbeimportantinreactionswheretheenergybarrierisnarrowand/orthepathwayischaracterizedbya
+long‘energytail’,e.g.,inrearrangementsordissociationreactions. Thechoiceofspringconstantswillaffectthe
+behaviorofacalculation,especiallythenumberofiterationsneededtoreachconvergence. Otherformulationsfor
+springforcesarealsoavailablesinceORCA4.2(keyword: springtype). Thesearereferredtoastheoriginal[416]
+andideal[553]springforces. Theoriginalspringforcesareestimatedbyaspringactingoneachdegreeoffreedom
+728 Chapter7. DetailedDocumentation
+
+--- Page 751 ---
+ORCAManual,Release6.0.0
+betweenapairofadjacentimages. Foridealspringseachimageisassignedanidealpositionalongthepathbased
+on a linear interpolation of the current location of the images and the individual images interact with the ideal
+locationsviaspringforces. Theidealspringsarecurrentlynotimplementedtoworkwithenergyweightedspring
+constants.
+WhileonlythecomponentofthespringforceparalleltothepathisincludedinanNEBcalculation(bydefault)the
+usercanchoosetoincludeafractionofthespringforceactingperpendiculartothepathtostabilizecalculations
+(keyword: perpspring. Since,theperpendicularcomponentofthespringforcecanservetostraightenoutthepath
+and is useful for complex pathways with multiple energy extrema and low resolution of the path. The inclusion
+oftheperpendicularcomponentofthespringforceisalwaysaccompaniedbyaswitchingfunctionthatisusedto
+scaleitaccordingto(i)convergencetotheMEP(the‘tan’function)[790](ii)theanglebetweenadjacentimages
+(the ‘cos’ function)[416] or a combination of both. The inclusion of the perpendicular spring force can help to
+reducethenumberofiterationsandeliminatekinksonthepath. However,itisimportanttostressthatbyinclusion
+oftheperpendicularspringforces,theimagesmaynotconvergeontheMEP.Alternatively,theusercanchooseto
+usethemodifiedDNEBmethod[790,852].
+7.29.2 Optimization and convergence of the NEB method
+TheeffectiveforceusedinastandardNEBcalculationsisthesumoftheatomicforcecomponentperpendicular
+tothepathandthespringforcecomponentparalleltothepath,
+𝐹 NEB =𝐹⊥+𝐹 sp,‖
+𝑖 𝑖 𝑖
+ThepathcanbebroughttotheMEPbymovingaccordingtotheeffectiveforce,asisshowninFig.7.21.
+Fig.7.21: Visualizationoftheeffectiveforce,𝐹NEBanditstwocomponents: 𝐹⊥and𝐹 sp,‖forthreeimagesalong
+𝑖 𝑖
+anintermediatepathinaNEBoptimization. ThefigureistakenfromRef. [3]
+Thiscanbeachievedbyusinganyofthethreeoptimizationmethodsimplemented(keyword:opt_method): velocity
+projectionoptimization(VPO)[416],fastinertialrelxationengine(FIRE)[108]andL-BFGS[635]. VPOandFIRE
+aremorerobustforregionsthatarefarfromtheMEP,whileL-BFGSconvergesfasterwhentheimagesareclose
+to the MEP. FIRE and VPO both have a local and global implementation (keyword:local). In the local variant,
+alloftheimagesaretreatedindividuallywhentakinganoptimizationstep, whileinthelatterthewholebandis
+treatedasasinglepoint. Aconstant‘trust-radius’isusedforalloptimizationmethods,whereifthemagnitudeof
+7.29. NudgedElasticBandMethod 729
+
+[... start of page 752 ...]
+ORCAManual,Release6.0.0
+themaximumCartesiancomponentofanoptimizationstepexceedsauser-suppliedthreshold(keyword:maxmove),
+thewholedisplacementisscaleddownaccordingly. ThenumberofstepsstoredintheL-BFGSoptimizationfor
+theconstructionoftheapproximateHessianmatrixcanbeadjustedbytheuser(keyword:lbfgs_memory). Fora
+more conservative optimization with L-BFGS, the memory can also be erased if a large step is attempted (key-
+word:lbfgs_restart_on_maxmove)

@@ -1,0 +1,79 @@
+[... end of page 187 ...]
+3LYP/G SV(P) Opt
+* int 0 1
+C 0 0 0 0.0000 0.000 0.00
+O 1 0 0 1.2029 0.000 0.00
+H 1 2 0 1.1075 122.016 0.00
+H 1 2 3 1.1075 122.016 180.00
+*
+AnoptimizationwiththeRImethod(theBPfunctionalisrecommend)wouldsimplylooklike:
+! BP SV(P) OPT
+* int 0 1
+C 0 0 0 0.0000 0.000 0.00
+O 1 0 0 1.2029 0.000 0.00
+H 1 2 0 1.1075 122.016 0.00
+(continuesonnextpage)
+6.3. GeometryOptimizations,SurfaceScans,TransitionStates,MECPs,ConicalIntersection1s6,5
+IRC,NEB
+
+--- Page 188 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H 1 2 3 1.1075 122.016 180.00
+*
+Anoptimizationofthefirstexcitedstateofethylene:
+! BLYP SVP OPT
+%tddft
+IRoot 1
+end
+* xyz 0 1
+C 0.000000 0.000000 0.666723
+C 0.000000 0.000000 -0.666723
+H 0.000000 -0.928802 1.141480
+H -0.804366 -0.464401 -1.341480
+H 0.000000 0.928802 1.241480
+H 0.804366 0.464401 -1.241480
+*
+6.3.2 Numerical Gradients
+Iftheanalyticgradientisnotavailable,thenumericalgradientcansimplyberequestedvia:
+! NumGrad
+asinthefollowingexample:
+!CCSD(T) TZVPP
+!Opt NumGrad
+* int 0 1
+C 0 0 0 0 0 0
+O 1 0 0 1.2 0 0
+H 1 2 0 1.1 120 0
+H 1 2 3 1.1 120 180
+*
+NOTE
+• Beawarethatthenumericalgradientisquiteexpensive. Thetimeforonegradientcalculationisequalto6
+×(numberofatoms)×(timeforonesinglepointcalculation).
+• Thenumericalgradientcanbecalculatedinamulti-processrun,usingamaximumofthreetimesthenumber
+ofatoms(seesectionHintsontheUseofParallelORCA).
+Moredetailsonvariousoptions,geometryconvergencecriteriaandthelikearefoundinsectionGeometryOpti-
+mization.
+6.3.3 Some Notes and Tricks
+Note:
+• TightSCFintheSCFpartissetasdefaulttoavoidthebuildupoftoomuchnumericalnoiseinthegradients.
+• Even if the optimization does not converge, the ORCA output may still end with “****ORCA TERMI-
+NATEDNORMALLY****”. Thereforedonotrelyonthepresenceofthislineasanindicatorofwhether
+the geometry optimization is converged! Rather, one should instead rely on the fact that, an optimization
+jobthatterminatesbecausethemaximumnumberofiterationshasbeenreached,willgeneratethefollowing
+outputmessage:
+166 Chapter6. RunningTypicalCalculations
+
+[... start of page 189 ...]
+ORCAManual,Release6.0.0
+Warning:
+The optimization did not converge but reached the maximum number of
+optimization cycles. Please check your results very carefully.
+Whileasuccessfullyconvergedjobwillgeneratethefollowingmessageinstead:
+***********************HURRAY********************
+*** THE OPTIMIZATION HAS CONVERGED ***
+*************************************************
+Tip:
+• In rare cases the redundant internal coordinate optimization fails. In this case, you may try to use COPT
+(optimization in Cartesian coordinates). This will likely take many more steps to converge but should be
+stable.
+• For optimizations in Cartesian coordinates the initial guess H

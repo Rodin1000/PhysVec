@@ -1,0 +1,87 @@
+[... end of page 520 ...]
+hange the defaults below if you know what you are doing
+AutoAuxF[0] 20.0 # The factor to increase the maximal s-exponent
+AutoAuxF[1] 7.0 # Same for the p-shell
+AutoAuxF[2] 4.0 # Same for the d-shell
+AutoAuxF[3] 4.0 # Same for the f-shell
+AutoAuxF[4] 3.5 # Same for the g-shell
+AutoAuxF[5] 2.5 # Same for the h-shell
+AutoAuxF[6] 2.0 # Same for the i-shell
+AutoAuxF[7] 2.0 # Same for the j-shell
+AutoAuxB[0] 1.8 # Even-tempered expansion factor for the s-shell
+AutoAuxB[1] 2.0 # Same for the p-shell
+AutoAuxB[2] 2.2 # Same for the d-shell
+AutoAuxB[3] 2.2 # Same for the f-shell
+AutoAuxB[4] 2.2 # Same for the g-shell
+(continuesonnextpage)
+498 Chapter7. DetailedDocumentation
+
+--- Page 521 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+AutoAuxB[5] 2.3 # Same for the h-shell
+AutoAuxB[6] 3.0 # Same for the i-shell
+AutoAuxB[7] 3.0 # Same for the j-shell
+AutoAuxTightB true # Only use B[l] for shells with high l and B[0] for the rest
+end
+Notethatiftheorbitalbasissetcontainsdiffusefunctions,asisthecasefortheaug-cc-pVXZsets,theAutoAux
+fitting basis may contain (near-)linear dependencies. In this case, the Cholesky decomposition of the Coulomb
+metricwillfailandtheprogramwilllikelycrash. Onemayprinttheoffendingauxiliarybasisusing!PrintBasis
+andmanuallyremovethemostdiffuses-and/orp-functions,whichwillusuallyresolvetheproblem. Analternative,
+automaticsolutionisimplementedinORCA5.0–seesectionRemovalofRedundantBasisFunctions.
+7.5.3 Assigning or Adding Basis Functions to an Element
+Inordertoassignanewbasissettoagivenelement,use:
+%basis
+NewGTO 8 # New basis for oxygen.
+# NewGTO O # This works as well.
+S 3
+1 910.10034975 0.03280967
+2 137.19711335 0.23422391
+3 30.85279077 0.81490980
+S 2
+1 1.72885887 0.27389659
+2 0.39954770 0.79112437
+P 1
+1 8.35065975 1.00000000
+end
+end
+Notethatforsimplicityandconsistencytheinputformatisthesameasthatusedinthebasissetfiles. Inthisformat
+the first line carries first the angular momentum of the shell to be added (s, p, d, f, g, h, i, j) and the number of
+primitives. Thenforeachprimitiveonelinefollowswhichhas(a)theindexoftheprimitive(1,2,3,...) (b)the
+exponentoftheprimitiveand(c)thecontractioncoefficient(unnormalized). NotethatORCAalwaysusesspherical
+harmonicGaussianfunctions. L-shells(nottobeconfusedwithangularmomentumequalto9)canonlybedealt
+withasseparates-andp-shells. TherealsoisthepossibilitytoincludeaSCALE Xstatementafterthenumberof
+primitivesinthefirstlinetoindicatethatthebasisfunctionexponentsshouldbescaled.
+Inordertoaddbasisfunctionstothebasisofagivenelement(forexamplebecauseyoudonotlikethestandard
+polarizationfunctions)useAddGTOinsteadof NewGTO.InNewGTOor AddGTOyoucanalsousethenicknamesof
+internallystoredbasissets. Anexampleis:
+%basis
+NewGTO 8 # new basis for oxygen
+"6-31G"
+D 1
+1 0.4 1.0
+end
+end
+Inthisexamplethe6-31Gbasisisassignedtooxygenandinadditionapolarizationfunctionwithexponent0.4is
+addedtotheoxygenbasis.
+NotethattheNewGTOkeyworddoesnotchangetheECPforthegivenelement-youmustuseNewECPorDelECP
+(seesectionAdvancedSpecificationofEffectiveCorePotentials).
+AsimilarmechanismwasestablishedfortheauxiliarybasissetsinRIcalculations:
+7.5. ChoiceofBasisSet 499
+
+[... start of page 522 ...]
+ORCAManual,Release6.0.0
+%basis
+NewAuxJGTO 8 # new auxiliary basis for oxygen
+s 1
+1 350 1.0
+... etc
+end
+AddAuxJGTO 8 # add a shell to the auxiliary basis for
+# oxygen
+D 1
+1 0.8 1.0
+end
+end
+New basis functions can be specifically assigned to any auxiliary basis sets. The keywords NewAuxCGTO,
+AddAuxCGTO, NewAuxJKGTO, AddAuxJKGTO, NewCABSGTO, A

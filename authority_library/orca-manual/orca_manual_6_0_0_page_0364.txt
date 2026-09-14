@@ -1,0 +1,79 @@
+[... end of page 363 ...]
+gauge is the
+GIAOapproach,butthiscanbemodifiedbythekeywordori. OtheroptionsaredefinedinsectionEPRandNMR
+properties. SOMF(1X) definesthechosenspin-orbitcoupling(SOC)operator. ThedetailsoftheSOCoperator
+aredefinedinsectionTheSpin-OrbitCouplingOperator. Otherchoicesandadditionalvariablesexistandcanbe
+setasexplainedindetailinsectionTheSpin-OrbitCouplingOperator.
+The output looks like the following. It contains information on the contributions to the g-tensor (relativistic
+mass correction, diamagnetic spin-orbit term (= gauge-correction), paramagnetic spin-orbit term (= OZ/SOC)),
+6.12. CalculationofProperties 341
+
+--- Page 364 ---
+ORCAManual,Release6.0.0
+theisotropicg-valueandtheorientationofthetotaltensor.
+-------------------
+ELECTRONIC G-MATRIX
+-------------------
+The g-matrix:
+2.0104321 -0.0031354 -0.0000000
+-0.0031354 2.0081968 -0.0000000
+-0.0000000 -0.0000000 2.0021275
+Breakdown of the contributions
+gel 2.0023193 2.0023193 2.0023193
+gRMC -0.0003174 -0.0003174 -0.0003174
+gDSO(tot) 0.0000808 0.0001539 0.0001515
+gPSO(tot) 0.0000449 0.0038301 0.0104898
+---------- ---------- ----------
+g(tot) 2.0021275 2.0059858 2.0126431 iso= 2.0069188
+Delta-g -0.0001917 0.0036665 0.0103238 iso= 0.0045995
+Orientation:
+X 0.0000000 0.5762906 -0.8172448
+Y 0.0000000 0.8172448 0.5762906
+Z 1.0000000 -0.0000000 0.0000000
+G-tensor calculations using GIAOs are now available at SCF and the RI-MP2 level. Note that GIAOs are NOT
+currentlyavailablewithCASSCFlinearresponseandagaugeoriginmustbeprovidedinthe%eprnmrblock(see
+CASSCFLinearResponse). GIAOsforCASSCFresponsearecomingsoontoORCA!
+TheGIAOone-electronintegralsaredoneanalyticallybydefaultwhereasthetreatmentoftheGIAOtwo-electron
+integralsischosentobesameasfortheSCF.Theavailableoptionswhichcanbesetwithgiao_1el / giao_2el
+inthe%eprnmrblockcanbefoundinsectionEPRandNMRproperties.
+Concerningthecomputationaltime,forsmallsystems,e.g. phenylradical(41electrons),therijk-approximation
+is good to use for the SCF-procedures as well as the GIAO two-electron integrals. Going to larger systems,
+e.g. chlorophyllradical(473electrons),therijcosx-approximationreducesthecomputationaltimeenormously.
+While the new default grid settings in ORCA 5.0 (defgrid2) should be sufficient in most cases, certain cases
+mightneedtheuseof defgrid3. TheoutputlooksjustthesameasforthecasewithoutGIAOs, butwithaddi-
+tionalinformationontheGIAO-parts.
+Ifthetotalspinofthesystemis𝑆 >1/2thenthezero-field-splittingtensorcanalsobecalculatedandprinted. For
+exampleconsiderthefollowingjobonahypotheticalMn(III)-complex.
+! BP86 def2-SVP SOMF(1X)
+%eprnmr DTensor ssandso
+DSOC cp # qro, pk, cvw
+DSS uno # direct
+end
+* int 1 5
+Mn 0 0 0 0 0 0
+O 1 0 0 2.05 0 0
+O 1 2 0 2.05 90 0
+O 1 2 3 2.05 90 180
+O 1 2 3 2.05 180 0
+F 1 2 3 1.90 90 90
+F 1 2 3 1.90 90 270
+H 2 1 6 1.00 127 0
+H 2 1 6 1.00 127 180
+H 3 1 6 1.00 127 0
+H 3 1 6 1.00 127 180
+H 4 1 6 1.00 127 0
+(continuesonnextpage)
+342 Chapter6. RunningTypicalCalculations
+
+[... start of page 365 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H 4 1 6 1.00 127 180
+H 5 1 6 1.00 127 0
+H 5 1 6 1.00 127 180
+*
+TheoutputdocumentstheindividualcontributionstotheD-tensorwhichalsocontains(unliketheg-tensor)con-
+tributionsfromspin-flipterms.
+Someexplanationmustbeprovided:
+• ThepresentimplementationinORCAisvalidforHF,DFTandhybridDFT.
+• TherearefourdifferentvariantsoftheSOC-contribution,whichshowsthatthisisadiffic

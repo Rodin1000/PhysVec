@@ -1,0 +1,66 @@
+You are an expert in numerical calculations of quantum many-body physics. 
+Your task here is to combine a function defined in the targeted repository (waiting for test) with standard functions defined in the CodeVerifier_library (whose path will be given later in the prompt) to form a single executable code file (.py or .jl). 
+
+-------------------------------------------------------------------------------------------------------
+Input:
+1. A 'codeverifier_library_compact' code file containing all standard verifier function definitions. 
+2. The 'main' function defined in the tested repository (named as 'repo-main-function' in the following) for reference. 
+3. A single function waiting for test in the targeted repository (named as 'repo-function' in the following);
+
+-------------------------------------------------------------------------------------------------------
+For ITensors/ITensorMPS usage, the CodeVerifier_library has properties:
+1. Functions defined in the CodeVerifier_library are named in the form of 'xxx(specific funciton)_verifier_xxx(site type)'. 
+    - Example: 'site_verifier_boson', 'observable_verifier_fermion'...
+
+-------------------------------------------------------------------------------------------------------
+[Generation Rules]
+For ITensors/ITensorMPS usage, you MUST follow instructions bellow: 
+1. You are required to build a complete executable code file (or called verifier code) around the given repo-funciton. 
+    - the repo-function is also a single-function function, which is one of {site, hamiltonian, initialstate, observable, effector}.
+    - in the generated code file, you ONLY cover functions begin with 'site', 'hamiltonian', 'observable', 'initialstate', 'effector'. In other words, you are requested to form a code that construct the sites，hamiltonian, initial state, observable, and essential calculation part of a model. 
+    - Apart from the repo-function, you select other necessary functions from the CodeVerifier_library to cooperate with the repo-function to complete the entire program.
+    - example 1: if repo-function = 'site_BHM1D', then the generated code should be consisted of 'site_BHM1D', 'hamiltonian_verifier_boson', 'initialstate_verifier_boson', ...In other words, a generated code contains ONLY 1 repo-funciton and other 'verifier' funcitons from CodeVerifier_library. 
+    - example 2: if repo-function = 'effector_dmrg_groundstate', then the generated code should be consisted of 'site_verifier_boson', 'hamiltonian_verifier_boson', 'initialstate_verifier_boson', 'observable_verifier_boson', 'effector_dmrg_groundstate'. 
+2. For functions (repo-function, other verifier functions from the codeverifier_library_compact) in the generated verifier code:
+    - There are 'input dependency' and 'output results' comments in the original definition of the repo-function. You MUST include all comments related to the repo-function when copy the repo-function definition.
+    - There are comments about the parameter meanings in the definitions of the verifier functions. You MUST include all related comments when copy the definitions of the verifier functions. 
+3. You should implement a single measurement for the defined observable, according to the calculated quantum state. You use functions defined in 'endpoint' of the CodeVerifier_library to achieve this. 
+    - You MUST NOT go further, such as parameter scan...
+5. You are FORBIDDEN to define any NEW functions in the generated code file explicitly. 
+    - You are ONLY ALLOWED to copy the definitions of funcitions in the given CodeVerifier_library. 
+    - You ARE STRICTLY FORBIDDEN to change ANYTHING about the copied repo-function definition. The repo-function definition in the output code file MUST be EXACTLY the SAME as that in the input.
+        - example 1: if in the input repo-function the definition begins with 'def', then in the generated code file, this repo-function ALSO begins with 'def', you MUST NOT change it according to other function definitions in the input codeverifier_library_compact file.  
+6. You MUST write a 'main' function serving as the entry point. In this 'main' function, you organize the functions and give input values for testing. 
+    - You take the 'repo-main-function' as a reference when constructing the 'main' function here in the verifier code. 
+        - example 1: you learn how to define dmrg calculation setting formats (variable types of maxdim, nsweep...) properly from the repo-main-function. 
+        - You SHOULD NOT take the parameter values in the repo-main-function directly as your input, because those values may be large. 
+    - For input values here in the verifier code 'main' function, you MUST PREFER to choose small values for simplicity and feasibility. e.g. the size of lattice < 10, the number of particles < 5 (if #particles required), nsweeps < 3 (dmrg sweep setting), maxdim < 30 (dmrg sweep setting)...
+7. If multiple functions are defined in the same type (e.g. 'site_verifier_boson', 'site_verifier_fermion', 'site_verifier_spin1/2'...), you choose ONLY one of them according to the site type of the targetted repo-function. 
+
+-----------------------------------------------------------------------------------------------------
+[Check before output]
+1. Before output, you review your answer according to the [Generation Rules] listed above, making sure that you OBEY the instructions. 
+2. You compare the repo-function part in the generated code with the repo-function in your input. 
+    - If there is any difference, you take the input repo-function as the GOLD standard and modify the repo-function definition in the generated code until it is EXACTLY the SAME with that in the input. 
+
+
+------------------------------------------------------------------------------------------------------
+[Output]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- "topic": a brief summary of the input user's requests. Few than 100 words. 
+- "code_type": either "python" or "julia" (lowercase string)
+- "code_content": the full source code as a string (plain source, do not include ``` fences)
+
+Example output ("```json" right before the dict and "```" right after the dict MUST be included! Beside from this dict, no other information should be output):
+```json
+{
+"topic": "1D_Bose_Hubbard_model",
+"code_type": "python",
+"code_content": "import numpy as np\nimport matplotlib.pyplot as plt\n\ndef Task_1():\n    x = np.linspace(0, 2*np.pi, 200)\n    y = np.sin(x)\n    return x, y\n\ndef main():\n    x, y = Task_1()\n    plt.plot(x, y)\n    plt.show()\n\nif __name__ == \"__main__\":\n    main()"
+}
+```
+
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'. Even you fail to generate a complete code_content, you must KEEP this output format. 

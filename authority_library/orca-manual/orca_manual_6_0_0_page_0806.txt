@@ -1,0 +1,74 @@
+[... end of page 805 ...]
+rixasreference
+and also uses the DFT orbitals for setting up the excited configuration state functions in the CI expansion. The
+twoelectronintegralsthatincludetheDFTorbitalsarescaledaccordingtotheirnatureandtheirpositionintheCI
+matrixbytheparameters𝑐 ,𝑐 and𝑐 . Theyalllieintheinterval[0;1]. Parameters𝑐 and𝑐 scalecoulomb-and
+1 2 3 1 2
+exchange-liketermsinthediagonalpartoftheCImatrix,whereas𝑐 reducesthesizeofalloff-diagonalelements
+3
+7.31. ExcitedStatesviaROCISandDFT/ROCIS 783
+
+--- Page 806 ---
+ORCAManual,Release6.0.0
+oftheCImatrix. Forexample:
+𝐻DFT/ROCIS =𝐹𝐶(KS)−𝐹𝐶(KS)−𝑐 (𝑖𝑖|𝑎𝑎)+2𝑐 (𝑖𝑎|𝑖𝑎)
+𝐻 𝑖 D 𝑎 F ,𝑖 T 𝑎 /ROCIS =𝑐 𝑎 {︁ 𝑎 𝛿 𝐹𝐶(K 𝑖 S 𝑖 )−𝛿 𝐹 1 𝐶(KS)−(𝑖𝑗|𝑎 2 𝑏)+2(𝑖𝑎|𝑗𝑏) }︁ (7.238)
+𝑖𝑎,𝑗𝑏 3 𝑖𝑗 𝑎𝑏 𝑎𝑏 𝑗𝑖
+Thethreedefaultparameters𝑐 =0.18,𝑐 =0.20and𝑐 =0.40havebeenoptimizedforatestsetofmolecules
+1 2 3
+andtheirexcitedstatesonaB3LYP/def2-TZVP(-f)leveloftheorybutcanbefreelychosen[725]. Itismostlikely
+thatforadifferentcombinationoftestmolecules,functionalandbasisset,adifferentsetofparametersgivesbetter
+results. Sincetheparametersarechosenwithregardofagood“balance”betweenorbitalenergies,Coulomband
+exchangeintegrals,anewsetofparametersshouldatleastcrudelyresembletheirrelativeproportions.
+! B3LYP def2-TZVP(-f) TightSCF
+%Basis
+AuxC "def2/J"
+end
+%ROCIS NRoots 20
+DoRI true
+SOC true
+DoHigherMult true
+PrintLevel 3
+OrbWin = 5,7,50,60
+DoDFTCIS true #switches on the DFT/ROCIS method
+DFTCIS_c = 0.18, 0.20, 0.40 #Array input of the three parameters
+end
+Fig.7.32: Comparisonoftheexperimentallyobserved(black)andcalculated(red)TiL-edgeof[Cp TiCl ]. The
+2 2
+red bars highlight the contribution of the individual states to the total spectrum. The pure ROCIS method (left)
+predictsawrongL -L intensityratioandstronglyoverestimatesthesplittingofthesatellitefeaturestothemain
+3 2
+bands. BetterresultsareobtainedwiththeDFT/ROCISmethod(right).
+7.31.3 Natural Transition Orbitals/ Natural Difference Orbitals
+LikewisetoCISandTD-DFT(sectionNaturalTransitionOrbitals)Thenatureofthecalculatedexcitedstatesin
+ROCIS and DFT/ROCIS can be analyzed by using the Natural Transition Orbitals (NTO) or Natural Difference
+Orbitals(NDO)machineries.[687]Notethat:
+• TheNTOanalysisisbasedonthetransitiondensitybetweengroundandexcitedstates. Henceisvalidfor
+singlyexcitedstatesandforstatesofthesamemultiplicity.
+• TheNDOanalysisontheotherhandissomewhatmoreflexibleinthisrespectasitisbasedonthedifference
+densitybetweengroundandexcitedstates.
+• Presently, only one analysis (NTO or NDO) can be performed at a time while when both flags are on the
+NTOanalysisswitchesoff.
+784 Chapter7. DetailedDocumentation
+
+[... start of page 807 ...]
+ORCAManual,Release6.0.0
+Anexampleisgivenbelowfor[FeCl ]2−:
+4
+!B3LYP def2-TZVP Conv TightSCF LargePrint PAL4
+%Basis
+AuxC "def2/J"
+end
+%ROCIS NRoots 40
+PrintLevel 3
+MaxCore 4000
+MaxDim 360
+SOC true
+DoRI true
+DoNTO true
+DoNDO true
+NDOThresh/NTOThresh 1e-4
+NDOStates/NTOStates= 1,2,3,4,5,6,7,8,9,10,13,14,15
+DoLowerMult true
+DoHigherMult true
+DoDFT

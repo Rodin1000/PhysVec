@@ -1,0 +1,81 @@
+[... end of page 678 ...]
+s locorbs #use localized internal MOs.
+# detailed settings
+PTSettings
+F12 true #Do the F12 correction
+TCutPNO 0.0
+TCutDO 0.0
+TCutCMO 0.0
+TCutDOij 0.0
+end
+end
+*xyz 0 3
+O 0.0 0.0 0.0
+O 0.0 0.0 1.207
+*
+656 Chapter7. DetailedDocumentation
+
+--- Page 679 ---
+ORCAManual,Release6.0.0
+7.19.4 Tackling large active CASSCF spaces
+Largeactivespaces(CAS(10,10)andmore)requirespecialattentionasthestandardimplementationinvolvesthe
+fourthorderreduceddensitymatrix(4-RDM).[46]Thestorageofthelattercaneasilyreachseveralgigabytesand
+thuscannotbekeptincorememory. ORCAthusbydefaultconstructsandcontractsthe4-RDMonthefly(D4Step
+fly). Note that the program can be forced to keep the 4-RDM on disk (D4Step disk) or in memory (D4Step
+core).
+Asidefromthestorage,theformationofthe4-RDMitselfbecomesthetimedominatingstepoftheNEVPT2cal-
+culationforlargeactivespaces. Therearetwosetofapproximationstotacklethechallenge. Theprescreening(PS)
+ortheextendedprescreening(EPS)approximationandthecumulantexpansion.[343]
+In addition, a reformulation of the canonical NEVPT2 is available, that avoids the 4-RDM.[458] The basic idea
+ofthelatterissimilartotherecentdevelopmentreportedbySokolovandcoworkers.[162]InORCAthereformu-
+lated“efficient”implementationiscombinedwiththePSapproximation. Notethatthereformulationispresently
+restricted to the canonical NEVPT2 ansatz. An extension to the DLPNO variant will be available in the future.
+Thenewcodeiscalledsetting“D4Step efficient”. Irrespectiveoftheformulation,ORCAbydefaulttruncates
+theCASSCFwavefunctionpriorcomputationofthefourthorderreduceddensitymatrixusingthePSapproxima-
+tion.[342,343]OnlyconfigurationswithaweightlargerthanagivenparameterD4TPrearetakenintoaccount. The
+samereductionisavailableforthethirdorderdensitymatrixusingthekeywordD3TPre. Bothoftheparameters
+canbeadjustedwithinthePTSettingssub-blockoftheCASSCFmodule.
+%casscf
+...
+PTMethod FIC_NEVPT2 # or SC_NEVPT2
+# detailed settings (optional)
+PTSettings
+D4Step efficient # calling the new NEVPT2 code.
+# "fly" for the standard code
+D4TPre 1e-10 # default truncation 4-RDM
+D4TPre 1e-14 # default truncation 3-RDM
+imaginary 0.0 # imaginary shift (only for FIC-NEVPT2)
+end
+These approximations naturally affect the “configuration RI” as well. In this context, it should be noted that a
+configuration corresponds to a set of configuration state functions (CSF) with identical orbital occupation. For
+eachstatethedimensionoftheCIandandRIspaceisprinted.
+D3 Build ... CI space truncated: 141 -> 82 CFGs
+... RI space truncated: 141 -> 141 CFGs
+D4 Build ... CI space truncated: 141 -> 82 CFGs
+... RI space truncated: 141 -> 141 CFGs
+The default values usually produce errors of less than 1 mEh. However, the error introduced by the D4TPre is
+system dependent and should be double checked. The exact NEVPT2 energy is recovered with the parameters
+set to zero. The approximation is available for all variants of NEVPT2 (SC, FIC and DPLNO-FIC). For crude
+cut-offs,theapproximationmayleadtosocalledfalseintruderstates.[342,343,911]Thebehaviorshowsupas
+unreasonablylargecorrelationenergycontributionsofthe1h(V_i)or1p(V_a)excitationsclasse.g. positiveor
+largecorrelationenergiescomparedtothe2h-2p(V_ijab)excitationclass. Thisisasystemspecificissue,whichis
+avoidedwithtighterthresholds(D4TPre=1e-14). Thedefaultsettingsischosenconservativeandrarelyproduces
+artifacts. As last resort, an imaginary shift can be added to mitigate intruder states. Note that imaginary shifts
+(default=0.0)arerestrictedthecanonicalFIC-NEVPT2-notDLPNO.
+ThePSapproximationcompletelyneglectsCFGswithasmallweight. ThisiscontrastedbytheEPSapproximation,
+wherethesmallweights(uptothreshD4TQuad)arestillaccountedfor(firstordercorrection).[343]. Theresults
+aremorerobustbutalsomoreexpensivecomparedtothePSapproximation.
+PTSettings
+D4Step D4PT # running the standard code withthe EPS approximation
+D4TPre 1e-10 # default truncation 4-RDM
+(continuesonnextpage)
+7.19. N-ElectronValenceStatePertubationTheory 657
+
+[... start of page 680 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+D4TQuad 1e-14 # selects CFGs for the first order correction.
+end
+Huge computational savings can be achieved with the cumulant expansion, which have been recently re-
+evaluated.[343]. Theresultsshouldbetreatedwithcareasfalseintruderstatescanemerge.[911]Inthesecases,
+the imaginary level shift is the only mitigation tool. Note that the imaginary shift is i

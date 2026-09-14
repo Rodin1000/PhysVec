@@ -1,0 +1,77 @@
+[... end of page 231 ...]
+oelectronsbeingejectedfromtheabsorberatomandscatteredatneighbouringatoms.
+WiththesimpleTD-DFTcalculationsdescribedhere, onefocusestheattentiononthepre-edgeregion. Neither
+the rising edge nor the EXAFS region are reasonably described with standard electronic structure methods and
+nocomparisonshouldbeattempted. Inaddition,thesecalculationsarerestrictedtoK-edgesasthecalculationof
+L-edgesismuchmorelaboriousandrequiresadetailedtreatmentofthecoreholespinorbitcoupling.
+6.6. ExcitedStatesCalculations 209
+
+--- Page 232 ---
+ORCAManual,Release6.0.0
+It is clearly hopeless to try to calculate enough states to cover all transitions from the valence to the pre-edge
+region. Hence, instead one hand-selects the appropriate donor core orbitals and only allows excitations out of
+these orbitals into the entire virtual space. This approximation has been shown to be justified.[200] One should
+distinguishtwosituations: First,thecoreorbitalinquestionmaybewellisolatedandunambiguouslydefined. This
+is usually the case for metal 1s orbitals if there is only one metal of the given type in the molecule. Secondly,
+theremaybeseveralatomsofthesamekindinthemoleculeandtheircoreorbitalsformtheappropriatesymmetry
+adaptedlinearcombinationsdictatedbygrouptheory. Inthislattercasespecialtreatmentisnecessary: Thesudden
+approximationdictatesthattheexcitationsoccursfromalocalcoreorbital. Inpreviousversionsoftheprogram
+youhadtomanuallylocalizethecoreholes. Inthepresentversionthereisanautomaticprocedurethatisdescribed
+below.
+AtypicalexampleisTiCl . IfwewanttocalculatethetitaniumK-edge,thefollowinginputisappropriate:
+4
+! BP86 ZORA ZORA-def2-TZVP(-f) SARC/J TightSCF
+%tddft OrbWin[0] = 0,0,-1,-1
+NRoots 25
+DoHigherMoments true
+DoFullSemiclassical true
+end
+* int 0 1
+Ti 0 0 0 0 0 0
+Cl 1 2 3 2.15 0 0
+Cl 1 2 3 2.15 109.4712 0
+Cl 1 2 3 2.15 109.4712 120
+Cl 1 2 3 2.15 109.4712 240
+*
+Note:
+• The absolute transition energies from such calculations are off by a few hundred electron volts due to the
+shortcomingsofDFT.Theshiftisconstantandverysystematicforagivenelement. Hence, calibrationis
+possibleandhasbeendoneforanumberofedgesalready. Calibrationdependsonthebasisset!
+• Electric quadrupole contributions and magnetic dipole contributions have been invoked with
+DoHigherMoments true (check section One Photon Spectroscopy for more information), which is
+essentialformetaledges. Forligandedges,thecontributionsaremuchsmaller.
+• OrbWinisusedtoselectthesingledonororbital(inthiscasethemetal1s). TheLUMO(45)andlastorbital
+intheset(174)areselectedautomaticallyif“-1”isgiven. Thisisdifferentfrompreviousprogramversions
+wherethenumbershadtobegivenmanually.
+TheoutputcontainsstandardTD-DFToutputbutalso:
+-----------------------------------------------------------------------------------------------
+---------------------------------
+˓→
+ABSORPTION SPECTRUM COMBINED ELECTRIC DIPOLE + MAGNETIC DIPOLE + ELECTRIC␣
+QUADRUPOLE SPECTRUM
+˓→
+-----------------------------------------------------------------------------------------------
+---------------------------------
+˓→
+Transition Energy Energy Wavelength fosc(D2) fosc(M2) fosc(Q2) ␣
+fosc(D2+M2+Q2) D2/TOT M2/TOT Q2/TOT
+˓→
+(eV) (cm-1) (nm) (au) (au*1e6) (au*1e6)
+-----------------------------------------------------------------------------------------------
+---------------------------------
+˓→
+Thissectioncontainstherelevantoutputsinceitcombineselectricdipole,electricquadrupoleandmagneticdipole
+transitionintensitiesintothefinalspectrum. Importantly,thereisagaugeissuewiththequadrupoleintensity: the
+resultsdependonthewheretheoriginisplaced. Wehaveproposedaminimizationprocedurethatguaranteesthe
+fastestpossibleconvergenceofthemultipoleexpansion.[201]
+210 Chapter6. RunningTypicalCalculations
+
+[... start of page 233 ...]
+ORCAManual,Release6.0.0
+Thespectraareplottedbycalling
+orca_mapspc MyOutput.out ABSQ -eV -x04890 -x14915 -w1.3
+StartingfromORCAversion4.1onemayobtainoriginindependenttransitionmomentsformulationswhichcan
+be combined with the multipole moments up to 2nd order to regenerate the electric dipole, electric quadrupole
+andmagneticdipolecontributionsineitherlengthorthevelocityrepresentations. Thisrequiresinadditiontothe
+electricdipole(D),electricquadrupole(Q)andmagneticdipole(m)intensitiesthecorrespondingelectricdipole-
+magneticquadrupole(DM)andt

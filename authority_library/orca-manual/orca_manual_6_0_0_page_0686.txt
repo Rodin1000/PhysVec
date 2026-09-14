@@ -1,0 +1,80 @@
+[... end of page 685 ...]
+ns with averaged orbitals and orbitals energies (canonstep 0/2) have the
+tendency to lessen the energy-denominator. To avoid artifacts, the calculation is restricted to canonstep 1 —
+eachstatehasitsownorbitals.
+If properties are requested within the casscf module i.e. zero-field splitting, there will be an additional printing
+withthe“improved”CIvectorsandenergies. Fortechnicalreasons,propertiesthatarenotcomputedinCASSCF
+suchastheMössbauerparametersdonotbenefitfromtheQD-NEVPT2correction.
+7.19. N-ElectronValenceStatePertubationTheory 663
+
+--- Page 686 ---
+ORCAManual,Release6.0.0
+7.20 Complete Active Space Peturbation Theory : CASPT2 and
+CASPT2-K
+The fully internally contracted CASPT2 (FIC-CASPT2) approach is available with real, imaginary and IPEA
+shifts.[40,270,730]. TheORCAimplementationemploysareformulationoftheCASPT2,thatcompletelyavoids
+thefourthorderreduceddensitymatrix,thatwouldappearinthecanonicalimplementation.[458]Someconcepts
+aresharedbyarecentdevelopmentreportedbySokolovandcoworkers.[162]Themodificationallowscalculations
+withlargeactivespaceswithoutapproximatingtheresultse.g. withthecumulantexpansion.
+ItshouldbenotedthattheIPEAshiftinOpenMOLCASslightlydeviatesfromORCA.[253]. Here,theIPEAshift,
+𝜆,isaddedtothematrixelementsoftheinternallycontractedCSFsΦ𝑝𝑟 =𝐸𝑝𝐸𝑟|Ψ0 >withthegeneralizedFock
+𝑞𝑠 𝑞 𝑠
+operator
+<Φ𝑝′𝑟′ |𝐹ˆ|Φ𝑝𝑟 >+=<Φ𝑝′𝑟′ |Φ𝑝𝑟 >· 𝜆 ·(4+𝛾𝑝−𝛾𝑞+𝛾𝑟−𝛾𝑠),
+𝑞′𝑠′ 𝑞𝑠 𝑞′𝑠′ 𝑞𝑠 2 𝑝 𝑞 𝑟 𝑠
+where𝛾𝑝 =<Ψ0|𝐸𝑝|Ψ0 >istheexpectationvalueofthespin-tracedexcitationoperator.[441]Thelabelsp,q,r,s
+𝑞 𝑞
+refer to general molecular orbitals (inactive, active and virtual). Irrespective of the ORCA implementation, the
+validity of the IPEA shift in general remains questionable and is thus by default disabled.[920] ORCA features
+an alternative formulation, named CASPT2-K, that revises the zeroth order Hamiltonian itself.[460] Here, two
+additionalFockmatricesareintroducedforexcitationclassesthataddorremoveelectronsfromtheactivespace.
+ThenewFockmatricesarederivedfromthegeneralizedKoopmans’matricescorrespondingtoelectronionization
+andattachmentprocesses. Theresultingmethodislesspronetointruderstatesandthesametimemoreaccurate
+comparedtothecanonicalCASPT2approach. Formoreadetaileddiscussion,werefertothepaperbyKollmaret
+al.[460]
+TheCASPT2andCASPT2-KapproachesarecalledincompleteanalogytotheFIC-NEVPT2approach. Notethat
+themethodologycanbecombinedwiththeRIapproximation. Adetailedexamplewithcommentsontheoutputis
+giveninSectionCompleteActiveSpacePerturbationTheory: CASPT2andCASPT2-K.Belowisconciselistwith
+theaccessibleoptions.
+%casscf
+...
+MULT 1,3 # multiplicity block
+NRoots 2,2 # number of roots for the MULT blocks
+TrafoStep RI # optional for RI approximation for CASSCF and CASPT2
+PTMethod FIC_CASPT2 # canonical CASPT2 approach
+FIC_CASPT2K # CASPT2-K with revised H0
+# Detailed settings (this is optional)
+PTSettings
+CASPT2_ishift 0.0 # imaginary level-shift
+CASPT2_rshift 0.0 # real level-shift
+CASPT2_IPEAshift 0.0 # IPEA shift.
+MaxIter 20 # Maximum for the CASPT2 iterations
+TSmallDenom 1e-2 # printing thresh for small denominators
+# general settings
+NThresh 1e-6 # FIC-CASPT2 cut off for linear dependencies
+D4Tpre 1e-10 # truncation of the 4-pdm
+D3Tpre 1e-14 # trunaction of the 3-pdm
+EWIN -3,1000 # Energy window for the frozencore setting fc_ewin
+# Option to skip the PT2 correction for a selected multiplicity blocks and roots
+# (same input structure as weights in %casscf)
+selectedRoots[0]=0,1 # skip the first roots of MULT=1
+selectedRoots[1]=0,0 # skip MULT=3 roots
+#CASPT2-K specific options
+(continuesonnextpage)
+664 Chapter7. DetailedDocumentation
+
+[... start of page 687 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+TReg 1e-2 # default for the Tikhonov reguralization
+end
+end
+CASPT2canalsobesetusingthesimplekeywordsontopofanyvalidCASSCFinput.
+!CASPT2 # FIC-CASPT2
+!CASPT2K # FIC-CASPT2-K
+!RI-CASPT2 # FIC-CASPT2 with RI approximation
+!RI-CASPT2-K # FIC-CASPT2-K with RI approximation
+%casscf ...
+7.21 Dynamic Correlation Dressed CAS
+DCD-CAS(2)isapost-CASSCFMRPTmethodoftheperturb-then-diagonalizekind,i.e. itcanmodifytheCAS
+wavefunctioncomparedtot

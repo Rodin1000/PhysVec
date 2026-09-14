@@ -1,0 +1,77 @@
+[... end of page 691 ...]
+may seem to make running a DMRG calculation more complicated than a usual quantum chemistry
+calculation, however, BLOCK provides a setof default settings which eliminate theneed to specify the above pa-
+rametersbyhand. WehighlyrecommendthatyoufirstlearntousetheBLOCKprogramwiththesedefaultsettings.
+Inthedefaultmode,theorbitalsareorderedautomatically(Fiedlervectormethod[58,72,259,260])andadefault
+sweepscheduleisset.
+AnexampleofadefaultCASCIcalculationontheC~2~moleculecorrelatingallelectronsinaVTZbasis,isgiven
+here:
+7.22. DensityMatrixRenormalizationGroup 669
+
+--- Page 692 ---
+ORCAManual,Release6.0.0
+!cc-pvtz pal4
+%MaxCore 16000
+%casscf
+nel 8
+norb 58
+nroots 1
+mult 1
+maxiter 1
+CIStep DMRGCI
+DMRG
+maxM 5000
+end
+end
+* xyz 0 1
+C 0 0 -0.621265
+C 0 0 0.621265
+*
+Once you are familiar with the default mode, we recommend exploring the localization of orbitals. In general,
+DMRG benefits from the use of localized orbitals, and these should be used unless the high-symmetry of the
+molecule (e.g., D symmetry) provides compensating computational benefits. We recommend using “split-
+2ℎ
+localized” orbitals, which correspond to localizing the occupied and virtual orbitals separately. An example of
+asplit-localizeddefaultDMRGcalculationontheporphinemolecule,correlatingthefull𝜋-space(26electronsin
+24orbitals),inacc-pVDZbasisisgiveninSec.Appendix: Porphine\pi-activespacecalculation.
+ForagivenmaxM,itcantakealongtimetotightlyconvergeDMRGcalculations(e.g. tothedefault1e-9tolerance).
+Todecreasecomputationtime,youmaywishtoloosenthedefaulttightsweeptoleranceorcontrolthemaximum
+numberofsweepiterationswiththecommandssweeptolandmaxIter.
+Orbitaloptimization
+Orbital optimization (mixing the external/internal space with the active space, not to be confused with orbital
+rotation and ordering in the active space) in DMRG calculation can be performed by using the BLOCK program
+as the “CIStep” within a CASSCF calculation, as described above. For the moment, spin-densities and related
+propertiesarenotavailableforthisCIStep.
+Duringtheoptimizationiterationsitisimportantthattheactiveorbitalsmaintaintheiroverlapandorderingwith
+previousiterations. ThisisdoneusingactConstrains. Thisflagissetbydefault.
+%casscf
+ActConstrains 1 # maintain shape and ordering of active orbitals
+...
+end
+Ingeneral,performingaDMRGcalculationwithorbitaloptimizationisquiteexpensive. Therefore,itisoftenbest
+tocarryouttheorbitaloptimizationusingasmallvalueof maxM(enabledbythedefaultparametersmaxM=25and
+theresultingsweepschedule),andtocarryoutafinalsingle-pointcalculationusingalargervalueof maxM.
+670 Chapter7. DetailedDocumentation
+
+[... start of page 693 ...]
+ORCAManual,Release6.0.0
+Advancedoptions
+TheremaybetimeswhenonewantsfinercontroloftheDMRGcalculation. Allkeywordsareshowninthecomplete
+setofBLOCKoptionsCompletesetofBLOCKoptionsbelow. ThestartMcommandallowstochangethestarting
+numberofstatesinDMRGcalculations. Itisalsopossibletospecifytheentiresweepschedulemanually. Asweep
+scheduleexamplefollows:
+%casscf
+...
+dmrg
+MaxIter 14
+switch_rst 1e-3
+TwoDot_to_oneDot 12
+NSchedule 3
+sche_iteration 0, 4, 8
+sche_M 50, 100, 500
+sche_sweeptol 1e-4, 1e-6, 1e-9
+sche_noise 1e-8, 1e-11, 0.0
+end
+end
+Thecommandsaboveare:
+•

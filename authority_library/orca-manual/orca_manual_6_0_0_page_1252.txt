@@ -1,0 +1,76 @@
+[... end of page 1251 ...]
+orereliablethantheirminimalbasiscounterpartsbutarenotcapableofdeliveringquantita-
+tivelyreliableresults. Theymay,however,betheonlychoiceifverylargemoleculesaretargeted.
+• In our own research we almost exclusively use the basis sets of the Karlsruhe group for non-relativistic
+calculations. Theyhavebeenupdatedtothe“def2”setthatismoreconsistentthantheolderbasissets.
+1229
+
+--- Page 1252 ---
+ORCAManual,Release6.0.0
+• Def2-SV(P)isthesmallestandcomputationallyefficientsplit-valencebasissetandislargelyidenticaltothe
+oldSV(P),exceptforthetransitionmetalswhichhavemoreconsistentpolarizationsets.
+• Def2-TZVPisdifferentfromtheoldTZVP.Ithasbeenrealizedthatifoneinvestsintoanaccuratetriple-
+zetadescriptionofthevalenceregionitmakeslimitedsensetoonlyemployasinglepolarizationfunction.
+TheaccuracyisthenlimitedbythepolarizationsetandisnotmuchbetterthanwhatonegetsfromSV(P).
+Hence, def2-TZVP contains a single p-set for hydrogens but is otherwise very similar to the old TZVPP
+basisset,e.g. itcontains2d1fpolarizationformaingroupelementsandmuchmoreextensivepolarization
+setsfortransitionmetals. Thehighestpolarizationfunction(fformaingroup)doesaddsubstantiallytothe
+computational effort. Hence, we often use def2-TZVP without the f polarization function. In order to do
+that one can use the keyword def2-TZVP(-f). Together with RI or RIJCOSX this is still computationally
+economicenoughformoststudies.
+• Def2-TZVPPisafullyconsistenttriple-zetabasissetthatprovidesexcellentaccuracyforSCFcalculations
+(HFandDFT)andisstillprettygoodforcorrelatedcalculations. Itisagoodbasissettoprovidefinalsingle
+pointenergies.
+• Def2-QZVPP is a high accuracy basis set for all kinds of calculations. It provides SCF energies near the
+basissetlimitandcorrelationenergiesthatarealsoexcellent. ItiscomputationallyexpensivebutwithRI
+and RIJCOSX in conjunction with parallelization it can often still be applied for final single-point energy
+calculations. Inconjunctionwithsuchlargebasissetsoneshouldalsoincreasetheaccuracyoftheintegra-
+tion grids in DFT and RIJCOSX — it would be a shame to limit the accuracy of otherwise very accurate
+calculationsbynumericalnoiseduetothegrid.
+• CorrelationconsistentbasissetsprovidegoodcorrelationenergiesbutpoortoverypoorSCFenergies. For
+thesamesize,theano-pVDZbasissetsaremuchmoreaccuratebutarealsocomputationallymoreexpensive.
+Exceptforsystematicbasissetextrapolationweseelittlereasontousetheccbases.
+• Poplebasissetsaresomewhatoldfashionedandalsomuchlessconsistentacrosstheperiodictablethanthe
+basisfromtheKarlsruhegroup. Hence,wegenerallypreferthelatter.
+• For scalar relativistic calculations (ZORA and DKH) we strongly recommend to use the SARC bases in
+conjunctionwiththeZORAorDKHrecontractionsoftheKarlsruhebases. Theyarealsoflexibleenoughin
+thecoreregionforgeneralpurposeandspectroscopicapplications.
+• Effectivecorepotentialsleadtosomesavings(butnotnecessarilyspectacularones)comparedtoall-electron
+relativisticcalculations. Foraccurateresults,smallcoreECPsshouldbeused. Theyaregenerallyavailable
+for the def2 Karlsruhe type basis sets for elements past krypton. In general we prefer Stuttgart–Dresden
+ECPsoverLANLones. Forthefirsttransitionrow,thechoicesaremoremeager. HereKarlsruhebasissets
+donotexistinconjunctionwithECPsandyouareboundtoeitherSDDorLANLofwhichwerecommend
+theformer. GeometriesandenergiesareusuallygoodfromECPs,butforpropertycalculationswestrongly
+recommend to switch to all electron scalar relativistic calculations using ZORA (magnetic properties) or
+DKH(electricproperties).
+• Youcantakeadvantageofabuilt-inbasisset(printedusing!PrintBasisororca_exportbasis)andthen
+modifyitbyuncontractingprimitives,addingsteeperfunctionsetc. (fullyuncontractedbasesaregenerated
+via uncontract in %basis) Alternatively, some basis sets exist that are of at least double-zeta quality in
+thecoreregionincludingtheDZPandDunningbasissets. Forhigheraccuracyyoumaywanttoconsider
+theaug-seriesofbasissets. SeesectionChoiceofBasisSetformoreaboutbasissetinput.
+• Likewise,ifyouaredoingcalculationsonanionsinthegasphaseitisadvisabletoincludediffusefunctions
+inthebasisset. Havingthesediffusefunctions,however,makesthingsmuchmoredifficultasthelocalityof
+thebasissetissignificantlyreduced. Ifthesefunctionsareincludeditisadvisabletochooseasmallvalue
+for Thresh (10−12 or lower). This is automatically done if the smallest eigenvalue of the overlap matrix
+is below DiffSThresh (which is 1e-6 by default). Also, diffuse functions tend to introduce basis set linear
+dependency issues, which can be solved by setting Sthresh to a larger value than the default 10−7 (see
+SectionLinearDependence). Anyvalueof Sthreshbeyond1e-6hastobeusedcarefully,speciallyifone
+isrunninggeometryoptimizations,weredifferentbasismightbecutoffduringdifferentgeometrysteps,or
+whencomparingdifferentconformerssincetherecouldbesomediscontinuityonthefinalbasisset.
+• TheintegrationgridsusedinDFTshouldbeviewedtogetherwiththebasisset. Iflargebasissetcalculations
+areconvergedtohighaccuracyitisadvisabletoalsouselargeDFTintegrationgrids(like ! DEFGRID3).
+For “unlimited” accuracy (i.e. benchmark calculations) it is probably best to use product grids (Grid=0)
+1230 Chapter8. SomeTipsandTricks
+
+[... start of page 1253 ...]
+ORCAManual,Release6.0.0
+with a large value for IntAcc (perhaps around 6.0). The default grids have been chosen such that they
+provide adequate accuracy at the lowest possible computational cost, but for all-electron calculations on
+heavyelementsinconjunctionwithscalarrelativisticHamiltoniansyoushouldexaminethegriddependency
+verycarefullyandadjusttheseparametersaccordinglytominimizeerrors. Youshouldbeawarethatforlarge
+moleculestheexchange-correlationintegrationisusuallynotthedominatingfactor(notevenincombination
+withRI-J).
+• Similarly important is the value of Thresh that will largely determine the tunaround time for direct SCF
+calculations. Itmaybepossibletogotovaluesof10−6–10−8whichwillresultinlargespeed-ups. However,
+the error in the final energy may then be 3 orders of magnitude larger than the cutoff or, sometimes, your
+calculation will fail to converge, due to

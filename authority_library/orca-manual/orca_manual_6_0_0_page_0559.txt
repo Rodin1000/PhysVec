@@ -1,0 +1,66 @@
+[... end of page 558 ...]
+ow
+#e.g. for MP2: %mp2 EWin EMin,EMax
+FC_NONE #No frozencore approximation
+-n #Freeze a total of n electrons
+NewNCore Bi 68 end #Set the number of core electrons for Bi to 68
+CheckFrozenCore true #Check whether frozen core orbitals are ordered correctly
+#Default: true only for post-(CAS)SCF calculations
+CorrectFrozenCore true #Whether to rotate valence orbitals out of the core region
+end
+536 Chapter7. DetailedDocumentation
+
+--- Page 559 ---
+ORCAManual,Release6.0.0
+Note:
+• TheFrozenCoreoptionsareappliedtoallpostHartree-Fockmethods.
+• Ifincludingallelectronsisdesired,the!NoFrozenCorekeywordcanbesimplyinserted. ForMP2: Frozen
+virtualorbitalsarenotallowedingradientrunsorgeometryoptimization!
+• IfECPsareused,thenumberforNewNCorehastoincludetheelectronsrepresentedbytheECPsaswell.
+E.g. ifanelementissupposedtohave60electronsintheECPandadditional8electronsshouldbefrozen
+inthecorrelationcalculation,NewNCoreshouldbe68.
+• InORCAweuseratherconservativefrozencoresettings, i. e. alargenumberofelectronsareincludedin
+thecorrelationtreatment. Therefore,werecommendtouseproperlyoptimizedcorrelatingbasisfunctions
+inallcases,suchasthecc-pwCVXZbasissets.
+• ForDLPNOcalculationsthevirtualspaceforcore-coreandcore-valencecorrelationisadjustedbydefault,
+whichisdescribedindetailinsectionIncluding(semi)coreorbitalsinthecorrelationtreatment.
+• In general, NewNCore only has an effect in calculations with FC_ELECTRONS. In calculations using the
+DLPNO approximation (except DLPNO-NEVPT2), NewNCore has also an effect in the other cases, as is
+describedinsectionIncluding(semi)coreorbitalsinthecorrelationtreatment.
+• Double-hybrid density functional (section DFT Calculations with Second Order Perturbative Correction
+(Double-Hybrid Functionals)) calculations by default use the FrozenCore option for the perturbative part,
+asisthecaseforMP2.
+7.13 The Second Order Many Body Pertubation Theory Module
+(MP2)
+Throughout this section, indices 𝑖,𝑗,𝑘,... refer to occupied orbitals in the reference determinant, 𝑎,𝑏,𝑐,... to
+virtualorbitalsand𝑝,𝑞,𝑟,...togeneralorbitalsfromeithersetwhile𝜇,𝜈,𝜅,𝜏,...refertobasisfunctions.
+7.13.1 Standard MP2
+Thestandard(orfullaccuracy)MP2modulehastwodifferentbranches. Onebranchisusedforenergycalculations,
+theotherforgradientcalculations.
+ForstandardMP2energies,theprogramperformstwohalf-transformationsandthehalf-transformedintegralsare
+storedondiskincompressedform. Thisappearstobethemostefficientapproachthatcanalsobeusedformedium
+sizedmolecules.ThemoduleshouldparallelizeacceptablywellaslongasI/Oisnotlimiting.
+ForstandardMP2gradients,theprogramperformsfourquartertransformationsthatareorderedbyoccupiedor-
+bitals. Here,theprogrammassivelybenefitsfromlargecorememory(%maxcore)sincethisminimizesthenumber
+ofbatchesthataretobedone. I/Odemandsareminimalinthisapproach.
+In“memorymode”(Q1Opt>0)basicallytheprogramtreatsbatchesofoccupiedorbitalsatthesametime. Thus,
+theremustbeatleastenoughmemorytotreatasingleoccupiedMOateachpass. OtherwisetheMP2modulewill
+fail. Thus,potentially,MP2calculationsonlargemoleculestakesignificantmemoryandmaybemostefficiently
+donethroughtheRIapproximation.
+Alternatively,inthe“diskbasedmode”(Q1Opt=-1)theprogramperformsahalftransformationoftheexchange
+integrals and stores the transformed integrals on disk. A bin-sort then leads to the AO operator 𝐾𝑖𝑗(𝜇,𝜈) =
+(𝑖𝜇|𝑗𝜈)in(11|22)integralnotation. TheseintegralsarethenusedtomakethefinalK𝑖𝑗(a,b)(a,b=virtualMOs)
+andtheEMP2pairenergycontributions. Inmanycases,andinparticularforlargermolecules,thisalgorithmis
+muchmoreefficientthanthememorybasedalgorithm. Itdepends,however,muchmoreheavilyontheI/Osystem
+of the computer that you use. It is important, that the program uses the flags CFLOAT, UCFLOAT, CDOUBLE or
+UCDOUBLEinordertostoretheunsortedandsortedAOexchangeintegrals. Whichflagisusedwillinfluencethe
+performanceoftheprogramandtosomeextenttheaccuracyoftheresult(floatbasedsingleprecisionresultsare
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 537
+
+[... start of page 560 ...]
+ORCAManual,Release6.0.0
+usuallyveryslightlylessaccurate;𝜇Eh-rangedeviationsfromthedoubleprecisionresult1). Finally,gradientsare
+presentlyonlyavailableforthememorybasedalgorithmsinceinthiscaseamuchlargersetofintegralsisrequired.
+The ! MP2 command does the following: (a) it changes the Method to HFGTO and (b) it sets the flag DoMP2 to
+true. The program will then first carry out a Hartree-Fock SCF calculation and then estimate the correlation
+energybyMP2theory. RHF,UHFandhigh-spinROHFreferencewavefunct

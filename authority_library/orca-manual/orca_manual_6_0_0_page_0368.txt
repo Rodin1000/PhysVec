@@ -1,0 +1,90 @@
+[... end of page 367 ...]
+
+A B AB
+becausethehighestspin-stateislowestinenergywhileinthecasethat𝐽 isnegativethecouplingisantiferro-
+AB
+magneticandthelowestspinstateislowestinenergy.
+Inthebrokensymmetryformalismonetriestoobtainawavefunctionthatbreaksspatial(andspin)symmetry. It
+maybethoughtofasa“poorman’sMC-SCF”thatsimulatesamultideterminantalcharacterwithinasingledeter-
+minantframework. Muchcouldbesaidaboutthetheoreticaladvantages,disadvantages,problemsandassumptions
+thatunderlythisapproach. Here,weonlywanttoshowhowthisformalismisappliedwithinORCA.
+6.12. CalculationofProperties 345
+
+--- Page 368 ---
+ORCAManual,Release6.0.0
+For𝑁 unpairedelectronslocalizedon“siteA”and𝑁 unpairedelectronslocalizedona“siteB”onecancalculate
+A B
+theparameter𝐽 fromtwoseparatespin-unrestrictedSCFcalculations: (a)thecalculationforthehigh-spinstate
+AB
+with𝑆 = (𝑁A+𝑁B) and(b)the“brokensymmetry”calculationwith𝑀 = (𝑁A−𝑁B) thatfeatures𝑁 spin-up
+2 𝑆 2 A
+electrons that are quasi-localized on “site A” and 𝑁 spin-down electrons that are quasi-localized on “site B”.
+B
+Severalformalismsexisttoextract𝐽 : [91,303,636,637,807,896].
+AB
+(𝐸 −𝐸 )
+𝐽 =− HS BS (6.18)
+AB (𝑆 +𝑆 )2
+A B
+(𝐸 −𝐸 )
+𝐽 =− HS BS (6.19)
+AB (𝑆 +𝑆 )(𝑆 +𝑆 +1)
+A B A B
+(𝐸 −𝐸 )
+𝐽 =− HS BS (6.20)
+AB ⟨𝑆2⟩ −⟨𝑆2⟩
+HS BS
+Wepreferthelastdefinition(Eq. (6.20))becauseitisapproximatelyvalidoverthewholecouplingstrengthregime
+whilethefirstequationimpliestheweakcouplinglimitandthesecondthestrongcouplinglimit.
+Inordertoapplythebrokensymmetryformalismuse:
+%scf BrokenSym NA,NB
+end
+Theprogramwillthengothroughanumberofsteps. Essentiallyitcomputesanenergyandwavefunctionforthe
+high-spinstate,localizestheorbitalsandreconvergestothebrokensymmetrystate.
+Caution: Make sure that in your input coordinates “site A” is the site that contains the larger number of
+unpairedelectrons!
+Mostoftentheformalismisappliedtospincouplingintransitionmetalcomplexesormetal-radicalcouplingorto
+the calculation of the potential energy surfaces in the case of homolytic bond cleavage. In general, hybrid DFT
+methodsappeartogivereasonablesemiquantitativeresultsfortheexperimentallyobservedsplittings.
+Asanexampleconsiderthefollowingsimplecalculationofthesinglet–tripletsplittinginastretchedLi molecule:
+2
+#
+# Example of a broken symmetry calculation
+#
+! B3LYP DEF2-SVP TightSCF
+%scf BrokenSym 1,1
+end
+* xyz 0 3
+Li 0 0 0
+Li 0 0 4
+*
+Thereisasecondmechanismforgeneratingbroken-symmetrysolutionsinORCA.Thismechanismusestheindi-
+vidualspindensitiesandisinvokedwiththekeywordsFlipSpinandFinalMs. Thestrategyistoexchangethe𝛼
+and𝛽spinblocksofthedensityoncertainuser-definedcentersafterconvergingthehigh-spinwavefunction. With
+thismethodarbitraryspintopologiesshouldbeaccessible. Theuseissimple:
+#
+# Example of a broken symmetry calculation using the "FlipSpin" feature
+#
+! B3LYP DEF2-SVP TightSCF
+%scf
+FlipSpin 1
+# Flip spin is a vector and you can give a list of atoms
+# on which you want to have the spin flipped. For example
+# FlipSpin 17,38,56
+# REMEMBER: counting starts at atom 0!
+(continuesonnextpage)
+346 Chapter6. RunningTypicalCalculations
+
+[... start of page 369 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+FinalMs 0
+# The desired Ms value of the broken symmetry determinant.
+# This value MUST be given since the program cannot determine it by itself.
+end
+* xyz 0 3
+Li 0 0 0
+Li 0 0 4
+*
+Finally, you may attempt to break the symmetry by using the SCF stability analysis feature (see Section SCF
+StabilityAnalysis). Thegroundspinstate

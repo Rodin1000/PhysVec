@@ -1,0 +1,75 @@
+[... end of page 882 ...]
+
+*
+InasimilarfashionMultireferenceEquationofMotopnCoupleClusterMR-EOM-CC(seenextsection)canalso
+beusedtocomputeX-rayspectra. Furtherinformationcanbefoundinreference[549]
+860 Chapter7. DetailedDocumentation
+
+--- Page 883 ---
+ORCAManual,Release6.0.0
+AsitisexplicitlydescribedintherespectiveROCISsectionRIXSspectracanberequestedbythefollowingkey-
+words:
+RIXS true # Request RIXS calculation (NoSOC)
+RIXSSOC true # Request RIXS calculation (with SOC)
+Elastic true # Request RIXS calculation (Elastic)
+PleaseconsultsectionResonantInelasticScatteringSpectroscopyforprocessingandanalyzingthegeneratedspec-
+tra
+LikewisetoTDDFT(UseofTD-DFTfortheCalculationofX-rayAbsorptionSpectra)ROCIS(GeneralUse)and
+CASSCF(Coreexcitedstateswith(C/R)ASCI/NEVPT2)thecomputedtransitiondensitiesalsointhepresenceof
+SOCcanbetakenbeyondthedipoleapproximationbyusingtheOPStoolfordetails.
+1. byperformingamultipleexpantionuptosecondorder
+2. bycomputingtheexacttransitionmoments
+Thewholesetofspectroscopytablescanberequestedwiththefollowingcommands:
+%mrci
+DoDipoleLength true
+DoDipoleVelocity true
+DoHigherMoments true
+DecomposeFoscLength true
+DecomposeFoscVelocity true
+DoFullSemiclassical true
+end
+MoredetailscanbefoundinTDDFT(UseofTD-DFTfortheCalculationofX-rayAbsorptionSpectra)ROCIS
+(GeneralUse)andCASSCF(Coreexcitedstateswith(C/R)ASCI/NEVPT2)sections.
+Starting from ORCA 4.2 the previously reported RASCI-XES protocol reference[690], which can compute K
+𝛽
+Mainline XES spectra, can be processed entirely within the ORCA modules. In ORCA 5.0 a similar protocol
+(CASCI-XES)existintheCASSCFmodule(Coreexcitedstateswith(C/R)ASCI/NEVPT2)
+• Like above or in the CASCI/NEVPT2 case in a first step one needs to optimize the valence active space
+orbitals in the framework of SA-CASSCF calculations, e.g. including valence excited states in the range
+between6to15eVfortheNelectronsystem.
+• Inasecondstepthemetal1sand3porbitalsarerotatedintheactivespaceandthe1sMOisdefinedinthe
+XASMOslist
+• ComputestheXESspectrumintheRASCIframeworkfortheN-1electronsysteminthepresenceofSOC
+iftheXESSOCkeywordforallthestatesthataredominatedby3p-1selectrondecays.
+ArepresentativeinputsequenceforthecaseofFe(Cl) isprovidedbellow:
+6
+Asdescribedinreference[690]atfirstforaCAS(5,5)theexcitationspaceissaturatedbythesextetaswellasthe
+24quartetandthe75doubletstateswhichareoptimizedintheSA-CASSCFfashion.
+!ZORA def2-TZVP def2-TZVP/C
+%cpcm
+epsilon 80
+refrac 1.33
+surfacetype gepol_ses
+end
+%scf
+MaxDisk 40000
+end
+%casscf
+nel 5
+(continuesonnextpage)
+7.42. 861
+
+[... start of page 884 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+norb 5
+mult 6,4,2
+nroots 1,24,75
+shiftup 0.5
+shiftdn 0.5
+trafostep RI
+maxiter 150
+end
+*xyzfile -3 6
+Fe 0.0000 0.0000 0.000000
+Cl 2.478 0.0000 0.0

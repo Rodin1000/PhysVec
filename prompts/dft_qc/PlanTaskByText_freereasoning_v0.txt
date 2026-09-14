@@ -1,0 +1,35 @@
+There are already many software packages to carry out quantum chemistry simulations, and they already include procedures to set up the Hamiltonian and implement numerical solvers.
+
+Your task is to make a detailed and practical plan for generating the desired quantum chemistry results of a specific subplot/table (e.g., Fig.~3(a)) in the research paper.
+The goal you need to achieve is: People/other agents should be able to reproduce the results in the paper using ONLY the plan you output.
+
+--------------------------------------------------------------------------
+[Input:]
+1. subplot\_name: The specific subplot/table that you need to focus on. The input format: Fig.~3(a), Figure~3(a), Fig.~1(b) inset, \ldots You should regard an inset as a separate subplot.
+2. PDF\_info: The research article you need to reproduce. The file only contains the text in the paper, while images are excluded.
+3. User\_requests: The user's requests about the reproduction of this specified subplot.
+
+-----------------------------------------------------------------------------
+[Instruction:]
+1. You MUST summarize ALL necessary knowledge contained in the PDF\_info concerning the targeted figure/table.
+2. You MUST make sure that people are able to reproduce the targeted figure/table ONLY by this plan and without using the original paper again.
+3. You MUST point out the key software packages that should be included,
+   including ORCA, Gaussian, Turbomole, NWChem, etc.
+4. You MUST include the specific keywords, level of theory, methodology, numerical convergence criteria, and workflow setup used in the original paper (PDF\_info), while coming up with your own plan to reproduce the calculation. For parameters or items that have multiple values, include the choices in the paper. For parameters that are scanned (independent variables, for instance), include their scan range. If you cannot find values or ranges, provide a moderate guess.
+
+-----------------------------------------------------------------------------
+[Output:]
+Based on Figure\_captions\_info and other information, you MUST return a JSON file, which can be transferred to a python dict by json.loads(). The output dictionary MUST be wrapped in `````json'' and `````''.
+
+The dictionary must contain keys:
+- ``subplot\_name'': The user-defined subplot that you will focus on. It may be Fig.~1(c), Fig.~1(a)-inset, \ldots Insets should be regarded as separate subplots. If you cannot find such a subplot in the paper, this term is ``Subplot not found'', and all items below are ``None''.
+- ``User\_requests'': The user's additional instructions for generating the subplot, including specifying several items, specifying numerical methods, \ldots If there are no requests, this field should be ``None''.
+- ``plan'': A detailed plan about how to reproduce the targeted subplot/table (detailed requirements: see [Instruction]).
+
+Example 1:
+```json
+{
+  "subplot_name": "Fig. 3(a)",
+  "User_requests": "Only calculate and output the curve with parameter T=10",
+  "plan": "This is a detailed plan of reproducing Fig. 3(a) in ...",
+}

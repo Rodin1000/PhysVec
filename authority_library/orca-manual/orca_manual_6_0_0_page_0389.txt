@@ -1,0 +1,75 @@
+[... end of page 388 ...]
+es.
+SwitchForceLJ true # Use the switch force scheme for the LJ interaction.
+# Default: true.
+LJCutOffInner 10. # Distance (in Ang). Default: 10 Ang.
+LJCutOffOuter 12. # Distance (in Ang). Default: 12 Ang.
+DielecConst 1. # dielectric constant used in calc. of electrostatic
+# interaction. Default: 1.
+Coulomb14Scaling 1. # Scaling factor for electrostatic interaction between
+# 1,4-bonded atoms. Default: 1.
+PrintLevel 1 # Printing options: Can be 0 to 4, 0=nothing, 1=normal, ...
+(continuesonnextpage)
+366 Chapter6. RunningTypicalCalculations
+
+--- Page 389 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# Keywords that can be accessed from the mm as well as the qmmm block.
+# For a description see qmmm block.
+# Information about topology and force field
+ORCAFFFilename "UBQ.ORCAFF.prms"# If available, e.g. from a previous run, or after
+# modification, the ORCA Forcefield can be provided.
+# Computing MM nonbonded interactions within non-active region.
+Do_NB_For_Fixed_Fixed true # Compute MM-MM nonbonded interaction also for
+# non-active atom pairs. Default true.
+# Optimization and MD of active MM waters
+RIGID_MM_WATER false # Default: false.
+# Extended active region
+ExtendActiveRegion distance # rule to choose the atoms belonging to activeRegionExt.
+# no - do not use activeRegionExt atoms
+# cov_bonds - add only atoms bonded covalently to
+# active atoms
+# distance (default) - use a distance criterion (VDW
+# distance plus Dist_AtomsAroundOpt)
+Dist_AtomsAroundOpt 1. # in Angstrom. Default 1 Ang.
+OptRegion_FixedAtoms { 2 9} end # Default: empty list.
+# The following keywords will affect the behavior of MM (without QMMM) calculations,
+# but have to be provided via the qmmm block
+PrintOptRegion true # Additionally print xyz and trj for opt region
+PrintOptRegionExt true # Additionally print xyz and trj for extended opt region
+PrintQMRegion true # Additionally print xyz and trj for QM region
+PrintPDB true # Additionally print pdb file for entire system, is
+# updated every iteration for optimization
+end
+*pdbfile 0 1 ubq.pdb # structure input via pdb file, but also possible via xyz file
+6.16 ORCA Multiscale Implementation
+WithORCA5.0ORCA‘smultiscalefunctionalityhasbeenextensivelyexpanded. ORCA5featuresfivedifferent
+multiscalemethodsfor
+• proteins,DNA,largemolecules,explicitsolvation:
+– additiveQMMM(AdditiveQMMM)
+– subtractiveQM1/QM2methods(2-layeredONIOM)(SubtractiveQM/QM2Method)
+– QM1/QM2/MMmethods(3-layeredONIOM)(QM/QM2/MMMethod)
+• CRYSTAL-QMMMforcrystals:
+– MOL-CRYSTAL-QMMMformolecularcrystals(MOL-CRYSTAL-QMMM)
+– IONIC-CRYSTAL-QMMMforsemiconductorsandinsulators(IONIC-CRYSTAL-QMMM)
+The multiscale features are optimally connected to all other modules and tools available in ORCA allowing the
+usertohandlemultiscalecalculationsfromaQM-centricperspectiveinasimpleandefficientway,withafocuson
+simplifyingtheprocesstoprepare,setupandrunmultiscalecalculations.
+Fromtheinputsideallmethodsshareacommonsetofconceptsandkeywords,whichwillbeoutlinedinthefirst
+partofthischapter. Inthesubsequentpartsofthischapter,thedifferentmethodsaredescribedandfurtherinput
+optionsarediscussed.
+6.16. ORCAMultiscaleImplementation 367
+
+[... start of page 390 ...]
+ORCAManual,Release6.0.0
+6.16.1 General Settings and Input Structure
+Someofthekeywordsinthissectionarecommontoallfivemultiscalefeatures,andsomearenot. Ifkeywordsare
+notavailableforoneofthemultiscalefeatures,thiswillbementioned.
+OverviewonCombiningMultiscaleFeatureswithotherORCAFeatures
+ThemultiscalefeaturescanbeusedtogetherwithallotherpossibleORCAmethods:
+SinglePointCalculations
+UseallkindsofavailableelectronicstructuremethodsasQMmethod.
+Optimization
+Useallkindsofgeometryoptimizationswithallkindsofconstraints,TSoptimization,relaxedsurfacescans,
+and th

@@ -1,0 +1,86 @@
+[... end of page 1039 ...]
+al Energy : -76.33292070695327 Eh -2077.12437 eV
+Components:
+Nuclear Repulsion : 9.11286213981824 Eh 247.97359 eV
+Electronic Energy : -85.43200537714571 Eh -2324.72305 eV
+One Electron Energy: -123.06209110061025 Eh -3348.68974 eV
+Two Electron Energy: 37.63008572346453 Eh 1023.96669 eV
+CPCM Dielectric : -0.01612924659271 Eh -0.43890 eV
+SMD CDS (Gcds) : 0.00230956608299 Eh 0.06285 eV
+7.53. ImplicitSolvationModels 1017
+
+--- Page 1040 ---
+ORCAManual,Release6.0.0
+Notes:
+• IfoneisinterestedinthecalculationoffreeenergiesofsolvationusingtheSMDmodel,onejustneedsto
+compute ∆𝐺 according to eq (7.321). However, here one should take into account that the SMD model
+S
+considersthesameconcentration(1mol/L)inboththegaseousandsolutionphases. Then, ifagas-phase
+standard state of 1 atm is considered, and we want to compare the calculated ∆𝐺 with its experimental
+S
+counterpart,aconcentrationtermequalto1.89kcal/molhastobeaddedtothecalculated∆𝐺 .
+S
+7.53.4 Dynamic Radii Adjustment for Continuum Solvation (DRACO)
+TheDRACOschemeisanapproachthatimprovestheperformanceofimplicitsolvationmodels,inparticularthe
+accuracyofthecalculatedsolvationfreeenergies.[688]Itisbasedonadynamicscalingoftheoriginalstaticradii
+usedtodescribetheatoms/spheresthatdefinethecavityofthesolute.
+Inthisapproach,theoriginalradii𝑟 ofanatom𝑖isscaledaccordingto
+𝑖
+𝑟 𝑖scale =𝑓 𝑖scale𝑟 𝑖 (7.322)
+withthescalingfactor𝑓
+𝑖scale
+determinedfrom
+𝑓 𝑖scale =erf(𝑎 𝑍 (𝑞eff,𝑖 −𝑏 𝑍 ))+1 (7.323)
+Here,𝑞eff,𝑖 correspondstotheeffectivepartialchargeandisdefinedas
+𝑞eff,𝑖 =𝑞
+𝑖
++𝑘
+𝑍
+𝑞
+𝑖
+CN
+𝑖
+(7.324)
+where𝑞 istheatomicpartialcharge. Theparameters𝑎 ,𝑏 and𝑘 areelement-specificparameters,andCN is
+𝑖 𝑍 𝑍 𝑍 𝑖
+thefractionalcoordinationnumber.
+Foroxygenatoms,the𝑓
+𝑖scale
+iscorrectedviaatermthatdependsontheAbraham’shydrogenbondacidity(𝛼):
+𝑓
+𝑖
+O
+scale
+=𝑓 𝑖scale+𝑐O(0.43−𝛼) (7.325)
+with 𝑐O a parameter that is different for pure C-PCM or SMD. The correction in eq (7.325) is only applied for
+solventswith𝛼<0.43.
+DRACO is parametrized for C-PCM and SMD for the following solvents: acetonitrile, DMSO, methanol, and
+water. The element-specific parameters in eqs (7.323),(7.324), and (7.325) are available in https://github.com/
+grimme-lab/DRACO.
+TheuseofDRACOwithC-PCMorSMDistriggeredviathefollowingtagsinthesimpleinput:
+! CPCM(solvent) DRACO
+or
+! SMD(solvent) DRACO
+Alternatively,itcanalsoberequestedinthe%cpcmblock:
+%cpcm
+DRACO true
+end
+In ORCA, the default scheme to calculate the partial charges in eq (7.324) is the electronegativity-equilibration
+(EEQ) charge model (D4 case),[132]. However, one can also request the Charge Extended Hückel (CEH)
+model.[541]ThechargeschemewithinDRACOiscontrolledbythefollowingtaginthe%cpcmblock:
+%cpcm
+draco_charges ceh # default = eeq
+end
+1018 Chapter7. DetailedDocumentation
+
+[... start of page 1041 ...]
+ORCAManual,Release6.0.0
+IfCEHchargesarerequested,ORCAneedstorunanXTBcalculationtogeneratethem. Here,oneshouldhave
+atleasttheversion6.7.1ofXTB(olderversionswillnotgeneratetheCEHcharges,seesectionProgramCompo-
+nents). Regarding the fractional coordination number in eq (7.324), it is calculated as described in GFN2-XTB
+calculations.[70]
+Note: DRACOcanonlybeused,forthemoment,insingle-pointenergycalculations.
+7.53.5 OpenCOSMO-RS
+ORCA is interfaced to openCOSMO-RS,[293] an open source implementation of the COSMO-RS model.[447,
+448]Thismodeliswidelyusedinbothacademiaandindustrytopredictfluidphasethermodynamics.
+ThemainideabehindCOSMO-RSisthattheinteractionbetweenmole

@@ -1,0 +1,87 @@
+[... end of page 136 ...]
+7.439917 6.726792 7.762120
+O 5.752050 6.489306 5.407671
+H 7.025510 6.226170 8.467436
+H 8.274883 6.280259 7.609894
+H 6.313507 6.644667 6.176902
+H 5.522285 7.367132 5.103852
+*
+%geom
+GhostFrags {1} end # space-separated list and X:Y ranges accepted
+fragments
+1 {0 2 3} end
+2 {1 4 5} end
+(continuesonnextpage)
+114 Chapter6. RunningTypicalCalculations
+
+--- Page 137 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+end
+Starting from ORCA 6.0, we support geometry optimizations with the counterpoise correction, us-
+ing analytic gradients. This opens up the way of obtaining accurate non-covalent complex ge-
+ometries (instead of just interaction energies) using modest basis sets. To use this functional-
+ity, one should NOT simply add !Opt to the above input files, but should instead use the dedi-
+cated compound script BSSEOptimization.cmp available in the ORCA Compound Script repository
+(https://github.com/ORCAQuantumChemistry/CompoundScripts/blob/main/GeometryOptimization/BSSEOptimization.cmp).
+Detailedusagearedescribedinthecommentsofthecompoundscript.
+6.1.7 Complete Active Space Self-Consistent Field Method
+Introduction
+Thereareseveralsituationswhereacomplete-activespaceself-consistentfield(CASSCF)treatmentisagoodidea:
+• Wavefunctions with significant multireference character arising from several nearly degenerate configura-
+tions(staticcorrelation)
+• Wavefunctionswhichrequireamultideterminantaltreatment(forexamplemultipletsofatoms,ions,transi-
+tionmetalcomplexes,)
+• Situationsinwhichbondsarebrokenorpartiallybroken.
+• Generationoforbitalswhichareacompromisebetweentherequirementsforseveralstates.
+• Generation of start orbitals for multireference methods covering dynamic correlation (NEVPT2, MRCI,
+MREOM,...)
+• Generationofgenuinespineigenfunctionsformultideterminantal/multireferencewavefunctions.
+In all of these cases the single-determinantal Hartree-Fock method fails badly and in most of these cases DFT
+methods will also fail. In these cases a CASSCF method is a good starting point. CASSCF is a special case of
+multiconfigurationalSCF(MCSCF)methodswhichspecializetothesituationwheretheorbitalsaredividedinto
+three-subspaces: (a)theinternalorbitalswhicharedoublyoccupiedinallconfigurationstatefunctions(CSFs)(b)
+partiallyoccupied(active)orbitals(c)virtual(external)orbitalswhichareemptyinallCSFs.
+Afixednumberofelectronsisassignedtotheinternalsubspaceandtheactivesubspace. IfN-electronsare“active”
+inMorbitalsonespeaksofaCASSCF(N,M)wavefunctions. Allspin-eigenfunctionsforN-electronsinMorbitals
+areincludedintheconfigurationinteractionstepandtheenergyismadestationarywithrespecttovariationsinthe
+MOandtheCIcoefficients. Anynumberofrootsofanynumberofdifferentmultiplicitiescanbecalculatedand
+theCASSCFenergymaybeoptimizedwithrespecttoauserdefinedaverageofthesestates.
+TheCASSCFmethodhastheniceadvantagethatitisfullyvariationalwhichrendersthecalculationofanalytical
+gradients relatively easy. Thus, the CASSCF method may be used for geometry optimizations and numerical
+frequencycalculations.
+The price to pay for this strongly enhanced flexibility relative to the single-determinantal HF method is that the
+CASSCFmethodrequiresmorecomputationalresourcesandalsomoreinsightandplanningfromtheuserside.
+ThetechnicaldetailsareexplainedinsectionTheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module.
+HereweexplaintheuseoftheCASSCFmethodbyexamples. Inadditiontothedescriptioninthemanual,there
+isaseparatetutorialforCASSCFwithmanymoreexamplesinthefieldofcoordinationchemistry. Thetutorial
+coversthedesignofthecalculation,practicaltipsonconvergenceaswellasthecomputationofproperties.
+AnumberofpropertiesareavailableinORCA(g-tensor,ZFSsplitting,CD,MCD,susceptibility,dipoles,...). The
+majorityofCASSCFpropertiessuchasEPRparametersarecomputedintheframeworkofthequasi-degenerate
+perturbation theory. Some properties such as ZFS splittings can also be computed via perturbation theory or
+rigorously extracted from an effective Hamiltonian. For a detailed description of the available properties and
+options see section CASSCF Properties. All the aforementioned properties are computed within the CASSCF
+module. AnexceptionareMössbauerparameters,whicharecomputedwiththeusualkeywordsusingtheEPRNMR
+module(MössbauerParameters).
+6.1. SinglePointEnergiesandGradients 115
+
+[... start of page 138 ...]
+ORCAManual,Release6.0.0
+AsimpleExample
+OnestandardexampleofamultireferencesystemistheBeatom. Letusruntwocalculations,astandardclosed-
+shell calculation (1s22s2) and a CASSCF(2,4) calculation which also includes the (1s22s12p1) and (1s22s02p2)
+configurations.
+! TZVPP TightSCF
+* xyz 0 1
+Be 0 0 0
+*
+Thisstandardclosed-shellcalculationyieldstheenergy-14.56213241 Eh. TheCASSCFcalculation
+! TZVPP TightSCF
+%casscf nel 2
+norb 4
+end
+* xyz 0 1
+Be 0 0 0
+*
+yieldstheenergy-1

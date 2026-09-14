@@ -1,0 +1,63 @@
+[... end of page 745 ...]
+n the .hess file you have accesss to the frequency
+# scaling factor (see below).
+# Flags to control NumFreq calculation:
+CentralDiff true # use central differences [f(x+h)-f(x-h)]/2h - or -
+# use one-sided differences [f(x+h)-f(x)]/h
+Restart false # restart a (numerical) frequency calculation
+DX 0.005 # increment h
+Increment 0.005 # increment h
+(continuesonnextpage)
+7.27. Frequencycalculations-numericalandanalytical 723
+
+--- Page 746 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Hybrid_Hess {...} end # calculate (numerical) Hybrid Hessian
+Partial_Hess [...] end # calculate (numerical) Partial Hessian
+# Flags to control subsequent vibrational analysis:
+QuasiRRHO true # Evaluate Vibrational Entropy with
+# Quasi-Rigid Rotor Harmonic Oscillator
+QRRHORefFreq 25 # reference frequency used in the QuasiRRHO in cm-1
+# default value is 100 from original paper
+CutOffFreq 1.0 # Threshold for frequencies to be considered
+# in spectra, thermochemistry and printout (cm-1)
+Temp 298.15 # run the thermochemistry calculations at user defined
+# temperatures (max 16 temperatures, separated by ',')
+T 290, 292, 295 # same as Temp
+XTBVPT2 True # use XTB for the VPT2 correction of the IR
+Delq 0.5 # the displacement in dimensionless coordinates used
+# during the VPT2
+TransInvar True # enforce translation invariance while calculating the Hessian?
+ProjectTR True # project out translation and rotation degrees of freedom
+# in frequency calculation and thermochemistry analysis?
+end
+At present, analytical Hessians can be calculated for SCF only. However, there are some additional restrictions.
+AnalyticalHessianscannotbeperformedfor
+-Double-Hybridfunctionals
+-RI-JKapproximation
+Hereiswhatyouwoulddo,ifyouranafrequencycalculationandhavea.hessfileondiskandwanttotrydifferent
+scalingfactorsforthefrequencies
+$frequency_scale_factor
+0.90 <<<---- you change this to whatever you want
+orca_vib myjob_scaled_freq.hess
+TheprogramwillthenreadtheHessian,diagonalizeitandapplyyourscalingfactor. Whateverscalingfactorwas
+used in the actual input that generated the Hessian is irrelevant since the Hessian is re-diagonalized. To avoid
+confusion,werecommendthatifthegoalistoplaywiththescalingfactor,thentoleavethescalingfactorinthe
+inputat1.0. Nothingbadhappensifyoudon’tthough.
+724 Chapter7. DetailedDocumentation
+
+[... start of page 747 ...]
+ORCAManual,Release6.0.0
+7.27.1 Restarting Numerical Frequency calculations
+Torestartanumericalfrequenciescalculation,use:
+%FREQ
+restart true
+END
+andORCAwilllookforbasename.res.{}filesinthesamefolderwherethecalculationisbeingrun,checkforwhat
+alreadyhasbeendoneandrestartwhereitisneeded.
+7.28 Intrinsic Reaction Coordinate
+TheIntrinsicReactionCoordinate(IRC)methodfindsapathconnectingatransitionstate(TS)withitsdownhill-
+nearest intermediates. The implementation in ORCA follows the method suggested by Morokuma and cowork-
+ers.[412]
+TheIRCmethodfollowsthegradientof

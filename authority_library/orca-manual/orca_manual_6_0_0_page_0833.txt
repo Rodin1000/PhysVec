@@ -1,0 +1,82 @@
+[... end of page 832 ...]
+IStotrue. Thelatterismorestablewhenalargenumberofrootsarerequested.
+7.33.7 Properties in the RHF EOM implementation
+TheonlypropertythatcanbecalculatedwiththecurrentRHFEOMimplementationisthetransitionmoment. Itis
+calculatedasaCI-likeexpectationvalue,asproposedbyStantonandBartlett. Therightandlefttransitiondensity
+aredefinedas
+𝜌𝐺𝑟→𝐸𝑥 =⟨𝜑 |(1+Λ)[𝑒−𝑇{𝑝+𝑞−}𝑒𝑇,𝑅]|𝜑 ⟩
+𝑝𝑞 0 0
+𝜌𝐸𝑥→𝐺𝑟 =⟨𝜑 |𝐿𝑒−𝑇{𝑝+𝑞−}𝑒𝑇|𝜑 ⟩
+𝑝𝑞 0 0
+Intheaboveequation,Λcorrespondstothegroundstateleftvector,whichneedstosolvedonceand𝐿istheleft
+vector,whichneedstobesolvedseparatelyforeachroot. Oncetherightandleftvectorshavebeenobtained,the
+leftandrighttransitiondensitiesareconstructedandtheoscillatorstrengthiscalculatedusingfollowingformula
+2
+𝑓 = 𝜀|𝜇 𝜌𝐸𝑥→𝐺𝑟||𝜇 𝜌𝐺𝑟→𝐸𝑥|
+3 𝑝𝑞 𝑝𝑞 𝑝𝑞 𝑝𝑞
+810 Chapter7. DetailedDocumentation
+
+--- Page 833 ---
+ORCAManual,Release6.0.0
+Theoscillatorstrength,calculatedbydefault,employsalinearapproximationforΛ. The𝐿vectorsare,ontheother
+hand, calculatedasageneralinverseofthecorresponding𝑅vectors. Thisapproximationrequiresnoadditional
+effort over the energy calculation and gives similar accuracy as that of the exact oscillator strength calculation,
+which is at least twice the cost of the energy calculation. Exact EOM-CC transition moments can, however, be
+calculatedbysettingDoLeftandDoTDMtotrue. Pleasenotethattransitionmomentshavenotyetbeenimplemented
+fortheUHFEOM-CCSDapproach.
+7.33.8 Some tips and tricks for EOM-CC calculation
+• The COSX approximation gives significant savings in terms of memory use, disk space use and compu-
+tational timings without almost no loss of accuracy[233]. Therefore, the preferred setting for large scale
+calculationsshouldincludeDoCOSXEOM true,DoAOX3e trueandKCOpt KC_AOBLAS(NotethatKC_AOX
+istheonlyoptionavailableforKCOptintheUHFimplementation).
+• The EOM-CC code in ORCA has three version of the Davidson’s solver. The default one is multi-root
+solverwhichdoesoptimizationofalltherootstogether. Itgivesthefastestconvergenceandismoresuitable
+whenoneisinterestedonlyinafewrootsofabigmolecule. However,themulti-rootsolvercanlandinto
+numericalissues,ifmorethan10rootaredesired. Inthatcase,onecaninvoketheroot-wisesolverbysetting
+DoRootwise true. Thesinglerootsolverisverystableandshouldbeusedwhenlargenumberofrootsare
+desired. However, theconvergenceofthesinglerootsolverisslowerthanthemulti-rootone. IntheRHF
+implementation, there is also a batchwise solver, where a subset of the total number of roots is optimized
+together. ThiscanbeinvokedbysettingNRootsPerBatchtotrueandisintermediatebetweenthemulti-root
+andsingle-rootsolverintermsofstabilityandconvergence.
+• If the EOM iterations do not converge within 50 cycles, one can try to increase the number of iterations
+by setting MaxIter in the %mdci block to a larger value. One can also try to increase the dimension of
+the Davidson’s space by increasing the NDav value and this generally helps in convergence acceleration.
+However,settingNDavtoavaluelargerthan200canmakethecalculationprohibitivelycostly.
+• Convergencethresholdsof DTol 1e-5(Davidsonconvergence)and STol1e-7(groundstateCCSDcon-
+vergence)generallyyieldsufficientlyconvergedenergies,andaresuitableformostpurposes.
+• ThenormalDavidsonsolvergenerallyleadstothelowestenergysolutions. Thisprocedurecanalsoyield
+rootsdominatedbydoubleexcitations(theso-calledsatellitestates)fortheIPandEAvariantsofEOM-CC,
+whenoneasksforalargenumberofroots. IfoneinterestedinthelowlyingKoopman’stypeofIPandEA
+states,theycanbeobtainedbysettingFollowCIStotrue. Thiswillfollowtheinitialguessprovidedbythe
+Fockoperators.
+7.34 Excited States via STEOM-CCSD
+The EOM-CCSD approach for excitation energies becomes prohibitively costly for large systems because of its
+O(𝑁6) scaling. Therefore, one needs a more compact form of the wave-function ansatz. A second similarity
+transformationcancompressthefinalmatrixdiagonalizationsteptotheCISspaceonly. TheresultingSTEOM-
+CCSDmethodofMarcelNooijenandco-workers[638]isanefficientwayforaccuratecalculationsofexcitation
+energies.
+7.34.1 General Description
+InthestandardEOM-CCmethod,thetransformedHamiltonianisdiagonalizedoverasinglesanddoublesspaceto
+obtainionized,attached,orexcitedstatesofthereferencestate. InSTEOM-CC,oneperformsasecondsimilarity
+transformation
+𝐺ˆ ={𝑒𝑆^ }−1𝐻 ˆ¯{𝑒𝑆^ }
+Thetransformationoperator𝑆ˆ,includingsinglesanddoubles,isdefinedas
+𝑆ˆ=𝑆ˆ𝐼𝑃 +𝑆ˆ𝐸𝐴,
+7.34. ExcitedStatesviaSTEOM-CCSD 811
+
+[... start of page 834 ...]
+ORCAManual,Release6.0.0
+1
+𝑆ˆ𝐼𝑃 =𝑆𝑚𝐸ˆ𝑚+ 𝑆𝑚𝑏𝐸ˆ𝑚𝑏,
+𝑖′ 𝑖′ 2 𝑖𝑗 𝑖𝑗
+1
+𝑆ˆ𝐸𝐴 =𝑆𝑎′ 𝐸ˆ𝑎′ + 𝑆𝑎𝑏𝐸ˆ𝑎𝑏.
+𝑒 𝑒 2 𝑒𝑗 𝑒𝑗
+In the above equations, 𝑚 and 𝑒 denote active indices of the hole and particle type respectively, while a prime
+denotesarestrictiontoorbitalsthatarenotactive. Theamplitudesoftheoperator𝑆ˆaredefinedinsuchawaythat
+matrixelementsofthetransformedHamiltonian,insecondquantizednotation,becomeequaltozero.
+𝑔𝑚 =𝑔𝑚𝑏 =𝑔𝑎′ =𝑔𝑎𝑏 =0
+𝑖′ 𝑖𝑗 𝑒 𝑒𝑗
+In addition, the zeros which pre-existed in 𝐻¯, after solving the CCSD equations, remain preserved. The above
+equationsarelinearin𝑆ˆandareequivalenttotheFockspacemultireferencecoupledclusterequationsfortheone
+valence problem. However, to ensure numerical stability, the equation

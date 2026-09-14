@@ -1,0 +1,77 @@
+[... end of page 568 ...]
+tion accuracy
+end
+The grid used for evaluation of the response operator on the right-hand side of the Z-vector equations (see for
+exampleeqs(7.77)and(7.78))canbeindependentlyselectedusingthekeywordZ_GridX_RHS.Notethatstarting
+with ORCA 5, the usage is different to Z_GridX - the choice is between one of the three grids used during the
+RIJCOSXSCFprocedure: asmallgridfortheinitialiterations,amediumgridforthefinaliterations(defaultin
+ORCA5),andalargegridtoevaluatetheenergymoreaccuratelyaftertheiterationshaveconverged.
+546 Chapter7. DetailedDocumentation
+
+--- Page 569 ---
+ORCAManual,Release6.0.0
+%method
+Z_GridX_RHS 1 # small SCF grid
+2 # medium SCF grid (default)
+3 # large SCF grid
+end
+Yet another grid is used to evaluate basis functions derivatives. Appropriate parameters are chosen through !
+DefGridn(inadditiontothethreeSCFgrids),butonecanoverridethisbysettingtheangular(GridX)andradial
+(IntAccX)gridsexplicitlythrough:
+%mp2 GridX 4 # default 4: angular Lebedev grid 302
+IntAccX 4.871 # radial grid
+end
+7.13.7 MP2 and RI-MP2 Second Derivatives
+Analyticalsecond-orderpropertieswiththeMP2,RI-MP2anddouble-hybridDFTmethodsareavailableinORCA
+forcalculationswithoutfrozencoreorbitals. HessianscanbecalculatedwithMP2andRI-MP2. Themostexpen-
+siveterminthesecondderivativecalculationsisthefour-externalcontributionwhichcanbeevaluatedeithervia
+anAOdirect(default)orasemi-numericalChain-of-Spheresapproach. Incasethatthelatterapproachischosen,
+appropriategridparametersaredefinedthroughthe! DefGridnsettings. However,amorefine-grainedspecifi-
+cationisavailabletoexpertusersasfollows:
+%mp2 KCOpt _AOBLAS # (default) AO direct with BLAS routines
+_COSX # semi-numerical evaluation using the COSX method
+KC_GridX 2 # default 2: angular Lebedev grid 110
+KC_IntAccX 4.020 # radial grid
+end
+Alternatively,allthegridsettingscanbedefinedinthe%methodblock,asdiscussedinsectionSCFgridkeyword
+list. ThefirstthreeentriesdefinethethreeSCFgrids,thefourthentrytheMP2gridforbasisfunctionderivatives
+(refertosectionRIJCOSX-RI-MP2Gradients)andthefifthentrythegridforthefour-externalcontribution.
+%method
+IntAccX Acc1, Acc2, Acc3, Acc4, Acc5
+GridX Ang1, Ang2, Ang3, Ang4, Ang5
+end
+7.13.8 RI-MP2 and Double-Hybrid DFT Response Properties
+StartingfromORCA5,boththeelectric(forthedipolepolarizability)andthemagnetic(forNMRshieldingand
+theEPRg-tensor)fieldresponseaswellasthenucleus-orbitresponse(hyperfinecouplings𝐴orb term)forRI-MP2
+(anddouble-hybridfunctionals)ishandledbyadifferentimplementationoftheRI-MP2secondderivativesthan
+thatusedforgeometricHessiancalculations(MP2andRI-MP2SecondDerivatives). Thiscodeismoreefficient,
+usestheRIapproximationthroughout(includingthefour-externalcontribution)andsupportsfrozencoreorbitals.
+The implementation is described in detail in refs [827, 848]. Consider the following input for a GIAO-RI-MP2
+NMRshieldingcalculation:
+! RIJK RI-MP2 def2-SVP def2/JK def2-SVP/C TightSCF NMR NoFrozenCore
+%mp2
+Density relaxed # required
+UsePertCanOrbs true # Whether to use perturbed canonical orbitals for
+# the internal block of the perturbed Fock matrix
+PertCan_EThresh 1e-6 # Energy threshold for special treatment of
+# degenerate orbital pairs
+PertCan_UThresh 10 # Coefficient threshold for special treatment of
+# strongly interacting orbital pairs
+(continuesonnextpage)
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 547
+
+[... start of page 570 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+FCut 1e-5 # Threshold for internal perturbed Fock elements
+RespStoreT true # Whether to precalculate and store all necessary
+# unperturbed amplitudes on disk
+RespDijConv false # Whether to store intermediates required for the
+# internal block of the response density on disk
+end
+* int 0 1
+O 0 0 0 0 0 0
+H 1 0 0 1.1056 0 0
+H 1 2 0 1.1056 109.62 0
+*
+Bydefaultperturbedcanonicalorbitalsareusedfortheoccupiedblock,i.e.

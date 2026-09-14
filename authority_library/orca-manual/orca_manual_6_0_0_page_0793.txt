@@ -1,0 +1,72 @@
+[... end of page 792 ...]
+ismodule.
+770 Chapter7. DetailedDocumentation
+
+--- Page 793 ---
+ORCAManual,Release6.0.0
+NormalModeScanCalculationsBetweenDifferentStructures
+This type of job allows to map PES between two different structures as a function of normal coordinates. The
+H Omoleculerepresentatrivialcasewhichhasformally2equivalentequilibriumstructureswhichdifferbyangle
+2
+H —O—H ( 103.5∘ and 256.5∘, respectively, as follows from the BP86/SV(P) calculations). In such a case
+1 2
+the input for the nomal mode trajectory run would require the calculation of geometry difference between both
+structuresintermsofthedimensionlessnormalcoordinates. Thiscanbedoneinorca_vibrunasfollows:
+> orca_vib water.hess ddnc geom.xyz
+The second parameter ddnc in the command line invokes the calculation of geometry difference in terms of the
+DNC’s. Bothstructuresarespecifiedinthefilegeom.xyzwhichhasastrictformat:
+2 3
+0
+0.000000 0.000000 0.000000
+0.000000 0.607566 0.770693
+0.000000 0.607566 -0.770693
+1
+0.000000 0.000000 0.000000
+0.000000 -0.607566 0.770693
+0.000000 -0.607566 -0.770693
+Thefirstlineoftheinputspecifiesthenumberofthestructuresandtotalnumberofatoms(2and3,respectively).
+Specification of each structure in sequence starts with a new line containing the number of the structure. The
+number0inthesecondlineisusedtodenotethereferencestructure. Notethatatomiccoordinatesshouldbegiven
+inunitsofÅandinthesameorderasintheORCAinputforthefrequencyrunfromwhichthefilewater.hess
+wascalculated.
+At the end of the orca_vib run the file geom.ddnc is generated. It contains the geometry difference in terms
+of the dimensionless normal coordinates between the structures with nonzero numbers and the reference one in
+geom.xyz:
+1
+1 9
+0 0.000000
+1 0.000000
+2 0.000000
+3 0.000000
+4 0.000000
+5 0.000000
+6 9.091932
+7 -9.723073
+8 0.000000
+Theoutputfileindicatesthatthestructuraldifferenceoccursalong2normalcoordinates: 6(bendingmode)and7
+(totallysymmetricO—Hstretchingmode). Onthebasisofthecalculateddisplacementpatternthefollowinginput
+forthenormalmodetrajectoryrunbetweentwostructurescanbedesigned:
+! RKS BP86 SV(P) def2/J RI TightScf MTR
+%mtr
+HessName "water.hess"
+modetype normal
+mlist 6,7
+rsteps 10,0
+lsteps 0, 10
+ddnc 0.9091932, 0.9723073
+end
+* xyz 0 1
+(continuesonnextpage)
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 771
+
+[... start of page 794 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+O 0.000000 0.000000 0.000000
+H 0.000000 0.607566 0.770693
+H 0.000000 0.607566 -0.770693
+*
+Here the parameters RSteps, LSteps and ddnc are chosen in such a way that in the scan along modes 6 and
+7 the corresponding dimensionless normal coordinates will be varied in the range 0 − 9.091932 and -9.723073
+− 0, respectively, in accordance with the projection pattern indicated in the file geom.ddnc. Note that normal
+modes are only defined up

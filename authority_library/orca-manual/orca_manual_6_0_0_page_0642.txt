@@ -1,0 +1,67 @@
+[... end of page 641 ...]
+is will process the non relativistic Exact, Velocity Absortion like spectra
+SOCABSQ #This will process the SOC corrected Origin Adjusted Absortion like spectra
+SOCABSOI #This will process the SOC corrected Exact Velocity Absortion like spectra
+XESSOCQ #This will process the SOC corrected Origin Adjusted X-ray Emission spectra
+XESSOCOI #This will process the SOC corrected Exact Velocity X-ray Emission spectra
+Amorecompletelistcanbefoundin(orca_mapspc)
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 619
+
+--- Page 642 ---
+ORCAManual,Release6.0.0
+7.16 CASSCF Linear Response
+Similar to the SCF linear response (see CP-SCF Options), second-derivative properties can be calculated at the
+CASSCFlevelbysolvingthecoupledperturbed(CP-)CASSCFequationsforthelinearresponseofthewavefunc-
+tionparameterstoaperturbation. Theselinearresponseequationsareexpressedas
+𝜕2𝐸 𝜕𝜆 𝜕2𝐸
+=−
+𝜕𝜆2 𝜕R 𝜕𝜆𝜕R
+where𝜆aretheCASSCFwavefunctionparametersandRaretheperturbationsforwhichtheresponseequations
+arebeingsolved[378,859]. Thepropertygradientontheright-handside(RHS)isaknownperturbation-dependent
+quantity,buttheleft-handside(LHS)dependsonthesolutionoftheresponseofthewavefunctionparametersto
+R. Therefore,theresponsetotheperturbationmustbesolvedforiteratively,whichisdoneusingthetrialvectors
+X. ThisleadstotheLHSbeingcomputedasasigma-vector,whichisreassembledateveryiteration. Thelinear
+responseequationforperturbation𝑅 canthenbewrittenas
+𝑖
+𝜎 =HX(𝑅𝑖) =G(𝑅𝑖)
+whereHistheperturbation-independentHessianmatrixandGistheperturbation-specificRHSmatrix. Oncethe
+linearequationconverges,thesolutionvectoroftheresponseparameterscanthenbecontractedwiththeelectron-
+and spin-density matrices to yield the AO response density matrices, [︀ P𝛼±𝛽]︀(R). The response densities can
+thenbecontractedwithappropriateAO1-electronpropertyintegralstocomputethesecond-ordercontributionsto
+second-derivativeproperties.
+In ORCA these equations are solved by the orca_casscfresp program and the underlying solver is BHP22, a
+Davidson-typelinearequationsolver. TheRHSisbuiltfromthepropertyintegralscalculatedintheorca_propint
+program. Afterthesolutionconvergesandtheresponsedensitiesaremadeandstored,theorca_propprogramis
+called,whereintheappropriatedensitiesandresponsedensitiesarecontractedwiththenecessarypropertyintegrals
+(alsofromorca_propint). Thisuseofdensitieskeepstheresponsepropertycalculationsinorca_propgenerally
+applicabletoallmethodsasthedensitieshousethemethod-specificinformation.
+7.16.1 Input Block
+Theinputblock%casrespisavailableforrequestingthefollowingoptions(givenbelowwiththeirdefaultvalues):
+%casresp
+TolR 1.e-5 # Convergence tolerance for the residual norm
+# Note: TolR not affected by global keywords (TightSCF, etc.)
+MaxIter 64 # Maximum number of iterations
+MaxRed 24 # Maximum size of the reduced space per RHS
+PrintRHSVec false # Print significant contributions to the RHS vector
+PrintRspVec false # Print significant contributions to the response vector
+PrintWF CFG # print CI part in (CFG (default), CSF, or DET basis)
+TolPrintVec 1.e-2 # Threshold to print a contribution to the RHS/response vector
+# Minimum value of the SQUARE of a vector element to print
+PreCondType diag # (default) Use diagonal preconditioner (requires auxiliary basis!)
+none # Do not use a preconditioner
+PreCondMaxRed 400 # Hessian precondition subset size
+end
+Note that the solver-related options in the %elprop and %eprnmr blocks do not affect the solution of the CP-
+CASSCFequations.
+620 Chapter7. DetailedDocumentation
+
+[... start of page 643 ...]
+ORCAManual,Release6.0.0
+7.16.2 Technical Notes
+ItshouldbenotedthatCASSCFlinearresponseusestheoptimizedCASSCFwavefunctionasastartingpoint. Thus,
+a %casscf blockwiththeappropriateinputs(seeCompleteActiveSpaceSelf-ConsistentFieldMethod)mustbe
+providedintheinput. State-specific(SS-)CASSCFresponseisrunonSS(NRoots 1)CASSCFwavefunctions. If
+theCASSCFwavefunctionisstate-averaged(SA),theresponseisrunovertheaveragedmanifoldofstatesandnot
+onaspecificroot. Inthiscase,oneshouldanalyzetheoutputcarefully. Itiswisetoonlyaveragestateswhichare
+(nearly-)degenerate.
+Bydefault,aCASSCFcalculationwillberunfromscratchbeforerunningtheCASSCFRespon

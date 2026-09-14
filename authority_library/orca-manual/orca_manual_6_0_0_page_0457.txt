@@ -1,0 +1,82 @@
+[... end of page 456 ...]
+dscriptandreturnforthisone.
+Thenextcommandisthebasisofallcompoundscripts. ThisistheNew_StepCommand. Thiscommandsignals
+compoundthatanormalORCAcalculationfollows. It’ssyntaxis:
+New_Command NormalORCAinputStep_End
+SomecommentsabouttheNew_Stepcommand. Firstly,insidetheNew_Step-Step_Endcommandsonecanaddall
+possilbecommandsthatanormalORCAinputaccepts. Weshouldrememberherethatthecommandsthatdefine
+434 Chapter6. RunningTypicalCalculations
+
+--- Page 457 ---
+ORCAManual,Release6.0.0
+thenumberofprocessorsandtheMaxCorecommandwillbeignored.
+Asecondpointtokeepinmindistheideaofthestep. EveryNew_Step-Step_Endstructurecorrespondstoastep,
+startingcountingfrom1(ThefirstORCAcalculation). Thishelpsusdefinethepropertyfilethatthiscalculation
+willcreate,sothatwecanuseittoretrieveinformationfromit.
+AsingificantfeatureintheNew_Step-Step_End block. istheusageofthestructure&{variable}. Thisstructure
+allowstheusertousevariablesthataredefinedoutsidetheNew_Step-Step_Endblockinsideit,makingtheORCA
+inputmoregeneric. Forexample,inthescriptgivenabove,webuildthebasenameofthecalculations
+%base "&{JobName}.step&{JobStep}"
+usingthedefinedvariablesJobNameandJobStep. Formoredetailsregardingtheusageofthe&{}structureplease
+refertosection&whilefortheNew_Step-Step_End structurepleaserefertothesectionNew_Step.
+Finally, a few comments about the geometries of the calculation. There are 3 ways to provide a geometry to
+a New_Step - Step_End calculation. The first one is the traditional ORCA input way, where we can give the
+coordinatesorthenameofafilewithcoordinates,likewedoinallORCAinputs. InCompound though,ifwedo
+notpassanyinformationconcerningthegeometryofthecalculation,thenCompoundwillautomaticallytrytoread
+thegeometryofthepreviouscalculation. Thisisthesecond(implicit)waytogiveageometrytoacompoundStep.
+Thenthereisathirdwayandthisistheoneweusedintheexampleabove. Thisisthe Read_Geom command.
+Thesyntatofthiscommandis:
+Read_Geom(Stepnumber);
+Wecanusethiscommandwhenwewanttopassaspecificgeometrytoacalculationthatisnotexplicitlygiven
+insidetheNew_Step-Step_End structureanditisalsonottheonefromthepreviousstep. Thenwejustpassthe
+numberofthestepofthecalculationweareinterestinginjustbeforewerunournewcalculation. Formoredetails
+regardingtheRead_GeomcommandpleaserefertosectionRead_Geom.
+6.20.4 Data manipulation
+OneofthemostpowerfullfeaturesofCompound isit’sdirectaccesstopropertiesofthecalculation. Inorderto
+usethesepropertieswedefinedtheRead command. InthepreviousexampleweuseittoreadtheSCFenergyof
+thecalculation:
+Read energies[iang] = SCF\_ENERGY[jobStep];
+Thesyntaxofthecommandis:
+Readvariablename=property
+where variable name is the name of a variable that is already defined, property is the property from the known
+propertiesfoundintableTablePredefinedandstepisthestepofthecalculationweareinterestedin. Formore
+detailsintheRead commandpleaserefertosectionRead.
+We note here that Compoud has the ability to also read property files from older calculations. We
+can achieve this using the command Get_From_Prop_File that works exactly like the Read command but
+in older compound files. For more details concerning the Get_From_Prop_File please refer to section
+sec:compound.commands.get_from_prop_file.detailed.
+# Print a summary at the end of the calculation
+# ---------------------------------------------
+print("////////////////////////////////////////////////////////\\n");
+print("// POTENTIAL ENERGY RESULT\\n");
+print("////////////////////////////////////////////////////////\\n");
+variable minimum,maximum;
+variable Em,E0,Ep;
+variable i0,im,ip;
+for iang from 0 to nsteps-1 do
+angle = amin + 1.0*iang*step;
+JobStep = iang+1;
+minimum = 0;
+(continuesonnextpage)
+6.20. CompoundMethods 435
+
+[... start of page 458 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+maximum = 0;
+i0 = iang;
+im = iang-1;
+ip = iang+1;
+E0 = energies[i0];
+Em = E0;
+Ep = E0;
+if (iang>0 and iang<nsteps-1) then
+Em = energies[im];
+Ep = energies[ip];
+endif
+if (E0<Em and E0<Ep) then minimum=1; endif
+if (E0>Em and E0>Ep) then maximum=1; endif
+if (minimum = 1 ) then
+print(" %3d %6.2lf %16.12lf (-)\textbackslash{}n",JobStep,angle, E0 );
+endif
+if (

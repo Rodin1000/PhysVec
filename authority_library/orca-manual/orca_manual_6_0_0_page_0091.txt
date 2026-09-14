@@ -1,0 +1,77 @@
+[... end of page 90 ...]
+the OO-RI-MP2 method is lower than that of the RI-MP2
+methoditself. OnemightthinkofthismethodasaspecialformofmulticonfigurationalSCFtheoryexceptforthe
+factthattheHamiltonianisdividedintoa0thordertermandaperturbation.
+The main benefit of the OO-RI-MP2 method is that it “repairs” the poor Hartree–Fock orbitals to some extent
+whichshouldbeparticularlybeneficialforsystemswhichsufferfromtheimbalanceintheHartree-Focktreatment
+oftheCoulombandtheExchangehole. Basedontheexperiencegainedsofar,theOO-RI-MP2methodisnobetter
+thanRI-MP2itselfforthethermochemistryoforganicmolecules. However,forreactionsbarriersandradicalsthe
+68 Chapter6. RunningTypicalCalculations
+
+--- Page 91 ---
+ORCAManual,Release6.0.0
+benefitsofOO-MP2overMP2aresubstantial. Thisisparticularlytruewithrespecttothespin-componentscaled
+variantofOO-RI-MP2thatisOO-RI-SCS-MP2. Furthermore,theOO-RI-MP2methodsubstantiallyreducesthe
+spincontaminationinUHFcalculationsonradicals.
+SinceeveryiterationoftheOO-MP2methodisasexpensiveasaRI-MP2relaxeddensitycalculation,thecompu-
+tationalcostismuchhigherthanforRI-MP2itself. Oneshouldestimateaboutafactorof10increaseincomputa-
+tionaltimewithrespecttotheRI-MP2timeofanormalcalculation. Thismaystillbefeasibleforcalculationsin
+therangeof1000–2000basisfunctions(theupperlimit,however,impliesverysignificantcomputationalcosts). A
+fullassessmentoftheorbitaloptimizedMP2methodhasbeenpublished.[620]
+OO-RI-MP2istriggeredeitherwith! OO-RI-MP2or! OO-RI-SCS-MP2 (withspincomponentscaling)inthe
+simpleinputlineorbyOrbOpt trueinthe%mp2block. Themethodcomeswiththefollowingnewvariables:
+%mp2 OrbOpt true # turns on the orbital optimization
+CalcS2 false # calculate the S**2 expectation value
+# in spin-unrestricted calculations
+MaxOrbIter 64 # Max. number of iterations
+MP2Shift 0.1 # Level shift for the procedure
+end
+ThesolverisasimpleDIIStypeschemewithadditionallevelshifting. Wehavefoundthatitisnotreallybeneficial
+tofirstconvergetheHartree-Fockequations. Thusitissensibletoadditionallyusethekeyword! noiterinorder
+toturnoffthestandardHartree-FockSCFprocessbeforeenteringtheorbitaloptimizations.
+TheOO-RI-MP2methodisimplementedforRHFandUHFreferencewavefunctions. Analyticgradientsareavail-
+able.
+ThedensitydoesnotneedtoberequestedseparatelyinOO-RI-MP2calculationsbecauseitisautomaticallycalcu-
+lated. Also,thereisnodistinctionbetweenrelaxedandunrelaxeddensitiesbecausetheOO-RI-MP2energyisfully
+stationarywithrespecttoallwavefunctionparametersandhencetheunrelaxedandrelaxeddensitiescoincide.
+MP2andRI-MP2GradientsandHessians
+GeometryoptimizationwithMP2,RI-MP2,SCS-MP2andRI-SCS-MP2proceedsjustaswithanySCFmethod.
+Frequenciescanbecalculatedanalyticallyinall-electroncalculations. Withfrozencoreorbitals,secondderivatives
+of any kind are currently only available numerically. The RIJCOSX approximation (section Hartree–Fock and
+HybridDFTCalculationswithRIJCOSX)issupportedinRI-MP2andhencealsoindouble-hybridDFTgradient
+runs (it is in fact the default for double-hybrid DFT since ORCA 5.0). This leads to large speedups in larger
+calculations,particularlyifthebasissetsareaccurate.
+#
+# MP2 optimization example
+#
+! SCS-MP2 def2-TZVP OPT NoFrozenCore
+* int 0 1
+C 0 0 0 0.00 0.0 0.00
+O 1 0 0 1.20 0.0 0.00
+H 1 2 0 1.09 120.0 0.00
+H 1 2 3 1.09 120.0 180.00
+*
+Thisjobresultsin:
+---------------------------------------------------------------------------
+Redundant Internal Coordinates
+--- Optimized Parameters ---
+(Angstroem and degrees)
+Definition OldVal dE/dq Step FinalVal
+----------------------------------------------------------------------------
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 69
+
+[... start of page 92 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+1. B(O 1,C 0) 1.2081 0.000488 -0.0003 1.2078
+2. B(H 2,C 0) 1.1027 0.000009 -0.0000 1.1027
+3. B(H 3,C 0) 1.1027 0.000009 -0.0000 1.1027
+4. A(O 1,C 0,H 3) 121.85 0.000026 -0.00 121.85
+5. A(H 2,C 0,H 3) 116.29 -0.000053 0.01 116.30
+6. A(O 1,C 0,H 2) 121.85 0.000026 -0.00 121.85
+7. I(O 1,H 3,H 2,C 0) -0.00 -0.000000 0.00 0.00
+----------------------------------------------------------------------------
+JusttodemonstratetheaccuracyofRI-MP2, hereistheresultwithRI-SCS-MP2insteadofSCS-MP2, withthe
+additionofdef2-TZVP/C:
+----------------------------------------------------------------

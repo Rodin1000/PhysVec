@@ -1,0 +1,140 @@
+Code Format Requirements for Verifier Codes
+-----------------------------------------------------------------------------
+
+Purpose
+Generate one verifier file that is a complete, executable ORCA input template (.inp) and is intended to test one target element block ({element}) for a {type} system.
+The template must be runnable by calling the ORCA executable. The run may be terminated early after ORCA starts successfully, as long as ORCA reports no input/parser errors.
+
+-----------------------------------------------------------------------------
+
+1) File Naming
+- Format: {element}_verifier_{type}
+- Examples:
+  - keywords_verifier_fermion
+  - scf_verifier_fermion
+  - casscf_verifier_fermion
+  - output_verifier_fermion
+  - mp2_verifier_fermion
+  - geometry_verifier_fermion
+
+-----------------------------------------------------------------------------
+
+2) Execution Requirement
+- The verifier must be runnable via the DFT software executable (e.g., ORCA).
+- It is not required to finish the full calculation.
+- You may terminate early only after the calculation has started, but the input must produce no ORCA parser/syntax errors.
+
+-----------------------------------------------------------------------------
+
+3) Output Content Rules (Critical)
+The file must contain ONLY:
+1) A keywords block (! ...)
+2) Exactly one target element block: the block under test ({element})
+3) Exactly one geometry block (e.g., * xyz charge mult ... *)
+4) Any additional prerequisite blocks that are strictly necessary for ORCA to start cleanly (examples: %scf, %basis, %pal, %cpcm, etc.)
+
+Forbidden
+- Do NOT include extra unrelated blocks.
+- Do NOT include example sections, reference snippets, or explanations outside the file.
+
+One element per file
+- The only “element block” that the verifier is testing is {element}.
+- Other blocks are allowed only as dependencies, not as additional “elements to test”.
+
+-----------------------------------------------------------------------------
+
+4) Dependency Rules (Critical)
+- If {element} depends on other settings, those dependencies must be satisfied within the same input file, using:
+  - the keyword line (! ...) and/or
+  - prerequisite blocks (%... end)
+- Do NOT create a second “tested element” in the same file.
+- Dependencies must be explicit and minimal.
+
+Example dependency statement (conceptual)
+- If testing tddft, you must select a functional/method in ! ... that supports TDDFT.
+
+-----------------------------------------------------------------------------
+
+5) Comment Style Requirements
+
+5.1 Element Separator (before each block section)
+Use this separator line before each major section:
+# {element} ------------------------------------------------------------------------------------------
+
+5.2 First line after the function/file header (Element block description)
+Immediately after the element block begins (or at the top of the file if there is no note header), include:
+- Format: # a {element} input block for {type} system: <brief description>
+- Use lowercase for the first word (unless proper noun)
+- Keep it concise and specific
+
+5.3 Parameter Documentation
+- One line per parameter:
+  # param_name: description
+- Include all parameters (positional and keyword)
+- Parameters must be treated as variables (placeholders), not hard-coded constants
+
+-----------------------------------------------------------------------------
+
+6) Code Style and Syntax
+- Topic {topic} = dft: output must be an ORCA input file (.inp) style.
+- Must follow ORCA syntax conventions and be self-consistent.
+- Keep code practical and readable.
+- Add short inline comments only where settings are non-obvious.
+
+-----------------------------------------------------------------------------
+
+7) Element Scope (Critical)
+- ELEMENT_NOTE: {element_note}
+- The verifier must implement ONLY what is described in ELEMENT_NOTE for the target {element} block.
+- You may add extra settings only if required for ORCA to start cleanly (dependencies).
+- If ELEMENT_NOTE says a block is outdated/unavailable or requires replacement (e.g., COSMO → CPCM), automatically use the correct modern block and include the minimal dependencies.
+
+-----------------------------------------------------------------------------
+
+8) Required Template Layout (Recommended)
+Order sections like this for consistency:
+1) ! keywords
+2) prerequisite blocks (if needed): %basis, %scf, %pal, %cpcm, etc.
+3) target {element} block
+4) geometry block (* xyz ... *)
+
+-----------------------------------------------------------------------------
+
+Example Structure (Illustrative Only)
+```orca
+# keywords ------------------------------------------------------------------------------------------
+# a keywords input block for fermion system: set method/basis and enable required approximations
+# method: DFT method and functional selection
+# basis: orbital basis set
+# ri: whether RI approximations are enabled (may require %basis auxiliary settings)
+! RKS B3LYP def2-QZVP RIJCOSX TightSCF
+
+# basis ---------------------------------------------------------------------------------------------
+# dependency block: required because RIJCOSX/RI needs auxiliary basis definitions
+%basis
+  AutoAux true
+end
+
+# scf -----------------------------------------------------------------------------------------------
+# dependency block: improves convergence robustness; not the tested element unless {element} == scf
+%scf
+  MaxIter 200
+  ConvCriteria Tight
+  SOSCF Start 0.00033
+end
+
+# {element} ------------------------------------------------------------------------------------------
+# a {element} input block for fermion system: <ELEMENT_NOTE-specific description>
+%{element}
+  ...
+end
+
+# geometry ------------------------------------------------------------------------------------------
+* xyz 0 1
+O  0.000000  0.000000  0.000000
+H  0.000000  0.757160  0.586260
+H  0.000000 -0.757160  0.586260
+*
+```
+
+Follow these rules strictly when generating verifier code.

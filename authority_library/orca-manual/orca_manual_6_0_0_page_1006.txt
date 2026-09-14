@@ -1,0 +1,77 @@
+[... end of page 1005 ...]
+ already exists at the beginning of a Run command, new frames will be appended to its end
+by default. If you want to overwrite the existing file instead, use the Replace modifier. The old existing file is
+erasedonlyonceafteradumpwiththismodifierhasbeenspecified. IfmultipleRun commandsfollowafterthe
+dumpdefinition,thetrajectorywillnotbereplacedbeforeeachoftheseruns,onlybeforethefirstoneamongthem.
+Tooverwritethefileanothertime,simplyre-definethedumpwiththeReplacemodifier. Ifthefiledoesnotyet
+existatthebeginningofarun,thismodifierhasnoeffect. AppendingframestoDCDtrajectoriesisnotpossible
+(becausetheystorethetotalframecountintheheader). Therefore,Replaceisautomaticallyswitchedonifthe
+formatisDCD.
+7.51. AbinitioMolecularDynamicsSimulations 983
+
+--- Page 1006 ---
+ORCAManual,Release6.0.0
+WiththeRegionmodifier,thetrajectoryoutputcanberestrictedtoaspecificregion(i. e.,subsetofatoms). This
+modifierexpectsoneargument,whichiseitherthenameofapre-definedregionorthenumberofauser-defined
+region(seeabove). Ifnotspecified,thetrajectoryofthewholesystemwillbewritten. Multipledumpcommands
+formultipleregionscanbeactiveatthesametime,buteachpairofregionandquantity(position/velocity/force)
+canhaveonlyoneattacheddumpcommandatatime(re-definingwilloverwritethedumpsettings).
+UsetheNonemodifiertodisablewritingthisquantitytoanoutputfile. Thecommand“Dump Position None”
+willdisablewritingofallpositiontrajectoriesforallregions. Todisableonlythedumpforaspecificregion,use
+“Dump Position Region r None”,whereristhenameornumberoftheregion.
+ThedefaultistowriteapositiontrajectorywithStride 1andFormat XYZtoafilenamed“proj-postrj-all.
+xyz”, where “proj” is the base name of the ORCA project. If you want to create no output trajectory at all, use
+“Dump Position None”asdescribedabove.
+The Dump GBW command keeps a copy of the GBW file every 𝑛 steps, which can be used for computing prop-
+ertiesalongtheMDtrajectory, e. g., plottingorbitals. Thisdoesnotyieldatrajectory, asalltheGBWfilesare
+storedindividually. Thevalueof𝑛iscontrolledbytheStridemodifier. Thefilenamesareformedbyappend-
+ing the step number (six digits with leading zeros) followed by “.gbw” to the Filename argument. Therefore,
+this argument should not contain the “.gbw” extension by itself. If the Filename modifier is not specified, the
+default will be “proj-step”, where “proj” is the base name of the ORCA project. This will lead to files such as
+“proj-step000001.gbw”,etc. TheFormatandRegionmodifierscannotbeusedforDump GBW.
+Inaverysimilarway,Dump EnGradstoresanORCA.engradfile(energyandgradient)every𝑛steps. Allthe
+.engradfilesarestoredindividually(notasacontinuoustrajectory). Thevalueof𝑛iscontrolledbytheStride
+modifier. Bydefaultfilenamessuchas“proj-step000001.engrad”willbeused.
+Initvel
+MandatoryArguments: temp Real [temperature]
+OptionalArguments: —
+Modifiers: Region region ... ...
+No_Overwrite —
+InitializesthevelocitiesoftheatomsbyrandomnumbersbasedonaMaxwell–Boltzmanndistribution,suchthat
+theinitialtemperaturematches𝑡𝑒𝑚𝑝(seealsosection1.5.2). Pleasenotethatthisoverwritesallvelocities,sodo
+notcallthiscommandwhenyoursystemisalreadyequilibrated(e. g.,tochangetemperature–useathermostat
+instead).
+Thetotallinearmomentumoftheinitialconfigurationisautomaticallyremoved,suchthatthesystemwillnotstart
+to drift away when the simulation begins. This only concerns the initial configuration. Total linear momentum
+mightbuildupduringthesimulationduetonumericeffects.
+Withthe Regionmodifier, theinitializationofvelocitiescanbeperformedforaspecificregion(i. e., subsetof
+atoms). Thismodifierexpectsoneargument,whichiseitherthenameofapre-definedregionorthenumberofa
+user-definedregion(seeabove). Ifnotspecified,thecommandactsonthewholesystem.
+The No_Overwrite modifier only initializes the velocities if no atom velocities have been defined/read before.
+This is useful in combination with the Restart command: After reading an existing restart file, the velocities
+are already known, and the initialization will be skipped if this modifier is used. The following combination of
+commands in a MD input would initialize the velocities only upon first execution, and restart the positions and
+velocitiesonallfollowingexecutionsofthesameinput:
+Restart IfExists
+Initvel 350_K No_Overwrite
+IfneithertheInitvelcommandnoraRestart commandisnotinvokedbeforeaRun call,theatomvelocities
+willbeinitializedtozerobeforestartingtherun.
+984 Chapter7. DetailedDocumentation
+
+[... start of page 1007 ...]
+ORCAManual,Release6.0.0
+Manage_Colvar
+MandatoryArguments: operation Keyword {Define}
+id Integer —
+type Keyword {Distance,Angle,Dihedral,CoordNumber}
+OptionalArguments: —
+Modifiers: Atom atom Integer —
+Group atomlist Integers —
+Weights weights Reals —
+Cutoff cutoff Real [length]
+Noprint —
+Defines collective variables (“Colvars”) which are used for Metadynamics or to impose Restraints on the
+system. Inageneralsense,aColvarissimplyacontinuousfunctionofalltheatompositionswhichreturnsareal
+number. AsColvarsdon’thaveanyeffectonthesimulationbythemselves,theycancurrentlyonlybedefinedor
+re-defined;thereisnorequirementfordeletingthem. ThesecondargumentoftheManage_Colvarcommandis
+thenumberoftheColvar. ThisnumberisusedtoaddresstheColvarlater. Allowednumbersarewi

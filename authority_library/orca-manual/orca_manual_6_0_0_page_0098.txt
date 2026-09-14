@@ -1,0 +1,88 @@
+[... end of page 97 ...]
+lesFockterm.
+Toputthisintoperspective,consideracalculationonserinewiththecc-pVDZbasisset—abasisonthelowerend
+ofwhatissuitableforahighlycorrelatedcalculation. ThetimerequiredtosolvetheequationsislistedinTable
+6.1. Wecandrawthefollowingconclusions:
+• As long as one can store the integrals and the I/O system of the computer is not the bottleneck, the most
+efficientwaytodocoupled-clustertypecalculationsisusuallytogoviathefulltransformation(itscalesas
+O(N5)whereasthelaterstepsscaleasO(N6)andO(N7)respectively).
+6.1. SinglePointEnergiesandGradients 75
+
+--- Page 98 ---
+ORCAManual,Release6.0.0
+• AO-based coupled-cluster calculations are not much inferior. For larger basis sets (i.e. when the ratio of
+virtualtooccupiedorbitalsislarger),thecomputationtimeswillbeevenmorefavorablefortheAObased
+implementation. TheAOdirectmethodusesmuchlessdiskspace. However,whenyouuseaveryexpensive
+basis set the overhead will be larger than what is observed in this example. Hence, conventionally stored
+integrals—ifaffordable—areagoodchoice.
+• AOX-basedcalculationsrunatessentiallythesamespeedasAO-basedcalculations. SinceAOX-basedcal-
+culationstakefourtimesasmuchdiskspace,theyareprettymuchoutdatedandtheAOXimplementationis
+onlykeptforhistoricalreasons.
+• RI-basedcoupled-clustermethodsaresignificantlyslower. Therearesomediskspacesavings,butthecom-
+putationallydominantstepsareexecutedlessefficiently.
+• CCSDisatmost10%moreexpensivethanQCISD.WiththelatestAOimplementationtheawkwardcoupled-
+clustertermsarehandledefficiently.
+• CEPAisnotmuchmorethan20%fasterthanCCSD.InmanycasesCEPAresultswillbebetterthanCCSD
+andthenitisarealsavingcomparedtoCCSD(T),whichisthemostrigorous.
+• IftriplesareincludedpracticallythesamecommentsapplyforMOversusAObasedimplementationsasin
+thecaseofCCSD.
+ORCA is quite efficient in this type of calculation, but it is also clear that the range of application of these rig-
+orousmethodsislimitedaslongasoneusescanonicalMOs. ORCAimplementsnovelvariantsoftheso-called
+localcoupled-clustermethodwhichcancalculatelarge,real-lifemoleculesinalinearscalingtime. Thiswillbe
+addressedinSec. LocalCoupledPairandCoupled-ClusterCalculations.
+Table6.1: Computertimes(minutes)forsolvingthecoupled-cluster/coupled-pairequationsforSerine(cc-pVDZ
+basisset)
+Method SCFMode Time(min)
+MO-CCSD Conv 38.2
+AO-CCSD Conv 47.5
+AO-CCSD Direct 50.8
+AOX-CCSD Conv 48.7
+RI-CCSD Conv 64.3
+AO-QCISD Conv 44.8
+AO-CEPA/1 Conv 40.5
+MO-CCSD(T) Conv 147.0
+AO-CCSD(T) Conv 156.7
+All of these methods are designed to cover dynamic correlation in systems where the Hartree-Fock determinant
+dominatesthewavefunctions. TheleastattractiveofthesemethodsisCISDwhichisnotsize-consistentandthere-
+forepracticallyuseless. ThemostrigorousareCCSD(T)andQCISD(T).Theformerisperhapstobepreferred,
+sinceitismorestableindifficultsituations.1 Onecangethighlyaccurateresultsfromsuchcalculations. However,
+one only gets this accuracy in conjunction with large basis sets. It is perhaps not very meaningful to perform a
+CCSD(T) calculation with a double-zeta basis set (see Table 6.2). The very least basis set quality required for
+meaningful results would perhaps be something like def2-TZVP(-f) or preferably def2-TZVPP (cc-pVTZ, ano-
+pVTZ).Foraccurateresultsquadruple-zetaandevenlargerbasissetsarerequiredandatthisstagethemethodis
+restrictedtorathersmallsystems.
+LetuslookatthecaseofthepotentialenergysurfaceoftheN molecule. Westudyitwiththreedifferentbasis
+2
+sets: TZVP,TZVPPandQZVP.Theinputisthefollowing:
+! TZVPP CCSD(T)
+%paras R= 1.05,1.13,8
+end
+* xyz 0 1
+(continuesonnextpage)
+1TheexponentialoftheT1operatorservestoessentiallyfullyrelaxtheorbitalsofthereferencewavefunction.Thisisnotincludedinthe
+QCISDmodelthatonlyfeaturesatmostalinearT1T2terminthesinglesresiduum.Hence,iftheHartree-Fockwavefunctionisapoorstarting
+pointbutstaticcorrelationisnotthemainproblem,CCSDismuchpreferredoverQCISD.Thisisnotuncommonintransitionmetalcomplexes.
+76 Chapter6. RunningTypicalCalculations
+
+[... start of page 99 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+N 0 0 0
+N 0 0 {R}
+*
+Forevenhigheraccuracywewouldneedtointroducerelativisticeffectsand-inparticular-turnthecorecorrelation
+on.2
+Table6.2: ComputedspectroscopicconstantsofN2withcoupled-clustermethods.
+Method Basisset R (pm) 𝜔 (cm−1) 𝜔 x (cm−1)
+e e e e
+CCSD(T) SVP 111.2 2397 14.4
+TZVP 110.5 2354 14.9
+TZVPP 110.2 2349 14.1
+QZVP 110.0 2357 14.3
+ano-pVDZ 111.3 2320 14.9
+ano-pVTZ 110.5 2337 14.4
+ano-pVQZ 110.1 2351 14.5
+CCSD QZVP 109.3 2437 13.5
+Exp 109.7 2358.57 14.32
+OnecanseefromTable6.2thatforhighaccuracy-inparticularforthevibrationalfrequency-oneneedsboth-the
+connectedtriple-excitationsandlargebasi

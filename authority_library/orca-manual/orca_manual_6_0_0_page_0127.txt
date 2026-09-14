@@ -1,0 +1,79 @@
+[... end of page 126 ...]
+rsmostoftheperiodic
+table. OtherchoicesaredocumentedinsectionsBasisSetsandChoiceofBasisSet.
+• For“pure”functionalstheuseofRI-Jwiththedef2/Jauxiliarybasissetisthedefault.
+SinceDFTisfrequentlyappliedtoopen-shelltransitionmetalswealsoshowone(moreorlesstrivial)exampleof
+aCu(II)complextreatedwithDFT.
+! BP86 SV SlowConv
+%base "temp"
+* xyz -2 2
+Cu 0 0 0
+(continuesonnextpage)
+104 Chapter6. RunningTypicalCalculations
+
+--- Page 127 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Cl 2.25 0 0
+Cl -2.25 0 0
+Cl 0 2.25 0
+Cl 0 -2.25 0
+*
+$new_job
+! B3LYP NoRI TZVP TightSCF MORead
+%moinp "temp.gbw"
+%scf GuessMode CMatrix
+end
+* xyz -2 2
+Cu 0 0 0
+Cl 2.25 0 0
+Cl -2.25 0 0
+Cl 0 2.25 0
+Cl 0 -2.25 0
+*
+Although it would not have been necessary for this example, it shows a possible strategy how to converge such
+calculations. FirstalessaccuratebutfastjobisperformedusingtheRIapproximation, aGGAfunctionalanda
+smallbasissetwithoutpolarizationfunctions. Notethatalargerdampingfactorhasbeenusedinordertoguidethe
+calculation(SlowConv). Thesecondjobtakestheorbitalsofthefirstasinputandperformsamoreaccuratehybrid
+DFT calculation. A subtle point in this calculation on a dianion in the gas phase is the command GuessMode
+CMatrix that causes the corresponding orbital transformation to be used in order to match the orbitals of the
+smallandthelargebasissetcalculation. Thisisalwaysrequiredwhentheorbitalenergiesofthesmallbasisset
+calculationarepositiveaswillbethecaseforanions.
+Hartree–FockandHybridDFTCalculationswithRIJCOSX
+Frustratedbythelargedifferenceinexecutiontimesbetweenpureandhybridfunctionals,wehavebeenmotivated
+tostudyapproximationstotheHartree-Fockexchangeterm. Themethodthatwehavefinallycomeupwithiscalled
+the“chainofspheres”COSXapproximationandmaybethoughtofasavariantofthepseudo-spectralphilosophy.
+Essentially,inperformingtwoelectronintegrals,thefirstintegrationisdonenumericallyonagridandthesecond
+(involvingtheCoulombsingularity)isdoneanalytically. ForalgorithmicandtheoreticaldetailsseeRefs. [623]and
+[383]. UponcombiningthistreatmentwiththeSplit-RI-JmethodfortheCoulombterm(thus,aCoulombfitting
+basisisneeded!),wehavedesignedtheRIJCOSXapproximationthatcanbeusedtoaccelerateHartree-Fockand
+hybridDFTcalculations. NotethatthisintroducesanothergridontopoftheDFTintegrationgridwhichisusually
+significantlysmaller.
+OBS.: Since ORCA 5, RIJCOSX is the default option for hybrid DFT (can be turned off by using !NOCOSX).
+However,itisbydefaultNOTturnedonforHF.
+Inparticularforlargeandaccuratebasissets,thespeedupsobtainedinthiswayareverylarge-wehaveobserved
+uptoafactorofsixty! Theprocedureisessentiallylinearscalingsuchthatlargeandaccuratecalculationsbecome
+possible with high efficiency. The RIJCOSX approximation is basically available throughout the program. The
+default errors are on the order of 0.05 ± 0.1 kcal mol−1 or less in the total energies as well as in energy differ-
+ences and can be made smaller with larger than the default grids or by running the final SCF cycle without this
+approximation. Theimpactonbonddistancesisafractionofapm,anglesarebetterthanafewtenthofadegree
+andsoftdihedralanglesaregoodtoabout1degree. Tothelimitedextenttowhichithasbeentested,vibrational
+frequenciesareroughlygoodto0.1wavenumberswiththedefaultsettings.
+TheuseofRIJCOSXisverysimple:
+! HF def2-TZVPP TightSCF RIJCOSX
+...
+One thing to be mentioned in correlation calculations with RIJCOSX is that the requirements for the SCF and
+correlationfittingbasesarequitedifferent. Wethereforesupporttwodifferentauxiliarybasissetsinthesamerun:
+6.1. SinglePointEnergiesandGradients 105
+
+[... start of page 128 ...]
+ORCAManual,Release6.0.0
+! RI-MP2 def2-TZVPP def2/J def2-TZVPP/C TightSCF RIJCOSX
+...
+Hartree–FockandHybridDFTCalculationswithRI-JK
+An alternative algorithm for accelerating the HF exchange in hybrid DFT or HF calculations is to use the RI
+approximationforbothCoulombandexchange. ThisisimplementedinORCAforSCFsinglepointenergiesbut
+notforgradients.
+! RHF def2-TZVPP def2/JK RI-JK
+...
+ThespeedupsforsmallmoleculesarebetterthanforRIJ

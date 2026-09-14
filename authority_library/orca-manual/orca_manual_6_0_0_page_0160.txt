@@ -1,0 +1,57 @@
+[... end of page 159 ...]
+Experimentaloption.
+Notethat,incontrasttotheSCFprogram,thereisnoAutoTRAHfeatureforCASSCFyet. TheTRAHfeaturehas
+toberequestedexplicitlyintheinput.
+6.1. SinglePointEnergiesandGradients 137
+
+--- Page 160 ---
+ORCAManual,Release6.0.0
+BreakingChemicalBonds
+Letusturntothebreakingofchemicalbonds. AsafirstexamplewestudythedissociationoftheH molecule.
+2
+Scanningabond,wehavetwopotentialsetupsforthecalculation: a)scanfromtheinsidetotheoutsideorb)from
+theoutsidetoinside. Ofcoursebothsetupsyieldidenticalresults,buttheydifferinpracticalaspectsi.e. conver-
+genceproperties. Ingeneral,scanningfromtheoutsidetotheinsideistherecommendedprocedure. Usingthe
+defaultguess(PModel),startingorbitalsaremucheasieridentifiedthanatshorterdistances,wheretheantibonding
+orbitalsareprobably‘impure’andhencewouldrequiresomeadditionalpreparation. Toensureasmoothpotential
+energysurface,inallsubsequentgeometrysteps,ORCAreadstheconvergedCASSCForbitalsfromtheprevious
+geometrystep. Inthefollowing,TightSCFisusedtotightentheconvergencesettingsofCASSCF.
+!Def2-SVP TightSCF
+%casscf
+nel 2
+norb 2
+mult 1
+nroots 1
+end
+# Scanning from the outside to the inside
+%paras
+R [4.1 3.8 3.5 3.2 2.9 2.6 2.4 2.2
+2 1.7 1.5 1.3 1.1 1 0.9 0.8
+0.75 0.7 0.65 0.6]
+end
+* xyz 0 1
+H 0.0 0.0 0.0
+H 0.0 0.0 {R}
+end
+Theresultingpotentialenergysurface(PES)isdepictedinFig.6.15togetherwithPESsobtainedfromRHFand
+broken-symmetryUHFcalculations(inputbelow).
+! RHF Def2-SVP TightSCF
+# etc...
+And
+! UHF Def2-SVP TightSCF
+%scf
+FlipSpin 1
+FinalMs 0.0
+end
+# etc...
+Note: TheFlipSpinoptiondoesnotworktogetherwiththeparameterscan. Onlythefirststructurewillundergo
+aspinflip. Therefore,atthecurrentstatus,aseparateinputfile(includingthecoordinatesorwithacorresponding
+coordinatefile)hastobeprovidedforeachstructurethatisscannedalongthePES.
+138 Chapter6. RunningTypicalCalculations
+
+[... start of page 161 ...]
+ORCAManual,Release6.0.0
+Fig.6.15: PotentialEnergySurfaceoftheH moleculefromRHF,UHFandCASSCF(2,2)calculations(Def2-SVP
+2
+basis).
+Itisobvious,thattheCASSCFsurfaceisconciseandyieldstheco

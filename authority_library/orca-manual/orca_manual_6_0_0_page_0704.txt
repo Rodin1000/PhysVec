@@ -1,0 +1,89 @@
+[... end of page 703 ...]
+swhereasthechargedistributionisgeneratedbytheprotonsinthenucleus.
+So,physically,themagnetizationshouldoccupyalargervolumeinspacethanthecharge. Thismightalsobethe
+reason why the resulting finite-nucleus model is insufficient to remedy the divergences in the f𝜋FW hyperfine-
+coupling tensor. Consequently, the hyperfine-coupling tensor is only implemented in the version resulting from
+the fpFW DKH Hamiltonian. In the case of the g-tensor both versions are implemented and accessible via the
+keyword
+%rel fpFWtrafo true/false end
+By default, this keyword is set to true. A detailed form of the property operators used for the g-tensor and
+hyperfine-tensorscanbefoundinRef.[744].
+7.23. RelativisticOptions 681
+
+--- Page 704 ---
+ORCAManual,Release6.0.0
+7.23.5 Finite Nucleus Model
+Compositeparticleslikenucleihave,asopposedtoelementaryparticles,acertainspatialextent. Whilethepoint-
+chargeapproximationfornucleiisingeneralverygoodinnonrelativisticcalculations,inrelativisticcalculationsit
+mightleadtonon-negligibleerrors. Afinite-nucleusmodelisavailableforallcalculationsintheORCAprogram
+package. Itisaccessiblefromthe%relblockvia
+%rel FiniteNuc true/false end
+Bydefault,thiskeywordissettofalse. Ifthekeywordissettotrue,finite-nucleuseffectsareconsideredinthe
+followingintegrals:
+• nucleuspotentialV
+• DKH-integral𝑉(𝑝)
+• one-electronspin-orbitintegralsSOC(alsoinone-electronpartofSOMF)
+• electric-field gradient EFG (and thus, as a consequence in the Fermi-contact and spin-dipole terms of the
+HFCtensor)
+• nucleus-orbitintegralNUC
+• angular-momentumintegrall
+Thefinite-nucleusmodelimplementedinORCAistheGaussiannucleusmodelofRef.[870].
+7.23.6 Exact Two-Component Theory (X2C)
+TheX2CimplementationinORCAcloselyfollowsthatofFranzke,Weigend,andtheircoworkers,describedinthe
+references: [658] (energy), [274] (gradient), [276] (EPR hyperfine coupling), [273] (NMR spin–spin coupling),
+[272](NMRshielding). ThesearealsoconsistentwiththeworkofGaussandcoworkersinrefs: [165](gradient,
+electricproperties),[166](Hessian),[167](NMRshielding). However,despitethename,onlyascalarrelativistic
+(spin-free)versionisavailableatpresent,resultingeffectivelyinaone-componentmethod(moreaptlycalled“SF-
+X2C-1e”), very similar to the DKH and ZORA approaches described above. The main difference to the latter
+two is that the decoupling of the one-electron Dirac Hamiltonian is exact, rather than approximate. SF-X2C-1e
+isimplementedinORCAforenergies,gradients,andvariousproperties(seebelow)withbothapoint-andfinite
+nucleusmodel.
+Webrieflydescribetheworkingequationshere,usingthenotationoftheaforementionedreferences,whichdiffers
+somewhatfromthatintheprevioussections. Theone-electronDiracequationissolveddirectly:
+(︂ CL CL)︂
+DC=MCE, C= + − (7.184)
+CS CS
++ −
+toobtaintheunitarytransformationmatrix:
+(︂
+U U
+)︂ (︂
+1
+−X†)︂(︂
+R 0
+)︂
+U= ++ +− =
+U U X 1 0 R′
+−+ −−
+X=CS (︀ CL)︀−1
++ +
+(︁ )︁−1
+R=S−
+2
+1 S−
+2
+1S˜S−1
+2
+2 S1
+2
+1
+S˜ =S+ X†TX
+2𝑐2
+whichexactlyblock-diagonalizestheHamiltonian:
+(︂ h+ 0 )︂
+U†DU= (7.185)
+0 h−
+h+ =R†LR (7.186)
+682 Chapter7. DetailedDocumentation
+
+[... start of page 705 ...]
+ORCAManual,Release6.0.0
+(︂ )︂
+1
+L=V+TX+X†T+X† W−T X (7.187)
+4𝑐2
+whereV,T,S,andWarethepotential,kinetic,overlap,andrelativisticpotential(𝑝ˆ𝑉ˆ𝑝ˆ)integralmatrices. h+is
+thusthematrixformoftherelativistically-correctedone-electronHamiltonianusedfortherestofthecalculation.
+Note that the potential operator 𝑉ˆ used in the above equations only includes the electron–nuclear Coulomb in-
+teraction. Externalpointchargesmayoptionallybeincludedvia%rel ModelPot[4]=1(default0). Thisoption
+affectsen

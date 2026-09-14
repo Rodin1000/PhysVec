@@ -1,0 +1,83 @@
+[... end of page 536 ...]
+ngworksreasonablywell,but
+mostotherconvergersinORCAaremorepowerful.
+IfdampingusedinconjunctionwithDIISorSOSCF,thevalueof DampErrisimportant: oncetheDIISerrorfalls
+belowDampErr,thedampingisturnedoff. IncaseSOSCFisused,DampErrreferstotheorbitalgradientvalueat
+whichthedampingisturnedoff. Thedefaultvalueis0.1Eh. Indifficultcases,however,itisagoodideatochoose
+DampErrmuchsmaller,e.g. 0.001. Thisis—tosomeextent—chosenautomaticallytogetherwiththekeyword
+! SlowConv.
+%scf
+# control of the Damping procedure
+CNVDamp true # default: true
+CNVZerner false # default: false
+(continuesonnextpage)
+514 Chapter7. DetailedDocumentation
+
+--- Page 537 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+DampFac 0.98 # default: 0.7
+DampErr 0.05 # default: 0.1
+DampMin 0.1 # default: 0.0
+DampMax 0.99 # default: 0.98
+# more convenient:
+Damp fac 0.98 ErrOff 0.05 Min 0.1 Max 0.99 end
+end
+7.7.3 Level Shifting
+Levelshiftingisafrequentlyusedtechnique. Thebasicideaistoshifttheenergiesofthevirtualorbitalssuchthataf-
+terdiagonalizationtheoccupiedandvirtualorbitalsmixlessstronglyandthecalculationconvergesmoresmoothly
+towardsthedesiredstate. Also,levelshiftingshouldpreventflippingofelectronicstatesinnear-degeneratecases.
+InaspecialcontextithasbeenshownbySaundersandHillier[335,749]tobeequivalenttodamping.
+SimilartoDampErrdescribedintheprevioussection,ShiftErrreferstotheDIISerroratwhichthelevelshifting
+isturnedoff.
+%scf
+# control of the level shift procedure
+CNVShift true # default: true
+LShift 0.1 # default: 0.25, energy unit is Eh.
+ShiftErr 0.1 # default: 0.0
+# more convenient:
+Shift Shift 0.1 ErrOff 0.1 end
+end
+7.7.4 Direct Inversion in Iterative Subspace (DIIS)
+Thedirectinversioniniterativesubspace(DIIS)isatechniquethatwasinventedbyPulay[701,702]. Ithasbecome
+thedefactostandardinmostmodernelectronicstructureprograms,becauseDIISisrobust,efficientandeasyto
+implement. Basically DIIS uses a criterion to judge how far a given trial density is from self-consistency. The
+commutatoroftheFockanddensitymatrices[F,P]isaconvenientmeasureforthiserror. Withthisinformation,
+anextrapolatedFockmatrixfromthepresentandpreviousFockmatricesisconstructed, whichshouldbemuch
+closer to self-consistency. In practice this is usually true, and better than linear convergence has been observed
+withDIIS.Insomerare(open-shell)caseshowever,DIISconvergenceissloworabsentaftersomeinitialprogress.
+Asself-consistencyisapproached,thesetoflinearequationstobesolvedforDIISapproacheslineardependency
+anditisusefultobiasDIISinfavoroftheSCFcyclethathadthelowestenergyusingthefactorDIISBfac. Thisis
+achievedbymultiplyingalldiagonalelementsoftheDIISmatrixwiththisfactorunlessitistheFockmatrix/density
+whichleadstothelowestenergy. ThedefaultvalueforDIISBfacis1.05.
+ThevalueofDIISMaxEqisthemaximumnumberofoldFockmatricestoremember. Valuesof5-7havebeenrec-
+ommended,whileotherusersstore10-15Fockmatrices. ShouldthestandardDIISnotachieveconvergence,some
+experimentationwiththisparametercanbeworthwhile. IncaseswhereDIIScausesproblemsinthebeginningof
+theSCF,itmayhavetobeinvokedatalaterstage. ThestartoftheDIISprocedureiscontrolledbyDIISStart.
+Ithasadefaultvalueof0.2Eh,whichusuallystartsDIISafter0-3cycles. AdifferentwayofcontrollingtheDIIS
+startisadjustingthevalueDIISMaxIt,whichsetsthemaximumnumberofcyclesafterwhichDIISwillbestarted
+irrespectiveoftheerrorvalue.
+%scf
+# control of the DIIS procedure
+CNVDIIS true # default: true
+DIISStart 0.1 # default: 0.2
+DIISMaxIt 5 # default: 12
+DIISMaxEq 7 # default: 5
+DIISBFac 1.2 # default: 1.05
+DIISMaxC 15.0 # default: 10.0
+(continuesonnextpage)
+7.7. SCFConvergence 515
+
+[... start of page 538 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# more convenient:
+DIIS Start 0.1 MaxIt 5 MaxEq 7 BFac 1.2 MaxC 15.0 end
+end
+NotethatfortroublesomeorlackingSCFconvergencetheTRAHalgorithmshouldbeused(seeSec. Trust-Region
+AugmentedHessian(TRAH)SCF).Ifnotturnedoffexplicitly,TRAHisswitchedonautomaticallywheneverconver-
+genceproblemsarepresentbymeansoftheAutoTRAHfeature(seeSec. Trust-RegionAugmentedHessian(TRAH)
+SCF).
+7.7.5 An alternative DIIS algorithm: KDIIS
+AnalternativealgorithmthatmakesuseoftheDIISconceptiscalledKDIIS(Kolmar’sDIIS[452,453])inORCA.
+TheKDIISalgorithmisdesignedt

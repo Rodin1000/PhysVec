@@ -1,0 +1,66 @@
+[... end of page 28 ...]
+tyintegralsinordertoproduceresponse
+densities.
+Theresponsedensitiesarethenstoredinthedensitycontainertoo. Atthispoint,onehaseverythingthatisrequired
+inordertocalculatetheactualproperties–ataskthatisperformedbyorca_prop.
+Theorca_propprogramworksbybrowsingthroughthedensitycontainerandlooksfordensitiesthatareappropri-
+ateforcalculatingarequestedproperty. Assoonasitfindsanappropriatedensity(orcombinationofunperturbed
+and response density), it will calculate the property. For example, if you have calculated SCF, MP2 and CCSD
+in the same calculation and have asked for the calculation of all three densities, orca_prop will calculate three
+dipolemomentsandprintthemrightnexttoeachother.
+6 Chapter2. TheArchitectureofORCA
+
+--- Page 29 ---
+ORCAManual,Release6.0.0
+Onebeneficialsideeffectofthisorganizationisthatitisverywellsuitedforfutureextensions. Ifanewmethod
+becomesavailableinORCAthatisabletoproducedensitiesandpossiblyresponsedensities,thepropertiesforthis
+methodwillbefullyavailablewithoutanyprogrammerneedingtowriteasinglelineofadditionalcode. Italso
+ensuresthatallpropertiesarecalculatedinaconsistentfashionandwithaconsistentprintout.
+Theresultsofallpropertycalculationsarestoredinthecentralpropertyfilethatwillbeleftafterthecalculation.
+Usersinterestedinreadingproperties,itshouldbereadfromthepropertyfileoritsJSONtranslation.
+2.4.2 QDPT properties
+Some properties are not calculated as energy derivatives but from quasi degenerate perturbation theory. In this
+methodonediagonalizestheQDPTmatrix:
+⟨ ⃒ ⃒ ⟩
+𝑄
+𝐼𝐽
+= Ψ𝑆
+𝐼
+𝑀⃒
+⃒
+𝐸
+𝐼
+𝛿
+𝐼𝐽
++𝐻̂︀𝑆𝑂𝐶 +𝐻̂︀𝑆𝑆 +𝐻̂︀𝐿𝐵 +...⃒
+⃒
+Ψ𝑆
+𝐽
+′𝑀′
+Here⃒ ⃒Ψ𝑆
+𝐼
+𝑀⟩︀aretherootsofagivenmethodthatcangenerateexcitedstateswithenergy𝐸
+𝐼
+. Forexample,thesecan
+beTD-DFTroots,CASSCFroots,CASSCFrootswithenergycorrectionsfromNEVPT2orCASPT2,MRCI-roots,
+EOM-CCSDrootsetc. and𝐻̂︀𝑆𝑂𝐶 isthespin-orbitcoupling(SOC)operator,𝐻̂︀𝑆𝑆 theelectron-electronspin-spin
+couplingoperator,𝐻̂︀𝐿𝐵 themolecularZeemanoperatoretc. Inpractice,onlytheprinciplecomponent𝑀 =𝑆 (i.
+e. Ψ𝑆𝑆)iscalculatedandthenecessarymatrixelementsaregeneratedusingtheWigner-Eckarttheorem.
+𝐼
+The diagonalization produces the complex valued relativistic eigenstates as linear combinations of the non-
+relativisticorscalarrelativisticeigenstates. Usingtheeigenstatesrelativisticdensitiesortransitiondensitiescan
+becalculatedthatsubsequentlycanbeusedtocalculatemagneticpropertiesor“relativistic”opticalormagneto-
+opticalspectra.
+Theprocedureobviouslysuffersfromatruncationerrorbecauseonlyafinitenumberofrootscanbecalculatedin
+practice. However,resultsindicatethattheQDPTgeneratedpropertiescompareoftenveryfavorablewithexperi-
+mentaldataprovidedthattheunderlyingelectronicstructuremethoddeliversreasonableresults.
+2.4. Thecalculationofmolecularproperties 7
+
+[... start of page 30 ...]
+ORCAManual,Release6.0.0
+InORCA,allQDPTpropertiesarecalculatedinaconsistentinfrastructureandthenalsoleadstoconsistentprinting
+andreportingoftheresults.
+2.4.3 Excited state properties
+CloselyrelatedtotheQDPTinfrastructureisthe“one-photonabsorption”(OPA)infrastructure. Thisisaninfras-
+tructurethatcoordinatesthecalculationoftransitionmomentsusingasetoftransitiondensitiesasinput. These
+mighthaveb

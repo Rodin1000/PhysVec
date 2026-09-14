@@ -1,0 +1,90 @@
+[... end of page 586 ...]
+icquestionsareaddressed. Therecom-
+CutPNO CutMKN
+mended way to control the accuracy of calculations is to specify “TightPNO”, “NormalPNO” or “LoosePNO”
+keywords,ratherthantochangenumericvaluesofcutoffs. Individualthresholdsshouldnormallynotbechanged,
+asthedefaultsaresensibleandleadtogoodcost/performanceratios.
+%mdci TCutPairs 1e-4 # cut-off for the pair truncation
+TCutPNO 3.33e-7 # cut-off for the PNO truncation
+TCutDO 1e-2 # cut-off for the DLPNO domain construction
+TCutMKN 1e-3 # cut-off for the local fit
+# for DLPNO2013: also domain construction
+# remaining options, tied to the three main cut-offs,
+EXPERTS ONLY!
+Localize true # flag for using localized orbitals
+LocMet AHFB # Localization method.
+# Options: PM, FB, IAOIBO, IAOBOYS, NEWBOYS, AHFB
+LocTol 1e-6 # Absolute threshold for the localization procedure
+(continuesonnextpage)
+564 Chapter7. DetailedDocumentation
+
+--- Page 587 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# Automatically adjusted by default.
+LocTolRel 1e-8 # Relative threshold for the localization procedure
+LocMaxIter 128 # Maximum number of localization iterations
+LocRandom 1 # default, take random seed for any localization
+# For internal orbitals: choose best of 32 localizations
+# Switched off for AHFB
+0 # take constant seed for any localization (for testing)
+LocNAttempts np # number of localization attempts
+# default: number of processes, minimum 8, if
+# randomize true
+# 1, if randomize false
+# any number larger or equal np, if randomize true
+PNONorm MP2Norm # default, old IEPANorm can also be used
+(near identical results)
+NrMP2Pairs_Trip 1 # number of MP2 pairs to be included in the triples
+calculation
+PAOOverlapThresh 1e-8 # generation of non-redundant PAOs from redundant ones
+UseFullLMP2Guess false # Use iterative full LMP2 (for DLPNO)
+SinglesFockUsePNOs true # compute the Singles Fock matrix (SFM) in PNOs.
+# DLPNO2013: default for SinglesFockUsePNOs is false,
+# by default RIJCOSX is used for the SFM, except when
+# RIJK is given. In that case the RIJK-SFM is used.
+LMP2MaxIter 50 # max no of iterations in the MP2 equations
+LMP2TolE 1e-7 # LMP2 energy convergence tolerance
+LMP2TolR 5e-7 # LMP2 residual convergence tolerance
+LMP2ScaleTCutPNO # PNO cutoff for LMP2 is: TCutPNO*LMP2ScaleTCutPNO
+# Default: TCutPNO(DLPNO-MP2)/TCutPNO(DLPNO-CCSD) with
+# respective TCutPNOs specific to Loose/Normal/TightPNO
+LMP2FCut 1e-5 # LMP2 neglect cut-off for
+off-diagonal Fock matrix elements
+TCutTNO 0 # Cut-off for triples natural orbitals (0=automatic)
+TCutPNOSingles -1 # -1= use 0.03*TCutPNO
+TCutPreScr -1 # -1= use 0.01*TCutPairs for
+multipole estimate based screening
+TCutDeloc 0.1 # delocalization threshold for specification
+of extended domains.
+Necessary because PAOs are not strictly localized
+TCutOSV 1e-6 # orbital specific virtuals used for pre-screening.
+No critical
+TScaleMP2Pairs 0.1
+TScaleMKNStrong 10
+TScaleMKNWeak 100
+ForlargersystemsandtighterthresholdsthediskI/OofaDLPNOcalculationmaybecomechallenging. Inthis
+case,itmightbeusefulltokeepsomeintegralsinmemory,ifenoughRAMisavailable. Withthefollowingflag
+%mdci
+StorageType Shared
+end
+ORCAwilltrytostorecertainmuch-usedintegralsinsharedmemory. Iftheamountofmemoryisnotsufficient,
+ORCAwillfallbacktoon-diskstorage. NOTE:Thisflagwillonlyworkifallprocessesworkonthesamenode.
+IMPORTANTNOTEREGARDINGORBITALLOCALIZATION
+• LocalizedorbitalsforDLPNOareobtainedviatheFoster-BoysmethodwithanaugmentedHessian
+converger(AHFB)bydefault.
+• Thelocalizationtolerance(LocTol)iscoupledtotheSCFgradienttolerance(TolG)withaconstantfactor
+bydefault. SelectingspecificSCFconvergencesettings(suchasTightSCF)thereforealsoensuresobtaining
+asetofappropriatelywellconvergedlocalizedorbitals. Thiscanbeoverriddenbysettingadifferentvalue
+7.14. TheSingleReferenceCorrelationModule 565
+
+[... start of page 588 ...]
+ORCAManual,Release6.0.0
+forLocTol.
+• AnimportantfeatureoftheaugmentedHessianconvergeristhatitsystematicallyapproachesalocalmaxi-
+mumofthelocalizationfunction(eventhoughconvergencetotheglobalmaximumcannotbeguaranteed).
+Asopposedtothat,theconventionallocalizationmethod(FB)maystop,forexample,atasaddlepoint. In
+badcases, thiscanleadtodeviationsofseveralkJ/molintheDLPNOenergy. Likewise, itcancontribute
+towardslackofreproducibilityofresults.
+• Nosimilarprocedurehasbeenimplementedfortheotherlocalizationmethods(suchasPipek-Mezey)yet.
+Thesameproble

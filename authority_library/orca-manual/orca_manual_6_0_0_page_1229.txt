@@ -1,0 +1,79 @@
+[... end of page 1228 ...]
+turnOff;
+else
+GoTo turnOn;
+endIf
+turnOff:
+print("Switch: %s\n", switch);
+switch="OFF";
+GoTo loopEnd;
+turnON:
+print("Switch: %s\n", switch);
+switch="ON";
+GoTo loopEnd;
+loopEnd:
+EndFor
+End
+1206 Chapter7. DetailedDocumentation
+
+--- Page 1229 ---
+ORCAManual,Release6.0.0
+7.61 orca_2json
+ThisutilityprogramsupportstheexchangeofexternalORCAdatalikegeometry,orbitalsandbasisetsbutalsoof
+internalORCAdatalike1-electronand2-electronintegalswithotherprograms.
+7.61.1 Export ORCA data
+Theprogramreadsinformationlikegeometries,basissets,MOsetc. storedinthe.gbwfileorotherequivalentones
+as.uno,.mp2nat,.qroetc. andcalculatesintegralstoexporttheminJSONstandardoutputformats. Fordensity
+informationthe.densitiesfilemustalsobeavailable. Theprogramiscalledasastandaloneviacommandline.
+Syntax:
+orca_2json BaseName.gbw -options
+or
+orca_2json BaseName.mp2nat -options
+or
+orca_2json BaseName.uno -options
+The following ASCII and binary JSON-formats are available as command line options. It is possible to specify
+morethanoneformatoption.
+-json Write ASCII JSON file (default)
+-bson Write binary JSON file
+-ubjson Write universal binary JSON specification file
+-msgpack Write MessagePack file
+Inadditiontwomoreoptionsareavailble. Thefirstofthemisusedtotranslateabasename.property.txtfiletoa
+correspondingoneinJSONformat(seePropertyFile).
+-property Translate a *.txt property file to a *.json one
+Finally,orca_2jsonhastheabilitytocreatea.gbwfilefromajsonfile. Forthisoneneedstousethe‘-gbw’option
+(seeImportJSONdataintoORCA).
+-gbw Create a GBW file from a json one
+7.61.2 Configuration file
+The data stored in the json file can be configured more individually. Some information like atom information,
+geometryandchargearealwayswrittenintheoutputfile(seeBasicInformation). Otherdatacanberequestedvia
+keywordsinaJSON-formattedconfigurationfilethateitherexistsforeveryORCAoutputfileorforallfilesina
+directory. WithouttheseconfigurationfilesALLavailabledataarestoredexceptforthedensitiesandtheintegrals.
+Becauseofthehugeamountofdatatheseareonlyavailablewhenexplicitlyrequestedintheconfigurationfile.
+Youcanspecifyabasename-dependendconfigurationfile
+BaseName.json.conf
+oraglobalfileusedforallrequestsinadirectory.
+orca.json.conf
+Mostkeywordsintheconfigurationfilecanbeactivatedordeactivatedwithtrueorfalsebutsomekeywordslike
+densitiesoroutputformatshavemoreoptionsandrequirealistofvalues. Ifanoptionisnotspecificallyselected
+itisomitted.
+Structureoftheconfigurationfile:
+7.61. orca_2json 1207
+
+[... start of page 1230 ...]
+ORCAManual,Release6.0.0
+{
+"keyword": true/false,
+...
+"keyword": true/false,
+"keyword": ["option",...."option"]
+...
+}
+Example
+{
+"MOCoefficients":false,
+"BasisSet":false
+}
+Usingtheaboveconfigurationfileintheworkingdirectory,orca_2jsonwillnotexportthemolecularcoefficients
+andthebasissetinformation.
+Example
+Here is an example configurati

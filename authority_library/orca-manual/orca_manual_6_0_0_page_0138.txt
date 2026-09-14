@@ -1,0 +1,72 @@
+[... end of page 137 ...]
+ Thetutorial
+coversthedesignofthecalculation,practicaltipsonconvergenceaswellasthecomputationofproperties.
+AnumberofpropertiesareavailableinORCA(g-tensor,ZFSsplitting,CD,MCD,susceptibility,dipoles,...). The
+majorityofCASSCFpropertiessuchasEPRparametersarecomputedintheframeworkofthequasi-degenerate
+perturbation theory. Some properties such as ZFS splittings can also be computed via perturbation theory or
+rigorously extracted from an effective Hamiltonian. For a detailed description of the available properties and
+options see section CASSCF Properties. All the aforementioned properties are computed within the CASSCF
+module. AnexceptionareMössbauerparameters,whicharecomputedwiththeusualkeywordsusingtheEPRNMR
+module(MössbauerParameters).
+6.1. SinglePointEnergiesandGradients 115
+
+--- Page 138 ---
+ORCAManual,Release6.0.0
+AsimpleExample
+OnestandardexampleofamultireferencesystemistheBeatom. Letusruntwocalculations,astandardclosed-
+shell calculation (1s22s2) and a CASSCF(2,4) calculation which also includes the (1s22s12p1) and (1s22s02p2)
+configurations.
+! TZVPP TightSCF
+* xyz 0 1
+Be 0 0 0
+*
+Thisstandardclosed-shellcalculationyieldstheenergy-14.56213241 Eh. TheCASSCFcalculation
+! TZVPP TightSCF
+%casscf nel 2
+norb 4
+end
+* xyz 0 1
+Be 0 0 0
+*
+yieldstheenergy-14.605381525 Eh. Thus,theinclusionofthe2pshellresultsinanenergyloweringof43mEh
+whichisconsiderable. TheCASSCFprogramalsoprintsthecompositionofthewavefunction:
+---------------------------------------------
+CAS-SCF STATES FOR BLOCK 1 MULT= 1 NROOTS= 1
+---------------------------------------------
+ROOT 0: E= -14.6053815294 Eh
+0.90060 [ 0]: 2000
+0.03313 [ 4]: 0200
+0.03313 [ 9]: 0002
+0.03313 [ 7]: 0020
+Thisinformationistobereadasfollows: Theloweststateiscomposedof90%oftheconfigurationwhichhasthe
+activespaceoccupationpattern2000whichmeansthatthefirstactiveorbitalisdoublyoccupiedinthisconfigu-
+rationwhiletheotherthreeareempty. TheMOvectorcompositiontellsuswhattheseorbitalsare(ORCAuses
+naturalorbitalstocanonicalizetheactivespace).
+0 1 2 3 4 5
+-4.70502 -0.27270 0.11579 0.11579 0.11579 0.16796
+2.00000 1.80121 0.06626 0.06626 0.06626 0.00000
+-------- -------- -------- -------- -------- --------
+0 Be s 100.0 100.0 0.0 0.0 0.0 100.0
+0 Be pz 0.0 0.0 13.6 6.1 80.4 0.0
+0 Be px 0.0 0.0 1.5 93.8 4.6 0.0
+0 Be py 0.0 0.0 84.9 0.1 15.0 0.0
+Thus,thefirstactivespaceorbitalhasoccupationnumber1.80121andistheBe-2sorbital. Theotherthreeorbitals
+are 2p in character and all have the same occupation number 0.06626. Since they are degenerate in occupation
+numberspace,theyarearbitrarymixturesofthethree2porbitals. Itisthenclearthattheothercomponentsofthe
+wavefunction(eachwith3.31%)arethoseinwhichoneofthe2porbitalsisdoublyoccupied.
+Howdidweknowhowtoputthe2sand2porbitalsintheactivespace? Theansweris–WEDIDNOTKNOW!In
+thiscaseitwas“goodluck”thattheinitialguessproducedtheorbitalsinsuchanorderthatwehadthe2sand2p
+orbitalsactive. INGENERALITISYOURRESPONSIBILITYTHATTHEORBITALSAREORDERED
+SUCHTHATTHEORBITALSTHATYOUWANTINTHEACTIVESPACECOMEINTHEDESIRED
+ORDER.Inmanycasesthiswillrequirere-orderingandCAREFULINSPECTIONofthestartingorbitals.
+116 Chapter6. RunningTypicalCalculations
+
+[... start of page 139 ...]
+ORCAManual,Release6.0.0
+Attention: Ifyouincludeorbitalsintheactivespacethatarenearlyemptyornearlydoublyoccupied, con-
+vegence problems are likely. The SuperCI(PT) [459] and Newton-Raphson method are less prone to these
+problems.
+StartingOrbitals
+Tip: Inmanycasesnaturalorbitalsofasimplecorrelatedcalculationofsomekindprovideagoodstartingpoint
+forCASSCF.
+Letusillustratethis

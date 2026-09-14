@@ -1,0 +1,85 @@
+[... end of page 166 ...]
+Test-CASSCF.H2CO-1.casscf.2-1A_nto-acceptor.gbw -i
+Fig.6.19: Mostdominantnaturaltransitionorbital(NTO)pairforthe21A1(S2)transitioninformaldehyde.
+Alternatively,NTOscanalsobecomputeddirectlyinorca_plotfromtheCASSCFtransitiondensitymatrices.
+Thoseneedtobestoredandkeptinthedensitycontainerbyinvoking
+! KeepTransDensity
+144 Chapter6. RunningTypicalCalculations
+
+--- Page 167 ---
+ORCAManual,Release6.0.0
+CASSCFNaturalOrbitalsasInputforCoupled-ClusterCalculations
+Consider the possibility that you are not sure about the orbital occupancy of your system. Hence you carry out
+someCASSCFcalculationforvariousstatesofthesysteminanefforttodecideonthegroundstate. Youcanof
+coursefollowtheCASSCFbyMR-MP2orMR-ACPForSORCIcalculationstogetatruemultireferenceresultfor
+thestateordering. Yet,insomecasesyoumayalsowanttoobtainacoupled-clusterestimateforthestateenergy
+difference. Converging coupled-cluster calculation on alternative states in a controlled manner is anything but
+trivial. HereafeatureofORCAmightbehelpful. ThebestsingleconfigurationthatresemblesagivenCASSCF
+stateisbuiltfromthenaturalorbitalsofthisstate. Theseorbitalsarealsoorderedintherightwaytobeinputinto
+the MDCI program. The convergence to excited states is, of course, not without pitfalls and limitations as will
+becomeevidentinthetwoexamplesbelow.
+Asanexample,considersomeionizedstatesofthewatercation:
+First,wegeneratethenaturalorbitalsforeachstatewiththehelpoftheMRCImodule. Tothisendwerunastate
+averageCASSCFforthelowestthreedoubletstatesandpassthatinformationontotheMRCImodulethatdoesa
+CASCIcalculationandproducesthenaturalorbitals:
+! ano-pVDZ TightSCF
+%casscf
+nel 7
+norb 6
+nroots 3
+mult 2
+end
+%mrci
+tsel 0
+tpre 0
+donatorbs 2
+densities 5,1
+newblock 2 *
+nroots 3
+excitations none
+refs
+cas(7,6)
+end
+end
+end
+* int 1 2
+O 0 0 0 0.000000 0.000 0.000
+H 1 0 0 1.012277 0.000 0.000
+H 1 2 0 1.012177 109.288 0.000
+end
+This produces the files Basename.bm_sn.nat where “m” is the number of the block (m = 0 correspond to the
+doubletinthiscase)and“n”standsoftherelevantstate(n=0,1,2).
+ThesenaturalorbitalsarethenfedintounrestrictedQCISD(T)calculations:
+! ano-pVDZ TightSCF QCISD(T) MOREAD NoIter
+%moinp "H2O+.b0_s0.nat"
+* int 1 2
+O 0 0 0 0.000000 0.000 0.000
+H 1 0 0 1.012277 0.000 0.000
+H 1 2 0 1.012177 109.288 0.000
+*
+AsareferencewealsoperformaSORCIonthesamesystem
+6.1. SinglePointEnergiesandGradients 145
+
+[... start of page 168 ...]
+ORCAManual,Release6.0.0
+! ano-pVDZ TightSCF SORCI
+%casscf
+nel 7
+norb 6
+nroots 3
+mult 2
+end
+* int 1 2
+O 0 0 0 0.000000 0.000 0.000
+H 1 0 0 1.012277 0.000 0.000
+H 1 2 0 1.012177 109.288 0.000
+*
+weobtainthetransitionenergies:
+SORCI QCISD(T) (in cm-1)
+D0 0 0.0
+D1 16269 16293
+D2 50403 50509
+Thus, in this example the agreement between single- and multireference methods is good and the unrestricted
+QCISD(T)methodisabletodescribetheseexciteddoubletstates. Thenaturalorbitalshavebeenareliablewayto
+guidetheCCequationsintothedesiredsolutions. Thiswillworkinmanycases.
+LargeScaleCAS-SCFcalculat

@@ -1,0 +1,88 @@
+[... end of page 866 ...]
+elow are listed
+only the steps required to reproduce the calculation for the dimer
+complex presented there.
+1\. The first step consists in obtaining the molecular orbitals that are
+going to be used in the configuration interaction (CI) procedure. A good
+set of orbitals can be obtained from a restricted open-shell
+spin-averaged Hartree-Fock (SAHF) calculation. The relevant part of the
+input is listed below:
+(continuesonnextpage)
+844 Chapter7. DetailedDocumentation
+
+--- Page 867 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+(cid:96)(cid:96)(cid:96)orca
+! def2-tzvp keepfock
+% scf
+hftyp rohf
+rohf_case sahf
+rohf_numop 2
+rohf_nel[1] 9
+rohf_norb[1] 10
+end
+ForthepresentMn(II)Mn(III)dimerthereareatotalof9electronsdistributedinto10d-orbitals.
+2. Next, the molecular orbitals are localized using one of the implemented localization schemes. Below is the
+orca_locinputusedinthiscase:
+sahf.gbw
+sahf.loc
+0
+200 # first of the 10 d-orbitals
+209 # last of the 10 d-orbitals
+128
+0.000001
+0.75
+0.65
+2
+3. Followingthis,thelocalizedorbitalsaremadelocallycanonicalbyblockdiagonalizingtheFockmatrixusing
+theorca_blockfutility.
+orca_blockf sahf.fsv sahf.loc 200 204 205 209
+Thefirsttwonumbersdefinetherangeofmolecularorbitalslocalizedononecenter;thelasttwoareforthesecond
+center.
+4. Therecanonicalizedorbitalsstoredinthesahf.locfilecanbethenusedtocalculatetheSOCcontributionto
+thelocalZFSoftheMn(III)centerusingthefollowingMRCIinput:
+! zora-def2-tzvp def2-tzvp/c zora
+! nomulliken noloewdin
+! moread noiter allowrhf
+! moread
+% mrci
+citype mrci
+tsel 0
+tpre 0
+intmode ritrafo
+solver diis
+soc
+intmode ritrafo
+dosoc true
+end
+newblock 10 *
+nroots 5
+excitations none
+refs
+# Mn(II) Mn(III)
+{1 1 1 1 1 1 1 1 1 0}
+{1 1 1 1 1 1 1 1 0 1}
+{1 1 1 1 1 1 1 0 1 1}
+(continuesonnextpage)
+7.42. 845
+
+[... start of page 868 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+{1 1 1 1 1 1 0 1 1 1}
+{1 1 1 1 1 0 1 1 1 1}
+end
+end
+newblock 8 *
+nroots 45
+excitations none
+refs
+# Mn(II) Mn(III)
+{1 1 1 1 1 2 1 1 0 0}
+{1 1 1 1 1 2 1 0 1 0}
+{1 1 1 1 1 2 1 0 0 1}
+{1 1 1 1 1 2 0 1 1 0}
+{1 1 1 1 1 2 0 1 0 1}
+{1 1 1 1 1 2 0 0 1 1}
+{1 1 1 1 1 1 2 1 0 0}

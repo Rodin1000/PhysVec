@@ -1,0 +1,95 @@
+[... end of page 1006 ...]
+thewholesystem.
+The No_Overwrite modifier only initializes the velocities if no atom velocities have been defined/read before.
+This is useful in combination with the Restart command: After reading an existing restart file, the velocities
+are already known, and the initialization will be skipped if this modifier is used. The following combination of
+commands in a MD input would initialize the velocities only upon first execution, and restart the positions and
+velocitiesonallfollowingexecutionsofthesameinput:
+Restart IfExists
+Initvel 350_K No_Overwrite
+IfneithertheInitvelcommandnoraRestart commandisnotinvokedbeforeaRun call,theatomvelocities
+willbeinitializedtozerobeforestartingtherun.
+984 Chapter7. DetailedDocumentation
+
+--- Page 1007 ---
+ORCAManual,Release6.0.0
+Manage_Colvar
+MandatoryArguments: operation Keyword {Define}
+id Integer —
+type Keyword {Distance,Angle,Dihedral,CoordNumber}
+OptionalArguments: —
+Modifiers: Atom atom Integer —
+Group atomlist Integers —
+Weights weights Reals —
+Cutoff cutoff Real [length]
+Noprint —
+Defines collective variables (“Colvars”) which are used for Metadynamics or to impose Restraints on the
+system. Inageneralsense,aColvarissimplyacontinuousfunctionofalltheatompositionswhichreturnsareal
+number. AsColvarsdon’thaveanyeffectonthesimulationbythemselves,theycancurrentlyonlybedefinedor
+re-defined;thereisnorequirementfordeletingthem. ThesecondargumentoftheManage_Colvarcommandis
+thenumberoftheColvar. ThisnumberisusedtoaddresstheColvarlater. Allowednumbersarewithintherange
+of 1...10000. If a Colvar number which had previously been defined is defined again, it is simply overwritten
+(andallrestraintsbasedontheoldColvararedeleted!). ThethirdmandatoryargumentisthetypeoftheColvar,
+whichcanbeDistance,Angle,Dihedral,andCoordNumber. MoreColvartypeswillprobablybeaddedinthe
+future(feelfreetomakesuggestionsintheforum!).
+Distance Colvars are defined between two points in space. Each point can either be a single atom (expressed
+by “Atom”) or the weighted average (center) of the positions of a group of atoms (expressed by “Group”). For
+example, the command “Manage_Colvar Define 1 Distance Atom 0 Atom 7” defines Colvar 1 to be the
+distancebetweenatoms0andatom7(asalways,theatomcountstartsatzero). Ontheotherhand,thecommand
+“Manage_Colvar Define 2 Distance Group 0 1 2 Group 3 4 5”setsColvar2tobethedistancebetween
+thecentersofatoms0,1,2andatoms3,4,5. Ifmanyatomsshallbeselected,therangesyntax“Group 0..2”can
+be used, including multiple such ranges if required, such as in “Group 0..2, 5, 7..11” (see also discussion
+of the Manage_Region command). By default, the center of mass is used for groups. However, weights can be
+manuallyspecifiedifrequiredbyusingthe“Weights”modifierdirectlyaftertheatomlistforthecenterisfinished.
+“Weights”expectsasmanyrealnumbersasthegrouppossessesatoms,forexample“Manage_Colvar Define
+2 Distance Atom 0 Group 1 2 3 Weights 1.0 1.0 1.0”. The“Atom”and“Group”syntaxcanbemixed,
+e. g.,todefinethedistancebetweenasingleatomandacenterofmass. WhendefiningdistanceColvars,oneof
+themodifiersX,Y,Z,XY,XZ,YZ,andXYZmaybespecifieddirectlyafter“Distance”. Thefirstthreeamongthem
+denotethatthepositionsshallbeprojectedontothecorrespondingCartesianvectorbeforecomputingthedistance.
+ThefollowingthreemodifiersrequirethatthetwopositionsareprojectedintothecorrespondingCartesianplane
+priortocomputingthedistance. Thelastoneisthedefault(justmeasurethestandarddistancein3Dspace)and
+doesnotneedtobespecifiedexplicitly.
+Inaverysimilarmanner,angleColvarscanbedefined. Insteadoftwopointsinspace,anangleColvarisdefinedvia
+threepointsinspace,eachofwhichcaneitherbean“Atom”ora“Group”(seeabove). Forexample,thecommand
+“Manage_Colvar Define 3 Angle Group 0 1 2 Atom 3 Atom 4”definesColvar3tobetheanglespanned
+bythemasscenterofatoms0,1,2,atom3,andatom4,respectively.
+DihedralColvarsaredefinedthroughfourpointsinspace, eachofwhichcaneitherbean“Atom”ora“Group”
+(seeabove). Forexample,thecommand“Manage_Colvar Define 4 Dihedral Atom 0 Group 1..5 Atom
+6 Atom 7”definesColvar4tobethedihedralanglespannedbyatom0, themasscenterofatoms1, 2, 3, 4, 5,
+atom6,andatom7,respectively.
+The Colvar type “CoordNumber” has been suggested in literature [408] to measure the coordination number of
+someatomspeciesaroundsomeotheratom. AnexamplewherethistypeofColvarhasbeensuccessfullyapplied
+isthecalculationofp𝐾 valuesofweakacidsinsolventviaMetadynamics[853,854]. TheColvarisdefinedby
+A
+thefollowingequation
+(︁ )︁6
+𝐶 := 1 ∑︁
+𝑁𝐴
+∑︁
+𝑁𝐵 1−
+𝑟
+𝑟
+c
+𝑖
+u
+𝑗
+t ,
+𝑁 𝐴 𝑖 𝑗 1− (︁ 𝑟𝑖𝑗 )︁12
+𝑟cut
+7.51. AbinitioMolecularDynamicsSimulations 985
+
+[... start of page 1008 ...]
+ORCAManual,Release6.0.0
+where𝑁 isthesetofatomswhichiscoordinated(typicallyonlyoneatom),𝑁 isthesetofcoordinatingatoms,
+𝐴 𝐵
+𝑟 isthedistancebetweenatoms𝑖and𝑗,and𝑟 isaconstantcutoffdistancewhichspecifiesathresholdforco-
+𝑖𝑗 cut
+ordination. After“CoordNumber”,twoatomsorgroupsofatomsmustfollow,whichcorrespondto𝑁 and𝑁 ,
+𝐴 𝐵
+respectively. Thedistancecutoffisspecifiedafterthe“Cutoff”modifierwhichshouldfollowthetwogroupdefini-
+tions. Forexample,thecommand“Manage_Colvar Define 5 CoordNumber Atom 0 Group 1..10 Cutoff
+200_pm”definesColvar5asthecoordinationnumberofthegroupofatoms1to10aroundatom0withadistance
+cutoffof𝑟 =200pm.
+cut
+ForeverydefinedColvar,thetemporaldevelopmentofthepositionandtheexternalforceactingontheColvaris
+writtentoatextfi

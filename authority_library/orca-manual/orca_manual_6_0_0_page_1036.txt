@@ -1,0 +1,101 @@
+[... end of page 1035 ...]
+𝜋𝜌 𝑅3/6,being𝜌 thedensityofthesolvent,R=𝑅 /𝑅 ,𝑇 thetemperatureand𝑃 thepressure. If
+𝑆 𝑆 𝑆 𝐼 𝑆
+weconsiderthesolvent-accessiblesurface(SAS),then,thetotal∆𝐺 isthesumofthe∆𝐺 weightedbya
+𝑐𝑎𝑣 𝑐𝑎𝑣,𝐼
+factorthatdependsontheexposedSASA ofsphere𝐼
+𝐼
+∆𝐺 = 𝑁 ∑︁ sph SASA 𝐼∆𝐺 = ∑︁ 𝑁𝑒𝑙 SASA 𝑖∆𝐺 (7.319)
+𝑐𝑎𝑣 4𝜋𝑅2 𝑐𝑎𝑣,𝐼 4𝜋𝑅2 𝑐𝑎𝑣,𝑖
+𝑖=1 𝐼 𝑖=1 𝐼
+Here, thesummationoverthetotalnumberofspheres(𝑁 )thatconformtheSASisreplacedbyasummation
+sph
+overthetotalnumberofsurfaceelements(𝑁 )inwhichtheSASisdividedinto.
+el
+Withrespectto∆𝐺 ,thisquantityisassumedtodependlinearlyonthecontributionofeachsurfaceelementto
+𝑑𝑖𝑠𝑝
+theSASA
+∑︁
+𝑁el
+∆𝐺 = 𝜎 SASA (7.320)
+𝑑𝑖𝑠𝑝 𝐼 𝑖
+𝑖=1
+7.53. ImplicitSolvationModels 1013
+
+--- Page 1036 ---
+ORCAManual,Release6.0.0
+Here,thefactor𝜎 istheatomicsurfacetensionofthesphere𝐼 towhichthesurfaceelement𝑖belongsto.
+𝐼
+Thisstrategy,thatconsiderseqs(7.319)and(7.320)tocompute∆𝐺 assumestheuseofGaussianchargesfor
+𝑛𝑒𝑙
+thecalculationof∆𝐺 ineq(7.317). WhenavdW-typecavityisusedtoaccountforelectrostaticsolvationeffects,
+𝑒𝑙
+thenthesolvationapproachiscalledGVDW_nel,whilewhenaSES-typecavityisusedwerefertothesolvation
+approachasGSES_nel(“G”forGaussianchargesand“nel”becauseoftheinclusionofnon-electrostaticsolvation
+effects). DetailsontheGVDW_nelandGSES_nelmodelscanbefoundinref. [287].
+The GVDW_nel and GSES_nel models have been parametrized for solutes containing H, C, N and O atoms in
+thefollowingsolvents: benzene,chloroform,cyclohexane,octanol,tolueneandwater. Theparametersforthe𝜎
+𝐼
+atomic surface tensions in eq (7.320) together with the radius of the solvent molecules 𝑅 used to generate the
+𝑆
+SASareprovidedinref. [287]. TheuseoftheGVDW_nelandGSES_neliscontrolledbythestringcds_cpcmto
+addinthe%cpcmblock. Thisflagshouldbeequalto2withinthesetwomodels(bydefault,whenweuseC-PCM
+togetherwiththeGaussianChargeSchemewithoutnon-electrostaticsolvationeffects,cds_cpcmisequalto0). In
+ordertocalculate∆𝐺 fortheGVDW_nelschemeonehastodothefollowingsteps:
+𝑠𝑜𝑙𝑣
+1. Optimize the geometry of the solute (anisole in this case) in vacuum. For a DFT calculation at the
+B3LYP/def2-TZVPleveloftheory(withRIJCOSX),ourinputfilewouldreadlike:
+! B3LYP def2-TZVP D3BJ tightopt
+%maxcore 4000
+* xyz 0 1
+C 0.66588156410505 1.19833878437922 -0.02647672759883
+C 1.95470174000504 0.69483871574862 -0.01927812843331
+C 2.17893173780041 -0.68097630146538 0.00933914777704
+C 1.09270919891774 -1.54252176637089 0.03141990372830
+C -0.21073409652496 -1.05179390481975 0.02471602253843
+C -0.42517201252444 0.32533458015547 -0.00499572635290
+H 0.47565631823749 2.26336213776820 -0.05012843684387
+H 2.79210971512409 1.38085300778245 -0.03749594945361
+H 3.18771596563920 -1.07149825338966 0.01433233618265
+H 1.25061585302875 -2.61357041387417 0.05495238973649
+H -1.03877793934640 -1.74453554370491 0.04346162651229
+O -1.65366310927299 0.90979347913477 -0.01693978807213
+C -2.79791686738707 0.07370821312998 0.01117694976431
+H -2.83142307710305 -0.58944196707467 -0.85867919998175
+H -3.65619850989594 0.74176224021803 -0.00958531946332
+H -2.82883648080292 -0.53125300761732 0.92288089996024
+*
+2. Usetheresultingstructure(anisole.xyz)asinputstructureforthesubsequentgeometryoptimizationin
+solution. Inthiscase,weconsiderwaterasthesolvent. Theinputfilelookslike:
+! B3LYP def2-TZVP D3BJ tightopt CPCM(Water)
+%cpcm
+cds_cpcm 2
+end
+%maxcore 4000
+* xyzfile 0 1 anisole.xyz
+3. Searchforthe“FINAL SINGLE POINT ENERGY”intheoutputfileforthesolvatedsystem(wecallit𝐸 ):
+𝑠
+------------------------- --------------------
+FINAL SINGLE POINT ENERGY -346.723542928530
+------------------------- --------------------
+4. Searchforthe“FINAL SINGLE POINT ENERGY”intheoutputfileforthesysteminvacuum(wecallit𝐸 ):
+0
+1014 Chapter7. DetailedDocumentation
+
+[... start of page 1037 ...]
+ORCAManual,Release6.0.0
+------------------------- --------------------
+FINAL SINGLE POINT ENERGY -346.719657762242
+------------------------- --------------------
+5. Calculate∆𝐺 = 𝐸 −𝐸 = −0.003885a.u. Ifweconvertittokcal/molandroundittotwodecimal
+𝑠𝑜𝑙𝑣 𝑠 0
+digits,wehave∆𝐺 = −2.44kcal/mol. Thisquantityisinverygoodagreementwithitsexperimental
+𝑠𝑜𝑙𝑣
+counterpart(-2.45kcal/mol[558]).
+6. Incasetheuserisinterestedinthevalueof∆𝐺 ,thisquantityisprintedinthe“CPCM Solvation Model
+𝑛𝑒𝑙
+Properties”block:
+CPCM Solvation Model Properties:
+Surface-charge : -0.02580685887229
+Corrected charge : 0.00000000000000
+Outlying charge corr. : 0.00005046198558 Eh 0.00137 e

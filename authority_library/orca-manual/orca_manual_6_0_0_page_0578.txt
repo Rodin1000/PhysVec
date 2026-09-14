@@ -1,0 +1,105 @@
+[... end of page 577 ...]
+possible.
+Fragmentsmustbedefined–seeFragmentSpecification.
+! DLPNO-MP2 NoFrozenCore TightPNO
+%mp2
+LoosePNOFragInter {1 *} # * can be used as a wildcard for either or both indices
+NormalPNOFragInter {1 1} {1 2} # multiple fragment pairs can be listed like this
+TightPNOFragInter {2 3}
+HFFragInter {3 1} {4 2}
+CustomFragInter
+FragPairs {4 4} {3 4} # pair definition is required
+HFOnly false # flag to skip MP2 for these pairs - same as HFFragInter
+FrozenCore false # flag to skip core correlation - requires !NoFrozenCore
+(continuesonnextpage)
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 555
+
+--- Page 578 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+TCutPNO 1e-8 # custom value for these pairs
+TCutDO 1e-2 # custom value for these pairs
+TCutDOij 1e-5 # custom value for these pairs
+TCutPre 1e-6 # custom value for these pairs
+end
+end
+# geometry and fragment definition
+Note that a given pair or fragments can only belong to a single layer and definitions later in the input overwrite
+previousones. Thismeansthatiftheaboveinputisusedina4-fragmentcalculation,the1-4interfragmentinter-
+actionswillbetreatedwithLoosePNOthresholds,theinteractionswithinfragment1andwithfragment2–with
+NormalPNOthresholds,2-3pairs–withTightPNO,1-3and2-4pairswillbeleftattheHFlevel,3-4and4-4pairs
+willbetreatedwith𝑇CutPNO =10−8and𝑇CutDO =10−2(i.e. theNormalPNOdefaults),and2-2and3-3pairswill
+beleftattheglobal(TightPNO)settings.
+7.14 The Single Reference Correlation Module
+ORCAfeaturesavarietyofsingle-referencecorrelationmethodsforsinglepointenergies(restrictedtoaRHFor
+RKSdeterminantintheclosed-shellcaseandaUHForUKSdeterminantintheopen-shellcase;quasi-restricted
+orbitals(QROs)[611]arealsosupportedintheopen-shellcase). Theyareallfairlyexpensivebutmaybebeusedin
+ordertoobtainaccurateresultsinthecasethatthereferencedeterminantisagoodstartingpointfortheexpansion
+ofthemany-bodywavefunction. Themoduleiscalledorca_mdcifor“matrixdrivenconfigurationinteraction”.
+Thisisarathertechnicaltermtoemphasizethatifonewantstoimplementthesemethods(CCSD,QCISDetc.)
+efficiently,oneneedstowritethemintermsofmatrixoperationswhichprettymucheverycomputercandriveat
+peakperformance. Letusfirstbrieflydescribethetheoreticalbackgroundofthemethodsthatwehaveimplemented
+inORCA.
+7.14.1 Theory
+WestartfromthefullCIhierarchyinwhichthewavefunctionisexpandedas:
+|Ψ⟩=|0⟩+|𝑆⟩+|𝐷⟩+|𝑇⟩+|𝑄⟩+... (7.113)
+where|0⟩isasingle-determinantreferenceandS,D,T,Q,...denotethesingle,double,triplequadrupleandhigher
+excitationsrelativetothisdeterminantatthespin-orbitallevel. Asusual,labels𝑖,𝑗,𝑘,𝑙refertooccupiedorbitals
+in|0⟩, 𝑎,𝑏,𝑐,𝑑tounoccupiedMOsand𝑝,𝑞,𝑟,𝑠togeneralMOs. Theactionofthesecondquantizedexcitation
+operators𝑎𝑎 = 𝑎†𝑎 on|0⟩leadtoexciteddeterminants|Φ𝑎⟩thatenter|Ψ⟩withcoefficients𝐶𝑖. Thevariational
+𝑖 𝑎 𝑖 𝑖 𝑎
+equationsare:
+⟨Φ𝑎
+𝑖
+|𝐻 −𝐸
+0
+|0+𝑆+𝐷⟩=𝐸C𝐶
+𝑎
+𝑖 −⟨Φ𝑎
+𝑖
+|𝐻 −𝐸
+0
+|𝑇⟩ (7.114)
+⟨︀ Φ𝑎
+𝑖𝑗
+𝑏|𝐻 −𝐸
+0
+|0+𝑆+𝐷 ⟩︀ =𝐸C𝐶
+𝑎
+𝑖𝑗
+𝑏
+− ⟨︀ Φ𝑎
+𝑖𝑗
+𝑏|𝐻 −𝐸
+0
+|𝑇 +𝑄 ⟩︀ (7.115)
+Furtherequationscouplingtripleswithsinglesthroughpentuplesetc.
+Thetotalenergyisthesumofthereferenceenergy𝐸 =⟨0|𝐻|0⟩andthecorrelationenergy
+0
+𝐸C =⟨0|𝐻|𝑆+𝐷⟩ (7.116)
+whichrequirestheexactsingles-anddoublesamplitudestobeknown. Inordertotruncatetheseriestosingles-
+anddoublesonemayeitherneglectthetermscontainingthehigherexcitationsontherighthandside(leadingto
+CISD)orapproximatetheireffecttherebylosingthevariationalcharacteroftheCImethod(CCSD,QCISDand
+CEPAmethods). Definingtheone-andtwo-bodyexcitationoperatorsas𝐶ˆ = ∑︀ 𝐶𝑖𝑎𝑎,𝐶ˆ = 1∑︀ 𝐶𝑖𝑗𝑎𝑎𝑏
+1 𝑖𝑎 𝑎 𝑖 2 4 𝑖𝑗𝑎𝑏 𝑎𝑏 𝑖𝑗
+onecanproceedtoapproximatethetriplesandquadruplesbythedisconnectedterms:
+|𝑇⟩=𝐶ˆ 𝐶ˆ |0⟩ (7.117)
+1 2
+556 Chapter7. DetailedDocumentation
+
+[... start of page 579 ...]
+ORCAManual,Release6.0.0
+1
+|𝑄⟩= 𝐶ˆ2|0⟩ (7.118)
+2 2
+As is well known, the CCSD equations contain many more disconnected contributions arising from the various
+powers of the 𝐶ˆ operator (if one would stick to CC logics one would usually label the cluster amplitudes with
+1
+𝑡𝑖,𝑡𝑖𝑗,...andthe𝑛-bodyclusteroperatorswith𝑇ˆ ;wetakeaCIpointofviewhere). InordertoobtaintheCEPA
+𝑎 𝑎𝑏 𝑛
+typeequationsfrom((7.114)-(7.118)),itismosttransparenttorelabelthesinglesanddoublesexcitationswitha
+compoundlabel𝑃 fortheinternalindices(𝑖)or(ij)and𝑥for(𝑎)or(ab). Then,theapproximationsareasfollows:
+1 2 ⟨ Φ𝑥 𝑃 ⃒ ⃒ ⃒ (𝐻 −𝐸 0 )𝐶ˆ 2 2 ⃒ ⃒ ⃒ 0 ⟩ = 1 2 ∑︁ 𝐶 𝑦 𝑄𝐶 𝑧 𝑅 ⟨ Φ𝑥 𝑃 |𝐻 −𝐸 0 |Φ𝑦 𝑄 𝑧 𝑅 ⟩ (7.119)
+𝑄𝑅𝑦𝑧
+∑︁ ⟨ ⟩
+≈𝐶 𝑥 𝑃 𝐶 𝑦 𝑄 Φ𝑥 𝑃 |𝐻|Φ𝑥 𝑃 𝑦 𝑄 (7.120

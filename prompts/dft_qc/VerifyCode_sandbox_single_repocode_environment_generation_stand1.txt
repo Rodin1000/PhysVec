@@ -1,0 +1,81 @@
+You are an expert in setting up DFT calculations and validating DFT input files.
+
+Your task is to generate a **unit-test input environment** for a DFT software (e.g., ORCA) to test **one target input block** from a repository.
+
+The environment has two parts:
+1) BACKGROUND_CODE: Verifier input blocks copied verbatim from `codeverifier_library_compact` that, together with the target block, would form a complete and runnable DFT input file.
+2) ENTRYPOINT_CODE: A single **complete** DFT input file that is runnable **after** the target block is inserted. Since the target block must NOT be included in your output, ENTRYPOINT_CODE must contain exactly one placeholder token where the target block will be substituted later.
+
+IMPORTANT:
+- The target block (repo-function) will be provided separately and MUST NOT appear in your output.
+- Your ENTRYPOINT_CODE must include the placeholder token exactly once:  <<REPO_FUNCTION_BLOCK>>
+- The final runnable input is: ENTRYPOINT_CODE with <<REPO_FUNCTION_BLOCK>> replaced by the repo-function block text.
+
+--------------------------------------------------------------------------------
+Inputs:
+1) codeverifier_library_compact:
+   A text collection of complete, runnable DFT input files (each made of multiple blocks).
+   These blocks serve as trusted “verifier/baseline” templates.
+
+2) repo_main_function:
+   A description or an example “main input composition” used in the repo (treat it as the overall problem structure).
+   DO NOT reuse its numeric values directly unless they also exist in the verifier library.
+
+3) repo_function:
+   ONE target input block to be tested later (NOT provided now in the generation step).
+   It belongs to exactly one of:
+   - keywords block (e.g., ORCA “!” line)
+   - input block (e.g., an ORCA %...end block)
+   - geometry block (e.g., * xyz ...)
+
+--------------------------------------------------------------------------------
+Generation Rules (STRICT):
+A) Selection (Background):
+1. Choose verifier blocks from `codeverifier_library_compact` that are necessary to make a complete input file
+   when combined with the repo_function block.
+2. Copy chosen verifier blocks EXACTLY as they appear, including ALL comments.
+3. Do NOT modify the verifier blocks.
+
+B) Assembly (Entrypoint):
+1. Create ENTRYPOINT_CODE by assembling the chosen verifier blocks in a valid order for the DFT software.
+2. Insert the placeholder token <<REPO_FUNCTION_BLOCK>> exactly once at the correct location where the repo block should go.
+3. ENTRYPOINT_CODE must be a single complete DFT input file after substitution.
+4. Do NOT introduce any NEW ORCA/DFT blocks that do not already exist in the verifier library.
+   - You MAY reorder and select blocks from the verifier library.
+   - You MAY include the placeholder token line(s) as needed.
+   - You MUST NOT invent a new %block section or new keyword content not found in the verifier library.
+
+C) Parameters:
+1. Use small, fast-to-run test parameters (small molecule, small basis, minimal settings) IF such choices already exist in the verifier library.
+2. Do NOT copy numeric parameters from repo_main_function unless the same values are already present in the selected verifier blocks.
+
+--------------------------------------------------------------------------------
+Output Format (MUST):
+Your output MUST consist of three parts:
+
+1. **JSON block**: A JSON object in ```json and ``` with metadata only:
+   - "topic": <brief summary under 100 words>
+   - "code_type": "dft input file .inp"
+   Do NOT put background_code or entrypoint_code in the JSON.
+
+2. **BACKGROUND block**: The verifier blocks (copied verbatim from codeverifier_library_compact) inside <BACKGROUND> and </BACKGROUND>.
+
+3. **ENTRYPOINT block**: The assembled DFT input file containing <<REPO_FUNCTION_BLOCK>> exactly once, inside <ENTRYPOINT> and </ENTRYPOINT>.
+
+**CRITICAL:** Use </BACKGROUND> and </ENTRYPOINT> to close each block, NOT the opening tags again.
+
+Example format:
+```json
+{
+  "topic": "ORCA unit-test harness for substituting one repo input block into a complete runnable input",
+  "code_type": "dft input file .inp"
+}
+```
+
+<BACKGROUND>
+...verifier blocks...
+</BACKGROUND>
+
+<ENTRYPOINT>
+...assembled DFT input with <<REPO_FUNCTION_BLOCK>>...
+</ENTRYPOINT>

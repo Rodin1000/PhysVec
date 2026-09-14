@@ -1,0 +1,82 @@
+[... end of page 573 ...]
+ncalculatingpropertieswithoutthefullnucleargradient,therelaxedMP2densityshouldberequested.
+Anumberofpointsregardinggeometryoptimizations(notallofthemspecifictoDLPNO-MP2)areworthkeeping
+inmind:
+• Asof2018,weexpectthattheDLPNO-MP2gradientcanmostbeneficiallybeusedforgeometryoptimiza-
+tionsofsystemscontainingaround70-150atoms. ItmaybefasterthanRI-MP2evenforsystemscontaining
+50-60atomsorless,butthetimingdifferenceisprobablynotgoingtobeverylarge. Ofcourse,structures
+containing200atomsandabovecan(andhavebeen)optimized, butthismaytakelongifmanygeometry
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 551
+
+--- Page 574 ---
+ORCAManual,Release6.0.0
+steps are required. On the other hand, single point gradient or density calculations can be performed for
+systemscontainingmanyhundredatoms.
+• DLPNO-MP2 is a substantially more expensive method for geometry optimizations than GGA or hybrid
+DFTfunctionals. Therefore,itisgenerallyagoodideatostartageometryoptimizationwithastructurethat
+isalreadyoptimizedatdispersion-correctedDFTlevel.
+• RIJCOSXcanbeusedtoaccelerateexchangeevaluationsubstantially. However,greatcareneedstobeex-
+ercisedwiththegridsettings. Insufficientlylargegridsmaylead,forexample,tonon-planardistortionsof
+planar molecules. The updated default grids in ORCA 5 (DefGrid2-3) should be sufficiently accurate to
+optimizeneutralmaingroupcompounds. Wethereforerecommendthesegridsforgeneralusewithsome
+carefulcheckinginmorecomplicatedcases. Evenwiththesegrids,thecalculationisalotfasterthan“reg-
+ular”Hartree-Fockwithbasissetsoftriplezetaquality(orlarger).
+UsingRIJONXisalsopossible.
+• Sufficientlylargegridsshouldbeusedfortheexchange-correlationfunctionalofdoublehybrids. TheSCF
+calculationtakesonlyafractionofthetimethatisneededforDLPNO-MP2,andsacrificingqualitybecause
+ofaninsufficientlyaccurategridisawasteofcomputertime.
+• Optimizationoflargestructuresisoftenachallengeforthegeometryoptimizer. Itmayhelptochangethe
+trustradiussettings,tomodifythesettingsoftheAddExtraBondsfeature,ortochangeothersettingsofthe
+geometry optimizer. Sometimes it may be beneficial to check the geometry optimizer settings with a less
+demandingelectronicstructuremethod.
+• Finally, problems with a geometry optimization may in some cases indeed be caused by the DLPNO ap-
+proximations. UsingLoosePNOforaccuratecalculationsisnotrecommendedanyway,anddifficultieswith
+NormalPNOsettingsarepossiblyrectifiedbyswitchingtoTightPNO.
+During the development process, a number of difficulties were encountered related to the orbital localization Z-
+vector equations. Great care was taken to work around these problems and to make the procedures as robust
+as possible, but a number of settings can be changed. For more information on these aspects, we recommend
+consultingthefullpaperontheDLPNO-MP2gradient[686].
+• SeveraldifferentsolversareimplementedfortheorbitallocalizationZ-vectorequations. Thedefaultisan
+iterative conjugate gradient solver. As an alternative, the DIIS-accelerated Jacobi solver can be used, but
+it tends to be inferior to the conjugate gradient solver. Moreover, a direct solver is available as a fail-safe
+alternativeforsmallersystems. Asthedimensionofthelinearequationsystemis𝑛(𝑛−1)/2for𝑛occupied
+orbitals,thememoryrequirementandFLOPcountincreaseas𝑂(𝑛4)and𝑂(𝑛6),respectively,andusingthe
+directsolverbecomesunfeasibleforlargesystems.
+• SettingsfortheCPSCFsolverarespecifiedthesamewayasforcanonicalMP2.
+• Underspecificcircumstances,theorbitalHessianoftheorbitallocalizationfunctionmayhavezeroornear-
+zeroeigenvalues,whichcanleadtosingularlocalizationZ-vectorequations. Inparticular,itistypicallya
+consequenceofcontinuouslydegeneratelocalizedorbitals,whichmay(butdonotneedto)appearinsome
+molecular symmetries.[759] A typical symptom are natural occupation number above 2 and below 0 for
+systems that would be expected to have MP2 density eigenvalues between 2 and 0 without the DLPNO
+approximations.
+• Inordertoworkaroundtheaforementionedproblem,aprocedurehasbeenimplementedtoeliminatesin-
+gularornear-singulareigenvectorsofthelocalizationfunctionorbitalHessian. Vectorswithaneigenvalue
+smallerthanZLoc_EThresh(orZLoc_EThresh_coreforthecoreorbitals)aresubjecttothemodifiedpro-
+cedure. Iftheprogrameliminatesanyeigenvectors,itmightsometimesbeagoodideatocheckifcalculated
+propertiesarereasonable(oratleasttocheckthenaturaloccupationnumbers). EigenvectorsoftheHessian
+arecalculatedbyDavidsondiagonalizationbydefault,butdirectdiagonalizationcanbechosenforsmaller
+systems,instead.
+• DiagonalizationofthelocalizationorbitalHessiancanbeswitchedoffaltogetherbysettingZLoc_EThresh
+to0.
+• If the “Asymmetric localization equation residual norm” exceeds the localization Z-vector equation toler-
+ance (ZLoc_Tol), there are typically two plausible reasons: (1) the localized orbitals are not sufficiently
+tightlyconverged(toolarge LocTol)orunconverged, or(2)theorbitallocalizationHessianhasgotsmall
+eigenvaluesthatwerenoteliminated.
+552 Chapter7. DetailedDocumentation
+
+[... start of page 575 ...]
+ORCAManual,Release6.0.0
+Thisisanoverviewovertheoptionsrelatedtothegradient:
+# Settings specific to the localization equation z-solver
+%mp2 ZLoc_Solver CG # Use conjugate gradient solver (default)
+DIR # Use direct solver
+JAC # Use DIIS-accelerated Jacobi solver
+ZLoc_Tol 1.0e-3 # Residual convergence tolerance for the
+# localization Z-solver
+# Default: same value as Z_Tol for CPSCF
+ZLoc_MaxIter 1024 # Maximum localization Z-solver iterations
+ZLoc_MaxDIIS 10 # Number of DIIS vectors for the Jacobi solver
+ZLoc_Shift 0.2 # Shift for the Jacobi solver
+# Options for eliminating (near-)singular eigenvectors of the
+# orbital Hessian of the localization function.
+ZLoc_EThresh 3.0e-

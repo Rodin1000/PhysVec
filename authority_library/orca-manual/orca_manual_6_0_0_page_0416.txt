@@ -1,0 +1,69 @@
+[... end of page 415 ...]
+taldata.
+Thetheorycandomostofwhat ORCA_ASAcanandmore,suchasincludingvibroniccouplinginforbiddentran-
+sitions (the so-called Herzberg-Teller effect, HT), considering Duschinsky rotations between modes of different
+states,solvingtheequationsusingdifferentcoordinatesystems,etc. Therearealsosevennewapproachestoobtain
+theexcitedstategeometryandHessianwithoutnecessarilyoptimizingitsgeometry. Manykeywordsandoptions
+areavailable,butmostofthedefaultsalreadygivegoodresults. Let’sgetintospecificexamples,startingwiththe
+absorptionspectrum. PleaserefertosectionMoreontheExcitedStateDynamicsmoduleforacompletekeyword
+listanddetails.
+6.18. ExcitedStateDynamics 393
+
+--- Page 416 ---
+ORCAManual,Release6.0.0
+6.18.1 Absorption Spectrum
+Theidealmodel,AdiabaticHessian(AH)
+To predict absorption or emission rates, including all vibronic transitions, ideally, one requires both the ground
+state(GS)andexcitedstate(ES)geometriesandHessians. Forinstance,whenpredictingtheabsorptionspectrum
+forbenzene,whichexhibitsonebandabove220nmcorrespondingtoasymmetry-forbiddenexcitationtotheS1
+state,theprocessisstraightforward. Groundstateinformationcanbeobtainedfrom(Sec. GeometryOptimizations,
+SurfaceScans,TransitionStates,MECPs,ConicalIntersections,IRC,NEB):
+!B3LYP DEF2-SVP OPT FREQ
+* XYZFILE 0 1 BEN.xyz
+andtheS1ESfrom(Sec. ExcitedStateGeometryOptimization):
+!B3LYP DEF2-SVP OPT FREQ
+%TDDFT
+NROOTS 5
+IROOT 1
+END
+* XYZFILE 0 1 BEN_S1.xyz
+AssumingDFT/TD-DFThere,butothermethodscanalsobeused(seeTips,TricksandTroubleshooting). With
+bothHessiansavailable,theESDmodulecanbeaccessedfrom:
+!B3LYP DEF2-SVP TIGHTSCF ESD(ABS)
+%TDDFT
+NROOTS 5
+IROOT 1
+END
+%ESD
+GSHESSIAN "BEN.hess"
+ESHESSIAN "BEN_S1.hess"
+DOHT TRUE
+END
+* XYZFILE 0 1 BEN.xyz
+Important: ThegeometrymustmatchthatintheGSHessianwhencallingtheESDmodule. Youcanobtainit
+fromthe.xyzfileaftergeometryoptimizationordirectlycopyitfromthe.hessfile(remembertouseBOHRSon
+theinputtocorrecttheunits,ifobtainedfromthe.hess).
+YoumustprovidebothnamesfortheHessiansandsetDOHTtoTRUEherebecausethefirsttransitionofbenzene
+issymmetryforbidden,withanoscillatorstrengthof2e-6. Therefore,allintensityarisesfromvibroniccoupling
+(HTeffect)[199]. Inmoleculeswithstronglyallowedtransitions,thisparametercantypicallyremainFALSE(the
+default). Some calculation details are printed, including the computation of transition dipole derivatives for the
+HTcomponent,andthespectrumissavedasBASENAME.spectrum.
+Energy TotalSpectrum IntensityFC IntensityHT
+10807.078728 2.545915e-02 2.067393e-07 2.545894e-02
+10828.022679 2.550974e-02 2.071508e-07 2.550954e-02
+10848.966630 2.556034e-02 2.075624e-07 2.556013e-02
+...
+Thefirstcolumnhasthetotalspectrum,butthecontributionsfromtheFranck-CondonpartandtheHerzberg-Teller
+partarealsodiscriminated. Asyoucansee,theFCintensityislessthan1%oftheHTintensityhere,highlighting
+theimportanceofincludingtheHTeffect. Itisimportanttonotethat,intheory,theabsorbanceintensityvalues
+correspondtotheexperimental𝜀(inLmolcm−1),andtheydependonthespectrallineshape. TheTotalSpectrum
+columncanbeplottedusinganysoftwaretoobtainthespectrumnamedFullAHspectrum(showninblue),inFig.
+6.58below.
+394 Chapter6. RunningTypicalCalculations
+
+[... start of page 417 ...]
+ORCAManual,Release6.0.0
+Fig.6.58: Hereistheexperimentalabsorptionspectrumforbenzene(showninblackontheleft),alongsidepre-
+dictionsmadeusingORCA_ESDatvariousPESapproximations.
+Thespectrumobtainedisveryclosetotheexperimentalresultsat298K,evenwhensimplyusingallthedefaults,
+anditcouldbefurtherimprovedbyadjustingparameterssuchaslineshape,asdiscussedindetailinSe

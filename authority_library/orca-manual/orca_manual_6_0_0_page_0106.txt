@@ -1,0 +1,95 @@
+[... end of page 105 ...]
+840092 -0.33918253 -114.179274 2
+pc-2 88 -113.914256 -0.41321906 -114.327475 43
+pc-3 196 -113.922543 -0.44911659 -114.371660 1176
+ano-pVDZ 38 -113.910571 -0.35822337 -114.268795 12
+ano-pVTZ 88 -113.920389 -0.42772994 -114.348119 113
+ano-pVQZ 170 -113.922788 -0.44995355 -114.372742 960
+Fig.6.4: ErrorinmEhforvariousbasissetsforhighlycorrelatedcalculationsrelativetotheano-pVQZbasisset.
+LetuslookatonemoreexampleinTable6.4: theoptimizedstructureoftheN moleculeasafunctionofbasisset
+2
+6.1. SinglePointEnergiesandGradients 83
+
+--- Page 106 ---
+ORCAManual,Release6.0.0
+usingtheMP2method(thesecalculationsareabitolderfromthetimewhentheano-pVnZbasissetsdidnotyet
+exist. Today,theano-pVnZwouldbepreferred).
+ThehighestqualitybasissethereisQZVPanditalsogivesthelowesttotalenergy. However,thisbasissetcontains
+up to g-functions and is very expensive. Not using g-functions and a set of f-functions (as in TZVPP) has a
+noticeable effect on the outcome of the calculations and leads to an overestimation of the bond distance of 0.2
+pm—asmallchangebutforbenchmarkcalculationsofthiskindstillsignificant. TheerrormadebytheTZVP
+basissetthatlacksthesecondsetofd-functionsonthebonddistance,bindingenergyandionizationpotentialis
+surprisinglysmalleventhoughthedeletionofthesecondd-set“costs”morethan20mEhinthetotalenergyas
+comparedtoTZV(2d,2p),andevenmorecomparedtothelargerTZVPP.
+Asignificanterrorontheorderof1–2pminthecalculateddistancesisproducedbysmallerDZPtypebasissets,
+whichunderlinesoncemorethatsuchbasissetsarereallytoosmallforcorrelatedmolecularcalculations—the
+ANO-DZPbasissetsaretoostronglybiasedtowardstheatom,whilethe“usual”moleculetargetedDZPbasissets
+likeSVPhavethed-setdesignedtocoverpolarizationbutnotcorrelation(thecorrelatingd-functionsaresteeper
+than the polarizing ones). The performance of the very economical SVP basis set should be considered as very
+good,and(abitsurprisingly)slightlybetterthancc-pVDZdespitethatitgivesahigherabsoluteenergy.
+Essentiallythesamepictureisobtainedbylookingatthe(uncorrectedforZPE)bindingenergycalculatedatthe
+MP2level–thelargestbasisset,QZVP,givesthelargestbindingenergywhilethesmallerbasissetsunderestimate
+it. TheerroroftheDZPtypebasissetsisfairlylarge(≈2eV)andthereforecautionisadvisablewhenusingsuch
+bases.
+Table6.4: Comparisonofvariousbasissetsforcorrelatedcalculations.
+Basisset R (pm) E(2N-N )(eV) IP(N/N+)(eV) E(MP2)(Eh)
+eq 2
+SVP 112.2 9.67 14.45 -109.1677
+cc-pVDZ 112.9 9.35 14.35 -109.2672
+TZVP 111.5 10.41 14.37 -109.3423
+TZV(2d,2p) 111.4 10.61 14.49 -109.3683
+TZVPP 111.1 10.94 14.56 -109.3973
+QZVP 110.9 11.52 14.60 -109.4389
+Automaticextrapolationtothebasissetlimit
+Note:
+• This functionality is deprecated - it may still be usable but we will not actively maintain this part of code
+anymore. Forbasissetextrapolationpleaseusetherespectivecompoundscripts(TableProtocols,knownto
+thesimpleinputline,withshortexplanation).
+Aseludedtointheprevioussection,oneofthebiggestproblemswithcorrelationcalculationsistheslowconver-
+gencetothebasissetlimit. Onepossibilitytoovercomethisproblemistheuseofexplicitlycorrelatedmethods.
+Theotherpossibilityistousebasissetextrapolationtechniques. Sincethisinvolvessomefairlyrepetitivework,
+some procedures were hardwired into the ORCA program. So far, only energies are supported. For extrapola-
+tion,asystematicseriesofbasissetsisrequired. Thisis,forexample,providedbythecc-pV𝑛Z,aug-cc-pV𝑛Zor
+thecorrespondingANObasissets. Here𝑛isthe“cardinalnumber”thatis2forthedouble-zetabasissets,3for
+triple-zeta,etc.
+TheconvergenceoftheHFenergytothebasissetlimitisassumedtobegivenby:
+(︁ √ )︁
+𝐸(𝑋) =𝐸(∞) +𝐴exp −𝛼 𝑋 (6.1)
+SCF SCF
+Here,𝐸(𝑋) istheSCFenergycalculatedwiththebasissetwithcardinalnumber𝑋,𝐸(∞) isthebasissetlimit
+SCF SCF
+SCF energy and 𝐴 and 𝛼 are constants. The approach taken in ORCA is to do a two-point extrapolation. This
+means that either 𝐴 or 𝛼 have to be known. Here, we take 𝐴 as to be determined and 𝛼 as a basis set specific
+constant.
+84 Chapter6. RunningTypicalCalculations
+
+[... start of page 107 ...]
+ORCAManual,Release6.0.0
+Thecorrelationenergyissupposedtoconvergeas:
+𝐸(∞) =
+𝑋𝛽𝐸
+c
+(
+o
+𝑋
+rr
+)−𝑌𝛽𝐸
+c
+(
+o
+𝑌
+r
+)
+r (6.2)
+corr 𝑋𝛽 −𝑌𝛽
+Thetheoreticalvaluefor𝛽is3.0. However,itwasfoundbyTruhlarandconfirmedbyus,thatfor2/3extrapolations
+𝛽 =2.4performsconsiderablybetter.
+Foranumberofbasissets,wehavedeterminedtheoptimumvaluesfor𝛼and𝛽[606]:
+𝛼 𝛽 𝛼 𝛽
+23 23 34 34
+cc-pVnZ 4.42 2.46 5.46 3.05
+pc-n 7.02 2.01 9.78 4.09
+def2 10.39 2.40 7.88 2.97
+ano-pVnZ 5.41 2.43 4.48 2.97
+saug-ano-pVnZ 5.48 2.21 4.18 2.83
+aug-ano-pVn

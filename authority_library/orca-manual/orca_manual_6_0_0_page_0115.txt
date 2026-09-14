@@ -1,0 +1,49 @@
+[... end of page 114 ...]
+ time (in 2013) to perform a CCSD(T) level
+calculation on an entire protein (Crambin with more than 650 atoms, Fig. 6.6). While the calculation using a
+double-zeta basis took about 4 weeks on one CPU with DLPNO2013-CCSD(T), it takes only about 4 days to
+completewithDLPNO-CCSD(T).WithDLPNO-CCSD(T)eventhetriple-zetabasiscalculationcanbecompleted
+withinreasonabletime,taking2weekson4CPUs.
+92 Chapter6. RunningTypicalCalculations
+
+--- Page 115 ---
+ORCAManual,Release6.0.0
+Fig.6.6: StructureoftheCrambinprotein-thefirstproteintobetreatedwithaCCSD(T)levelabinitiomethod
+TheuseoftheLPNO(andDLPNO)methodsissimpleandrequireslittlespecialattentionfromtheuser:
+# Local Pair Natural Orbital Test
+! cc-pVTZ cc-pVTZ/C LPNO-CCSD TightSCF
+# or
+! cc-pVTZ cc-pVTZ/C DLPNO-CCSD TightSCF
+%maxcore 2000
+# these are the default values - they need not to be touched!
+%mdci TCutPNO 3.33e-7 # cutoff for PNO occupation numbers. This
+is the main truncation parameter
+TCutPairs 1e-4 # cut-off for estimated pair correlation energies.
+This exploits the locality in the internal space
+TCutMKN 1e-3 # this is a technical parameter here that controls the domain
+size for the local fit to the PNOs. It is conservative.
+end
+* xyz 0 1
+... (coordinates)
+*
+Usingthewelltesteddefaultsettings,theLPNO-CEPA(LPNO-CPF,LPNO-VCEPA),LPNO-QCISDandLPNO-
+CCSD(LPNO-pCCSD)methods6 canberuninstrictanalogytocanonicalcalculationsandshouldapproximate
+6Asatechnicaldetail: Theclosed-shellLPNOQCISDandCCSDcomeintwotechnicalvariants-LPNO1-CEPA/QCISD/CCSDand
+LPNO2-CEPA/CCSD/QCISD.The“2”variantsconsumelessdiskspacebutarealsoslightlylessaccuratethanthe“1”variants. Thisis
+discussedintheoriginalpaperinthecaseofQCISDandCCSD.Forthesakeofaccuracy,the“1”variantsarethedefault. Inthosecases,
+where“1”canstillbeperformed,thecomputationalefficiencyofbothapproachesisnotgrosslydifferent. ForLPNOCCSDthereisalsoa
+thirdvariant(LPNO3-CCSD,alsointheopen-shellversion)whichavoidsneglectingthedressingoftheexternalexchangeoperator.However,
+theresultsdonotdiffersignificantlyfromvariant1butthecalculationswillbecomemoreexpensive.Thusitisnotrecommendtousevariant
+3.Variant2isnotavailableintheopen-shellversion.
+6.1. SinglePointEnergiesandGradients 93
+
+[... start of page 116 ...]
+ORCAManual,Release6.0.0
+thecanonicalresultveryclosely. Infact,oneshouldnotviewtheLPNOmethodsasnewmodelchemistry-they
+are designed to reproduce the canonical results, including BSSE. This is different from the domain based local
+correlationmethodsthatdoconstituteanewmodelchemistrywithpropertiesthataredifferentfromtheoriginal
+methods.
+In some situations, it may be appropriate to adapt the accuracy of the calculation. Sensible defaults have been
+determinedfromextensivebenchmarkcalculationsandareaccessibleviaLoosePNO,NormalPNOandTightPNO
+keywordsinthesimpleinputline.[522]
+Thesekeywordsrepresenttherecommendedwa

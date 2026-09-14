@@ -1,0 +1,79 @@
+[... end of page 463 ...]
+ntegralpackagesincetherearemanyintegralsoverprimitiveGaussianbasisfunctionsthatneedtobegenerated. If
+theintegralpackagedoesnottakeadvantageofthegeneralcontraction,thenthisintegralevaluationwillbehighly
+redundantsinceidenticalintegralswillbecalculated𝑁 times(andhence,integralsoverfourgenerallycontracted
+𝑙
+shellswillberedundantlygenerated𝑁4 times). SHARKtakesfulladvantageofgeneralcontractionforallone-
+𝑙
+andtwo-electronintegralsthatitcangenerate. Here,theuniqueadvantagesoftheintegralfactorizationcometo
+fullbenefitsinceallintegralquadruplesofagivenatomquadruple/angularmomentumquadruplecanbeefficiently
+generatedbyjusttwolargematrixmultiplications.
+Theoppositeofgeneralcontractionismetwithsegmentedcontraction. Hereeachbasisfunctioninvolvesanumber
+7.1. TheSHARKIntegralPackageandTaskDriver 441
+
+--- Page 464 ---
+ORCAManual,Release6.0.0
+ofprimitives:
+∑︁
+𝜙 = 𝑑 𝜑
+𝜇 𝑘𝜇 𝑘
+𝑘
+Quitetypically,noneofthe𝜑 thatoccurinthecontractionofonebasisfunctionsoccursinanyotherbasisfunction.
+𝑘
+Typicalbasissetsofthisformarethe“def2”basissetsoftheKarlsruhegroup. Theyarereadilyhandledbymost
+integralpackagesandbothSHARKandlibintareefficientinthiscase.
+Thethirdclassofbasissetsismet,whengeneralcontractioniscombinedwithsegmentedcontraction. Basissets
+ofthistypeare,forexample,thecorrelationconsistent(cc)basissets. Wecallsuchbasissets“partiallygenerally
+contracted”. In such basis sets, part of the basis functions are generally contracted (for example, the s- and p-
+functionsinmaingroupelements),whileotherbasisfunctions(e. g. polarizationfunctions,diffusefunctions,core
+correlationfunctions)arenotgenerallycontracted. Itisdifficulttotakefulladvantageofsuchbasissetsgiventheir
+complicatedstructure. InORCA5,specialcodehasbeenprovidedthattransformsthebasissetintoanintermediate
+basissetthatdoesnotcontainanyredundanciesandhencedrivesSHARKorlibintatpeakperformance.
+Inassessingtheefficiencyvstheaccuracyofdifferentintegralalgorithms,itisclearthatsegmentedbasissetslead
+tothehighestpossibleefficiencyiftheyarewellconstructed. Forsuchbasissetthepre-screeningthatisanessential
+stepofanyintegraldirectalgorithmperformsbest. Thehighestpossibleaccuracy(perbasisfunctions)ismetwith
+generally contracted basis sets. However, here the pre-screening becomes rather inefficient since it can only be
+performedatthelevelofatom/angularmomentumcombinationsratherthanindividualshellquadruples. Thus,as
+soon as a given atom/angular momentum combination leads to any non-negligible integral, all integrals for this
+combinationneedtobecalculated. Thiscreatedasizeableoverhead. Consequently,SCFcalculationscanneverbe
+asefficientaswithsegmentedbasissets. Ifthisisimmaterial,forexample,becauseasubsequentcoupledcluster
+or MRCI calculation is dominating the calculation time, general contraction is very worthwhile to be explored.
+Forpartialgeneralcontraction,ouralgorithmperformsverynearlyasefficientlyasforsegmentedcontractionin
+SCFcalculations. However,sincetheintermediatebasissetislargerthantheoriginalorbitalbasis,certainlimited
+performancepenaltiescanariseinsomejobtypes.
+7.1.5 Task drivers
+Intraditionalalgorithms,quantumchemicalprogramsfrequentlycontainmanyinstancesofnestedloopsoverbasis
+functionshells,theintegralpackageiscalledandtheintegralsare“digested”foragiventask. Whilethesesteps
+areinevitable,programmingthemrepeatedlyislaboriousanderrorprone. Inaddition,improvements,sayinthe
+handlingofcontractionsorsymmetry,needtoimplementedinmanydifferentplaces. IntheSHARKinfrastructure
+allofthisisunnecessarysinceitisprogrammedinanobject-orientedfashion,wheretheprogrammerdoesnotneed
+totakecareofanydetail. Hence, developersonlyneedtowriteshortcodesectionsthatdistributethegenerated
+integralsintowhateverdatastructuretheyneed,whiletheSHARKinterfacetakescareofalltechnicalaspectsand
+triggersthesophisticatedandefficientmachinerythatunderliesit.
+Given this situation, the future of ORCA will involve SHARK taking care of nearly of the compute intensive,
+laborioustasks,whileORCAwillorganizeandtriggerallofthesetasks. ORCAandSHARKcommunicateviaa
+leanandwell-definedinterfacetoexchangethenecessarydata. Inthisway, amodern, efficient, easytouseand
+readilymaintainabledevelopmentenvironmentiscreated.
+7.1.6 SHARK User Interface
+While SHARK is a large and complicated machinery, we have deliberately kept the interface as straightforward
+andsimpleaspossible. Thereareonlyafewflagsthatcanbesetthatareexplainedbelow:
+Inthesimpleinputlinethereis:
+! UseShark
+! NoUseShark
+ThisturnsSHARKon(default)oroff. NotethattheoptiontoturnSHARKoff,willbeuniquetoORCA5.0. Future
+versionsofORCAwillalwaysmakeuseofSHARKandthelegacycodewilldisappearfromtheprogramforgood.
+442 Chapter7. DetailedDocumentation
+
+[... start of page 465 ...]
+ORCAManual,Release6.0.0
+%shark
+UseGeneralContraction false # turns general contraction algorithm on or
+# off. There normally is no need to set this
+# flag since the program will find the
+# contraction case automatically
+Printlevel 1 # Amount of output generated. Choose 0 to
+# suppress output and 2 for more output.
+# Everything else is debug level printing and
+# will fill your harddrive very quickly with
+# unusable information
+Par

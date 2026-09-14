@@ -1,0 +1,97 @@
+[... end of page 567 ...]
+trapolatedB-matrixistransformedbacktothecurrentsetofMOspriortodiagonalization. Obviously,
+thesamestrategycanbeusedfororbitaloptimizationinanymethodforwhichanorbitalgradientisavailable.
+Forwellbehavedcasesthissimpleschemeconvergesin5-10iterations. Transitionmetalsandmorecomplicated
+moleculesmayrequireupto20iterationsandlevelshiftinginordertoachieveconvergence.
+UponconvergencethesumofthematrixDandthedensityofthereferencedeterminant𝑃 = ∑︀ 𝑐 𝑐 formthe
+𝜇𝜈 𝑖 𝜇𝑖 𝜈𝑖
+trueone-particledensitymatrixoftheOO-MP2approachthatcanbeusedforpropertyorgradientcalculations.
+7.13. TheSecondOrderManyBodyPertubationTheoryModule(MP2) 545
+
+--- Page 568 ---
+ORCAManual,Release6.0.0
+7.13.5 Regularized MP2 and RI-MP2
+RegularizedMP2isavariantofsecond-orderMoller-Plessettheory(MP2)introducedbyJ.Shee,M.Loipersberger,
+A.Rettig,J.Lee,andM.Head-Gordon[789]thataimstoimproveitsaccuracyforsystemswith𝜋-drivendispersion
+interactionsanddativebondsintransitionmetalcomplexes. Theapproachachievesthisbyintroducingasingle-
+parameter,energy-gapdependentregularizationthatdampensoverestimatedpairwiseadditivecontributions,thus
+renormalizingfirst-orderamplitudestoempiricallymimichigher-ordercorrelations.
+Forthis,thestandardMP2energyandthusthestandardalgorithmsaremodified. Forthe𝜎(𝑝=1)and𝜎2(𝑝=2)
+regularization,theenergyismodifiedaccordingto
+𝐸 𝜎𝑝-MP2 =−
+1
+4
+∑︁|⟨𝑖𝑗
+∆
+||𝑎
+𝑎𝑏
+𝑏⟩|2
+(1−𝑒−𝜎(Δ𝑎
+𝑖𝑗
+𝑏)𝑝
+)
+𝑖𝑗𝑎𝑏 𝑖𝑗
+whichcorrespondstoregularizingthefirst-orderamplitudes. Forthe𝜅regularization,theMP2energyismodified
+accordingto
+𝐸 𝜅-MP2 =−
+1
+4
+∑︁|⟨𝑖𝑗
+∆
+||𝑎
+𝑎𝑏
+𝑏⟩|2 (︁
+1−𝑒−𝜅(Δ𝑎
+𝑖𝑗
+𝑏)
+)︁2
+𝑖𝑗𝑎𝑏 𝑖𝑗
+whichcorrespondstoregularizingthefirst-orderamplitudesandtheexchangeintegrals.
+RegularizedMP2isavailableforstandardMP2in“memorymode”(Q1Opt>0)andRI-MP2(RIJDX,RIJCOSX,
+RIJK).
+TheusageofregularizedMP2iscontrolledbytheDoRegMP2keyword,thetypeofregularizationcanbespecified
+bysettingtheRegMP2Typeparameterto0for𝜅,1for𝜎,or2for𝜎2. Thevalueoftheregularizerscanbespecified
+byRegMP2KappaandRegMP2Sigmarespectively.
+%mp2
+DoRegMP2 true # required
+RegMP2Type 0 # kappa regularizer
+1 # sigma regularizer
+2 # sigma-sqaured regularizer
+RegMP2Kappa 1.1 # kappa value
+RegMP2Sigma 0.5 # sigma value
+end
+ItisimportanttonotethatonlysinglepointenergiesareavailableandtestedforregularizedMP2. Density,Gradient,
+andHessiancalculationsarenotyetsupported.
+7.13.6 RIJCOSX-RI-MP2 Gradients
+AdditionalgridsareintroducedfortheRIJCOSX-MP2gradient. Theyhavesensibledefaultsettingsandtherefore
+do not usually require any intervention from the user. However, a number of expert options are available, as
+describedbelow.
+The COSX terms in the Z-vector equations are calculated on a grid, controlled by the keywords Z_GridX and
+Z_IntAccX,asdiscussedinsectionsChangingTD-DFT,CP-SCFandHessiangrids andCP-SCFOptions. For
+example,theDefGrid3CP-SCFCOSXgridcanberequestedas:
+%method
+Z_GridX 2 # Lebedev 110-point grid
+Z_IntAccX 3.067 # radial integration accuracy
+end
+The grid used for evaluation of the response operator on the right-hand side of the Z-vector equations (see for
+exampleeqs(7.77)and(7.78))canbeindependentlyselectedusingthekeywordZ_GridX_RHS.Notethatstarting
+with ORCA 5, the usage is different to Z_GridX - the choice is between one of the three grids used during the
+RIJCOSXSCFprocedure: asmallgridfortheinitialiterations,amediumgridforthefinaliterations(defaultin
+ORCA5),andalargegridtoevaluatetheenergymoreaccuratelyaftertheiterationshaveconverged.
+546 Chapter7. DetailedDocumentation
+
+[... start of page 569 ...]
+ORCAManual,Release6.0.0
+%method
+Z_GridX_RHS 1 # small SCF grid
+2 # medium SCF grid (default)
+3 # large SCF grid
+end
+Yet another grid is used to evaluate basis functions derivatives. Appropriate parameters are chosen through !
+DefGridn(inadditiontothethreeSCFgrids),butonecanoverridethisbysettingtheangular(GridX)andradial
+(IntAccX)gridsexplicitlythrough:
+%mp2 GridX 4 # default 4: angular Lebedev grid 302
+IntAccX 4.871 # radial grid
+end
+7.13.7 MP2 and RI-MP2 Second Derivatives
+Analyticalsecond-orderpropertieswiththeMP2,RI-MP2anddouble-hybridDFTmethod

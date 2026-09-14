@@ -1,0 +1,89 @@
+[... end of page 1091 ...]
+𝐴
+InORCA,thepro-atomicdensitywithintheHirshfeldmethodiscalculatedviadensityfittingwithasetofGaussian
+s-functionsperelement.
+ThecalculationoftheHirshfeldchargesinORCAisrequestedbywriting
+! Hirshfeld
+intheORCAinputfile,oralternativelyviathe%outputblock:
+%output
+Print[ P_Hirshfeld ] 1 # default = off
+end
+7.56. PopulationAnalysesandControlofOutput 1069
+
+--- Page 1092 ---
+ORCAManual,Release6.0.0
+Forinstance,ifwerequesttheHirshfeldchargesforawatermolecule:
+!HF cc-pvdz tightscf Hirshfeld
+%maxcore 4000
+* xyz 0 1
+O 0.00000006589375 0.00157184228646 0.00000000004493
+H 0.77316868532439 -0.58666889665624 -0.00000000000005
+H -0.77316876182122 -0.58666895650640 -0.00000000000005
+*
+ORCAprintsthefollowinginformationattheendoftheoutputfile:
+------------------
+HIRSHFELD ANALYSIS
+------------------
+Total integrated alpha density = 4.999998580
+Total integrated beta density = 4.999998580
+ATOM CHARGE SPIN
+0 O -0.333756 0.000000
+1 H 0.166879 0.000000
+2 H 0.166879 0.000000
+TOTAL 0.000003 0.000000
+7.56.9 MBIS Charges
+The Minimal Basis Iterative Stockholder (MBIS) method is a variant of the Hirshfeld method.[868] The idea
+behind this approach is that the pro-atomic density 𝜌0(⃗𝑟) is expanded in a minimal set of atom-centered s-type
+𝐴
+Slaterfunctions𝜌0 (⃗𝑟):
+𝐴𝑖
+∑︁
+𝑚𝐴
+𝜌0(⃗𝑟)= 𝜌0 (⃗𝑟) (7.426)
+𝐴 𝐴𝑖
+𝑖=1
+with𝜌0 (⃗𝑟)equalto:
+𝐴𝑖
+⎛ ⃒ ⃒⎞
+⃒⃗𝑟−𝑅⃗ ⃒
+𝜌0 𝐴𝑖 (⃗𝑟)= 𝜎 𝑁 3 𝐴 8 𝑖 𝜋 exp⎝− ⃒ 𝜎 𝐴⃒ ⎠ (7.427)
+𝐴𝑖 𝐴𝑖
+Here,𝑚 isthenumberofshellsofatom𝐴. Thepopulations𝑁 ,andthewidths𝜎 canbewrittenas:
+𝐴 𝐴𝑖 𝐴𝑖
+∫︁ 𝜌0 (⃗𝑟)
+𝑁 = 𝜌(⃗𝑟) 𝐴𝑖 𝑑⃗𝑟 (7.428)
+𝐴𝑖 𝜌0(⃗𝑟)
+1 ∫︁ 𝜌0 (⃗𝑟)⃒ ⃒
+𝜎 = 𝜌(⃗𝑟) 𝐴𝑖 ⃒⃗𝑟−𝑅⃗ ⃒𝑑⃗𝑟 (7.429)
+𝐴𝑖 3𝑁 𝜌0(⃗𝑟) ⃒ 𝐴⃒
+𝐴𝑖
+InordertocomputetheAIMdensities𝜌 (⃗𝑟),theMBISmethodusesaniterativealgorithmwhere: (1)aninitial
+𝐴
+guessisgeneratedforthesetof𝑁 and𝜎 andthepro-atomicdensitiesarecalculatedthrougheqs. (7.426)and
+𝐴𝑖 𝐴𝑖
+(7.427),(2)thenewsetof𝑁 and𝜎 areobtainedviaeqs. (7.428)and (7.429),(3)ifconvergenceisreached
+𝐴𝑖 𝐴𝑖
+for𝜌 (⃗𝑟),theiterativeprocessstops,otherwisewegobackto(1)butnowoneusesthelastestimatesfor𝑁 and
+𝐴 𝐴𝑖
+𝜎 .
+𝐴𝑖
+Once,theMBISiterativeprocessstops,theMBISchargesarecalculatedas:
+∫︁
+𝑄MBIS. =𝑍 − 𝜌 (⃗𝑟)𝑑⃗𝑟 (7.430)
+𝐴 𝐴 𝐴
+ThecalculationoftheMBISchargesinORCAisrequestedbywriting
+1070 Chapter7. DetailedDocumentation
+
+[... start of page 1093 ...]
+ORCAManual,Release6.0.0
+! MBIS
+intheORCAinputfile,oralternativelyviathe%outputblock:
+%output
+Print[ P_MBIS ] 1 # default = off
+end
+IfwerequesttheMBISchargesforaHFcalculationatthecc-pvdzlevelofachloroformmolecule:
+!HF cc-pvdz tightscf MBIS
+* xyz 0 1
+C -0.00000997794639 -0.00091664148112 0.45499807439812
+H 0.00000069467312 0.00031189002174 1.53703126401237
+Cl 0.000031887

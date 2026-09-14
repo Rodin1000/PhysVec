@@ -1,0 +1,64 @@
+[... end of page 674 ...]
+olverfortheCAS-CIproblem. Inprinciple,theNEVPT2approachcanbecombinedwithapproximateCIsolution
+such as the DMRGapproach described in section Density Matrix Renormalization Group. Startingwith ORCA
+4.0itispossibletorunNEVPT2-DMRGcalculationsfortheFICandSCtypeansatzusingthemethodologyde-
+velopedbytheChangroup.[336]AsidefromtheusualDMRGinput,theprogramrequiresanadditionalparameter
+(nevpt2_MaxM)intheDMRGblock. However,someofthefeatureswillberestrictedtothedefaultCIStep.
+652 Chapter7. DetailedDocumentation
+
+--- Page 675 ---
+ORCAManual,Release6.0.0
+%casscf
+cistep DMRGCI
+%dmrg
+...
+nevpt2_MaxM 2000 # (see Note below)
+end
+PTMethod SC_NEVPT2 # or FIC_NEVPT2
+end
+Forthevaluenevpt2_MaxM 2000cf[336].
+UsingtheRIapproximation,largemoleculeswithactivesspacesofupto20orbitalsshouldbecomputable. The
+DMRGextensioncanbecombinedwithDLPNOandF12variants. FutureversionmightalsosupporttheCIStep
+ACCCIandCIStep ICE.
+7.19.1 RI, RIJK and RIJCOSX Approximation
+SettingtheRIapproximationontheCASSCFlevel, willsettheRIoptionsforNEVPT2respectively. Thethree
+indexintegralsarecomputedandpartiallystoredondisk. Threeindexintegralwithtwointernallabelsarekeptin
+mainmemory. Thetwo-electronintegralsareassembledonthefly. Theauxiliarybasismustbelargeenoughtofit
+theintegralsappearingintheCASSCForbitalgradient/HessianandtheNEVPT2part. Theauxiliarybasissetof
+thetype/Jdoesnotsufficehere.
+%casscf
+...
+TrafoStep RI # enable RI approximation in CASSCF and NEVPT2
+PTMethod SC_NEVPT2 # or the NEVPT2 approach or your choice
+end
+AdditionalspeedupscanbeobtainediftheFockoperatorformationisapproximatedusingthe!RIJCOSXor!RIJK
+techniques. Incaseof RIJCOSX,anadditionalauxiliarybasismustbeprovidedfortheAuxJauxiliarybasisslot.
+FormoreinformationonthebasissetslotsseesectionBuilt-inBasisSets.
+#RIJCOSX one-liner
+! def2-svp def2/J RIJCOSX def2-svp/C
+# Commented out: Alternative definition via %basis block
+#%basis
+#auxJ "def2/J" # or for example "AutoAux"
+#auxC "def2-svp/C" # or for example "AutoAux"
+#end
+WhereastheRIJKrequiresasingleauxiliarybasisset(AuxJKslot),thatislargeenoughtofitintegralsintheFock-
+matrix construction, orbital gradient/Hessian and the correlation part. In contrast to COSX, the calculation can
+alsobecarriedoutinconvmode(storingtheAOintegralsondisk).
+#RIJK one-liner, conv is mandatory for RIJK in CASSCF
+! def2-svp def2/JK RIJK
+# Commented out: Alternative definition via %basis block
+#%basis
+#auxJK "def2/JK" # or "AutoAux"
+#end
+The described methodology allows the computation of systems with up to 2000 basis functions. Even larger
+molecules are accessible in the framework of DLPNO-NEVPT2 described in the next subsection. Several ex-
+amplescanbefoundintheCASSCFtutorial.
+7.19. N-ElectronValenceStatePertubationTheory 653
+
+[... start of page 676 ...]
+ORCAManual,Release6.0.0
+7.19.2 Beyond the RI approximation: DLPNO-NEVPT2
+Forsystemswithmorethan80atoms,werecommendtherecentlydevelopedDLPNO-NEVPT2.[344]Itisasuc-
+cessful combination of DLPNO strategy with the FIC-NEVPT2 method. As its single reference counterparts,
+DLPNO-NEVPT2 recovers 99.9% of the FIC-NEVPT2 correlation energies even for large system. The input
+structureissimilartotheparentingFIC-

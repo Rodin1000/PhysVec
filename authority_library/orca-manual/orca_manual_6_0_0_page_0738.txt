@@ -1,0 +1,96 @@
+[... end of page 737 ...]
+inbothquantitiesisimposedinORCA).
+ConstrainedOptimization
+Constraints on the redundant internal coordinates can be imposed by modifying the above projector 𝑃′ with a
+projectorfortheconstraints𝐶:
+P=P′−P′C(CPC)−1CP′ (7.202)
+𝐶 isadiagonalmatrixwith1’sfortheconstraintsand0’selsewhere. ThegradientandtheHessianareprojected
+withthemodifiedprojector:
+𝑔˜ =𝑃𝑔 (7.203)
+𝑞 𝑞
+𝐻˜ =𝑃𝐻 𝑃 +𝛼(1−𝑃) (7.204)
+𝑞 𝑞
+7.26. GeometryOptimization 715
+
+--- Page 738 ---
+ORCAManual,Release6.0.0
+ConstrainedFragmentsOptimization
+Theconstrainedfragmentsoptionwasimplementedinordertoprovideaconvenientwaytohandleconstraintsfor
+systemsconsistingofseveralmolecules. Thedifferencetoacommonoptimizationliesinthecoordinatesetup. In
+acommoncoordinatesetuptheinternalcoordinatesarebuiltupasdescribedinthefollowing:
+Inafirststep,bondsareconstructedbetweenatompairswhichfulfillcertain(atomtypespecific)distancecriteria. If
+therearefragmentsinthesystem,whicharenotconnectedtoeachother(thisisthecasewhentherearetwoormore
+separatemolecules),anadditionalbondisassignedtothenearestatompairbetweenthenonbondedfragments. All
+otherinternalcoordinatesareconstructedonthebasisofthissetofbonds. Here,inasecondstep,bondanglesare
+constructedbetweentheatomsofdirectlyneighbouredbonds. Ifsuchananglereachesmorethan175∘,aspecial
+typeoflinearanglesisconstructed. Inathirdstep,dihedralangles(andimpropertorsions)areconstructedbetween
+theatomsofdirectlyneighbouringangles.
+If the constrained fragments option is switched on, the set of bonds is constructed in a different way. The user
+definesanumberoffragments. Foreachfragmentafullsetofbonds(notseeingtheatomsoftheotherfragments)
+isconstructedasdescribedabove. Whenusingthisoption,theuseralsohastodefinewhichfragmentsaretobe
+connected. Theconnectionbetweenthesefragmentscaneitherbeuser-definedorautomaticallychosen. Iftheuser
+definestheconnectingatomsN1andN2,thentheinterfragmentalbondistheonebetweenN1andN2. Iftheuser
+does not define the interfragmental bond, it is constructed between the atom pair with nearest distance between
+thetwofragments. Thentheanglesanddihedralsareconstructeduponthis(different)setofbondsinthealready
+describedfashion.
+Nowletusregardthedefinitionofthefragmentconstraints: Afragmentisconstrainedinternallybyconstraining
+allinternalcoordinatesthatcontainonlyatomsoftherespectivefragment. Theconnectionbetweentwofragments
+A and B is constrained by constraining specific internal coordinates that contain atoms of both fragments. For
+bonds,oneatomhastobelongtofragmentAandtheotheratomhastobelongtofragmentB.Regardingangles,
+two atoms have to belong to fragment A and one to fragment B and vice versa. With respect to dihedrals, only
+thoseareconstrainedwheretwoatomsbelongtofragmentAandtheothertwobelongtofragmentB.
+7.26.2 Transition State Optimization
+Astransitionstatefinderweimplementedthewell-establishedeigenvectorfollowingalgorithmusingaP-RFOstep
+asimplementedbyBaker[67]. Thisalgorithmisaquasi-Newtonlikealgorithm.
+TheTaylorseriesoftheenergy,truncatedafterthequadraticterm,is:
+1
+𝐸 =𝐸 +𝑔 +∆𝑞 + ∆𝑞+H ∆𝑞 (7.205)
+0 𝑞 𝑞 2 𝑞
+TheNewton-Raphsonsteptogetfromtheactualpointtoastationarypointis:
+∆𝑞 =−H−1𝑔 = ∑︁ − 𝑉 𝑖 +𝑔 𝑞 𝑉 𝑖 (7.206)
+𝑞 𝑞 𝑏
+𝑖
+with𝑉 and𝑏 aseigenvectorsandeigenvaluesoftheHessianH . Thisstepleadstotheneareststationarypoint
+𝑖 𝑖 𝑞
+onthePES.Thisstationarypointcanbeaminimumorasaddlepoint,accordingtothecurvatureofthePESatthe
+actualpoint.
+WithasimpleshiftoftheHessianeigenvalues𝑏 inthisequationonecanguidethesteptoastationarypointwith
+𝑖
+therequiredcharacteristics(Hessianwithexactlyonenegativeeigenvalue). Thetransitionstatesearchisseparated
+intotwodifferentoptimizationproblems. TheenergyismaximizedalongoneHessianeigenmodeandminimized
+along the remaining 3𝑁 −7(6) eigenmodes. We introduce two different shift parameters 𝜆 and 𝜆 , where 𝜆
+𝑝 𝑛 𝑝
+is the shift parameter for the eigenmode being maximized and 𝜆 shifts the Hessian eigenvalues of the modes
+𝑛
+beingminimized. Thismethodallowsustomaximizealonganymode,notonlytheonewithsmallesteigenvalue.
+StartingfromtwodifferentRFO-matricesforthedifferentoptimizationproblems(seedescriptionabove)weget
+for𝜆 and𝜆 :
+𝑝 𝑛
+1 1√︁ ∑︁ 𝐹2
+𝜆 = 𝑏 + 𝑏2 +4𝐹2 and 𝑖 =𝜆 (7.207)
+𝑝 2 𝑘 2 𝑘 𝑘 𝜆 −𝑏 𝑛
+𝑛 𝑖
+𝑖̸=𝑘
+716 Chapter7. DetailedDocumentation
+
+[... start of page 739 ...]
+ORCAManual,Release6.0.0
+whereas𝐹 =𝑉+𝑔isthecomponentof𝑔alongtheHessianeigenmode𝑉 and𝜆 hastogetsolvediteratively. The
+𝑖 𝑖 𝑖 𝑛
+solutionfor𝜆 hastobenegativeandlowerthan𝑏 (orlowerthan𝑏 ,ifnotthelowestmodeisbeingfollowed). If
+𝑛 2 1
+theHessianhasmorethanonenegativeeigenvalue,thesepropertiesmightnotbefulfilled,andtheHessianwould
+havetobemodified. InourimplementationtheHessiandiagonalelementsareeithershiftedorreversedinsucha
+case.
+OncetheshiftparametersareknowntheP-RFOstepℎiscalculatedasfollows:
+𝐹¯ 𝑉 𝐹¯𝑉
+∆𝑞 =− 𝑘 𝑘 and ∆𝑞 =− 𝑖 𝑖 with 𝑖=1...𝑛, 𝑖̸=𝑘 (7.208)
+𝑘 𝑏 −𝜆 𝑖 𝑏 −𝜆
+𝑘 𝑝 𝑖 𝑛
+𝑛
+∑︁
+∆𝑞 = ∆𝑞 (7.209)
+𝑗
+𝑗=1
+ScanTSoption
+ForTSmodesofratherlocalnature(involvingonlyonebondo

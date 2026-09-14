@@ -1,0 +1,337 @@
+There are already lots of numerical methods to compute various quantum many-body physics. 
+
+Your task is to make a detailed and practical plan of generating wanted numerial results of a specific subplot (e.g. Fig. 3(a)) in the research paper. 
+The goal you need to achieve is: People/other agents should be able to reproduce the results in the paper using only the plan you output.
+
+--------------------------------------------------------------------------
+You will be given information including: 
+1. PDF_info: The research article you need to reproduce. The file only contains the text in the paper, while images are excluded. 
+2. Paper_basic_info: It contains a brief summary of the research paper. It includes topic, model, methods, Hamiltonian and findings of the paper. 
+3. Figure_captions_info: It contains a summary of each figure, extracted mainly from the figure captions. It includes information about the subplots in each figure. 
+4. The specific subplot that you need to focus on. You are going to output a detailed and practical plan on how to reproduce this subplot numerically. The input format: Fig. 3(a), Figure 3(a), Fig. 1(b) inset, ...You should regard inset as a seperate subplot. 
+5. User requests about this specified subplot. 
+
+The information specifying a subplot is necessary. Other information is optional. 
+
+----------------------------------------------------------------------------
+In each subplot (e.g. Fig. 3(a)), there may be several items (curves, lines, ...).
+You will category all items of this subplot mentioned in Figure_captions_info into different tasks and data_set, preparing for coding. You can use information from correponding part of Figure_Captions_info. 
+
+1. Items should be grouped into the same task if they satisfy all conditions below: 
+  1.1. They are results of the same physical model. (e.g. BHM ladder with four-body interaction)
+  1.2. They use the same calculation method. (e.g. DMRG)
+  1.3. Their dependent variables (may be different) root in/derived from the same quantity or results. (e.g. different order parameters can be derived from a calculated ground state)
+
+
+2. Items calculated from different numerical/analytical methods should be seperated as different tasks. e.g. average particle number calculated by DMRG and Gutzwiller. 
+
+3. Items calculated from different mechanisms should be seperated into different tasks. This case includes: 
+  3.1. Results of a Ising chain and results of a XXZ chain should be divided. 
+  3.2. Numerical results and the analytical results should be divided. 
+  3.3. Numerical/analytical results and the vertical/horizontal benchmark lines should be divided. 
+
+-----------------------------------------------------------------------------
+Based on Figure_captions_info and other information, you will output a JSON file containg the following fields:
+- "subplot_name": The user defined subplot that you will focus on. May be Fig. 1(c), Fig. 1(a)-inset, ...Insets should be regarded as seperate subplots. If you cannot find such subplot in the paper, this term is 'Subplot not found', and all items below is 'None'. 
+- "User_requests": User's additional instructions for generating the subplot. Including specifying several items, specifying numerical methods, ...If there is no requests, this field should be "None". 
+- "Task 1": 
+    - "description": A general description about this task. 
+    - "phy_model": The physical model should be used to generate the results. Could be Hamiltonians, differential equations, ...
+    - "numerical_method": The numerical method required for this task. Example: DMRG, TEBD, Gross-Pitaevskii equations, ...
+    - "external_resource": Avaliable packages addressing the numerical implementation for this task. Example: ITensors & ITensorMPS for DMRG, qutip for quantum optics, ...If there is not any, this term is 'None'. 
+    - "keywords": keywords related to the physical model, the numerical method, the most suitable program language, and external sources of this task. Example: Hubbard, lattice, Gutzwiller, python, qutip, ...
+    - "independent 1": The independent variable. You identify its mathematical definition, and provide a moderate computational interval. 
+    - "independent 2": If there are more than 1 independent variables (e.g. a mesh). If there is only 1 independent variable, do not contain this term. 
+    - "dependent 1": The dependent variable (or the observable). You identify its mathematical definition. 
+    - "dependent 2": If more than 1 observable is included in this task. Otherwise do not contain this term. 
+    # You have to include all observables here, as long as it is listed in data_sets in this task. 
+    - "para 1": A parameter participating in the task/physical model. You identify its mathematical definition and all possible values (as long as used by one of the items). 
+    - "para 2": Another parameter. 
+    # You list all the parameters necessary for this task. Identify their mathematical definition and all values included in this task. 
+    - "data_set 1": {indepentdent variable(s), dependent variable (only one for a dataset), parameters (each parameter has only one choice of value)} for item 1.
+    - "data_set 2": Another item set. 
+    # You produce a data_set for all items that can be categoried in this task. 
+- "Task 2": 
+    ...
+
+Check: 
+# All items in the Figure_Captions_info pertaining to this subplot should correspond one-to-one with a data_set in one of the tasks provided here. If the total number of data_set does not match the number of items of this subplot (In Figure_captions_info), You check the difference and re-generate. 
+# In one task, all dependent variables mentioned in data_set should be listed as "dependent i". You have to ensure the consistence inside a single task. 
+# After generate the output, please verify that whether different tasks could be merged into one task. Sometimes you list multiple tasks merely because their observables are not the same, that will be a mistake. 
+
+------------------------------------------------------------------------------
+Your output should be in JSON format strictly. 
+Example 1: Assume in the target paper, there is a subplot (e.g. Fig. 3(a)) shows the average particle number as a funciton of chemical potential in a 1D Bose-Hubbard lattice. In the subplot, results from both DMRG and Gutzwiller methods are shown. You are supposed to generate a plan of reproducing this subplot as follows: 
+{
+  "subplot_name": "Fig. 3(a)",
+  "User_requests": "None",
+  "Task 1": {
+    "description": "Calculate the average particle number as a function of chemical potential using the Density Matrix Renormalization Group (DMRG) method for a 1D Bose-Hubbard lattice.",
+    "phy_model": "1D Bose-Hubbard Hamiltonian: H = -t * sum_i (b_i^dagger b_{i+1} + h.c.) + U/2 * sum_i n_i (n_i - 1) - mu * sum_i n_i",
+    "numerical_method": "Density Matrix Renormalization Group (DMRG)",
+    "external_resource": "ITensors (Julia/C++) or TeNPy (Python) for DMRG implementation.",
+    "keywords": "1D, Bose, Hubbard, DMRG, julia, ITensors. ",
+    "independent 1": {
+      "name": "Chemical potential",
+      "symbol": "mu",
+      "definition": "The chemical potential, controlling the average particle number.",
+      "computational_interval": "[-5.0, 5.0] with 100 points"
+    },
+    "dependent 1": {
+      "name": "Average particle number",
+      "symbol": "<n>",
+      "definition": "The expectation value of the total number operator divided by the lattice size."
+    },
+    "para 1": {
+      "name": "Hopping parameter",
+      "symbol": "t",
+      "definition": "Strength of particle hopping between adjacent sites.",
+      "values": [
+        "1.0"
+      ]
+    },
+    "para 2": {
+      "name": "On-site interaction strength",
+      "symbol": "U",
+      "definition": "Strength of on-site repulsive interaction between particles.",
+      "values": [
+        "2.0",
+        "5.0",
+        "10.0"
+      ]
+    },
+    "para 3": {
+      "name": "Lattice size",
+      "symbol": "L",
+      "definition": "Number of sites in the 1D lattice.",
+      "values": [
+        "40"
+      ]
+    },
+    "para 4": {
+      "name": "Maximum bond dimension",
+      "symbol": "chi",
+      "definition": "Maximum bond dimension used in the DMRG calculation.",
+      "values": [
+        "200"
+      ]
+    },
+    "data_set 1": {
+      "description": "Average particle number for U/t = 2.0",
+      "dependent_variable": "<n>",
+      "parameters": {
+        "U": "2.0",
+        "t": "1.0",
+        "L": "40",
+        "chi": "200"
+      }
+    },
+    "data_set 2": {
+      "description": "Average particle number for U/t = 5.0",
+      "dependent_variable": "<n>",
+      "parameters": {
+        "U": "5.0",
+        "t": "1.0",
+        "L": "40",
+        "chi": "200"
+      }
+    },
+    "data_set 3": {
+      "description": "Average particle number for U/t = 10.0",
+      "dependent_variable": "<n>",
+      "parameters": {
+        "U": "10.0",
+        "t": "1.0",
+        "L": "40",
+        "chi": "200"
+      }
+    }
+  },
+  "Task 2": {
+    "description": "Calculate the average particle number as a function of chemical potential using the Gutzwiller mean-field approximation for a 1D Bose-Hubbard lattice.",
+    "phy_model": "1D Bose-Hubbard Hamiltonian: H = -t * sum_i (b_i^dagger b_{i+1} + h.c.) + U/2 * sum_i n_i (n_i - 1) - mu * sum_i n_i.  Approximated by Gutzwiller mean-field decoupling of hopping terms.",
+    "numerical_method": "Gutzwiller mean-field approximation",
+    "external_resource": "None (Can be implemented self-consistently by solving local equations or using existing libraries like QuSpin for Hamiltonian construction and exact diagonalization on a single site).",
+    "keywords": "1D, Bose, Hubbard, Gutzwiller, python. ",
+    "independent 1": {
+      "name": "Chemical potential",
+      "symbol": "mu",
+      "definition": "The chemical potential, controlling the average particle number.",
+      "computational_interval": "[-5.0, 5.0] with 100 points"
+    },
+    "dependent 1": {
+      "name": "Average particle number",
+      "symbol": "<n>",
+      "definition": "The expectation value of the average particle number per site obtained from the Gutzwiller state."
+    },
+    "para 1": {
+      "name": "Hopping parameter",
+      "symbol": "t",
+      "definition": "Strength of particle hopping between adjacent sites.",
+      "values": [
+        "1.0"
+      ]
+    },
+    "para 2": {
+      "name": "On-site interaction strength",
+      "symbol": "U",
+      "definition": "Strength of on-site repulsive interaction between particles.",
+      "values": [
+        "2.0",
+        "5.0"
+      ]
+    },
+    "para 3": {
+      "name": "Maximum local occupation number",
+      "symbol": "n_max",
+      "definition": "Maximum number of bosons considered on a single site in the Gutzwiller ansatz.",
+      "values": [
+        "5"
+      ]
+    },
+    "data_set 1": {
+      "description": "Average particle number for U/t = 2.0",
+      "dependent_variable": "<n>",
+      "parameters": {
+        "U": "2.0",
+        "t": "1.0",
+        "n_max": "5"
+      }
+    },
+    "data_set 2": {
+      "description": "Average particle number for U/t = 5.0",
+      "dependent_variable": "<n>",
+      "parameters": {
+        "U": "5.0",
+        "t": "1.0",
+        "n_max": "5"
+      }
+    }
+  }
+}
+
+Example 2: Fig. 4(a) shows order parameters of a extended Bose-Hubbard ladder under four-body interaction.
+{
+  "subplot_name": "Fig. 4(a)",
+  "User_requests": "None", 
+  "Task 1": {
+    "description": "Calculate the superfluid order parameter and density wave order parameter as a function of the four-body interaction strength K for an extended Bose-Hubbard Model (BHM) ladder using the Density Matrix Renormalization Group (DMRG) method.",
+    "phy_model": "Extended Bose-Hubbard Model on a Ladder: H = -t * sum_{<i,j>} (b_i^dagger b_j + h.c.) + U/2 * sum_i n_i (n_i - 1) + V * sum_{<i,j>} n_i n_j + K * sum_i b_i^dagger b_i^dagger b_i b_i b_i^dagger b_i^dagger b_i b_i",
+    "numerical_method": "Density Matrix Renormalization Group (DMRG)",
+    "external_resource": "ITensors (Julia/C++) or TeNPy (Python) for DMRG implementation.",
+    "keywords": "ladder, Bose, Hubbard, four-body interaction, DMRG, julia, ITensors. ",
+    "independent 1": {
+      "name": "Four-body interaction strength",
+      "symbol": "K",
+      "definition": "Strength of the four-body interaction term in the Hamiltonian.",
+      "computational_interval": "[0.0, 5.0] with 50 points"
+    },
+    "dependent 1": {
+      "name": "Superfluid order parameter",
+      "symbol": "|<b_i>|",
+      "definition": "The magnitude of the local boson annihilation operator expectation value, representing off-diagonal long-range order."
+    },
+    "dependent 2": {
+      "name": "Density wave order parameter",
+      "symbol": "(-1)^i <n_i>",
+      "definition": "Alternating density average, indicating density wave order."
+    },
+    "para 1": {
+      "name": "Hopping parameter",
+      "symbol": "t",
+      "definition": "Strength of particle hopping between adjacent sites.",
+      "values": [
+        "1.0"
+      ]
+    },
+    "para 2": {
+      "name": "On-site interaction strength",
+      "symbol": "U",
+      "definition": "Strength of on-site repulsive interaction between particles.",
+      "values": [
+        "10.0"
+      ]
+    },
+    "para 3": {
+      "name": "Nearest-neighbor interaction strength",
+      "symbol": "V",
+      "definition": "Strength of nearest-neighbor repulsion between particles.",
+      "values": [
+        "2.0"
+      ]
+    },
+    "para 4": {
+      "name": "Lattice size",
+      "symbol": "L",
+      "definition": "Number of sites in the 1D lattice (if converted from ladder for DMRG, total sites).",
+      "values": [
+        "20",
+        "40",
+        "60"
+      ]
+    },
+    "para 5": {
+      "name": "Maximum bond dimension",
+      "symbol": "chi",
+      "definition": "Maximum bond dimension used in the DMRG calculation.",
+      "values": [
+        "256"
+      ]
+    },
+    "data_set 1": {
+      "description": "Superfluid order parameter for L=20",
+      "dependent_variable": "|<b_i>|",
+      "parameters": {
+        "U": "10.0",
+        "V": "2.0",
+        "t": "1.0",
+        "L": "20",
+        "chi": "256"
+      }
+    },
+    "data_set 2": {
+      "description": "Superfluid order parameter for L=40",
+      "dependent_variable": "|<b_i>|",
+      "parameters": {
+        "U": "10.0",
+        "V": "2.0",
+        "t": "1.0",
+        "L": "40",
+        "chi": "256"
+      }
+    },
+    "data_set 3": {
+      "description": "Density wave order parameter for L=20",
+      "dependent_variable": "(-1)^i <n_i>",
+      "parameters": {
+        "U": "10.0",
+        "V": "2.0",
+        "t": "1.0",
+        "L": "20",
+        "chi": "256"
+      }
+    },
+    "data_set 4": {
+      "description": "Density wave order parameter for L=40",
+      "dependent_variable": "(-1)^i <n_i>",
+      "parameters": {
+        "U": "10.0",
+        "V": "2.0",
+        "t": "1.0",
+        "L": "40",
+        "chi": "256"
+      }
+    },
+    "data_set 5": {
+      "description": "Density wave order parameter for L=60",
+      "dependent_variable": "(-1)^i <n_i>",
+      "parameters": {
+        "U": "10.0",
+        "V": "2.0",
+        "t": "1.0",
+        "L": "60",
+        "chi": "256"
+      }
+    }
+  }
+}

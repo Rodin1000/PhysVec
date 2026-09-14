@@ -1,0 +1,68 @@
+[... end of page 705 ...]
+ 2 # compute the full relativistic Hamiltonian derivative
+1 # neglect derivatives of R and X
+0 # (default) use the non-relativistic operator
+end
+ThesamesettingisappliedtoallpropertiesforwhichtheX2Ccorrectionisimplemented. Currently, theseare:
+geometricgradients,electricdipoles,quadrupoles,andpolarizabilities,electricfieldgradients,EPRhyperfinecou-
+plings, and NMR shieldings and spin–spin couplings. For the Hessian, the X2C correction is implemented in a
+7.23. RelativisticOptions 683
+
+--- Page 706 ---
+ORCAManual,Release6.0.0
+semi-numeric fashion. The DLU approximation is applied throughout, if requested, and reduces the computa-
+tionaleffortdramatically. Notethatformagneticproperties,therestrictedmagneticbalance(RMB)forthesmall
+componentbasisfunctionsisusedwheneverGIAOsarerequested(e.g. NMRshielding),whiletherestrictedki-
+neticbalance(RKB)isusedotherwise(e.g. NMRcoupling). Thespin–orbitcouplingintegralsusedforvarious
+propertiesonlyincludearelativisticcorrectiontotheone-electronterm,asisthecaseforDKH.
+Forsecondderivativepropertieswhosenumberisproportionaltothenumberofatoms,e.g. theDSOtermofNMR
+couplings,firstderivativesofvariousintermediatequantitiesrequiredforthefullX2Csecondderivativearestored
+ondisk. ThestoragerequirementscanbereducedviatheStorageLevelkeywordandthemissingintermediates
+willberecomputedon-the-fly,whichofcourseincreasesthecomputationtime.
+%rel
+StorageLevel 0 # do not store anything - not always available
+1 # store integral derivatives
+2 # 1 + derivatives of R and X (default, minimum for DLU)
+3 # 2 + derivatives of L
+4 # 3 + derivatives of S-tilde
+5 # 4 + derivatives of D and M
+end
+7.23.7 Basis Sets in Relativistic Calculations
+For relativistic calculations, special basis sets have been designed, both as DKH and ZORA recontractions of
+thenon-relativisticAhlrichsbasissets(intheirall-electronversions)forelementsuptoKr,andaspurpose-built
+segmentedall-electronrelativisticallycontracted(SARC)basissetsforelementsbeyondKr[62,640,641,642,643,
+727]. Theirnamesare“ZORA-”or“DKH-”followedbytheconventionalbasissetname. ForX2Ccalculations,the
+“x2c-XVPall”basissetsandtheirvariantsareavailable.[275,689]SeesectionChoiceofBasisSetforacomplete
+listofbasissets.
+7.24 Approximate Full CI Calculations in Subspace: ICE-CI
+7.24.1 Introduction
+Inmanycircumstances,onewouldliketogenerateawavefunctionthatisascloseaspossibletothefull-CIresult,
+butFullCIitselfisoutofthequestionforcomputationalreasons. Situationsinwhichthatmaybedesirableinclude
+a)onewantstogeneratehighlyaccurateenergiesforsmallmoleculesorb)onewantstosortoutanumberoflow-
+lyingstatesorc)onewantstorunCASSCFcalculationswithlargeractivespacesthantheaboutfourteenorbitals
+thathavebeenthestateoftheartforalongtime.
+ORCAfeaturesamethodthathasbeentermedIterative-ConfigurationExpansionConfigurationInteraction(ICE-
+CI).[171, 172] It is based on much older ideas brought forward by Jean-Paul Malrieu and his co-workers in the
+frameworkoftheCIPSI(anabbreviationforamethodwitharatherbulkynameConfigurationInteractionbyPer-
+turbationwithmulticonfigurationalzeroth-orderwavefunctionsSelectedbyIterativeprocess)intheearly1970s.
+ThegoaloftheICE-CIistoprovidecompactwavefunction(s)(e.g. oneorseveralstates)closetothefull-CIlimit
+atasmallfractionofthecomputationalcost. However,ICE-CIitselfisnotdesignedtodealwithhundredsofatoms
+orthousandsofbasisfunctions. Thus,unlike,sayDLPNO-CCSD(T)whichisahighaccuracymethodfortreating
+largesytems,ICE-CIiseitherahighlyrobusthighaccuracymethodforverysmallsystemsora“buildingblock”
+forlargesystems. Byitselfitcantreatafewdozenelectronsandorbitals–e.g. muchmorethanfullCI–butit
+cannotdowonders. Itsscopeissimilartothedensitymatrixrenormalizationgroup(DMRG)orQuantumMonte
+CarloFullCI(QMCFCI)procedures.
+ICE-CIshouldbeviewedasamultireferenceapproach. Itisself-adaptiveandrobust,eveninthepresenceofnear
+orperfectdegeneracies. Ityieldsorthogonalstates(whenappliedtoseveralstates)andspineigenfunctions. Italso
+yieldsadensityandaspindensity.
+684 Chapter7. DetailedDocumentation
+
+[... start of page 707 ...]
+ORCAManual,Release6.0.0
+7.24.2 The ICE-CI and CIPSI Algorithms
+ThegeneralideaofICE-CIisstraightforward:Consideramany-particlestatethathasatleastasizeablecontribution
+fromagivenconfigurationn0 (thisisasetofoccupationnumbersfortheactiveorbitalsthatare𝑛0 = 0,1 𝑜𝑟 2
+𝑝
+(𝑝 = any active orbital). By nature of the non-relativisitic Hamiltonian only configurations that differ by at
+most two orbital occupations from n0 will interact with it. We can use perturbation theory to select the subset
+of singles 

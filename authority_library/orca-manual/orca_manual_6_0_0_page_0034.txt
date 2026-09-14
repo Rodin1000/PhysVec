@@ -1,0 +1,73 @@
+[... end of page 33 ...]
+elORCAcanbeusedwithOpenMPI(onLinuxandMAC)orMS-MPI(onwindows)only. Pleasesee
+thedownloadinformationfordetailsoftherelevantOpenMPI-versionforyourplatform.
+2. TheOpenMPIversionisconfigurableinalargevarietyofways,whichcannotbecoveredhere. Foramore
+detailedexplanationofallavailableoptions,cf. http://www.open-mpi.org2
+2OpenMPI 3.1.x did contain a few errors causing calculations to hang randomly. Building OpenMPI with the switch
+3.2. HintsontheUseofParallelORCA 11
+
+--- Page 34 ---
+ORCAManual,Release6.0.0
+3. PleasenotethattheOpenMPIversionisdynamicallylinked,thatis,itneedsatruntimetheOpenMPIlibraries
+(andseveralotherstandardlibraries)!
+(RemembertosettheLD_LIBRARY_PATH)
+4. Many problems arise, because parallel ORCA does not find its executables. To avoid this, it is crucial to
+provide ORCA with its complete pathname. The easiest and safest way to do so is to include the direc-
+tory with the orca-executables in your $PATH. Then start the calculation: - interactively: start orca with
+fullpath: /mypath_orca_executables/orca MyMol.inp-batch: exportyourpath: export PATH=/
+mypath_orca_executables:$PATH (for bash) then start orca with full path: $PATH/orca $jobname.
+inp
+Thisseemsredundant,butitreallyisimportantifyouwanttostartaparallelcalculationtorunORCAwithfull
+path! Otherwiseitwillnotbeabletofindtheparallelexecutables.
+5. It is recommended to run orca in local (not nfs-mounted) scratch-directories, (for example /tmp1, /usr/
+local, ...) and to renew these directories for each run to avoid confusion with left-overs of a previous
+run.
+6. Ithasprovenconvenienttouse“wrapper”scripts. Thesescriptsshould
+• setthepath
+• createlocalscratchdirectories
+• copyinputfilestothescratchdirectory
+• startorca
+• saveyourresults
+• removethescratchdirectory
+A basic example of such a submission script for the parallel ORCA version is shown below (this is for the
+Torque/PBSqueuingsystem,runningonAppleMacOSX):
+#!/bin/zsh
+setopt EXTENDED_GLOB
+setopt NULL_GLOB
+#export MKL_NUM_THREADS=1
+b=${1:r}
+#get number of procs.... close your eyes... (it really works!)
+if [[ ${$(grep -e '^!' $1):u} == !*(#b)PAL(<0-9>##)* ]]; then
+nprocs=$match
+let "nodes=nprocs"
+elif [[ ${(j: :) $(grep -v '^#' $1):u} == *%(#b)PAL*NPROCS' '#(<0-9>##)* ]]; then
+nprocs=$match
+let "nodes=nprocs"
+fi
+cat > ${b}.job <<EOF
+#!/bin/zsh
+#PBS -l nodes=1:ppn=${nodes:=1}
+#PBS -S /bin/zsh
+#PBS -l walltime=8760:00:00
+setopt EXTENDED_GLOB
+setopt NULL_GLOB
+(continuesonnextpage)
+–disable-builtin-atomicscircumventsthis.
+12 Chapter3. CallingtheProgram(SerialandParallel)
+
+[... start of page 35 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+export PATH=$PBS_O_PATH
+logfile=$PBS_O_WORKDIR/${b}.log
+tdir=$(mktemp -d /Volumes/scratch/$USER/${b}__XXXXXX)
+trap '
+echo "Job terminated from outer space!" >> $logfile
+rm -rf $tdir
+exit
+' TERM
+cp $PBS_O_WORKDIR/$1 $tdir
+foreach f ($PBS_O_WORKDIR/*.gbw $PBS_O_WORKDIR/*.pot) { cp $f $tdir }
+cd $tdir
+echo "Job started from ${PBS_O_HOST}, running on $(hostname) in $tdir using
+$(which o

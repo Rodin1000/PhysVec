@@ -1,0 +1,86 @@
+[... end of page 1217 ...]
+l = 2; # Cardinal number of small basis set
+Variable UpperCardinal = 3; # Cardinal number of big basis set
+Variable alpha = 4.420; # Exponent for SCF extrapolation
+Variable beta = 2.460; # Exponent for corrleation extrapolation
+Variable enGradFilename = "result.engrad"; # Filename of the ORCA engrad file
+Variable produceEnGradFile = true; # Produce an ORCA engrad file
+# ---------------------------------------------------------------------
+# -------------- Rest of the variables --------------------------------
+(continuesonnextpage)
+7.60. CompoundExamples 1195
+
+--- Page 1218 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Geometry myGeom;
+Variable scfGradX, scfGradY; # SCF Gradients
+Variable scfEnX, scfEnY, scfEnCBS; # SCF energies
+Variable corrEnX, corrEnY, corrEnCBS; # Correlation enegies
+Variable totalGradX, totalGradY; # Total Gradients
+Variable eX = 0.0;
+Variable eY = 0.0;
+Variable res = -1;
+Variable denominator = 0.0;
+Variable gradX = 0.0, gradY = 0.0, gradCBS=0.0;
+Variable nAtoms = 0;
+Variable EnGradFile;
+Variable Cartesians, AtomicNumbers;
+# -------------------------------------------------------------------
+# Step 1. SCF Calculation with small basis set (X)
+# -------------------------------------------------------------------
+New_Step
+! HF &{LowerBasis} &{restOfInput}
+*xyzfile &{charge} &{multiplicity} &{Molecule}
+Step_end
+res = scfEnX.readProperty(propertyName="SCF_Energy");
+res = scfGradX.readProperty(propertyName="Nuclear_Gradient", Property_Base=true);
+myGeom.Read();
+nAtoms = myGeom.GetNumOfAtoms();
+# ------------------------------------------------------------------
+# Step 2. Initialize rest of the variables
+# ------------------------------------------------------------------
+Variable corrGradX[3*nAtoms]; # Correlation part of gradient with basis X
+Variable corrGradY[3*nAtoms]; # Correlation part of gradient with basis Y
+Variable corrGradCBS[3*nAtoms]; # CBS estimation of correlation part of the gradient
+Variable scfGradCBS[3*nAtoms]; # CBS estimation of SCF part of the gradient
+Variable totalGradCBS[3*nAtoms];# CBS estimation of total gradient
+# -------------------------------------------------
+# Step3. Correlation Calculation with small basis set (X)
+# -------------------------------------------------
+if (addCorrelation) then
+New_Step
+! &{method} &{LowerBasis} &{restOfInput}
+Step_end
+res = scfEnX.readProperty(propertyName=scfEnPropName);
+res = corrEnX.readProperty(propertyName=corrEnPropName);
+res = totalGradX.readProperty(propertyName="Nuclear_Gradient", Property_Base=true);
+# -------------------------------------------------
+# Evaluate correlation gradient with small basis set (X)
+# -------------------------------------------------
+corrGradX =mat_p_mat(1, totalGradX, -1, scfGradX);
+EndIf
+# -------------------------------------------------
+# Step4. SCF Calculation with large basis set (Y)
+# -------------------------------------------------
+New_Step
+!HF &{UpperBasis} &{restOfInput}
+Step_End
+res = scfEnY.readProperty(propertyName="SCF_Energy");
+res = scfGradY.readProperty(propertyName="Nuclear_Gradient", Property_Base=true);
+(continuesonnextpage)
+1196 Chapter7. DetailedDocumentation
+
+[... start of page 1219 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# -------------------------------------------------
+# Step5. Correlation calculation with large basis set (Y)
+# -------------------------------------------------
+if (addCorrelation) then
+New_Step
+! &{method} &{UpperBasis} &{restOfInput}
+Step_end
+res = scfEnY.readProperty(propertyName=scfEnPropName);
+res = corrEnY.readProperty(propertyName=corrEnPropName);
+res = totalGradY.readProperty(propertyName="Nuclear_

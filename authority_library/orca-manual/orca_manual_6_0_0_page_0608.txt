@@ -1,0 +1,81 @@
+[... end of page 607 ...]
+rizedattheend
+ofthecalculationwiththekeywordPrintGState.
+%casscf
+...
+printgstate true # optional printing of the state-specific orbital gradients
+end
+Orbitaloptimizationmethods. Inthefollowingwediscusstheavailableoptionsfororbitaloptimization. Anum-
+berofconvergenceproblemscanberesolvedchangingtheguessorbitals. Thefollowingkeywordsareoptional
+and should only be used facing severe convergence difficulties. Aside from the SuperCI_PT (default),[459]
+severalorbitaloptimizationmethods(listbelow)areimplemented.
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 585
+
+--- Page 608 ---
+ORCAManual,Release6.0.0
+# Keywords to be used as Orbstep/Switchstep
+SuperCI_PT # perturbative SuperCI (first order)
+SuperCI # SuperCI (first order)
+DIIS # DIIS (first order)
+KDIIS # KDIIS (first order)
+SOSCF # approx. Newton-Raphson (first order)
+NR # augmented Hessian Newton-Raphson
+# unfolded two-step procedure
+# - still not true second order
+Thedifferentconvergershavedifferentstrengths. Firstordermethodarecheapbuttypicallyrequiremoreiterations
+comparedtosecondordermethods. Whenthegradientisfarofffromconvergencetheprogramusestheconverger
+defined as orbstep while close to convergence the switchstep is used. The actual criteria for switchstep are
+definedwiththekeywordsSwitchConvandSwitchIter.
+%casscf
+OrbStep SuperCI # or any other from the list above
+SwitchStep DIIS # or any other from the list above
+SwitchConv 0.03 # gradient at which to switch
+SwitchIter 15 # iteration at which the switch takes place
+# irrespective of the gradient
+MaxIter 75 # Maximum number of macro-iterations
+end
+Picking a convergence strategy, the program has to balance speed and robustness. The default strategy uses the
+SuperCI_PTasconvergerfororbstepandswitchstep.[459]Thisapproachdeterminestheelements𝑋 ofthe
+𝑝𝑞
+anti-Hermiteanmatrixusedintheorbitalupdateaccordingto
+C𝑛𝑒𝑤 =C𝑜𝑙𝑑𝑒X
+fromfirstorderperturbationtheoryusingtheDyall-Hamiltonian[238]inzerothorderandafirst-orderperturbed
+wave function given as Ψ(1) = ∑︀ Ψ𝑞𝑋 where the Ψ𝑞 represent singly excited functions obtained from the
+𝑝𝑞 𝑝 𝑞𝑝 𝑝
+CASSCF wave function by excitation from orbital 𝜓 to orbital 𝜓 . The SuperCI_PT is robust with respect to
+𝑝 𝑞
+orbitals that are exactly doubly occupied or empty. Rotations with orbital close to this critical occupations can
+furtherbeeliminatedwiththekeyword DThresh(default=1e-6). However,themethodisquietaggressiveinthe
+orbitaloptimization. Insomecases,suchasbasissetprojectionorPATOMguess(intrinsicbasissetprojection),the
+programmightpickastep-sizethatistoobig. Thenrestrictingthestep-sizeviathekeywordMaxRot(default=0.2)
+mightbeuseful. ThekeywordsDThreshandMaxRotdescribedbelowarespecifictoSuperCI_PT.Formanyusers,
+MaxRotislesspalpablethanlevelshifting. Therefore,thepresentversionallowslevelshiftsaswell. Incontrast
+tootherconvergers,levelshiftsarenotneededandhighlydiscouraged. Withtheexceptionof GradScaling
+(videinfra),otherdampingtechniquesdescribedfurtherbelowdonotapplytotheSuperCI_PT.
+MaxRot 0.05 # cap stepsize for SuperCI_PT
+DThresh 1e-6 # thresh for critical occupation
+Incaseofconvergenceproblemswiththedefaultsettings,itisrecommendedtotrythecombinationof orbstep
+SuperCIandswitchstep DIIS,whichinconjuctionwithalargelevelshift(2Eh),whichmaybeimmediately
+successful. Theproposedschemetypicallyrequiresmoreiterations. Moreoever, incontrasttotheSuperCI(PT),
+theSuperCI,DIISandKDIISshouldnotbeusedwhentheactiveorbitalshaveanoccupationofexactly2.0or0.0!
+TheDIISmaysometimesconvergeslowlyor“trail”towardstheendsuchthatrealconvergenceisneverreached.
+The KDIIS [452, 453] — based on perturbation theory — is an approximation to the regular DIIS procedure
+avoidingredundantrotations. BothDIISschemesavoidlineardependenciesintheexpansionspace.
+MaxDIIS 15 # max. no of DIIS vectors to keep
+DIISThresh 1e-7 # overlap criteria for linear dependency
+The combination of SuperCI and DIIS (switchstep) is particularly suited to protect the active space composi-
+tion. Adjusting the level shift will do the job. Here, level shift is the single most important lever to control
+convergence.
+586 Chapter7. DetailedDocumentation
+
+[... start of page 609 ...]
+ORCAManual,Release6.0.0
+# default = dynamic level-shifting based on Ext-Act, Int-Act
+ShiftUp 2.0 # static up-shift the virtual orbitals
+ShiftDn 2.0 # static down-shift the internal orbitals
+MinShift 0.6 # minimum separation subspaces
+Level-shiftisparticularlyimportantiftheactive,inactiveandvirtualorbitalsoverlapintheirorbitalenergies. The
+energyseparationofthesubspacesisprintedintheoutput. Ideally,theentriesExt-ActandAct-Intshouldbe
+positiveandlargerthan0.2Eh. Thiswillhelptheprogramtopreserveyouractivespacecompositionthroughout
+theiterations. Ifnoshiftisspecifiedintheinput,ORCAwillchoosealevel-shifttoguaranteeanenergyseparation
+betweenthesubspaces(MinShift

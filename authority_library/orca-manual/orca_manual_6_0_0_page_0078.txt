@@ -1,0 +1,91 @@
+[... end of page 77 ...]
+n.
+CleanUpGradient Boolean True SameasCleanUpGrad.
+Print Integer 1 Determines the output
+size for symmetry han-
+dling in general and
+point group detection in
+particular.
+0 No output during
+pointgroupdetec-
+tion
+1 Normaloutput
+2 Detailed informa-
+tion
+3 Debugprint
+.
+.
+.
+PrtSALC Integer 0 Specifies the output size
+for the construction of
+symmetry-adapted linear
+combinations (SALCs)
+ofatomicorbitals.
+0 No output for
+symmetry-
+adaptedorbitals
+1 Normaloutput
+2 Detailed in-
+formation (e.
+g. the SALCs
+themselves)
+3 Debugprint
+.
+.
+.
+
+--- Page 78 ---
+ORCAManual,Release6.0.0
+4.7 Jobs with Multiple Steps
+ORCAsupportsinputfileswithmultiplejobs. Thisfeatureisdesignedtosimplifyseriesofcloselyrelatedcalcu-
+lationsonthesamemoleculeorcalculationsondifferentmolecules. Theobjectivesforimplementingthisfeature
+include:
+• Calculateofamolecularpropertyusingdifferenttheoreticalmethodsand/orbasissetsforonemolecule.
+• Calculationsonaseriesofmoleculeswithidenticalsettings.
+• Geometryoptimizationfollowedbymoreaccuratesinglepointsandperhapspropertycalculations.
+• Crudecalculationstoprovidegoodstartingorbitalsthatmaythenbeusedforsubsequentcalculationswith
+largerbasissets.
+Forexampleconsiderthefollowingjobthatinthefirststepcomputestheg-tensorofBOattheLDAlevel,andin
+thesecondstepusingtheBP86functional.
+# -----------------------------------------------------
+! LSD DEF2-SVP TightSCF KeepInts
+# -----------------------------------------------------
+%eprnmr gtensor 1 end
+* int 0 2
+B 0 0 0 0 0 0
+O 1 0 0 1.2049 0 0
+*
+# *************************************************
+# ****** This starts the input for the next job *
+# *************************************************
+$new_job
+# --------------------------------------------------
+! BP86 DEF2-SVP SmallPrint ReadInts NoKeepInts
+# --------------------------------------------------
+%eprnmr gtensor 1 end
+* int 0 2
+B 0 0 0 0 0 0
+O 1 0 0 1.2049 0 0
+*
+Whathappensifyouusethe$new_jobfeatureisthatallcalculationflagsfortheactualjobaretransferredfrom
+thepreviousjobandthatonlythechangesinthesettingsmustbeinputbytheuser. Thusifyouturnonsomeflags
+foronecalculationthatyoudonotwantforthenext,youhavetoturnthemoffagainyourself(forexampletheuse
+oftheRIapproximation)! Inaddition,thedefaultisthatthenewjobtakestheorbitalsfromtheoldjobasinput. If
+youdonotwantthisyouhavetooverwritethisdefaultbyspecifyingyourdesiredguessexplicitly.
+4.7.1 Changing the default BaseName
+NormallytheoutputfilesforMyJob.inparereturnedinMyJob.xxx(anyxxx,forexamplexxx=out). Sometimes,
+andinparticularinmultistepjobs,youwillwanttochangethisbehavior. Tothisendthereisthevariable%basethat
+canbeusercontrolled. Allfilenames(alsoscratchfiles)willthenbebasedonthisdefaultname. Forexample,using
+thefollowingsetting,theoutputfilesforthecurrentjobwouldbejob1.xxx(e.g. job1.gbw,job1.densities,
+etc.).
+%base "job1"
+56 Chapter4. GeneralStructureoftheInputFile
+
+[... start of page 79 ...]
+CHAPTER
+FIVE
+INPUT OF COORDINATES
+Coordinatescanbeeitherspecifieddirectlyintheinputfileorreadfromanexternalfile,andtheycanbeineither
+Cartesian(“xyz”)orinternalcoordinateformat(“Z-matrix”).
+5.1 Reading coordinates from the input file
+Theeasiestwaytospecifycoordinatesintheinputfileisbyincludingablocklikethefollowing,e

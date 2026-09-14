@@ -1,0 +1,58 @@
+[... end of page 52 ...]
+ofNEB-CI
+NEB-MMFTS NEB+subsequentMMF-TSoptimization
+NEB-TS NEB+subsequenttransitionstateoptimization
+ZOOM-NEB-TS ZOOM-NEB + subsequent transition state optimiza-
+tion
+FLAT-NEB-TS
+FAST-NEB-TS NEB with one iteration + subsequent transtion state
+optimization
+LOOSE-NEB-TS
+TIGHT-NEB-TS Selecttightconvergencecriteria
+30 Chapter4. GeneralStructureoftheInputFile
+
+--- Page 53 ---
+ORCAManual,Release6.0.0
+Compressionandstorage
+The data compression and storage options deserve some comment: in a number of modules including RI-MP2,
+MDCI,CIS,(D)correctiontoCIS,etc. theprogramusessocalled“MatrixContainers”. Thismeansthatthedata
+tobeprocessedisstoredintermsofmatricesinfilesandisaccessedbyadoublelabel. Atypicalexampleisthe
+exchangeoperatorKijwithmatrixelements𝐾𝑖𝑗(𝑎,𝑏)=(𝑖𝑎|𝑗𝑏). Heretheindices𝑖and𝑗refertooccupiedorbitals
+ofthereferencestateand𝑎and𝑏areemptyorbitalsofthereferencestate. Dataofthiskindmaybecomequitelarge
+(formally𝑁4scaling). Tostorethenumbersinsingleprecisioncutsdownthememoryrequirementsbyafactorof
+twowith(usuallyvery)slightlossinprecision. Forlargersystemsonemayalsogainadvantagesbyalsocompress-
+ingthedata(e.g. usea“packed”storageformatondisk). Thisoptionleadstoadditionalpacking/unpackingwork
+andaddssomeoverhead. ForsmallmoleculesUCDOUBLEisprobablythebestoption,whileforlargermolecules
+UCFLOATorparticularlyCFLOATmaybethebestchoice. Compressiondoesnotnecessarilyslowthecalculation
+downforlargersystemssincethetotalI/Oloadmaybesubstantiallyreducedandthus(sinceCPUismuchfaster
+thandisk)theworkofpackingandunpackingtakeslesstimethantoreadmuchlargerfiles(thepackingmayreduce
+diskrequirementsforlargersystemsbyapproximatelyafactorof4butithasnotbeenextensivelytestedsofar).
+Therearemanyfactorscontributingtotheoverallwallclocktimeinsuchcasesincludingthetotalsystemload. It
+maythusrequiresomeexperimentationtofindoutwithwhichsetofoptionstheprogramrunsfastestwith.
+Caution:
+• ItispossiblethatFLOATmayleadtounacceptableerrors. Thusitisnottherecommendedoptionwhen
+MP2orRI-MP2gradientsorrelaxeddensitiesarecomputed. ForthisreasonthedefaultisDOUBLE.
+• IfyouhaveconvincedyourselfthatFLOATisOK,itmaysaveyouafactoroftwoinbothstorageand
+CPU.
+Globalmemoryuse
+SomeORCAmodules(inparticularthosethatperformsomekindofwavefunctionbasedcorrelationcalculations)
+requirelargescratcharrays. Eachmodulehasanindependentvariabletocontrolthesizeofthesedominantscratch
+arrays. However, since these modules are never running simultaneously, we provide a global variable MaxCore
+thatassignsacertainamountofscratchmemorytoallofthesemodules. Thus:
+%MaxCore 4000
+sets4000MB(=4GB)asthelimitforthesescratcharrays. Thislimitappliesperprocessingcore. Donotbe
+surprised if the program takes more than that – this size only refers to the dominant work areas. Thus, you are
+welladvisedtoprovideanumberthatissignificantlylessthanyourphysicalmemory. Notealsothatthememory
+useoftheSCFprogramcannotbecontrolled: itdynamicallyallocatesallmemorythatitneedsandifitrunsout
+ofphysicalmemoryyouareoutofluck. This,however,rarelyhappensunlessyourunonareallysmallmemory
+computeroryouarerunningagiganticjob.
+4.2. KeywordLines 31
+
+[... start of page 54 ...]
+ORCAManual,Release6.0.0
+4.2.2 Density Functional Methods
+Fordensityfunctionalcalculationsanumberofstandardfunctionalscanbeselectedviathe“simpleinput”feature.
+SinceanyofthesekeywordswillselectaDFTmethod,thekeyword“DFT”isnotneededintheinput. Furtherfunc-
+tionalsareavailableviathe%methodblock. ReferencesaregiveninSection[sec:model.dft.functionals.detailed]
+Localandgradientcorrectedfunctionals
+HFS 

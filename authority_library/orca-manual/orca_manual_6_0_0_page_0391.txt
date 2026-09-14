@@ -1,0 +1,76 @@
+[... end of page 390 ...]
+metry optimizations the atoms that are optimized, for a
+frequencycalculationtheatomsthatareallowedtovibrateforthePHVA,orforanMDruntheatomsthatare
+propagated. SeeActiveandNon-ActiveAtoms-Optimization,FrequencyCalculation,MolecularDynamics
+andRigidMMWaterandFig.6.57.
+Forcefield
+ORCAhasitsownforcefieldfileformat(storedinfilescalledbasename.ORCAFF.prms). Foraconvenient
+setuptheorca_mmmoduleofferstheoptiontoconvertfromotherforcefieldformats. Currently,thefollowing
+formatscanbeconvertedtotheORCAforcefieldfileformat:
+368 Chapter6. RunningTypicalCalculations
+
+--- Page 391 ---
+ORCAManual,Release6.0.0
+CHARMMpsffiles
+protein structure file from the CHARMM forcefield. The psf files can be easily prepared with the
+popularmolecularvisualizerVMD,togetherwithitsextensions(psfgen,QwikMD,fftk,whichworks
+togetherwithORCA).
+AMBERprmtopfiles
+topologyfilesfromtheAMBERforcefield. TutorialsonhowtogenerateAMBERprmtopfiles(for
+standardandnon-standardmolecules)canbefoundhere.
+OpenForceField
+xmlfilesfromtheopenforcefieldinitiative. Withtheopenff-toolkitxmltopologyfiles(compatiblewith
+theAMBERforcefield)canbeeasilygeneratedforsmallandmedium-sizednon-standardmolecules.
+Foratutorialseehere.
+Simpleforcefieldforsmalltomedium-sizedmolecules
+Alternatively,theorca_mmmodulecangenerateasimpleapproximateORCAFF.prmsfile. Formore
+options,seeORCAForcefieldFile.
+Thisconcepthasthefollowingadvantages:
+Modificationofforcefieldparameters
+AtomandbondspecificparameterscanbeeasilymodifiedwithintheORCAforcefieldfile,allowingthe
+usermaximumflexibilityinmodifyingtheforcefield,whichmightbeparticularlyusefulforchemical
+systemsliketransitionmetalcomplexes. SeeORCAForcefieldFile.
+StandardandNon-StandardLigands
+Ligandscanbeeasilyandflexiblyexchangedoraddedtothesystem,seeORCAForcefieldFile.
+BoundaryTreatment
+ORCA automatically detects QM-MM boundaries, i.e. bonds that have to be cut between QM and MM
+region. ORCAautomaticallygeneratesthelinkatomsandkeepsthemattheirrelativepositionthroughout
+the run, even allowing to optimize the bond along the boundary. See QM-MM, QM-QM2 and QM2-MM
+Boundary. NotapplicableforCRYSTAL-QMMM.
+Treatmentofoverpolarization
+ORCAautomaticallyadaptsthechargesattheQM-MMboundary. SeeQM-MM,QM-QM2andQM2-MM
+Boundary. NotapplicableforbothCRYSTAL-QMMM.
+Embeddingtypes
+Theelectrostaticandmechanicalembeddingschemesareavailable. SeeEmbeddingTypes.
+Detailedinformationonthedifferentavailableinputandruntimeoptionsandadditionallyavailablekeywords(see
+AdditionalKeywords)aregivenbelow.
+QMAtoms
+QMatomscanbedefinedeitherdirectly
+!QMMM
+%qmmm
+QMAtoms {0 1 2 27 28} end
+end
+orviatheoccupancycolumnofapdbfile.
+%qmmm # use either
+QMAtoms {0:4} end # 1. list of atoms (counting starts from 0) or
+Use_QM_InfoFromPDB true # 2. get the definition from the pdb file. Default false.
+end # If (2) is set to true, (1) is ignored
+*pdbfile 0 1 ubq.pdb
+IfUse_QM_InfoFromPDBissettotrue,apdbfileshouldbeusedforthestructuralinput. QMatomsaredefinedvia
+1intheoccupancycolumn,MMatomsvia0. QM2atoms(forQM/QM2/MMcalculations,seeQM2Atoms)can
+bedefinedvia2intheoccupancycolumn. TheIONIC-CRYSTAL-QMMMmethodcanhaveevenfurtherentries
+6.16. ORCAMultiscaleImplementation 369
+
+[... start of page 392 ...]
+ORCAManual,Release6.0.0
+inthePDBfile,seeDifferentQMandMMregionsStoredinthePDBfile. NotethattheUse_QM_InfoFromPDB
+keywordneedstobewrittenbeforethecoordinatesection.
+ubq.pdb:
+...
+ATOM 327 N ASP A 21 29.599 18.599 9.828 0.00 0.00 P1 N
+ATOM 328 HN ASP A 21 29.168 19.310 9.279 0.00 0.00 P1 H
+ATOM 329 CA ASP A 21 30.796 19.083 10.566 0.00 0.00 P1 C
+ATOM 330 HA ASP A 21 31.577 18.340 10.448 0.00 0.00 P1 H
+ATOM 331 CB ASP A 21 31.155 20.515 10.048 2.00 0.00 P1 C
+ATOM 332 HB1 ASP A 21 30.220 21.082 9.865 2.00 0.00 P1 H
+ATOM 333 HB2 ASP A 21 31.754 21.064 10.80

@@ -1,0 +1,80 @@
+[... end of page 646 ...]
+umintegrals,etc. Theinterface
+withORCAgeneratestherequireddatafileautomatically. Thefollowingnamingconventionswereadoptedfor
+thedatafileinfunctionoftheemployedcomputationalmethod:
+• CASSCF+SOC+SINGLE_ANISO=>"$orca_input_name.CASSCF.anisofile"
+• CASSCF+QD-NEVPT2+SOC+SINGLE_ANISO=>"$orca_input_name.NEVPT2.anisofile"
+NotethatiftheCASSCF+QD-NEVPT2+SOC+SINGLE_ANISOcalculationisrequested,thentheSINGLE_ANISOwill
+beexecutedtwice,andtheabovetwodatafileswillbegenerated. TheinterfacewillgeneratetheSINGLE_ANISOin-
+putfilewiththekeywordsinformationprovidedintheCASSCF/anisosubblock. Thesefilenameofthedatafile
+624 Chapter7. DetailedDocumentation
+
+--- Page 647 ---
+ORCAManual,Release6.0.0
+is included automatically in the input file for the SINGLE_ANISO utility (keyword DATA), also generated auto-
+matically by the interface. The naming convention for the generated input files for the SINGLE_ANISO utility is
+“$orca_input_name.anisofile”.
+All keywords of the SINGLE_ANISO program are possible to be specified within the CASSCF/ANISO subblock.
+TheyarereferencedinSectionReferencelistofCASSCF/ANISOkeywords. Optionally,aworkingSINGLE_ANISO
+inputfilecanbepasseddirectlytotheCASSCFmodulesettingthefilenamewithkeyword InputNameOnDiskin
+theANISOsubblock.
+An example of the full ORCA input for performing magnetic properties calculations within the CASSCF/SOC/
+SINGLE_ANISOmethodologyforahypotheticalCo(II)compoundisprovidedbelow:
+! 6-31G TightSCF # basis set and other global ORCA settings
+%maxcore 2000
+%casscf nel 7
+norb 5 # 7 electrons in 5 orbitals (3d shell)
+mult 4, 2
+nroots 10, 40 # 10 quartet and 40 doublet states
+rel
+dosoc true # include spin-orbit coupling
+end
+ANISO
+doaniso true # generate datafile/input and call
+# the SINGLE_ANISO module
+MLTP 2,2,2,2 # group of spin-orbit states for which the pseudospin
+# Hamiltonian is computed: 4 low-lying spin-orbit doublet states.
+TINT 0, 300, 301 # 301 steps in the temperature interval [0-300]
+# for magnetic susceptibility (in Kelvin)
+HINT 0, 7.0, 71 # 71 steps in the field interval [0-7]
+# for molar magnetisation (in Tesla)
+TMAG 1.0,1.2,1.8,2.5,3.6 # temperature points for which molar magnetisation
+# is computed
+CRYS_element "Co"
+CRYS_charge 2
+PLOT true # requires the ANISO to produce gnuplot scripts,
+# datafiles and plots of various quantities
+# Alternative to the snippet above. Provide separate input file:
+# InputFile "$orca_input_name.anisoinput"
+end
+end
+*xyz 0 4 # charge is 0 for this neutral compound
+Co -2.80118000 9.91634000 19.40386000
+O -3.59660000 12.00284000 20.51731000
+O -5.12835000 10.85934000 19.53431000
+O -5.70975000 12.39302000 20.99406000
+O -1.30202341 11.67611386 19.17300658
+O -3.84191000 9.45315000 21.48634000
+O -1.27500262 8.12582233 19.18634310
+O -3.94611990 9.65426823 17.48476360
+N -4.85020000 11.78071000 20.36823000
+H -1.23636310 12.09677337 18.41017549
+H -1.07910455 7.59540828 19.85227241
+H -3.30514987 9.28034259 22.26327382
+H -4.79957696 9.43862752 21.55163236
+H -4.64801074 9.00163025 17.42987361
+H -3.73273676 10.19508893 16.72083912
+(continuesonnextpage)
+7.17. InterfacetoSINGLE_ANISOmodule 625
+
+[... start of page 648 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H -0.75470916 11.94100908 19.91589125
+*
+The input above utilises the following keywords: MLTP keyword requires the computation of the 𝑔 tensor for 4
+groupsofspin-orbitstates,thedimensionalityofeachgroupbeing2(KramersorIsingdoublets). TINTrequires
+computationofthemagneticsusceptibilityinthetemperatureinterval0K-300Kdistributedequallyin300tem-
+peratureintervals. TMAGrequirescomputationofpowdermolarmagnetisationat6temperaturepoints,inKelvin
+(K):1.0K,1.2K,1.8K,2.5K,2.9Kand3.6K.HINTdefinestherangeforthemagneticfieldstrength,inTesla.
+PLOTkeywordinvokestheplottingfunctionofthemodule. CRYS_element + CRYS_chargerequestforthecom-

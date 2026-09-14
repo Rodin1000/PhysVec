@@ -1,0 +1,71 @@
+[... end of page 410 ...]
+nonbonded interactions within non-active region.
+Do_NB_For_Fixed_Fixed true # Compute MM-MM nonbonded interaction also for
+# non-active atom pairs. Default true.
+# Treats all active water molecules that are treated on MM level as rigid bodies
+# in optimization and MD simulation, see section "Rigid Water".
+Rigid_MM_Water false # Default false.
+end
+*pdbfile 0 1 ubq.pdb # structure input via pdb file, but also possible via xyz file
+388 Chapter6. RunningTypicalCalculations
+
+--- Page 411 ---
+ORCAManual,Release6.0.0
+6.17 QM/MM via Interfaces to ORCA
+ORCAiseasytointerfaceasaQMengineinprettymuchanyQM/MMenvironment,asitwillacceptasetofpoint
+charges from an external file (see section Inclusion of Point Charges) and it will return, in a transparent format,
+alltherequiredinformationforcomputingenergiesandgradientstothedrivingprogram. Inourresearchgroup
+wehaveexperiencewithfourdifferentQM/MMenvironments: ChemShell,Gromacs,pDynamoandNAMD.In
+thefollowingeachoftheinterfacesaredescribed. Isbeyondthescopeofthemanualtobeexhaustive, andonly
+minimalworkingexamplesaregoingtobepresented. Thesewillcovermainlythetechnicalaspectswithrespect
+to the QM part of the QM/MM calculation. For the initial preparation of the system the user is referred to the
+documentationofthedrivingprogram.
+6.17.1 ORCA and Gromacs
+IncooperationwiththedevelopersofGromacssoftwarepackagewedevelopedaninterfacetoORCA.Theinterface
+isavailablestartingwithGromacsversion4.0.4uptoversion4.5.5.
+Asmentionedabove,theinitialsetuphastobedonewiththeGromacs. IntheQM/MMcalculationGromacswill
+callORCAtogettheenergyandthegradientsoftheQMatoms. Theinterfacecanbeusedtoperformalljobtypes
+allowedbytheGromacssoftwarepackage,e.g. optimizations,moleculardynamics,freeenergy. Inaddition,for
+geometryoptimizationswehaveimplementedamicroiterativeschemethatcanberequestedbysettingthekeyword
+bOpt = yesintheGromacs.mdpfile. ThiswillcauseORCAtoperformaQMgeometryoptimizationeverytime
+itiscalledbyGromacs. DuringthisoptimizationORCAwillalsocomputetheLennard-Jonesinteractionbetween
+theQMandMMatoms,andfreezetheboundaryatoms. Thismicroiterativeschemecanalsobeusedtoperforma
+transitionstateoptimization. Ifyouarelookingforatransitionstateandhaveagoodinitialguessforthestructure,
+youcancarryoutanoptimizationoftheMMsystemandatthesametimeperformatransitionstateoptimization
+oftheQMsystemwithORCAviathemicroiterativescheme. SinceitisexpensivetocalculatetheHessianforeach
+microiterativemicroiterativestep,theusercantellORCAtousethe(updated)Hessianmatrixofthepreviousstep
+viaread_temp_HessintheORCAinput.
+Inordertoallowfullflexibilitytotheuser, theinformationfortheQMrunareprovidedinaseparateplaintext
+file,calledGromacsBasename.ORCAINFO.WhenGromacswritestheinputfortheORCAcalculation,itwillmerge
+thisfilewiththeinformationonthecoordinates,pointcharges,Lennard-Jonescoefficientsandtypeofcalculation
+(EnGrad,Opt,TSOpt).
+BelowisatypicalexampleofaninputfilecreatedbyGromacs,whereforeachGromacsoptimizationstep,afull
+optimizationoftheQM-partwillbeperformedbyORCA,insteadofjustdoingtheenergyandgradientcalculation.
+# Optimization step in the Lennard-Jones and point charges field of the MM atoms
+! QMMMOpt
+# file containing the Lennard Jones coefficients for the Lennard-Jones interaction
+%LJCoefficients "temp.LJ"
+# file containing the point charges for the electrostatic interaction
+%pointcharges "temp.pc"
+%geom
+# calculate the exact Hessian before the first optimization step
+Calc_Hess true
+# in case of a TS optimization the updated Hessian of the previous
+# TS optimization run is read instead of calculating a new one
+read_temp_Hess true
+end
+Note:
+• IfyouareusingbOptor bTSyouhavetotakecareofadditionaltermsovertheboundary. Eitheryoucan
+zerooutthedihedraltermsoftheQ2-Q1-M1-M2configurations,oryoucanfixtherespectiveQ2atoms.
+• IfyouwanttousetheORCAconstraints,youhavetoalsoputthemintheGromacspartofthecalculation.
+6.17. QM/MMviaInterfacestoORCA 389
+
+[... start of page 412 ...]
+ORCAManual,Release6.0.0
+• IftherearenobondsbetweentheQMandMMsystems,thebOptoptimizationoftheQMsystemmighthave
+convergenceproblems. ThisisthecaseifthestepsizeistoolargeandthusQMatomscometooclosetoMM
+atoms. TheconvergenceproblemscanbecircumventedbyaddingextracoordinatesandHessiandiagonal
+values for Cartesian coordinates of selected QM atoms to the set of internal coordinates. This should be
+doneforonlyfewatomsthatareintheboundaryregion.
+%geom
+# add the Cart

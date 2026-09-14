@@ -1,0 +1,43 @@
+**Detailed Rules for Generating [ITensors/ITensorMPS] Codes**
+
+====================================================================================================
+
+## **Notation**
+
+**Function Categories:**
+- **ELEMENT functions:** Functions with tags {'site', 'hamiltonian', 'observable', 'initialstate', 'effector'}. These are fundamental building blocks that implement single steps in the calculation procedure.
+- **Task functions:** Functions with tags {'run', 'item', 'plot'}. These orchestrate ELEMENT functions to complete calculation tasks.
+- **Entry point:** The 'main' function serves as the entry point of the program.
+
+**Scope of this part:** This part applies to **ALL functions** (ELEMENT functions, task functions, and main). The format requirements specified here must be followed by every function in the code.
+
+====================================================================================================
+
+## **CRITICAL: Function Format Requirements (MANDATORY)**
+
+**Every function MUST follow this exact format:**
+
+```
+# Input dependency: ...(elements needed as input, from user or other functions. Format: "name"[brief description, data format])
+# Output results: ...(output variables of this function)
+function FUNCTION_NAME(parameters):
+```
+
+**Key Requirements:**
+1. **Function naming:** MUST be in form of 'tag_xxx' (except the main entry point)
+   - tag should be replaced by one of the ELEMENT function tags {'site', 'hamiltonian', 'observable', 'initialstate', 'effector'} or task function tags {'run', 'item', 'plot'}
+   - here 'xxx' can be ANY string. 
+   - you do not care too much about the '_' in the function name prefix. 'site_' and 'site', 'hamiltonian' and 'hamiltonian_' have no difference. 
+   - e.g., 'site_BoseHubbard1D', 'hamiltonian_XXZchain', 'run_groundstate', 'item_KVrelation' are all valid names. 
+2. You are FORBIDDEN to change one tag to another tag in this part. You ONLY make sure the format is correct. Function contents will be checked later. 
+
+**CRITICAL:** You MUST STRICTLY FOLLOW this format for ALL functions.
+
+====================================================================================================
+
+## **Function Decomposition Principle**
+
+**You MUST avoid monolithic functions.** Decompose logic into smaller units using different tags (listed below).
+
+====================================================================================================
+

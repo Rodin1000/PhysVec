@@ -1,0 +1,165 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is Phase 3 of a 3-phase refinement workflow: **modify an ORCA/DFT input file based on Phase 2 RAG summary + Phase 1/previous run errors, then run ORCA to verify the fix**.
+
+**PURPOSE: Read Phase 2 RAG summary (refine_summary.json) and prior ORCA run logs (stdout + stderr), edit the ORCA input (.inp) to fix the errors (preserving all block comments/descriptions), then execute ORCA using program-dft-mcp `run_orca` to confirm whether errors are resolved. refine_summary.json is ACCUMULATIVE: it contains Q-A fix guidance from all prior refinement iterations; use the full set when applying fixes.**
+
+--------------------------------------------------------------------------
+[Input:]
+1. TYPE: {type} (a concise scientific classification label for this ORCA/DFT task—covering the calculation kind, material/system class, and the physics/wavefunction focus you care about, e.g., molecule_dft_fermion, td_dft_excited_states, spin_polarized_magnetism, relativistic_soc, solvation_cpcm_smd, periodic_solid_state.)
+2. TOPIC: {topic} (the package/library topic, e.g., dft_qc)
+3. PROGRAM_FILE: {program_file} (ORCA input filename to refine, e.g., something.inp)
+4. FILE_EXT: {file_ext} (must be "inp")
+5. QUERY_DIR: {query_dir} (reference directory containing refine_summary.json and prior retrieval outputs)
+6. REFINING_DIR: {refining_dir} (working directory containing the ORCA input file)
+7. STDERR_INFO: {stderr_info} (ORCA stderr from Phase 1/previous run - contains error messages, abort messages, and critical failures)
+8. STDOUT_INFO: {stdout_info} (ORCA stdout from Phase 1/previous run - contains warnings, parser messages, hints, and execution status)
+
+**CRITICAL:** Use the ORCA output above (STDERR_INFO and STDOUT_INFO) to fix the input. If STDERR_INFO or STDOUT_INFO show "(EMPTY - you MUST read...)" or are empty, you MUST do Step 0 first.
+
+Note:
+- The filesystem-mcp working directory is set to {refining_dir} (contains the ORCA input file).
+- A reference project "query" is available, containing refine_summary.json from Phase 2 (ACCUMULATIVE across refinement iterations) and possibly other retrieved JSON files.
+
+**GUIDE ELEMENTS (MANDATORY):** The elements/block types specified in the guide (e.g. keywords, basis, cpcm, method, scf, rel, geometry, output) must ALL remain present in the final verifier code after refinement. Do NOT remove or omit any guide-specified block; only fix or repair its content. The refined file must still contain exactly one block for each guide element—same set as in the initial verifier code.
+
+-----------------------------------------------------------------------------
+[Instruction:]
+0. **If STDERR_INFO and STDOUT_INFO are empty or show "(EMPTY - you MUST read...)":**
+   - BEFORE any other step: call filesystem-mcp `read_file(file_path="run_log_{program_stem}_{file_ext}.json")` in the working directory.
+   - Use the "stderr" and "stdout" fields from that JSON as the ORCA output for all following steps. Do NOT apply fixes without real error/output content.
+
+1. **Read reference information (MANDATORY):**
+   - First call filesystem-mcp `get_reference_projects` and confirm reference "query" exists
+   - From reference "query", read refine_summary.json:
+     * filesystem-mcp `list_reference_directory(refer
+     ence_name="query")`
+     * filesystem-mcp `read_reference_file(reference_name="query", file_path="refine_summary.json")`
+     * CRITICAL: file_path MUST be the exact RELATIVE path returned by list_reference_directory
+   - OPTIONAL (only if needed): read additional retrieval JSON files in reference "query" to resolve ambiguous fixes.
+
+2. **Read prior run information (if exists):**
+   - In working directory, read Phase 1 run_log (if exists) — do NOT overwrite this file:
+     * filesystem-mcp `read_file(file_path="run_log_{program_stem}_{file_ext}.json")`
+     * CRITICAL: file_path must be ONLY the filename (no directories, no `..\\`, no absolute paths)
+     * This file is written by Phase 1; Phase 3 writes to a SEPARATE file (see Step 7).
+   - Extract error/warning information from BOTH the "stderr" and "stdout" fields. Use both to validate fixes and avoid recurring issues.
+
+3. **Read the current ORCA input file (MANDATORY):**
+   - filesystem-mcp `read_file(file_path="{program_file}")`
+   - CRITICAL: file_path MUST be ONLY "{program_file}" (no directories, no `..\\`, no absolute paths)
+   - **After reading, scan the file to identify ALL blocks of each type:**
+     * Count keywords lines (`!`), `%basis`, `%cosmo`/`%cpcm`, `%method`, `%output`, `%tddft`, `%rel`, and geometry blocks (`* xyz ... *`)
+     * **If any block type appears more than once, you MUST remove duplicates as part of your edits.**
+
+4. **Modify the ORCA input based on RAG summary + errors:**
+   - CRITICAL: The file is an ORCA input file, NOT python/julia code. It consists of keywords and blocks.
+   - Use filesystem-mcp `edit_file` to modify the ORCA input file in {refining_dir}:
+     * file_path = "{program_file}" (just the filename)
+     * edits = list of {{ old_text, new_text }} replacements (exact match, whitespace-sensitive)
+     * **CRITICAL: All comments shown in the input file MUST be kept as they are. Do NOT delete or modify any comment lines.**
+   - Apply fixes based on:
+     * refine_summary.json guidance (primary)
+     * STDERR_INFO and STDOUT_INFO from prior run (secondary validation - use BOTH)
+     * ORCA input syntax constraints
+   - **CRITICAL PRESERVATION RULE:**
+     * DO NOT delete existing comment sections or descriptions for any block (e.g., lines starting with `#Tags_...` and explanatory comment lines).
+     * Keep block structure intact unless an error explicitly requires a change.
+     * Do NOT remove blocks just to silence errors; replace/repair them per manual guidance (e.g., deprecated keyword replacement).
+   - **CRITICAL BLOCK PRESERVATION (element blocks / guide elements):**
+     * **All block types specified in the guide MUST remain present in the final verifier code after refinement.** Do NOT remove or omit any guide-specified block; only fix or repair their content.
+     * You MUST NOT delete any existing element block (e.g. keywords, basis, cosmo, output, geometry, %blocks). If a block exists, it must remain.
+     * You MUST NOT allow any block to degenerate into an empty block. Each block that exists must retain non-empty, valid content after your edits. Fix/repair content within blocks; do not remove blocks to "fix" errors.
+   - **CRITICAL BLOCK UNIQUENESS (no duplicates):**
+     * **Each block type MUST appear exactly ONCE in the file.** Block types include:
+       - Keywords line (starts with `!`)
+       - `%basis` block (starts with `%basis` and ends with `end`)
+       - `%cosmo` or `%cpcm` block (starts with `%cosmo`/`%cpcm` and ends with `end`)
+       - `%method` block (starts with `%method` and ends with `end`)
+       - `%output` block (starts with `%output` and ends with `end`)
+       - `%tddft` block (starts with `%tddft` and ends with `end`)
+       - `%rel` block (starts with `%rel` and ends with `end`)
+       - Geometry block (starts with `* xyz` and ends with `*`)
+     * **Before making edits, identify ALL existing blocks of each type in the current file.**
+     * **If a block type already exists: REPLACE/UPDATE the existing block, do NOT add a duplicate.**
+     * **If duplicates exist: Remove all duplicates, keeping only ONE correct/updated version of each block type.**
+     * **When applying fixes from refine_summary.json: Update the existing block's content, not create a new block.**
+   - Make the smallest changes necessary to resolve the observed errors.
+
+5. **Run ORCA to validate the refined input (MANDATORY):**
+   - Use program-dft-mcp tool `run_orca` to execute the edited ORCA input:
+     * Parameter: `file_path` should be "{program_file}" (just the filename)
+     * **CRITICAL: file_path MUST be ONLY "{program_file}" (no directories, no `..\\`, no absolute paths)**
+     * Capture stdout/stderr, exitcode, timeout from the run result.
+
+6. **Determine if refinement is complete (MANDATORY - CRITICAL DECISION):**
+   After running `run_orca`, you MUST analyze the results and determine if refinement is complete:
+   
+   **Refinement is COMPLETE (success) if:**
+   - **Timeout occurred (`timeout=True`) AND output is normal:**
+     * ORCA banner/version appears in stdout
+     * "Starting time" or "Host name" appears (indicates ORCA began execution)
+     * No fatal input errors (no "INPUT ERROR", "FATAL ERROR", "SYNTAX ERROR", "PARSER ERROR")
+     * Output shows normal ORCA startup and execution progress
+     * **This means: ORCA started successfully and is running (execution exceeded timeout)**
+   
+   **Refinement is NOT COMPLETE (needs more work) if:**
+   - **Program ended before timeout (`timeout=False`) AND final lines show errors:**
+     * Fatal errors in stderr: "INPUT ERROR", "FATAL ERROR", "SYNTAX ERROR", etc.
+     * Unknown/invalid keywords detected
+     * Parser errors or malformed input blocks
+     * **This means: Input file still has errors that need fixing**
+   
+   **Also NOT COMPLETE if:**
+   - No ORCA banner/startup indicators in output (ORCA didn't start)
+   - Fatal errors present even if timeout occurred
+   
+   **CRITICAL:** Your decision determines whether refinement continues or stops. Be accurate:
+   - **If `timeout=True` AND output is normal (ORCA banner, "Starting time", no fatal errors) → `refinement_complete: true`**
+     * This means ORCA started successfully and execution exceeded timeout - input is valid
+   - **If `timeout=False` AND final lines show errors (INPUT ERROR, FATAL ERROR, etc.) → `refinement_complete: false`**
+     * This means program ended with errors before timeout - needs more fixing
+   - **If `timeout=True` BUT fatal errors present → `refinement_complete: false`**
+     * Even if timeout occurred, fatal errors mean input is still invalid
+   - **If `timeout=False` AND no errors (exitcode=0) → `refinement_complete: true`**
+     * Program completed successfully without errors
+   
+   **Decision logic summary:**
+   - Check `timeout` field from run_orca result
+   - Check `stdout` and `stderr` for ORCA startup indicators and errors
+   - Analyze final lines of output for error messages
+   - Set `refinement_complete: true` ONLY if: (timeout AND normal) OR (no timeout AND exitcode=0 AND no errors)
+   - Set `refinement_complete: false` if: errors detected OR ORCA didn't start
+
+7. **Write the Phase 3 run log (MANDATORY) — do NOT overwrite Phase 1 run_log:**
+   - Save a SEPARATE run log JSON for Phase 3 in the working directory:
+     * filesystem-mcp `save_file(file_path="run_log_{program_stem}_{file_ext}_phase3.json", content=<json>)`
+   - **CRITICAL:** Use the `_phase3.json` suffix. Phase 1 uses `run_log_{program_stem}_{file_ext}.json`; Phase 3 uses this separate file so Phase 1 data is preserved.
+   - The JSON MUST include:
+     * `exitcode`, `stdout`, `stderr`, `timeout` (from run_orca result)
+     * `refinement_complete` (boolean): YOUR DECISION based on analysis above
+     * `program_file`, `type`, `topic` (for reference)
+   - **CRITICAL:** The `refinement_complete` field is YOUR decision - set it to `true` if refinement succeeded, `false` if more work is needed
+   - CRITICAL: file_path must be ONLY the filename.
+
+8. **CRITICAL - How to call tools:**
+   - You have REAL MCP tools available - when you call them, they EXECUTE
+   - DO NOT write "Action:", "Thought:", "Observation:" - this is NOT ReAct format
+   - DO NOT describe what you will do - DIRECTLY call the tools
+   - Call tools sequentially and wait for each result before continuing
+
+9. **Workflow sequence (MANDATORY):**
+   Step 1: filesystem-mcp get_reference_projects → list_reference_directory("query") → read_reference_file("query","refine_summary.json")
+   Step 2: filesystem-mcp read_file("run_log_{program_stem}_{file_ext}.json") if exists (Phase 1 run_log — read only, do not overwrite)
+   Step 3: filesystem-mcp read_file("{program_file}")
+   Step 4: filesystem-mcp edit_file("{program_file}", edits=[...])
+   Step 5: program-dft-mcp run_orca(file_path="{program_file}")
+   Step 6: **ANALYZE run_orca results:**
+      - Check `timeout` field: true means execution exceeded timeout
+      - Check `stdout` and `stderr` for ORCA startup indicators and errors
+      - Determine: timeout AND normal output → refinement_complete=true
+      - Determine: no timeout AND errors → refinement_complete=false
+   Step 7: filesystem-mcp save_file("run_log_{program_stem}_{file_ext}_phase3.json", ... ) with `refinement_complete` field (Phase 3 own file)
+   Step 8: STOP
+
+**Start executing the workflow NOW. Use Phase 2 refine_summary.json (accumulative) and run_log stdout+stderr to edit the ORCA input, then run ORCA using run_orca/run_orca_file, and write the Phase 3 run log to run_log_*_phase3.json.**

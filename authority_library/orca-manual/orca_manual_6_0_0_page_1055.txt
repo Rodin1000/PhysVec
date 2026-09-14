@@ -1,0 +1,158 @@
+[... end of page 1054 ...]
+SpinElemPairs {C C} {H *} {6 7} # default is {* *}, i.e. all
+# Similarly, coupling can be restricted to certain atom pairs
+# (if they are added to the "Nuclei" list and are within RThresh).
+# The syntax accepts multiple pairs of indices (starting at 0!)
+# or "*" as a wildcard
+SpinSpinAtomPairs {1 0} {5 *} # default is {* *}, i.e. all
+# whether to print reduced spin-spin coupling constants
+PrintReducedCoupling false
+end
+1032 Chapter7. DetailedDocumentation
+
+--- Page 1055 ---
+ORCAManual,Release6.0.0
+HyperfineandQuadrupoleCouplings
+Thehyperfinecouplinghasfourcontributions:
+(a)TheisotropicFermicontacttermthatarisesfromthefinitespindensityonthenucleusunderinvestigation. It
+iscalculatedfornucleus𝑁 from:
+(︂ 4 )︂ (︁ )︁
+𝑎iso(𝑁)=
+3
+𝜋⟨𝑆
+𝑧
+⟩−1 𝑔
+𝑒
+𝑔
+𝑁
+𝛽
+𝑒
+𝛽
+𝑁
+𝜌 𝑅⃗
+𝑁
+(7.348)
+Here, ⟨𝑆 ⟩istheexpectationvalueofthez-componentofthetotalspin, 𝑔 and𝑔 aretheelectronandnuclear
+𝑧 𝑒 𝑁
+(︁ )︁
+g-factorsand𝛽 and𝛽 aretheelectronandnuclearmagnetonsrespectively. 𝜌 𝑅⃗ isthespindensityatthe
+𝑒 𝑁 𝑁
+nucleus. Theproportionalityfactor𝑃 = 𝑔 𝑔 𝛽 𝛽 iscommonlyusedandhasthedimensionsMHzbohr3 in
+𝑁 𝑒 𝑁 𝑒 𝑁
+ORCA.
+(b)Thespindipolepartthatarisesfromthemagneticdipoleinteractionofthemagneticnucleuswiththemagnetic
+momentoftheelectron. Itisalsocalculatedasanexpectationvalueoverthespindensityas:
+𝐴 d
+𝜇
+i
+𝜈
+p (𝑁)=𝑃
+𝑁
+∑︁ 𝑘𝑙𝜌
+𝑘𝑙
+⟨︀ 𝜑
+𝑘
+⃒ ⃒𝑟
+𝑁
+−5(︀ 3⃗𝑟
+𝑁𝜇
+⃗𝑟
+𝑁𝜈
+−𝛿
+𝜇𝜈
+𝑟
+𝑁
+2 )︀⃒ ⃒𝜑
+𝑙
+⟩︀ (7.349)
+where𝜌isthespin-densitymatrixand⃗𝑟 isavectorofmagnitude𝑟 thatpointsfromthenucleusinquestionto
+𝑁 𝑁
+theelectron({𝜑}isthesetofbasisfunctions).
+(c) The second order contribution that arises from spin-orbit coupling. Presently ORCA can calculate all these
+contributions. Thefirsttwoarecalculatedassimpleexpectationvaluesoftheappropriateoperatorsovertheself-
+consistentspindensity,butthesecondordercontributionrequiresthesolutionofthecoupled-perturbedSCFequa-
+tionsandisconsequentlycomputationallymoredemanding. Thecontributioncanbewritten:
+𝐴 o
+𝜇
+r
+𝜈
+b (𝑁)=−
+2
+1
+𝑆
+𝑃
+𝑁
+∑︁𝜕
+𝜕
+𝜌
+𝐼
+𝑘𝑙 ⟨︀ 𝜑
+𝑘
+⃒ ⃒ℎ S
+𝜇
+OC⃒ ⃒𝜑
+𝑙
+⟩︀ (7.350)
+𝜈
+𝑘𝑙
+Thederivativeofthespindensityiscomputedfromsolvingthecoupled-perturbedSCFequationswithrespectto
+thenucleus-orbitcouplingasperturbation. Thenucleus-orbitcouplingisrepresentedbytheoperator
+ℎ NOC (𝐴)= ∑︁ 𝑟−3𝑙(𝐴) (7.351)
+𝜈 𝑖𝐴 𝑖,𝜈
+𝑖
+wherethesumisoverelectronsand𝐴isthenucleusinquestion.
+(d)Thegauge-correctioncontribution.[492]Thistermisoftensmall. However,itisneededinordertogetexactly
+gauge-invariantresults. Werecentlyshowedthatthegaugecorrectioncanbecomecrucialinthelong-distancelimit
+betweenthenuclearspinandtheelectronspin. ThisisrelevantforpseudocontactNMRchemicalshifts(PCS).[492]
+Thefieldgradienttensoriscloselyrelatedtothedipolecontributiontothehyperfinecoupling. Themaindiffer-
+encesarethattheelectroninsteadofthespindensityentersitscalculationandthatitcontainsanuclearcontribution
+duetothesurroundingnuclei. Itiscalculatedfrom
+𝑉
+𝜇𝜈
+(𝑁)=− ∑︀ 𝑃
+𝑘𝑙
+⟨︀ 𝜑
+𝑘
+⃒ ⃒𝑟
+𝑁
+−5(︀ 3⃗𝑟
+𝑁𝜇
+⃗𝑟
+𝑁𝜈
+−𝛿
+𝜇𝜈
+𝑟
+𝑁
+2 )︀⃒ ⃒𝜑
+𝑙
+⟩︀
+𝑘𝑙 (︁ )︁ (7.352)
++ ∑︀ 𝑍 𝑅⃗−5 3𝑅⃗ 𝑅⃗ −𝛿 𝑅2
+𝐴 𝐴𝑁 𝐴𝑁𝜇 𝐴𝑁𝜈 𝜇𝜈 𝐴𝑁
+𝐴̸=𝑁
+with𝑍 asthenuclearchargeofnucleus𝐴and𝑅⃗ asavectorofmagnitude𝑅 thatpointsfromnucleus𝐴
+𝐴 𝐴𝑁 𝐴𝑁
+tonucleus𝑁. Pisthefirstorderdensitymatrix.
+NOTE:
+• Hyperfineandquadrupolecouplingsarepropertieswherethestandardbasissetsthathavebeendesignedfor
+geometryoptimizationandthelikemaynotbeentirelysatisfactory(especiallyforatomsheavierthanNe).
+Youshouldprobablylookintotailoringthebasissetaccordingtoyourneeds. Whileitislikelythatalater
+release will provide one or two special basis sets for “core-property” calculations at this time you have to
+makesureyourselfthatthebasissethasenoughflexibilityinthecoreregion,forexamplebyuncontracting
+core basis functions and adding s-primitives with large exponents (or using the “decontraction feature”,
+section Choice of Basis Set). If you add these tight functions and use DFT make sure that the numerical
+integrationisstillsatisfactory. Usethe“SpecialGrid”featuretoenlargegridsforindividualatomswithout
+increasingthecomputationalefforttoodrastically.
+7.54. CalculationofProperties 1033
+
+[... start of page 1056 ...]
+ORCAManual,Release6.0.0
+• For heavy nuclei you may want to consider the possibility of relativistic effects. Scalar relativistic effects
+canbehandledwithseveralquasi-relativisticHamiltoniansinORCA,anoverviewofthepossibilitiesand
+somerecommendationscanbefoundinRelativisticCalculations. Notethatrelativisticcalculationsmayhave
+specialrequirementsonbasissets,andinthecontextofpropertycalculations,youshouldbeespeciallyaware
+of the importance of using picture change corrections (see Relativistic Calculations and Picture-Change
+Effects). Inquasi-relativisticcalculationswithDFT,oneshouldalsobeverycautiousaboutaccuracyofthe
+numericalintegration,especiallyforheavier(transitionmetal)nuclei.
+Second order HFCs require the calculation of the spin-orbit coupling contributions which in turn requires the
+calculationofthecoupled

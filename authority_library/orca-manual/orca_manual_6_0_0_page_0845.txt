@@ -1,0 +1,63 @@
+[... end of page 844 ...]
+henallthethresholdsaremadeinfinitelytight,oneobtains
+theEOM-CCSD(2)results. ThisPNO-basedexcitedstateapproachisavailableforalltheflavorsofEOM-CCSD
+andforSTEOM-CCSDinbothopen-andclosed-shellsystems.
+Below,welistalltheparametersthatinfluencetheDLPNO-CCSD-basedexcitedstatecalculations
+%mdci
+#bt-PNO-EOM and STEOM parameters - defaults displayed
+DoEOMMP2 true # MP2 correction for missing pairs
+DoRECAN true # recanonicalization of the occupied
+# orbitals before the excited state calculation
+#(only relevant for the RHF implementation)
+end
+822 Chapter7. DetailedDocumentation
+
+--- Page 845 ---
+ORCAManual,Release6.0.0
+7.36.2 Reference State Energy
+Here,itshouldbenotedthatthereferenceenergyforPNO-basedEOM-CCSDorSTEOM-CCSDisslightlydif-
+ferent from that printed for a converged ground state DLPNO-CCSD calculation, as it includes the perturbative
+correctionfordifferenttruncatedquantities.
+----------------------
+COUPLED CLUSTER ENERGY
+----------------------
+E(0) ... -113.913498239
+E(CORR)(strong-pairs) ... -0.401457078
+E(CORR)(weak-pairs) ... -0.000339627
+E(CORR)(corrected) ... -0.401796705
+E(TOT) ... -114.315294944
+Inthebt-PNO-EOM-CCSDscheme, theCI-likeexcitedstatetreatmentofthereferencestateisdefinedbyback-
+transformedDLPNOamplitudes(orMP2amplitudesfortheweakpairs). Theenergycorrespondingtothissetof
+amplitudeisprintedatthebeginningoftheEOMcalculations.
+Dressing integrals for EOM-CCSD ...
+Reference state energy for EOM-DLPNO-CCSD ... -114.314954945
+done ( 0.4)
+Therefore, to calculate the total energy of an excited (ionized or electron attached) state, one needs to add the
+excitationenergytothereferencestateenergyinbt-PNO-EOM-CCSD.
+7.36.3 Use of Local Orbitals
+TheuseoflocalorbitalsmakesitdifficulttofollowaparticularguessvectorintheDavidsondigonalizationprocess
+inEOM-CCandSTEOM-CC.Therefore, itisadvisabletorecanonicalizetheoccupiedorbitalsaftertheground
+stateDLPNO-CCSDcalculationbysettingDoRECANtotrue(i.e. onlyrelevantfortheclosed-shellRHFimple-
+mentation). It should be noted that the recanonicalization does not change the EOM-CCSD energies. However,
+theSTEOM-CCenergiesarenotinvarianttoorbitalrotationsanddifferslightlyforlocalandcanonicalorbitals.
+Intheopen-shellbt-PNOimplementation,wefollowadifferentprocedureinthatallquantitiesaretransformedto
+thedelocalizedbasisbeforeproceedingwiththebacktransformationandtheexcitedstatecalculation.
+7.36.4 Some tips and tricks for bt-PNO calculations
+• Thebt-PNOschemewithtightPNOsettingsgivesresults,whicharewithin0.01eVofthecanonicalEOM-
+CCSDnumbers,atafractionofthecomputationalcost[234]. So,useofbt-PNOschemeisalwayspreferable
+overcanonicalcalculations.
+• InthecaseofanRHFreference,oneshouldset‘DLPNOLINEARtrue’and‘NEWDOMAINStrue’inthe
+mdciblock input touse the2015 fullylinear scalingimplementation, whichis morerobust thanthe 2013
+implementationusedasdefaultinbt-PNOscheme.
+• Thetransitionmomentinbt-PNO-EOM(RHFonly)andbt-PNO-STEOM(RHF,UHF(QROs)orROHF)
+isonlyavailableusingthelinearapproximation.
+7.36. ExcitedStatesusingPNO-basedcoupledcluster 823
+
+[... start of page 846 ...]
+ORCAManual,Release6.0.0
+7.37 Excited States via DLPNO-STEOM-CCSD
+7.37.1 PNO dressing (experimental keyword)
+InSTEOM-DLPNO-CCSDmethodmostofthestepsaredoneusingthepowerfulPNOapproximationexceptthe
+lastonecorrespondingtotheSTEOM-CCSDcalculationitself. Inthecanonicalversionofthedressing(defaultin
+ORCA)alltheamplitudespreviouslycomputedatthePNOlevelarerecanonicalizedwhichincreasesthecalculation
+cost.PNOdressingusessomeofthePNOintermediatest

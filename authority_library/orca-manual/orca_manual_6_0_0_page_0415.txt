@@ -1,0 +1,65 @@
+[... end of page 414 ...]
+.183 33.335 0.00 1.00 PROT C
+ATOM 1749 HD2 HSE P 117 16.451 49.401 33.388 0.00 1.00 PROT H
+ATOM 1750 C HSE P 117 13.916 47.000 30.775 0.00 0.00 PROT C
+ATOM 1751 O HSE P 117 12.965 46.452 31.334 0.00 0.00 PROT O
+...
+NOTES:
+• IfonewantstoincludemorethanoneQMregion,integersbiggerthan1canbeusedtodefinethedifferent
+regions.
+• Charge groups cannot be split when selecting QM and MM region. The reason is that non-integer partial
+chargesmayoccurifachargegroupissplit. SincetheQMpartialchargesareupdatedineveryQMiteration,
+thismayleadtoachangeinthetotalchargeofthesystemoverthecourseoftheMDsimulation.
+392 Chapter6. RunningTypicalCalculations
+
+--- Page 415 ---
+ORCAManual,Release6.0.0
+• The occupancy and b-factor columns are used for several declarations in NAMD. If two of these come
+togetherinonesimulation,thekeywordqmParamPDBisusedtodefinewhichpdbfilecontainstheinformation
+aboutQMatomsandbonds.
+• TosimplifytheselectionofQMatomsandwritingthepdbfileasetofscriptsisplannedtobeincludedin
+futurereleasesofNAMD.
+Torunthecalculation, thekeyword qmForces onmustbeset. ToselectORCA qmSoftware "orca"mustbe
+specifiedandthepathtotheexecutablesmustbegiventoqmExecPath,aswellasadirectorywherethecalculation
+iscarriedout(qmBaseDir). TopassthemethodandspecificationsfromNAMDtoORCAqmConfigLineisused.
+These lines will be copied to the beginning of the input file and can contain both simple input as well as block
+input. Toensurethecalculationofthegradient,theengradkeywordshouldbeused.
+The geometry of the QM region including the selected links as well as the MM point charges are copied to the
+ORCAinputfileautomatically. MultiplicityandchargecanbedefinedusingqmMultandqmCharge,althoughthe
+lattercanbedeterminedautomaticallybyNAMDusingtheMMparameters. Itshouldbenotedatthispointthat
+NAMDiscapabletohandlemorethanoneQMregionperQM/MMcalculation. Thereforeforeachregion,charge
+andmultiplicityareexpected. InthecaseofonlyoneQMregion,theinputlookslikethefollowing:
+qmMult "1 1"
+qmCharge "1 0"
+Currently, two charge modes are available: Mulliken and CHELPG. They have to be specified in the NAMD
+inputusingQMChargeModeandintheqmConfigLine,respectively. Differentembeddingschemes,pointcharge
+schemesandswitchingfunctionsareavailable,whichwillbenotfurtherdiscussedhere. Anotherusefultoolworth
+mentioning is the possibility to call secondary executables before the first or after each QM software execution
+usingQMPrepProcorQMSecProc,respectively. BotharecalledwiththecompletepathandnametotheQMinput
+file,allowinge.g. storageofvaluesduringanQM/MM-MD.
+Itisstronglyenphasizedthatatthispointsbothprogramsareconstantlydevelopedfurther. Forthelatestinforma-
+tion,eithertheORCAforumortheNAMDwebsiteshouldbeconsulted.
+6.18 Excited State Dynamics
+ORCAcannowalsobeusedtocomputedynamicpropertiesinvolvingexcitedstatessuchasabsorptionspectra,
+fluorescenceandphosphorescenceratesandspectra,aswellasresonantRamanspectrausingthenewORCA_ESD
+module. WedothisbyanalyticallysolvingtheFermi’sGoldenRule-likeequationfromQuantumElectrodynamics
+(seethesectionMoreontheExcitedStateDynamicsmodule),usingapathintegralapproachtothedynamics,as
+describedinourrecentpapers[198,199]. Thecomputationoftheseratesreliesontheharmonicapproximation
+forthenuclearnormalmodes. Providedthisapproximationholds,theresultscloselymatchexperimentaldata.
+Thetheorycandomostofwhat ORCA_ASAcanandmore,suchasincludingvibroniccouplinginforbiddentran-
+sitions (the so-called Herzberg-Teller effect, HT), considering Duschinsky rotations between modes of different
+states,solvingtheequationsusingdifferentcoordinatesystems,etc. Therearealsosevennewapproachestoobtain
+theexcitedstategeometryandHessianwithoutnecessarilyoptimizingitsgeometry. Manykeywordsandoptions
+areavailable,butmostofthedefaultsalreadygivegoodresults. Let’sgetintospecificexamples,startingwiththe
+absorptionspectrum. PleaserefertosectionMoreontheExcitedStateDynamicsmoduleforacompletekeyword
+listanddetails.
+6.18. ExcitedStateDynamics 393
+
+[... start of page 416 ...]
+ORCAManual,Release6.0.0
+6.18.1 Absorption Spectrum
+Theidealmodel,AdiabaticHessian(AH)
+To predict absorption or emission rates, including all vibronic transitions, ideally, one requires both the ground
+state(GS)andexcitedstate(ES)geometriesandHessians. Forinstance,whenpredictingtheabsorptionspectrum
+forbenzene,whichexhibitsonebandabove220nmcorrespondingtoasymmetry-forbiddenexcitationtotheS1
+state,theprocessisstraightforward. Groundstateinformationcanbeobtainedfrom(Sec. GeometryOptimizations

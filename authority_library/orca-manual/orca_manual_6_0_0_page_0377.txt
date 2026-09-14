@@ -1,0 +1,82 @@
+[... end of page 376 ...]
+9975 which
+𝑑𝑖𝑠𝑝𝑒𝑟𝑠𝑖𝑜𝑛
+is-1.010kcal/mol. Soalltermsthatwehaveevaluatedsofarare:
+∆𝐸 =∆𝐸 +∆𝐸𝑟𝑒𝑓. +𝐸𝑟𝑒𝑓. +𝐸𝑟𝑒𝑓. +∆𝐸𝐶−𝐶𝐶𝑆𝐷 +𝐸𝐶−𝐶𝐶𝑆𝐷 +∆𝐸𝐶−(𝑇)
+𝑔𝑒𝑜−𝑝𝑟𝑒𝑝 𝑒𝑙−𝑝𝑟𝑒𝑝 𝑒𝑙𝑠𝑡𝑎𝑡 𝑒𝑥𝑐ℎ 𝑛𝑜𝑛−𝑑𝑖𝑠𝑝𝑒𝑟𝑠𝑖𝑜𝑛 𝑑𝑖𝑠𝑝𝑒𝑟𝑠𝑖𝑜𝑛 𝑖𝑛𝑡
+∆𝐸 ∆𝐸 ∆𝐸𝑟𝑒𝑓. 𝐸𝑟𝑒𝑓. 𝐸𝑟𝑒𝑓. ∆𝐸𝐶−𝐶𝐶𝑆𝐷 𝐸𝐶−𝐶𝐶𝑆𝐷 ∆𝐸𝐶−(𝑇)
+𝑔𝑒𝑜−𝑝𝑟𝑒𝑝 𝑒𝑙−𝑝𝑟𝑒𝑝 𝑒𝑙𝑠𝑡𝑎𝑡 𝑒𝑥𝑐ℎ 𝑛𝑜𝑛−𝑑𝑖𝑠𝑝. 𝑑𝑖𝑠𝑝. 𝑖𝑛𝑡
+a.u. 0.0004237160.060716530712- - 0.001056616 - -
+0.056636132 0.010292635 0.001609975 0.000266331
+kcal/mol 0.266 38.100 -35.540 -6.459 0.663 -1.010 -0.167
+which sum to the total binding energies of -0.006608211 a.u. or -4.147 kcal/mol that we have evaluated at the
+beginningofthissection. Adetaileddiscussionoftheunderlyingphysicsandchemistrycanbefoundin [33].
+354 Chapter6. RunningTypicalCalculations
+
+--- Page 377 ---
+ORCAManual,Release6.0.0
+6.13.3 Open shell LED
+The decomposition of the DLPNO-CCSD(T) energy in the open shell case is carried out similarly to the closed
+shellcase.[33]Anexampleofinputfileisshownbelow.
+! dlpno-ccsd(t) cc-pvdz cc-pvdz/c cc-pvtz/jk rijk verytightscf TightPNO LED
+*xyz 0 3
+C(1) 0.32786304018834 0.25137292674595 0.32985672433579
+H(1) 0.78308855251826 -0.37244139824620 -0.42204823336026
+H(1) -0.19639272865450 1.19309490346756 0.33713773666060
+O(2) -1.47005964014997 -1.60804001777555 1.84974416203666
+H(2) -0.89305417808014 -1.00736849071095 1.35216686141176
+H(2) -1.02515061661047 -1.73931270222718 2.69260529998224
+*
+Thecorrespondingoutputisentirelyequivalenttotheonejustdiscussedfortheclosedshellcase. However,theopen
+shellvariantoftheLEDschemereliesonadifferentimplementationthantheclosedshellone. Afewimportant
+differencesexistbetweenthetwoimplementations,whicharelistedbelow.
+• IntheclosedshellLEDthereferenceenergyistypicallytheHFenergy. Hence,thetotalenergyequalsthe
+sumofHFandcorrelationenergies. Intheopenshellvariant,thereferenceenergyistheenergyoftheQRO
+determinant. Hence,thetotalenergyinthiscaseequalsthesumoftheenergyoftheQROdeterminantand
+thecorrelationenergy.
+• ThesinglescontributionistypicallynegligibleintheclosedshellcaseduetotheBrillouin’stheorem. Inthe
+openshellvariant,thisisnotnecessarilythecase. Inbothcases,thesinglescontributionisincludedinthe
+“Nondispersion”partofthestrongpairs.
+• IntheUHFDLPNO-CCSD(T)frameworkwehave𝛼𝛼,𝛽𝛽and𝛼𝛽pairs. Hence,intheopenshellLED,all
+correlationterms(e.g. Londondispersion)have𝛼𝛼,𝛽𝛽 and𝛼𝛽 contributions. Byadding“printlevel3”in
+the%mdciblockonecanobtaininformationontherelativeimportanceofthedifferentspinterms.
+• The open shell DLPNO-CCSD(T) algorithm can also be used for computing the energy of closed shell
+systemsbyaddingthe“UHF”keywordinthesimpleinputlineofaDLPNO-CCSD(T)calculation.
+6.13.4 Dispersion Interaction Density plot
+TheDispersionInteractionDensity(DID)plotprovidesasimpleyetpowerfultoolforthespatialanalysisoftheLon-
+dondispersioninteractionbetweenapairoffragmentsextractedfromtheLEDanalysisintheDLPNO-CCSD(T)
+framework.[29]AsimilarschemewasdevelopedfortheclosedshelllocalMP2method.[892]The“dispersion
+energydensity”,whichisnecessaryforgeneratingtheDIDplot,canbeobtainedfromasimpleLEDcalculation
+byadding“DoDIDplottrue”inthe%mdciblock.
+!DLPNO-CCSD(T) ... LED
+%mdci DoDIDplot true end
+These can be converted to a format readable by standard visualization programs, e.g. a cube file, through
+orca_plot. Todothat,callorca_plotwiththecommand:
+orca_plot gbwfilename -i
+andfollowtheinstructionsthatwillappearonyourscreen,i.e.:
+1 - Enter type of plot
+2 - Enter no of orbital to plot
+3 - Enter operator of orbital (0=alpha,1=beta)
+4 - Enter number of grid intervals
+5 - Select output file format
+6 - Plot CIS/TD-DFT difference densities
+7 - Plot CIS/TD-DFT transition densities
+(continuesonnextpage)
+6.13. LocalEnergyDecomposition 355
+
+[... start of page 378 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+8 - Set AO(=1) vs MO(=0) to plot
+9 - List all available densities
+10 - Generate the plot
+11 - exit this program
+Type“1”forselectingtheplottype. Afewoptionsarepossible:
+1 - molecular orbitals
+2 - (scf) electron density ...... (scfp ) - available
+3 - (scf) spin density ...... (scfr ) - available
+4 - natural orbitals
+5 - corresponding orbitals
+6 - atomic orbitals
+7 - mdci electron density ...... (mdcip ) - NOT available
+8 - mdci spin density ...... (m

@@ -1,0 +1,72 @@
+[... end of page 681 ...]
+5] = 0.00620254
+...
+===============================================================
+NEVPT2 Results
+===============================================================
+...
+NEVPT2 natural orbital can be used to do natural orbital iterations (!MORead NoIter). They might also be a
+usefultooltofindsuitableorbitaltoextendtheactivespace.[443]
+7.19. N-ElectronValenceStatePertubationTheory 659
+
+--- Page 682 ---
+ORCAManual,Release6.0.0
+7.19.7 State-averaged NEVPT2
+InthedefinitionoftheDyallHamiltonian[238]theCASSCForbitalsarechosentodiagonalizetheFockoperator
+(pseudo-canonicalized). Therefore, using a state-averaged CASSCF wave function, the NEVPT2 procedure in-
+volvestheconstructionanddiagonalizationofthe“state-specific”Fockoperatorsandisthusresultinginaunique
+setoforbitalsforeachstate. Thisbecomesquicklyinefficientforlargenumberofstatesorlargemolecularsystems
+sinceeachorbitalsetimpliesanintegral-transformation. ThisisthedefaultsettingforNEVPT2andisprintedin
+theoutput
+NEVPT2-SETTINGS:
+Orbitals ... canonical for each state
+Otherorbitaloptionscanbesetusingthekeywordcanonstep.
+%casscf
+...
+# detailed settings (optional)
+PTSettings
+canonstep 0 # state-averaged orbitals and specific orbital energies
+1 # canonical for each state
+2 # state-averaged orbitals and orbital energies
+3 # 1-step orbital relaxation
+# and canonical for each state (partially relaxed)
+end
+end
+Thefinalorbitalsofthestate-averagedCASSCFdiagonalizethestate-averagedFockoperator. Largecomputational
+savingscanbemadeiftheseorbitalsareemployedforallofthestates. canonstep 0choosesorbitalenergiesas
+diagonal elements of the state-specific Fock operators. In release version ORCA 3.0 and older, this has been
+the default setting. These options work best if the averaged states are similar in nature. For SC-NEVPT2, we
+haveimplementedtwomorecanonsteps,whichtradeaccuracyforspeedandviceversa. canonstep 2ismore
+approximate and employs orbital energies from the state-averaged calculation. Thus there is no contribution to
+excitationenergiesfromtheperturberclass𝑉𝑎𝑏atthislevelofapproximation.
+𝑖𝑗
+Ifthestatesunderconsiderationaresubstantiallydifferent,theseapproximationswillbeofpoorqualityandshould
+be turned off. Better results can be achieved, if the state-averaged orbitals are partially relaxed for each state
+beforetheactualSC-NEVPT2calculation. [224]Oftenitisnotpossibletooptimizetheexcitedstatesseparately.
+Thus canonstep 3 will try a single steepest descent step for each state before running the actual SC-NEVPT2
+calculation with canonicalized orbitals. Optionally, instead of a steepest descent using an approximate diagonal
+Hessian,asingleNewton-Raphsonstepcanbemade.
+%casscf
+...
+PTMethod SC_NEVPT2
+# detailed settings (optional)
+PTSettings
+gstep SOSCF true # steepest descent step
+NR false # Newton-Raphson step
+end
+end
+Despiteaconvergedstate-averagedcalculation,thegradientfortheindividualstatescanbesurprisinglylarge. As
+aconsequence,theorbitalrelaxationmightfailasbothmethodsmightbeoutsidetheirconvergenceradius. ORCA
+willretrytherelaxationwithanincreaseddamping. Iftheorbitalupdatestillfails,theprogramwillstickwiththe
+initialorbitals. Settinganoveralldampingmanually,mighthelptherelaxationprocedure.
+PTMethod SC_NEVPT2
+PTSettings
+gscaling 0.5 # damp gradient with a pre-factor
+end
+660 Chapter7. DetailedDocumentation
+
+[... start of page 683 ...]
+ORCAManual,Release6.0.0
+7.19.8 Quasi-Degenerate SC-NEVPT2
+NEVPT2 as it is presented in the previous subsections follows the recipe of “diagonalize and perturb”. The 0th
+orderwavefunctionisdeterminedbythediagonalizationoftheCAS-CImatrix. Thespac

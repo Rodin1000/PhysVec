@@ -1,0 +1,60 @@
+[... end of page 786 ...]
+ EspeciallyDFTcalculationshavethenicefeatureofnotbeingoverlybasissetde-
+pendent.
+IfRydbergstatesaredesired,youshouldmakesurethatdiffusefunctionsarepresentinyourbasisset. Youcould
+always use the augmented-specific basis, e.g. DEF2-TZVPD, ma-DEF2-TZVP, or aug-cc-pVTZ, or add some
+extradiffusebasistoyourregularbasis. Thesecanbeaddedtoany“normal”basisset. Forexample,thefollowing
+exampleprovidesaratherhighqualitybasisforexcitedstatecalculationsthatisbasedontheAhlrichsbasisset:
+764 Chapter7. DetailedDocumentation
+
+--- Page 787 ---
+ORCAManual,Release6.0.0
+%basis
+# augment the carbon basis set by diffuse functions
+addgto 6
+s 1
+1 0.01 1.0
+p 1
+1 0.01 1.0
+d 1
+1 0.07 1.0
+end
+end
+Tip: IfyouwanttoaugmentagivenbasissetitissensibletorunapreliminarySCFcalculationanduse%output
+print[p_basis] 2 end. This will provide you with a detailed listing of basis functions and their exponents.
+Youcanthenaddadditionals,pandperhapsd-functionswiththeAddGTOcommandasintheexampleabove. It
+issensibletodecreasetheexponentofthediffusefunctionsbyroughlyafactorof3fromthesmallestexponentin
+theoriginalbasis.
+RestrictionsforRange-SeparatedDensityFunctionals
+Severalrestrictionsapplyforrange-separated(hybridaswellasdouble-hybrid)densityfunctionals. Theyarecur-
+rentlyonlyimplementedtoworkwiththeAO-basedalgorithmwithintheRIJONX,RIJCOSX,andNORIintegral
+schemes. Additionally,theasymptoticcorrectionhasbeendisabled. However,thenucleargradientfortheexcited
+statesisnowavailable, includingforthetriplets. PleasenothattheIROOTMULTflagmustbesettoTRIPLET
+under%CISor%TDDFTinordertoobtainthat.
+PotentialEnergySurfaceScans
+ORCA allows the combination the scan feature with CIS or TD-DFT. This can be used to map out the excited
+statepotentialenergysurfacesasafunctionofone-two-orthreeparameters. Theoutputofthe“trajectory”run
+automaticallycontainstheexcitedstateenergiesinadditiontothegroundstateenergy. Forexampleconsiderthe
+followingsimplejob.
+! def2-TZVPD
+%method scanguess pmodel # this assignment forces a PModel guess at each step
+# which is often better if diffuse functions are present
+end
+%cis NRoots 7
+end
+%paras rCO = 0.85,1.45,21;
+end
+* xyz 0 1
+O 0 0 0
+C 0 0 {rCO}
+*
+Theoutputfilefromthisjobcontainsthetotalenergies(i.e. thegroundstateenergyplustheexcitationenergy)for
+eachexcitedstateasafunctionofC-Obondlengthasshownbelow. Howerver, theassignmentoftheindividual
+stateswillchangewithgeometryduetocurvecrossings. Thus,thestate-to-statecorrelationmustbeworkedout
+“byhand”. Thesecalculationsareneverthelessveryhelpfulinobtainingatleastaroughideaaboutexcitedstate
+energysurfaces.
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 765
+
+[... start of page 788 ...]
+ORCAManual,Release6.0.0
+Fig.7.29

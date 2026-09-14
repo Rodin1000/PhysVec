@@ -1,0 +1,80 @@
+Your task is to repair an ORCA input file (.inp) for DFT/quantum chemistry workflows according to the given repair suggestion.
+
+**This prompt is for ORCA input files only.** The ORIGINAL_CODE and repaired output are ORCA .inp files containing ! keywords, % blocks, and * xyz geometry.
+
+**When QUERY_SUMMARY is provided and conflicts with REPAIR_SUGGESTION, follow QUERY_SUMMARY.**
+
+-----------------------------------------------------------------------------------------------
+[Input]:
+1. ALLOWED_LANGUAGE / ALLOWED_PACKAGES (optional): When provided, you must obey them (e.g. ORCA keywords, basis sets, functionals). The repaired input must use the listed packages and follow the domain constraints.
+2. ORIGINAL_CODE: The original ORCA .inp file content that needs to be repaired.
+3. QUERY_SUMMARY (optional): Summary of retrieved ORCA manual or documentation. If provided, use it for correct keyword syntax, block format, and API usage; otherwise rely on REPAIR_SUGGESTION only.
+4. REPAIR_SUGGESTION: A repair suggestion containing:
+   - location: Brief location indicator (e.g. block name like %method, %scf, or ! line, and file code_LLM.inp)
+   - location_description: Detailed description of where the error occurs (block, line, keyword)
+   - repair_suggestion: Specific suggestion on how to fix the error
+   - repair_id: Unique identifier for this repair suggestion
+
+-----------------------------------------------------------------------------------------------
+[Instructions:]
+1. Read ORIGINAL_CODE carefully to understand the current ORCA input structure.
+2. If QUERY_SUMMARY is provided, read it before applying the repair.
+3. Read REPAIR_SUGGESTION to understand:
+   - Where the problem is located (location and location_description)
+   - How to fix it (repair_suggestion)
+4. Apply the repair suggestion to fix the identified problem.
+5. Ensure the repaired code:
+   - Fixes the specific issue mentioned in the repair suggestion
+   - Maintains the overall ORCA input structure and validity
+   - Follows ORCA format rules below
+
+**CRITICAL - Scope of modification:** You MUST ONLY modify the parts of the code explicitly pointed out in REPAIR_SUGGESTION (location, location_description). Do NOT make divergent modifications to places not included in the suggestion. Do NOT "improve" or refactor code outside the suggested fix scope.
+
+**CRITICAL - Must apply:** You MUST apply the change described in REPAIR_SUGGESTION. Do NOT output unchanged code for the targeted location. If the suggestion says "Replace X with Y", the output MUST contain Y, not X. Do not skip repairs.
+
+**CRITICAL - Conflict resolution:** When QUERY_SUMMARY is provided and gives contradictory guidance to REPAIR_SUGGESTION (e.g. different keyword syntax, different block format), you MUST follow QUERY_SUMMARY as the authority. The retrieved ORCA documentation takes precedence.
+
+**When QUERY_SUMMARY is null or empty:** Rely on REPAIR_SUGGESTION as the sole guide. Apply the suggested fix exactly.
+
+**CRITICAL - Keyword relocation:** When the repair says to remove a keyword from a block because it belongs elsewhere (e.g. TightSCF from %scf), ADD that keyword to the correct place (e.g. the ! line as a global keyword) instead of deleting it. Do not remove functional keywords without relocating them.
+
+**CRITICAL - Block preservation:** Do NOT remove blocks to "fix" them. Fix syntax, format, or placement within the block. Keep all existing blocks; only modify the parts that are wrong.
+
+-----------------------------------------------------------------------------------------------
+[ORCA .inp format - you MUST follow:]
+The repaired code MUST preserve this structure:
+- First block: #Tags_keywords, then # Scientific problem:, then # Elements used:, then exactly one ! line (all keywords on that single line; do NOT add a second ! line). Blank line.
+- Before each %... block: #Tags_inputblocks_<name> (e.g. #Tags_inputblocks_scf, #Tags_inputblocks_basis), then purpose and provenance comments, then the %... block. **There must be ONLY ONE block per % type** (e.g. one %scf block containing all SCF options like MaxCore and MaxIter; do NOT output two separate %scf blocks). Blank line after each block.
+- All %... input blocks MUST appear before the geometry block. Do NOT place any % block after the geometry block.
+- Before the geometry block: #Tags_geometryblocks, then purpose and provenance comments, then * xyz Charge Mult and only coordinate lines (element x y z) until *; no # lines between * xyz and *.
+- **CRITICAL - Geometry block closure:** The geometry block MUST end with * on its own line. Do NOT omit the closing *. A valid ORCA input requires this terminator; outputting a truncated geometry without * makes the file invalid.
+- When adding or modifying a block, include the full #Tags_... and comment section; do NOT insert a bare %... block without the preceding tags and comments. If multiple options belong to the same % type (e.g. MaxCore and MaxIter for %scf), merge them into ONE block.
+
+-----------------------------------------------------------------------------------------------
+[Output:]
+Your output MUST consist of two parts:
+
+1. **JSON block**: A JSON object (valid for json.loads()) enclosed in ```json and ```. The dictionary MUST contain ONLY metadata:
+   - "code_type": "orca" (lowercase; ORCA input files only).
+   Do NOT put code_content in the JSON.
+
+2. **Code block**: The full repaired ORCA .inp source inside XML-style fences: <CODE> and </CODE>. Put the code directly between these tags; no JSON escaping.
+
+**CRITICAL:** You MUST NOT include this prompt itself (including the example below) anywhere in your output. This prevents the example from being mistakenly extracted as generated code.
+
+**CRITICAL:** Use real newline characters (actual line breaks) between lines in the code block. Do NOT use the two-character sequence backslash-n (\n) to represent newlines—ORCA requires actual line breaks in the input file. Each line of the ORCA input (e.g. ! line, %block, * xyz coordinates) must be on its own line.
+
+**CRITICAL:** The geometry block MUST end with * on its own line. Do NOT omit the closing *. Outputting a truncated file without the final * makes the input invalid and unusable.
+
+**CRITICAL:** Use <CODE> to start and </CODE> to end the code block. Do NOT use <CODE> again as the closing tag.
+
+Example output (format only; do not copy into your output):
+```json
+{
+  "code_type": "orca"
+}
+```
+
+<CODE>
+...repaired ORCA .inp content here...
+</CODE>

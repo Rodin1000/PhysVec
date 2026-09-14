@@ -1,0 +1,74 @@
+[... end of page 209 ...]
+optimizationinterrupted,orforsomereasonwanttousethemodelHessianupdatedfrom
+apreviouscalculation,youcandothatbypassingabasename.optfile,abasename.carthessfileortheinitial
+Hessianonanewcalculation.
+%GEOM InHess READ
+InHessName "basename.carthess"
+END
+6.3. GeometryOptimizations,SurfaceScans,TransitionStates,MECPs,ConicalIntersection1s8,7
+IRC,NEB
+
+--- Page 210 ---
+ORCAManual,Release6.0.0
+6.3.18 Geometry Optimizations using the L-BFGS optimizer
+OptimizationsusingtheL-BFGSoptimizeraredoneinCartesiancoordinates. Theycanbeinvokedquitesimple
+asinthefollowingexample:
+! L-Opt
+! MM
+%mm
+ORCAFFFILENAME "CHMH.ORCAFF.prms"
+end
+*pdbfile 0 1 CHMH.pdb
+Usingthisoptimizersystemswith100softhousandsofatomscanbeoptimized. Ofcourse,theenergyandgradient
+calculationsshouldnotbecomethebottleneckforsuchcalculations,thusMMorQM/MMmethodsshouldbeused
+forsuchlargesystems.
+Thedefaultmaximumnumberofiterationsis200,andcanbeincreasedasfollows:
+! L-Opt
+%geom
+maxIter 500 # default 200
+end
+*pdbfile 0 1 CHMH.pdb
+Onlythehydrogenpositionscanbeoptimizedwiththefollowingcommand:
+! L-OptH
+Butalsootherelementscanbeexclusivelyoptimizedwiththefollowingcommand:
+! L-OptH
+%geom
+OptElement F # optimize fluorine only when L-OptH is invoked.
+# Does not work with the regular optimizer.
+end
+Whenfragmentsaredefinedforthesystem, eachfragmentcanbeoptimizeddifferently(similartothefragment
+optimizationdescribedabove). Thefollowingoptionsareavailable:
+FixFrags
+Freezethecoordinatesofallatomsofthespecifiedfragments.
+RelaxHFrags
+Relaxthehydrogenatomsofthespecifiedfragments. Defaultforallatomsif!L-OptHisdefined.
+RelaxFrags
+Relaxallatomsofthespecifiedfragments. Defaultforallatomsif!L-Optisdefined.
+RigidFrags
+Treateachspecifiedfragmentasarigidbody,butrelaxthepositionandorientationoftheserigidbodies.
+Note:
+• Thefragmentshavetobedefinedafterthecoordinateinput.
+Amorecomplexexampleisdepictedinthefollowing:
+! L-OptH
+%mm
+ORCAFFFILENAME "CHMH.ORCAFF.prms"
+end
+*pdbfile 0 1 CHMH.pdb
+(continuesonnextpage)
+188 Chapter6. RunningTypicalCalculations
+
+[... start of page 211 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%geom
+Frags
+2 {8168:8614} end # First the fragments need to be defined
+3 {8615:8699} end # Note that all other atoms belong to
+4 {8700:8772} end # fragment 1 by default
+5 {8773:8791} end #
+RelaxFrags {2} end # Fragment 2 is fully relaxed
+RigidFrags {3 4 5} end # Fragments 3, 4 and 5 are treated as rigid bodies each.
+end
+6.3.19 Nudged Elastic Band Method
+TheNudgedElasticBand(NEB)methodisusedtofindaminimumenergypath(MEP)connectinggivenreactant
+andproductstateminimaontheenergysurface. Aninitialpathisgeneratedandrepresentedbyadiscretesetof

@@ -1,0 +1,70 @@
+[... end of page 1014 ...]
+erformed.
+If the first argument is “Add”, a new restraint is added to the specified Colvar. Note that an arbitrary number
+of restraints of different types can be active on a Colvar at the same time. The next argument after the Colvar
+number needs to be the type of the restraint. Currently, Harmonic and Gaussian are allowed. When adding
+harmonicrestraints,theSpringmodifiercanbegiven,specifyingtheharmonicspringconstantoftherestraintin
+992 Chapter7. DetailedDocumentation
+
+--- Page 1015 ---
+ORCAManual,Release6.0.0
+kJmol−1unit−2,whereunitisthedefaultphysicalunitoftheColvar(Angstromfordistances,degreeforangles).
+Ifnotspecified,avalueof50kJmol−1 unit−1 isused. WhenaddingGaussianrestraints,theHeightandSigma
+modifiersareallowed. TheformersetstheheightoftheGaussianhillinkJmol−1,whilethelattersetsthewidth
+oftheGaussianfunctioninphysicalColvarunits(𝜎 isthestandarddeviation, notthevariance𝜎2). Theheight
+canbeeitherpositiveornegative,allowingforbothGaussianhillsandGaussianwells. Ifnotspecified,thedefault
+valuesof−10kJmol−1 fortheheight(i. e.,Gaussianwell)and10Colvarunits(e. g.,Angstromordegree)for
+sigmaareused.
+ThepositionofthenewrestraintiscontrolledviatheTargetmodifier,whichexpectsonerealargumentinColvar
+units. Iftherestraintshallbeanone-sidedwall,themodifiersLowerandUppercanbeusedinsteadof Target. It
+isalsopossibletospecifybothLowerandUpperinordertodefinealowerandanupperwallatdifferentpositions
+inonecommand. If RampisgivendirectlyafterTarget,Lower,orUpper,arestraintwithlinearlymovingtarget
+position over time is defined. Ramp expects two arguments, which are the initial restraint position, and the final
+restraintpositionafterthenextsubsequentRun command.
+Thefollowingexampleshowshowtoassignaharmonictwo-sidedrestraintwithdifferentlowerandupperwallpa-
+rameterstoadistanceColvarwithnumber7thathasbeenpreviouslydefinedviatheManage_Colvarscommand:
+Restraint Add Colvar 7 Harmonic Lower 400_pm Spring 50.0
+Restraint Add Colvar 7 Harmonic Upper 800_pm Spring 80.0
+Bydefault,someadditionaldata(currentposition,potentialenergy,externalforce,internalforce)foreachrestraint
+isprintedtoafilewiththename“basename-restraints.csv”ineveryMDstep. Thisdatacanbeused,e. g.,
+forthermodynamicintegration. Ifalargenumberofrestraintsisdefined,thiscanwastetimeanddiskspace. To
+switchthisoffforarestraint,specifytheNoprintmodifierwhendefiningit.
+Ifthefirstargumentwas“Reset”,allrestraintsimposedonthespecifiedColvararedeleted. Nofurtherarguments
+ormodifiers(apartfromthethreemandatoryargumentsdescribedabove)canbegiven.
+Run
+MandatoryArguments: n Integer —
+OptionalArguments: —
+Modifiers: StepLimit value Real [length]
+CenterCOM —
+Performs a molecular dynamics run over 𝑛 time steps with the current settings, applying the velocity Verlet al-
+gorithmtosolvetheequationsofmotion(seesection1.5.1). YoumightwanttocallcommandslikeTimestep,
+Initvel,Thermostat,andDump before. Pleasenotethatonlyatomswithintheactiveregionwillbesubject
+totimeintegration. Allotheratomswillbeskipped,andwillthereforeretaintheirinitialpositions.
+TheStepLimitmodifiercanbeusedtolimitthemaximumdisplacementofanyatominaMDtimeintegration
+step. Inadditiontothedisplacement,alsothevelocitieswillbelimitedtoamaximumofvalue·∆𝑡. Thiscanhelp
+tostabilizethedynamicsiftheinitialgeometryispoorandlargeforcesareacting(closeatoms,etc.). Thekeyword
+expectsonerealargumentindistanceunits. Areasonablechoicewouldbe0.1Å.
+If the CenterCOM modifier is given, the center of mass (CoM) of the total system is kept fixed. Normally, the
+CoMshouldnotdriftanyway,becausethevelocityinitializationisperformedinawaywhichgivestheCoMazero
+initialvelocity,andtheconservationofmomentumshouldkeepitlikethat. However,numericalerrorsandmassive
+Thermostats (amongotherfactors)canbreakthismomentumconservation,leadingtoadriftoftheCoMover
+time. Ifthisshallbeavoided,specifythismodifier.
+If no call to Initvel occurred before this command, the atom velocities are initialized to zero. If no call to
+Timestepoccurredbeforethiscommand,adefaulttimestepof0.5fsisset.
+You can cleanly end a MD run by creating an empty file with the name “EXIT” (note the all-uppercase letters
+oncase-sensitivefilesystems). OnUnixoperatingsystemssuchasGNULinux,thiscaneasilybeachievedbythe
+command“touch EXIT”. willdetectthefile,aborttheMDrun,anddeletethefile. Youwillstillgettheremaining
+output(suchasthetimingstatistics),andyoudon’thavetodeletealltheremaining“.tmp”files,whichbothwould
+notbethecaseifyouwouldhavekilledtheprocessinstead.
+7.51. AbinitioMolecularDynamicsSimulations 993
+
+[... start of page 1016 ...]
+ORCAManual,Release6.0.0
+SCFLog
+MandatoryArguments: value Keyword {Discard,Last,Append,Each}
+OptionalArguments: —
+Modifiers: —
+Controlshow/ifthedetailedoutputfromtheelectronstructurecalculation(i. e.,integrals,scf,gradient,...) will
+bewrittentologfiles. Discardcompletelydiscardstheoutput. Lastonlykeepsthelastoutputforeachprogram
+call (useful to read error message if simulation aborts). Append redirects all the output into one single log file
+(“basename.scf.log”, “basename.int.log”, “basename.grad.log”, ...), appending each step at the en

@@ -1,0 +1,77 @@
+[... end of page 393 ...]
+tareincluded.
+Covalentbonds
+All(non-active)atomsthatarecovalentlybondedtoactiveatomsareincluded.
+No
+Nonon-activeatomsareincluded.
+Theusercanalsoprovidetheatomsfortheextensionshellmanually. ThiswillbediscussedinsectionFrequency
+Calculation.
+Fig.6.57: Activeandnon-activeatoms. Additionallyshownistheextensionshell, whichconsistsofnon-active
+atomscloseindistancetotheactiveatoms. Theextensionshellisusedforoptimizationininternalcoordinatesand
+PHVA.
+6.16. ORCAMultiscaleImplementation 371
+
+--- Page 394 ---
+ORCAManual,Release6.0.0
+The set of active atoms is called the ‘activeRegion’, and the set of active atoms plus the surrounding non-active
+atomsiscalled‘activeRegionExt’. Duringgeometryoptimizationthefollowingtrajectoriesarestored(whichcan
+beswitchedoff):
+basename_trj.xyz
+EntireQM/MMsystem
+basename.QMonly_trj.xyz
+OnlyQMregion
+basename.activeRegion_trj.xyz
+Onlyactiveatoms
+basename.activeRegionExt_trj.xyz
+Activeatomsplusextension
+Thefollowingfilesarestoredcontainingtheoptimizedstructures-ifrequested:
+basename.pdb
+OptimizedQM/MMsysteminpdbfileformat
+basename.xyz
+OptimizedQM/MMsystem
+basename.QMonly.xyz
+OnlyQMregion
+basename.activeRegion.xyz
+Onlyactiveatoms
+basename.activeRegionExt.xyz
+Activeatomsplusextension
+OptimizationwiththeCartesianL-BFGSMinimizer
+Forverylargeactiveregionsthequasi-Newtonoptimizationininternalcoordinatescanbecomecostlyanditcanbe
+advantageoustousetheL-OptorL-OptHfeature,seesectionGeometryOptimizationsusingtheL-BFGSoptimizer.
+FortheL-Opt(H)featurethereexisttwowaystodefinetheactiveregion:
+• viatheActiveAtomskeyword(ortheUse_Active_InfoFromPDBflag)or
+• viafragmentdefinitionandthedifferentkeywordsforfragmentoptimization. Availableoptionsare:
+FixFrags
+Freezethecoordinatesofallatomsofthespecifiedfragments.
+RelaxHFrags
+Relaxthehydrogenatomsofthespecifiedfragments. Defaultforallatomsif!L-OptHisdefined.
+RelaxFrags
+Relaxallatomsofthespecifiedfragments. Defaultforallatomsif!L-Optisdefined.
+RigidFrags
+Treateachspecifiedfragmentasarigidbody,butrelaxthepositionandorientationoftheserigidbodies.
+Note:
+• TheL-Opt(H)optiontogetherwiththefragmentoptimizationcanbeusedinordertoquicklypreoptimize
+yoursystematMMlevel. E.g. youcanoptimizethehydrogenpositionsoftheproteinandwatermolecules,
+andatthesametimerelaxnon-standardmolecules,forwhichnoexactbondedparametersareavailable,as
+rigidbodies.
+!MM L-OptH
+%mm
+ORCAFFFilename "DNA_hexamer.ORCAFF.prms"
+(continuesonnextpage)
+372 Chapter6. RunningTypicalCalculations
+
+[... start of page 395 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+*pdbfile 0 1 protein_ligand.pdb
+%geom
+Frags # all other atoms belong to fragment 1 by default
+2 {22307:22396} end # cofactor
+3 {22397:22423} end # ligand
+end
+RigidFrags {2 3} end # treat cofactor and ligand as individual rigid bodies
+end
+FrequencyCalculation
+Ifallatomsareactive,aregularfrequencycalculationiscarriedoutwhenrequesting!NumFreq. Iftherearealso
+non-active atoms in the QM/MM system, the Partial Hessian Vibration

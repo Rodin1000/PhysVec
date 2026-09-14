@@ -1,0 +1,69 @@
+[... end of page 286 ...]
+wimportantitcanbetogotoamultirefer-
+ence treatment with a physically reasonable active space (even if is only 2×2) in order to get qualitatively and
+quantitativelycorrectresults.
+(a)(a)RHF (b)(b)CASSCF(2,2) (c)(c)MP2 (d)(d)CCSD(T) (e)(e)MRCI+Q
+(f) (f) Difference
+CCSD(T)/MRCI+Q
+Fig.6.32: 2Dpotentialenergysurfaceforthe𝑂 moleculecalculatedwithdifferentmethods
+3
+264 Chapter6. RunningTypicalCalculations
+
+--- Page 287 ---
+ORCAManual,Release6.0.0
+6.7.10 Size Consistency
+Finally, we want to study the size consistency errors of the methods. For this we study two non-interacting HF
+molecules at the single reference level and compare to the energy of a single HF molecule. This should give a
+reasonablyfairideaofthetypicalperformanceofeachmethod(energiesinEh)5:
+E(HF) E(HF+HF) |Difference|
+CISD+Q -100.138 475 -200.273 599 0.00335
+ACPF -100.137 050 -200.274 010 0.00000
+ACPF2 -100.136 913 -200.273 823 0.00000
+AQCC -100.135 059 -200.269 792 0.00032
+Theresultsareroughlyasexpected–CISD+Qhasarelativelylargeerror,ACPFandACPF/2areperfectforthis
+typeofexample;AQCCisnotexpectedtobesizeconsistentandis(only)aboutafactorof10betterthanCISD+Q
+inthisrespect. CEPA-0isalsosizeconsistent.
+6.7.11 Efficient MR-MP2 Calculations for Larger Molecules
+Uncontracted MR-MP2 approachesare nowadays outdated. They are much more expensivethan internally con-
+tractede.g. theNEVPT2methoddescribedinsectionN-ElectronValenceStatePertubationTheory. Moreover,
+MR-MP2ispronetointruderstates,whichisamajorobstacleforpracticalapplications. Forhistoricalreasons,this
+sectionisdedicatedtothetraditionalMR-MP2approachthatisavailablesinceversion2.7.0ORCA.Theimple-
+mentationavoidsthefullintegraltransformationforMR-MP2whichleadstosignificantsavingsintermsoftime
+andmemory. Thus,relativelylargeRI-MR-MP2calculationscanbedonewithfairlyhighefficiency. However,the
+program still uses an uncontracted first order wavefunction which means that for very large reference space, the
+calculationsstillbecomeuntractable.
+Considerforexampletherotationofthestilbenemoleculearoundthecentraldoublebond
+(a)(a)
+(b)(b)
+Fig.6.33: RotationofstilbenearoundthecentraldoublebondusingaCASSCF(2,2)referenceandcorrelatingthe
+referencewithMR-MP2.
+The input for this calculation is shown below. The calculation has more than 500 basis functions and still runs
+through in less than one hour per step (CASSCF-MR-MP2). The program takes care of the reduced number of
+two-electronintegralsrelativetotheparentMRCImethodandhencecanbeappliedtolargermoleculesaswell.
+Notethatwehavetakena“JK”fittingbasisinordertofittheCoulombandthedynamiccorrelationcontributions
+bothwithsufficientaccuracy. Thus,thisexampledemonstratesthatMR-MP2calculationsfornottoolargereference
+spacescanbedoneefficientlywithORCA(asaminordetailnotethatthecalculationswerestartedatadihedral
+angleof90degreesinordertomakesurethatthecorrecttwoorbitalsareintheactivespace,namelythecentral
+carbonp-orbitalsthatwouldmakeupthepi-bondinthecoplanarstructure).
+5Mostofthesenumberswereobtainedwithaslightlyolderversionbutwillnotchangetoomuchinthepresentversion.
+6.7. MultireferenceConfigurationInteractionandPertubationTheory 265
+
+[... start of page 288 ...]
+ORCAManual,Release6.0.0
+#
+# Stilbene rotation using MRMP2
+#
+! def2-TZVP def2/JK RIJCOSX RI-MRMP2
+%casscf nel 2
+norb 2
+end
+%mrci maxmemint 2000
+tsel 1e-8
+end
+%paras DIHED = 90,270, 19
+end
+* int 0 1
+C 0 0 0 0.000000 0.000 0.000
+C 1 0 0 1.343827 0.000 0.000
+C 2 1 0 1.490606 125.126 0.000
+C 1 2 3

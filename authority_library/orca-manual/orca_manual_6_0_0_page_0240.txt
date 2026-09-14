@@ -1,0 +1,77 @@
+[... end of page 239 ...]
+anslationfactors”(ETFs)[252], andthoseareaddedwithETFTRUEunder%TDDFT.By
+nowusingtheinput:
+!PBE0 DEF2-SVP
+%TDDFT NROOTS 5
+IROOT 2
+NACME TRUE
+ETF TRUE
+END
+* xyz 0 1
+O 0.000000000 0.000000000 0.611403292
+C 0.000000000 0.000000000 -0.613232096
+H 0.931880792 0.000000000 -1.200880848
+H -0.931880792 0.000000000 -1.200880848
+*
+onegetsthefollowingoutput:
+6.6. ExcitedStatesCalculations 217
+
+--- Page 240 ---
+ORCAManual,Release6.0.0
+---------------------------------
+CARTESIAN NON-ADIABATIC COUPLINGS
+<GS|d/dx|ES>
+with built-in ETFs
+---------------------------------
+1 O : -0.071334028 -0.000001941 0.000003727
+2 C : -0.362514525 -0.000000130 -0.000000776
+3 H : 0.217014763 0.000000003 -0.128968922
+4 H : 0.217014813 -0.000000002 0.128968939
+Difference to translation invariance:
+: 0.0001810232 -0.0000020693 0.0000029689
+Norm of the NACs ... 0.5137724505
+RMS NACs ... 0.1483133313
+MAX NAC ... 0.3625145251
+wheretheresidualtranslationvarianceisduetotheDFTandCOSXgridsonly.
+Warning: ThesearetherecommendedNACstobeusedwithanykindofdynamicsorconicalintersection
+optimization,otherwisemovingthecenterofmassofyousystemwouldalreadychangethecouplings!
+Numericalnon-adiabaticcouplingmatrixelements
+Thenumericalnon-adiabaticcouplingmatrixelementsbetweengroundandexcitedstatesfromCIS/TD-DFTcan
+becalculatedinanumericalfashion,bysettingtheNumNACMEflagonthemaininputline:
+! NumNACME
+ORCAwillthencalculateboththeNACMEsandthenumericalgradientforagivenIROOTatthesamecost. Please
+becarefulwiththeSCFoptionsandGRIDsizessincetherearedisplacementsinvolved,formoreinformationcheck
+NumericalGradients. Alloptionsregardingstepsizeandsooncanbechangedfrom%NUMGRAD.
+These are current implemented in both RHF/RKS and UHF/UKS, but only for CIS/TDA and RPA/TD-DFT, no
+multireferencemethodsyet. Forthelattercase,theoverlapofthe|𝑋−𝑌⟩vectorisused[517].
+RestrictedOpen-shellCIS
+InadditiontotheCIS/TD-DFTdescriptionofexcitedstates,ORCAfeaturestheorca_rocismoduletoperform
+configurationinteractionwithsingleexcitationscalculationsusingarestrictedopen-shellHartree–Fock(ROHF)
+reference. Itcanbeusedtocalculateexcitationenergies,absorptionintensitiesandCDUHFintensities. Ingeneral,
+ROCIScalculationsworkonrestrictedopen-shellHFreferencefunctionsbutinthisimplementationitispossible
+to enter the calculations with RHF (only for closed-shell molecules) or UHF reference functions as well. If the
+calculationstartswithanUHF/UKScalculation,itwillautomaticallyproducethequasi-restrictedorbitalswhich
+willthenbeusedforthesubsequentROCIScalculations. NotethatifthereferencefunctionisaRHF/RKSfunction
+themethodproducestheCISresults. Themoduleisinvokedbyprovidingthenumberofrootssoughtinthe%rocis
+blockoftheinputfile:
+! SVP TightSCF
+%rocis NRoots 2
+MaxDim 5 #Davidson expansion space = MaxDim * NRoots
+end
+* xyz -2 2
+Cu 0.00 0.00 0.00
+(continuesonnextpage)
+218 Chapter6. RunningTypicalCalculations
+
+[... start of page 241 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Cl 2.25 0.00 0.00
+Cl -2.25 0.00 0.00
+Cl 0.00 2.25 0.00
+Cl 0.00 -2.25 0.00
+*
+InthisexampletheMaxDimparameterisgiveninadditiontothenumberofrootstobecalculated. Itcontrolsthe
+maximumdimensionoftheexpansionspaceintheDavidsonprocedurethatisusedtosolvetheCIproblem.
+TheuseofROCISisexplainedingreaterdetailinsectionExcitedStatesviaROCISandDFT/ROCIS.
+Starting from ORCA 6.0, the General-Spin ROCIS (GS-ROCI

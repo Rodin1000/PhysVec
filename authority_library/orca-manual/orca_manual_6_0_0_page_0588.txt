@@ -1,0 +1,79 @@
+[... end of page 587 ...]
+,
+ORCAwillfallbacktoon-diskstorage. NOTE:Thisflagwillonlyworkifallprocessesworkonthesamenode.
+IMPORTANTNOTEREGARDINGORBITALLOCALIZATION
+• LocalizedorbitalsforDLPNOareobtainedviatheFoster-BoysmethodwithanaugmentedHessian
+converger(AHFB)bydefault.
+• Thelocalizationtolerance(LocTol)iscoupledtotheSCFgradienttolerance(TolG)withaconstantfactor
+bydefault. SelectingspecificSCFconvergencesettings(suchasTightSCF)thereforealsoensuresobtaining
+asetofappropriatelywellconvergedlocalizedorbitals. Thiscanbeoverriddenbysettingadifferentvalue
+7.14. TheSingleReferenceCorrelationModule 565
+
+--- Page 588 ---
+ORCAManual,Release6.0.0
+forLocTol.
+• AnimportantfeatureoftheaugmentedHessianconvergeristhatitsystematicallyapproachesalocalmaxi-
+mumofthelocalizationfunction(eventhoughconvergencetotheglobalmaximumcannotbeguaranteed).
+Asopposedtothat,theconventionallocalizationmethod(FB)maystop,forexample,atasaddlepoint. In
+badcases, thiscanleadtodeviationsofseveralkJ/molintheDLPNOenergy. Likewise, itcancontribute
+towardslackofreproducibilityofresults.
+• Nosimilarprocedurehasbeenimplementedfortheotherlocalizationmethods(suchasPipek-Mezey)yet.
+ThesameproblemsaswiththeFBconvergercanoccurinthesecases.
+• NorandomizationisusedfortheAHFBconverger.
+TheolddefaultorbitallocalizationsettingsofORCA4.0canbereproducedwiththefollowingoptions:
+%MDCI
+LocMet FB
+LocTol 1.0e-6
+LocRandom 1
+End
+Regardingthemethodsthatemployrandomization(FB,PM,IAOIBO,IAOBOYS)only,thefollowingnotesapply:
+• Generally,betterDLPNOresultsareobtainedwhenseveralrunsoflocalizationareundertakenusingdifferent
+initialguesses. Thedifferentinitialguessesareobtainedusingrandomization(LocRandom).
+• However,randomizationoftheinitialguesscanleadtodifferentlylocalizedMOsindifferentcalculations.
+Thiscanyieldnon-identicalcorrelationenergies,varyinginthesub-kJ/molrange,fordifferentrunsonthe
+samemachine.
+• In order to yield identical correlation energy results, randomization can be switched off (LocRandom 0).
+However,switchingoffrandomizationonlyleadstoidenticalresultsonthesamemachine,butcanstilllead
+toslightlydifferentresults(inthesub-kJ/molrange)ondifferentmachines.
+• Reproducibility of the correlation energy is expected to increase further if LocNAttempts is set to higher
+values.
+TheinputbelowshowshowtoperformaDLPNOcalculation withsettingsthatexactlyreproducethecanonical
+RI-MP2result. Theyarenotrecommendedforproductionuse,butmerelytoshowthatifthelocalapproximations
+are pushed, then the result coincides with the canonical one. If one would set 𝑇 to zero this would give
+CutPNO
+canonicalRI-CCSD.However,thisisanabsurdlyinefficientcalculationandhencenotdone.
+#
+! def2-SV(P) def2/JK def2-SVP/C RI-JK DLPNO-CCSD VeryTightSCF RI-MP2
+# obtain a result that only contains errors from the PNO approximation
+# but no others
+%mdci TCutPairs 0
+TCutMKN 0
+UseFullLMP2Guess true
+LMP2FCut 1e-9
+LMP2MaxIter 25
+LMP2TolE 1e-10
+LMP2TolR 1e-11
+PAOOVerlapThresh 1e-9
+end
+! Bohrs
+* xyz 0 1
+C -1.505246952209632 1.048213673267046 -3.005665895986369
+C 1.289678561934891 0.246429688933291 -3.259735682020124
+C 2.834670835163566 1.157307360133605 -0.990383454919828
+C 1.924119415395082 -0.128330938291771 1.465070676514038
+C -0.931529472233802 -0.722841293992075 1.397639867298547
+C -2.347670084056626 1.213332291655600 -0.217984867773136
+(continuesonnextpage)
+566 Chapter7. DetailedDocumentation
+
+[... start of page 589 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H 2.084955694093313 0.973408301535989 -5.037750251258102
+H 1.426532559234904 -1.831017720289521 -3.371063003813707
+H -1.795307501459984 2.891278294563413 -3.927855043896308
+H -2.709613973668925 -0.308515546176734 -4.026627646697411
+H -4.404246093821399 0.941639912907262 -0.071175054238094
+H -1.962867323232915 3.122079490952855 0.528101313545138
+H -1.245096579039474 -2.621186110634707 0.594784162223769
+H -1.699155144887690 -0.782162821007662 3.32895

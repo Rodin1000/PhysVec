@@ -1,0 +1,73 @@
+[... end of page 111 ...]
+tlimit.
+Let’slookatsomeresultsandcomparetoextrapolation:
+#
+# Correlation energies of the water molecule: extrapolation versus F12
+#
+# cc-pVDZ MP2: -0.201380894
+# T : -0.261263141
+# Q : -0.282661311
+# T/Q : -0.298276192
+# Q/5 : -0.300598282
+# F12-DZ : -0.295775804
+# RI-F12-DZ : -0.295933560 (cc-pVDZ/C)
+# -0.295774489 (cc-pVTZ/C)
+# F12-TZ : -0.299164006
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 89
+
+--- Page 112 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# RI-F12-TZ : -0.299163478 (cc-pVQZ/C)
+# F12-QZ : -0.300130086
+ItisobviousthatextrapolatedandF12correlationenergiesconvergetothesamenumber(inthiscasearound300
+mEh). ThebestextrapolatedresultisstillbelowtheF12result(thiswouldprimarilybemeaningfulinavariational
+calculation). However,firstofallthiswasanexpensiveextrapolationandsecond,thesmallresidualF12erroris
+very smooth and cancels in energy differences. In any case, already the F12-double-zeta (where “double zeta”
+istobeinterpretedratherloosely)bringsoneintowithin5mEhofthebasissetlimitcorrelationenergyandthe
+F12-triple-zetacalculationtowithin1mEh,whichisimpressive.
+The additional effort for the F12 calculation is rather high, since five types of additional two-electron integrals
+needtobecalculated. BothintegralsinCABSspaceandintheoriginalorbital(OBS)spacemustbecalculated
+andmixedFockmatricesarealsorequired. Hence,onemaywonder,whetheradouble-zetaF12calculationactually
+savesanytimeover,say,aquadruple-zetaregularcalculation. Theactualanswertothisquestionis: “NO”. Given
+allpossibilitiesofobtainedapproximateMP2andSCFenergies,wehaveinvestigatedthequestionofhowtoobtain
+MP2basissetlimitenergiesmostefficientlyinsomedetail. Theresultsshowthatintermsoftimings, basisset
+extrapolationincombinationwithRI-JKisthemethodofchoiceforMP2.[521]However,energydifferencesare
+more reliable with F12-MP2. In combination with RI-JK or RIJCOSX F12-MP2 becomes also competitive in
+termsofcomputationalefficiency.
+Thissituationisdifferentinthecaseofcoupled-clustermethods,whereF12methodsoutperformextrapolationand
+arethemethodofchoice.
+Forcoupled-clustertheory,everythingworksinaverysimilarfashion:
+# the keywords
+! F12-CCSD(T)
+# and
+! CCSD(T)-F12
+# are equivalent
+AspecialfeatureofORCAthatcansavelargeamountsoftime,istousetheRIapproximationonlyfortheF12-part.
+Thekeywordhereis:
+! F12/RI-CCSD(T)
+# or
+! CCSD(T)-F12/RI
+EverythingelseworksasdescribedforF12-MP2.
+FrozenCoreOptions
+In coupled-cluster calculations the Frozen Core (FC) approximation is applied by default. This implies that the
+coreelectronsarenotincludedinthecorrelationtreatment,sincetheinclusionofdynamiccorrelationinthecore
+electronsusuallyaffectsrelativeenergiesinsignificantly.
+Thefrozencoreoptioncanbeswitchedonoroffwith! FrozenCoreor ! NoFrozenCoreinthesimpleinput.
+MoreinformationandfurtheroptionsaregiveninsectionFrozenCoreOptionsandinsectionIncluding(semi)core
+orbitalsinthecorrelationtreatment.
+90 Chapter6. RunningTypicalCalculations
+
+[... start of page 113 ...]
+ORCAManual,Release6.0.0
+LocalCoupledPairandCoupled-ClusterCalculations
+ORCAfeaturesaspecialsetoflocalcorrelationmethods. Theprevalentlocalcoupled-clusterapproachesdateback
+toideasofPulayandhavebeenextensivelydevelopedbyWerner,Schützandco-workers. Theyusetheconcept
+ofcorrelationdomainsinordertoachievelinearscalingwithrespecttoCPU,diskandmainmemory. Whilethe
+centralconceptofelectronpairsisverysimilarinbothapproaches,thelocalcorrelationmethodsinORCAfollow
+acompletelydifferentandoriginalphilosophy.
+In ORCA rather than trying to use sparsity, we exploit data compression. To this end two concepts are used:
+(a) localization of internal orbitals, which reduces the number of electron pairs to be correlated since the pair
+correlationenergiesareknowntofalloffsharplywithdistance;(b)useofatruncatedpairspecificnaturalorbital
+basistospanthe

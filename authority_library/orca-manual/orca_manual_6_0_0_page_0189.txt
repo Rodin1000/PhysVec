@@ -1,0 +1,59 @@
+[... end of page 188 ...]
+eforedonotrelyonthepresenceofthislineasanindicatorofwhether
+the geometry optimization is converged! Rather, one should instead rely on the fact that, an optimization
+jobthatterminatesbecausethemaximumnumberofiterationshasbeenreached,willgeneratethefollowing
+outputmessage:
+166 Chapter6. RunningTypicalCalculations
+
+--- Page 189 ---
+ORCAManual,Release6.0.0
+Warning:
+The optimization did not converge but reached the maximum number of
+optimization cycles. Please check your results very carefully.
+Whileasuccessfullyconvergedjobwillgeneratethefollowingmessageinstead:
+***********************HURRAY********************
+*** THE OPTIMIZATION HAS CONVERGED ***
+*************************************************
+Tip:
+• In rare cases the redundant internal coordinate optimization fails. In this case, you may try to use COPT
+(optimization in Cartesian coordinates). This will likely take many more steps to converge but should be
+stable.
+• For optimizations in Cartesian coordinates the initial guess Hessian is constructed in internal coordinates
+andthustheseoptimizationsshouldconvergeonlyslightlyslowerthanthoseininternalcoordinates. Never-
+theless,ifyouobserveaslowconvergencebehaviour,itmaybeagoodideatocomputeaHessianinitially
+(perhapsatalowerleveloftheory)anduseInHess readinordertoimproveconvergence.
+• AtthebeginningofaTSoptimizationmoreinformationonthecurvatureofthePESisneededthanamodel
+Hessiancangive. ThebestchoiceisanalyticHessian,availableforHF,DFTandMP2. Inothercases(e.g.
+CAS-SCF),thenumericalevaluationisnecessary. NeverthelessyoudonotneedtocalculatethefullHessian
+when starting such a calculation. With ORCA we have good experience with approximations to the exact
+Hessian. HereitisrecommendedtoeitherdirectlycombinetheTSoptimizationwiththeresultsofarelaxed
+surfacescanortousetheHybridHessianastheinitialHessian, dependingonthenatureoftheTSmode.
+Note that these approximate Hessians do never replace the exact Hessian at the end of the optimization,
+whichisalwaysneededtoverifytheminimumorfirstordersaddlepointnatureoftheobtainedstructure.
+6.3.4 Initial Hessian for Minimization
+TheconvergenceofageometryoptimizationcruciallydependsonthequalityoftheinitialHessian. Inthesimplest
+caseitistakenasaunitmatrix(inredundantinternalcoordinatesweuse0.5forbonds,0.2foranglesand0.1for
+dihedralsandimpropertorsions). However,simplemodelforce-fieldsliketheonesproposedbySchlegel,Lindh,
+SwartorAlmlöfareavailableandleadtomuchbetterconvergence. ThedifferentguessHessianscanbesetviathe
+InHessoptionwhichcanbeeitherunit,Almloef,Lindh,SwartorSchlegelinredundantinternalcoordinates.
+Sinceversion2.5.30,thesemodelforce-fields(builtupininternalcoordinates)canalsobeusedinoptimizations
+inCartesiancoordinates.
+ForminimizationswerecommendtheAlmloefHessian,whichisthedefaultforminimizations. TheLindhand
+SchlegelHessianyieldasimilarconvergencebehaviour. Fromversion4.1?,thereisalsotheoptionfortheSwart
+modelHessian, whichislessparametrizedandshouldimproveforweaklyinteractingand/orunusualstructures.
+Of course the best Hessian is the exact one. Read may be used to input an exact Hessian or one that has been
+calculated at a lower level of theory (or a “faster” level of theory). From version 2.5.30 on this option is also
+available in redundant internal coordinates. But we have to point out that the use of the exact Hessian as initial
+oneisonlyoflittlehelp,sinceinthesecasestheconvergenceisusuallyonlyslightlyfaster,whileatthesametime
+muchmoretimeisspentinthecalculationoftheinitialHessian.
+Tosumitup: weadvisetouseoneofthesimplemodelforce-fieldsforminimizations.
+6.3. GeometryOptimizations,SurfaceScans,TransitionStates,MECPs,ConicalIntersection1s6,7
+IRC,NEB
+
+[... start of page 190 ...]
+ORCAManual,Release6.0.0
+6.3.5 Coordinate Systems for Optimizations
+Thecoordinatesystemfortheoptimizationcanbechosenbythecoordsysvariablethatcanbesettocartesian
+orredundantwithinthe%geomblock. Thedefaultistheredundantinternalcoordinatesystem. Iftheoptimization
+withredundantfails,youcanstilltrycartesian. IftheoptimizationisthencarriedoutinCartesiandisplacement
+coordinates with a simple model force-field Hessian, the convergence will be only slightly slower. With a

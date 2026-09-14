@@ -1,0 +1,68 @@
+[... end of page 1013 ...]
+, the random number generator is initialized with the current system time as a seed. MD runs
+started at different times will have different random velocities in the beginning. If you want more control over
+this process, you can also specify a positive integer number as argument, which is used as initial random seed.
+Simulationsstartedwiththesameseedargumentwillhaveidenticalinitialrandomvelocities(ifallothersystem
+parameterssuchasatomcount,atomtypes,... remainidentical).
+WithoutacalltoRandomize,aseedof1isalwaysused.
+7.51. AbinitioMolecularDynamicsSimulations 991
+
+--- Page 1014 ---
+ORCAManual,Release6.0.0
+Restart
+MandatoryArguments: —
+OptionalArguments: fname String —
+Modifiers: IfExists —
+Readsarestartfiletocontinueapreviousmoleculardynamicsrun. Sucharestartfileiswrittenaftereverysimu-
+lationstep,suchthatacrashedsimulationmayeasilyberecovered. Thefilenameoftherestartfilemaybegiven
+viafname;otherwise,itisdeducedfromtheproject’sbasenameas<basename>.mdrestart.
+IftheIfExistsmodifierisspecified,arestartisonlyperformediftherestartfileexists. Theerrorandabortthat
+wouldnormallyoccurincaseofanon-existentrestartfilearesuppressedbythisflag. Thisisusefulinthefirstof
+aseriesofbatchruns,wheretherestartfiledoesnotyetexistinthebeginning.
+Pleasenotethatthefollowingquantitiesarestoredto/loadedfromrestartfiles:
+• AtomPositions
+• AtomVelocities
+• Thermostatinternalstate(onlyforNHC)
+• MetadynamicshillsandextendedLagrangianinternalstate
+• Simulationstepnumberandelapsedphysicaltime
+Allotherquantities(timestep,regions,thermostat,constraints,cells,etc.) arenot restartedandneedtobesetin
+theinputfile,typicallybeforetheRestartcommand. ItissafetojustcalltheRestartcommandimmediately
+beforetheRun command.
+Pleaseseealsothediscussiononrestartingsimulationsin[Section1.3](#moldyn:sec_restart).
+Restraint
+MandatoryArguments: operation Keyword {Add,Reset}
+Keyword Colvar
+colvar Integer —
+OptionalArguments: —
+Modifiers: Harmonic —
+Gaussian —
+Spring —
+Sigma GaussianSigma Real ...
+Height GaussianHeight Real kJmol−1
+Target target Real ...
+Lower lowerwall Real ...
+Upper upperwall Real ...
+Ramp initialtarget Real ...
+finaltarget Real ...
+Noprint —
+This command imposes restraints on collective variables (“Colvars”) defined before via the Manage_Colvars
+command. As a first argument, it expects the kind of operation to perform, which can be Add and Reset. The
+secondargumentneedstobethekeyword“Colvar”,andthethirdargumentisanintegernumberspecifyingthe
+Colvaronwhichtheoperationshallbeperformed.
+If the first argument is “Add”, a new restraint is added to the specified Colvar. Note that an arbitrary number
+of restraints of different types can be active on a Colvar at the same time. The next argument after the Colvar
+number needs to be the type of the restraint. Currently, Harmonic and Gaussian are allowed. When adding
+harmonicrestraints,theSpringmodifiercanbegiven,specifyingtheharmonicspringconstantoftherestraintin
+992 Chapter7. DetailedDocumentation
+
+[... start of page 1015 ...]
+ORCAManual,Release6.0.0
+kJmol−1unit−2,whereunitisthedefaultphysicalunitoftheColvar(Angstromfordistances,degreeforangles).
+Ifnotspecified,avalueof50kJmol−1 unit−1 isused. WhenaddingGaussianrestraints,theHeightandSigma
+modifiersareallowed. TheformersetstheheightoftheGaussianhillinkJmol−1,whilethelattersetsthewidth
+oftheGaussianfunctioninphysicalColvarunits(𝜎 isthestandarddeviation, notthevariance𝜎2). Theheight
+canbeeitherpositiveornegative,allowingforbothGaussianhillsandGaussianwells. Ifnotspecified,thedefault
+valuesof−10kJmol−1 fortheheight(i. e.,Gaussianwell)and10Colvarunits(e. g.,Angstromordegree)for
+sigmaareused.
+ThepositionofthenewrestraintiscontrolledviatheTargetmodifier,whichexpectsonerealargumentinColvar
+units. Iftherestraintshallbeanone-sidedwall,themodifiersLowerandUppercanbeused

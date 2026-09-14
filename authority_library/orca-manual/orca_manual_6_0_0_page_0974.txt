@@ -1,0 +1,82 @@
+[... end of page 973 ...]
+ a
+descriptionofthefinalESHessian:
+Table7.28: MethodsusedtoestimatetheESPES
+Method Step ESHessian
+AHAS ESgrad+GSHessian calculatedontheESgeometry
+VH ESgrad+ESHessianatGSgeometry calculatedontheGSgeometry
+VG (de- ESgrad+GSHessian equaltoGSHessian
+fault)
+VGFC ESgrad+GSHessian equal to GS Hessian (+ APPROXADEN
+TRUE)
+HHBS ESgrad+HybridESHessianonGSgeometry HybridHessianonGSgeometry
+HHAS ESgrad+GSHessian HybridHessianonESgeometry
+UFBS ESgrad+UpdatedfrequenciesESHessianonGS Updated frequencies ES Hessian on GS
+geometry geometry
+UFAS ESgrad+GSHessian UpdatedfrequenciesESHessianonESge-
+ometry
+7.48. MoreontheExcitedStateDynamicsmodule 951
+
+--- Page 974 ---
+ORCAManual,Release6.0.0
+OBS:AlwaysusetheGSgeometryontheinputfile,equaltotheoneintheGSHESSIAN!IfyouaskedforOPT
+FREQattheinput,a.xyzfileisgeneratedwiththesamegeometryfoundonthe.hess. Ifyoupickedthegeometry
+fromthe.hessfile,rememberthatitisinatomicunits,soyouhavetouseBOHRSonthemaininput.
+AfterthecalculationoftheESPES,afilenamedBASENAME.ES.hessisprintedandcanbeusedinfuturecalcu-
+lations. Forexample,onecanuseitinaseparateAHcalculation,asifthefilecontainstheoptimizedESgeometry
+andtheexactESHessian(ofcourse,inrealitybothareapproximate). Thisallowsonetoperforme.g. phosphores-
+cenceandISCratecalculationswithapproximateESPESseventhoughESDdoesnotsupportthesecalculations
+directly. Forexample,thephosphorescenceratefromatripletstatetothe𝑆 state,withtheVGapproximationfor
+0
+thetripletPESandtheESgradientcomputedattheTDDFTlevel,canbecomputedasfollows:
+• Run an ESD fluorescence calculation using the VG approximation, but where “IROOTMULT TRIPLET”
+is added to the %TDDFT block. The resulting rate and spectrum are not meaningful, but the BASE-
+NAME.ES.hessfilegeneratedfromthiscalculationisthecorrectVGapproximationtothetripletPES.
+• Run an ESD phosphorescence calculation using the AH method, with the aforementioned BASE-
+NAME.ES.hessfileastheTSHESSIAN.
+Thisway,thefirstESDcalculationonlyusestheinformationofthescalartripletstateincomputingtheVGstep,
+whilethesecondESDcalculationonlyusestheSOC-correctedstates. ThesameESHessianfilecanthereforebe
+usedinthecalculationsofallthreespinsublevelsofthetripletstate.
+In addition to the BASENAME.ES.hess file, if there was any updates on the GS Hessian, like transition dipole
+derivatives,aBASENAME.GS.hessisalsoprinted.
+• ThestepcanbecontrolledwiththeGEOMSTEPflag,withQNorAUGHESSoptions.
+• Currently all ES Hessians are calculated numerically, if you want to change the parameters related to the
+frequency calculations, you can do that under %FREQ (Sec. Vibrational Frequencies). The numerical
+gradientsettingsareunder%NUMGRAD(Sec. NumericalGradients).
+• TheEShybridHessianiscalculatedinthesamewayasdescribedinSec. HybridHessian,exceptthatthe
+“model”HessianistheGSone.
+• TheESHessianwithupdatedfrequenciesisrecalculatedfromthesameGSnormalmodes,afteranupdate
+onthefrequencies,asH =L𝜔2 L𝑇. WithLbeingthenormalmodesand𝜔 theupdatedfrequencies,
+𝑢𝑝 𝑢𝑝 𝑢𝑝
+withnegativesignbeingkeptafterthesquare.
+• Thefrequenciesareupdateddependingonacalculationoftheenergyafteragivenstep. IftheESmodes
+areequaltotheGS,thenastepoveracoordinate𝛿𝑞 thatwouldresultinanenergydifference𝛿𝐸 isgiven
+√ 𝑖
+b m y et 𝛿 h 𝑞 o 𝑖 d = s. ( If − th √ 𝑔 e 𝜔 𝑖 e𝑖r + rori 𝜔 n 𝑔 𝑖 𝑖 2 en + erg 2 y 𝛿𝐸 af 𝜔 te 𝑖 r )/ th 𝜔 e 𝑖 . st T ep he is d l e a f r a g u e l r t t 𝛿 h 𝐸 an u a se th d re is sh 1 o 0 l − d 4 gi E v h e , n i b n y g t e h n e e U ra P l D ab A o T v E e F th R e E e Q rr E o R r R of fl th ag e
+(default0.20or20%),thegradientsarecalculatedandthefrequencyrecomputed. Ifnotnot,thatmodeand
+frequencyareassumedtobethesame.
+• TheUpdatedFrequenciesmethodcangreatlyacceleratethecalculationoftheHessian,formuchfewergra-
+dientcalculationarenecessary,althoughyoudonotcorrectthemodes. Also,thederivativesoverthemodes
+arealreadycomputedsimultaneously.
+• Theexpectedenergyerror𝛿𝐸 canbechangedusingtheUF_DELEflag.
+• ThedefaultmethodistheVG,buttheAHASismoretrustworthyforunknownsystems,althoughalotheavier
+(Sec. Abettermodel,AdiabaticHessianAfteraStep(AHAS)and[199]).
+• Alwayscheckthesumof𝐾2printedontheoutput. Ifthatnumberistoohigh(above8orso),itmeansthat
+𝑖
+thegeometriesaretoodisplacedandthetheorymightnotworkonthesecases(checkfordifferentcoordinate
+systemsthen,Sec. Normalmodescoordinatesystems).
+• Also check for RMSD between the geometries after a step. If the difference is too big, there might be
+problemswiththestep.
+952 Chapter7. DetailedDocumentation
+
+[... start of page 975 ...]
+ORCAManual,Release6.0.0
+Mixingmethods
+Inprinciple, itispossibletousedifferentmethodstocomputedifferentpartsneededforthe ORCA_ESDmodule.
+Youcould,forinstanceuse(TD)DFTanalyticalgradientsfortheground/excitedstategeometriesandHessiansand
+amoreelaboratemethodsuchasSTEOM-CCSDtogettheenergiesandtransitiondipoles. Ifyouwanttodothat,
+justinputtheHessiansandusetheDELEflagfortheenergydifferencebetweenthestates-attheirowngeometry!
+- and TDIP x,y,z to input the transition dipole. If there is SOC and the transition dipole is complex, use TDIP
+x.real,x.imag,y.real,y.imag,z.real,z.imag. Theprogramwillautomaticallydetecteachcase. Ifyoudon’tinput
+these,theywillbeobtainedbythemoduleduringtherun,soyoucansettheexcitedmethodyouwantandletthe
+programfigur

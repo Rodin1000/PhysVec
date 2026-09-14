@@ -1,0 +1,84 @@
+[... end of page 1172 ...]
+ store a
+geometryondiskbutonlyinternallypassthenewgeometrytothenextcalculation. Anexampleoftheusageof
+thiscommandcanbefoundinthescript‘iterativeOptimization’thatisgivenwithORCA.Therelevantpartisas
+follows: example:
+# Define variables
+Variable MaxNTries = 25;
+Variable CutOff = -50;
+Variable displacement = 0.6;
+Variable NNegative = 0;
+Variable freqs[];
+Variable modes[];
+Variable NFreq;
+Variable limit;
+(continuesonnextpage)
+1150 Chapter7. DetailedDocumentation
+
+--- Page 1173 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Variable done;
+Variable FinalEnergy;
+# ===========================================================
+# Start a for loop over number of tries
+# ===========================================================
+For itry From 1 To maxNTries Do
+# ----------------------------------
+# Run a geometry optimization
+# ----------------------------------
+New_Step
+! tightopt freq verytightscf nopop def2-TZVP xyzfile
+Step_End
+Read freqs = THERMO_FREQS[itry];
+Read modes = HESSIAN_MODES[itry];
+Read NFreq = THERMO_NUM_OF_FREQS[itry];
+limit = NFreq - 1;
+# ----------------------------------
+# check for sufficeintly negative
+# frequencies
+# ----------------------------------
+NNegative = 0;
+For ifreq From 0 to limit Do
+if ( freqs[ifreq] < CutOff ) then
+New_Geom = (Displace, itry, modes, ifreq, displacement);
+OpenFile
+Compoundcanwritetextfilesondisk. Inordertowritetoafileafilepointermustbecreated. ForthisinCompound
+existsthecommandOpenFile.
+Syntax:
+filePtr=OpenFile(Filename,“openmode”);
+filePtrisavariablepreviouslydeclared.
+Filenamecanbeastringoravariableofstringtypeandrepresentsthenameofthefileondisk.
+Therearetwoavailableopeningmodes:
+• ‘w’. Inthismodeanewfilewillbecreatedandtheusercanwriteonit. Ifanoldfilewiththesamename
+exists,it’scontentswillbedeleted.
+• ‘a’. Inthismodeifafilealreadyexists,theuserwillappendtowhatalreadyexistsinthefile.
+Example:
+%Compound
+# -------------------------------------------------------------
+# This is to check all available open and close
+# file options
+# -------------------------------------------------------------
+Variable myFilename = "myFile.txt";
+Variable file;
+# ---------------------------
+# First open for writing
+# ---------------------------
+file = openFile(myFilename, "w");
+write2File(file, "This is the first time we write.\n");
+(continuesonnextpage)
+7.59. CompoundMethods 1151
+
+[... start of page 1174 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+closeFile(file);
+# ---------------------------
+# Re-open to append
+# ---------------------------
+file = openFile(myFilename, "a");
+write2File(file, "This is the second time we write.\n");
+closeFile(file);
+End
+Remove_Atom
+Remove_atomremovesanatomfromageometrygivenitsindex.

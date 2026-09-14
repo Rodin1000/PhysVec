@@ -1,0 +1,96 @@
+[... end of page 504 ...]
+ vDZP
+7.4.3 Semiempirical Methods
+The present version of ORCA has inherited the capability of doing semiempirical calculations from the earlier
+versions. Anumberofmethodsbasedonthe“neglectofdifferentialoverlap”[691,777]arecurrentlyimplemented
+forenergiesandanalyticgradients(forgeometryoptimization).
+%method
+Method CNDO
+INDO
+NDDO
+# for Method=CNDO
+Version CNDO_1
+CNDO_2
+CNDO_S
+# for Method=INDO
+Version INDO_1
+INDO_2
+INDO_S
+ZINDO_1
+ZINDO_2
+(continuesonnextpage)
+482 Chapter7. DetailedDocumentation
+
+--- Page 505 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+ZINDO_S
+# for Method=NDDO
+Version ZNDDO_1
+ZNDDO_2
+MNDO
+AM1
+PM3
+end
+The methods MNDO [206, 207, 846], AM1 [208] and PM3 [820] are available for main group elements only
+and arise from the work of the Dewar group. They have been optimized to reproduce molecular structure and
+energetics. The older CNDO/1,2 and INDO/1,2 were developed by the Pople group [61, 175, 176, 177, 692,
+695,696,747,748]andweredesignedtoroughlymimicminimalbasisabinitiocalculations. Themethodsofthe
+Zernergroup(ZINDO/1,2andZINDO/S)arecloselyrelatedtotheoldermethodsbuthavebeenwellparameterized
+for transition metals too [36, 37, 38, 63, 183, 466, 718, 906, 907, 908, 910]. ZINDO/1 (and less so ZINDO/2)
+aresuitableforgeometryoptimization. ZINDO/Sgivesgoodresultsforelectronicallyexcitedstatesatmoderate
+configurationinteractionlevelsandisalsosuccessfulforthecalculationofelectronandspindistributionsinlarge
+transition metal complexes [37, 183, 466, 906, 907, 908]. The ZNDDO/1,2 methods have been implemented
+intoORCAasstraightforwardextensionsofthecorrespondingINDOmethodswithoutchanginganyparameter.
+However,themethodsbenefitfromthesomewhatmoreaccuraterepresentationoftheCoulombinteractionwithin
+theNDDOapproximation[431,633]. Thepreliminaryexperiencewiththesemethodsisthattheyarebetterthan
+thecorrespondingINDOmethodsforcalculationoftransitionmetalcomplexstructuresbutonthewholehavealso
+similardeficiencies.
+The analytic gradients are available for all of these methods and can be used to produce reasonable molecular
+structuresatlowcomputationalcostortogetpreliminaryinsightinthebehaviorofthesystemunderinvestigation9.
+Thereisalsoamechanismforsimplifiedinput. InsteadofgivingvaluesforMethodandVersionseparatelyyou
+canalsoassignthevaluethatwouldnormallybelongtoMethodtoVersion. Theprogramwillrecognizethatand
+assignthecorrectvaluestobothMethodandVersion.
+%method
+# shortcut to Method=NDDO; and Version=AM1;
+Method AM1
+end
+• IfyouwantyoucanalsocombinesemiempiricalmethodswithMP2(energiesonly). ForexampleuseMethod
+=AM1;andDoMP2=true;Itisquestionableifthismakestheresultsofsemiempiricalcalculationsanybetter
+butatleastitispossibleinORCA.
+Youcanchangethebuilt-insemiempiricalparametersinastraightforwardfashion. Forexample:
+! ZINDO/S TightSCF DIIS NoMOPrint
+%cis NRoots 20
+MaxDim 3 # Davidson expansion space = MaxDim * NRoots
+end
+%ndoparas P[6,25] 20
+P[6,26] 20
+end
+The%ndoparasblockisthereinordertoletyouinputyourfavoritepersonalparameters. The“molecular”param-
+etersaresetusing“INTFA”(“interactionfactors”);
+%ndoparas INTFA[PP_PI] 0.585
+# The interaction factors exist for
+# ss_sigma
+(continuesonnextpage)
+9However,donottrytouseZINDO/S(orCNDO/S)forstructureoptimizations-itdoesnotmakesenseandwillleadtodisastrousresults
+becausethereisnoaccuraterepresentationofnuclearrepulsioninthesemethods.
+7.4. ChoiceofComputationalModel 483
+
+[... start of page 506 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# sp_sigma
+# sd_sigma
+# pp_sigma
+# pd_sigma
+# dd_sigma
+# pp_pi
+# pd_pi
+# dd_pi
+# dd_delta
+# the parameter entering the Coulomb integrals
+# in INDO/S
+FGAMMA 1.2
+end
+Allatomicparametersarecollectedinanarray“P”. Thefirstindexistheatomicnumberoftheelementwhose
+parameters you want to change. The second inde

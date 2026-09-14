@@ -1,0 +1,74 @@
+[... end of page 1062 ...]
+er of the vector–matrix–vector multiplications in the respective spin Hamiltonians. Unless stated otherwise,
+ORCAadoptsthefollowingconventions:
+FortheNMRshieldingtensorthenuclearZeemanHamiltonianassumestheform:
+𝐻 =−𝑔 𝛽 B(1−𝜎)I,
+𝐼 𝑁 𝑁
+whereBistheappliedmagneticfieldvector.
+FortheEPR𝑔and𝐴tensorstheEPRspinHamiltonianassumestheform:
+𝐻 =𝛽 BgS+SAI. (7.403)
+𝑆 𝑒
+1040 Chapter7. DetailedDocumentation
+
+--- Page 1063 ---
+ORCAManual,Release6.0.0
+MP2levelmagneticproperties
+Presently,hyperfinecouplings(excludingthe𝐴orb term),g-tensors,andshieldingtensorswithoutGIAOscanbe
+calculated for both canonical and RI-MP2 and double-hybrid DFT without the frozen core approximation. The
+𝐴orb termofthehyperfinecouplingsisavailableonlyforRI-MP2anddouble-hybridDFTwithandwithoutfrozen
+coreapproximation. IncasetheRIJCOSXapproximationisused,thekeywordsZ_GridX,Z_GridX_RHS,KCOpt,
+KC_GridXandKC_IntAccXarerelevant–seesectionsRIJCOSX-RI-MP2GradientsandMP2andRI-MP2Second
+Derivatives. NMR shielding and g-tensor calculations with GIAOs are available for RI-MP2 and double-hybrid
+DFTwithorwithoutafrozencore. Theimplementationisdescribedindetailinrefs[827,848]andtheavailable
+optionsareshowninsectionRI-MP2andDouble-HybridDFTResponseProperties. Notethatfordouble-hybrid
+DFTthecorrectpropertiesareprintedafterthedensityheadingcontaining“Method: MP2”and“Level: Relaxed
+density”. DLPNO-MP2(anddouble-hybrid)shieldingtensorsarealsoavailable-seesectionLocalMP2Response
+Properties.
+Nucleus-independentchemicalshielding
+Aromaticityisafundamentalconceptinchemistryandmuchattentionhasbeenpayedtoitsanalysisinquantum
+chemistry. OnepossibilitytogaininsightintoaromaticityistosampletheringcurrenteffectinNMRclosetothe𝜋-
+system. Asthisisnotdonebyinspectingthechemicalshieldingofanyoftheatoms,thisquantityiscallednucleus
+independentchemicalshielding(NICS).Usually,a“dummy”atomisplacedinthecenteroftheringand/oratsome
+distanceawayfromit. InORCA,oneneedstouseaghostatom,e.g. “H:”toensurethattheprogramgenerates
+DFTorCOSXgridpointsintheregiononinterest. Fortechnicalreasons, thisatommustalsohaveatleastone
+basisfunction,whichcanbesetwithNewGTO.Ans-functionwithasufficientlylargeexponentwillnotoverlapwith
+anyotherbasisfunctioninthemoleculeandwillthushavenoeffectontheresults,butonlysatisfythetechnical
+requirement(notethattheextragridpointsmaychangesomeofthecalculationresultsbyincreasingtheaccuracy
+of the numerical integration). If RI is used, a dummy fitting function must also be added to the AuxJ, AuxJK,
+and/orAuxCbasisset. Atypicalinputforbenzenelookslikethis:
+! TightSCF NMR PBE def2-TZVP RI def2/J
+* gzmt 0 1
+H: NewGTO S 1 1 1e6 1 end NewAuxJGTO S 1 1 2e6 1 end
+H: 1 1 NewGTO S 1 1 1e6 1 end NewAuxJGTO S 1 1 2e6 1 end
+C 1 1.39 2 90
+C 1 1.39 2 90 3 60
+C 1 1.39 2 90 4 60
+C 1 1.39 2 90 5 60
+C 1 1.39 2 90 3 -60
+C 1 1.39 2 90 6 60
+H 3 1.09 4 120 1 180
+H 4 1.09 3 120 1 180
+H 5 1.09 4 120 1 180
+H 6 1.09 5 120 1 180
+H 7 1.09 3 120 1 180
+H 8 1.09 7 120 1 180
+*
+7.54. CalculationofProperties 1041
+
+[... start of page 1064 ...]
+ORCAManual,Release6.0.0
+Shieldingtensororbitaldecomposition
+ItispossibletodecomposetheNMRshieldingtensorintoorbital-ororbitalpaircontributions. Onesuchoptionis
+theNaturalChemicalShieldinganalysis(seeSectionNaturalChemicalShieldingAnalysis(NCS)),whileanother
+ispresentedhere. Theshieldingtensorfornucleus𝐴canbeexactlydecomposedasfollows:
+𝜎𝐴 = ∑︁(︀ 𝜎𝐴,para +𝜎𝐴,dia)︀
+𝑝 𝑝
+𝑝
+𝜎𝐴,para/dia =𝜎𝐴,para/dia
++
+1∑︁(︁
+𝜎𝐴,para/dia +𝜎𝐴,para/dia
+)︁
++
+∑︁(︁
+𝜎𝐴,para/dia +𝜎𝐴,pa

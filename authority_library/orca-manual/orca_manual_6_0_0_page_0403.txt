@@ -1,0 +1,72 @@
+[... end of page 402 ...]
+eedstoaddthefollowingtagsintheORCA
+inputfile,
+XTBfortheQM2region:
+!QM/XTB ALPB(Water)
+or
+!QM/XTB DDCOSMO(Water)
+or
+!QM/XTB CPCMX(Water)
+NoXTBfortheQM2region:
+!QM/HF-3c CPCM(Water)
+IftheddCOSMO(XTB)ortheC-PCM(non-XTB)arerequested,therearetwopossibleONIOM/implicit-solvation
+methods:[873]
+380 Chapter6. RunningTypicalCalculations
+
+--- Page 403 ---
+ORCAManual,Release6.0.0
+• C-PCM/B:Theeffectofthesolventis,inthefirstplace,includedinthecalculationforthelargeQM2system.
+Oncethiscalculationfinishes,thesolvationchargeslocatedonthesurfaceofthecavityforthelargesystem
+areusedaspointchargesforthesubsequentlow-levelandhigh-levelcalculationsforthesmallsystem.
+• C-PCM/C:TheeffectofthesolventisonlyincludedinthecalculationforthelargeQM2system.
+Theusercanchooseoneschemeortheotherviathetag“solv_scheme”inthe“qmmm”block:
+%qmmm
+solv_scheme CPCM_B # CPCM_B (default)
+# CPCM_C
+end
+IftheALPBmodelortheCPCM-Xarerequested(withinQM/XTBmethods),thesolvationeffectisjustincluded
+inthecalculationforthelargeQM2system(asonedoesfortheC-PCM/Cscheme).
+QM/QM2/MMMethod
+The QM/QM2/MM method uses a combination of the subtractive scheme for the QM-QM2 part, and the addi-
+tive scheme for the (QM-QM2) - (MM) interaction. It can be used if very large QM regions are required for
+biomoleculesandexplicitlysolvatedsystems. Thesystemisdividedintoahighlevel(QM),lowlevel(QM2),and
+MMregion(MM).
+QM2Atoms
+QM2atomsneedtobedefinedforQM/QM2/MMcalculations. Theycanbedefinedeitherdirectly
+%qmmm
+QMAtoms {0:4} end # list of QM atoms (counting starts from 0) or
+QM2Atoms {5:22} end # list of QM2 atoms
+end # an atom should not occur in both lists
+*pdbfile 0 1 ubq.pdb
+orviatheoccupancycolumnofapdbfile(seeQMAtoms).
+Systemchargesandmultiplicities
+The high and low level subsystems can have different (integer) charges and multiplicities. Defining the correct
+charges and multiplicities is important. The charge and multiplicity defined via the coordinate section defines
+the charge and multiplicity of the high level region (QMAtoms). The user still needs to define the charge and
+multiplicityofthemediumsystem(correspondingtothesumofthechargeofthehighlevelandlowlevelregions,
+andcorrespondingtotheoverallmultiplicityofthecombinedhighandlowlevelregion). ThechargeoftheMM
+regionisdeterminedbasedontheMMparametersprovidedbytheforcefield.
+%qmmm
+QMAtoms {0:3} end # high level region
+Charge_Medium 0 # charge of the medium system. Default 0.
+Mult_Medium 1 # multiplicity of the medium system. Default 0.
+end
+*xyz 0 1 # charge and mult. of the high level region, i.e. atoms 0 to 3
+6.16. ORCAMultiscaleImplementation 381
+
+[... start of page 404 ...]
+ORCAManual,Release6.0.0
+Availablelowlevelmethods
+ThefollowingQM2(lowlevel)methodsareavailable:
+!QM/XTB/MM
+!QM/XTB1/MM
+!QM/XTB0/MM
+!QM/HF-3C/MM
+!QM/PBEH-3C/MM
+!QM/R2SCAN-3C/MM
+!QM/PM3/MM
+!QM/AM1/MM
+!QM/QM2/MM
+ForinformationonhowtospecifythecustomQM/QM2/MMmethodpleaseseeAvailableQM2Methods.
+ExampleInput
+AnexampleforaQM

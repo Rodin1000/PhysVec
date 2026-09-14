@@ -1,0 +1,148 @@
+Title: Code Generation Plan for Reproducing Quantum Chemistry Calculations (ORCA-focused)
+
+-----------------------------------------------------------------------------------------------
+Overall Goal
+-----------------------------------------------------------------------------------------------
+Generate ONE executable, practical quantum-chemistry input file that reproduces the results of a
+research paper using the provided information. The generated input must be runnable as-is
+(assuming referenced files exist) and must faithfully implement the plan.
+
+You MUST use MCP tools to look up missing details in the local library before writing the input.
+
+-----------------------------------------------------------------------------------------------
+[Input]
+-----------------------------------------------------------------------------------------------
+You are given:
+
+1. plan
+   A detailed plan describing currently available information for reproducing the calculations:
+   - Intended calculation settings
+   - Theoretical methods/models
+   - Constraints/approximations/expectations
+
+2. summary of the calculation setup
+   A concise description of:
+   - Computation types (optimization, frequencies, single points, excited states, etc.)
+   - Levels of theory, basis sets, solvation, physical approximations
+   - Known numerical settings (convergence, grids, integration, etc.)
+
+-----------------------------------------------------------------------------------------------
+[Coding language constraint]
+-----------------------------------------------------------------------------------------------
+The "coding language" is the input syntax of the chosen quantum-chemistry package.
+
+You are NOT allowed to use general-purpose programming languages (Python/Julia/C++/etc.).
+All output MUST be valid input syntax for one package listed in "software_packages".
+For this prompt, the intended target is ORCA (code_type = "orca").
+
+-----------------------------------------------------------------------------------------------
+[MCP usage: REQUIRED pre-lookup]
+-----------------------------------------------------------------------------------------------
+Before generating the ORCA input, you MUST use MCP to retrieve relevant guidance from the
+local library.
+
+Local library note:
+- Prior RAG/manual lookups are stored as JSON files, each named after a specific question.
+- These files contain questions + retrieved results (examples/rules/keywords).
+
+Allowed MCP usage:
+1) You MAY use the MCP server "filesystem" ONLY to read from the designated reference-project
+   folder(s) that store these prior query JSON results.
+2) You are NOT allowed to browse other project directories or unrelated files.
+3) You are NOT allowed to write/modify/append/move/delete any files.
+4) MCP tool arguments must be a JSON object (never a JSON string).
+
+During code construction:
+- If you still have questions, use MCP to search the reference-project folder for the
+  closest matching prior query result(s).
+- If a needed detail is not found, clearly mark it as unresolved (see "remaining_unclear_factors").
+
+-----------------------------------------------------------------------------------------------
+[Instructions: input-file generation - SINGLE STEP ONLY]
+-----------------------------------------------------------------------------------------------
+You will generate ONE ORCA input content string (ONE job, ONE input file).
+
+1) The output MUST be a single-step, standalone ORCA job:
+   - Include method/basis, charge, multiplicity, and all required keywords.
+2) If the workflow depends on outputs from other calculations:
+   - DO NOT generate other inputs.
+   - Explicitly name required external files (e.g., *.gbw, *.hess, *.xyz) and assume they exist.
+   - Reference them correctly in THIS input file using valid ORCA syntax.
+3) You may use a placeholder ONLY for the molecular geometry, and only if no geometry is available.
+
+Coverage expectations (apply when relevant to the plan/paper):
+- Charge, multiplicity, reference type (RHF/ROHF/UHF or DFT)
+- Functional choice and dispersion (D3BJ/D4/etc.) or justified absence
+- Basis sets (including aux basis/RI settings if applicable)
+- SCF and numerical settings (thresholds, grids, integration, stability)
+- Relativistic treatment (ECP/DKH/ZORA/X2C) and SOC if required
+- Solvation/environment model (CPCM/SMD/etc.) including solvent name
+- Correlated methods (MP2/CCSD(T)/DLPNO/etc.) with correct variants
+- Excited states (TDDFT/ROCIS/EOM-CC/etc.) with number of roots/states
+- Frequencies/thermochemistry when required for minima/TS validation
+- Property modules (NMR/EPR/etc.) when the plan/paper requires them
+- Add explicit in-input comments for any inferred/assumed settings
+
+CRITICAL:
+- You MUST NOT output incomplete or placeholder input blocks (e.g., "TODO", "<FILL>", "...").
+
+-----------------------------------------------------------------------------------------------
+[NEW REQUIRED ADDITION: Learned facts + remaining unclear factors]
+-----------------------------------------------------------------------------------------------
+In addition to the executable input, you MUST return two extra fields in the output JSON:
+
+A) "learned_facts"
+   - A concise list summarizing what you learned from MCP/library lookups.
+   - Each entry must be a concrete, actionable fact (keyword rule, syntax rule, option default,
+     example pattern, best practice) that influenced your input construction.
+   - Do NOT include provenance or filenames.
+
+B) "remaining_unclear_factors"
+   - A list of unresolved ambiguities after MCP lookup.
+   - Each entry MUST include:
+     - "item": what is unclear/missing
+     - "why_it_matters": what it affects in reproducibility/execution
+     - "needed_to_resolve": the exact missing info required
+     - "assumption_used": null if none; otherwise the explicit assumption used to keep executability
+
+These must be separate JSON fields (NOT comments inside code_content).
+
+-----------------------------------------------------------------------------------------------
+[Output format]
+-----------------------------------------------------------------------------------------------
+Your output MUST consist of two parts:
+
+1. **JSON block**: A JSON object in ```json and ``` with metadata (do NOT put code_content in JSON):
+   - "subplot_name": The subplot/result identifier from the plan (figure/table element being reproduced).
+   - "code_type": Must be "orca" (lowercase).
+   - "learned_facts": [...]
+   - "remaining_unclear_factors": [...]
+
+2. **Code block**: The full ORCA input inside <CODE> and </CODE>. One complete ORCA input file (ONE job).
+   Put brief purpose/context at the top as ORCA comments. The input must be copy-paste runnable as a standalone ORCA job.
+
+**CRITICAL:** Use </CODE> to close the code block, NOT <CODE> again.
+
+Example:
+```json
+{
+  "subplot_name": "...",
+  "code_type": "orca",
+  "learned_facts": ["..."],
+  "remaining_unclear_factors": [...]
+}
+```
+
+<CODE>
+...full ORCA input...
+</CODE>
+
+-----------------------------------------------------------------------------------------------
+[Response constraints]
+-----------------------------------------------------------------------------------------------
+- Return ONLY the single JSON object (no extra prose).
+- Use EXACT keys in JSON: "subplot_name", "code_type", "learned_facts", "remaining_unclear_factors". Put code in <CODE>...</CODE>.
+- Put explanations/assumptions inside:
+  - "learned_facts" and "remaining_unclear_factors", and/or
+  - native ORCA comments inside "code_content" where appropriate.
+- Ensure the single ORCA input is executable standalone (given referenced files exist).

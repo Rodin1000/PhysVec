@@ -1,0 +1,72 @@
+[... end of page 107 ...]
+tsareautomaticallychosenandcannotbechanged.
+• All other basis set choices, externally defined bases etc. will be ignored — the automatic procedure only
+workswiththedefaultbasissets!
+• Thebasissetswiththe“core”postfixcontaincorecorrelationfunctions. Bydefaultitisassumedthatthis
+meansthatthecoreelectronsarealsotobecorrelatedandthefrozencoreapproximationisturnedoff. How-
+ever,thiscanbeoverriddeninthemethodblockbychoosing,e.g. %method frozencore fc_electrons
+end!
+6.1. SinglePointEnergiesandGradients 85
+
+--- Page 108 ---
+ORCAManual,Release6.0.0
+• Sofar,theextrapolationisonlyimplementedforsinglepointsandnotforgradients. Hence,geometryopti-
+mizationscannotbedoneinthisway.
+• The extrapolation method should only be used with very tight SCF convergence criteria. For open shell
+methods,additionalcautionisadvised.
+Thisgives:
+Alpha(2/3) : 4.420 (SCF Extrapolation)
+Beta(2/3) : 2.460 (correlation extrapolation)
+SCF energy with basis cc-pVDZ: -76.026430944
+SCF energy with basis cc-pVTZ: -76.056728252
+Extrapolated CBS SCF energy (2/3) : -76.066581429 (-0.009853177)
+MDCI energy with basis cc-pVDZ: -0.214591061
+MDCI energy with basis cc-pVTZ: -0.275383015
+Extrapolated CBS correlation energy (2/3) : -0.310905962 (-0.035522947)
+Estimated CBS total energy (2/3) : -76.377487391
+Thus,theerrorinthetotalenergyisindeedstronglyreduced. Letuslookatthemorerigorous3/4extrapolation:
+Alpha(3/4) : 5.460 (SCF Extrapolation)
+Beta(3/4) : 3.050 (correlation extrapolation)
+SCF energy with basis cc-pVTZ: -76.056728252
+SCF energy with basis cc-pVQZ: -76.064381269
+Extrapolated CBS SCF energy (3/4) : -76.066687152 (-0.002305884)
+MDCI energy with basis cc-pVTZ: -0.275383016
+MDCI energy with basis cc-pVQZ: -0.295324345
+Extrapolated CBS correlation energy (3/4) : -0.309520368 (-0.014196023)
+Estimated CBS total energy (3/4) : -76.376207520
+Inourexperience,theANObasissetsextrapolatesimilarlytothecc-basissets. Hence,repeatingtheentirecalcu-
+lationwithExtrapolate(3,ANO) gives:
+Estimated CBS total energy (2/3) : -76.377652792
+Estimated CBS total energy (3/4) : -76.376983433
+Whichiswithin1mEhoftheestimatedCCSD(T)basissetlimitenergyinthecaseofthe3/4extrapolationand
+within2mEhforthe2/3extrapolation.
+Forlargermolecules,thebottleneckofthecalculationwillbetheCCSD(T)calculationwiththelargerbasisset.
+Inordertoavoidthisexpensive(orprohibitive)calculation,itispossibletoestimatetheCCSD(T)energyatthe
+basissetlimitas:
+𝐸(CCSD(T);𝑌) ≈𝐸(CCSD(T);𝑋)+𝐸(MP2;∞)−𝐸(MP2;𝑋) (6.3)
+corr corr corr corr
+ThisassumesthatthebasissetdependenceofMP2andCCSD(T)issimilar. Onecanthenextrapolateasbefore.
+Alternatively,thestandardway—asextensivelyexercisedbyHobzaandco-workers—istosimplyuse:
+𝐸(CCSD(T);CBS) ≈𝐸(𝑌) +𝐸(CCSD(T);𝑋)+𝐸(MP2;∞)−𝐸(MP2;𝑋) (6.4)
+total SCF corr corr corr
+Theappropriatekeywordis:
+! ExtrapolateEP2(2/3,ANO,MP2) TightSCF Conv Bohrs
+* int 0 1
+O 0 0 0 0 0 0
+H 1 0 0 1.81975 0 0
+H 1 2 0 1.81975 105.237 0
+*
+86 Chapter6. RunningTypicalCalculations
+
+[... start of page 109 ...]
+ORCAManual,Release6.0.0
+Thiscreatesthefollowingoutput:
+Alpha : 5.410 (SCF Extrapolation)
+Beta : 2.430 (correlation extrapolation)
+SCF energy with basis ano-pVDZ: -76.059178452
+SCF energy with basis ano-pVTZ: -76.064774379
+Extrapolated CBS SCF energy : -76.065995735 (-0.001221356)
+MP2 energy with basis ano-pVDZ: -0.219202871
+MP2 energy with basis ano-pVTZ: -0.267058634
+Extrapolated CBS correlation energy : -0.295568604 (-0.028509970)
+CCSD(T) correlation energy with ba

@@ -1,0 +1,53 @@
+[... end of page 196 ...]
+youcangive
+thisseriesinsquarebrackets,[]. Thegeneralsyntaxisasfollows:
+B N1 N2 = initial-value, final-value, NSteps
+or:
+B N1 N2 [value1 value2 value3 ... valueN]
+• Inadditiontobondlengthsyoucanalsoscanbondanglesanddihedralangles:
+B N1 N2 = ... # bond length
+A N1 N2 N3 = ... # bond angle
+D N1 N2 N3 N4 = ... # dihedral angle
+174 Chapter6. RunningTypicalCalculations
+
+--- Page 197 ---
+ORCAManual,Release6.0.0
+Tip:
+• Asinconstrainedgeometryoptimizationsitispossibletostarttherelaxedsurfacescanwithadifferentscan
+parameterthanthevaluepresentinyourmolecule. Butkeepinmindthatthisvalueshouldnotbetoofar
+awayfromyourinitialstructure.
+Amorechallengingexampleisshownbelow. Here,theH-atomabstractionstepfromCH toOH-radicaliscom-
+4
+putedwitharelaxedsurfacescan(videsupra). Thejobwasrunasfollows:
+! B3LYP SV(P) Opt SlowConv NoTRAH
+%geom scan B 1 0 = 2.0, 1.0, 15 end end
+* int 0 2
+C 0 0 0 0.000000 0.000 0.000
+H 1 0 0 1.999962 0.000 0.000
+H 1 2 0 1.095870 100.445 0.000
+H 1 2 3 1.095971 90.180 119.467
+H 1 2 3 1.095530 95.161 238.880
+O 2 1 3 0.984205 164.404 27.073
+H 6 2 1 0.972562 103.807 10.843
+*
+It is obvious that the reaction is exothermic and passes through an early transition state in which the hydrogen
+jumpsfromthecarbontotheoxygen. Thestructureatthemaximumofthecurveisprobablyaverygoodguessfor
+thetruetransitionstatethatmightbelocatedbyatransitionstatefinder.
+You will probably find that such relaxed surface scans are incredibly useful but also time consuming. Even the
+simple job shown below required several hundred single point and gradient evaluations (convergence problems
+appearfortheSCFclosetothetransitionstateandforthegeometryoncethereactionpartnersactuallydissociate
+–thisistobeexpected). Yet,whenyousearchforatransitionstateoryouwanttogetinsightintotheshapesof
+thepotentialenergysurfacesinvolvedinareactionitmightbeagoodideatousethisfeature. Onepossibilityto
+easetheburdensomewhatistoperformtherelaxedsurfacescanwitha“fast”methodandasmallerbasissetand
+thendosinglepointcalculationsonalloptimizedgeometrieswithalargerbasissetand/orhigherleveloftheory.
+Atleastyoucanhopethatthisshouldgiveareasonableapproximationtothedesiredsurfaceatthehigherlevelof
+theory–thisisthecaseifthegeometriesatthelowerlevelarereasonable.
+6.3. GeometryOptimizations,SurfaceScans,TransitionStates,MECPs,ConicalIntersection1s7,5
+IRC,NEB
+
+[... start of page 198 ...]
+ORCAManual,Release6.0.0
+Fig.6.22: RelaxedsurfacescanfortheH-atomabstractionfromCH byOH-radical(B3LYP/SV(P)).
+4
+MultidimensionalScans
+AfterseveralrequestsfromourusersORCAnowallowsuptothreecoordinatestobe

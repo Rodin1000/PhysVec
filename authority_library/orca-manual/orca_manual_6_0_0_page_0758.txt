@@ -1,0 +1,57 @@
+[... end of page 757 ...]
+teapproximationtotheunstablemodeatthesaddlepoint.
+The initial Hessian matrix needed for the eigenvector-following calculation can either be computed analytically
+(if available) or taken as the Almlöf empirical Hessian matrix [264]. If the Almlöf Hessian matrix is used, the
+curvatureattheCIisestimatedbyusingafinitedifferenceapproximation(i.e. usingtheatomforceactingonthe
+neighboringimagestoCI)andusedtoscalethecorrespondingeigenvalueoftheselectedeigenvector,allowingthe
+eigenvector-followingcalculationtobestartedfromaHessianmatrixofcorrectform. Thetypical‘%geom’block
+canbeusedtomodifythesettingsoftheeigenvector-followingcalculation.
+7.29. NudgedElasticBandMethod 735
+
+--- Page 758 ---
+ORCAManual,Release6.0.0
+Fig. 7.23: Illustration of how the NEB-TS method works on a two-dimensional Müller-Brown energy surface,
+𝐸(𝑥,𝑦) [539]. The calculation is started from a linear interpolation between the reactant and product energy
+minima,using𝑀 = 10. Theimagesaredisplacedintheorthogonaldirectiontothepath(redcurves)usingthe
+CI-NEBalgorithm,untilaroughconvergencetotheminimumenergypath(whitedashedcurve)isobtained. The
+climbing image then provides an approximate saddle point configuration that can be used to start eigenvector-
+following partitioned rational function optimization to accurately (and swiftly) identify the (higher energy) first
+ordersaddlepoint. ThefigureistakenfromRef. [4]
+7.29.12 FAST-NEB-TS and LOOSE-NEB-TS
+SinceourfirstNEB-TSimplementation,weinvestigatedalotmoresettingsandvariants,see[4]. Basedonthose
+findings,twonewalgorithmsandconvergencethresholdsettingshavebeenimplementedintoORCA.FAST-NEB-
+TS corresponds to the IDPP-TS in the paper, and LOOSE-NEB-TS corresponds to the actual NEB-TS defaults,
+whicharedefinedinthepaper. Bothfeatures, FAST-andLOOSE-NEB-TS,showslightlylowerrobustness, but
+needsignificantlylessNEBcycles.
+7.29.13 NEB / NEB-TS and TD-DFT
+TheNEBandNEB-TSalgorithmnowalsoworksincombinationwithTD-DFT.Theinput:
+! NEB-TS
+%neb
+product "product.xyz"
+end
+%tddft
+NRoots 1
+IRoot 1
+end
+not only computes the MEP and TS of the first excited state, but it also prints out (after NEB convergence) the
+excitedstateaswellasgroundstateenergiesovertheMEP:
+-----------------------------------------
+Image E0 Root 1
+(continuesonnextpage)
+736 Chapter7. DetailedDocumentation
+
+[... start of page 759 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+-----------------------------------------
+0 -67.203 0.000
+1 -66.443 1.517
+2 -54.382 5.774
+3 -42.483 10.473
+4 -32.798 14.323
+5 -28.056 16.108
+6 -34.102 13.915
+7 -48.125 8.249
+8 -64.188 2.212
+9 -67.066 0.018
+YoucanevenrequestanNEB-TScalculationonthegroundstatePES,andatthesametimegaininformation

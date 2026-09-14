@@ -1,0 +1,64 @@
+[... end of page 397 ...]
+softhetypeQM2-QM1-MM1,andtorsionsofthetypeQM3-QM2-QM1-MM1. Other
+QM-MMmixedbondedinteractions(withmorethantwoMMatomsinvolved)areincluded. Theuserisallowed
+toincludethedescribedinteractions,whichiscontrolledviathefollowingkeywords:
+%qmmm
+DeleteLADoubleCounting true # Neglect bends (QM2-QM1-MM1) and torsions
+# (QM3-QM2-QM1-MM1). Default true.
+DeleteLABondDoubleCounting true # Neglect bonds (QM1-MM1)
+end
+6.16. ORCAMultiscaleImplementation 375
+
+--- Page 398 ---
+ORCAManual,Release6.0.0
+ChargeAlteration
+IfQMandMMatomsareconnectedviaabond(definedinthetopologyfile),thechargeoftheclose-byMMatom
+(anditsneighboringatoms)hastobemodifiedinordertopreventoverpolarizationoftheelectrondensityofLA
+andQMregion. ThischargealterationisautomaticallytakencareofbyORCA.ORCAprovidesthemostpopular
+schemesthatcanbeusedtopreventoverpolarization:
+CS
+ChargeShift-ShiftthechargeoftheMMatomawaytotheMM2atomssothattheoverallchargeisconserved
+RCD
+RedistributedChargeandDipole-ShiftthechargeoftheMMatomsothattheoverallchargeanddipoleis
+conserved
+Z0
+Keepchargesastheyare. ThisMMatomwillprobablyleadtooverpolarization
+Z1
+DeletethechargeontheMM1atom(nooverallchargeconservation)
+Z2
+DeletethechargesontheMM1atomandonitsfirst(MM2)neighbors(nooverallchargeconservation)
+Z3
+DeletethechargesontheMM1atomandonitsfirst(MM2)andsecond(MM3)neighbors(nooverallcharge
+conservation)
+EmbeddingTypes
+Thefollowingembedingschemesareavailable:
+Electrostatic
+TheelectrostaticinteractionbetweenQMandMMsystemiscomputedattheQMlevel. Thus, thecharge
+distributionoftheMMatomscanpolarizetheelectrondensityoftheQMregion. TheLJinteractionbetween
+QMandMMsystemiscomputedattheMMlevel.
+%qmmm
+Embedding Electrostatic # Electrostatic (Default)
+# Mechanical
+end
+Intheschemeofelectrostaticembedding, theevaluationoftheelectrostaticpotentialgeneratedbytheMMpart
+canbeacceleratedbyusingtheFMMalgorithm(describedinreference[317]). Thiswillspeedupthebuildingof
+theFockMatrix. ThedefaultrecommendedsetupcanbecalledusingtheFMM-QMMMkeyworddirectlyinthe
+keywordsline. However, moredetailsaboutthealgorithmparametersandallinputoptionscanbefoundin(see
+alsoparagraphFastMultipoleMethod)
+! FMM-QMMM
+It is recommended to use that option whenever the MM part is composed of more than 10,000 atoms (or point
+chargesforECMmethods).
+376 Chapter6. RunningTypicalCalculations
+
+[... start of page 399 ...]
+ORCAManual,Release6.0.0
+6.16.2 Additive QMMM
+TheminimuminputnecessaryforanadditiveQM/MMcalculationlooksasfollows.
+!QMMM
+%qmmm
+QMAtoms {0 1 2 27 28} end
+ORCAFFFilename "UBQ.ORCAFF.prms"
+end
+6.16.3 ONIOM Methods
+For the simulation of large systems with up to 10000 atoms, or for large QM regions in biomolecules, ORCA
+provides the QM/QM2 and 

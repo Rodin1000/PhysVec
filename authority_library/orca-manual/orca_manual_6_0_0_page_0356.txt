@@ -1,0 +1,78 @@
+[... end of page 355 ...]
+SpinElemPairskeyword. Analogously,theSpinSpinAtomPairskeywordselects
+theactualpairsofnucleitoconsider. Theunionofthelattertwooptionsisusedtoreducetheselectionmadeusing
+theNucleiinput,afterwhichSpinSpinRThreshisapplied.
+Hereisanotherexampleillustratingtheseadditionaloptions:
+! B3LYP EPR-II
+* xyz 0 1
+C -1.226922 0.247095 -0.000000
+C -0.013548 -0.546773 0.000000
+(continuesonnextpage)
+6.12. CalculationofProperties 333
+
+--- Page 356 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H -2.092804 -0.413336 0.000000
+H -1.249625 0.875419 -0.889165
+H -1.249625 0.875419 0.889165
+O 1.099618 0.302262 -0.000000
+H 0.009152 -1.175097 0.889165
+H 0.009152 -1.175097 -0.889165
+H 1.892077 -0.216216 0.000000
+*
+%eprnmr
+nuclei = all C { ssall, ist = 13 };
+nuclei = all H { ssall, ist = 1 };
+nuclei = all O { ssall, ist = 17 };
+PrintReducedCoupling true
+SpinSpinRThresh 3.0 # Angstrom
+SpinSpinElemPairs {C C} {O *} # "*" means any element
+SpinSpinAtomPairs {8 *} # indices start from 0
+# Final selection:
+# C 0 - C 1
+# C 0 - O 5
+# C 1 - O 5
+# C 1 - H 8
+# H 3 - O 5
+# H 4 - O 5
+# O 5 - H 6
+# O 5 - H 7
+# O 5 - H 8
+# H 6 - H 8
+# H 7 - H 8
+end
+NMRSpectra
+FromthecomputedNMRshieldingsandspin-spincouplingconstants,thecoupledNMRspectracanbesimulated.
+ThemosttypicalNMRexperimentsaredecoupled13𝐶 andcoupled1𝐻 spectra,sowewillfocusonthesehere.
+ForsimulatingafullNMRspectrum,wewilluseethylcrotonateasanexample,andthreestepsarerequired: 1)
+computationofthespin-spincouplingconstants,2)computationofthechemcialshieldingsand3)simulationofthe
+spectrumusingaspin-Hamiltonianformalism. Notethatthesestepscanbecarriedoutindependentlyanddifferent
+levelsoftheorycanbeusedforshieldingsandcouplingsandtheorderofsteps1and2doesn’tmatter.
+Furthermore,ifthespectraaretobesimulatedwithTMSasreference,theshieldingsforTMSarerequired(thehy-
+drogenandcarbonvaluesinthiscaseare31.77and188.10ppm,respectively). Hereistheinputforthecalculation
+forthecouplingconstants,whichisnamedethylcrotonate_sscc.inp:
+! PBE pcJ-3 autoaux tightscf
+*xyzfile 0 1 ethylcrotonate.xyz
+%eprnmr
+Nuclei = all H {ssall}
+end
+The spin-spin coupling constants will be stored in the file ethylcrotonate_sscc.property.txt, which the
+simulationoftheNMRspectrumwillneedtoread. TheNMRshieldingsandwillbecomputedinthenextstep,
+forwhichtheinputethylcrotonate_nmr.inplookslikethis:
+!TPSS pcSseg-3 autoaux tightscf NMR
+*xyzfile 0 1 ethylcrotonate.xyz
+334 Chapter6. RunningTypicalCalculations
+
+[... start of page 357 ...]
+ORCAManual,Release6.0.0
+ThefinalNMRspectrumsimulationiscarriedoutusingorca_nmrspectrum,whichrequiresaseparateinputfile
+ethylcrotonate.nmrspecwhichlookslikethis(notetherequiredfinalENDstatement):
+NMRShieldingFile = "ethylcrotonate_nmr" #property file for shieldings
+NMRCouplingFile = "ethylcrotonate_sscc" #property file for couplings
+NMRSpecFreq = 80.00 #spectrometer freq [MHz] (default 400)
+PrintLevel = 0 #PrintLevel for debugging info
+NMRCoal = 1.0 #threshold for merged lines [Hz] (default 1)
+NMRREF[1] 31.77 #shielding for 1H reference [ppm]
+NMRREF[6] 188.10 #shielding for 13C reference [ppm]
+NMREquiv #lists of NMR-

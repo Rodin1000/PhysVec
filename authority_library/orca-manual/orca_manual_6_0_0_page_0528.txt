@@ -1,0 +1,70 @@
+[... end of page 527 ...]
+ded ... 0.387 sec
+Here,thesmallesteigenvalueisprinted,alongwiththecurrentlyusedoverlapthreshold,andthenumberoffunc-
+tionsbelowthis(whichwillbedropped). Itisarecommendedconsistencychecktolookforanequalnumberof
+zeroentriesamongorbitalenergiesoncetheSCFprocedureconverged. Notethatforfunctionsbelongingtozero
+eigenvaluesnolevelshiftsareapplied!
+Incasethatredundantvectorswereremovedfromthebasis,! MORead NoItershouldonlybeusedinconjunction
+withthesameSThreshasintheoriginalcalculation,otherwisetheresultswillbeinconsistent. ! MOReadmay
+stillbeusedtogetherwithachangeinSThresh,butafewSCFiterationswillberequired.
+7.5. ChoiceofBasisSet 505
+
+--- Page 528 ---
+ORCAManual,Release6.0.0
+AutomaticAdjustmentsforNearLinear-DependentCases
+StartingfromORCA6,thereisnowakeywordcalledDiffSThresh,whichcontrolsanautomatictighteningofthe
+integralcutoffparametersThreshandTCutincasesmalleigenvaluesoftheoverlapmatrixarefound. Wefound
+this to be important in some calculations using diffuse basis, and these parameters are set to a minimum value
+ofThresh=1e-12andTCut=1e-13incasethe“Smallesteigenvalue”shownabovegetsbelowthatnumber. Ifthe
+cutoffsarealreadytighterthanthat,forinstancewhenusing!VeryTightSCF,thannothingwillhappen.
+WefoundempiricallythatthesearesafenumberstomitigatenoiseandincreasetherobustnessoftheSCFproce-
+dure,thustheyareenforcedbydefault. Thedefaultis1e-6andthiscanbeturnedoffbysetting%SCF DiffSThresh
+-1 ENDontheinputincaseyoudon’twantthisautomaticadjustmenttohappen.
+RemovalofRedundantBasisFunctions
+Whiletheapproachdescribedaboveisusuallysuccessfulinremovinglineardependenciesfromtheorbitalbasisset,
+theauxiliarybasisusedinRIisnotorthogonalizedthesameway. Instead,theRIlinearequationsystemissolved
+usingaCholeskydecomposition(CD)oftheauxiliarybasisCoulombmetric. Iftheauxiliarybasisisredundant,
+theCDfailsandtheprogramusuallyaborts. OnesimplesolutionimplementedinORCAistoperformapivoted
+Choleskydecomposition(PCD)ofthemetric,terminatingatagiventhreshold. Then,theshellscontributingtothe
+nullspaceareremovedfromthebasisatthebeginningofthecalculation. Thiscanberequestedforanyofthebasis
+setsusingeithertheoverlaportheCoulombmetric. ItismostappropriatefortheAuxJ/AuxJK/AuxCbasisusing
+the Coulomb metric. The truncated basis can be examined using the !PrintBasis keyword. Often, functions
+mayberemovedforsomeatomsofagivenelement,butkeptforothers. Aslongasthethresholdislowenough,
+i.e. onlytrulyredundantfunctionsareremoved,thisshouldnotaffectthemolecularsymmetryoftheresults.
+%basis
+PCDTrimBas Overlap # Trim the orbital basis in the overlap metric
+PCDTrimAuxJ Coulomb # Trim the AuxJ basis in the Coulomb metric
+PCDTrimAuxJK Coulomb # Trim the AuxJK basis in the Coulomb metric
+PCDTrimAuxC Coulomb # Trim the AuxC basis in the Coulomb metric
+PCDThresh -1 # Threshold for the PCD: chosen automatically if <0
+end
+7.6 Choice of Initial Guess and Restart of SCF Calculations
+TheinitialguessisanimportantissueineachSCFcalculation. Ifthisguessisreasonable,theconvergenceofthe
+procedurewillbemuchbetter. ORCAmakessomeefforttoprovideagoodinitialguessandgivestheuserenough
+flexibilitytotailortheinitialguesstohisorherneeds.
+Theinitialguessisalsocontrolledviathe%scfblockandthevariablesGuess,MOInpandGuessMode.
+%scf
+Guess HCore # One electron matrix
+Hueckel # Extended H\"uckel guess
+PAtom # Polarized atomic densities
+PModel # Model potential
+MORead # Restart from an earlier calc.
+MOInp "Name.gbw" # orbitals used for MORead
+GuessMode FMatrix # FMatrix projection
+CMatrix # Corresponding orbital projection
+AutoStart true # try to use the orbitals from the existing
+# GBW file of the same name (if possible)
+# (default)
+false # don't use orbitals from existing GBW file
+end
+506 Chapter7. DetailedDocumentation
+
+[... start of page 529 ...]
+ORCAManual,Release6.0.0
+7.6.1 AutoStart feature
+OlderversionsofORCAalwayscreatedanewGBWfileatthebeginningoftherunnomatterwhetherafileof
+the same name existed or perhaps contained orbitals. Now, in the case of single-point calculations the program
+automatically checks if a .gbw file of the same name exists. If yes, the program checks if it contains orbitals
+andallothernecessaryinformationforarestart. Ifyes,thevariableGuessissettoMORead. Theexisting.gbw
+fileisrenamedtoBaseName.gesandMOInpissettothisfilename. IftheAutoStartfeatureisnotdesired,set
+AutoStart false in the %scf block or give the keyword !NoAutoStart in

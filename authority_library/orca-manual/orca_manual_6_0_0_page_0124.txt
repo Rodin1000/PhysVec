@@ -1,0 +1,70 @@
+[... end of page 123 ...]
+necanconstructasubsystemforMOi. Thedefault
+valueofCIMTHRESHis0.001. Ifaccurateresultsareneeded,atighterCIMTHRESHmustbeused.
+2. Since ORCA 4.1, the neglected correlations between LMO i and LMOs outside the MO domain of i are
+consideredaswell. Theseweakcorrelationsareapproximatelyevaluatedbydipolemomentintegrals. With
+thiscorrection, theCIMresultsof3dimensionalproteinsaresignificantlyimproved. About99.8%ofthe
+correlationenergiesarerecovered.
+6.1. SinglePointEnergiesandGradients 101
+
+--- Page 124 ---
+ORCAManual,Release6.0.0
+The CIM can invoke different single reference correlation methods for the subsystem calculations. In ORCA
+the CIM-RI-MP2, CIM-CCSD(T), CIM-DLPNO-MP2 and CIM-DLPNO-CCSD(T) methods are available. The
+CIM-RI-MP2andCIM-DLPNO-CCSD(T)havebeenprovedtobeveryefficientandaccuratemethodstocompute
+correlationenergiesofverybigmolecules,containingafewthousandatoms.[340]
+TheusageofCIMinORCAissimple. ForCIM-RI-MP2,
+#
+# CIM-RI-MP2 calculation
+#
+! RI-MP2 cc-pVDZ cc-pVDZ/C CIM
+%CIM
+CIMTHRESH 0.0005 # Default value is 0.001
+end
+* xyzfile 0 1 CIM.xyz
+ForCIM-DLPNO-CCSD(T),
+#
+# CIM-DLPNO-CCSD calculation
+#
+! DLPNO-CCSD(T) cc-pVDZ cc-pVDZ/C CIM
+* xyzfile 0 1 CIM.xyz
+TheparallelefficiencyofCIMhasbeensignificantlyimproved.[340]Exceptforafewdomainconstructionsub-
+steps,theCIMalgorithmcanachieveveryhighparallelefficiency. SinceORCA4.1,theparallelversiondoesnot
+supportWindowsplatformanymoreduetotheparallelizationstrategy. ThegeneralizationofCIMfromclosed-
+shelltoopen-shell(multi-reference)willalsobeimplementedinthenearfuture.
+ArbitraryOrderCoupled-ClusterCalculations
+ORCAfeaturesaninterfacetoKallay’spowerfulMRCCprogram. Thisprogrammustbeobtainedseparately. The
+interfaceisrestrictedtosinglepointenergiesbutcanbeusedforrigidscancalculationsornumericalfrequencies.
+Theuseoftheinterfaceissimple:
+#
+# Test the MRCC code of Mihael Kallay
+#
+! cc-pVDZ Conv SCFConv10 UseSym
+%mrcc method "CCSDT"
+ETol 9
+end
+* xyz 0 1
+F 0 0 0
+H 0 0 0.95
+*
+TheMethodstringcanbeanyof:
+# The excitation level specification can be anything
+# like SD, SDT, SDTQ, SDTQP etc.
+%mrcc method "CCSDT"
+"CCSD(T)"
+"CCSD[T]"
+"CCSD(T)_L" (the lambda version)
+"CC3"
+"CCSDT-1a"
+(continuesonnextpage)
+102 Chapter6. RunningTypicalCalculations
+
+[... start of page 125 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+"CCSDT-1b"
+"CISDT"
+Itisnotagoodidea,ofcourse,tousethiscodeforCCSDorCCSD(T)orCISD.Itsrealpowerliesinperforming
+thehigherordercalculations. Open-shellcalculationscanpresentlynotbedonewiththeinterface.
+Notealsothatcertainhigh-orderconfigurationinteractionorcoupledclustermethods,suchasCISDT,CISDTQ,
+CC3andCCSDTetc.,havenowbeenimplementednativelyinORCAintheAUTOCI

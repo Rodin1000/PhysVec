@@ -1,0 +1,71 @@
+[... end of page 467 ...]
+int true # reduce printout after the first point
+# default=true
+# The initial guess can be changed after the first point.
+# The default is MORead. The MOs of the previous point will,
+# in many cases, be a very good guess for the next point.
+# However, in some cases you may want to be more conservative
+# and use a general guess.
+(continuesonnextpage)
+7.2. MoreonCoordinateInput 445
+
+--- Page 468 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+ScanGuess OneElec # the one-electron matrix
+Hueckel # the extended Hueckel guess
+PAtom # the PAtom guess
+PModel # the PModel guess
+MORead # MOs of the previous point
+end
+Note:
+• You can scan along normal modes of a Hessian using the NMScan feature as described in section Normal
+ModeScanCalculationsBetweenDifferentStructures.
+• ThesurfacescanoptionsarealsosupportedinconjunctionwithTD-DFT/CISorMR-CIcalculations(see
+sectionPotentialEnergySurfaceScans).
+7.2.3 Mixing internal and Cartesian coordinates
+InsomecasesitmaybepracticaltodefinesomeatomicpositionsinCartesianandsomeininternalcoordinates.
+Thiscanbeachievedbyspecifyingallcoordinatesinthe*intblock: using“000”asreferenceatomsindicates
+Cartesiancoordinates. Notethatforthefirstatomtheflagsare“111”,as“000”wouldbethenormalvaluesfor
+internalcoordinates. Consider,forexample,therelaxedsurfacescanfromsectionRelaxedSurfaceScans,where
+themethylgroupisgivenfirstinanarbitraryCartesianreferenceframeandthenthewatermoleculeisspecifiedin
+internalcoordinates:
+! UKS B3LYP SV(P) TightSCF Opt SlowConv
+%geom scan B 4 0 = 2.0, 1.0, 15 end end
+* int 0 2
+# First atom - reference atoms 1,1,1 mean Cartesian coordinates
+C 1 1 1 -0.865590 1.240463 -2.026957
+# Next atoms - reference atoms 0,0,0 mean Cartesian coordinates
+H 0 0 0 -1.141534 2.296757 -1.931942
+H 0 0 0 -1.135059 0.703085 -2.943344
+H 0 0 0 -0.607842 0.670110 -1.127819
+# Actual internal coordinates
+H 1 2 3 1.999962 100.445 96.050
+O 5 1 2 0.984205 164.404 27.073
+H 6 5 1 0.972562 103.807 10.843
+*
+InternalandCartesiancoordinatescanthusbemixedinanyorderbutitisrecommendedthatthefirst3atomsare
+specifiedinCartesiancoordinatesinordertodefineauniquereferenceframe.
+7.2.4 Inclusion of Point Charges
+Insomesituationsitisdesirabletoaddpointchargestothesystem. InORCAtherearetwomechanismstoadd
+point-charges. If you only want to add a few point charges you can “mask” them as atoms as in the following
+(nonsense)input:
+# A water dimer
+! BP86 def2-SVP
+* xyz 0 1
+O 1.4190 0.0000 0.0597
+H 1.6119 0.0000 -0.8763
+(continuesonnextpage)
+446 Chapter7. DetailedDocumentation
+
+[... start of page 469 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H 0.4450 0.0000 0.0898
+Q -0.834 -1.3130 0.0000 -0.0310
+Q 0.417 -1.8700 0.7570 0.1651
+Q 0.417 -1.8700 -0.7570 0.1651
+*
+Herethe“Q“‘sdefinetheatomsaspointcharges. Thenextfournumbersarethemagnitudeofthepointchargeand
+itsposition. Theprogramwillthentreatthepointchargesasatomswithnobasisfunctionsandnuclearcharges
+equaltoth

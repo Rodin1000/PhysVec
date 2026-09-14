@@ -1,0 +1,81 @@
+[... end of page 1147 ...]
+";
+Variable number = 0; #integer variable
+Variable distance = 0.8; #double variable
+New_step
+! &{method} &{basis} TightSCF
+%base "&{name}_&{number}" #combination of variables
+*xyz 0 1
+H 0.0 0.0 0.0
+H 0.0 0.0 &{distance}
+(continuesonnextpage)
+7.59. CompoundMethods 1125
+
+--- Page 1148 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+*
+Step_End
+# ------------------------------------------
+# Add some printing
+# ------------------------------------------
+print("SUMMARY OF VARIABLES\n");
+print("Method: %s\n", method);
+print("Basis: %s\n", basis);
+print("Name: %s\n", name);
+print("Number: %d\n", number);
+print("Distance: %.2lf\n", distance);
+End
+Abort
+Abortisusedwhentheuserwantstoexittheprograminstantly. Syntax:
+Abort;
+oralternatively:
+Abort
+Example:
+%Compound
+for i from 0 to 4 do
+print("i: %d\n", i);
+if (i=2) then
+abort;
+endif
+endfor
+End
+Alias
+Aliasisusedtoreplaceanintegernumberwithamorerepresentativestring. Itisusefulwhenoneperformsmore
+thanonecalculationsandthestepnumbersbecometoocomplicatedtoevaluate. InthiscaseusingAlias_Stepafter
+theStep_Endcommandwillconnectthepreceedingcalculationstepnumberwiththeprovidedname.
+Syntax:
+Alias𝑛𝑎𝑚𝑒;
+oralternatively:
+Alias𝑛𝑎𝑚𝑒
+Example:
+# ----------------------------------
+# This script checks 'alias' keyword
+# ----------------------------------
+Variable numOfSteps = 20;
+Variable Range = 4.0;
+Variable distStart = 0.4;
+Variable Step = Range/numOfSteps;
+Variable distance;
+Variable Energies[numOfSteps];
+Variable simpleInput = "BP86 def2-SVP def2/J";
+For index from 0 to numOfSteps-1 Do
+Distance = distStart+ index*Step;
+New_Step
+!&{simpleInput}
+(continuesonnextpage)
+1126 Chapter7. DetailedDocumentation
+
+[... start of page 1149 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+*xyz 0 1
+H 0.0 0.0 0.0
+H 0.0 0.0 &{Distance}
+*
+Step_End
+Alias currStep;
+print("Current step: %d\n", currStep);
+Read Energies[index] = JOB_INFO_TOTAL_EN[currStep];
+EndFor
+print("---------------------------

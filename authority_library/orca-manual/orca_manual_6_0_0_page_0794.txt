@@ -1,0 +1,76 @@
+[... end of page 793 ...]
+ceoccursalong2normalcoordinates: 6(bendingmode)and7
+(totallysymmetricO—Hstretchingmode). Onthebasisofthecalculateddisplacementpatternthefollowinginput
+forthenormalmodetrajectoryrunbetweentwostructurescanbedesigned:
+! RKS BP86 SV(P) def2/J RI TightScf MTR
+%mtr
+HessName "water.hess"
+modetype normal
+mlist 6,7
+rsteps 10,0
+lsteps 0, 10
+ddnc 0.9091932, 0.9723073
+end
+* xyz 0 1
+(continuesonnextpage)
+7.30. ExcitedStatesviaRPA,CIS,TD-DFTandSF-TDA 771
+
+--- Page 794 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+O 0.000000 0.000000 0.000000
+H 0.000000 0.607566 0.770693
+H 0.000000 0.607566 -0.770693
+*
+Here the parameters RSteps, LSteps and ddnc are chosen in such a way that in the scan along modes 6 and
+7 the corresponding dimensionless normal coordinates will be varied in the range 0 − 9.091932 and -9.723073
+− 0, respectively, in accordance with the projection pattern indicated in the file geom.ddnc. Note that normal
+modes are only defined up to an arbitrary choice of sign. Consequently, the absolute sign of the dimensionless
+displacementsisambiguousandinprinciplecanvaryindifferentorca_vib runs. Itisimportantthatthenormal
+modescanbetweendifferentstructuresexemplifiedaboveisperformedusingthesamesignofnormalmodesas
+inthecalculationofnormalmodedisplacements. Thisconditionisfulfilledifthesamenormalmodesareusedin
+orca_vib runandtrajectorycalculation. Thus,sinceinorca_vibcalculationnormalmodesarestoredin.hess
+fileitisnecessarytousethesameHessianfileinthetrajectorycalculation.
+PrintingExtraGradientsSequentially
+If you want to print extra gradients for external applications or any other reason, you can use the keywords
+SGRADLIST and TGRADLIST, for singlets and triplets. This will print the gradients sequentially after the
+CIS/TDDFTrun. Ifyouput0onthesingletlist,thegroundstategradientwillalsobeadded,alwaysattheend.
+%TDDFT SGRADLIST 0, 1, 2
+TGRADLIST 2, 3
+END
+Inordertosavethisgradientsinatextfile,pleaseuse:
+%METHOD STORECISGRAD TRUE END
+7.30.11 Keyword List
+\%cis or \%tddft
+NRoots 3 #The number of desired roots
+IRoot 1 #The root to be optimized
+IRootMult Singlet #or Triplet to optimize it
+MaxDim 5 #Davidson expansion space = MaxDim * NRoots
+MaxIter 35 #Maximum CI Iterations
+NGuessMat 512 #The dimension of the guess matrix
+MaxCore 1024 #The maximum memory to be used on this calculation
+ETol 1e-6 #Energy convergence tolerance
+RTol 1e-6 #Residual Convergence tolerance
+TDA false #Switch off for full TDDFT
+LRCPCM true #Use LRCPCM
+CPCMEQ false #Which epsilon is used to compute the charges.
+DoNTO #Generate Natural Transition Orbitals
+NTOStates 1,2,3 #States to consider for NTO analysis. If empty, all will be done.
+NTOThresh 1e-4 #Threshold for printing occupation numbers
+SaveUnrNatOrb #Saves natural orbitals (not NTO) from unrelaxed densities
+#for the IROOT chosen (including IROOTLISTs)
+DoSoc false #Include spin-orbit coupling?
+(continuesonnextpage)
+772 Chapter7. DetailedDocumentation
+
+[... start of page 795 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+SocGrad false #Set true to compute the SOC gradient for a given IROOT
+DOTRANS false #Transient spectra - starting from IROOT
+ALL #Compute all possible transitions
+7.31 Excited States via ROCIS and DFT/ROCIS
+TheORCAprogrampackageincludestheorca_rocismoduletoperformconfigurationinteractionwithsingle
+excitations(CIS)calculationsusingarestrictedopen-shellHartee-Fock(ROHF)referencefunction. Itproduces
+excitationenergies,absorptionenergiesandCDintensities. Itwasdesignedwiththeaimtoreproduceand-even
+moreimportantly-reliablypredicttransitionmetalL-edgesasobservedin

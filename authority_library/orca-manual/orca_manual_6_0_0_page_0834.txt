@@ -1,0 +1,108 @@
+[... end of page 833 ...]
+ large systems because of its
+O(𝑁6) scaling. Therefore, one needs a more compact form of the wave-function ansatz. A second similarity
+transformationcancompressthefinalmatrixdiagonalizationsteptotheCISspaceonly. TheresultingSTEOM-
+CCSDmethodofMarcelNooijenandco-workers[638]isanefficientwayforaccuratecalculationsofexcitation
+energies.
+7.34.1 General Description
+InthestandardEOM-CCmethod,thetransformedHamiltonianisdiagonalizedoverasinglesanddoublesspaceto
+obtainionized,attached,orexcitedstatesofthereferencestate. InSTEOM-CC,oneperformsasecondsimilarity
+transformation
+𝐺ˆ ={𝑒𝑆^ }−1𝐻 ˆ¯{𝑒𝑆^ }
+Thetransformationoperator𝑆ˆ,includingsinglesanddoubles,isdefinedas
+𝑆ˆ=𝑆ˆ𝐼𝑃 +𝑆ˆ𝐸𝐴,
+7.34. ExcitedStatesviaSTEOM-CCSD 811
+
+--- Page 834 ---
+ORCAManual,Release6.0.0
+1
+𝑆ˆ𝐼𝑃 =𝑆𝑚𝐸ˆ𝑚+ 𝑆𝑚𝑏𝐸ˆ𝑚𝑏,
+𝑖′ 𝑖′ 2 𝑖𝑗 𝑖𝑗
+1
+𝑆ˆ𝐸𝐴 =𝑆𝑎′ 𝐸ˆ𝑎′ + 𝑆𝑎𝑏𝐸ˆ𝑎𝑏.
+𝑒 𝑒 2 𝑒𝑗 𝑒𝑗
+In the above equations, 𝑚 and 𝑒 denote active indices of the hole and particle type respectively, while a prime
+denotesarestrictiontoorbitalsthatarenotactive. Theamplitudesoftheoperator𝑆ˆaredefinedinsuchawaythat
+matrixelementsofthetransformedHamiltonian,insecondquantizednotation,becomeequaltozero.
+𝑔𝑚 =𝑔𝑚𝑏 =𝑔𝑎′ =𝑔𝑎𝑏 =0
+𝑖′ 𝑖𝑗 𝑒 𝑒𝑗
+In addition, the zeros which pre-existed in 𝐻¯, after solving the CCSD equations, remain preserved. The above
+equationsarelinearin𝑆ˆandareequivalenttotheFockspacemultireferencecoupledclusterequationsfortheone
+valence problem. However, to ensure numerical stability, the equations are re-casted as matrix diagonalization
+problemandsolvedasIP-EOM-CCSDandEA-EOM-CCSDproblems. The𝑆ˆ𝐼𝑃 and𝑆ˆ𝐸𝐴arethenextractedfrom
+theconvergedpreviouscalculations,respectively,byinvokingintermediatenormalizationonthesuitablychosen
+eigenvectorscorrespondingtoactiveholesandactiveparticles. Thetotalprocesscanbedescribedasfollowing
+• Solutionofthegroundstatecoupledclusterequations
+• ConstructthefirstsimilaritytransformedHamiltonianas𝐻 ˆ¯ =𝑒−𝑇^𝐻ˆ𝑒𝑇^
+• SolutionoftheIP-EOMandEA-EOMequations
+• Extractionofthe𝑆ˆamplitudes
+• ConstructthesecondsimilaritytransformedHamiltonianas𝐺 ˆ¯ =𝑒−𝑆^𝐻 ˆ¯𝑒𝑆^
+• Diagonalizationof𝐺 ˆ¯ inCISspace
+Theadvantageoftheabovemethodisthat,insteadofoneiterativeO(𝑁6)scalingdiagonalizationstep,itrequires
+two iterative O(𝑁5) scaling steps, one non-iterative O(𝑁5) scaling step and one iterative O(𝑁4) scaling matrix
+diagonalizationstep. Thepresenceofso-called‘implicittriplesexcitation’termensuresthechargetransfersep-
+arability of the excited states, which is absent in EOM-CCSD. In addition, since the final diagonalization step
+isperformedinaCISspace, thespinadaptionistrivialandexcitedstatesoftripletmultiplicitycanbeobtained
+withoutgoingthroughthecomplicationsofaspinorbitalbasedimplementation.
+TheSTEOMCCapproachhasalsorecentlybeenextendedforapplicationstoopen-shellsystemswithintheUHF
+formalism[403]. Inthiscase,theexpressionsfortheoperators𝑆ˆ𝐼𝑃 and𝑆ˆ𝐸𝐴taketheform,
+𝑆ˆ𝐼𝑃 = 1 ∑︁ 𝑠𝑎𝑏{︀ 𝑎ˆ†ˆ𝑏†𝑒ˆˆ𝑖 }︀ + ∑︁ 𝑠𝑎¯𝑏{︀ 𝑎ˆ¯†ˆ𝑏†𝑒ˆ ˆ¯𝑖 }︀
+2 𝑖𝑒 ¯𝑖𝑒
+𝑖,𝑒,𝑎,𝑏 ¯𝑖,𝑒,𝑎¯,𝑏
++
+1 ∑︁ 𝑠𝑎¯¯𝑏{︀ 𝑎ˆ¯†ˆ¯𝑏†𝑒ˆ¯ ˆ¯𝑖 }︀
++
+∑︁ 𝑠𝑎¯𝑏{︀ 𝑎ˆ†ˆ¯𝑏†𝑒ˆ¯ˆ𝑖 }︀
+,
+2 ¯𝑖𝑒¯ 𝑖𝑒¯
+¯𝑖,𝑒¯,𝑎¯,¯𝑏 𝑖,𝑒¯,𝑎,¯𝑏
+𝑆̂︀− = 1
+2
+∑︁ 𝑠𝑎
+𝑖𝑗
+𝑚{︀ 𝑎ˆ†𝑚ˆ†ˆ𝑗ˆ𝑖 }︀ + ∑︁ 𝑠
+¯
+𝑎
+𝑖
+¯
+𝑗
+𝑚{︀ 𝑎ˆ¯†𝑚ˆ†ˆ𝑗 ˆ¯𝑖 }︀
+𝑖,𝑗,𝑎,𝑚 ¯𝑖,𝑗,𝑎¯,𝑚
++
+1 ∑︁ 𝑠𝑎¯𝑚¯{︀ 𝑎ˆ¯†𝑚ˆ¯†ˆ¯𝑗 ˆ¯𝑖 }︀
++
+∑︁ 𝑠𝑎𝑚¯{︀ 𝑎ˆ†𝑚ˆ¯†ˆ¯𝑗ˆ𝑖 }︀
+.
+2 ¯𝑖¯𝑗 𝑖¯𝑗
+¯𝑖,¯𝑗,𝑎¯,𝑚¯ 𝑖,¯𝑗,𝑎,𝑚¯
+whereweuseoverbarstodistinguishthe𝛽orbitalsfromthe𝛼orbitals. Theamplitudes{︀ 𝑠𝑎𝑏,𝑠𝑎¯𝑏}︀aredetermined
+𝑖𝑒 ¯𝑖𝑒
+bysolvingtheUHFEA-EOM-CCSDequationsfortheattachmentofan𝛼electron,whilethe{︀ 𝑠𝑎¯¯𝑏,𝑠𝑎¯𝑏}︀amplitudes
+¯𝑖𝑒¯ 𝑖𝑒¯
+are extracted from a UHF EA-EOM-CCSD calculation for the attachment of a 𝛽 electron. Similarly, the sets of
+amplitudes{︀ 𝑠𝑎𝑚,𝑠𝑎¯𝑚}and{︀ 𝑠𝑎¯¯𝑏,𝑠𝑎𝑚¯}︀aredeterminedbysolvingthedecoupledUHFIP-EOM-CCSDproblems
+𝑖𝑗 ¯𝑖𝑗 ¯𝑖¯𝑗 𝑖¯𝑗
+for the ionization of an 𝛼 electron and the ionization of a 𝛽 electron, respectively. Hence, an UHF STEOMCC
+calculationinvolvestwoseparateIPcalculations(O(𝑁5)scaling)andtwoseparateEAcalculations(O(𝑁5)scaling
+steps).
+Allthespeedupoptions,includingCCSD(2)(onlyavailableinRHFimplementation)andCOSX,whichareavail-
+ableforEOM-CCSDarealsoavailableforSTEOMCC.ThemostimportantstepsinaSTEOMCCcalculationare
+theIP-EOMandEA-EOMcalculations. ThesestepsareperformedusingtheEOM-CCSDmoduleandtherelevant
+keywordsarethesameasthatdescribedinExcitedStatesviaEOM-CCSD.Thekeywordswhichareexclusiveto
+theRHFSTEOMmoduleare:
+812 Chapter7. DetailedDocumentation
+
+[... start of page 835 ...]
+ORCAManual,Release6.0.0
+%mdci
+#RHF STEOM parameters - defaults displayed
+DoCISNat true # automatic selection of active space
+NActIP 3 # number of states defined as active in the IP calculation
+NActEA 2 # number of states defined as active in the EA calculation
+DoTriplet false # target state of triplet multiplicity
+DoDbFilter true # filters out states with doubles excitation character
+DoNewActSch true # new active space selection scheme for STEOM-CCSD
+DoSOLV # perturbative correction for solvation effects (experimental)
+#Default values for automatic active space selection scheme
+OThresh 0.001 # Cut off occupation of CIS natural orbitals in IP calculation
+VThresh 0.001 # Cut off 

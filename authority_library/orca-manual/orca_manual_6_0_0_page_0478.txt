@@ -1,0 +1,103 @@
+[... end of page 477 ...]
+the underlying LDA functional. A special situation arises if
+LYPisthecorrelationfunctional[502]sinceLYPisnotacorrectiontothecorrelation,butratherincludesthefull
+correlation. ItisthereforeusedintheB3LYPfunctionalas:
+𝐸 C =𝐸 C +𝑐 (︀ 𝐸 C −𝐸 C )︀ (7.2)
+B3LYP LSD LYP LSD
+InORCA,VWN5ischosenforthelocalcorrelationpartofB3LYP.ThischoiceisconsistentwiththeTurboMole
+program[12,13,14],butnotwiththeGaussianprogram[278]. However,theuserhasfullcontroloverthissetting.
+TheunderlyinglocalpartofanycorrelationfunctionalcanbesetintheinputwiththevariableLDAOpt:
+%method
+LDAOpt C_PWLDA
+C_VWN5
+C_VWN3
+end
+7.4. ChoiceofComputationalModel 455
+
+--- Page 478 ---
+ORCAManual,Release6.0.0
+Specifying C_VWN3 for LDAOpt together with Functional=B3LYP should give results very close to the B3LYP
+functionalasimplementedintheGaussianseriesofprograms1. DuetothepopularityoftheB3LYPfunctional,
+thefollowingaliasesaredefinedinordertofacilitatecomparisonswithothermajorelectronicstructurepackages:
+%method
+Functional B3LYP # consistent with TurboMole
+B3LYP_TM # := Functional B3LYP
+# LDAOpt C_VWN5
+B3LYP_G # consistent with Gaussian
+# := Functional B3LYP
+# LDAOpt C_VWN3
+end
+One-Parameter Hybrid Density Functionals. The underlying LDA-dependence of the three-parameter (i.e.
+ACM) hybrids causes slightly different results from programs which use a different choice of LDA. It has been
+argued from a theoretical viewpoint that the optimal mixing of HF exchange is 25% [248]. It has been further
+shownthatuseofthisfixedratioandnotscalingtheGGAcorrelationorexchangecontributionsgivesresultsthat
+areasgoodastheoriginalthree-parameterhybrids[9]. Theone-parameterhybridPBE0hasbeenadvertisedasa
+hybridfunctionalofoverallwell-balancedaccuracy[8].
+As such, the one-parameter hybrids are based more in theory and remove some arbitrariness from the hybrid
+procedures. TheslightlyhigherHF-exchange(0.25infavorof0.20usedintheoriginalthree-parameterhybrids)
+isalsoreasonableformanysystems. Theone-parameterhybridshavethesimpleform:
+𝐸XC =𝐸
+D
+X
+FT
++𝑎′(︀ 𝐸
+H
+X
+F
+−𝐸
+D
+X
+FT
+)︀ +𝐸
+D
+C
+FT
+(7.3)
+with𝑎′ = 1. Thisisthesameasthethree-parameterhybrids(equation(7.1))with𝑎=𝑎′,𝑏=1−𝑎′,and𝑐=1
+4
+andishowitisimplemented.
+Extended “double-hybrid” functionals. In addition to mixing the HF-exchange into a given DF, Grimme has
+proposedtomixinafractionoftheMP2correlationenergyascalculatedwithhybridDFTorbitals[320]. Such
+functionalsmaybereferredtoas“extended”or“double”hybridfunctionals. Grimme’sexpressionis:
+𝐸XC =𝑎𝐸
+X
+HF +(1−𝑎)𝐸
+X
+DFT +(1−𝑐)𝐸
+C
+DFT +𝑐𝐸
+C
+MP2 (7.4)
+SuchfunctionalscanbedefinedbytheuserinORCAasfollows:
+%method
+ScalHFX = a
+ScalDFX = 1-a
+ScalGGAC = 1-c
+ScalLDAC = 1-c
+ScalMP2C = c
+end
+GrimmerecommendstheB88exchangefunctional,theLYPcorrelationfunctionalandtheparameters𝑎 = 0.53
+and 𝑐 = 0.27. This gives the B2PLYP functional which appears to be a fair bit better than B3LYP based on
+Grimme’sdetailedevaluationstudy.
+Presently,thismethodologycoverssinglepointcalculations,analyticgradients(andthusalsogeometryoptimiza-
+tions,relaxedscans,andtransitionstatesearches),andfrequenciesandothersecond-derivativeproperties(without
+thefrozencoreapproximationintheMP2part). Notethat%mp2 density relaxed endshouldbespecifiedin
+order to get the response density that is consistent with first-order properties from analytic first-derivatives. By
+default,thisresponsedensityisnotcalculatedsinceitsconstructionaddssignificantoverheadtothecalculation.
+Therefore,youhavetospecificallyrequestittolookattheconsistentdensity. Theconsiderablylesscostlyunre-
+laxed(expectationvalue-like)densitymayinsteadrequestedby%mp2 density unrelaxed end. However,this
+isnotrecommendedsincethechangestotherelaxeddensityareconsiderableinourexperienceandtheunrelaxed
+densityhasamuchweakertheoreticalstatusthanitsrelaxedcounterpart.
+1ThereissomeevidencethattheversionusedintheGaussianprogramgivesslightlybetterresultsinmolecularapplicationsthanthe
+TurboMolevariant,butthedifferencesareverysmall[387].
+456 Chapter7. DetailedDocumentation
+
+[... start of page 479 ...]
+ORCAManual,Release6.0.0
+Range-separated hybrid functionals. ORCA supports functionals based on the error function splitting of the
+two-electronoperatorusedforexchangeasfirstrealizedbyHiraoandcoworkers[410]:
+𝑟−1 =erfc(𝜇·𝑟 )·𝑟−1+erf(𝜇·𝑟 )·𝑟−1
+12 12 12 12 12 (7.5)
+⏟ ⏞ ⏟ ⏞
+SR LR
+wh

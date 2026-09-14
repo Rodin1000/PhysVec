@@ -1,0 +1,87 @@
+[... end of page 351 ...]
+-----------------------------------------\n");
+For i from 0 to 2 Do
+print("%13.8lf %13.8lf %13.8lf\n", aEigenVectors[i][0], aEigenVectors[i][1],␣
+aEigenVectors[i][2]);
+˓→
+EndFor
+print( "\n a isotropic value : %.5lf\n", (aEigenValues[0]+aEigenValues[1]+aEigenValues[2])/3.
+0);
+˓→
+#
+#
+# ---------------------------------------------------
+# Maybe remove unneccesary files
+# ---------------------------------------------------
+if (removeFiles) then
+(continuesonnextpage)
+6.12. CalculationofProperties 329
+
+--- Page 352 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+sys_cmd("rm *_Compound_* *.bas* ");
+EndIf
+End
+FormoredetailsonCompoundjobsingeneral,seeCompoundMethods.
+Forothercorrelationmethods,wherenotevenrelaxeddensitiesareavailable,onlyafullynumericapproach(using
+compoundsscripts)ispossibleandrequiresobnoxiouslytightconvergence.
+Notethatpolarizabilitycalculationshavehigherdemandsonbasissets. Arathernicebasissetforthisproperty
+istheSadlejone(seeBuilt-inBasisSets). Inrelationtoelectricproperties,itmightbeinterestingtoknowthatit
+ispossibletocarryoutfiniteelectricfieldcalculationsinORCA.SeesectionAddingfiniteelectricfield formore
+informationonsuchcalculations.
+6.12.7 NMR Chemical Shifts
+NMR chemical shifts at the HF, DFT (standard GGA and hybrid functionals), CASSCF, as well as the RI- and
+DLPNO-MP2anddouble-hybridDFTlevels(seesectionMP2levelmagneticpropertiesandreferencestherein)
+canbeobtainedfromtheEPR/NMRmoduleofORCA.ForthecalculationoftheNMRshieldingtensortheprogram
+utilizesGaugeIncludingAtomicOrbitals(GIAOs-sometimesalsoreferredtoasLondonorbitals). [211,375,532]
+Inthisapproach,fielddependentbasisfunctionsareintroduced,whichminimizesthegaugeorigindependenceand
+ensuresrapidconvergenceoftheresultswiththeoneelectronbasisset. [289]NotethatGIAOsareNOTcurrently
+availablewithCASSCFlinearresponseandagaugeoriginmustbeprovidedinthe%eprnmrblock(seeCASSCF
+LinearResponse). GIAOsforCASSCFresponsearecomingsoontoORCA!
+Theuseofthechemicalshiftmoduleissimple:
+# Ethanol - Calculation of the NMR chemical shieldings at the HF/SVP level of theory
+! RHF SVP Bohrs NMR
+* xyz 0 1
+C -1.22692181 0.24709455 -0.00000000
+C -0.01354839 -0.54677253 0.00000000
+H -2.09280406 -0.41333631 0.00000000
+H -1.24962478 0.87541936 -0.88916500
+H -1.24962478 0.87541936 0.88916500
+O 1.09961824 0.30226226 -0.00000000
+H 0.00915178 -1.17509696 0.88916500
+H 0.00915178 -1.17509696 -0.88916500
+H 1.89207683 -0.21621566 0.00000000
+*
+Theoutputfortheshieldingscontainsdetailedinformationaboutthepara-anddiamagneticcontribution,theori-
+entationofthetensor,theeigenvalues,itsisotropicpartetc. Foreachatom,anoutputblockwiththisinformation
+isgiven:
+--------------
+Nucleus 0C :
+--------------
+Diamagnetic contribution to the shielding tensor (ppm) :
+209.647 -10.519 0.000
+-26.601 215.858 0.000
+-0.000 0.000 200.382
+Paramagnetic contribution to the shielding tensor (ppm):
+59.273 18.302 -0.000
+13.380 6.063 -0.000
+0.000 -0.000 -2.770
+(continuesonnextpage)
+330 Chapter6. RunningTypicalCalculations
+
+[... start of page 353 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Total shielding tensor (ppm):
+268.920 7.783 -0.000
+-13.220 221.921 -0.000
+0.000 0.000 197.611
+Diagonalized sT*s matrix:
+sDSO 200.382 214.507 210.998 iso= 208.629
+sPSO -2.770 7.279 58.057 iso= 20.855
+--------------- --------------- ---------------
+Total 197.611 221.786 269.055 iso= 229.484
+Notethatallunitsaregiveninppmandthechemicalshieldingsgivenareabsoluteshieldings(seebelow). Atthe
+endoftheatomblocks,asummaryisgivenwiththeisotropicshieldingsandtheanisotropy[564]foreachnucleus:
+Nucleus Eleme

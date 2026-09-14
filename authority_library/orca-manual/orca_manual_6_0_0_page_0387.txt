@@ -1,0 +1,64 @@
+[... end of page 386 ...]
+L-QMMM
+ForIONIC-CRYSTAL-QMMMcalculations,sectionIONIC-CRYSTAL-QMMM,anORCAFF.prmsfilewithinitial
+chargesandconnectivitiesisrequired. Ifyouarenotusingtheorca_crystalpreptoolforsettingupsuchcalculations,
+seesectionorca_crystalprep,youcandirectlypreparetheORCAFF.prmsfilewiththecommand:
+orca_mm -makeff <XYZ/PDBFILE> -CEL <ELEMENT1> <OXIDATION_STATE1>
+-CEL <ELEMENT2> <OXIDATION_STATE2>
+Keywords:
+(continuesonnextpage)
+364 Chapter6. RunningTypicalCalculations
+
+--- Page 387 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+<ELEMENT1> = element name
+<OXIDATION_STATE1> = formal oxidation state of element 1
+... = More elements possible
+Example:
+orca_mm -makeff na4cl4.xyz -CEL Na 1.0 -CEL Cl -1.0
+Here,na4cl4.xyzisthesupercellstructurefile(itcancontaintensofthousandsofatoms).
+Note:
+• For supercells with more complex oxidation states’, e.g. Co O , the ORCAFF.prms file can be generated
+3 4
+convenientlyviatheorca_crystalpreptool,orca_crystalprep.
+6.15.2 Speeding Up Nonbonded Interaction Calculation
+ForMMcalculationsofverylargesystemswithhundredsofthousandsofatoms,andforQMMMcalculationswith
+fastQMmethods(e.g. XTB,AM1)and/orverysmallQMsystems,thecomputationofthenonbondedinteractions
+canbecomeabottleneck. Differentschemesforspeedingupthecalculationofnonbondedinteractionsareavailable
+withintheORCAMMimplementation. Twoschemestruncatelong-rangeinteraction,anotherschemecanbeused
+forcalculationswithactiveregions,i.e. calculationswhereonlyapartofthesystemisactiveoroptimized. Formore
+information on active regions see section Active and Non-Active Atoms - Optimization, Frequency Calculation,
+MolecularDynamicsandRigidMMWater.
+ForceSwitchingforLJInteraction
+WithforceswitchingfortheLJinteraction(describedinreference[817])asmoothswitchingfunctionisusedto
+truncatetheLJpotentialenergysmoothlyattheoutercutoffdistanceLJCutOffOuter. Ifswitchingissettofalse,the
+LJinteractionisnottruncatedatLJCutOffOuter. TheparameterLJCutOffInnerspecifiesthedistanceatwhichthe
+switchingfunctionstartstakinganeffecttobringthevanderWaalspotentialto0smoothlyattheLJCutOffOuter
+distance, ensuringthattheforcegoesdowntozeroatLJCutOffOuter, withoutintroducingdiscontinuities. Note
+thatLJCutOffInnermustalwaysbesmallerthanLJCutOffOuter.
+%mm
+SwitchForceLJ true # Use the switch force scheme for the LJ interaction.
+# Default: true.
+LJCutOffInner 10. # Distance (in Ang). Default: 10 Ang.
+LJCutOffOuter 12. # Distance (in Ang). Default: 12 Ang.
+end
+ForceShiftingforElectrostaticInteraction
+Withforceshiftingfortheelectrostaticinteraction(describedinreference[817])theelectrostaticpotentialisshifted
+tozeroatthecutoffdistanceCoulombCutOff. Ifshiftingissettofalse,theelectrostaticinteractionisnottruncated
+atCoulombCutOff.
+%mm
+ShiftForceCoulomb true # Use the shift force scheme for the Coulomb interaction.
+# Default: true.
+CoulombCutOff 12. # Distance (in Ang). Default: 12 Ang.
+end
+6.15. ORCAMMModule 365
+
+[... start of page 388 ...]
+ORCAManual,Release6.0.0
+NeglectingNonbondedInteractionsWithinNon-ActiveRegion
+When using active regions (see section Active and Non-Active Atoms - Optimization, Frequency Calculation,
+Molecular Dynamics and Rigid MM Water) for optimizations and MD runs, the nonbonded interactions at the
+MMlevelcanbeneglectedforthoseatompairs, whicharebothnon-active, withoutlossofaccuracyforthere-
+sults. Evenrelativeenergiesbetweentwostructuresarecorrect,iftheatompositionsofthenon-activeatomsare
+identical. For all other cases, i.e. if the positions of ato

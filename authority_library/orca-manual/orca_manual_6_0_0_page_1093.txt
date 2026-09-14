@@ -1,0 +1,77 @@
+[... end of page 1092 ...]
+edviaeqs. (7.428)and (7.429),(3)ifconvergenceisreached
+𝐴𝑖 𝐴𝑖
+for𝜌 (⃗𝑟),theiterativeprocessstops,otherwisewegobackto(1)butnowoneusesthelastestimatesfor𝑁 and
+𝐴 𝐴𝑖
+𝜎 .
+𝐴𝑖
+Once,theMBISiterativeprocessstops,theMBISchargesarecalculatedas:
+∫︁
+𝑄MBIS. =𝑍 − 𝜌 (⃗𝑟)𝑑⃗𝑟 (7.430)
+𝐴 𝐴 𝐴
+ThecalculationoftheMBISchargesinORCAisrequestedbywriting
+1070 Chapter7. DetailedDocumentation
+
+--- Page 1093 ---
+ORCAManual,Release6.0.0
+! MBIS
+intheORCAinputfile,oralternativelyviathe%outputblock:
+%output
+Print[ P_MBIS ] 1 # default = off
+end
+IfwerequesttheMBISchargesforaHFcalculationatthecc-pvdzlevelofachloroformmolecule:
+!HF cc-pvdz tightscf MBIS
+* xyz 0 1
+C -0.00000997794639 -0.00091664148112 0.45499807439812
+H 0.00000069467312 0.00031189002174 1.53703126401237
+Cl 0.00003188789531 1.69433732001280 -0.08420513240263
+Cl 1.46635420502892 -0.84684178730039 -0.08421103795485
+Cl -1.46637680965097 -0.84689178125304 -0.08420916805301
+*
+ORCAprintsthefollowinginformationattheendoftheoutputfile:
+------------------
+MBIS ANALYSIS
+------------------
+Convergence threshold (charges) ... 1.000e-06
+Number of iterations ... 46
+Total integrated alpha density ... 29.000001385
+Total integrated beta density ... 29.000001385
+ATOM CHARGE POPULATION SPIN
+0 C 0.208633 5.791367 0.000000
+1 H 0.169417 0.830583 0.000000
+2 Cl -0.126877 17.126877 0.000000
+3 Cl -0.125586 17.125586 0.000000
+4 Cl -0.125590 17.125590 0.000000
+TOTAL -0.000003 58.000003 0.000000
+MBIS VALENCE-SHELL DATA:
+ATOM POPULATION WIDTH(A.U.)
+0 C 4.122213 0.508675
+1 H 0.830583 0.358785
+2 Cl 8.532439 0.524031
+3 Cl 8.531380 0.523959
+4 Cl 8.531381 0.523959
+The second block corresponds to the valence Slater function, which is caracterized by its population 𝑁 and
+𝐴,𝑣
+width𝜎 .
+𝐴,𝑣
+The convergence threshold for the MBIS charges is set to 10−6. However, it can be changed via the tag
+MBIS_CHARGETHRESHinthe%methodblock:
+%method
+MBIS_CHARGETHRESH 0.0001
+end
+ORCA can also print the following MBIS-related quantities: (1) atomic dipole moments, (2) atomic
+quadrupole moments, (3) atomic octupole moments, and (4) third radial moment of the MBIS density
+(︂ ⟨𝑟3⟩ = ∫︀ ⃒ ⃒⃗𝑟−𝑅⃗ ⃒ ⃒ 3 𝜌 (⃗𝑟)𝑑⃗𝑟 )︂ . TheprintingofthesepropertiesiscontrolledbythetagMBIS_LARGEPRINT,
+𝐴 ⃒ 𝐴⃒ 𝐴
+7.56. PopulationAnalysesandControlofOutput 1071
+
+[... start of page 1094 ...]
+ORCAManual,Release6.0.0
+tobespecifiedinthe%methodblock:
+%method
+MBIS_LARGEPRINT TRUE # default = FALSE
+end
+Ifthisoptionisactivated,anextraiterationisperformedafterreachingtheconvergencethresholdforthecharges.
+The origin for the calculation of the atomic dipole, quadrupole and octupole moments is the center of each
+atom (default). However, the user can also define a global origin (independent of the atom) through the tag
+MBIS_OR

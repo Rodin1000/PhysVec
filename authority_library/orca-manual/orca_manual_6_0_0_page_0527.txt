@@ -1,0 +1,65 @@
+[... end of page 526 ...]
+mbeddingcanbeaccomplishedquiteeasily:
+*xyz ...
+# atom> charge x y z optional ECP declaration
+Zr> 4.0 0.0 0.0 0.0 NewECP "SDD" end
+...
+*
+ThedeclarationofsuchacorelessECPcentertakesplaceinthecoordinatessectionbyappendingabracket“>”
+to the element symbol. Note that embedding ECPs are treated as point charges in ORCA, so the charge has to
+504 Chapter7. DetailedDocumentation
+
+--- Page 527 ---
+ORCAManual,Release6.0.0
+begivennext. ThecoordinatesofthecorelessECPcenterhavetobespecifiedasusualandmaybefollowedby
+anoptionalECPassignment. Ingeneral,calculationsthatemployanECPembeddingprocedureshouldbesingle
+point calculations. However if the need arises to perform a geometry optimization, make sure to set up explicit
+CartesianconstraintsforthecorelessECPcenters.
+7.5.9 Linear Dependence
+The previous sections describe the assessment of a desired molecular basis set from appropriately parametrized
+functions at various locations within the molecule (normally centered on atoms). The parametrization of these
+functionsissuchthatthechanceforredundancyisminimal. Sincehowever,oneislimitedtoworkwithfinitenu-
+mericalprecision,andfurthermoretheseparametersalsodependonthemoleculargeometry,redundanciescannot
+becompletelyeliminatedinadvance. Redundancymeansthatthesubspacespannedbythegivenbasisfunctions
+atgivenvaluesofparameters(includinggeometry),canbeidenticallyspannedbyasmallernumberoflinearin-
+dependentbasisfunctions. Lineardependent(redundant)functionsetshowevermaycausenumericalinstabilities.
+Linear dependence is normally identified by searching for zero eigenvalues of the overlap matrix. Note that the
+inverseoftheoverlap(orrelatedmatrices)areusedfororthogonalizationpurposes,anditfollowsthatifnearzero
+eigenvaluesarenottreatedproperly,theinversebecomesill-defined,andtheSCFprocedurenumericallyunstable.
+Fromthepreviousdiscussion,itisevidentthatthecrucialparameterforcuringlineardependenceisthethreshold
+belowwhichanoverlapeigenvalueisconsideredzero. Thisparametermaybechangedusingthefollowingkeyword
+%scf
+sthresh 1e-6 # default 1e-7
+end
+Althoughthereisnostrictlimitforthevalueoftheaboveparameter,itshouldreasonablybesomewherebetween
+1e-5 and 1e-8 (the default is 1e-7). One may get away with 1e-9 or perhaps even lower without convergence
+problem,butthereisariskthattheresultiscontaminatedwithnoisecausedbythenearzerovectors. Indifficult
+cases,an1e-6thresholdwasoftenfoundtoworksmoothly,andabovethatonerisksthrowingawaymoreandmore
+functions, which also influence comparability of results with other calculations. To monitor the behavior of the
+smalleigenvalues,oneshouldlookforthefollowingblockintheoutput
+Diagonalization of the overlap matrix:
+Smallest eigenvalue ... -1.340e-17
+Time for diagonalization ... 0.313 sec
+Threshold for overlap eigenvalues ... 1.000e-07
+Number of eigenvalues below threshold ... 1
+Smallest eigenvalue above threshold ... 6.013e-07
+Time for construction of square roots ... 0.073 sec
+Total time needed ... 0.387 sec
+Here,thesmallesteigenvalueisprinted,alongwiththecurrentlyusedoverlapthreshold,andthenumberoffunc-
+tionsbelowthis(whichwillbedropped). Itisarecommendedconsistencychecktolookforanequalnumberof
+zeroentriesamongorbitalenergiesoncetheSCFprocedureconverged. Notethatforfunctionsbelongingtozero
+eigenvaluesnolevelshiftsareapplied!
+Incasethatredundantvectorswereremovedfromthebasis,! MORead NoItershouldonlybeusedinconjunction
+withthesameSThreshasintheoriginalcalculation,otherwisetheresultswillbeinconsistent. ! MOReadmay
+stillbeusedtogetherwithachangeinSThresh,butafewSCFiterationswillberequired.
+7.5. ChoiceofBasisSet 505
+
+[... start of page 528 ...]
+ORCAManual,Release6.0.0
+AutomaticAdjustmentsforNearLinear-DependentCases
+StartingfromORCA6,thereisnowakeywordcalledDiffSThresh,whichcontrolsanautomatictighteningofthe
+integralcutoffparametersThreshandTCutincasesmalleigenvaluesoftheoverlapmatrixarefound. Wefound
+this to be important in some calculations using diffuse basis, and these parameters are set to a minimum value
+ofThresh=1e-12andTCut=1e-13incasethe“Smallesteigenvalue”shownabovegetsbelowthatnumber. Ifthe
+cutoffsarealreadytighterthanthat,forinstancewhenusing!VeryTightSCF,thannothingwillhappen.
+Wefoundempiricallythatthesearesafenumberstomitigateno

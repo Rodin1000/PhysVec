@@ -1,0 +1,61 @@
+You are an expert in numerical calculations of quantum many-body physics. 
+Your task here is to generate the unit test environment code for a function defined in the targeted repository (waiting for test). The environment consists of two parts:
+1. Background code: All verifier functions copied from CodeVerifier_library that are needed to construct the unit test.
+2. Entrypoint code: The main function and entry point that organizes the functions and provides test input values.
+
+Note: The target function to be tested will be provided separately and should NOT be included in your output. 
+
+-------------------------------------------------------------------------------------------------------
+Input:
+1. **codeverifier_library_compact**: A code file containing all standard verifier function definitions. **Note: These verifier code files contain complete executable code including main() functions and entry points. You should refer to these entrypoints as examples when generating the entrypoint_code.** 
+2. **repo-main-function**: The 'main' function defined in the tested repository for reference. 
+3. **repo-function**: A single function waiting for test in the targeted repository;
+
+-------------------------------------------------------------------------------------------------------
+[Generation Rules]
+For Qiskit usage, you MUST follow instructions bellow: 
+1. You are required to generate the unit test environment code for the given repo-function. The environment consists of two separate parts:
+    - Background code: All verifier functions from CodeVerifier_library needed to construct the unit test. The repo-function is NOT included here.
+    - Entrypoint code: The main function and entry point that organizes all functions (including the repo-function) and provides test input values.
+    - The repo-function is a single-function function, which is one of {hamiltonian, circinit, circevol, effector, observable}.
+
+2. **BACKGROUND CODE**: You select ALL necessary verifier functions from the CodeVerifier_library to cooperate with the repo-function to complete the entire program.
+    - The chosen verifier functions together with the repo-function MUST form a COMPLETE process workflow, including hamiltonian definition, initial state circuit definition (circinit), evolution circuit definition (circevol), observable definition and effector (quantum calculation using Statevector.from_instruction(), IQPE, VQE or other quantum algorithms) part. 
+    - There are comments about the parameter meanings in the definitions of the verifier functions. You MUST include all related comments when copying the definitions of the verifier functions.
+    - You MUST copy the function definitions EXACTLY as they appear in the CodeVerifier_library, DO NOT modefy them.
+    - example 1: if repo-function = 'hamiltonian_XXZchain', then background_code should contain 'circinit_verifier_spin0.5', 'circevol_verifier_spin0.5', 'observable_verifier_spin0.5', 'effector_verifier_spin0.5' (if needed). The entrypoint_code should call 'hamiltonian_XXZchain' (which will be provided separately) along with these verifier functions.
+    - example 2: if repo-function = 'effector_statevector_evolution', then background_code should contain 'hamiltonian_verifier_spin0.5', 'circinit_verifier_spin0.5', 'circevol_verifier_spin0.5', 'observable_verifier_spin0.5'. The entrypoint_code should call 'effector_statevector_evolution' (which will be provided separately) along with these verifier functions.
+    
+3. For the entrypoint_code: You organize ALL chosen verifier functions and the repo-function to form a SIMPLE and COMPLETE workflow. 
+    - You define a hamiltonian, create initial state circuit and evolution circuit, do the quantum calculation (using Statevector.from_instruction() or other quantum algorithms) and measure an observable. You MUST NOT go further, such as parameter scan...
+    - You MUST refer to the main function in the 'codeverifier_library_compact' when constructing the entrypoint_code. You should follow a similar structure and pattern, but adapt it for the specific repo-function being tested.
+    - You MUST refer to the 'repo-main-function' as a reference when constructing the 'main' function.
+        - You SHOULD NOT take the parameter values in the repo-main-function directly as your input, because those values may be large.
+    - For input values in the 'main' function, you MUST PREFER to choose small values for simplicity and feasibility. e.g. num_qubits < 6, evolution time < 1.0 (if time evolution required), number of VQE iterations < 10 (if VQE required)...
+
+4. You are FORBIDDEN to define any NEW functions in the generated code explicitly.
+
+5. If multiple functions are defined in the same type (e.g. 'hamiltonian_verifier_spin0.5', 'circinit_verifier_spin0.5', 'circevol_verifier_spin0.5'...), you choose ONLY one of them according to the system type of the targetted repo-function. 
+
+------------------------------------------------------------------------------------------------------
+[Output]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- "topic": a brief summary of the input user's requests. Few than 100 words. 
+- "code_type": "python" (lowercase string, always "python" for Qiskit)
+- "background_code": ALL verifier functions copied from codeverifier_library_compact to be used in constructing the unit test. 
+- "entrypoint_code": The definition code of the entry point of this unit test, including the main function. 
+
+Example output ("```json" right before the dict and "```" right after the dict MUST be included! Beside from this dict, no other information should be output):
+```json
+{
+"topic": "1D_Bose_Hubbard_model",
+"code_type": "python",
+"background_code": "import numpy as np\nimport matplotlib.pyplot as plt\n\ndef Task_1():\n    x = np.linspace(0, 2*np.pi, 200)\n    y = np.sin(x)\n    return x, y\n",
+"entrypoint_code": "def main():\n    x, y = Task_1()\n    plt.plot(x, y)\n    plt.show()\n\nif __name__ == \"__main__\":\n    main()"
+}
+```
+
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'. Even you fail to generate a complete code_content, you must KEEP this output format. 

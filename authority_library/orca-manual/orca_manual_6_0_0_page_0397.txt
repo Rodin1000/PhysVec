@@ -1,0 +1,58 @@
+[... end of page 396 ...]
+ORCAFF.prms"
+end
+QM-MM,QM-QM2andQM2-MMBoundary
+This section is important for the QM/MM, QM/QM2 and QM/QM2/MM methods. For the latter method two
+boundaryregionsarepresent(betweenQMandQM2aswellasbetweenQM2andMMregion),andbothcango
+throughcovalentbonds. InthefollowingwewillonlydiscusstheconceptfortheboundarybetweenQMandMM,
+butthesameholdstruefortheothertwoboundaries.
+374 Chapter6. RunningTypicalCalculations
+
+--- Page 397 ---
+ORCAManual,Release6.0.0
+LinkAtoms
+ORCAautomaticallygenerateslinkatomsbasedontheinformationoftheQMregionandonthetopologyofthe
+system(basedontheORCAFF.prmsfile). ORCAplaceslinkatomsonthebondbetweenQMandMMatoms.
+Important:
+• When defining the QM, QM2 and MM regions, make sure that you only cut through single bonds (not
+aromatic,double,triplebonds,etc.).
+BondLengthScalingfactor
+ThedistancebetweenQMatomandlinkatomisdeterminedviaascalingfactor(inrelationtotheQM-MMbond
+length)thatiscomputedastheratiooftheequilibriumbondlengthbetweenQMandhydrogenatom(d0_QM-H)
+andtheequilibriumbondlengthbetweenQMandMMatom(d0_QM-MM).
+StandardQM-HBondLength
+Fortheequilibriumbondlengthstohydrogen,ORCAusestabulatedstandardvaluesforthemostcommonatoms
+involved in boundary regions (C, N, O), which can be modified via keywords as defined further below. ORCA
+storesthesevalueson-the-flyinasimplefile(basename.H_DIST.prms). Ifnecessary, theusercanmodifythese
+valuesatom-specificoraddotherstothefileandprovidethisfileasinputtoORCA(seealsoparagraphGetstandard
+hydrogen bond lengths: getHDist). For QM/QM2 and QM/QM2/MM methods the equilibrium bond lengths to
+hydrogenareexplicitlycalculated.
+%qmmm
+# standard equilibrium bond lengths with hydrogen can be modified
+Dist_C_HLA 1.09 # d0_C-H
+Dist_O_HLA 0.98 # d0_O-H
+Dist_N_HLA 0.99 # d0_N-H
+# file can be provided which provides the used d0_X-H values specific to all atoms
+H_Dist_FileName "QM_H_dist.txt"
+end
+BondedInteractionsattheQM-MMBoundary
+TheMMbondedinteractionswithintheQMregionareneglectedintheadditivecouplingscheme. However, at
+theboundary,itisadvisabletousesomespecificbondedinteractionswhichincludeQMatoms. BydefaultORCA
+neglectsonlythosebondedinteractionsattheboundary, whereonlyoneMMatomisinvolved, i.e. allbondsof
+thetypeQM1-MM1,bendsofthetypeQM2-QM1-MM1,andtorsionsofthetypeQM3-QM2-QM1-MM1. Other
+QM-MMmixedbondedinteractions(withmorethantwoMMatomsinvolved)areincluded. Theuserisallowed
+toincludethedescribedinteractions,whichiscontrolledviathefollowingkeywords:
+%qmmm
+DeleteLADoubleCounting true # Neglect bends (QM2-QM1-MM1) and torsions
+# (QM3-QM2-QM1-MM1). Default true.
+DeleteLABondDoubleCounting true # Neglect bonds (QM1-MM1)
+end
+6.16. ORCAMultiscaleImplementation 375
+
+[... start of page 398 ...]
+ORCAManual,Release6.0.0
+ChargeAlteration
+IfQMandMMatomsareconnectedviaabond(definedinthetopologyfile),thechargeoftheclose-byMMatom
+(anditsneighboringatoms)hastobemodifiedinordertopreventoverpolarizationoftheelectrondensityofLA
+andQMregion. ThischargealterationisautomaticallytakencareofbyORCA.ORCAprovidesthemostpopular
+schemesthatcanbeusedtopreventoverpolarization:

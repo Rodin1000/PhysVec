@@ -1,0 +1,68 @@
+[... end of page 127 ...]
+grids or by running the final SCF cycle without this
+approximation. Theimpactonbonddistancesisafractionofapm,anglesarebetterthanafewtenthofadegree
+andsoftdihedralanglesaregoodtoabout1degree. Tothelimitedextenttowhichithasbeentested,vibrational
+frequenciesareroughlygoodto0.1wavenumberswiththedefaultsettings.
+TheuseofRIJCOSXisverysimple:
+! HF def2-TZVPP TightSCF RIJCOSX
+...
+One thing to be mentioned in correlation calculations with RIJCOSX is that the requirements for the SCF and
+correlationfittingbasesarequitedifferent. Wethereforesupporttwodifferentauxiliarybasissetsinthesamerun:
+6.1. SinglePointEnergiesandGradients 105
+
+--- Page 128 ---
+ORCAManual,Release6.0.0
+! RI-MP2 def2-TZVPP def2/J def2-TZVPP/C TightSCF RIJCOSX
+...
+Hartree–FockandHybridDFTCalculationswithRI-JK
+An alternative algorithm for accelerating the HF exchange in hybrid DFT or HF calculations is to use the RI
+approximationforbothCoulombandexchange. ThisisimplementedinORCAforSCFsinglepointenergiesbut
+notforgradients.
+! RHF def2-TZVPP def2/JK RI-JK
+...
+ThespeedupsforsmallmoleculesarebetterthanforRIJCOSX,formediumsizedmolecules(e.g. (gly) )similar,
+4
+andforlargermoleculesRI-JKislessefficientthanRIJCOSX.TheerrorsofRI-JKareusuallybelow1mEhand
+theerrorisverysmooth(smootherthanforRIJCOSX).Hence,forsmallcalculationswithlargebasissets,RI-JK
+isagoodidea,forlargecalculationsonlargemoleculesRIJCOSXisbetter.
+Note:
+• ForRI-JKyouwillneedalargerauxiliarybasisset. FortheKarlsruhebasisset,theuniversaldef2/JKand
+def2/JKsmallbasissetsareavailable. Theyarelargeandaccurate.
+• ForUHFRI-JKisroughlytwiceasexpensiveasforRHF.ThisisnottrueforRIJCOSX.
+• RI-JKisavailableforconventionalanddirectrunsandalsoforANObases. Theretheconventionalmodeis
+recommended.
+A comparison of the RIJCOSX and RI-JK methods (taken from Ref. [465]) for the (gly) , (gly) and (gly) is
+2 4 8
+shownbelow(wallclocktimesinsecondforperformingtheentireSCF):
+Def2-SVP Def2-TZVP(-df) Def2-TZVPP Def2-QZVPP
+(gly) Default 105 319 2574 27856
+2
+RI-JK 44 71 326 3072
+RIJCOSX 70 122 527 3659
+(gly) Default 609 1917 13965 161047
+4
+RI-JK 333 678 2746 30398
+RIJCOSX 281 569 2414 15383
+(gly) Default 3317 12505 82774
+8
+RI-JK 3431 5452 16586 117795
+RIJCOSX 1156 2219 8558 56505
+ItisobviousfromthedatathatforsmallmoleculestheRI-JKapproximationisthemostefficientchoice. For(gly)
+4
+thisisalreadynolongerobvious. Foruptothedef2-TZVPPbasisset,RI-JKandRIJCOSXarealmostidentical
+andfordef2-QZVPPRIJCOSXisalreadyafactoroftwofasterthanRI-JK.Forlargemoleculeslike(gly) with
+8
+smallbasissetsRI-JKisnotabigimprovementbutforlargebasissetitstillbeatsthenormal4-indexcalculation.
+RIJCOSX on the other hand is consistently faster. It leads to speedups of around 10 for def2-TZVPP and up to
+50-60fordef2-QZVPP.HereitoutperformsRI-JKby,again,afactoroftwo.
+106 Chapter6. RunningTypicalCalculations
+
+[... start of page 129 ...]
+ORCAManual,Release6.0.0
+DFTCalculationswithSecondOrderPerturbativeCorrection(Double-HybridFunctionals)
+Thereisafamilyoffunctionalswhichcameupin2006andwereproposedbyGrimme[320]. Theyconsistofa
+semi-empiricalmixtureofDFTcomponentsandtheMP2correlationenergycalculatedwiththeDFTorbitalsand
+their energies. Grimme referred to his functional as B2PLYP (B88 exchange, 2 parameters that were fitted and
+perturbativemixtureofMP2andLYP)–aversionwithimprovedperformance(inparticularforweakinteractions)
+ismPW2PLYP[771]andisalsoimplemented. Fromtheextensivecalibrationwork,thenewfunctionalsappear
+togivebetterenergeticsandanarrowererrordistributionthanB3LYP.Thus,theadditionalcostofthecalculatio

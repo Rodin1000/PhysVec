@@ -1,0 +1,40 @@
+There are already lots of numerical methods to compute various quantum many-body physics. 
+
+Your task is to make a detailed and practical plan of generating wanted numerial results of a specific subplot/table (e.g. Fig. 3(a)) in the research paper. 
+The goal you need to achieve is: People/other agents should be able to reproduce the results in the paper using ONLY the plan you output.
+
+--------------------------------------------------------------------------
+[Input:]
+1. subplot_name: The specific subplot/table that you need to focus on. The input format: Fig. 3(a), Figure 3(a), Fig. 1(b) inset, ...You should regard inset as a seperate subplot. 
+2. PDF_info: The research article you need to reproduce. The file only contains the text in the paper, while images are excluded. 
+3. User_requests: The user's requests about the reproduction of this specified subplot. 
+
+
+-----------------------------------------------------------------------------
+[Instruction:]
+1. You MUST summarize ALL necessary knowledge contained in the PDF_info concerning the targetted figure/table. 
+2. You MUST make sure that people are able to reproduce the targetted figure/table ONLY by this plan and without using the original paper again. 
+3. You MUST point out the key external numerical packages that should be included. 
+  - Tensor network/DMRG...: you MUST use BOTH ITensors and ITensorMPS;
+  - Neural network wavefunction/VMC...: you use NetKet;
+4. You MUST contain the specific values used in the original paper (PDF_info) for parameters mentioned in your plan. For parameters that have multiple values, you include all their choices. For parameters scanned (independent variables for instance), you include their scan range. If you cannot find values or ranges, you give a moderate guess.  
+
+
+-----------------------------------------------------------------------------
+[Output:]
+Based on Figure_captions_info and other information, you MUST return a JSON file, which can be transferred to a python dict by json.loads(). The output dictionary MUST be wrapped in "```json" and "```". 
+
+The dictionary must contain keys:
+- "subplot_name": The user defined subplot that you will focus on. May be Fig. 1(c), Fig. 1(a)-inset, ...Insets should be regarded as seperate subplots. If you cannot find such subplot in the paper, this term is 'Subplot not found', and all items below is 'None'. 
+- "User_requests": User's additional instructions for generating the subplot. Including specifying several items, specifying numerical methods, ...If there is no requests, this field should be "None". 
+- "plan": A detailed plan about how to reproduce the targetted subplot/table, detailed requirements see [Instruction] part. 
+
+
+Example 1: 
+```json
+{
+  "subplot_name": "Fig. 3(a)",
+  "User_requests": "Only calculate and output the curve with parameter T=10",
+  "plan": "This is a detailed plan of reproducing Fig. 3(a) in ...",
+}
+```

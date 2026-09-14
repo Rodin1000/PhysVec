@@ -1,0 +1,67 @@
+[... end of page 406 ...]
+notincludedinthePost-HFtreatment.
+• TheHFLayerscanalsobeusedfornon-DLPNOcalculations. Insuchcases,theHFLayermoleculesarein
+thesamewayincludedintheQMcalculationastheotherQMmolecules. Buttheirdefinitionisaconvenient
+waytochooseadifferentbasisset(andECPs)forthosemolecules.
+• ItcanbeassumedthattheQMchargescomputedfortheQMcoreregionaremorerealisticthanthecharges
+of the HFLayer atoms near the MM atomic charges. Thus, using only the QM atomic charges of the QM
+coreregionrepresentmorerealisticchargesforthechargeconvergencescheme.
+384 Chapter6. RunningTypicalCalculations
+
+--- Page 407 ---
+ORCAManual,Release6.0.0
+Note:
+• ThetermHFLayersmightbemisleading. Strictlyspeaking,onlyforMOL-CRYSTAL-QMMMcalculations
+withDLPNOmethods(e.g. DLPNO-CCSD(T),DLPNO-MP2, DLPNO-B2PLYP)theHFlayeratomsare
+treatedonHFlevel. Forothermethods(e.g. DFT)theHFlayeratomsaretreatedwiththesameelectronic
+structuremethodastheQMcoreregionatoms.
+• If necessary, the atoms of the HFLayer can be defined by the user. Make sure that complete molecular
+subunitsareusedhere.
+%qmmm
+HFLayerAtoms {0:15} end
+end
+ExampleInput
+AnexampleforaMOL-CRYSTAL-QMMMcalculationlooksasfollows:
+! MOL-CRYSTAL-QMMM
+! PBE def2-SVP Opt NumFreq
+%qmmm
+NUnitCellAtoms 13
+QMAtoms {221:233} end
+ActiveAtoms {221:233} end
+end
+*xyzfile 0 1 Ala_SC.xyz
+IONIC-CRYSTAL-QMMM
+Conceptuallyweuseanembeddedclustercalculation,inwhichtheQMregioninteractsonlywiththeMMatomic
+pointchargesofthesurrounding. UnlikewithMOL-CRYSTAL-QMMM,theLennard-Jonesinteractionbetween
+QMandMMregionisnotcomputed. ThechargeconvergencetreatmentbetweenQMandMMregionstartswith
+theinitialMMcharges(thechargesinitiallyreadfromtheORCAFF.prmsfile)andisiterateduntilconvergenceof
+theQMatomic(CHELPG)andMMpointchargesisachieved.
+BoundaryRegion
+ForioniccrystalsaboundaryregionneedstobeintroducedbetweentheQMregionandtheatomicpointcharges
+of the MM atoms in order to avoid spurious electron leakage from the clusters and to treat dangling bonds on
+thesurfaceoftheQMregion. Thisboundaryregionconsistsofcappedeffectivecorepotentials(cECPs). These
+cECPsareplacedonthepositionoftheMMatomsthataredirectlyadjacenttotheQMregion. ORCAanalyzes
+theconnectivityoftheatomsofthesupercellandcanthusdetectthelayersofatomsaroundtheQMregion,where
+thefirstlayerconsistsoftheatomsdirectlybondedtotheQMatoms,thesecondlayerconsistsoftheatomsdirectly
+bondedtotheatomsofthefirstlayerandsoon. ThechargesofthesecECPsaredeterminedinthesamewayasthe
+MMatomicchargesduringthechargeconvergencescheme.
+%qmmm
+ECPLayerECP "SDD" # cECPs used for the boundary region
+ECPLayers 3 # Number of cECP layers around the QM region.
+# Default is 3.
+Scale_FormalCharge_ECPAtom 1. # default is 1. Charges on cECPs are scaled by
+# this factor
+end
+6.16. ORCAMultiscaleImplementation 385
+
+[... start of page 408 ...]
+ORCAManual,Release6.0.0
+ExtendingtheQMRegion
+ORCA can extend the QM region (which we call QM core region, defined by the original QMAtoms input) by
+oneormultiplelayersofatomsusingtheHFLayerskeyword. IftheHFLayerskeywordisused,theatomsofthe
+definednumberoflayersaroundtheQMcoreregionisaddedtotheQMregion. Thelayersofatomsaroundthe
+QMcoreregionaredetectedinthesamewayasdefinedabovefortheECPLayers.
+%qmmm
+HFLayers 0 # default 0
+HFLayerGTO "LANL2DZ" # default. Use this basis set for the HFLayer atoms
+HFLayerECP "HayWadt" # default. Use these

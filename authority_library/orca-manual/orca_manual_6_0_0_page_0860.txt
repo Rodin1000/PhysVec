@@ -1,0 +1,78 @@
+[... end of page 859 ...]
+ength).
+7.38. Core-levelspectroscopywithcoupledclustermethods 837
+
+--- Page 860 ---
+ORCAManual,Release6.0.0
+7.39 The Multireference Correlation Module
+7.39.1 General Description
+Anumberof uncontracted multireferenceapproachesareimplementedinORCAandresideinthe orca_mrci
+module. Alloftheseapproachesstartwithareferencewavefunctionthatconsistsofmultipleconfigurations(orbital
+occupation patterns). The reference wavefunction defined in the ref subblock can be a complete active space
+(CAS),restrictedactivespace(RAS)oranarbitrarylistofconfigurations. Thetotalwavefunctionisconstructed
+by considering single and double excitations out of the reference configurations. These excited configurations
+are then used to generate configuration state functions (CSF) that have the proper spin and spatial symmetry.
+The number of wavefunction parameters rapidly grows with the number of reference functions. The orca_mrci
+modulefeaturesasetoftruncationcriteria(TSel, TPre, TNat)thathelptoreducethenumberofwavefunction
+parameters. Furthermore, by default, the program only considers reference configurations that already have the
+target spin and spatial symmetry. There are situations, where this is undesired and the restrictions can be lifted
+withthekeywordrejectinvalidrefs false. Formoreinformationonthetheory,theprogrammoduleaswell
+asitsusagewerecommendthereviewarticlebyNeeseetal.[628]. Atutorialtypeintroductiontothesubjectis
+presented in chapter The Multireference Correlation Module of the manual and more examples in the CASSCF
+tutorial. ThedetaileddocumentationofallfeaturesoftheMR-CIandMR-PTmoduleissomewhatprematureand
+atthispointonlyasummaryofkeywordsisgivenbelow. Athoroughdescriptionofalltechnicalandtheoretical
+subtletiesmustwaitforalaterversionofthemanual.
+Theoverallscalingofuncontractedapproachesissteep. Hence,themethodologyisrestrictedtosmallreference
+spacesandsmallmoleculesingeneral. Notethatallintegralsmustbekeptinmemory! Internallycontracted
+multireferenceapproachessuchasNEVPT2donotsharethesebottlenecks. AsidefromNEVPT2,ORCAfeatures
+afullyinternallycontractedMRCI(FIC-MRCI)thatresidesintheorca_autocimodule. Formoredetailsonthe
+FIC-MRCIwerefertosectionCImethodsusinggeneratedcode.
+%mrci
+# -----------------------------------------------------------
+# Orbital selection
+# NOTE: The orbitals are used as supplied. Thus, the ORDER of
+# orbitals is critical. Say you have
+# nact electrons in the active space
+# nint electrons in the internal space
+# nfrozen electrons
+# * The first nfrozen/2 orbitals will not be included in the CI
+# * The next nint/2 orbitals will be doubly occupied in all
+# references
+# * the nact electrons are distributed over the,say, mact
+# orbitals according to the active space definitions.
+# The remaining orbitals are external.
+# IT IS YOUR RESPONSIBILITY THAT THE ORBITAL ORDERING MAKES
+# SENSE!
+# A sensible two-step procedure is:
+# * generate some orbitals and LOOK AT THEM. Decide which ones
+# to include in the CI.
+# * re-read these orbitals with ! MORead NoIter. Perhaps use
+# the "rotate" feature to reorder the MOs
+# Then jump right into the CI which is defined in this se-
+# cond job
+#
+# NOTE: the MRCI module respects the %method FrozenCore settings
+# -----------------------------------------------------------
+Loc 0,0,0
+# Localize orbitals in the internal (first flag), active
+# (second flag) and external space (third flag).
+UseIVOs false
+# Use improved virtual orbitals in the CI
+# ---------------------------------
+(continuesonnextpage)
+838 Chapter7. DetailedDocumentation
+
+[... start of page 861 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# Method selection
+# ---------------------------------
+CIType MRCI # Multireference CI (default)
+MRDDCI1 # Difference dedicated CI 1-degree of freedom
+MRDDCI2 # Difference dedicated CI 2-degrees of freedom
+MRDDCI3 # Difference dedicated CI 3-degrees of freedom
+MRACPF # Average coupled-pair functional
+MRACPF2 # Modified version of ACPF
+MRACPF2a # A slightly modified version of ACPF-2a
+MRAQCC # Average quadratic coupled-cluster
+MRCEPA_R # 

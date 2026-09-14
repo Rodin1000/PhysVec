@@ -1,0 +1,85 @@
+[... end of page 609 ...]
+E= -0.790571374 <r|r>= 4.722929453
+AUGHESS-ITER 10: E= -0.790590554 <r|r>= 4.716012014
+AugHess: No convergence in the Davidson procedure
+...
+ThereareanumberofrefinedNRsettingsthatinfluencetheconvergencebehavioronanon-convexenergysurface.
+Wementionthekeywordsforcompletenessanddis-encouragefromchangingthedefaultsettings. Ifoverallconver-
+gencecannotbechangedduetonegativeeigenvalues,itisrecommendedtodelaytheNRswitchstep(switchconv,
+switchiter). Thiswillrequiresometrialanderror,sincethecurvatureofthesurfaceisapriorinotknow.
+%casscf
+...
+aughess
+Solver 0 # Davidson (default)
+(continuesonnextpage)
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 587
+
+--- Page 610 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+1 # Pople (pure NR steps)
+2 # DIIS
+MaxIter 35 # max. no. of CI iters.
+MaxDim 35 # Davidson expansion space
+MaxDIIS 12 # max. number of DIIS vectors
+UseSubMatrixGuess true # diag a submatrix of the Hessian
+# as an initial guess
+NGuessMat 512 # size of initial guess matrix (part of
+# the Hessian exactly diagonalized)
+ExactDiagSwitch 512 # up to this dimension the Hessian
+# is exactly diagonalized (small problems)
+PrintLevel 1 # amount of output during AH iterations
+Tol 1e-6 # convergence tolerance
+Compress true # use compressed storage
+DiagShift 0.0 # shift of the diagonal elements of the
+# Hessian
+UseDiagPrec true # use the diagonal in updating
+SecShift 1e-4 # shift the higher roots in the Davidson
+# secular equations
+UpdateShift 0.5 # shift of the denominator in the
+# update of the AH coefficients
+end
+end
+In general, convergence is strongly influenced by numerical noise, especially in the final iterations. One source
+of numerical noise is the incremental Fock build. Thus, it can help to enforce more frequent full Fock matrix
+formation.
+ResetFreq 1 # reset frequency for direct SCF
+Iftheorbitalchangeintheactivespaceissmall,theactiveFockmatrixinORCAisapproximatedusingthedensity
+matrix from the previous cycle saving a second Fock matrix build. However, this approximation might also be
+asourceofnumericalinstability. Thethreshold“SwitchDens”canbesettozerotoenabletheexactbuild. The
+programdefaultstartswitharatherlargevalue(1e-2)andwillreducethisparameterautomaticallywhennecessary.
+switchdens 0.0001 # ~gtol * 0.1
+Inalloftheimplementedorbitaloptimizationschemesthestep-sizecorrelateswiththegradient-norm. Aconstant
+dampingfactorcanbesetwiththekeyword GradScaling. Note,dampingandlevelshiftingtechniquesarenot
+recommendedforthedefaultconverger(SuperCI_PT).
+GradScaling 0.5 # constant damping in all steps
+Therearesituationswhentheactivespacehasbeenchosencarefully,buttheinitialgradientisstillfaroff. Tokeep
+the“good”activespace,wecansuppressallrotationbuttheinactive-externalonesuntilthegradient-normissmall
+enoughtocontinuesafely. ThethresholdcanbesetwithFreezeIEkeyword. Oncethecomponentsofthegradient
+intheinactive-externaldirectionhaveaweightoflessthanFreezeIE,allconstraintsarelifted. ORCAbydefault
+freezesactiverotationsifthetotalgradientnormislargerthan1.0andtheactiverotationshaveaweightofless
+than5%. Thefeaturecanbeturnedoffsettingthethresholdtozero.
+Similarly,rotationsofthealmostdoublyoccupiedorbitalswiththeinactiveorbitalscanbedampedusingthethresh-
+oldFreezeActive. RotationsofthistypearedampedaslongasalltheirweightissmallerthanFreezeActive.
+IncontrasttotheShiftDn,itdampsjustthe“troublesome”partsofinternal-activerotations. Thisoptionapplies
+toalloftheorbitaloptimizationschemesbuttheSuperCI_PT.
+FreezeIE 0.4 # keep active space until int-ext rotation have
+# a contribution of less than 40% to the ||g||
+FreezeActive 0.03 # keep almost doubly occupied orbitals as long as
+# their contribution is less than 3% to the ||g||
+IfthecalculationstartsfromaconvergedHartree-Fockorbitals,thecoreorbitalsshouldnotchangedramatically
+588 Chapter7. DetailedDocumentation
+
+[... start of page 611 ...]
+ORCAManual,Release6.0.0
+bytheCASSCFoptimization. Oftentrailingconvergenceisassociatedtorotationswithlowlyingorbitals. Their
+contributiontothetotalenergyisfairlysmall. WiththekeywordFreezeGradtheserotationscanbeomittedfrom
+theorbitaloptimizationprocedure.
+FreezeGrad 0.2 # omit hitting a gradient norm ||g|| <0.2
+TheaffectedorbitalsareprintedatthestartupofCASSCF.
+FreezeGrad ... enabled if ||g|| is below 0.02
+Note Convergence can be signaled if the reduced gradient reaches GTol
+Last frozen orbital ... 9
+First deleted orbital ... 320
+Once rotations with core and deleted orbitals are stabilized they will be damped.
+Bydefault

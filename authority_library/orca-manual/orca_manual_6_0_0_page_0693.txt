@@ -1,0 +1,77 @@
+[... end of page 692 ...]
+scf
+ActConstrains 1 # maintain shape and ordering of active orbitals
+...
+end
+Ingeneral,performingaDMRGcalculationwithorbitaloptimizationisquiteexpensive. Therefore,itisoftenbest
+tocarryouttheorbitaloptimizationusingasmallvalueof maxM(enabledbythedefaultparametersmaxM=25and
+theresultingsweepschedule),andtocarryoutafinalsingle-pointcalculationusingalargervalueof maxM.
+670 Chapter7. DetailedDocumentation
+
+--- Page 693 ---
+ORCAManual,Release6.0.0
+Advancedoptions
+TheremaybetimeswhenonewantsfinercontroloftheDMRGcalculation. Allkeywordsareshowninthecomplete
+setofBLOCKoptionsCompletesetofBLOCKoptionsbelow. ThestartMcommandallowstochangethestarting
+numberofstatesinDMRGcalculations. Itisalsopossibletospecifytheentiresweepschedulemanually. Asweep
+scheduleexamplefollows:
+%casscf
+...
+dmrg
+MaxIter 14
+switch_rst 1e-3
+TwoDot_to_oneDot 12
+NSchedule 3
+sche_iteration 0, 4, 8
+sche_M 50, 100, 500
+sche_sweeptol 1e-4, 1e-6, 1e-9
+sche_noise 1e-8, 1e-11, 0.0
+end
+end
+Thecommandsaboveare:
+• MaxIter,correspondstothemaximumnumberofsweepsdonebyDMRG;
+• NSchedule,specifiesthetotalnumberofscheduleparameterswewillspecify;
+• Sche_iteration,detailsthesweepnumberatwhichtochangetheparametersofthecalculation. Notice
+countbeginsat0;
+• Sche_M,isthenumberofrenormalizedstatesateachsweep;
+• Sche_sweeptol,isthetoleranceoftheDavidsonalgorithm;
+• Sche_noise,istheamountofperturbativenoiseweaddeachsweep;
+• Twodot_to_onedot,specifiesthesweepatwhichtheswitchismadefromatwodottoaonedotalgorithm.
+Therecommendedchoiceistostartwithtwodotalgorithmandthenswitchtoonedotalgorithmafewsweeps
+afterthemaximum𝑀hasbeenreached. Todoacalculationentirelywiththetwodotortheonedotalgorithm,
+replacethetwodot_to_onedotlinewithtwodot 1oronedot 1;
+• switch_rst,definestheswitchingthresholdoforbitalgradientbelowwhichDMRGturnstoonedotalgo-
+rithmandrestartsfrompreviousoperatorsandwavefunction. Thisisessentialtoavoidoscillationofenergy
+valuesintheorbitaloptimization.
+ThedefaultDMRGsweepscheduleisselectedautomaticallyaccordingtothechoiceofcomputationalmode. By
+default two different sets of predefined schedules are supported for CASCI and CASSCF computations, respec-
+tively.
+In CASCI mode, the default schedule corresponds to the following: starting from a given startM (where the
+defaultis250and8sweeps),increasetoavalueof1000(8sweeps)andincrementby1000every4iterationsuntil
+maxMisreached. ThealgorithmswitchesfromtwodottoonedottwosweepsafterthemaxMhasbeenreached.
+InCASSCFmode,theorbitaloptimizationrequiresmuchfewerrenormalizedstatestoconvergethewavefunction
+withrespecttoorbitalrotations. ThedefaultschedulethereforestartswithstartM(wherethedefaultis25and2
+sweeps),andincrementsbyafactorof2every2sweepsutilmaxMisreached. Thealgorithmcontinuesthesweep
+at maxM by decreasing the Davison tolerance sche_sweeptol and noise level sche_noise every 2 cycles by a
+factorof10,untilsche_sweeptolbecomessmallerthansweeptol.
+Forbettercontroloftheorbitalordering,wealsoprovideageneticalgorithmminimizationmethodofaweighted
+exchangematrix. Thegeneticalgorithmusuallyprovidesasuperiororbitalorderingtothedefaultordering, but
+canitselftakesometimetorunforlargenumbersoforbitals. Thegeneticalgorithmcanbeenabledby
+7.22. DensityMatrixRenormalizationGroup 671
+
+[... start of page 694 ...]
+ORCAManual,Release6.0.0
+%casscf
+...
+DMRG
+auto_ordering GAOPT
+end
+end
+withinthe%casscfinput.
+Troubleshooting
+ThetwomostcommonproblemswithDMRGcalculationsarethat(i)convergencewithmaxMisslowerthandesired,
+or(ii)theDMRGsweepsgetstuckinalocalminimum. (i)isgovernedbytheorbitalordering/choiceoforbitals.
+Toimproveconvergence,turnonthegeneticalgorithmorbitalordering.
+Ifyoususpect(ii)isoccurring,thesimplestthingtodoistoincreasethestartingnumberofstateswiththestartM
+(e.g. from500to1000states). LocalminimacanalsosometimesbeavoidedbyincreasingthenoiseintheDMRG
+schedule, e.g. by a factor of 10. To check that you are stuck in a local minimum, you can carry out a DMRG

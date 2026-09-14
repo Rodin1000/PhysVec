@@ -1,0 +1,58 @@
+[... end of page 682 ...]
+ep SOSCF true # steepest descent step
+NR false # Newton-Raphson step
+end
+end
+Despiteaconvergedstate-averagedcalculation,thegradientfortheindividualstatescanbesurprisinglylarge. As
+aconsequence,theorbitalrelaxationmightfailasbothmethodsmightbeoutsidetheirconvergenceradius. ORCA
+willretrytherelaxationwithanincreaseddamping. Iftheorbitalupdatestillfails,theprogramwillstickwiththe
+initialorbitals. Settinganoveralldampingmanually,mighthelptherelaxationprocedure.
+PTMethod SC_NEVPT2
+PTSettings
+gscaling 0.5 # damp gradient with a pre-factor
+end
+660 Chapter7. DetailedDocumentation
+
+--- Page 683 ---
+ORCAManual,Release6.0.0
+7.19.8 Quasi-Degenerate SC-NEVPT2
+NEVPT2 as it is presented in the previous subsections follows the recipe of “diagonalize and perturb”. The 0th
+orderwavefunctionisdeterminedbythediagonalizationoftheCAS-CImatrix. ThespacespannedbytheCAS-CI
+vectorsisoftenreferredtoas“modelspace”. Thesubsequentperturbationtheoryisconstructedbasedontheas-
+sumptionthatthestatesunderconsiderationarewelldescribedwithinthemodelspace. Consequently,thefirstorder
+correctiontothewavefunctionΨ(1) doesnotaffectthecompositionofthereferencestate|𝐼⟩. Correctionstothe
+𝐼
+wavefunctionandenergyarisefromtheinteractionofthereferencestatewiththefunctions|𝑘⟩ofthecontributing
+firstorderinteractingspace
+Ψ(1) = ∑︁ 𝐶 |𝑘⟩
+𝐼 𝑘
+𝑘
+𝐸(2) =
+∑︁⟨𝐼|𝐻|𝑘⟩⟨𝑘|𝐻|𝐼⟩
+𝐼 𝐸(0)−𝐸
+𝑘 𝐼 𝑘
+This is problematic, when the interaction/mixing of states are falsely described at the CASSCF level. A typical
+exampleisthedissociationoflithiumfluoride.
+!def2-tzvp nevpt2 nofrozencore
+%casscf
+nel 2
+norb 2 #Li(2s), F(2pz)
+mult 1
+nroots 2
+end
+%paras
+r = 3,7,200
+end
+*xyz 0 1
+Li 0 0 0
+F 0 0 {r}
+*
+Here,thegroundandfirstexcitedstateofΣ+ shouldnotcross. However,attheNEVPT2level,anerraticdouble
+crossingisobservedinstead.
+7.19. N-ElectronValenceStatePertubationTheory 661
+
+[... start of page 684 ...]
+ORCAManual,Release6.0.0
+Fig.7.7: SC-NEVPT2andQD-SC-NEVPT2Li-Fdissociationcurvesofthegroundandfirstexcitedstatesfora
+CAS(2,2)reference
+Are-organizingofthereferencestatescanbeintroducedintheframeworkofquasi-degenerateperturbationtheory.

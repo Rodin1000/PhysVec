@@ -1,0 +1,82 @@
+[... end of page 1065 ...]
+𝐸 −𝐸
+𝜆′ 𝜆
+𝜆′̸=𝜆𝑎,𝑎′
+where 𝑄
+0
+= ∑︀
+𝜆′,𝑎
+𝑒−𝐸𝜆/𝑘𝑇 denotes the partition function. An important property of the Z matrix as defined
+aboveisthatitgoestotheidentitymatrixasD/𝑘𝑇 goestozero.
+Theorbitalpartoftheshielding,𝜎orb,iscalculatedinthesamemannerasforclosed-shellmolecules. Itisavailable
+inORCAfortheunrestrictedHFandDFTmethodsandforMP2(seeSectionMP2levelmagneticpropertiesfor
+moreinformationonthelatter).
+Theorca_pnmrtoolusesEq. (7.407)tocalculate𝜎p. Usageof orca_pnmrisdescribedinSectionorca_pnmr.
+1ForacomprehensivereviewonparamagneticNMR,seee.g.[657].
+7.54. CalculationofProperties 1043
+
+--- Page 1066 ---
+ORCAManual,Release6.0.0
+7.54.5 Calculating properties from existing densities
+Occasionally,onemaycalculateadensitymatrixusinganexpensivecorrelatedmethodsuchasCCSDandrealize
+afterwardsthatacertainpropertysuchasthequadrupolemomentorahyperfinecouplingconstant(HFCC)isalso
+required. Rather than start the whole calculation from scratch, one may wish to use the existing density matrix
+to calculate the properties. For this purpose, we have experimentally introduced a “properties only” calculation
+mode,wherebytheMOsarereadfromanexistingBaseName.gbwfileandthedensitiesarereadfromanexisting
+BaseName.densitiesfileandonlythepropertycalculationsareperformed. Notehowever,thatthispresentsmany
+possibilitiesforerror,soonlyuseitasalastresortandbeverycarefulwiththeresults!
+Take,forexample,thisCCSDcalculation:
+! ccsd def2-svp
+%base "BO-CCSD"
+%mdci density unrelaxed end
+*xyz 0 2
+B 0 0 0
+O 0 0 1.2049
+*
+This produces the files BO-CCSD.gbw and BO-CCSD.densities. To obtain the CCSD quadrupole moment and
+HFCCswithoutrepeatingthewholecalculation,wecancopythesetwofilesintoanewdirectory(highlyrecom-
+mended!) andstartasecondjobwiththe!PropertiesOnlykeyword. Notethatthebasenameofthesecondjob
+mustbeidentical!
+! ccsd def2-svp
+%base "BO-CCSD"
+%mdci density unrelaxed end
+*xyz 0 2
+B 0 0 0
+O 0 0 1.2049
+*
+# Everything above must be the same as in the first job!
+# Request the property calculations
+! PropertiesOnly
+%elprop
+quadrupole true
+end
+%eprnmr
+Nuclei = all B { Aiso, Adip }
+Nuclei = all O { Aiso, Adip }
+end
+7.54.6 Local Energy Decomposition
+TheDLPNO-CCSD(T)methodprovidesveryaccuraterelativeenergiesandallowstosuccessfullypredictmany
+chemical phenomena. In order to facilitate the interpretation of coupled cluster results, we have developed the
+LocalEnergyDecomposition(LED)analysis[33,105,766],whichpermittodividethetotalDLPNO-CCSD(T)
+energy (including the reference energy) into physically meaningful contributions. A practical guide to the LED
+schemeisreportedinSectionLocalEnergyDecomposition. Examplesofapplicationsofthisschemecanbefound
+inRef.[84,106,294,536,537,902]
+Asawordofcautionweemphasizethatonlythetotalenergyisanobservableanditsdecompositionis,tosome
+extent, arbitrary. Nevertheless, the LED analysis appears to be physically well grounded and logical to us, it is
+straightforward to apply and comes typically at a negligible computational cost compared to DLPNO-CCSD(T)
+calculations. StartingfromORCA4.1,theLEDschemeisavailableforbothclosedshellandopenshellcalcula-
+tions. Thecodehasalsobeenmadeparallelandmoreefficient.
+TheLEDschememakesnoassumptionaboutthestrengthoftheintermolecularinteractionandhenceitremains
+validandconsistentovertheentirepotentialenergysurface. Alternativeschemes,suchasthepopularsymmetry
+1044 Chapter7. DetailedDocumentation
+
+[... start of page 1067 ...]
+ORCAManual,Release6.0.0
+adaptedperturbationtheory,areperturbativeinnatureandhencearebestappliedtoweaklyinteractingsystems.
+The idea of the LED analysis is rather simple. In local correlation methods occupied orbitals are localized and
+canbereadilyassignedtopre-definedfragmentsinthemolecule. Thesamecanbedoneforthecorrelationenergy
+intermsofpaircorrelationenergiesthatrefertopairsofoccupiedorbitals. Inthisway,boththecorrelationand
+the reference energy can be decomposed into intra- and interfragment contributions. The fragmentation is user
+defined. Anarbitrarynumberoffragmentscanbedefined. Inthecasethatmorethan2fragmentsaredefined,the
+interfragmentinteractionisprintedforeachfragmentpair.
+AveryimportantfeatureoftheLEDschemeisthepossibilitytodisting

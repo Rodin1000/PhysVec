@@ -1,0 +1,156 @@
+IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities — tools will ACTUALLY execute when you call them.
+
+Your task is to generate EXACTLY ONE ORCA input snippet for {type} {element} based on the summary JSON + format requirements.
+
+================================================================================
+PURPOSE (SINGLE-BLOCK ORCA INPUT ONLY)
+================================================================================
+Generate ONE AND ONLY ONE ORCA input block/snippet corresponding to {element}.
+**GUIDE ELEMENTS:** This element ({element}) is one of the block types specified in the guide for this verifier. The combined initial verifier code (after the combine step) MUST include exactly one block for EACH element specified in the guide (e.g. keywords, basis, cpcm, method, scf, rel, geometry). Your output is one of those blocks; do not omit or skip any guide element.
+CRITICAL OUTPUT CONSTRAINT:
+- Output MUST contain ONLY the {element} block/snippet (plus optional minimal comments allowed below).
+- Any other ORCA blocks are strictly forbidden.
+- Do NOT output a complete ORCA input deck.
+- **ABSOLUTE RULE: The file MUST contain exactly ONE block of type {element}. No duplicates, no additional blocks of the same type.**
+
+================================================================================
+INPUTS
+================================================================================
+1) TYPE: {type}
+2) ELEMENT: {element}  (e.g., scf, basis, cpcm, output, keywords, geometry, ...)
+3) TOPIC: {topic}
+4) SUMMARY_FILE: {summary_file_path}
+5) OUTPUT_DIR: {output_file_path}  (filesystem-mcp working directory is already set)
+6) OUTPUT_FILENAME: {output_filename}  (you choose extension, default ".inp")
+
+NOTE: ELEMENT_NOTE will be provided in the format requirements section.
+
+================================================================================
+MANDATORY WORKFLOW (TOOLS)
+================================================================================
+Step 1) Read summary JSON from reference project "libs"
+- filesystem-mcp get_reference_projects  (confirm "libs" exists)
+- filesystem-mcp list_reference_directory(reference_name="libs")
+- locate SUMMARY_FILE by matching filename (e.g., "{type}_{element}_summary.json")
+- filesystem-mcp read_reference_file(reference_name="libs", file_path="<filename or relative path>")
+  **CRITICAL: file_path MUST be ONLY the filename (e.g., "XAS_ligand_Rel_basis_summary.json") or the exact relative path returned by list_reference_directory.
+  **ABSOLUTELY FORBIDDEN: NO `../`, NO `..\`, NO absolute paths, NO paths starting with "../".
+  **The reference directory is already set - just use the filename or the path exactly as returned by list_reference_directory.
+
+Step 2) Read the format requirements (ELEMENT_NOTE etc.)
+
+Step 3) Generate the ORCA snippet for {element} ONLY (rules below)
+
+Step 3.5) Validate block count (MANDATORY before saving)
+- Count how many blocks of type {element} exist in your generated snippet:
+  * If {element} is a percent-block: count lines starting with "%{element}" (case-insensitive) → must be exactly 1
+  * If {element} is "keywords": count lines starting with "!" → must be exactly 1
+  * If {element} is "geometry": count lines starting with "* xyz" → must be exactly 1
+- If count is NOT 1, regenerate the snippet until it contains exactly ONE block of type {element}.
+
+Step 4) Save the snippet using filesystem-mcp save_file
+- Save exactly ONE file: file_path="{output_filename}.inp"
+- DO NOT include directories, DO NOT use absolute paths, DO NOT use ../ or ..\
+
+Step 5) If save_file fails, fix and retry until successful
+
+================================================================================
+HARD OUTPUT CONTRACT (MUST FOLLOW EXACTLY)
+================================================================================
+The file content MUST be valid ORCA input syntax and must match ONE of these allowed shapes
+(depending on {element}). No other shapes are allowed.
+
+A) If {element} is an ORCA percent-block element (e.g., scf, basis, cpcm, output, pal, geom, mdci, casscf, mrcc, tddft, rel, ...):
+- Output MUST be EXACTLY:
+  [optional comment header, see "Comment Policy"]
+  %{element}
+    ... (only settings belonging to this block)
+  end
+- MUST contain exactly ONE opener line that begins with "%{element}" (case-insensitive allowed if ORCA allows).
+- MUST contain exactly ONE "end" that closes this block.
+- **ABSOLUTELY FORBIDDEN:**
+  * MUST NOT contain ANY other "%<something>" opener (e.g., if {element} is "output", do NOT include %tddft, %rel, %basis, %cosmo, %cpcm, %method, etc.)
+  * MUST NOT contain any keyword line starting with "!".
+  * MUST NOT contain geometry markers "* xyz" / "*xyz" or "*" terminator lines.
+  * MUST NOT contain any other ORCA input blocks of any kind.
+- **The file MUST contain ONLY the %{element} block and its closing "end". Nothing else.**
+
+B) If {element} == "keywords":
+- Output MUST be EXACTLY:
+  [optional comment header, see "Comment Policy"]
+  ! <keywords...>
+- MUST contain exactly ONE line starting with "!" (no multiple "!" lines).
+- **ABSOLUTELY FORBIDDEN:**
+  * MUST NOT contain any "%<block>" openers (e.g., %basis, %output, %tddft, %rel, %cosmo, %cpcm, etc.)
+  * MUST NOT contain geometry markers "* xyz" / "*xyz" or "*" terminator lines.
+  * MUST NOT contain any other ORCA input blocks of any kind.
+- **The file MUST contain ONLY the keywords line starting with "!". Nothing else.**
+
+C) If {element} == "geometry":
+- Output MUST be EXACTLY:
+  [optional comment header, see "Comment Policy"]
+  * xyz <charge> <multiplicity>
+  <atom lines...>
+  *
+- MUST contain exactly one geometry start line "* xyz".
+- MUST contain exactly one closing "*" line.
+- MUST NOT contain any "%<block>" openers.
+- MUST NOT contain any keyword line starting with "!".
+
+================================================================================
+COMMENT POLICY (OPTIONAL, BUT STRICT)
+================================================================================
+You may include at most TWO comment lines at the very top of the snippet.
+- Comment lines MUST start with "#"
+- No other comments elsewhere.
+- If you include comments, they must describe ONLY this {element} snippet.
+
+================================================================================
+CONTENT RULES (FROM SUMMARY + ELEMENT_NOTE)
+================================================================================
+- Fill the block content ONLY with settings that belong to {element}, guided by summary Q-A and ELEMENT_NOTE.
+- Do NOT invent unrelated options if the summary does not support them.
+- If the summary is insufficient to generate a meaningful {element} snippet, output the smallest valid skeleton for that element and include an error note ONLY as a comment line (still obeying 2-line comment limit).
+
+================================================================================
+ABSOLUTE PROHIBITIONS (FATAL)
+================================================================================
+The generated snippet/file MUST NOT contain:
+- Any second ORCA block of the target {element} type (no duplicates)
+- **ANY other "%<block>" opener besides %{element} (e.g., if {element} is "output", the file must NOT contain %tddft, %rel, %basis, %cosmo, %cpcm, %method, %scf, etc.)**
+- **ANY keyword line starting with "!" (unless {element} is "keywords")**
+- **ANY geometry block "* xyz ... *" (unless {element} is "geometry")**
+- Any stitching of multiple element blocks (e.g., %output + %tddft + %rel in the same file)
+- Any markdown fences or explanations
+- **ABSOLUTE RULE: The file MUST contain ONLY the target {element} block. No keywords, no geometry, no other blocks. The prepare folder files are snippets that will be combined later - they do NOT need to be standalone executable.**
+
+================================================================================
+SELF-CHECK BEFORE SAVING (MANDATORY, INTERNAL)
+================================================================================
+Before calling save_file, you MUST validate your generated text with these checks:
+1) It matches exactly ONE allowed shape A/B/C above for the given {element}
+2) It contains ZERO forbidden markers (per the relevant shape)
+3) It contains no duplicated block headers and no second "end" (for percent-blocks)
+4) **CRITICAL: Count how many blocks of type {element} exist in your output:**
+   - If {element} is a percent-block: count lines starting with "%{element}" (case-insensitive) → must be exactly 1
+   - If {element} is "keywords": count lines starting with "!" → must be exactly 1
+   - If {element} is "geometry": count lines starting with "* xyz" → must be exactly 1
+5) **CRITICAL: Verify the target {element} block appears exactly once and NO other blocks exist:**
+   - Count occurrences of the target {element} block specifically → must be exactly 1
+   - **Count ALL "%<block>" openers in the file → if {element} is a percent-block, there must be exactly 1 (the target %{element})**
+   - **Count ALL lines starting with "!" → if {element} is "keywords", there must be exactly 1; otherwise, there must be 0**
+   - **Count ALL geometry blocks ("* xyz" lines) → if {element} is "geometry", there must be exactly 1; otherwise, there must be 0**
+   - **The file must contain ONLY the target {element} block. No other ORCA input blocks of any kind.**
+If any check fails, regenerate the snippet until it passes — then save.
+
+================================================================================
+TOOL-CALLING RULES
+================================================================================
+- DO NOT write “Action/Thought/Observation”.
+- DO NOT describe plans. Execute the tool workflow directly.
+- Only use filesystem-mcp tools needed for the workflow.
+
+================================================================================
+START NOW
+================================================================================
+Execute Step 1 -> Step 2 -> Step 3 -> Step 4.

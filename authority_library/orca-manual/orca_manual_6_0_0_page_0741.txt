@@ -1,0 +1,104 @@
+[... end of page 740 ...]
+ the boundary to the MM-system
+end
+end
+NOTE
+• ThisprocedureshouldbeusedforQM/MMoptimizedstructuresonlytoverifythenatureofthestationary
+pointandhaveanestimateoftheZPE.
+Hereweshortlydescribetheprocedure: InPHVAwedividethesystemintotwoparts𝐵 (ofsize𝑛atoms)and𝐶
+(size𝑁−𝑛). Lettheatomset𝐵belongtotheregionwherethechemicalchangeislocalized. ThePartialHessian
+matrixisbuiltupasfollows:
+(︂ )︂
+𝐾 0
+𝐵𝐵 (7.211)
+0 𝐾𝜀
+𝐶𝐶
+718 Chapter7. DetailedDocumentation
+
+--- Page 741 ---
+ORCAManual,Release6.0.0
+With:
+𝐾 :𝑥,𝑦,𝑧 direction
+𝐵𝐵
+⎛ ⎞
+𝜀 0 0
+𝐾
+𝐶
+𝜀
+𝐶
+=⎜
+⎝0
+...
+0
+⎟
+⎠
+, 𝜀=10−8au, (7.212)
+0 0 𝜀
+thiscorrespondstousingnear-infinitemassesfortheatomsin𝐶.
+Withthisprocedurewegetthefollowingeigenvaluestructure:
+• Sixzeroeigenvalueswithmodescorrespondingtotranslationalandrotationalmotionoftheentiremolecule.
+• 3(𝑁 −𝑛)−6small(lessthan1cm−1)eigenvalueswithmodescorrespondingmainlytointernalmotion
+withinregion𝐶.
+• Threeeigenvalues(typicallylessthan10cm−1)withmodescorrespondingmainlytomotionofregion𝐶
+relativetoregion𝐵.
+• (3𝑛−3)eigenvalueswithmodescorrespondingmainlytorelativemotionof𝐵 and𝐶 aswellasinternal
+motionwithinregion𝐵.
+7.26.3 Minimum Energy Crossing Points
+The MECP optimization allows the user to optimize to structures where two different potential energy surfaces
+(PES1andPES2)crosseachother. Inthisoptimizationtwoconditionsapply: theenergy𝐸 ofPES1isminimized
+1
+whileatthesametimetheenergydifference(𝐸 −𝐸 )2 ofbothsurfacesisminimized. Fortheimplementation
+1 2
+wefollowinprinciplethesuggestionsofHarveyetal. in[365].
+Fortheminimizationtwodifferentgradientsareconstructed:
+Thefirstgradientchosenfortheminimizationis
+𝜕
+f = (𝐸 −𝐸 )2 =2(𝐸 −𝐸 )·𝑥 (7.213)
+𝜕𝑞 1 2 1 2 1
+where𝑥 isthegradientdifferencevector
+1
+[︂(︂ )︂ (︂ )︂]︂
+𝜕𝐸 𝜕𝐸
+𝑥 = 1 − 2 (7.214)
+1 𝜕𝑞 𝜕𝑞
+whichisorthogonaltothecrossinghyperlineneartheMECP.
+Thegradient
+(︂ )︂ [︂(︂ )︂ ]︂
+𝜕𝐸 𝑥 𝜕𝐸 𝑥
+g= 1 − 1 1 · 1 (7.215)
+𝜕𝑞 |𝑥 | 𝜕𝑞 |𝑥 |
+1 1
+isorthogonalto𝑥 .
+1
+Bothgradientsarecombinedtoyieldtheeffectivesurfacecrossinggradient
+g = g+f (7.216)
+SC
+Thecrossinghyperlineisdefinedasthe3𝑁 −7dimensionalsubspaceofPES1,whichisorthogonalto𝑥 . Inthe
+1
+MECPoptimizationwewanttofindthepointoflowestenergywithinthissubspace.
+Ourcalculationofnormalmodesandforceconstantsformovementsalongthecrossinghyperlinedifferfromthe
+one proposed by Harvey et al. A standard frequency analysis can not be performed, but a similar procedure is
+applied:
+Letusregardthesecond-orderTaylorexpansionfortheenergyofbothsurfacesneartheMECPforadisplacement
+alongthecrossinghyperline(orthogonalto𝑥 ):
+1
+1
+E
+𝐴
+=𝐸MECP+
+2
+∆𝑞𝑇𝐻eff,𝐴 ∆𝑞 (7.217)
+7.26. GeometryOptimization 719
+
+[... start of page 742 ...]
+ORCAManual,Release6.0.0
+with:
+E EnergyE onPES1orE onPES2
+𝐴 1 2
+𝐻eff,𝐴 effectiveHessianforPES1orPES2
+∆𝑞 displacementalongthecrossinghyperline
+DiagonalizationofthiseffectiveHessiangivesusthenormalmodesofthecrossinghyperlineandthusallowsus
+todecidewhethertheMECPoptimizationconvergedtoaminimuminthe3𝑁 −7dimensionalsubspaceofthe
+crossinghyperline.
+TheprocedureforthecalculationoftheeffectiveHessianisnowasfollows: Foreachofbothsurfacesthesecond
+derivativematrixiscalculated. Thenthe

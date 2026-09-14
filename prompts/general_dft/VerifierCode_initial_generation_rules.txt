@@ -1,0 +1,76 @@
+Code Format Requirements for Verifier Codes
+-----------------------------------------------------------------------------
+
+Purpose
+Generate one verifier file per target element. Each file contains exactly ONE ORCA block ({element}) saved as {element}_verifier_{type}.inp in the prepare folder. The combine step merges these single-block files later. Do NOT put multiple blocks into one file.
+
+**GUIDE ELEMENTS (MANDATORY):** The guide specifies which elements must be present in the verifier code. Every element listed in the guide MUST have a corresponding block in the initial combined verifier code (one block per element). The same set of elements must remain present in the final verifier code after any refinement; do not remove or omit any guide-specified block.
+
+-----------------------------------------------------------------------------
+
+1) File Naming (MANDATORY)
+- Format: {element}_verifier_{type}.inp
+- Examples: keywords_verifier_fermion, output_verifier_fermion, geometry_verifier_fermion, basis_verifier_fermion, cosmo_verifier_fermion
+
+-----------------------------------------------------------------------------
+
+2) One Block Per File (ABSOLUTE)
+Each file MUST contain ONLY the target {element} block (plus optional comment header).
+
+Allowed:
+- If {element} is "keywords": ONLY "! <keywords...>" line
+- If {element} is a percent-block (output, basis, cosmo, cpcm, scf, tddft, rel, ...): ONLY "%{element}" ... "end"
+- If {element} is "geometry": ONLY "* xyz <charge> <mult>" ... "<atoms>" ... "*"
+
+Forbidden:
+- Multiple blocks in same file
+- Keywords line (!) when {element} ≠ "keywords"
+- Geometry block when {element} ≠ "geometry"
+- Any "%<block>" when {element} ≠ that block
+- Prerequisite/dependency blocks (combine step adds them later)
+
+Content: Fill from summary JSON and ELEMENT_NOTE. No unrelated options.
+
+-----------------------------------------------------------------------------
+
+3) Comment Style (optional)
+- At most TWO comment lines at top: "# {element} ------------------------------------------------------------------------------------------" and "# a {element} input block for {type} system: <description>"
+- Parameter docs: "# param_name: description" only for this block's parameters
+- No comments elsewhere
+
+-----------------------------------------------------------------------------
+
+4) Code Style and Element Scope
+- ORCA .inp syntax for topic {topic}
+- ELEMENT_NOTE: {element_note} — implement ONLY what it describes
+- If ELEMENT_NOTE mentions replacements (e.g. COSMO → CPCM), use the modern block; still output only that one block
+
+-----------------------------------------------------------------------------
+
+5) Examples (one block per file)
+
+{element} == "keywords":
+# keywords ------------------------------------------------------------------------------------------
+# a keywords input block for {type} system: <description>
+! B3LYP def2-SVP TightSCF
+
+{element} == "output" (or any percent-block):
+# output ------------------------------------------------------------------------------------------
+# a output input block for {type} system: <description>
+%output
+  PrintLevel Normal
+  Print[ P_Basis ] 2
+end
+
+{element} == "geometry":
+# geometry ------------------------------------------------------------------------------------------
+# a geometry input block for {type} system: <description>
+* xyz 0 1
+O  0.000000  0.000000  0.000000
+H  0.000000  0.757160  0.586260
+H  0.000000 -0.757160  0.586260
+*
+
+Never combine examples into one file. One element → one file → one block.
+
+Follow these rules strictly when generating verifier code.

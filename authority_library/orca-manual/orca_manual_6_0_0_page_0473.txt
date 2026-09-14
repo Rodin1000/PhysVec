@@ -1,0 +1,76 @@
+[... end of page 472 ...]
+
+END
+7.3.6 Changing TD-DFT, CP-SCF and Hessian grids
+TD-DFT.ThegridsusedinCISorTD-DFTcanbechangedintheirrespectiveblock:
+%TDDFT # or %CIS, they are equivalent
+# XC grids
+IntAccXC 3.467
+GridXC 1
+#COSX grids
+IntAccX 3.076
+GridX 1
+END
+CP-SCF.TheCP-SCFgridsarechangedinthe%METHODblock:
+450 Chapter7. DetailedDocumentation
+
+--- Page 473 ---
+ORCAManual,Release6.0.0
+%METHOD
+# XC grids
+Z_IntAccXC 3.467
+Z_GridXC 1
+#COSX grids
+Z_IntAccX 3.076
+Z_GridX 1
+Z_GridX_RHS 2
+END
+OBS.: TheZ_Grid_RHSisonlyusedinMP2andthenumberherehasadifferentmeaning. Itreferstowhichof
+the COSX grids used in the SCF will be chosen, rather than an AngularGrid scheme. The default is to use the
+secondCOSXgrid.
+Hessian. The XC grids used to compute the DFT terms in the Hessian are automatically chosen to be one unit
+higher than the SCF grids. Because of the second derivative terms, we found that it is better to have a slightly
+higherXCgridhere. TheCOSXgridcanbechangedfreely:
+%FREQ
+HessGridX = 2,2,2,2
+END
+ThesefournumbersrefertothepossibleusagesofCOSXintheHessian,asexplainedinSec. Frequencycalcula-
+tions-numericalandanalytical
+Non-local functionals (VV10 and alike). The default non-local grid is defined by AngularGrid 2, and is not
+recommendedtobechanged. Inanycase,thesecanbealteredbyusing:
+%METHOD
+# non-local grids
+VdwAngularGrid 2 # same scheme as the SCF ones
+VdWIntAcc 5.0 # determines no. of radial points
+VdwGridPruning Adaptive # default
+VdwDistTCut 10 # cutoff distance between grid points, in angstroem
+END
+7.3.7 When should I change from the default grids?
+In general, the errors from the default grids are rather small and reasonable for most applications. After bench-
+marking against the GMTNK55 test set with the default !DEFGRID2, we found an error of about 0.01±0.03
+kcal/mol from DFT (compared to a reference grid), and 0.05±0.10 kcal/mol for the COSX (compared to the
+analyticalintegration). Wealsobenchmarkedgeometries, excitationenergiesandfrequencies, andallerrorsare
+systematicallylow.
+However,theremightstillbecaseswhereanimprovedgridisneeded:
+• Ifyouneedtobeconfidentthatyourenergyerrorisbelow0.2kcal/mol;
+• Whendealingwithanionswithlargenegativecharges(<−3);
+• Forverysubtleintermolecularinteractions;
+• Whendealingwithweirdelectronicstructures;
+• Withlargeconjugatedsystems-graphene-likestructuresandlargepolyaromatics.
+When needed, the !DEFGRID3 is very large and conservative - it was built to cover almost all these cases. In
+contrast,!DEFGRID1willyieldgridsofthesizeclosetopreviousORCAversionsdefaults,butstillwithincreased
+accuracy.
+7.3. Detailsonthenumericalintegrationgrids 451
+
+[... start of page 474 ...]
+ORCAManual,Release6.0.0
+7.4 Choice of Computational Model
+7.4.1 Features Common to All Calculations
+Thecomputationalmodelisspecifiedintheblock%method. Thefollowingchoicesexist:
+%method
+Method HFGTO (or HF) # Hartree-Fock with GTOs
+DFGTO (or DFT) # Density Functional Theory with GTOs
+MP2 # Second-order Møller-Plesset Perturbation Theory
+CNDO # Complete neglect of differential overlap
+INDO # Intermediate neglect of differential overlap
+NDDO # Neglect of di

@@ -1,0 +1,70 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is to organize a pre-merged verifier code file by consolidating imports and creating a main() function.
+
+**PURPOSE: Read the existing merged program file, extract and organize all import/using statements at the top, and create a main() function that properly chains all element functions.**
+
+--------------------------------------------------------------------------
+[Input:]
+1. TYPE: {type} (e.g., boson, fermion)
+2. TOPIC: {topic} (the package/library topic, e.g., dmrg, netket, dft)
+3. PROGRAM_FILE: {program_file} (filename of the merged program file, e.g., "integ_verifier_basic.py")
+4. FILE_EXT: {file_ext} (file extension: "py" or "jl")
+5. REFINING_DIR: {refining_dir} (working directory where the program file is located)
+
+Note: The filesystem-mcp working directory is set to {refining_dir}. The program file {program_file} already exists in this directory.
+
+-----------------------------------------------------------------------------
+[Instruction:]
+1. **Read the existing program file:**
+   - Use filesystem-mcp `read_file(file_path="{program_file}")` to read the merged program
+   - **CRITICAL: file_path MUST be ONLY "{program_file}" (no directories, no `..\\`, no absolute paths)**
+   - Understand the structure: the file contains multiple element function definitions merged together
+
+2. **Extract and organize imports:**
+   - Identify ALL `using` statements (for Julia) or `import`/`from ... import` statements (for Python)
+   - Collect all imports and place them at the very beginning of the file. Make sure you DO NOT miss any package. 
+   - Remove import statements from their original locations in the merged code
+
+3. **Create main() function and entry point:**
+   - Use filesystem-mcp `edit_file` tool to modify the program file
+     * Parameter: `file_path` should be "{program_file}" (just the filename)
+     **CRITICAL: file_path MUST be ONLY "{program_file}" (no directories, no `..\\`, no absolute paths)**
+   - Define a `main()` function that serves as the entry point
+   - Call all element functions in the correct order to satisfy dependencies:
+     * Functions that produce outputs needed by other functions must be called first
+     * Use return values from earlier functions as inputs to later functions
+   - Define minimal parameters in main() to reduce computational resources:
+     * Use small system sizes (e.g., N<6 for lattice systems)
+     * Use default values where possible
+     * Keep parameters small enough for quick execution but sufficient for verification
+   - Ensure all function calls are properly chained (outputs → inputs)
+   - **CRITICAL - Error tolerance: If you cannot perfectly chain all element functions due to parameter mismatches or missing dependencies:**
+     * DO NOT modify any element function definitions (they must remain exactly as they appear)
+     * Create the best possible main() function that calls all element functions
+     * You may need to create intermediate variables or use default/placeholder values to bridge gaps
+     * Output the best form you can achieve - it's better to have an imperfect but complete program than no program at all
+     * The goal is to demonstrate the integration of all element functions, even if some connections are not perfect
+   - **Add program entry point:**
+     * For Python ({file_ext}="py"): Add `if __name__ == "__main__": main()` at the end of the file
+     * For Julia ({file_ext}="jl"): Add `main()` call at the end of the file
+     * This allows the program to be executed directly
+
+4. **CRITICAL - How to call tools:**
+   - You have REAL MCP tools available - when you call them, they EXECUTE and return results
+   - DO NOT write "Action:", "Thought:", "Observation:" - this is NOT ReAct format
+   - DO NOT describe what you will do - DIRECTLY call the tools
+   - DO NOT simulate tool calls - tools will actually run
+   - Wait for tool execution to complete before proceeding
+
+5. **Workflow sequence (MANDATORY):**
+   Step 1: Use filesystem-mcp read_file(file_path="{program_file}") to read the merged program
+   Step 2: Extract all import/using statements and identify duplicates
+   Step 3: Identify all element function definitions in the merged code
+   Step 4: Create a main() function that chains all element functions in correct dependency order
+   Step 5: Add program entry point (Python: `if __name__ == "__main__": main()`, Julia: `main()`)
+   Step 6: Use filesystem-mcp edit_file or save_file to organize the code (imports at top, main() function and entry point added)
+   Step 7: Verify the file was saved successfully
+
+**Start executing the workflow NOW. Read the file, organize imports, and create main() function.**
+

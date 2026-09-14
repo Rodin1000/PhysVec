@@ -1,0 +1,68 @@
+[... end of page 407 ...]
+oftheatomsdirectly
+bondedtotheatomsofthefirstlayerandsoon. ThechargesofthesecECPsaredeterminedinthesamewayasthe
+MMatomicchargesduringthechargeconvergencescheme.
+%qmmm
+ECPLayerECP "SDD" # cECPs used for the boundary region
+ECPLayers 3 # Number of cECP layers around the QM region.
+# Default is 3.
+Scale_FormalCharge_ECPAtom 1. # default is 1. Charges on cECPs are scaled by
+# this factor
+end
+6.16. ORCAMultiscaleImplementation 385
+
+--- Page 408 ---
+ORCAManual,Release6.0.0
+ExtendingtheQMRegion
+ORCA can extend the QM region (which we call QM core region, defined by the original QMAtoms input) by
+oneormultiplelayersofatomsusingtheHFLayerskeyword. IftheHFLayerskeywordisused,theatomsofthe
+definednumberoflayersaroundtheQMcoreregionisaddedtotheQMregion. Thelayersofatomsaroundthe
+QMcoreregionaredetectedinthesamewayasdefinedabovefortheECPLayers.
+%qmmm
+HFLayers 0 # default 0
+HFLayerGTO "LANL2DZ" # default. Use this basis set for the HFLayer atoms
+HFLayerECP "HayWadt" # default. Use these ECPs for the HFLayer atoms.
+Conv_Charge_UseQMCoreOnly true # only use the QM core region for the charge
+# convergence scheme
+end
+The HFLayer can be seen as a buffer region between the actual atoms of interest (original QM atoms) and the
+surroundingcECPandMMpointchargeenvironment.ThedifferentpossiblereasonsforHFLayersareasfollows:
+• ForDLPNOcalculationswithHFLayers,theDLPNOmultilevelfeatureisautomaticallyswitchedon. The
+atoms of the HFLayer form an own fragment which is treated at HF level only, i.e. these atoms are not
+includedinthePost-HFtreatment.
+• ItcanbeassumedthattheQMchargescomputedfortheQMcoreregionaremorerealisticthanthecharges
+of the HFLayer atoms near the cECPs and MM atomic charges, in particular for highly charged systems.
+Thus, using only the QM atomic charges of the QM core region represent more realistic charges for the
+chargeconvergencescheme.
+Note:
+• The term HFLayers might be misleading. Strictly speaking, only for IONIC-CRYSTAL-QMMM calcula-
+tionswithDLPNOmethods(e.g. DLPNO-CCSD(T),DLPNO-MP2,DLPNO-B2PLYP)theHFlayeratoms
+aretreatedonHFlevel. Forothermethods(e.g. DFT)theHFlayeratomsaretreatedwiththesameelectronic
+structuremethodastheQMcoreregionatoms.
+• Ifnecessary,theatomsoftheHFLayercanbedefinedbytheuser:
+%qmmm
+HFLayerAtoms {29:35} end
+end
+• ThechargeoftheHFLayerisautomaticallycomputedbasedontheformalchargesofitsatoms. Ifnecessary,
+theHFLayerchargecanbeprovidedbytheuser.
+%qmmm
+Charge_HFLayer 10 # by default it is computed automatically based on the formal
+# charges from the ORCAFF.prms file
+end
+NetChargeoftheEntireSupercell
+Forioniccrystals, theQMregion(aswellastheentiresupercell)canconsistofanunequalnumberofatomsof
+eachatomtype. Asaresultofthat,theQMregionmayhavenon-zeronetcharge. Consequently,whenassigning
+the atomic point charges to the MM atoms during the charge convergence scheme, the sum of the charge of the
+QMregion,oftheECPlayer,andoftheatomicchargesoftheMMatoms,candeviatefromtheidealchargeofthe
+supercell. Inordertoenforcetheidealchargeofthesupercell,thetotalchargeoftheentiresystemisenforcedby
+equallyshiftingthechargesofallMM(includingboundary)atoms.
+386 Chapter6. RunningTypicalCalculations
+
+[... start of page 409 ...]
+ORCAManual,Release6.0.0
+%qmmm
+Charge_Total 0 # default 0. Total charge of the supercell
+EnforceTotalCharge true # enforce the total charge by shifting MM charges
+end
+The charge shifting procedure can be restricted to the MM atoms on the outer parts of the supercell by defin-
+ing the numberof Oute

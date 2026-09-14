@@ -1,0 +1,80 @@
+[... end of page 547 ...]
+dtoreachconvergencemaybelargerrelativetoacalculationwith
+fullintegralaccuracythroughout.2 Whenrestartingcalculationsthatareclosetoconvergence,itisrecommended
+toswitchUseCheapIntsoff. UseCheapIntshasnomeaninginaconventionalSCF.
+ThevalueofDirectResetFreqsetsthenumberofincrementalFockmatrixbuildsafterwhichtheprogramshould
+performafullFockmatrixbuildina DirectSCFcalculation. Topreventnumericalinstabilitiesthatarisefrom
+1Abatchisasetofintegralsthatarisesfromallcomponentsoftheshellsinvolvedintheintegral.Forexamplea⟨𝑝𝑝|𝑝𝑝⟩batchgivesrise
+to3×3×3×3=81integralsduetoallpossiblecombinationsof𝑝𝑥 ,𝑝𝑦 and𝑝𝑧 functionsinthefourshells.Computationsbasedonbatches
+leadtogreatcomputationaladvantagesbecausethe81integralsinvolvedinthe⟨𝑝𝑝|𝑝𝑝⟩batchsharemanycommonintermediatequantities.
+2Thismightbeanundesirablefeatureofthecurrentimplementation.
+7.8. ChoiceofWavefunctionandIntegralHandling 525
+
+--- Page 548 ---
+ORCAManual,Release6.0.0
+accumulatederrorsintherecursivelybuildFockmatrix,thevalueshouldnotbetoolarge,sincethiswilladversely
+affecttheSCFconvergence. Ifthevalueistoosmall,theprogramwillupdatemorefrequently,butthecalculation
+willtakeconsiderablylonger,sinceafullFockmatrixbuildismoreexpensivethanarecursiveone.
+ThethresholdsTCutandThreshalsodeserveacloserexplanation. Threshisathresholdthatdetermineswhento
+neglecttwo-electronintegrals. IfagivenintegralissmallerthanThreshEh,itwillnotbestoredorusedinFock
+matrixconstruction. Additionally, contributionstotheFockmatrixthataresmallerthan ThreshEhwillnotbe
+calculatedinaDirectSCF.
+Clearly, it would be wasteful to calculate an integral, then find out it is good for nothing and thus discard it. A
+usefulfeaturewouldbeanefficientwaytoestimatethesizeoftheintegralbeforeitisevencalculated,orevenhave
+anestimatethatisarigorousupperbound onthevalueoftheintegral. HäserandAhlrichs[346]werethefirstto
+recognizethatsuchanupperboundisactuallyrathereasytocalculate. Theyshowedthat:
+|⟨𝑖𝑗|𝑘𝑙⟩|(cid:54) √︀ ⟨𝑖𝑗|𝑖𝑗⟩ √︀ ⟨𝑘𝑙|𝑘𝑙⟩ (7.47)
+where:
+∫︁ ∫︁
+⟨𝑖𝑗|𝑘𝑙⟩= 𝜑 (⃗𝑟 )𝜑 (⃗𝑟 )𝑟−1𝜑 (⃗𝑟 )𝜑 (⃗𝑟 )𝑑⃗𝑟 𝑑⃗𝑟 (7.48)
+𝑖 1 𝑗 1 12 𝑘 2 𝑙 2 1 2
+Thus,inordertocomputeanupperboundfortheintegralonlytherighthandsideofthisequationmustbeknown.
+Thisinvolvesonlytwoindexquantities,namelythematrixoftwocenterexchangeintegrals⟨𝑖𝑗|𝑖𝑗⟩. Theseintegrals
+areeasyandquicktocalculateandtheyareall(cid:62)0sothatthereisnotroublewiththesquareroot. Thus,onehas
+apowerfuldevicetoavoidcomputationofsmallintegrals. Inanactualcalculation,theSchwartzprescreeningis
+not used on the level of individual basis functions but on the level of shell batches because integrals are always
+calculatedinbatches. Torealizethis,thelargestexchangeintegralofagivenexchangeintegralblockislookedfor
+anditssquarerootisstoredinthesocalledpre-screeningmatrixK(thatisstoredondiskinORCA).InaDirect
+SCFthismatrixisnotrecalculatedineverycycle,butsimplyreadfromdiskwheneveritisneeded. Thematrixof
+exchangeintegralsonthelevelofindividualbasisfunctionisusedinConventionalcalculationstoestimatethe
+diskrequirements(the“statistics”run).
+Onceithasbeendeterminedthatagivenintegralbatchsurvivesitmaybecalculatedas:
+∑︁ ∑︁ ∑︁ ∑︁
+⟨𝑖𝑗|𝑘𝑙⟩= 𝑑 𝑝𝑖 𝑑 𝑞𝑗 𝑑 𝑘𝑟 𝑑 𝑠𝑙 ⟨𝑖 𝑝 𝑗 𝑞 |𝑘 𝑟 𝑙 𝑠 ⟩ (7.49)
+𝑝 𝑞 𝑟 𝑠
+wherethesums𝑝,𝑞,𝑟,𝑠runovertheprimitiveGaussiansineachbasisfunction𝑖,𝑗,𝑘,𝑙 andthe𝑑’sarethecon-
+tractioncoefficients. TherearemorepowerfulalgorithmsthanthisoneandtheyarealsousedinORCA.However,
+ifmanytermsinthesumcanbeskippedandthetotalangularmomentumislow,itisstillworthwhiletocompute
+contractedintegralsinthisstraightforwardway. Inequation(7.49),eachprimitiveintegralbatch⟨𝑖 𝑗 |𝑘 𝑙 ⟩con-
+𝑝 𝑞 𝑟 𝑠
+tainsaprefactor𝐼 thatdependsonthepositionofthefourGaussiansandtheirorbitalexponents. Since
+𝐺𝑎𝑢𝑠𝑠𝑖𝑎𝑛𝑠
+acontractedGaussianusuallyhasorbitalexponentsoveraratherwiderange,itisclearthatmanyoftheseprim-
+itive integral batches will contribute negligibly to the final integral values. In order to reduce the overhead, the
+parameterTCutisintroduced. Ifthecommonprefactor𝐼 issmallerthanTCut,theprimitiveintegralbatchis
+𝑝𝑞𝑟𝑠
+skipped. However,𝐼 isnot arigorousupperboundtothetruevalueoftheprimitiveintegral. Thus,onehas
+𝑝𝑞𝑟𝑠
+tobemoreconservativewith TCutthanwith Thresh. InpracticeitappearsthatchoosingTCut=0.01*Thresh
+providessufficientaccuracy,buttheuserisencouragedtodeterminetheinfluenceof TCutifitissuspectedthat
+theaccuracyreachedintheintegralsisnotsufficient.
+Hint:
+• IfthedirectSCFcalculationisclosetoconvergencebutfailstofinallyconverge,thismayberelatedtoanu-
+mericalproblemwiththeFockmatrixupdateprocedure–theaccumulatednumericalnoisefromtheupdate
+procedurepreventssharpconvergence. Inthiscase, set Threshand TCutlowerand/orletthecalculation
+morefrequentlyresettheFockmatrix(DirectResetFreq).
+Note:
+• ForaDirectcalculation,thereisnowaytohaveThreshlargerthanTolE.IftheerrorsintheFockmatrix
+are larger than the requested convergence of the energy, the change in energy can never reach TolE. The
+programchecksforthat.
+526 Chapter7. DetailedDocumentation
+
+[... start of page 549 ...]
+ORCAManual,Release6.0.0
+• TheactualdiskspaceusedforalltemporaryfilesmayeasilybelargerthanMaxDisk. MaxDiskonlypertains
+to the two-electron integral files. Other disk requirements are not currently checked by the program and
+appeartobeuncritical.
+7.9 DeltaSCF: Converging to Arbitrary Single-Reference Wave-
+functions
+TheregularSCFprocedureissupposedtobringthewavefunctiontoastationarypoint,andmosttimesthatmeans
+a minimum. Howe

@@ -1,0 +1,107 @@
+[... end of page 1007 ...]
+atom4,respectively.
+DihedralColvarsaredefinedthroughfourpointsinspace, eachofwhichcaneitherbean“Atom”ora“Group”
+(seeabove). Forexample,thecommand“Manage_Colvar Define 4 Dihedral Atom 0 Group 1..5 Atom
+6 Atom 7”definesColvar4tobethedihedralanglespannedbyatom0, themasscenterofatoms1, 2, 3, 4, 5,
+atom6,andatom7,respectively.
+The Colvar type “CoordNumber” has been suggested in literature [408] to measure the coordination number of
+someatomspeciesaroundsomeotheratom. AnexamplewherethistypeofColvarhasbeensuccessfullyapplied
+isthecalculationofp𝐾 valuesofweakacidsinsolventviaMetadynamics[853,854]. TheColvarisdefinedby
+A
+thefollowingequation
+(︁ )︁6
+𝐶 := 1 ∑︁
+𝑁𝐴
+∑︁
+𝑁𝐵 1−
+𝑟
+𝑟
+c
+𝑖
+u
+𝑗
+t ,
+𝑁 𝐴 𝑖 𝑗 1− (︁ 𝑟𝑖𝑗 )︁12
+𝑟cut
+7.51. AbinitioMolecularDynamicsSimulations 985
+
+--- Page 1008 ---
+ORCAManual,Release6.0.0
+where𝑁 isthesetofatomswhichiscoordinated(typicallyonlyoneatom),𝑁 isthesetofcoordinatingatoms,
+𝐴 𝐵
+𝑟 isthedistancebetweenatoms𝑖and𝑗,and𝑟 isaconstantcutoffdistancewhichspecifiesathresholdforco-
+𝑖𝑗 cut
+ordination. After“CoordNumber”,twoatomsorgroupsofatomsmustfollow,whichcorrespondto𝑁 and𝑁 ,
+𝐴 𝐵
+respectively. Thedistancecutoffisspecifiedafterthe“Cutoff”modifierwhichshouldfollowthetwogroupdefini-
+tions. Forexample,thecommand“Manage_Colvar Define 5 CoordNumber Atom 0 Group 1..10 Cutoff
+200_pm”definesColvar5asthecoordinationnumberofthegroupofatoms1to10aroundatom0withadistance
+cutoffof𝑟 =200pm.
+cut
+ForeverydefinedColvar,thetemporaldevelopmentofthepositionandtheexternalforceactingontheColvaris
+writtentoatextfilenamed“basename-colvars.csv”ineveryMDstepbydefault. IfalargenumberofColvars
+aredefined,thismightbeawasteoftimeanddiskspace. Inthesecases,the“Noprint”modifiercanbespecified
+whendefiningtheColvar. Colvarsdefinedwiththismodifierwillnotappearinthetextfile,andtheforceacting
+ontheColvarwillnotbecomputed(ifnotrequiredotherwise,e. g.,forrestraints).
+Manage_Region
+MandatoryArguments: identifier Keyword/Integer ...
+operation Keyword {Define,AddAtoms,RemoveAtoms}
+atomlist Integer(s) —
+OptionalArguments: —
+Modifiers: Element elem String —
+Defines or modifies regions. Regions are just subsets of atoms from the system – see [Section
+1.3](#moldyn:sec_regions)above.
+As described above, there exist several pre-defined regions which are identified by names. The only such pre-
+definedregionwhichcanbere-definedbytheuseristheactiveregion. Allatomsinthisregionaresubjectto
+timeintegrationinmoleculardynamicsanddisplacementinminimizationruns. Allotheratomsaresimplyignored
+andremainontheirinitialpositions. Pleasenotethattheactiveregionmayneverbeempty.
+Tore-definetheactiveregion,usethecommand“Manage_Region active Define 1 5 7 ...”. Theinteger
+argumentsafteractivearethenumbersoftheatomstobecontainedintheregion,intheordergivenintheORCA
+inputfile. Atomnumbersaregenerallyzero-basedinORCA,i. e.,countingstartswith0.
+Apartfromthat,user-definedregionsaresupported. Theseareidentifiedwithanintegernumberinsteadofaname.
+Theintegernumbersdonotneedtobesequential,i. e.,itisfinetodefineregion2withoutdefiningregion1. To
+giveanexample,thecommand“Manage_Region 1 Define 17 18 19”definesregion1,andaddsatoms17,18,
+and19tothisnewlydefinedregion. UsingDefinewithoutanatomlist,suchasin“Manage_Region 1 Define”,
+deletestheuser-definedregion,asitwillbeemptythen. Atomscanbeaddedtoorremovedfrompreviouslydefined
+regions (including the active region) with the AddAtoms and RemoveAtoms operations. The atom numbers
+specified after the operation name are added to or removed from the region. For example, “Manage_Region
+active RemoveAtoms 15 16 17” will remove atoms 15 to 17 from the active region (and add them to the
+inactiveregioninstead).
+If you want to specify a range of atoms, you can use the syntax “a..b” to include all atom numbers from a to
+b. Ifyouwantonly,e. g.,everythirdatominarange,youcanuse“a..b..i”toaddtherangefromatobwith
+incrementi. Asanexample,“2..10..3”willexpandtothelist2, 5, 8. Youcanmixatomnumbersandranges,
+asshowninthefollowingtwoexamples(asalways,thecommasareoptional):
+Manage_Region active Define 1, 4, 5..11, 14, 17..30..2
+Manage_Region active RemoveAtoms 4, 15..17
+Insteadofanatomlist,theElementmodifiercanbeused,followedbyastringwhichrepresentsanelementlabel.
+Thiswillhavethesameeffectasspecifyinganatomlistwithallatomsofthiselementtypeinstead. Don’tforgetthe
+doublequotesaroundtheelementlabelstring. Forexample,Manage_Region active RemoveAtoms Element
+"H"removesallhydrogenatomsfromtheactiveregion.
+986 Chapter7. DetailedDocumentation
+
+[... start of page 1009 ...]
+ORCAManual,Release6.0.0
+Metadynamics
+MandatoryArguments: —
+OptionalArguments: —
+Modifiers: Off —
+Reset —
+Colvar colvar Integer —
+Scale scale Real ...
+Wall side Keyword {Lower,Upper}
+target Real phys. unit
+k Real kJmol−1phys. unit−2
+HillSpawn frequency Integer —
+height Real kJmol−1
+sigma Real phys. unit
+Range from Real phys. unit
+to Real phys. unit
+resolution Integer —
+Store store Integer —
+Temperature temp Real [temperature]
+WellTempered biastemp Real [temperature]
+Lagrange mass Real a.m.u.
+k Real kJmol−1scaleunit−2
+target_temp Real [temperature]
+tau Real [time]
+SetstheparametersforaMetadynamicssimulation

@@ -1,0 +1,75 @@
+[... end of page 743 ...]
+ethods,youcanusethekeyword:
+! ExtOpt
+in your input file. All information that you give on the electronic structure is discarded. In each optimiza-
+tion/NEB/IRCstepORCAwritesaninputfilecalledbasename_EXT.extinp.tmpwiththefollowinginfo:
+basename_EXT.xyz # xyz filename: string, ending in '.xyz'
+0 # charge: integer
+1 # multiplicity: positive integer
+(continuesonnextpage)
+7.26. GeometryOptimization 721
+
+--- Page 744 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+1 # NCores: positive integer
+0 # do gradient: 0 or 1
+pointcharges.pc # point charge filename: string (optional)
+Commentsfrom#untiltheendofthelineshouldbeignored. Thefilebasename_EXT.xyzwillalsobepresentin
+theworkingdirectory. ORCAalwaysrequeststheenergy,butagradientonlyifneededforthechosencalculation
+type.
+ORCAthencalls:
+scriptname basename_EXT.extinp.tmp [args]
+whereargsareoptionalcommandlinearguments,whichcanbeprovidedintheORCAinputfile(seebelow)and
+aredirectlypassedtothecommandlinefortheexternalprogram.
+scriptnameisthenameoftheexternalprogramorwrapperscript,whichisnotdistributedwiththeORCAbinaries
+andmustbesuppliedbytheuserinoneofthefollowingways:
+1. asafileorlinknamedotool_externalinthesamedirectoryastheORCAexecutables;
+2. byassigningtheEXTOPTEXEenvironmentvariabletothefullpathtotheexternalprogram;
+3. viatheORCAinput:
+%method
+ProgExt "/full/path/to/script"
+Ext_Params "optional command line arguments"
+end
+Regardlessofwhichoptionisused,thekeywordExt_Paramscanbeusedtospecifytheadditionalcommandline
+argumentsasasinglestring.
+The external script starts the energy (and gradient) calculation and finally provides the results in a file called
+basename_EXT.engradusingthesamebasenameastheXYZfile. Thisfilemusthavethefollowingformat:
+#
+# Number of atoms: must match the XYZ
+#
+3
+#
+# The current total energy in Eh
+#
+-5.504066223730
+#
+# The current gradient in Eh/bohr: Atom1X, Atom1Y, Atom1Z, Atom2X, etc.
+#
+-0.000123241583
+0.000000000160
+-0.000000000160
+0.000215247283
+-0.000000001861
+0.000000001861
+-0.000092005700
+0.000000001701
+-0.000000001701
+Commentsfrom#untiltheendofthelineareignored,asareanycomment-onlylines.
+ThescriptmayalsoprintrelevantoutputtoSTDOUTand/or STDERR.STDOUTwilleitherbeprintedintheORCA
+standardoutput,orredirectedtoatemporaryfileandremovedafterwards,dependingonthetypeofjob(e.g.,for
+NumFreqtheoutputforthedisplacedgeometriesisalwaysredirected)andORCAoutputsettings:
+722 Chapter7. DetailedDocumentation
+
+[... start of page 745 ...]
+ORCAManual,Release6.0.0
+%output
+Print[P_EXT_OUT] 1 # (default) print the external program output
+Print[P_EXT_GRAD] 1 # (default) print the gradient from the ext. program
+end
+7.26.7 Gaussian as External Optimizer
+TousetheexternaloptimizerfromGaussianinORCA,thefollowingkeywordswereprovidedinthepast:
+%geom
+UseGaussian true # Use the external Gaussian optimizer instead
+# of the ORCA optimizer.
+GaussianName "GAU" # String de

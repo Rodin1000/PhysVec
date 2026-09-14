@@ -1,0 +1,76 @@
+[... end of page 519 ...]
+CPpseudopotentials(Rb–Rn).
+3Usedwiththedhf-ECPordhf-ECP-2cpseudopotentials(Rb–Rn).
+4UsedwiththeHayWadtpseudopotentials(Na–La,Hf–Bi,U–Pu).
+5Valencedouble-ζwithlarge-corepseudopotentials.FortherespectiveECPtypesperelement,seeRef.[540]andTable4.3.
+6Therespectivebasissetswithoutcorecorrelationfunctions,i.e.(aug-)cc-pVXZ(-DK)(/C),areusedforHandHe.
+7UsedwiththeSK-MCDHF-RSCpseudopotentials(Ca,Cu–Kr,Sr–Xe,Ba,Hf–Ra,U).
+7.5. ChoiceofBasisSet 497
+
+--- Page 520 ---
+ORCAManual,Release6.0.0
+• 4UsedwiththeHayWadtpseudopotentials(Na–La,Hf–Bi,U–Pu).
+• 5Valencedouble-ζwithlarge-corepseudopotentials. FortherespectiveECPtypesperelement,seeRef. [15]
+andtable6.5.
+• 6Therespectivebasissetswithoutcorecorrelationfunctions,i.e. (aug-)cc-pVXZ(-DK)(/C),areusedforH
+andHe.
+• 7UsedwiththeSK-MCDHF-RSCpseudopotentials(Ca,Cu–Kr,Sr–Xe,Ba,Hf–Ra,U).
+A note on RI and auxiliary basis sets: one thing that is certainly feasible and reasonable if you do not want to
+depend on the RI approximation is to converge a RI-J calculation and then take the resulting orbitals as initial
+guessforacalculationwithexactCoulombterm. Thisshouldconvergewithinafewcyclesandthetotalexecution
+timeshouldstillbelowerthanjustconvergingthecalculationdirectlywithexactCoulombtreatment.
+7.5.2 Automatic generation of auxiliary basis sets
+Ifnoauxiliarybasissetisavailableforyourchosenorbitalbasisset,onecanbegeneratedautomaticallybyORCA
+usingthekeywordAutoAux. Thisisspecifiedasanyotherfittingbasisset: asavaluetotheAuxJ/AuxJK/AuxC
+variablesinthe%basisblockorasaseparatekeywordinthesimpleinputline(inwhichcaseallthreeAuxslots
+are populated with identical fitting basis sets). AutoAux can also be assigned to individual elements or atoms
+- see sections Assigning or Adding Basis Functions to an Element and Assigning or Adding Basis Functions to
+Individual Atoms. The generated basis sets can be used for Coulomb, exchange and correlation fitting and are
+as accurate as the optimized auxiliary basis sets at the cost of being up to twice as large. The exact generation
+procedureisdescribedelsewhere[826]butnotably ithasbeensignificantlyalteredsinceORCA3.1andwill
+notproducethesameresults! Forcompatibility, theoldversionisstillaccessibleviathesettingOldAutoAux
+trueinthe%basisblock. SomeadditionalsettingsforAutoAuxaregivenbelowwiththeirdefaultvalues.
+%basis
+AuxJ "AutoAux" # Use AutoAux to generate the AuxJ fitting basis set
+AuxJK "AutoAux" # Use AutoAux to generate the AuxJK fitting basis set
+AuxC "AutoAux" # Use AutoAux to generate the AuxC fitting basis set
+AutoAuxSize 0-3 # 0 use minimal effective rather than minimal
+# primitive exponent (suitable for ANO basis sets)
+# 1 (default) increases the maximal exponent
+# for the shells with low angular momenta.
+# 2 increases the maximal exponent for all shells
+# 3 directly uses the primitives and produces
+# the largest fitting basis
+AutoAuxLmax false # If true increase the maximal angular momentum of
+# the fitting basis set to the highest value
+# permitted by ORCA and by the orbital basis set.
+AutoAuxLLimit -1 # If >0, do not exceed the given angular momentum.
+OldAutoAux false # If true selects the ORCA 3.1 generation procedure
+# Only change the defaults below if you know what you are doing
+AutoAuxF[0] 20.0 # The factor to increase the maximal s-exponent
+AutoAuxF[1] 7.0 # Same for the p-shell
+AutoAuxF[2] 4.0 # Same for the d-shell
+AutoAuxF[3] 4.0 # Same for the f-shell
+AutoAuxF[4] 3.5 # Same for the g-shell
+AutoAuxF[5] 2.5 # Same for the h-shell
+AutoAuxF[6] 2.0 # Same for the i-shell
+AutoAuxF[7] 2.0 # Same for the j-shell
+AutoAuxB[0] 1.8 # Even-tempered expansion factor for the s-shell
+AutoAuxB[1] 2.0 # Same for the p-shell
+AutoAuxB[2] 2.2 # Same for the d-shell
+AutoAuxB[3] 2.2 # Same for the f-shell
+AutoAuxB[4] 2.2 # Same for the g-shell
+(continuesonnextpage)
+498 Chapter7. DetailedDocumentation
+
+[... start of page 521 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+AutoAuxB[5] 2.3 # Same for the h-shell
+AutoAuxB[6] 3.0 # Same for the i-shell
+AutoAuxB[7] 3.0 # Same for the j-shell
+AutoAuxTightB true # Only use B[l] for shells with high l and B[0] for the rest
+end
+Notethatiftheorbitalbasissetcontainsdiffusefunctions,asisthecasefortheaug-cc-pVXZsets,theAutoAux
+fitting basis may contain (near-)linear dependencies. In this case, the Cholesky decomposition of the Coulomb
+metricwillfailandtheprogram

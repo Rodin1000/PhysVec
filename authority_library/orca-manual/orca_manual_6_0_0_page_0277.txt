@@ -1,0 +1,88 @@
+[... end of page 276 ...]
+e
+TSel=0 -112.943 387 (5671)
+TSel=1e-14 -112.943 387 (2543) -112.943 387 (2478)
+TSel=1e-10 -112.943 387 (2543) -112.941 023 (2453)
+TSel=1e-08 -112.943 387 (2451) -112.937 087 (2346)
+TSel=1e-06 -112.943 350 (2283) -112.937 046 (2178)
+TSel=1e-05 -112.943 176 (1660) -112.936 821 (1555)
+TSel=1e-04 -112.944 039 ( 782) -112.938 381 ( 677)
+254 Chapter6. RunningTypicalCalculations
+
+--- Page 277 ---
+ORCAManual,Release6.0.0
+Itisclearthattheconvergenceiserraticifthesinglesarenotautomaticallyincluded. Thisisthereasonformaking
+thisthedefaultfromrelease2.6.35on. Inthepresentcasesingleswillonlybeselectedduetoround-offerrorssince
+byBrillouin’stheoremthesingleshavezero-interactionwiththegroundstatedeterminant. Thus,forindividually
+selectingsingle-referencemethodsitisagoodideatoautomaticallyincludeallsingle-excitationsinordertoget
+convergedresults. Thealternativewouldbeadifferentsinglesselectionprocedurewhichhasnotyetbeendeveloped
+however. Theselectionofdoublesappeartoconvergethetotalenergiesreasonablywell. Itisseenthattheselection
+selects most CSFs between 10−5 and 10−7 Eh. Already a threshold of 10−6 Eh yields an error of less than 0.1
+mEhwhichisnegligibleinrelationtoreactionenergiesandthelike. Even10−5Ehgivesanerroroflessthan0.1
+kcal/mol.
+ConvergenceofMultireferenceApproacheswithRespecttoT
+pre
+Wenextturntomultireferencetreatments. Herewewanttocorrelateallvalenceelectronsinallvalenceorbitalsand
+thereforeaCAS(10,8)istheappropriatechoice. WefirstaskfortheconvergedvalueofT
+pre
+byusingT
+sel
+=10−14
+andobtainforMRCI+Q:
+TPre = 1e-1: -112.943 964
+1e-2: -112.952 963
+1e-3: -112.953 786
+1e-4: -112.954 019
+1e-5: -112.954 336
+1e-6: -112.954 416
+1e-7: -112.954 440
+Thus,prettygoodconvergenceisobtainedforT
+pre
+=10−4−10−6. Hence10−4isthedefault.
+Toshowaconvenientinputconsiderthefollowing:
+\
+#
+# Here we calculate the CO ground state correlation energy with several methods
+#
+! Def2-SVP Def2-SV/C RI-MP2 CCSD(T)
+%base "1"
+%mp2 density relaxed
+donatorbs true
+end
+* int 0 1
+C 0 0 0 0.000000 0.000 0.000
+O 1 0 0 1.128 0.000 0.000
+*
+$new_job
+! aug-SVP MRACPF
+! moread
+%moinp "1.mp2nat"
+# the CASSCF is done with MP2 natural orbitals which is a good idea and
+# secondly we use a large level shift in order to help convergence
+%casscf nel 10
+norb 8
+mult 1
+nroots 1
+shiftup 2
+shiftdn 2
+end
+%mrci tsel 1e-8
+tpre 1e-6
+(continuesonnextpage)
+6.7. MultireferenceConfigurationInteractionandPertubationTheory 255
+
+[... start of page 278 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+* int 0 1
+C 0 0 0 0.000 0.000 0.000
+O 1 0 0 1.128 0.000 0.000
+*
+Thisjobcomputesatthesametimeallofthebelowanddemonstratesoncemoretheagreementbetweenconsequent
+single-andmultireferencecorrelationmethods
+SCF = -112.6459
+RI-MP2 = -112.9330
+CCSD = -112.9398
+CCSD(T) = -112.9506
+CASSCF

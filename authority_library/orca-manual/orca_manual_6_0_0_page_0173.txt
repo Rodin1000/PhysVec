@@ -1,0 +1,79 @@
+[... end of page 172 ...]
+PotentialEnergySurfaceoftheN moleculefromCASSCF(6,6)andNEVPT2calculations(def2-SVP).
+2
+AlloftheoptionsavailableinCASSCFcaninprinciplebeappliedtoNEVPT2. SinceNEVPT2isimplemented
+150 Chapter6. RunningTypicalCalculations
+
+--- Page 173 ---
+ORCAManual,Release6.0.0
+asasubmoduleofCASSCF,itwillinheritallsettingsfromCASSCF(!tightscf, !UseSym, !RIJCOSX, ...).
+NOTE
+• NEVPT2analyticgradientsarenotavailable,butnumericalgradientsare!
+6.1.9 Complete Active Space Perturbation Theory: CASPT2 and CASPT2-K
+The fully internally contracted CASPT2 (FIC-CASPT2) approach shares its wave function ansatz with the FIC-
+NEVPT2approachmentionedintheprevioussection.[40]Thetwomethodsdifferinthedefinitionofthezeroth
+orderHamiltonian. TheCASPT2approachemploysthegeneralizedFock-operator,whichmayresultinintruder
+states problems (singularities in the perturbation expression). Real and imaginary level shifting techniques are
+introducedtoavoidintruderstates.[270,730]Notethatbothlevelshiftsaremutuallyexclusive. Sincelevelshifts
+ingeneralaffectthetotalenergies,theyshouldbeavoidedorchosenassmallaspossible. AsarguedbyRoosand
+coworkers,CASPT2systematicallyunderestimatesopen-shellenergies,sincetheFockoperatoritselfisnotsuited
+todescribeexcitationsintoandoutofpartiallyoccupiedorbitals. Thedeficiencycanbeadjustedwiththeinclusion
+ofIPEAshifts-anempiricalparameter.[295]WhiletheimplementationofthecanonicalCASPT2withrealand
+imaginaryshiftsisvalidatedagainstOpenMOLCAS.[253],theORCAversiondiffersintheimplementationofthe
+IPEAshiftsandyieldsslightlydifferentresults. TheIPEAshift,𝜆,isaddedtothematrixelementsoftheinternally
+contractedCSFsΦ𝑝𝑟 =𝐸𝑝𝐸𝑟|Ψ0 >withthegeneralizedFockoperator
+𝑞𝑠 𝑞 𝑠
+<Φ𝑝′𝑟′ |𝐹ˆ|Φ𝑝𝑟 >+=<Φ𝑝′𝑟′ |Φ𝑝𝑟 >· 𝜆 ·(4+𝛾𝑝−𝛾𝑞+𝛾𝑟−𝛾𝑠),
+𝑞′𝑠′ 𝑞𝑠 𝑞′𝑠′ 𝑞𝑠 2 𝑝 𝑞 𝑟 𝑠
+where𝛾𝑝 =<Ψ0|𝐸𝑝|Ψ0 >istheexpectationvalueofthespin-tracedexcitationoperator.[441]Thelabelsp,q,r,s
+𝑞 𝑞
+refer to general molecular orbitals (inactive, active and virtual). Irrespective of the ORCA implementation, the
+validityoftheIPEAshiftingeneralremainsquestionableandisthusbydefaultdisabled.[920]
+ORCAfeaturesanalternativeapproach, denotedasCASPT2-K,thatreformulatesthezerothorderHamiltonian
+itself.[460]Here,twoadditionalFockmatricesareintroducedforexcitationclassesthataddorremoveelectrons
+fromtheactivespace. ThenewFockmatricesarederivedfromthegeneralizedKoopmans’matricescorresponding
+toelectronionizationandattachmentprocesses. Theresultingmethodislesspronetointruderstatesandthesame
+timemoreaccuratecomparedtothecanonicalCASPT2approach. Foramoredetaileddiscussion,werefertothe
+paperbyKollmaretal.[460]
+TheCASPT2andCASPT2-KmethodologiesarecalledincompleteanalogytotheNEVPT2branchinORCAand
+canbecombinedwiththeresolutionofidentity(RI)approximation.
+%casscf
+...
+PTMethod FIC_CASPT2 # fully internally contracted CASPT2
+FIC_CASPT2K # CASPT2-K (revised H0)
+# Optional settings
+PTSettings
+CASPT2_rshift 0.0 # (default) real level shift
+CASPT2_ishift 0.0 # (default) imaginary level shift
+CASPT2_IPEAshift 0.0 # (default) IPEA shift
+end
+end
+TheRIapproximatedresultsarecomparabletotheCD-CASPT2approachpresentedelsewhere.[50]Forageneral
+discussionoftheRIandCDapproximations,werefertotheliterature.[883]Manyoftheinputparameterareshared
+withtheFIC-NEVPT2approach. AlistwiththeavailableoptionsispresentedinsectionCompleteActiveSpace
+PeturbationTheory: CASPT2andCASPT2-K.
+Inthisshortsection,weaddtheCASPT2resultstothepreviouslycomputedNEVPT2potentialenergysurfaceof
+theN molecule.
+2
+! def2-svp nofrozencore
+%casscf nel 6
+(continuesonnextpage)
+6.1. SinglePointEnergiesandGradients 151
+
+[... start of page 174 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+norb 6
+mult 1
+PTMethod FIC_CASPT2 # fully internally contracted CASPT2
+end
+# scanning from the outside to the inside
+%paras
+R = 2.5,0.7, 30
+end
+*xyz 0 1
+N 0.0 0.0 0.0
+N 0.0 0.0 {R}
+*
+TheCASPT2outputliststhesettingspriortothecomputation. Theprintedreferenceweightsshouldbechecked.
+Smallreferenceweightsindicateintruderstates. Alongthelines

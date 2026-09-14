@@ -1,0 +1,93 @@
+[... end of page 261 ...]
+tpre 1e-2
+MaxMemInt 256
+MaxMemVec 32
+IntMode FullTrafo
+AllSingles true
+Solver Diag
+# ground state 1A1
+NewBlock 1 0
+NRoots 1
+Excitations cisd
+Refs CAS(2,2) end
+End
+# HOMO LUMO transition 1A2
+NewBlock 1 1
+NRoots 1
+Excitations cisd
+Refs CAS(2,2) end
+End
+# HOMO LUMO triplet transition 3A2
+NewBlock 3 1
+NRoots 1
+Excitations cisd
+Refs CAS(2,2) end
+end
+(continuesonnextpage)
+6.7. MultireferenceConfigurationInteractionandPertubationTheory 239
+
+--- Page 262 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+* int 0 1
+C 0 0 0 0.000000 0.000 0.000
+O 1 0 0 1.200371 0.000 0.000
+H 1 2 0 1.107372 121.941 0.000
+H 1 2 3 1.107372 121.941 180.000
+*
+Thisinput–whichismuchmorethanwhatisreallyrequired-needssomeexplanations: Firstofall,wechoosea
+standardRHFcalculationwiththeSVPbasissetandweassigntheSV/Cfittingbasisalthoughitisnotusedinthe
+SCFprocedureatall. Inthe%mrciblockalldetailsoftheMR-CIprocedurearespecified. First,EWin(%method
+frozencore fc_ewin) selects the MOs within the given orbital energy range to be included in the correlation
+treatment. TheCITypevariableselectsthetypeofmultireferencetreatment. Numerouschoicesarepossibleand
+MRCIisjusttheoneselectedforthisapplication.
+Note: TheCITypestatementselectsseveraldefaultvaluesforothervariables. Soitisaverygoodideatoplacethis
+statementatthebeginningoftheMR-CIblockandpossiblyoverwritetheprogramselecteddefaultslater. Ifyou
+placetheCITypestatementafteroneofthevalueswhichitselectsbydefaultyourinputwillsimplybeoverwritten!
+ThevariablesEUnselOptandDavidsonOptcontrolthecorrectionstotheMR-CIenergies. EUnselOptspecifies
+the way in which the MR-CI energies are extrapolated to zero threshold T . Here we choose a full MR-MP2
+Sel
+calculation of the missing contributions to be done after the variational step, i.e. using the relaxed part of the
+referencewavefunctionasa0thorderstateforMR-PT.TheDavidsonOptcontrolsthetypeofestimatemadeforthe
+effectofhighersubstitutions. Again,multiplechoicesarepossiblebutthemostcommonlyusedone(despitesome
+realshortcomings)iscertainlythechoiceDavidson1. TheflagUseIVOsinstructstheprogramtouse“improved
+virtualorbitals”. ThesearevirtualorbitalsobtainedfromadiagonalizationoftheFockoperatorfromwhichone
+electronhasbeenremovedinanaveragedwayfromthevalenceorbitals. Thus,theseorbitals“see”onlya𝑁 −1
+electronpotential(asrequired)andarenotasdiffuseasthestandardvirtualorbitalsfromHartree-Fockcalculations.
+If you input DFT orbitals in the MR-CI moldule (which is perfectly admittable and also recommended in some
+cases,forexamplefortransitionmetalcomplexes)thenitisrecommendedtoturnthatflagoffsincetheDFTorbitals
+arealreadyo.k. inthisrespect. ThetwothresholdsTselandTprearealreadyexplainedaboveandrepresentthe
+selectioncriteriaforthefirstorderinteractingspaceandthereferencespacerespectively. Tselisgiveninunits
+ofEhandreferstothesecondorderMR-MP2energycontributionfromagivenexcitedCSF.10−6 Ehisapretty
+good value. Reliable results for transition energies start with ≈ 10−5; however, the total energy is converging
+prettyslowlywiththisparameterandthisisoneofthegreatestdrawbacksofindividuallyselectingCIprocedures!
+(see below). Tpre is dimensionless and refers to the weight of a given initial reference after diagonalization of
+thegiveninitialreferencespace(10−4isaprettygoodvalueandthereislittleneedtogomuchlower. Aggressive
+valuessuchas10−2 onlyselectthetrulyleadingconfigurationsforagiventargetstatewhichcanbetimesaving.
+Intermediatevaluesarenotreallyrecommended). TheparametersMaxMemIntand MaxMemVectelltheprogram
+howmuchmemory(inMB)itisallowedtoallocateforintegralsandfortrialandsigma-vectorsrespectively.
+TheflagIntModetellstheprogramtoperformafullintegraltransformation. Thisispossibleforsmallcaseswith
+lessthan,say,100–200MOs. Inthiscasethatitispossibleitspeedsupthecalculationsconsiderably. Forlarger
+moleculesyouhavetosetthisflagtoRITrafowhichmeansthatintegralsarerecomputedontheflyusingtheRI
+approximation which is more expensive but the only way to do the calculation. To switch between the possible
+modesuse:
+%mrci IntMode FullTrafo # exact 4 index transformation
+RITrafo # use auxiliary basis sets
+Forsmallmoleculesorifhighaccuracyinthetotalenergiesisrequireditismuchbettertousetheexactfourindex
+transformation. Thelimitationsarethatyouwillrunoutofdiskspaceormainmemorywithmorethanca.200–300
+MOs.
+ThevariableSolvercanbediag(forDavidsontypediagonalization)orDIISformultirrotDIIStypetreatments.
+240 Chapter6. RunningTypicalCalculations
+
+[... start of page 263 ...]
+ORCAManual,Release6.0.0
+%mrci Solver Diag # Davidson solver
+DIIS # Multiroot DIIS
+ForCImethods,thediagsolverisusuallypreferable. FormethodslikeACPFthatcontainnonlinearterms,DIIS
+isimperative.
+NextintheinputcomesthedefinitionofwhatCImatricesaretobeconstructedanddiagonalized. Eachmultiplicity
+definesablockoftheCImatrixwhichisseparatelyspecified. Hereweaskfortwoblocks–singletandtriplet. The
+generalsyntaxis:
+NewBlock Multiplicity Irrep
+NRoots 1 #

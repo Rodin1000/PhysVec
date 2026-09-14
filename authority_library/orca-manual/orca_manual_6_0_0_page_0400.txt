@@ -1,0 +1,60 @@
+[... end of page 399 ...]
+METHOD "B3LYP"
+QM2CUSTOMBASIS "def2-SVP def2/J"
+end
+Alternatively,acustomQM2method/basissetfilecanbeprovided:
+!QM/QM2 or !QM/QM2/MM
+%qmmm
+QM2CustomFile "myQM2Method.txt" # File should be available in working directory.
+end
+ThecustomQM2methodfilecancontainanydesiredinput,ase.g. thefilemyQM2Method.txt:
+6.16. ORCAMultiscaleImplementation 377
+
+--- Page 400 ---
+ORCAManual,Release6.0.0
+!cc-pVDZ HF TightSCF NOSOSCF KDIIS
+%basis
+NewAuxJKGTO Mg "AutoAux" end
+end
+Note:
+• Onlyaddmethods(includingconvergencesettings)andbasissetsfortheQM2Customoptions. Everything
+else(parallelization,memory,solvation,etc.) istakencareofbyORCAitself.
+ElectrostaticInteractionbetweenhighandlowlevel
+By default we are using electrostatic embedding, i.e. the high level system sees the atomic point charges of the
+lowlevel(QM2)system. Thesepointchargesarederivedfromthefullsystemlowlevel(QM2)calculation. The
+followingmethodsfordeterminingthesechargesareavailable:
+Charge_Method Hirshfeld # Hirshfeld (default)
+# MBIS
+# CHELPG
+# Mulliken
+# Loewdin, default for QM2 = AM1 or PM3
+TheQM2pointchargescanbescaledwiththefollowingkeyword.
+%qmmm
+Scale_QM2Charges_MMAtom 1. # default is 1.
+end
+BoundaryRegion
+The boundary between high and low level part of the system can contain covalent bonds. For the detection and
+realistictreatmentofthesecovalentbonds,atopologyofthelargeQM2systemisgeneratedusingthefollowing
+keyword.
+AutoFF_QM2_Method XTB # XTB (default)
+# XTB1
+# XTB0
+# GFNFF
+# HF3C
+# PBEH3C
+# R2SCAN3C
+# PM3
+# AM1
+Note:
+• BydefaultORCAusestheXTBmethodforthepreparationoftheQM2topology. Inordertousethedefault
+youneedtomakesuretohavetheotool_xtbbinaryinyourORCAPATH,seeSemi-empiricaltight-binding
+methods: Grimme’sGFN0-xTB,GFN-xTBandGFN2-xTB.
+378 Chapter6. RunningTypicalCalculations
+
+[... start of page 401 ...]
+ORCAManual,Release6.0.0
+SubtractiveQM/QM2Method
+TheQM/QM2methodisaveryconvenientwayofrunningmultiscalecalculationswithouttheneedtoprepareany
+parameters. ThismethodisasubtractiveQM-QMmethod,inwhichwetreatapartofinterestonahigherlevelof
+accuracy,andtheremainderofthesystemonlowerlevelofaccuracy. Theimplementationfollowssimilarworks
+ase.g. describedinref

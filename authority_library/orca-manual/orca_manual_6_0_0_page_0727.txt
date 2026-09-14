@@ -1,0 +1,70 @@
+[... end of page 726 ...]
+:88)
+UHF CC3 (cid:88)
+UHF QCISD (cid:88)
+UHF MP2 (cid:88) (cid:88)
+UHF MP3 (cid:88) (cid:88)
+UHF MP4 (cid:88) (cid:88)
+UHF MP4(SDQ) (cid:88) (cid:88)
+UHF MP5 (cid:88) (cid:88)
+ROHF CISD (cid:88)
+AnyAUTOCImethodcanbecalledfromthesimplekeywordbyprependingAUTOCI-tothecorrelationmethod,
+704 Chapter7. DetailedDocumentation
+
+--- Page 727 ---
+ORCAManual,Release6.0.0
+forinstance
+! AUTOCI-CCSD
+7.25.4 Analytic Nuclear Gradients with AUTOCI
+Obtainingaccurategeometriesiscrucialtocomputingmolecularpropertiesaccurately. Inordertoperformgeom-
+etryoptimisations,thenucleargradientisnecessaryandwhilethiscaneasilybeobtainedusingnumericalfinite
+difference methods, it is also quite costly. More importantly, perhaps, is the fact that numeric derivatives tend
+tobecomeunstable. Therefore, beingabletoevaluateanalyticgradientsisofvitalimportance. UsingtheAGE,
+a general framework has been built that supports arbitrary-order CI, CC and MPn nuclear gradients (and other
+derivatives).[500]
+AnexampleisshownbelowhowtooptimiseageometryusingAUTOCI’sgradientsattheCCSDleveloftheory
+! RHF cc-pVTZ AUTOCI-CCSD VerytightSCF Opt
+%maxcore 10000
+*xyz 0 1
+...
+*
+Theanalyticgradientscanevenbeusedtoperformsemi-numericalfrequencycalculations
+! AUTOCI-CCSD NumFreq
+Besidesnucleargradients,allotherfirst-orderpropertiesavailableinORCAareavailablefortherespectivemeth-
+ods, such as dipole/quadrupole moments, hyperfine couplings or quadrupole splittings. As discussed above,
+(un)relaxeddensitiescanberequestedvia
+%autoci
+density relaxed
+end
+Forgeometryoptimisations,boththeunrelaxedandrelaxeddensitiesarecomputedautomaticallyanddonotneed
+toberequestedexplicitly.
+7.25.5 AUTOCI Response Properties via Analytic Derivatives
+Forsingle-referencemethods(currentlylimitedtoCCSDand MP2),someresponsepropertiescouldbecalculated
+viatakingtheanalyticderivativeofthewavefunctionscomputedbyAUTOCI.
+Theinputparametersforthewavefunctionsarecontrolledbythe %autociblock, whiletheproperty-relatedpa-
+rametersarecontrolledbyrespectivepropertyblocks,likeelpropandeprnmr. Someusefuloptionsareshown
+below.
+%autoci
+citype # only CCSD and MP2 available
+CCSD
+MP2
+STol 1e-06 # residue convergence tolerance
+MaxIter 50 # maximum number of iterations
+MaxDIIS 5 # depth of the DIIS memory
+density # need at least unrelaxed density (see details below)
+unrelaxed
+relaxed
+end
+(continuesonnextpage)
+7.25. CImethodsusinggeneratedcode 705
+
+[... start of page 728 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%elprop
+polar true # polarizability via analytic derivative
+end
+%eprnmr
+NMRShielding 2 # NMR shielding for all nuclei, equivalent to the 'NMR' simple input
+end
+N.B.Fortheresponsepropertycalculations,theelectrondensit

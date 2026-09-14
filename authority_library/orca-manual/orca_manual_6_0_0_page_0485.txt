@@ -1,0 +1,64 @@
+[... end of page 484 ...]
+calculationmuch. Furthermore,theerrorsintroducedbytheRImethodareusuallymuchsmallerthanthe
+errorsinthecalculationduetobasissetincompleteness. ItisthereforerecommendedtousetheRIprocedurefor
+pure DFs. However, one should probably not directly mix absolute total energies obtained from RI and non-RI
+calculations as the error in the total energy accumulates and will rise with increased molecular size, while the
+errorsintherelativeenergieswilltendtocancel.
+462 Chapter7. DetailedDocumentation
+
+--- Page 485 ---
+ORCAManual,Release6.0.0
+Thereareseveralchoicesforauxiliarybasissetsdescribedinthenextsection,whichdependonthechoiceofthe
+primaryGTObasissetusedtoexpandthemolecularorbitals4.
+InORCA,theRIapproximationistoggledbytheinput
+%method
+RI on # do use the RI-J approximation
+off # do not use the RI-J approximation
+end
+Note: IfyouuseRI,youmustspecifyanauxiliarybasisset(inthe%basissectionorusingtheappropriatesimple
+keyword)orusethe!AutoAuxsimplekeyword.
+TheSplit-RI-JCoulombApproximation
+There is an improved version of the RI-algorithm that has been implemented since ORCA 2.2.09. This Split-
+RI-J algorithm yields the same Coulomb energy as the standard RI-algorithm, but is significantly faster if the
+basis set contains many high angular momentum functions (d-, f-, g-functions). For small basis sets, there is
+virtually no difference between the two algorithms, except that Split-RI-J uses more memory than standard RI.
+However, calculations with ca. 2000 basis functions only need about an extra 13 MB for Split-RI-J, which is a
+trivialrequirementonpresent-dayhardware.
+TheSplit-RI-Jalgorithmisinvokedwiththe!Split-RI-Jsimplekeyword. Split-RI-Jispresentlyonlyavailable
+forSCFandgradientcalculations.
+Note:
+• TheSplit-RI-JalgorithmisthedefaultifRIisturnedonvia!RI.IfyoudonotwanttouseSplit-RI-J,please
+alsousethekeyword!NoSplit-RI-J
+UsingtheRIApproximationforHartree-FockandHybridDFT(RIJONX)
+TheRIapproximationcanbeused,althoughwithlessbenefit,forhybridDFTandHartree-Fock(RHFandUHF)
+calculations. Inthiscase, adifferentalgorithm5 isusedthatallowsafairapproximationtotheHartree-Fockex-
+changematrix(RI-JK).Itcanbedifficulttomakethisapproximationhighlyaccurate. Itis,however,usefullyfast
+comparedtodirectSCFifthemoleculeis“dense”enough. Therearespecialauxiliarybasissetsforthispurpose
+(seesectionBasisSets).
+%method
+RI on
+end
+%basis
+Aux "def2/JK"
+end
+Note: Therehasbeenlittleexperimentationwiththisfeature. Itisprovidedonanexperimentalbasishere.
+4ItprobablyshouldbenotedthataslightlyawkwardstepintheprocedureistheinversionoftheauxiliaryintegralmatrixV,whichcan
+easilybecomeverylarge. MatrixinversionisanO(N3)processsuchthatforlargemolecules,thissteptakessomerealtime. However,in
+ORCA,thisisonlydoneonceduringthecalculation,whereasotherprogramsthatconstrainthefittoalsoexactlyreproducethenumberof
+electronsperformasimilarprocesseachiteration.StartingfromORCA2.2.09,theCholeskydecompositionisusedinfavorofmatrixinversion,
+removinganybottleneckconcerningthesolutionofthelinearequationsystem.
+5ThisalgorithmwasdescribedbyKendallandFrüchtl[440].
+7.4. ChoiceofComputationalModel 463
+
+[... start of page 486 ...]
+ORCAManual,Release6.0.0
+Alternatively,theRImethodcanbeusedfortheCoulombtermandthestandardtreatmentfortheexchangeterm.
+This method is called RIJONX since the exchange term should tend towards linear scaling for large molecules.
+ThisfeaturecanbeusedforHartree-FockandhybridDFTcalculationsbyusing:
+%method
+RI on # do use the RI approximation
+RIFlags 1 # ...but treat exchange exactly
+end
+# Equivalently, use the following simple keyword:
+! RIJONX
+# Remember to assign an aux

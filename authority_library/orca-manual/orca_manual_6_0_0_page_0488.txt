@@ -1,0 +1,67 @@
+[... end of page 487 ...]
+SCF fitting matrix for gradient calculations
+# (Default is true)
+end
+Note that overlap fitting also works for HF and MP2 gradients without specifying any additional keyword. The
+UseQGradFit parameter uses the same fitting matrix for the gradients as for the energy calculation and is the
+defaultbehaviorsinceORCA6.
+7Thetheoryisnotyetpublished,butwillbesoon.
+7.4. ChoiceofComputationalModel 465
+
+--- Page 488 ---
+ORCAManual,Release6.0.0
+UseofPartialContractionScheme
+SinceORCA5.0,generally-contractedbasissetscanbehandledefficientlybyusinganintermediatepartiallycon-
+tracted(pc)atomic-orbitalbasisfortheexchange-matrixcomputationwithoutaffectingtheresults[383]. Depend-
+ing on the basis set and element type, computational speedups by many orders of magnitude are possible. For
+testingorbenchmarkpurposes,theKmatrixcomputationcanbedoneintheoriginalbasisbyusingtheflag
+%method
+COSX_PartialContraction false # No intermediate basis for generally contracted shells
+# (Default is true)
+end
+RestoringFullSymmetry
+Thesemi-numericalintegrationschemeinthedefaultCOSXalgorithmbreaksthepermutationalsymmetryofthe
+two-electron integrals. We have observed that this flaw is often the cause of convergence problems for iterative
+algorithms,inparticularformulti-referencetheories[382]. AninputoptionisavailablesinceORCA6.0topreserve
+thefulleight-foldpermutationalsymmetryofthetwo-electronintegrals:
+%method
+COSX_IntSymmetry Full # Fully symmetrized integrals
+Standard # Original COSX algorithm
+end
+The full-symmetrization algorithm often improves the numerical stability and is enabled by default for TRAH-
+CASSCFandCASSCFlinear-responsecalculations. However,thefull-symmetrizationalgorithmmaycomewith
+additional costs that depend on the number of F intermediates. The number of F intermediates depends on the
+symmetryofthedensitymatrix(symmetric(S),anti-symmetric(A),andnon-symmetric(N))andwhetheroverlap
+fittingisemployed,assummarizedinthetablebelow.
+Table7.5: NumberofCOSXFintermediatesperdensitymatrix
+Sfitting Psymmetry(S,A,N) NumberofFintermediates
+No S/A 1
+No N 2
+Yes S/A 2
+Yes N 4
+Notethatforsymmetric(S)andanti-symmetric(A)densities,wesymmetrizeandanti-symmetrize,respectively,
+exchange matrices at the end, which reduces the number of F intermediates by a factor of 2. The actual com-
+putationalcostsusuallydonotincreaselinearlywiththenumberofFintermediatessincewecomputethecostly
+analyticintegrals(𝐴 (r ))onlyonceandthencontractthemwiththeadditionalFintermediates. Fromourexpe-
+𝜈𝜏 𝑔
+riencetheoverheadofthefull-symmetrizationalgorithmisroughlybetween1.2and1.5timesthatoftheoriginal
+algorithm.
+COSXGridandConvergenceIssues
+Symptomsofconvergenceissues: Erraticconvergencebehavior,oftenstartingfromthefirstSCFsteporpossibly
+settinginatalaterstage,whichproducecrazyenergyvalueswith“megahartree”jumps. Ifoverlapfittingison,
+thefollowingerrormessagemayalsobeencountered: “ErrorinCholeskyinversionofnumericaloverlap”.
+Convergenceissuesmayarisewhenthechosengridhasdifficultiesinrepresentingthebasisset. Thisisthe“grid
+equivalent”ofalineardependenceproblem,asdiscussedinLinearDependence. Itshouldalsobementionedthat
+the grid-related problem discussed here often goes hand in hand with basis set linear dependence, although not
+necessarily. Themoststraightforwardwayofdealingwiththisistoincreasethesizeoftheintegrationgrid. This,
+however,isnotalwaysdesirableorpossible.
+466 Chapter7. DetailedDocumentation
+
+[... start of page 489 ...]
+ORCAManual,Release6.0.0
+OnewaytoavoidtheCholeskyinversionissueistoturnoverlapfittingoff(!NoSFitting). However,thismeans
+that the numerical problems are still present, but are ignored. Due to the fact that overlap fitting operates with
+the numerical overlap and its inverse, it is more sensitive to linear dependence issues, so turning off the fitting
+proceduremayleadtoconvergence. Thismaybeapragmatic—butbynomeansclean—solution,sinceitrelies
+ontheassumptionthatthenumericalerrorsaresmall.
+Ontheotherhand,overlapfittingalsogivesasimilartooltodealwithlineardependenceis

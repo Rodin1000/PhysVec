@@ -1,0 +1,75 @@
+[... end of page 693 ...]
+orof2every2sweepsutilmaxMisreached. Thealgorithmcontinuesthesweep
+at maxM by decreasing the Davison tolerance sche_sweeptol and noise level sche_noise every 2 cycles by a
+factorof10,untilsche_sweeptolbecomessmallerthansweeptol.
+Forbettercontroloftheorbitalordering,wealsoprovideageneticalgorithmminimizationmethodofaweighted
+exchangematrix. Thegeneticalgorithmusuallyprovidesasuperiororbitalorderingtothedefaultordering, but
+canitselftakesometimetorunforlargenumbersoforbitals. Thegeneticalgorithmcanbeenabledby
+7.22. DensityMatrixRenormalizationGroup 671
+
+--- Page 694 ---
+ORCAManual,Release6.0.0
+%casscf
+...
+DMRG
+auto_ordering GAOPT
+end
+end
+withinthe%casscfinput.
+Troubleshooting
+ThetwomostcommonproblemswithDMRGcalculationsarethat(i)convergencewithmaxMisslowerthandesired,
+or(ii)theDMRGsweepsgetstuckinalocalminimum. (i)isgovernedbytheorbitalordering/choiceoforbitals.
+Toimproveconvergence,turnonthegeneticalgorithmorbitalordering.
+Ifyoususpect(ii)isoccurring,thesimplestthingtodoistoincreasethestartingnumberofstateswiththestartM
+(e.g. from500to1000states). LocalminimacanalsosometimesbeavoidedbyincreasingthenoiseintheDMRG
+schedule, e.g. by a factor of 10. To check that you are stuck in a local minimum, you can carry out a DMRG
+extrapolation(seeextendedManualintheBLOCKwebsite).
+NotethatthepresentDMRG-SCFestablishestheinputorderofactivespaceorbitalsaccordingtotheirHartree-Fock
+occupancy,eveniftheseorbitalsareultimatelycanonicalorsplit-localizedcanonicalinnature. Thisisspecifiedby
+hf_occinwhichtheHartree-Fockoccupancyisderivedbydefaultfromtheone-electronintegrals. Otheroptions
+forobtainingtheoccupancyareavailable(seeCompletesetofBLOCKoptions).
+SomettimestheenergyvaluesproducedfromoneSCFcycletoanothermayoscillate. Suchanonlinearnumerical
+behaviourmayoccurtypicallybythelastfewiterations,mostlikelycausedbythelossofacertaindistributionof
+quantumnumbers(eg,particlenumber,irrepsymmetryandspin)intheblockinganddecimationproceduredue
+to incomplete many-body basis. On the other hand, the loss of quantum numbers is the main source of energy
+discontinuitiesonpotentialenergycurvescalculatedbyDMRG-SCFusingasmallnumberofrenormalizedstates.
+InthecurrentreleaseofDMRG-SCFimplementation,thenumberofquantumstatesislockedtoavoidtheseprob-
+lems. Thelockingmechanismisturnedonwhentheorbitalgradientfallsbelowacertainthresholddefinedbythe
+keywordswitch_rst(default: 0.001). TheDMRGcalculationthenstartsfrompreviousoperatorsandwavefunc-
+tion in which a perturbative noise is not added. Locking quantum states and restaring DMRG wavefunction not
+onlyensuresasmoothconvergencetowardsthefinalenergybutalsominimizesthenumberofiterations. Notethat
+thelockingprocedureintroducesanarbitrarinesstothefinalenergy,whenaverysmall𝑀 isused,sincethefinal
+digitsofenergydependonwherethelockingbegins. Itisthereforenotrecommendedtostartlockingtooearlyin
+iterationswhichcouldtraptheorbitalsolutioninalocalmimimum. Finallythequalityofresultingorbitalscan
+be checked by carrying out a DMRG calculation with sufficient renormalized states. Using the default value of
+switch_rstDMRG-SCFusuallyresultsintheorbitalsthataregoodenoughtoreproducetheCASSCFenergy.
+CompletesetofBLOCKoptions
+%casscf
+...
+dmrg
+startM 25 # CASSCF mode: number of re-normalized states for a singlee root
+250 # CASCI mode: number of re-normalized states for a single root
+maxM 25 # CASSCF mode: number of re-normalized states for a singlee root
+250 # CASCI mode: number of re-normalized states for a single root
+DryRun false # just create an input for Block
+SweepTol 1e-9 # energy tolerance for the sweeps
+auto_ordering NOREORDER # auto_ordering is an int. If set to 0
+# or the alias NOREORDER, the reordering is skipped.
+FIEDLER # (default) let Block optimize the active orbital ordering
+GAOPT # let Block optimize the active orbital ordering
+# using genetic algorithm
+(continuesonnextpage)
+672 Chapter7. DetailedDocumentation
+
+[... start of page 695 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+hf_occ 0 # user-defined initial Hartree-Fock occupancy manually
+1 # default: initial Hartree-Fock occupancy based on the values of
+the one-electron integrals
+2 # initial Hartree-Fock occupancy based on the energy ordering
+of canonical orbitals
+TwoDot_to_OneDot 1 # Switch from two-dot expressions to one-dot
+OneDot 0 # Only one-dot expressions. %In CASCI mode only.
+TwoDot 0 # Only two-dot expressions. %In CASCI mode only.
+switch_rst 1e-3 # Specify the t

@@ -1,0 +1,343 @@
+{
+  "query": "How to define XYZ coordinates and molecular geometry blocks in ORCA inputs",
+  "package": "orca-manual",
+  "results": [
+    {
+      "id": "6.5_ORCA_and_Symmetry__orca_manual_4_2_1-page-0068__2ff36dab3a45580a653da7ac68a02bde__full__0",
+      "text": "36 6 General Structure of the Input File\n! UKS BLYP def2-SVP\n%method\nSpecialGridAtoms 28, 29, 27\nSpecialGridIntacc 8, 8, 8\nend\n6.5 ORCA and Symmetry\nFor most of its life, ORCA did not take advantage of molecular symmetry. Starting from version 2.8.0 there\nis at least limited use. On request, with the UseSym keyword, the program detects the point group, cleans up\nthe coordinates, orients the molecule and produces symmetry-adapted orbitals in SCF/CASSCF calculations.\nNote however that the calculation time will not be reduced. Only D 2h and subgroups are currently supported.\nThe only correlation module that makes use of this information so far is the MRCI module. Here and in\nCASSCF calculations, the use of symmetry helps to control the calculation and the interpretation of the\nresults. More symmetry is likely to be implemented in the future, although it is unlikely that the program\nwill ever take advantage of symmetry in a very big way.\nIf the automatic symmetry detection fails to ﬁnd the expected point group, the coordinates speciﬁed are not\nabsolutely symmetrical to that group, and one should take a careful look at the input coordinates, maybe\nusing a visualization program. A problem often encountered when using coordinates generated from other\njobs (e.g. geometry optimizations) is the detection of a “too low” symmetry because of numerical noise. This\ncan be solved by increasing the detection threshold using an input line which looks like this:\n%method SymThresh 5.0e-2 end\nHowever, it is not recommended to run calculations on a very high threshold, since this may introduce some\nodd behavior. Instead, a method to symmetrize the coordinates is to do a “fake” run with NoIter, XYZFile\nand an increased threshold, and then to use the created .xyz ﬁle as input for the actual calculation. This\nhas the additional beneﬁt that the input coordinates stored in your data are already symmetrical. To give\nan example: the following coordinates for staggered ethane were obtained by geometry optimization NOT\nusing the symmetry module. They are, however, not recognized as D 3d symmetrical due to numerical noise\nand instead are found to be of C i symmetry (a subgroup of D 3d). To counter this, the detection threshold is\nincreased and a symmetry perfected coordinate ﬁle is produced by the following input:\n! RHF SVP UseSym NoIter XYZfile\n%method SymThresh 1.0e-2 end\n*xyz 0 1\nC -0.002822 -0.005082 -0.001782\nC -0.723141 -1.252323 -0.511551\nH 0.017157 0.029421 1.100049\nH 1.042121 0.030085 -0.350586\nH -0.495109 0.917401 -0.350838\nH -0.743120 -1.286826 -1.613382\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_title": "6.5_ORCA_and_Symmetry__orca_manual_4_2_1-page-0068.txt",
+        "source_file": "6.5_ORCA_and_Symmetry__orca_manual_4_2_1-page-0068.txt",
+        "section_id": "full"
+      },
+      "score": 0.9472191320711811,
+      "original_score": 0.9396790080813499,
+      "vector_score": 1.0,
+      "bm25_score": 0.698395040406749,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "xyz",
+        "coordinates",
+        "molecular",
+        "geometry",
+        "orca"
+      ],
+      "match_ratio": 0.625,
+      "is_html": false
+    },
+    {
+      "id": "9.1.1_Fragment_Specication__orca_manual_4_2_1-page-0408__a26bc8ebee06f0e796cee8cab2dc4e72__full__0",
+      "text": "376\n9 Detailed Documentation\n9.1 More on Coordinate Input\nWe will now enter the detailed discussion of the features of ORCA. Note that some examples are still written\nin the “old syntax” but that there is no need for the user to adopt that old syntax. The new one works as\nwell.\n9.1.1 Fragment Speciﬁcation\nThe atoms in the molecule can be assigned to certain fragments. This helps to organize the output in the\npopulation analysis section, is used for the fragment optimization feature, for the local energy decomposition\nand for multi-level calculations. There are two options to assign atoms to fragments. The ﬁrst option is\nto assign a given atom to a given fragment by putting a (n) directly after the atomic symbol. Fragment\nenumeration starts with fragment 1!\n%coords\nCTyp xyz # the type of coordinates xyz or internal\nCharge -2 # the total charge of the molecule\nMult 2 # the multiplicity = 2S+1\ncoords\nCu(1) 0 0 0\nCl(2) 2.25 0 0\nCl(2) -2.25 0 0\nCl(2) 0 2.25 0\nCl(2) 0 -2.25 0\nend\nend\nIn this example the fragment feature is used to divide the molecule into a “metal” and a “ligand” fragment\nand consequently the program will print the metal and ligand characters contained in each MO in the\npopulation analysis section.\nAlternatively you can assign atoms to fragments in the geom block:\n",
+      "metadata": {
+        "section_title": "9.1.1_Fragment_Specication__orca_manual_4_2_1-page-0408.txt",
+        "source_file": "9.1.1_Fragment_Specication__orca_manual_4_2_1-page-0408.txt",
+        "package": "orca-manual",
+        "section_id": "full"
+      },
+      "score": 0.7781704281553522,
+      "original_score": 0.7601842466544348,
+      "vector_score": 0.9502303083180436,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "xyz",
+        "coordinates",
+        "orca"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "2.1.9_Miscellaneous__orca_manual_4_2_1-page-0026__937e00bba2c367c8957e69b181bd9ea9__full__0",
+      "text": "XXIV 2 ORCA 4.2 Changes\n• The MD module can now write trajectories in DCD ﬁle format (in addition to the already implemented\nXYZ and PDB formats).\n• The thermostat is now able to apply temperature ramps during simulation runs.\n• Added more ﬂexibility to region deﬁnition (can now add/remove atoms to/from existing regions).\n• Added two new constraint types which keep centers of mass ﬁxed or keep complete molecules rigid.\n• Ability to store the GBW ﬁle every n-th step during MD runs (e.g. for plotting orbitals along the\ntrajectory).\n• Can now set limit for maximum displacement of any atom in a MD step, which can stabilize dynamics\nwith poor initial structures. Runs can be cleanly aborted by “touch EXIT”.\n• Better handling/reporting of non-converged SCF during MD runs.\n• Fixed an issue which slowed down molecular dynamics after many steps.\n• Stefan Grimme’s xTB method can now be used in the MD module, allowing fast simulations of large\nsystems.\n2.1.9 Miscellaneous\n• Compute thermochemical corrections at diﬀerent temperatures without recomputing the Hessian\n• Fragments can now be deﬁned in the geom block as simple lists\n• Simpler input format for deﬁnition of atom lists and fragments, in particular useful for large atom lists\n• basename.trj ﬁles are now called basename trj.xyz\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "2.1.9_Miscellaneous__orca_manual_4_2_1-page-0026.txt",
+        "package": "orca-manual",
+        "section_title": "2.1.9_Miscellaneous__orca_manual_4_2_1-page-0026.txt"
+      },
+      "score": 0.6852108629113082,
+      "original_score": 0.6596874193635764,
+      "vector_score": 0.8246092742044705,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "xyz",
+        "molecular",
+        "orca"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021__72e5cefb9c642f759756406daaa4db36__part_0__0",
+      "text": "XIX\nList of Tables\n6.1 Main keywords that can be used in the simple input of ORCA. . . . . . . . . . . . . 12\n6.2 Density functionals available in ORCA. . . . . . . . . . . . . . . . . . . . . . . . . . 23\n6.3 Basis sets available on ORCA. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25\n6.4 Overview of auxiliary basis sets available in ORCA. . . . . . . . . . . . . . . . . . . 30\n6.5 Overview of library keywords for ECPs and associated basis sets available in ORCA. 33\n8.1 Computer times for solving the coupled-cluster/coupled-pair equations for Serine . . 62\n8.2 Computed spectroscopic constants of N 2 with coupled-cluster methods. . . . . . . . 63\n8.2 Computed spectroscopic constants of N 2 with coupled-cluster methods. . . . . . . . 64\n8.3 Comparison of various basis sets for highly correlated calculations . . . . . . . . . . 70\n8.4 Comparison of various basis sets for correlated calculations. . . . . . . . . . . . . . . 72\n8.6 Accuracy settings for DLPNO coupled cluster (current version). . . . . . . . . . . . . 90\n8.7 Accuracy settings for DLPNO coupled cluster (deprecated 2013 version). . . . . . . . 90\n8.10 DSD-DFT parameters deﬁned in ORCA . . . . . . . . . . . . . . . . . . . . . . . . . 99\n8.12 Comparison of the performance of the MRCI and MDCI modules for a single refer-\nence calculation with the bn-ANO-DZP basis set on the zwitter-ionic form of serine. 213\n8.15 Energies of the H 2O-CH2 example for illustrating how the diﬀerent LED contri-\nbutions are evaluated. The superscript opt denotes energies of optimized structures,\nfixed denotes energies of isolated fragments in the dimer structure. In the last column\nthe energy of the dimer is reported. . . . . . . . . . . . . . . . . . . . . . . . . . . . . 311\n9.2 Predeﬁned COSX Grid keywords . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+      "metadata": {
+        "package": "orca-manual",
+        "section_title": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021.txt",
+        "section_id": "part_0",
+        "source_file": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021.txt"
+      },
+      "score": 0.6154350838476246,
+      "original_score": 0.6055744449719226,
+      "vector_score": 0.7569680562149032,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0044__14a9dcbc7268879e8f6ff1bcb0a878e4__full__0",
+      "text": "12 6 General Structure of the Input File\nTable 6.1: Main keywords that can be used in the simple input of ORCA.\nKeyword Input\nblock\nVariable Comment\nHF METHOD METHOD Selects the Hartree–Fock method\nDFT Selects the DFT method (see table 6.2\non page 23 for a list of functionals)\nFOD FOD analysis (see 9.6.8.2) employ-\ning default settings (TPSS/def2-TZVP,\nTightSCF, SmearTemp = 5000 K)\nRuntypes\nENERGY or SP METHOD RUNTYP Selects a single point calculation\nOPT Selects a geometry optimization calcu-\nlation (using internal redundant coordi-\nnates)\nCOPT Optimization in Cartesian coordinates\n(if you are desperate)\nZOPT Optimization in Z-matrix coordinates\n(dangerous)\nGDIIS-COPT COPT using GDIIS\nGDIIS-ZOPT ZOPT using GDIIS\nGDIIS-OPT Normal optimization using GDIIS\nENGRAD Selects an energy and gradient calcula-\ntion\nNUMGRAD Numerical gradient (has explicitly to\nbe asked for, if analytic gradient is not\navailable)\nNUMFREQ Numerical frequencies\nNUMNACME Numerical non-adiabatic coplings (only\nfor CIS/TD-DFT)\nMD Molecular dynamic simulation\nCIM Cluster-In-Molecule calculation\nAtomic mass/weight handling\nMass2016 METHOD AMASS Use the latest (2016) atomic masses of\nthe most abundant or most stable iso-\ntopes instead of atomic weights.\nSymmetry handling\nUseSym Turns on the use of molecular symme-\ntry (see section 6.5). THIS IS VERY\nRUDIMENTARY!\nNoUseSym Turns symmetry oﬀ\nSecond order many body perturbation theory\nMP2 Selects Method=HF and DoMP2=true\nMP2RI or RI-MP2 Select the MP2-RI method\nSCS-MP2 Spin-component scaled MP2\nRI-SCS-MP2 Spin-component scaled RI-MP2\n(synonym is SCS-RI-MP2)\n",
+      "metadata": {
+        "section_title": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0044.txt",
+        "package": "orca-manual",
+        "source_file": "6.2.1_Main_Methods_and_Options__orca_manual_4_2_1-page-0044.txt",
+        "section_id": "full"
+      },
+      "score": 0.5184883049564403,
+      "original_score": 0.4649870055071559,
+      "vector_score": 0.5812337568839449,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "coordinates",
+        "molecular",
+        "geometry",
+        "orca"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "8.20.2_ORCA_and_pDynamo__orca_manual_4_2_1-page-0375__30b03e13c06ff4d157a7282136577678__full__0",
+      "text": "8.20 QM/MM via Interfaces to ORCA 343\n%geom\n# add the Cartesian position of atoms 2 and 4 to the\n# set of internal coordinates with a diagonal Hessian value of 0.1\nHess_Internal\n{C 2 D 0.1}\n{C 4 D 0.1}\nend\nend\n8.20.2 ORCA and pDynamo\nThe interface with the pDynamo library is brieﬂy documented here. It uses the same plain text ﬁles to\nexchange information between the pDynamo library and ORCA. In order to have simiar functionality as\npresented above, we have extended the interface to generate more complex ORCA input ﬁles by accepting\nverbatim blocks of text. We have also implemented in pDynamo the capability of writing ﬁles containing\nLennard-Jones parameters.\nA simple example which calculates the QM/MM energy for a small designed peptide in which the side chain\nof one amino acid is treated QM is ilustrated below. For this example, a complete geometry optimization is\ngoing to be performed during the ORCA call.\nimport os\nimport pCore\nimport pBabel\nimport pMolecule\nimport pMoleculeScripts\n# Read the initial coordinates from the .pdb file.\nsystem = pMoleculeScripts.PDBFile_ToSystem(\n\"1UAO.pdb\", modelNumber=1, useComponentLibrary=True)\n# Instantiate the required models.\nmmmodel = pMolecule.MMModelOPLS(\"protein\")\nnbmodel = pMolecule.NBModelORCA()\nqcmodel = pMolecule.QCModelORCA(\ncommand=os.getenv(\"ORCA_COMMAND\"),\ndeleteJobFiles=False, header=\"bp86␣def2-svp␣qmmmopt/pdynamo\",\njob=\"chignolin\", run=True)\n# Assign the models to the system.\nsystem.DefineMMModel(mmmodel)\nsystem.DefineQCModel(\nqcmodel, qcSelection=pCore.Selection([35, 36, 37, 34, 40, 41]))\nsystem.DefineNBModel(nbmodel)\nsystem.electronicState = pMolecule.ElectronicState(\ncharge=-1, multiplicity=1)\n# Print a summary and calculate the energy.\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_title": "8.20.2_ORCA_and_pDynamo__orca_manual_4_2_1-page-0375.txt",
+        "source_file": "8.20.2_ORCA_and_pDynamo__orca_manual_4_2_1-page-0375.txt",
+        "section_id": "full"
+      },
+      "score": 0.492711148983762,
+      "original_score": 0.43634572109306885,
+      "vector_score": 0.4489137516376768,
+      "bm25_score": 0.38607359891463716,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "coordinates",
+        "geometry",
+        "blocks",
+        "orca"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "8.2.9_Multiple_XYZ_File_Scans__orca_manual_4_2_1-page-0199__c3809b39ce9b16c9d7ca9ae5fe587be6__full__0",
+      "text": "8.2 Geometry Optimizations, Surface Scans, Transition States, MECPs, Conical Intersections, IRC, NEB167\n8.2.8.1 Multidimensional Scans\nAfter several requests from our users ORCA now allows up to three coordinates to be scanned within one\ncalculation.\n! RKS B3LYP/G SV(P) TightSCF Opt\n%geom Scan\nB 0 1 = 1.35, 1.10, 12 # C-O distance that will be scanned\nB 0 2 = 1.20, 1.00, 5 # C-H distance that will be scanned\nA 2 0 1 = 140, 100, 5 # H-C-O angle that will be scanned\nend\nend\n* int 0 1\nC 0 0 0 0.0000 0.000 0.00\nO 1 0 0 1.3500 0.000 0.00\nH 1 2 0 1.1075 122.016 0.00\nH 1 2 3 1.1075 122.016 180.00\n*\nNOTE:\n• For ﬁnding transition state structures of more complicated reaction paths ORCA now oﬀers its very\neﬃcient NEB-TS implementation (see section 9.22.2).\n• 2-dimensional or even 3-dimensional relaxed surface scans can become very expensive - e.g. requesting\n10 steps per scan, ORCA has to carry out 1000 constrained optimizations for a 3-D scan.\n• The results can depend on the direction of the individual scans and the ordering of the scans.\n8.2.9 Multiple XYZ File Scans\nA diﬀerent type of scan is implemented in ORCA in conjunction with relaxed surface scans. Such scans\nproduce a series of structures that are typically calculated using some ground state method. Afterwards\none may want to do additional or diﬀerent calculations along the generated pathway such as excited state\ncalculations or special property calculations. In this instance, the “multiple XYZ scan” feature is useful. If\nyou request reading from a XYZ ﬁle via:\n* xyzfile Charge Multiplicity FileName\nthis ﬁle could contain a number of structures. The format of the ﬁle is:\n",
+      "metadata": {
+        "source_file": "8.2.9_Multiple_XYZ_File_Scans__orca_manual_4_2_1-page-0199.txt",
+        "package": "orca-manual",
+        "section_id": "full",
+        "section_title": "8.2.9_Multiple_XYZ_File_Scans__orca_manual_4_2_1-page-0199.txt"
+      },
+      "score": 0.4650229025263347,
+      "original_score": 0.40558100280703857,
+      "vector_score": 0.5069762535087982,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "xyz",
+        "coordinates",
+        "geometry",
+        "orca"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "9.1.2_Dening_Geometry_Parameters_and_Scanning_Potential_Energy_Surfaces__orca_manual_4_2_1-page-0409__8ebd8a2aae2e60a5270da562e09bd6d1__full__0",
+      "text": "9.1 More on Coordinate Input 377\n*xyz -2 2\nCu 0 0 0\nCl 2.25 0 0\nCl -2.25 0 0\nCl 0 2.25 0\nCl 0 -2.25 0\n*\n%geom\nFragments\n1 {0} end # atom 0 for fragment 1\n2 {1:4} end # atoms 1 to 4 for fragment 2\nend\nend\nNOTE\n• With the second option (geom-fragments) the %geom block has to be written after the coordinate\nsection.\n• geom-fragments also works with coordinates that are deﬁned via an external ﬁle.\n• For the geom-fragments option the atoms are assigned to fragment 1 if no assignment is given.\n9.1.2 Deﬁning Geometry Parameters and Scanning Potential Energy Surfaces\nORCA lets you deﬁne the coordinates of all atoms as functions of user deﬁned geometry parameters. By\ngiving not only a value but a range of values (or a list of values) to this parameters potential energy surfaces\ncan be scanned. In this case the variable RunTyp is automatically changed to Scan. The format for the\nparameter speciﬁcation is straightforward:\n%coords\nCTyp internal\nCharge 0\nMult 1\npardef\nrCH = 1.09; # a C-H distance\nACOH = 120.0; # a C-O-H angle\nrCO = 1.35, 1.10, 26; # a C-O distance that will be scanned\nend\ncoords\nC 0 0 0 0 0 0\nO 1 0 0 {rCO} 0 0\nH 1 2 0 {rCH} {ACOH} 0\nH 1 2 3 {rCH} {ACOH} 180\n",
+      "metadata": {
+        "section_title": "9.1.2_Dening_Geometry_Parameters_and_Scanning_Potential_Energy_Surfaces__orca_manual_4_2_1-page-0409.txt",
+        "section_id": "full",
+        "package": "orca-manual",
+        "source_file": "9.1.2_Dening_Geometry_Parameters_and_Scanning_Potential_Energy_Surfaces__orca_manual_4_2_1-page-0409.txt"
+      },
+      "score": 0.41861122159637665,
+      "original_score": 0.3540124684404185,
+      "vector_score": 0.4425155855505231,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "xyz",
+        "coordinates",
+        "geometry",
+        "orca"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "4.2_Units_and_Conversion_Factors__orca_manual_4_2_1-page-0034__a2630fa2fc8dc953707ac789c88a132a__full__0",
+      "text": "2 4 General Information\norca 2aim : Produces WFN and WFX ﬁles suitable for AIM analysis\norca 2mkl : Produces an ASCII ﬁle to be read by molekel, molden or\nother visualization programs\norca asa : Calculation of absorption, ﬂuorescence and resonance Ra-\nman spectra\norca chelpg : Electrostatic potential derived charges\norca euler : Calculate Euler angles from .prop ﬁle\norca ﬁtpes : Simple program to ﬁt potential energy curves of diatomics\norca mapspc : Produces ﬁles for transfer into plotting programs\norca pltvib : Produces ﬁles for the animation of vibrations\norca pnmr : Calculation of paramagnetic NMR shielding tensors\norca vib : Calculation of vibrational frequencies from a completed fre-\nquency run (also used for isotope shift calculations)\notool gcp : Geometrical Counterpose Correction\nFriends of ORCA:\ngennbo : The NBO analysis package of Weinhold (must be purchased\nseparately from the university of Wisconsin; older versions\navailable for free on the internet may also work)\nMolekel : Molecular visualization program (see 7.20.2.3)\ngOpenMol : Molecular visualization program (see 7.20.2.2)\nIn principle every individual module can also be called “standalone”. However, it is most convenient to do\neverything via the main module.\nThere is no real installation procedure. Just copy the executables wherever you want them to be and make\nsure that your path variable contains a reference to the directory where you copied the ﬁles. This is important\nto make sure that the programs can call each other (but you can also tell the main program the explicit\nposition of the other programs in the input ﬁle as described below).\n4.2 Units and Conversion Factors\nInternally the program uses atomic units. This means that the unit of energy is the Hartree (Eh) and the\nunit of length is the Bohr radius ( a0). The following conversion factors to other units are used:\n1 Eh = 27.2113834 eV\n1 eV = 8065.54477 cm −1 = 23.0605 kcal\nmol\n1 cm−1 = 29979.2458 MHz\n1 a0 = 0.5291772083 ˚A\n1 a.t.u. = 2.4188843 10 −17 s\n",
+      "metadata": {
+        "source_file": "4.2_Units_and_Conversion_Factors__orca_manual_4_2_1-page-0034.txt",
+        "section_title": "4.2_Units_and_Conversion_Factors__orca_manual_4_2_1-page-0034.txt",
+        "section_id": "full",
+        "package": "orca-manual"
+      },
+      "score": 0.4178472765738448,
+      "original_score": 0.38720765955141556,
+      "vector_score": 0.48400957443926945,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "molecular",
+        "orca"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022__78f49d4facd1d5a01c416b6730711ee4__full__0",
+      "text": "XX\n1 ORCA 4.2 Foreword\nDear ORCA Users or potential ORCA users,\nWe are all very proud that we can present ORCA Version 4.2. to you! We thoroughly hope that you enjoy\nthe program and that it will serve you well in all of your scientiﬁc endeavors. As with previous releases,\nwe have worked very hard on this release until the last minute and while we did our best to ensure that\neverything is working and complete, we can of course not exclude the possibility that a few things might\nhave escaped our attention. Hence, please give us feedback over the next few months – we plan to follow up\nwith a minor release soon.\nWith this release, we have largely continued the path that we have been following for about the last decade –\nnamely to engage in wavefunction theory and make it applicable to larger and larger and larger systems with\nhigher and higher accuracy.\nIt has been increasingly evident that DLPNO methods are a staple of ORCA and with this release we have\nsigniﬁcantly enhanced the DLPNO methodology by making sure that iterative (T) corrections are available\nfor closed- and open-shell systems. Also the long awaited DLPNO-STEOM for closed shells is an excellent\nexcited state method. Open shell DLPNO-CCSD(T)-F12 has been completed for this release as well.\nThe second staple of ORCA are multireference methods. In this release, we have added some signiﬁcant\nfunctionality, most importantly there is a full CASPT2 implementation now in ORCA and there are signiﬁcant\nimprovements in our large-scale approximate full CI scheme (ICE). There also is a fully internally contracted\nquadratic MRCI scheme implemented (essentially internally contracted multireference coupled cluster).\nThe third staple of ORCA are spectroscopic calculations. We have continued to enhance the NMR capabilities\nof ORCA by adding the RI-MP2 chemical shift calculations. It also works for double hybrid functionals and\ngive pretty accurate results. In addition, there have been a number of enhancements in the ORCA ESD\nmodule for the calculation of ﬂuorescence, phosphorescence spectra as well as vibronic bandshapes and\nresonance Raman spectra. One signiﬁcant addition is spin-orbit coupling in TD-DFT. Additionally, ORCA\nnow has the capability to optimize to conical intersections.\nThe fourth staple of ORCA are analysis tools that allow you to go beyond the bare numbers. In this respect\nthe very successful local energy decomposition has been further extended to cover DLPNO-MP2. There\nalso is a low-cost, high accuracy method added: HF-LD that adds London dispersion to a Hartree-Fock\ncalculation.\nA lot of work has gone into the improvement of the implicit solvation capabilities. We have added the Gaussian\ncharge scheme that is numerically much more stable than the usual point charge scheme used in CPCM or\nCOSMO. Great improvements have also been made to the nudge elastic band transition state optimizer. In\naddition, we are now using the libxc library to give access to a wider variety of density functionals. The MD\n",
+      "metadata": {
+        "source_file": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022.txt",
+        "section_id": "full",
+        "section_title": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.4130623735656518,
+      "original_score": 0.39801269083656593,
+      "vector_score": 0.49751586354570737,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "9.23.8.9_Normal_Mode_Scan_Calculations_Between_Dierent_Structures__orca_manual_4_2_1-page-0695__239c82fb34cd453989eef7e4a46d6e16__full__0",
+      "text": "9.23 Excited States via RPA, CIS and TD-DFT 663\nFigure 9.23: Result of a potential energy surface scan along C-C stretching normal coordinate\n(mode 13 in the present example) for the excited states of the ethene molecule using\nthe orca cis module.\n0.000000 0.000000 0.000000\n0.000000 -0.607566 0.770693\n0.000000 -0.607566 -0.770693\nThe ﬁrst line of the input speciﬁes the number of the structures and total number of atoms (2 and 3,\nrespectively). Speciﬁcation of each structure in sequence starts with a new line containing the number of\nthe structure. The number 0 in the second line is used to denote the reference structure. Note that atomic\ncoordinates should be given in units of ˚A and in the same order as in the ORCA input for the frequency run\nfrom which the ﬁle water.hess was calculated.\nAt the end of the orca vib run the ﬁle geom.ddnc is generated. It contains the geometry diﬀerence in terms\nof the dimensionless normal coordinates between the structures with nonzero numbers and the reference one\nin geom.xyz :\n1\n1 9\n0 0.000000\n",
+      "metadata": {
+        "source_file": "9.23.8.9_Normal_Mode_Scan_Calculations_Between_Dierent_Structures__orca_manual_4_2_1-page-0695.txt",
+        "package": "orca-manual",
+        "section_id": "full",
+        "section_title": "9.23.8.9_Normal_Mode_Scan_Calculations_Between_Dierent_Structures__orca_manual_4_2_1-page-0695.txt"
+      },
+      "score": 0.41255532513296717,
+      "original_score": 0.3472836945921857,
+      "vector_score": 0.41722942871276825,
+      "bm25_score": 0.0675007581098556,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "xyz",
+        "coordinates",
+        "geometry",
+        "orca"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "8.19.5_Forceeld_Input__orca_manual_4_2_1-page-0365__8d50c13240b3fc84668565e62818fd2f__full__0",
+      "text": "8.19 ORCA QM/MM Implementation 333\n%qmmm\nOptRegion_FixedAtoms {27 1288:1290 4400} end # manually define the\n# optRegionExt atoms.\nend\nNote that ORCA did print the necessary information in the output of the calculation in which the Hessian\nwas computed:\nFixed atoms used in optimizer ... 27 1288 1289 1290 4400\n8.19.4.5 Nudged Elastic Band Calculations\nNEB calculations (section 8.2.17) can be carried out in combination with the QM/MM feature in order to\ne.g. study enzyme catalysis. When automatically building the extension shell at the start of a QM/MM-NEB\ncalculation, not only the coordinates of the main input structure (’reactant’), but also the atomic coordinates\nof the ’product’ and, if available, of the ’transition state guess’ are used to determine the union of the\nextension shell of the active region. For large systems it is advised to use the active region feature for the\nNEB calculation. Note that the atomic positions of the non-active atoms of reactant and product and, if\navailable, transition state guess, should be identical.\n8.19.4.6 Molecular Dynamics\nIf there are active and non-active atoms in the QM/MM system, only the active atoms are allowed to\npropagate in the MD run. If all atoms are active, all atoms are propagated. For more information on the\noutput and trajectory options, see section 9.34.2.\n8.19.4.7 Rigid MM Water\nAs TIP3P water might have to be treated as rigid bodies due to its parametrization - please check out the\nspeciﬁcs of the applied force ﬁeld parametrization - we oﬀer a keyword for the automated rigid treatment of\nall active MM waters. The following keyword applies bond and angle constraints to active MM waters in\noptimization as well as MD runs:\nRigid_MM_Water false # Default: false.\n8.19.5 Forceﬁeld Input\nFor the MM part of the QM/MM calculation force-ﬁeld parameters are necessary. Internally, ORCA uses the\nORCA Forceﬁeld. For a description on the format, how to obtain and manipulate the force ﬁeld parameters,\nsee section 8.18.1. Two diﬀerent input forceﬁeld types are possible: the ORCA forceﬁeld File and psf ﬁles\n(from VMD’s psfgen or QWikMD).\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "8.19.5_Forceeld_Input__orca_manual_4_2_1-page-0365.txt",
+        "section_title": "8.19.5_Forceeld_Input__orca_manual_4_2_1-page-0365.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.38808452764341345,
+      "original_score": 0.3200939196037927,
+      "vector_score": 0.1501173995047409,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "define",
+        "coordinates",
+        "molecular",
+        "orca"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "4.1_Program_Components__orca_manual_4_2_1-page-0033__3708bba4aee1cb70f9e6eb0d7234c2d1__full__0",
+      "text": "1\n4 General Information\n4.1 Program Components\nThe program system ORCA consists of several separate programs that call each other during a run. The\nfollowing basic modules are included in this release:\norca : Main input+driver program\norca anoint : Integral generation over ANOs\norca autoci : CI type program using the automated generation environment (ORCA-AGE)\norca ciprep : Preparation of data for MRCI calculations (frozen core matrices and the like)\norca cis : Excited states via CIS and TD-DFT\norca cipsi : Iterative Conﬁguration Expansion Conﬁguration Interaction (ICE-CI)\norca cpscf : Solution of the coupled-perturbed SCF equations\norca casscf : Main program for CASSCF driver\norca eprnmr : SCF approximation to EPR and NMR parameters\norca fci : Full-CI program\norca gtoint : Calculation of gaussian integrals\norca gstep : Relaxation of the geometry based on energies and gradients\norca loc : Calculation of localized molecular orbitals\norca md : Molecular dynamics program\norca mdci : Matrix driven correlation program: CI, CEPA, CPF, QCISD, CCSD(T)\norca mp2 : MP2 program (conventional, direct and RI)\norca mrci : MRCI and MRPT calculations (individually selecting)\norca ndoint : Calculates semiempirical integrals and gradients\norca numfreq : Numerical hessian computation\norca pc : Addition of point charge terms to the one-electron matrix\norca plot : Generation of orbital and density plots\norca pop : External program for population analysis on a given density\norca rel : (Quasi) Relativistic corrections\norca rocis : Excited states via the ROCIS method\norca scf : Self-consistent ﬁeld program (conventional and direct)\norca scfgrad : Analytic derivatives of SCF energies (HF and DFT)\norca scfhess : Analytical hessian calculation for SCF\norca soc : Calculation of spin-orbit coupling matrices\norca vpot : Calculation of the electrostatic potential on a given molecular surface\nUtility programs:\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_id": "full",
+        "section_title": "4.1_Program_Components__orca_manual_4_2_1-page-0033.txt",
+        "source_file": "4.1_Program_Components__orca_manual_4_2_1-page-0033.txt"
+      },
+      "score": 0.37894656219750206,
+      "original_score": 0.32859087805135356,
+      "vector_score": 0.41073859756419195,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "molecular",
+        "geometry",
+        "orca"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "6.6_Jobs_with_Multiple_Steps__orca_manual_4_2_1-page-0069__32b3079a63d83c662451456073818303__full__0",
+      "text": "6.6 Jobs with Multiple Steps 37\nH -0.230855 -2.174806 -0.162495\nH -1.768085 -1.287489 -0.162747\n*\n6.6 Jobs with Multiple Steps\nORCA supports input ﬁles with multiple jobs. This feature is designed to simplify series of closely related\ncalculations on the same molecule or calculations on diﬀerent molecules. The objectives for implementing\nthis feature include:\n• Calculate of a molecular property using diﬀerent theoretical methods and/or basis sets for one molecule.\n• Calculations on a series of molecules with identical settings.\n• Geometry optimization followed by more accurate single points and perhaps property calculations.\n• Crude calculations to provide good starting orbitals that may then be used for subsequent calculations\nwith larger basis sets.\nFor example consider the following job that in the ﬁrst step computes the g-tensor of BO at the LDA level,\nand in the second step using the BP86 functional.\n# -----------------------------------------------------\n! UKS LSD SVP grid5 NoFinalGrid TightSCF KeepInts\n# -----------------------------------------------------\n%eprnmr gtensor 1 end\n* int 0 2\nB 0 0 0 0 0 0\nO 1 0 0 1.2049 0 0\n*\n# *************************************************\n# ****** This starts the input for the next job *\n# *************************************************\n$new_job\n# --------------------------------------------------\n! BP86 SVP SmallPrint ReadInts NoKeepInts\n# --------------------------------------------------\n%eprnmr gtensor 1 end\n* int 0 2\nB 0 0 0 0 0 0\nO 1 0 0 1.2049 0 0\n*\n",
+      "metadata": {
+        "package": "orca-manual",
+        "source_file": "6.6_Jobs_with_Multiple_Steps__orca_manual_4_2_1-page-0069.txt",
+        "section_id": "full",
+        "section_title": "6.6_Jobs_with_Multiple_Steps__orca_manual_4_2_1-page-0069.txt"
+      },
+      "score": 0.3400640458136064,
+      "original_score": 0.28655572520389877,
+      "vector_score": 0.3581946565048735,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "molecular",
+        "geometry",
+        "orca"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "9.31_Multireference_Equation_of_Motion_Coupled-Cluster__orca_manual_4_2_1-page-0795__8b0699007d0dce4cd9fec7b52b0d148f__part_2__2",
+      "text": " 1p\nMR-EOM-T|T†|SXD-h-v MR-EOM-T|Td|SXD ˆT; ˆT†; ˆS+ ˆX+ ˆD CAS, 2h, 1h, 1p\nMR-EOM-T|T†|SXD|U-h-v MR-EOM ˆT; ˆT†; ˆS+ ˆX+ ˆD; ˆU CAS, 1h, 1p\nNote that there are three diﬀerent MR-EOM approaches which have been implemented in ORCA. Namely, the\ncurrent implementation allows for MR-EOM-T|T†-h-v, MR-EOM-T|T†|SXD-h-v and MR-EOM-T|T†|SXD|U-\nh-v calculations. At this point it is useful to discuss the naming convention used for these approaches. We\nuse a vertical line to separate each transformation involved in the sequence of transformations deﬁning the\ngiven MR-EOM approach. For example T |T†|SXD indicates that a T transformation, is followed by a T †\ntranformation, which is then followed by an SXD transformation. The h-v indicates that the elements of the\n",
+      "metadata": {
+        "source_file": "9.31_Multireference_Equation_of_Motion_Coupled-Cluster__orca_manual_4_2_1-page-0795.txt",
+        "section_title": "9.31_Multireference_Equation_of_Motion_Coupled-Cluster__orca_manual_4_2_1-page-0795.txt",
+        "section_id": "part_2",
+        "package": "orca-manual"
+      },
+      "score": 0.328135956752503,
+      "original_score": 0.3109086735923108,
+      "vector_score": 0.3886358419903885,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 54,
+    "final_results_count": 15
+  }
+}

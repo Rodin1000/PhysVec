@@ -1,0 +1,338 @@
+{
+  "query": "ORCA CPCM versus COSMO usage transition for XAS calculations solvation setup",
+  "package": "orca-manual",
+  "results": [
+    {
+      "id": "9.35.3_The_SMD_Solvation_Model__orca_manual_4_2_1-page-0912__51d21fc5f172c182967894040cb36c83__full__0",
+      "text": "880 9 Detailed Documentation\n9.35.2 The Conductor-like Screening Solvation Model (COSMO)\nThe COSMO solvation model has been removed from ORCA v4.0.0 !!!\nPlease use the C-PCM solvation model in combination with the COSMO epsilon function if required!\nAs a short form to use the C-PCM model with the COSMO epsilon function, you can specify the solvent via\n!CPCMC(solvent).\n9.35.3 The SMD Solvation Model\nThe SMD solvation model has been proposed by the Cramer and Truhlar groups [518], and is based on the\nquantum mechanical charge density of a solute molecule interacting with a continuum description of the\nsolvent. In the model the full solute electron density is used without deﬁning partial atomic charges and\nthe solvent is not represented explicitly but rather as a dielectric medium with the surface tension at the\nsolute–solvent boundary. SMD is a universal solvation model, in the sense that it is applicable to any charged\nor uncharged solute in any solvent or liquid medium for which a few key descriptors are known. In particular,\nthese descriptors are the dielectric constant, refractive index, bulk surface tension, and acidity and basicity\nparameters. Neglecting the concentration contribution, the model separates the observable solvation free\nenergy into two main components,\n∆GS = ∆GENP + ∆GCDS. (9.390)\nIn ORCA, the ﬁrst component is the bulk electrostatic contribution arising from a self-consistent reaction\nﬁeld treatment that involves the electrostatic interaction using the Conductor-like Polarizable Continuum\nModel (C-PCM). However, the radii are set to “intrinsic atomic Coulomb radii”. The second component,\ncalled the cavity-dispersion solvent-structure (CDS) term, is the contribution resulting from short-range\ninteractions between the solute and solvent molecules in the ﬁrst solvation shell. This contribution is a sum\nof terms that are proportional (with geometry-dependent proportionality constants called atomic surface\ntensions) to the solvent-accessible surface areas of the individual atoms of the solute. The CDS contribution\nto the free energy of solvation is given by\n∆GCDS =\natoms∑\nk\nσkAk(R,RZk + rs) + σ[M]\natoms∑\nk\nAk(R,RZk + rs), (9.391)\nwhere σk and σ[M] are the atomic surface tension of atom k and the molecular surface tension, respectively,\nand Ak is the solvent accessible surface area (SASA). The SASA depends on the geometry R, the set RZk of\nall atomic van der Waals radii, and the solvent radius rs, which is added to each of the atomic van der Waals\nradii. In the program Bondi radii are used for CDS contribution.\nMore details can be found in the original paper of Marenich et al. [518], which should be cited in publications\nusing results of SMD calculations.\nSMD can be employed in single point calculations and geometry optimizations, using single-determinant SCF\n(HF and DFT) and CASSCF methods. In post-SCF methods the result is corrected in the reference wave\nfunction. To use SMD the user must simply specify smd true in the %cpcm block and provide the name of\nthe solvent. This automatically sets a number of default SMD parameters (see the table below for a list\n",
+      "metadata": {
+        "section_title": "9.35.3_The_SMD_Solvation_Model__orca_manual_4_2_1-page-0912.txt",
+        "source_file": "9.35.3_The_SMD_Solvation_Model__orca_manual_4_2_1-page-0912.txt",
+        "section_id": "full",
+        "package": "orca-manual"
+      },
+      "score": 0.9830144679656139,
+      "original_score": 0.9811271866284599,
+      "vector_score": 0.9764089832855748,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "orca",
+        "cpcm",
+        "cosmo",
+        "calculations",
+        "solvation"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "8.14_Solvation__orca_manual_4_2_1-page-0289__b034380f03c6c4adcf4725921c12aa41__full__0",
+      "text": "8.14 Solvation 257\n8.14 Solvation\nSeveral implicit solvation models are implemented in ORCA. A completely integrated implementation of the\nconductor-like polarizable continuum model (C-PCM) oﬀers a range of options and has been implemented in\nall parts of ORCA. The following calculations can be used to carry out calculations in a polarizable continuum\nusing a realistic Van-der-Waals cavity:\n• Energies of molecules in solution with a ﬁnite dielectric constant ε using any HF or DFT method.\n• Optimization of molecular structures in solution using any HF or DFT method using analytic gradients.\n• Calculation of vibrational frequencies using the analytic Hessian for any HF or DFT method for which\nthe same quantity is available in vacuum.\n• Calculation of solvent eﬀects on response properties like polarizabilities through coupled-perturbed\nSCF theory. For magnetic response properties such as the g-tensor the C-PCM response vanishes.\n• Calculations of solvent shifts on transition energies using the time-dependent DFT or CIS method.\nHere one needs to know the refractive index of the solvent in addition to the dielectric constant.\n• First order perturbation estimate of solvent eﬀects on state and transition energies in multireference\nperturbation and conﬁguration-interaction calculations.\nAs a simple example let us look at the solvent eﬀect on the transition energy of the n→π∗ transition in\nformaldehyde. We ﬁrst do a normal CIS calculation:\n! RHF TZVP\n%cis nroots 1\nend\n* int 0 1\nC 0 0 0 0.000000 0.000 0.000\nO 1 0 0 1.200371 0.000 0.000\nH 1 2 0 1.107372 121.941 0.000\nH 1 2 3 1.107372 121.941 180.000\n*\nyielding a transition energy of 4.582 eV. Now we repeat the same calculation but with the CPCM model\nenabled (which is fairly simple; nothing except the dielectric constant and the refractive index needs to be\ninput; there are technical parameters which can be deﬁned by the user but this is not necessary in most\napplications; all modules will automatically recognize the presence of the CPCM terms automatically).\n",
+      "metadata": {
+        "source_file": "8.14_Solvation__orca_manual_4_2_1-page-0289.txt",
+        "section_title": "8.14_Solvation__orca_manual_4_2_1-page-0289.txt",
+        "section_id": "full",
+        "package": "orca-manual"
+      },
+      "score": 0.9414107321152884,
+      "original_score": 0.9349008134614315,
+      "vector_score": 1.0,
+      "bm25_score": 0.6745040673071573,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "orca",
+        "cpcm",
+        "transition",
+        "calculations",
+        "solvation"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021__72e5cefb9c642f759756406daaa4db36__part_0__0",
+      "text": "XIX\nList of Tables\n6.1 Main keywords that can be used in the simple input of ORCA. . . . . . . . . . . . . 12\n6.2 Density functionals available in ORCA. . . . . . . . . . . . . . . . . . . . . . . . . . 23\n6.3 Basis sets available on ORCA. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25\n6.4 Overview of auxiliary basis sets available in ORCA. . . . . . . . . . . . . . . . . . . 30\n6.5 Overview of library keywords for ECPs and associated basis sets available in ORCA. 33\n8.1 Computer times for solving the coupled-cluster/coupled-pair equations for Serine . . 62\n8.2 Computed spectroscopic constants of N 2 with coupled-cluster methods. . . . . . . . 63\n8.2 Computed spectroscopic constants of N 2 with coupled-cluster methods. . . . . . . . 64\n8.3 Comparison of various basis sets for highly correlated calculations . . . . . . . . . . 70\n8.4 Comparison of various basis sets for correlated calculations. . . . . . . . . . . . . . . 72\n8.6 Accuracy settings for DLPNO coupled cluster (current version). . . . . . . . . . . . . 90\n8.7 Accuracy settings for DLPNO coupled cluster (deprecated 2013 version). . . . . . . . 90\n8.10 DSD-DFT parameters deﬁned in ORCA . . . . . . . . . . . . . . . . . . . . . . . . . 99\n8.12 Comparison of the performance of the MRCI and MDCI modules for a single refer-\nence calculation with the bn-ANO-DZP basis set on the zwitter-ionic form of serine. 213\n8.15 Energies of the H 2O-CH2 example for illustrating how the diﬀerent LED contri-\nbutions are evaluated. The superscript opt denotes energies of optimized structures,\nfixed denotes energies of isolated fragments in the dimer structure. In the last column\nthe energy of the dimer is reported. . . . . . . . . . . . . . . . . . . . . . . . . . . . . 311\n9.2 Predeﬁned COSX Grid keywords . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+      "metadata": {
+        "source_file": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021.txt",
+        "section_id": "part_0",
+        "package": "orca-manual",
+        "section_title": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0021.txt"
+      },
+      "score": 0.6071910192672203,
+      "original_score": 0.5908239784033544,
+      "vector_score": 0.738529973004193,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "orca",
+        "calculations"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "8.1.5_Quadratic_Convergence__orca_manual_4_2_1-page-0134__93af4574729706a138a75e25a3e3f83f__part_0__0",
+      "text": "102 8 Running Typical Calculations\nCAM-B3LYP, [125] LC-BLYP [126] and members of the ωB97-family of functionals have been implemented\ninto ORCA, namely ωB97, ωB97X [127], ωB97X-D3 [128], ωB97X-V [129], ωB97M-V [130], ωB97X-D3BJ and\nωB97M-D3BJ. [131] (For more information on ωB97X-V [129] and ωB97M-V [130] see section 9.3.2.12) Some\nof them incorporate ﬁxed amounts of Hartree-Fock exchange (EXX) and/or DFT exchange and they diﬀer\nin the RS-parameter µ. In the case of ωB97X-D3, the proper D3 correction (employing the zero-damping\nscheme) should be calculated automatically. The D3BJ correction is used automatically for ωB97X-D3BJ\nand ωB97M-D3BJ (as well as for the meta-GGA B97M-D3BJ). The user is encouraged to check this.\nSeveral restrictions apply to these functionals at the moment. They have only been implemented and tested\nfor use with the libint integral package and for RHF and UHF single-point, ground state nuclear gradient,\nground state nuclear hessian, TDDFT, and TDDFT nuclear gradient calculations. Only the standard integral\nhandling (NORI), RIJONX, and RIJCOSX are supported. Do not use these functionals with any other\noptions.\n8.1.4.8 DFT Calculations with Range-Separated Double Hybrid Functionals\nFor the speciﬁcs of the range-separated double-hybrid functionals the user is referred to sections 8.1.4.5,\n8.1.4.7 and 8.4.4. In ORCA the functionals ωB2PLYP and ωB2GP-PLYP are available. [132] Both were\noptimized for the calculation of excitation energies. They will soon be tested for ground-state properties, but\ncurrently we advise to solely use them for the purpose for which they were developed.\n8.1.5 Quadratic Convergence\nConvergence in SCF calculations is not always easy to achieve. One way to go if the calculations converges\nonly slowly or “creeps” towards the end of the SCF cycles such that many almost useless cycles are being\nperformed is to switch on a powerful but somewhat expensive convergence helper – the full Newton-Raphson\nmethod. In the neighbourhood of a stable SCF solution this method converges quadratically which means\nthat after 3-4 Newton-Raph",
+      "metadata": {
+        "source_file": "8.1.5_Quadratic_Convergence__orca_manual_4_2_1-page-0134.txt",
+        "section_id": "part_0",
+        "section_title": "8.1.5_Quadratic_Convergence__orca_manual_4_2_1-page-0134.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.4458527420209202,
+      "original_score": 0.4227632729384585,
+      "vector_score": 0.5284540911730731,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "orca",
+        "calculations"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022__78f49d4facd1d5a01c416b6730711ee4__full__0",
+      "text": "XX\n1 ORCA 4.2 Foreword\nDear ORCA Users or potential ORCA users,\nWe are all very proud that we can present ORCA Version 4.2. to you! We thoroughly hope that you enjoy\nthe program and that it will serve you well in all of your scientiﬁc endeavors. As with previous releases,\nwe have worked very hard on this release until the last minute and while we did our best to ensure that\neverything is working and complete, we can of course not exclude the possibility that a few things might\nhave escaped our attention. Hence, please give us feedback over the next few months – we plan to follow up\nwith a minor release soon.\nWith this release, we have largely continued the path that we have been following for about the last decade –\nnamely to engage in wavefunction theory and make it applicable to larger and larger and larger systems with\nhigher and higher accuracy.\nIt has been increasingly evident that DLPNO methods are a staple of ORCA and with this release we have\nsigniﬁcantly enhanced the DLPNO methodology by making sure that iterative (T) corrections are available\nfor closed- and open-shell systems. Also the long awaited DLPNO-STEOM for closed shells is an excellent\nexcited state method. Open shell DLPNO-CCSD(T)-F12 has been completed for this release as well.\nThe second staple of ORCA are multireference methods. In this release, we have added some signiﬁcant\nfunctionality, most importantly there is a full CASPT2 implementation now in ORCA and there are signiﬁcant\nimprovements in our large-scale approximate full CI scheme (ICE). There also is a fully internally contracted\nquadratic MRCI scheme implemented (essentially internally contracted multireference coupled cluster).\nThe third staple of ORCA are spectroscopic calculations. We have continued to enhance the NMR capabilities\nof ORCA by adding the RI-MP2 chemical shift calculations. It also works for double hybrid functionals and\ngive pretty accurate results. In addition, there have been a number of enhancements in the ORCA ESD\nmodule for the calculation of ﬂuorescence, phosphorescence spectra as well as vibronic bandshapes and\nresonance Raman spectra. One signiﬁcant addition is spin-orbit coupling in TD-DFT. Additionally, ORCA\nnow has the capability to optimize to conical intersections.\nThe fourth staple of ORCA are analysis tools that allow you to go beyond the bare numbers. In this respect\nthe very successful local energy decomposition has been further extended to cover DLPNO-MP2. There\nalso is a low-cost, high accuracy method added: HF-LD that adds London dispersion to a Hartree-Fock\ncalculation.\nA lot of work has gone into the improvement of the implicit solvation capabilities. We have added the Gaussian\ncharge scheme that is numerically much more stable than the usual point charge scheme used in CPCM or\nCOSMO. Great improvements have also been made to the nudge elastic band transition state optimizer. In\naddition, we are now using the libxc library to give access to a wider variety of density functionals. The MD\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022.txt",
+        "package": "orca-manual",
+        "source_file": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0022.txt"
+      },
+      "score": 0.3784838501361122,
+      "original_score": 0.29373164788194567,
+      "vector_score": 0.25544543081606474,
+      "bm25_score": 0.44687651614546936,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "orca",
+        "cpcm",
+        "cosmo",
+        "transition",
+        "calculations",
+        "solvation"
+      ],
+      "match_ratio": 0.6,
+      "is_html": false
+    },
+    {
+      "id": "8.1.3.5_Automatic_exptrapolation_to_the_basis_set_limit__orca_manual_4_2_1-page-0108__cdc23a3fc03168dc9eda671bfb193f3e__full__0",
+      "text": "76 8 Running Typical Calculations\nRef. [85]. method is optional and can be either MP2 or DLPNO-CCSD(T), the latter being the default. In\ncase the method is DLPNO-CCSD(T) in the method-details option one can ask for LoosePNO, NormalPNO\nor TightPNO.\nE(CCSD(T);CBS)\ncorr ≈E(CCSD(T);X)\ncorr + E(M;CBS)\ncorr (X,X + 1) −E(M;X)\ncorr (8.5)\nHere M represents any correlation method one would like to use. For the previous water molecule the input\nof a calculation that uses DLPNO-CCSD(T (that is the default now) instead of MP2 would look like:\n! RHF ExtrapolateEP2(2/3,cc,DLPNO-CCSD(T)) TightSCF Conv Bohrs\n* int 0 1\nO 0 0 0 0 0 0\nH 1 0 0 1.81975 0 0\nH 1 2 0 1.81975 105.237 0\n*\nand it would produce the following output:\nAlpha : 4.420 (SCF Extrapolation)\nBeta : 2.460 (correlation extrapolation)\nSCF energy with basis cc-pVDZ: -76.026430944\nSCF energy with basis cc-pVTZ: -76.056728252\nExtrapolated CBS SCF energy : -76.066581429 (-0.009853177)\nMDCI energy with basis cc-pVDZ: -0.214582636\nMDCI energy with basis cc-pVTZ: -0.275299616\nExtrapolated CBS correlation energy : -0.310778753 (-0.035479137)\nCCSD(T) correlation energy with basis cc-pVDZ: -0.214699894\nCCSD(T) - MDCI energy with basis cc-pVDZ: -0.000117258\nEstimated CBS total energy : -76.377477440\nwhich is less than 2 mEh from the basis set limit. Finally it was shown [85] that instead of extrapolating\nthe cheap method, M, using cardinal numbers X and X+ 1 it is better to use cardinal numbers X+ 1 and\nX+ 2.\nE(CCSD(T);CBS)\ncorr ≈E(CCSD(T);X)\ncorr + E(M;CBS)\ncorr (X+ 1,X + 2) −E(M;X)\ncorr (8.6)\nThis can be done using the ExtrapolateEP3(bas,[method,method-details]) keyword:\n! RHF ExtrapolateEP3(CC) TightSCF Conv Bohrs\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "8.1.3.5_Automatic_exptrapolation_to_the_basis_set_limit__orca_manual_4_2_1-page-0108.txt",
+        "source_file": "8.1.3.5_Automatic_exptrapolation_to_the_basis_set_limit__orca_manual_4_2_1-page-0108.txt",
+        "package": "orca-manual"
+      },
+      "score": 0.3710627923748014,
+      "original_score": 0.3582273391579606,
+      "vector_score": 0.44778417394745074,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "calculations"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    },
+    {
+      "id": "8.5_SCF_Stability_Analysis__orca_manual_4_2_1-page-0228__f7e48d3d924dbd189379d9dae1068382__full__0",
+      "text": "196 8 Running Typical Calculations\nThese are current implemented in both RHF/RKS and UHF/UKS, but only for CIS/TDA and RPA/TD-DFT,\nno multireference methods yet. For the latter case, the overlap of the |X−Y⟩vector is used [178].\n8.4.9 Restricted Open-shell CIS\nIn addition to the CIS/TD-DFT description of excited states, ORCA features the orca rocis module to\nperform conﬁguration interaction with single excitations calculations using a restricted open-shell Hartree–\nFock (ROHF) reference. It can be used to calculate excitation energies, absorption intensities and CD\nUHFintensities. In general, ROCIS calculations work on restricted open-shell HF reference functions but\nin this implementation it is possible to enter the calculations with RHF (only for closed-shell molecules) or\nUHF reference functions as well. If the calculation starts with an UHF/UKS calculation, it will automatically\nproduce the quasi-restricted orbitals which will then be used for the subsequent ROCIS calculations. Note\nthat if the reference function is a RHF/RKS function the method produces the CIS results. The module is\ninvoked by providing the number of roots sought in the %rocis block of the input ﬁle:\n! SVP TightSCF\n%rocis NRoots 2\nMaxDim 5 #Davidson expansion space = MaxDim * NRoots\nend\n* xyz -2 2\nCu 0.00 0.00 0.00\nCl 2.25 0.00 0.00\nCl -2.25 0.00 0.00\nCl 0.00 2.25 0.00\nCl 0.00 -2.25 0.00\n*\nIn this example the MaxDim parameter is given in addition to the number of roots to be calculated. It controls\nthe maximum dimension of the expansion space in the Davidson procedure that is used to solve the CI\nproblem.\nThe use of ROCIS is explained in greater detail in section 9.24.\n8.5 SCF Stability Analysis\nThe SCF stability will give an indication whether the SCF solution is at a local minimum or a saddle\npoint. [179, 180] It is available for RHF/RKS and UHF/UKS. In the latter case, the SCF is restarted by\ndefault using new unrestricted start orbitals if an instability was detected. For a demonstration, consider the\nfollowing input:\n",
+      "metadata": {
+        "section_title": "8.5_SCF_Stability_Analysis__orca_manual_4_2_1-page-0228.txt",
+        "source_file": "8.5_SCF_Stability_Analysis__orca_manual_4_2_1-page-0228.txt",
+        "section_id": "full",
+        "package": "orca-manual"
+      },
+      "score": 0.31289092545200425,
+      "original_score": 0.2842613806791711,
+      "vector_score": 0.3553267258489639,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "orca",
+        "calculations"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "8.1.3.10_Arbitrary_Order_Coupled-Cluster_Calculations__orca_manual_4_2_1-page-0125__aeef6b896c87dc800aa977c43851369d__full__0",
+      "text": "8.1 Single Point Energies and Gradients 93\nFor CIM-DLPNO-CCSD(T),\n#\n# CIM-DLPNO-CCSD calculation\n#\n! DLPNO-CCSD(T) cc-pVDZ cc-pVDZ/C CIM\n* xyzfile 0 1 CIM.xyz\nThe parallel eﬃciency of CIM has been signiﬁcantly improved. [106] Except for few domain construction\nsub-steps, the CIM algorithm can achieve very high parallel eﬃciency. Since ORCA 4.1, the parallel version\ndoes not support Windows platform anymore due to the parallelization strategy. The generalization of CIM\nfrom close-shell to open-shell (multi-reference) will also be implemented in near furture.\n8.1.3.10 Arbitrary Order Coupled-Cluster Calculations\nORCA features an interface to Kallay’s powerful MRCC program. This program must be obtained separately.\nThe interface is restricted to single point energies but can be used for rigid scan calculations or numerical\nfrequencies.\nThe use of the interface is simple:\n#\n# Test the MRCC code of Mihael Kallay\n#\n! cc-pVDZ Conv SCFConv10 UseSym\n%mrcc method \"CCSDT\"\nETol 9\nend\n* xyz 0 1\nF 0 0 0\nH 0 0 0.95\n*\nThe Method string can be any of:\n# The excitation level specification can be anything\n# like SD, SDT, SDTQ, SDTQP etc.\n%mrcc method \"CCSDT\"\n\"CCSD(T)\"\n\"CCSD[T]\"\n\"CCSD(T)_L\" (the lambda version)\n",
+      "metadata": {
+        "section_title": "8.1.3.10_Arbitrary_Order_Coupled-Cluster_Calculations__orca_manual_4_2_1-page-0125.txt",
+        "source_file": "8.1.3.10_Arbitrary_Order_Coupled-Cluster_Calculations__orca_manual_4_2_1-page-0125.txt",
+        "section_id": "full",
+        "package": "orca-manual"
+      },
+      "score": 0.24670042312576984,
+      "original_score": 0.21531294075601026,
+      "vector_score": 0.2691411759450128,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "orca",
+        "calculations"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "9.35.1.1_Use_of_the_Gaussian_Charge_Scheme__orca_manual_4_2_1-page-0910__480b6113a2c2a7704595c529b80fe716__full__0",
+      "text": "878 9 Detailed Documentation\nSolvent Name Dielectric Constant Refractive Index\nWater 80.4 1.33\nAcetone 20.7 1.359\nAcetonitrile 36.6 1.344\nAmmonia 22.4 1.33\nBenzene 2.28 1.501\nCCl4 2.24 1.466\nCH2Cl2 9.08 1.424\nChloroform 4.9 1.45\nCyclohexane 2.02 1.425\nDMF 38.3 1.430\nDMSO 47.2 1.479\nEthanol 24.3 1.361\nHexane 1.89 1.375\nMethanol 32.63 1.329\nOctanol 10.3 1.421\nPyridine 12.5 1.510\nTHF 7.25 1.407\nToluene 2.4 1.497\nThe parameters can be more accurately deﬁned using the %cpcm block input. The available options are as\nfollows\n%cpcm epsilon 80.0 # Dielectric constant\nrefrac 1.0 # Refractive index\nrsolv 1.3 # Solvent probe radius\nrmin 0.5 # Minimal GEPOL sphere radius\npmin 0.1 # Minimal distance between two surface points\nfepstype cpcm # Epsilon function type: cpcm, cosmo\nxfeps 0.0 # X parameter for the feps scaling function\nsurfacetype gepol_ses # GEPOL surface: gepol_ses, gepol_sas\ngepol_ses_gaussian, vdw_gaussian\nndiv 5 # Maximum depth for recursive sphere generation\nnum_leb 302 # Lebedev points for the Gaussian charge scheme\nradius[N] 1.3 # Atomic radius for atomic number N in Angstrom\nAtomRadii(N,1.4) # Atomic radius for the Nth atom in Angstrom\nscale_gauss 1.2 # Scaling factor for the atomic radii in the\ngaussian charge scheme\nend\n9.35.1.1 Use of the Gaussian Charge Scheme\nThe Gaussian charge scheme avoids the Coulomb singularity present in conventional point charge surface\nelement models. This approach results in a smooth solvation potential and, more importantly, on smooth\nderivatives of this quantity with respect to external perturbations. Then, it is highly recommended to\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "9.35.1.1_Use_of_the_Gaussian_Charge_Scheme__orca_manual_4_2_1-page-0910.txt",
+        "package": "orca-manual",
+        "section_title": "9.35.1.1_Use_of_the_Gaussian_Charge_Scheme__orca_manual_4_2_1-page-0910.txt"
+      },
+      "score": 0.21327964402316696,
+      "original_score": 0.1630634510884755,
+      "vector_score": null,
+      "bm25_score": 0.8153172554423778,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "cpcm",
+        "cosmo",
+        "solvation"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    },
+    {
+      "id": "8.12.1_Introductory_Remarks__orca_manual_4_2_1-page-0244__0d1e1f7e007f9d8228612549c9e5d76f__full__0",
+      "text": "212 8 Running Typical Calculations\nnot produce a meaningful result – your insight is a key ingredient to a successful application! Below a few\nexamples illustrate some basic uses of the orca mrci module.\nRI-approximation\nFirst of all, it is important to understand that the default mode of the MR-CI module in its present\nimplementation performs a full integral transformation from the AO to the MO basis. This becomes very\nlaborious and extremely memory intensive beyond approximately 200 MOs that are included in the CI.\nAlternatively, one can construct molecular electron-electron repulsion integrals from the resolution of the\nidentity (RI) approximation. Thus a meaningful auxiliary basis set must be provided if this option is chosen .\nWe recommend the ﬁtting bases developed by the TurboMole developers for MP2 calculations. These give\naccurate transition energies; however, the error in the total energies is somewhat higher and may be on the\norder of 1 mEh or so. Check IntMode to change the default mode for the integral transformation. Note that\nin either way, the individually selecting MRCI module requires to have all integrals in memory which sets a\nlimit on the size of the molecule that can be studied.\nIndividual Selection\nSecondly, it is important to understand that the MR-CI module is of the individually selecting type. Thus,\nonly those excited conﬁguration state functions (CSFs) which interact more strongly than a given threshold\n(Tsel) with the 0th order approximations to the target states will be included in the variational procedure. The\neﬀect of the rejected CSFs is estimated using second order perturbation theory. The 0 th order approximations\nto the target states are obtained from the diagonalization of the reference space conﬁgurations. A further\napproximation is to reduce the size of this reference space through another selection – all initial references\nwhich contribute less than a second threshold ( Tpre) to the 0 th order states are rejected from the reference\nspace.\nSingle excitations\nOne important aspect concerns the single excitations. If the reference orbitals come from a CASSCF\ncalculation the matrix elements between the reference state and the single excitations vanishes and the singles\nwill not be selected. However, they contribute to fourth and higher orders in perturbation theory and may\nbe important for obtaining smooth potential energy surfaces and accurate molecular properties. Hence, the\ndefault mode of the MRCI module requires to include all of the single excitations via the ﬂag AllSingles\n=true. This may lead to lengthy computations if the reference spaces becomes large!\nReference Spaces\nThird, the reference spaces in the MR-CI module can be of the complete active space ( CAS(n-electrons,m-\norbitals)) or restricted active space ( RAS, explained later) type. It is important to understand that the\nprogram uses the orbitals around the HOMO-LUMO gap as provided by the user to build up the reference\nspace! Thus, if the orbitals that you want to put in the active space are not coming “naturally” from your\nSCF calculation in the right place you have to reorder them using the “ moread” and “ rotate” features\n",
+      "metadata": {
+        "section_title": "8.12.1_Introductory_Remarks__orca_manual_4_2_1-page-0244.txt",
+        "package": "orca-manual",
+        "source_file": "8.12.1_Introductory_Remarks__orca_manual_4_2_1-page-0244.txt",
+        "section_id": "full"
+      },
+      "score": 0.1975094421504745,
+      "original_score": 0.14628664058561117,
+      "vector_score": 0.18285830073201395,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "orca",
+        "transition",
+        "calculations"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    },
+    {
+      "id": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0023__a18b7d0666a6e1df12d118344ef7fc74__full__0",
+      "text": "XXI\nmodule has been signiﬁcantly extended, now featuring a cartesian minimzer which can be used for tens of\nthousands of atoms.\nThe current release now provides an ORCA-native QM/MM implementation, which renders setting up and\nrunning QM/MM calculations way more eﬃcient than with the previously available interfaces from external\nprograms. The QM/MM feature can be directly combined with all other ORCA methods, making it easy to\nrun all kinds of applications for large protein systems, ranging from simple optimizations to minimum energy\npath explorations and spectroscopic calculations.\nWe are very excited to release this version of ORCA! The user community has now grown to signiﬁcantly\nover 20000 users world-wide. ORCA runs in most super-computer centers world-wide, on most synchrotron\ncomputing facilities and it is increasingly used by industry. We are happy and proud that ORCA is now so\nwidely used in the scientiﬁc community and we will continue and intensify our eﬀorts to give you the best\nprogram possible.\nAs we pointed out previously, ORCA will remain free of charge for academic users in long term. The only\nthing we ask you in return is to please cite our papers when you use ORCA and please do not just cite the\nglobal ORCA reference, but make a slight eﬀort to cite the relevant original method development literature –\nthis will allow us to document our standing in the scientiﬁc community and allow us to raise the funds to\ncontinue with the development of ORCA to, hopefully, everybody’s beneﬁt.\nWe have also pointed out since the release of ORCA 4.0, that ORCA is available for commercial users via the\ncompany FAccTs (Fast and Accurate Computational Chemistry Tools; https://www.faccts.de). Please\ncontact info@faccts.de if you are interested in the opportunities oﬀered by FAccTs. If you are unsure whether\nyou qualify for an academic license, please contact orca.license@kofo.mpg.de.\nI want to express my heartfelt thanks to everybody who has contributed to this release! All our graduate\nstudents, postdocs and collaborators have worked very hard to make this happen. Often this requires eﬀorts\nthat are beyond the immediate scientiﬁc project and I am deeply grateful for their enthusiasm and dedication!\nVery special thanks goes to the ORCA development team – Frank Wennmohs, Ute Becker, Kanthruban\nSivalingam, Dimitrios Liakos and Dagmar Lenk – who have taken the lead in putting everything together,\nrunning countless checks, ﬁxing many bugs and making sure that we deliver a package to you that is as good\nas it can get. We warmly welcome Axel Koslowski to this team and his contributions will start to appear in\nsubsequent ORCA versions.\nPlease enjoy ORCA and do good science with it! This is the source of our inspiration and motivation to\ncontinue.\nFrank Neese on behalf of all ORCA developers!\nAugust 9, 2019\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "orca-manual",
+        "section_title": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0023.txt",
+        "source_file": "9.16_The_details_of_the_various_MR-EOM_transformations_that_are_considered_in_the__orca_manual_4_2_1-page-0023.txt"
+      },
+      "score": 0.19454988480512603,
+      "original_score": 0.16098946333867292,
+      "vector_score": 0.20123682917334115,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "orca",
+        "calculations"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "9.32.4.3_Example_Normal_Mode_Scan_Calculations_of_Model_Parameters_for__orca_manual_4_2_1-page-0015__f8fcd1fe910c119d9155f9025ea7ecc0__part_0__0",
+      "text": "Contents XIII\n9.33.4 Complete Keyword List for the ESD Module . . . . . . . . . . . . . . . . . . 845\n9.34 Ab initio Molecular Dynamics Simulations . . . . . . . . . . . . . . . . . . . . . . . . 847\n9.34.1 Changes in ORCA 4.2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 847\n9.34.2 Input Format . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 848\n9.34.3 Command List . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 855\n9.34.4 Scientiﬁc Background . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 870\n9.34.4.1 Time Integration and Equations of Motion . . . . . . . . . . . . . . 870\n9.34.4.2 Velocity Initialization . . . . . . . . . . . . . . . . . . . . . . . . . . 871\n9.34.4.3 Thermostats . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 872\n9.34.4.4 Constraints . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 874\n9.35 Implicit Solvation Models . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 874\n9.35.1 The Conductor-like Polarizable Continuum Model (C-PCM) . . . . . . . . . . 875\n9.35.1.1 Use of the Gaussian Charge Scheme . . . . . . . . . . . . . . . . . . 877\n9.35.2 The Conductor-like Screening Solvation Model (COSMO) . . . . . . . . . . . 879\n9.35.3 The SMD Solvation Model . . . . . . . . . . . . . . . . . . . . . . . . . . . . 879\n9.36 Calculation",
+      "metadata": {
+        "package": "orca-manual",
+        "source_file": "9.32.4.3_Example_Normal_Mode_Scan_Calculations_of_Model_Parameters_for__orca_manual_4_2_1-page-0015.txt",
+        "section_title": "9.32.4.3_Example_Normal_Mode_Scan_Calculations_of_Model_Parameters_for__orca_manual_4_2_1-page-0015.txt",
+        "section_id": "part_0"
+      },
+      "score": 0.18052227453938008,
+      "original_score": 0.12821518568019158,
+      "vector_score": null,
+      "bm25_score": 0.6410759284009581,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "orca",
+        "cosmo",
+        "solvation"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    },
+    {
+      "id": "2.1.9_Miscellaneous__orca_manual_4_2_1-page-0026__937e00bba2c367c8957e69b181bd9ea9__full__0",
+      "text": "XXIV 2 ORCA 4.2 Changes\n• The MD module can now write trajectories in DCD ﬁle format (in addition to the already implemented\nXYZ and PDB formats).\n• The thermostat is now able to apply temperature ramps during simulation runs.\n• Added more ﬂexibility to region deﬁnition (can now add/remove atoms to/from existing regions).\n• Added two new constraint types which keep centers of mass ﬁxed or keep complete molecules rigid.\n• Ability to store the GBW ﬁle every n-th step during MD runs (e.g. for plotting orbitals along the\ntrajectory).\n• Can now set limit for maximum displacement of any atom in a MD step, which can stabilize dynamics\nwith poor initial structures. Runs can be cleanly aborted by “touch EXIT”.\n• Better handling/reporting of non-converged SCF during MD runs.\n• Fixed an issue which slowed down molecular dynamics after many steps.\n• Stefan Grimme’s xTB method can now be used in the MD module, allowing fast simulations of large\nsystems.\n2.1.9 Miscellaneous\n• Compute thermochemical corrections at diﬀerent temperatures without recomputing the Hessian\n• Fragments can now be deﬁned in the geom block as simple lists\n• Simpler input format for deﬁnition of atom lists and fragments, in particular useful for large atom lists\n• basename.trj ﬁles are now called basename trj.xyz\n",
+      "metadata": {
+        "package": "orca-manual",
+        "section_title": "2.1.9_Miscellaneous__orca_manual_4_2_1-page-0026.txt",
+        "source_file": "2.1.9_Miscellaneous__orca_manual_4_2_1-page-0026.txt",
+        "section_id": "full"
+      },
+      "score": 0.17406960195544097,
+      "original_score": 0.15721387954636834,
+      "vector_score": 0.19651734943296043,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "orca"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    },
+    {
+      "id": "8.1.3.8_Local_Coupled_Pair_and_Coupled-Cluster_Calculations__orca_manual_4_2_1-page-0118__510d69513fa10fbb3dbda9cf3fd24ace__full__0",
+      "text": "86 8 Running Typical Calculations\n# (1) In case of ROHF reference\n! ROHF DLPNO-CCSD def2-TZVPP def2-TZVPP/C TightSCF TightPNO\n# (2) In case of UHF reference, the QROs are constructed first and used for\n# the open-shell DLPNO-CCSD computations\n! UHF DLPNO-CCSD def2-TZVPP def2-TZVPP/C TightSCF TightPNO\n# (3) In case that the UKS are specified, the QROs are constructed first and used as\n# \"unconverged\" UHF orbitals for the open-shell DLPNO-CCSD computations.\n! UKS CAM-B3LYP DLPNO-CCSD def2-TZVPP def2-TZVPP/C TightSCF TightPNO\nNote that this implementation is dedicated to the closed-shell and high-spin open-shell species. For spin-\npolarized systems, the UHF-LPNO-CCSD or Mk-LPNO-CCSD are available in addition to DLPNO-NEVPT2.\nThe same set of truncation parameters as the closed-shell DLPNO-CCSD is used also in case of open-shell\nDLPNO. The open-shell DLPNO-CCSD produces more than 99.9 % of the canonical CCSD correlation energy\nas in case of the closed-shell variant. This feature is certainly diﬀerent from the UHF-LPNO methods because\nthe open-shell DLPNO-CCSD is re-designed from scratch on the basis of a new PNO ansatz which makes use\nof the high-spin open-shell NEVPT framework. The computational timings of the UHF-DLPNO-CCSD and\nRIJCOSX-UHF for linear alkane chains in triplet state are shown in Figure 8.7.\nNumber of Carbon Atoms \n40 60 80 100 120 140 160 180 \nComputational Time (sec.) \n0\n50 \n100 \n150 \n200 \n3×10 \nRĲCOSX-UHF \nUHF-DLPNO-CCSD \nFigure 8.7: Computational times of RIJCOSX-UHF and UHF-DLPNO-CCSD for the linear alkane\nchains (CnH2n+2) in triplet state with def2-TZVPP basis and default frozen core set-\ntings. 4 CPU cores and 128 GB of memory were used on a single cluster node.\nAlthough those systems are somewhat idealized for the DLPNO method to best perform, it is clear that the\npreceding RIJCOSX-UHF is the rate-determining step in the total computational time for large examples. In\nthe open-shell DLPNO implementations, SOMOs are included not only in the occupied space but also in the\nPNO space in the preceding integral transformation step. This means the presence of more SOMOs may lead\nto more demanding PNO integral transformation and DLPNO-CCSD iterations. The illustrative examples\ninclude active site model of the [NiFe] Hydrogenase in triplet state and the oxygen evolving complex (OEC)\n",
+      "metadata": {
+        "section_title": "8.1.3.8_Local_Coupled_Pair_and_Coupled-Cluster_Calculations__orca_manual_4_2_1-page-0118.txt",
+        "source_file": "8.1.3.8_Local_Coupled_Pair_and_Coupled-Cluster_Calculations__orca_manual_4_2_1-page-0118.txt",
+        "package": "orca-manual",
+        "section_id": "full"
+      },
+      "score": 0.17012936288619002,
+      "original_score": 0.15319322743488778,
+      "vector_score": 0.1914915342936097,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "calculations"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    },
+    {
+      "id": "9.40_Utility_Programs__orca_manual_4_2_1-page-0976__465f297898e1c510f12461335dbd5234__full__0",
+      "text": "944 9 Detailed Documentation\n%chelpg\nGRID 0.3 # Spacing of the regular grid in Ang\nRMAX 2.8 # Maximum distance of all atoms to any\n# gridpoint in Ang\nVDWRADII COSMO # VDW Radii of Atoms, COSMO default\nBW # Breneman, Wiberg radii\nend\nIn this case the ORCA automatically calculates the CHELPG charges at the end of the calculation. Automatic\ncalculation of CHELPG charges using the default values can also be achieved by specifying\n! CHELPG\nIn the simple input section. By default the program uses the COSMO VDW radii for the exclusion of\ngridpoints near the nuclei, as these are deﬁned for all atoms. The BW radii are similar, but only deﬁned for\nvery few atom types.\n9.40.3 orca pltvib\nThis program is used in conjunction with gOpenMol (or xmol) to produce animations or plots of vibrational\nmodes following a frequency run. The usage is again simple and described in section 8.15.3.5 together with a\nshort description of how to produce these plots in gOpenMol.\nThe program produces 20 frames of animation, where ﬁrst and last frame correspond to the TS, all others\ncalculated as sin(2πframe/20 −1) ∗displacement.\n9.40.4 orca vib\nThis is a small “standalone” program to perform vibrational analysis. The idea is that the user has some\ncontrol over things like the atomic masses that enter the prediction of vibrational frequencies but are\nindependent of the electronic structure calculation as such.\nThe program takes a “ .hess” ﬁle as input and produces essentially the same output as follows the frequency\ncalculation. The point is that the “ .hess” is a user-editable textﬁle that can be manually changed to achieve\nisotope shift predictions and the like. The usage together with an example is described in section 8.15.3.6. If\nyou pipe the output from the screen into a textﬁle you should also be able to use orca mapspc to plot the\nmodiﬁed IR, Raman and NRVS spectra.\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "9.40_Utility_Programs__orca_manual_4_2_1-page-0976.txt",
+        "package": "orca-manual",
+        "section_title": "9.40_Utility_Programs__orca_manual_4_2_1-page-0976.txt"
+      },
+      "score": 0.16081203194524296,
+      "original_score": 0.10724684249493933,
+      "vector_score": null,
+      "bm25_score": 0.5362342124746968,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "orca",
+        "cosmo",
+        "usage"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 56,
+    "final_results_count": 15
+  }
+}

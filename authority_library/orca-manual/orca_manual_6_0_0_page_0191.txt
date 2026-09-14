@@ -1,0 +1,71 @@
+[... end of page 190 ...]
+atesmightnotworkwellforthesecases,convergencecanslowdown. ORCA’sautomaticinternal
+coordinategenerationtakescareofthisproblembyassigningbondstoatompairsthatarecloseinrealspace,but
+distantintermsofnumberofbondsconnectingthem.
+%geom
+AddExtraBonds true # switch on/off assigning bonds to atom pairs that are
+# connected by more than <Max_Length> bonds and are less
+# than <MaxDist> Ang. apart (default true)
+(continuesonnextpage)
+168 Chapter6. RunningTypicalCalculations
+
+--- Page 191 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+AddExtraBonds_MaxLength 10 # cutoff for number of bonds connecting the two
+# atoms (default 10)
+AddExtraBonds_MaxDist 5 # cutoff for distance between two atoms (default 5 Ang.)
+end
+Forsolidsystemsmodeledasembeddedsolidstheautomaticallygeneratedsetofinternalcoordinatesmightbecome
+verylarge, renderingthecomputingtimespentintheoptimizationroutineunnecessarilylarge. Usually, insuch
+calculations the cartesian positions of outer atoms, coreless ECPs and point charges are constrained during the
+optimization-thusmostoftheirinternalcoordinatesarenotneeded. Byrequesting:
+%geom
+ReduceRedInts true
+end
+onlytherequiredneededinternalcoordinates(oftheconstrainedatoms)aregenerated.
+OBS: If the step in redundant fails badly and only Cartesian constrains are set (or no constrains), ORCA will
+fallbacktoacartesianstepautomatically. ThiscanbeturnedoffbysettingCARTFALLBACKtoFALSE.
+6.3.6 Constrained Optimizations
+Youcanperformconstrainedoptimizationswhichcan,attimes,beextremelyhelpful. Thisworksasshowninthe
+followingexample:
+! RKS B3LYP/G SV(P) Opt
+%geom Constraints
+{ B 0 1 1.25 C }
+{ A 2 0 3 120.0 C }
+end
+end
+* int 0 1
+C 0 0 0 0.0000 0.000 0.00
+O 1 0 0 1.2500 0.000 0.00
+H 1 2 0 1.1075 122.016 0.00
+H 1 2 3 1.1075 122.016 180.00
+*
+Constraining bond distances : { B N1 N2 value C }
+Constraining bond angles : { A N1 N2 N1 value C }
+Constraining dihedral angles : { D N1 N2 N3 N4 value C }
+Constraining cartesian coordinates : { C N1 C }
+Note:
+• Likefornormaloptimizationsyoucanusenumericalgradients(seeNumericalGradients.) forconstrained
+optimizations. In this case the numerical gradient will be evaluated only for non-constrained coordinates,
+savingalotofcomputationaleffort,ifalargepartofthestructureisconstrained.
+• “value” in the constraint input is optional. If you do not give a value, the present value in the structure is
+constrained. Forcartesianconstraintsyoucan’tgiveavalue,butalwaystheinitialpositionisconstrained.
+• Itisrecommendedtouseavaluenottoofarawayfromyourinitialstructure.
+• Itispossibletoconstrainwholesetsofcoordinates:
+all bond lengths where N1 is involved : { B N1 * C}
+all bond lengths : { B * * C}
+(continuesonnextpage)
+6.3. GeometryOptimizations,SurfaceScans,TransitionStates,MECPs,ConicalIntersection1s6,9
+IRC,NEB
+
+[... start of page 192 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+all bond angles where N2 is the central atom: { A * N2 * C }
+all bond angles : { A * * * C }
+all dihedral angles with central bond N2-N3 : { D * N2 N3 * C }
+all dihedral angles : { D * * * * C }
+• ForCartesianconstraintslistsofatomscanbedefined:
+a list of atoms (10 to 17) with Cartesian constraints : { C 10:17 C}
+• Coo

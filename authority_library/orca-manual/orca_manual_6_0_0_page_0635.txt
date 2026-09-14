@@ -1,0 +1,84 @@
+[... end of page 634 ...]
+
+5 4 " -0.0154"
+5 5 "1086.1183"
+6 0 " 0.0000"
+6 1 " -0.0000"
+6 2 " -0.0000"
+6 3 " -0.0767"
+6 4 " -0.0080"
+6 5 " 0.0341"
+6 6 "1086.1219"
+(continuesonnextpage)
+612 Chapter7. DetailedDocumentation
+
+--- Page 635 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+7 0 " -0.0000"
+7 1 " 0.0000"
+7 2 " 0.0000"
+7 3 " 0.0050"
+7 4 " -0.0023"
+7 5 " 0.0026"
+7 6 " -0.0038"
+7 7 "1086.0688"
+end
+#--------------------
+#---SOC-CONSTANTS---
+#---All Values in eV---
+PARAMETERS
+ZETA_P = 8.06
+ZETA_D = 0.06
+end
+#--------------------
+#---SPECTRA/PROPERTIES---
+DoABS true
+#------------------------
+end
+*xyz Charge Multiplicity
+Atom 0.00 0.00 0.00
+*
+Furtherdetailsregardinorca_lftcanbefoundintheorca_lftsection(orca_lft)andtheorca_lfttutorial.
+7.15.5 Core excited states with (C/R)ASCI/NEVPT2
+Starting from ORCA 4.1, a CASCI/NEVPT2 protocol can be used to compute core excited spectra, namely X-
+ray absorption (XAS) and resonant inelastic scattering (RIXS) spectra. RASCI calculations can also be easily
+specified.
+TheXAS/RIXSspectracalculationsrequirestwosteps:
+• In a first step one needs to optimize the valence active space orbitals in the framework of SA-CASSCF
+calculations,e.g. includingvalenceexcitedstatesintherangebetween6to15eV.
+• In a second step the relevant core orbitals are rotated into the active space and the (C/R)ASCI/NEVPT2
+problemissolvedbysaturatingtheexcitationspacewithsinglycore-excitedelectronicconfigurationsusing
+thepreviouslyoptimizedsetsoforbitals
+Furtherinformationcanbefoundinreference[163]
+A relevant input for Fe L-edge XAS calculation of a Fe(III) complex like Fe(acac) is given below for
+3
+CASCI/NEVPT2:
+%moinp "Fe_acac3_casscf.gbw"
+%scf
+rotate
+{4,89,90,0,0}
+{3,88,90,0,0}
+{2,87,90,0,0}
+end
+(continuesonnextpage)
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 613
+
+[... start of page 636 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+end
+%rel
+picturechange true
+FiniteNuc true
+end
+%method FrozenCore FC_NONE
+end
+# CASSCF/NEVPT2 on the valence and L-edge excited states
+%casscf
+nel 11
+norb 8
+mult 6,4
+nroots 16,173
+maxiter 1
+# 

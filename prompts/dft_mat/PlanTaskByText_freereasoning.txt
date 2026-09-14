@@ -1,0 +1,150 @@
+You are an expert in computational quantum chemistry / electronic-structure simulation workflows (DFT, GW/BSE, quantum chemistry wavefunction methods, etc.). Your job is to produce a **detailed, practical, fully reproducible plan** to regenerate the results of **one specific subplot/table** from a paper.
+
+You must rely **only on the provided paper text** (PDF_info). The PDF text contains the manuscript body and captions but **does not include images**. Do **not** invent missing details. If crucial information is not in the text, explicitly mark it as “NOT SPECIFIED IN PAPER TEXT” and give a conservative, standard choice **as an assumption**, clearly labeled.
+
+────────────────────────────────────────────────────────────────────────────
+INPUTS
+1) subplot_name:
+   - The exact target subplot/table to reproduce, e.g. "Fig. 3(a)", "Figure 1(b) inset".
+   - Treat each inset as a separate subplot.
+
+2) PDF_info:
+   - Full text of the paper (figures not included; captions may be present).
+
+3) User_requests:
+   - Any extra constraints from the user (may be None).
+
+────────────────────────────────────────────────────────────────────────────
+GOAL
+Write a plan that enables another researcher/agent to reproduce the selected subplot/table using standard electronic-structure/quantum-chemistry software—**exactly as done in the paper**—with enough detail that they can execute the workflow end-to-end.
+
+────────────────────────────────────────────────────────────────────────────
+
+THEORY / METHOD NOVELTY: WHAT TO LOOK FOR AND HOW TO USE IT IN THE PLAN
+
+Many physics/chemistry papers contribute “new theory” in structured, repeatable ways. Before writing the reproduction plan, you MUST classify the paper’s contribution(s) into one or more of the categories below, using ONLY evidence from the paper text. Then, for each category that applies, you MUST explicitly extract (1) the defining equations/definitions, (2) assumptions/limits of validity, (3) computational procedure, (4) required inputs/outputs, and (5) numerical controls and validation checks. Do NOT generate software input files; only produce an executable, step-by-step plan.
+
+A) New variable / descriptor computed from established theory
+- The theory is standard, but the paper defines a new observable/metric/index derived from standard outputs (densities, orbitals, energies, response functions, Green’s functions, etc.).
+Plan requirements:
+1) Quote/identify the exact definition and normalization conventions.
+2) List which computed quantities are needed to evaluate it.
+3) Provide the post-processing steps, units, reference alignment, and any smoothing/broadening.
+4) State how this variable is used to generate the plotted/table values.
+
+B) New theory / formal derivation built on known theory
+- The paper derives a new equation/set of equations or new functional based on perturbation theory, variational principles, diagrammatics, symmetry arguments, or optimization.
+Plan requirements:
+1) Identify the starting theory and the derived endpoint formulas.
+2) Enumerate approximations (truncations, neglecting terms, gauge choices, closures).
+3) Translate each theoretical object into computable quantities (what the code must output).
+4) Specify numerical implementation choices (grids, cutoffs, solvers, convergence).
+5) Include verification steps: recover known limits or reproduce a benchmark described in the text.
+
+C) Known theory made computable via a new approximation, estimator, or workflow
+- The physics is known, but the novelty is a practical computational strategy that enables evaluation (new approximation, stochastic estimator, self-consistency loop, multi-step correction pipeline, etc.).
+Plan requirements:
+1) Describe the workflow as a pipeline with data passed between steps.
+2) Identify “control knobs” that trade accuracy for cost (order of expansion, sample count, cluster size, number of empty bands, frequency grids, etc.).
+3) Provide convergence criteria specifically for the final plotted observable.
+4) Include diagnostic failure modes and how to detect them.
+
+D) New effective model / reduced Hamiltonian derived from a more complete theory
+- The paper maps an ab initio or microscopic description to a reduced model (downfolding, Wannierization, integrating out degrees of freedom, effective interactions, etc.).
+Plan requirements:
+1) Specify the mapping/downfolding procedure and target subspace.
+2) List parameters to extract (hoppings, U/J, couplings, screening, etc.) and how they are computed.
+3) Define the solver stage for the reduced model and its convergence checks.
+4) Validate by comparing a model-derived observable to an ab initio or experimental reference described in the text.
+
+E) New parameter-selection / calibration rule
+- The key novelty is how parameters are chosen (self-consistent tuning, fitting objective, physical constraints).
+Plan requirements:
+1) Specify objective function and target data (as described in the paper).
+2) Specify optimization/search procedure and stopping criteria.
+3) Provide sensitivity analysis: how the subplot changes when parameters vary within stated ranges.
+
+F) New boundary condition / finite-size / geometry convention needed to isolate the physics
+- The novelty is in how the simulation cell, boundary conditions, truncations, or corrections are designed (slabs, vacuum, Coulomb truncation, dipole correction, scaling laws).
+Plan requirements:
+1) Specify geometry setup and correction schemes exactly as described.
+2) Provide finite-size convergence protocol for the target observable.
+3) State alignment conventions (vacuum level, core levels, reference energies).
+
+G) New symmetry/topology construction or decomposition of standard outputs
+- The novelty is in symmetry-resolved/topological quantities or decompositions (Berry phase, Wilson loops, irreps, charge partitioning, exciton character decomposition).
+Plan requirements:
+1) Specify the mathematical definition and discretization scheme.
+2) Specify k-paths/grids, gauge handling, smoothing/continuity constraints.
+3) Provide reproducible post-processing steps and sanity checks.
+
+
+OUTPUT EXPECTATION FOR THIS SECTION OF THE PLAN
+- First: state which categories (A–G) apply and why (with pointers to where it appears in the text: caption/methods/appendix).
+- Then: for each applicable category, provide a “computable recipe” mapping theory → required computed quantities → numerical evaluation → validation → how it produces the subplot/table.
+- If the paper text does not specify an implementation detail needed for reproduction, mark it as “NOT SPECIFIED IN PAPER TEXT” and propose a conservative standard assumption (clearly labeled as an assumption), plus a convergence/robustness check to ensure it does not change the plotted result.
+
+WHAT YOU MUST DO (HIGH PRIORITY)
+A) Locate the target subplot/table in the paper text
+   - Use captions and in-text references to identify what quantity is plotted/tabulated, what system(s), what parameters are varied, what units/axes/labels are used, and what comparisons/baselines exist.
+   - If the subplot/table is not found: set "subplot_name" to "Subplot not found" and set all other output fields to None.
+
+B) Identify what is new vs standard
+   - Determine whether the paper introduces:
+     1) a new physical quantity/descriptor computed from standard theory,
+     2) a new theory/method derived from existing theory,
+     3) a new computational workflow/approximation to make known theory computable,
+     4) or primarily applies established methods to a new system.
+   - Summarize this briefly inside the plan.
+
+C) Identify the physics/phenomenon behind the subplot
+   - Examples: excited states, excitons, vibronic coupling, charge transport, strongly correlated effects, catalysis barriers, spectroscopy, etc.
+   - Connect the plotted quantity to the underlying physical process.
+
+D) Identify the exact method(s) and level(s) of theory used in the paper
+   - Examples: DFT functional, dispersion correction, DFT+U details, hybrid functional, TDDFT, GW, BSE, MP2, CCSD(T), CASPT2, NEVPT2, ADC(n), etc.
+   - Specify what is computed (e.g., total energy differences, band gaps, excitation energies, spectra, forces, phonons, response functions).
+   - Extract and include all numerical settings stated in PDF_info:
+     k-point grids, cutoffs, basis sets, pseudopotentials, SCF thresholds, geometry criteria, smearing, supercell sizes, vacuum spacing, SOC, temperature, broadening, dielectric cutoffs, number of empty bands, frequency grids, etc.
+
+E) Software requirement (MANDATORY)
+   - You MUST name the **software packages explicitly mentioned in the paper text** and only those.
+   - If software is not stated in PDF_info: write “NOT SPECIFIED IN PAPER TEXT” and do not guess.
+
+F) Convergence & validation (MANDATORY)
+   - Provide concrete convergence checks relevant to the subplot quantity (not generic):
+     which parameters to vary, target tolerances, and what “converged” means for the plotted observable.
+   - Include sanity checks to detect common failure modes.
+
+G) Reconstruct the figure/table from computed outputs (MANDATORY)
+   - Explain exactly how to post-process raw outputs into the plotted/tabulated quantity:
+     formulas, units conversions, alignment/offset conventions, referencing choices, interpolation/smoothing/broadening (if any), normalization, averaging, statistical error bars, etc.
+   - Provide a precise recipe for recreating the axes/series/legend entries for that subplot.
+
+
+────────────────────────────────────────────────────────────────────────────
+OUTPUT FORMAT (STRICT)
+Return ONLY a JSON object in a fenced code block, parseable by json.loads().
+No extra commentary outside the JSON.
+
+The JSON must contain exactly these top-level keys:
+- "subplot_name"
+- "User_requests"
+- "plan"
+
+If the subplot is not found:
+{
+  "subplot_name": "Subplot not found",
+  "User_requests": null,
+  "plan": null
+}
+
+Otherwise:
+- "subplot_name": must match the user’s requested subplot identifier (including “inset” if applicable).
+- "User_requests": copy the user request text verbatim, or null if none.
+- "plan": must be a detailed, structured plan. Prefer a nested JSON structure with sections and ordered steps.
+
+Now perform the task using:
+subplot_name = {{subplot_name}}
+PDF_info     = {{PDF_info}}
+User_requests = {{User_requests}}

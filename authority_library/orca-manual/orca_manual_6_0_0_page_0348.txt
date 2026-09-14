@@ -1,0 +1,90 @@
+[... end of page 347 ...]
+----------------
+STATIC TRACELESS POLARIZABILITY TENSOR (Quadrupole/Quadrupole)
+-------------------------------------------------------------
+The order in each direction is XX, YY, ZZ, XY, XZ, YZ
+Method : SCF
+Type of density : Electron Density
+Type of derivative : Quadrupolar Field (Direction=X)
+Multiplicity : 1
+Irrep : 0
+Relativity type :
+(continuesonnextpage)
+6.12. CalculationofProperties 325
+
+--- Page 348 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Basis : AO
+The raw cartesian tensor (atomic units):
+26.331642600 -13.160050722 -13.171591878 0.000221134 0.
+000000581 -0.000000065
+˓→
+-13.160050722 22.733889017 -9.573838294 -5.113861448 -0.
+000000735 -0.000000324
+˓→
+-13.171591878 -9.573838294 22.745430172 5.113640314 0.
+000000154 0.000000389
+˓→
+0.000221134 -5.113861448 5.113640314 12.537485829 0.
+000000127 -0.000000022
+˓→
+0.000000581 -0.000000735 0.000000154 0.000000127 12.
+536887647 5.114093442
+˓→
+-0.000000065 -0.000000324 0.000000389 -0.000000022 5.
+114093442 16.150971543
+˓→
+Note:
+• Likethequadrupolemomentsthemselves,thedipole-quadrupoleandquadrupole-quadrupolepolar-
+izabilities depend on the gauge origin of the %elprop module. The latter can be changed using the
+Originkeywordin%elprop;seesectionElectricProperties.
+AttheSCFlevel,dynamic(frequency-dependent)dipolepolarizabilitiescanbecomputedusingeitherpurelyreal
+orpurelyimaginaryfrequencies.
+%elprop
+polar 1
+freq_r 0.08 # purely real frequencies
+#freq_i 0.08 # purely imaginary frequencies
+end
+Intheexampleabove,thedynamicdipolepolarizabilitytensorforasinglerealfrequencyof0.8a.u. iscomputed.
+For every frequency, linear response equations must be solved for all component of the perturbation operator (3
+Cartesian components of the electric dipole). Note that imaginary-frequency polarizabilities are computed with
+the same costs as real-frequency polarizabilities. By a simple contour integration they can be used to compute
+dispersioncoefficients.
+Formethodsthatdonotsupportanalyticpolarizabilities,onecancalculatenumericdipole-dipoleandquadrupole-
+quadrupole polarizabilities, either by finite differentiation of dipole/quadrupole moments with respect to a finite
+dipole/quadrupole electric field, or by double finite differentiation of the total energy with respect to a finite
+dipole/quadrupoleelectricfield. Thelattercanbedoneusingcompoundscripts(seeCompoundMethods,Com-
+poundExamples).
+AttheMP2level,polarizabilitiescancurrentlybecalculatedanalyticallyusingtheRI(RI-MP2andDouble-Hybrid
+DFTResponseProperties)orDLPNO(LocalMP2ResponseProperties)approximationsorinall-electroncanon-
+icalcalculations,butforcanonicalMP2withfrozencoreorbitalsthedipolemomenthastobedifferentiatednu-
+mericallyinordertoobtainthepolarizabilitytensor. Ingeneralinsuchcases,youshouldkeepinmindthattight
+SCF convergence is necessary in order to not get too much numerical noise in the second derivative. Also, you
+shouldexperimentwiththefinitefieldincrementinthenumericaldifferentiationprocess.
+Asanexample,thefollowingCompoundjobcanbeusedtocalculatetheseminumericpolarizabilityattheMP2
+level(replacingthenowdeprecatedusageof Polar 2):
+*xyz 0 1
+O 0.00000000000000 0.05591162058341 0.05591162058342
+H 0.00000000000000 -0.06629333722358 1.01038171664016
+H 0.00000000000000 1.01038171664017 -0.06629333722358
+*
+(continuesonnextpage)
+326 Chapter6. RunningTypicalCalculations
+
+[... start of page 349 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%Compound "semiNumericalPolarizability.cmp"
+with
+method = "MP2";
+basis = "aug-cc-pVDZ cc-pVDZ/C";
+restOfInput = "VeryTightSCF PModel NoFrozenCore";
+end
+withthefilesemiNumericalPolarizability.cmpcontaining:
+# ---------------------------------------------------------------------
+# Authors: Dimitrios G. Liakos and Frank Neese
+# Date : March-May of 2024
+#
+# This is a compound script that calculates the
+# raw porarizability tensor semi-numerical

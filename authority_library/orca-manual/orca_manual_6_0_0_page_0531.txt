@@ -1,0 +1,70 @@
+[... end of page 530 ...]
+tegralsthatmighthavebeentimeconsumingtocalculateondisk. Normally
+the program deletes these integrals at the end of the calculation. However, if you want to do a closely related
+calculationthatrequiresthesameintegrals(i.e. thegeometry,thebasissetandthethresholdThresharethesame)
+itisfastertousetheintegralsgeneratedpreviously. ThisisdonebyusingKeepInts = trueinthe% scfblock
+ofthefirstcalculationandthenuseReadInts = trueinthe% scfblockofthesecondcalculation. Ifthesecond
+calculation has a different name than the first calculation you have to use IntName = "FirstName" to tell the
+programthenameoftheintegralfiles. Notethatthefilecontainingtheintegralsdoesnothaveanextension—it
+issimplythenameofthepreviousinputfilewith.inpstrippedoff.
+%scf
+KeepInts true # Keep integrals on disk
+(continuesonnextpage)
+508 Chapter7. DetailedDocumentation
+
+--- Page 531 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+ReadInts true # Read integrals from disk
+IntName "MyInts" # Name of the integral files without extension
+end
+Notethat,ingeneral,restartingcalculationswitholdintegralfilesrequirestheawarenessandresponsibilityofthe
+user. Ifproperlyused,thisfeaturecansaveconsiderableamountsoftime.
+7.6.7 Changing the Order of Initial Guess MOs and Breaking the Initial Guess
+Symmetry
+OccasionallyyouwillwanttochangetheorderofinitialguessMOs—beitbecausetheinitialguessyieldedan
+erroneousoccupationpatternorbecauseyouwanttoconvergetoadifferentelectronicstateusingtheorbitalsof
+a previous calculation. Reordering of MOs and other tasks (like breaking the symmetry of the electronic wave-
+function)areconvenientlyhandledwiththeRotatefeatureinORCA.RotateisasubblockoftheSCFblockthat
+allowsyoutolinearlytransformpairsofMOs.
+%scf
+Rotate
+{ MO1, MO2, Angle }
+{ MO1, MO2, Angle, Operator1, Operator2 }
+{ MO1, MO2} # Shortcut to swap MO1 and MO2. Angle=90 degrees.
+end
+end
+Here,MO1andMO2aretheindicesofthetwoMOsofinterest. RecallthatORCAstartscountingMOswithindex
+0, i.e. the MO with index 1 is the second MO. Angle is the rotation angle in degrees. A rotation angle of 90∘
+correspondstoflippingtwoMOs,anangleof45∘leadstoa50:50mixtureoftwoMOs,anda180∘rotationleadsto
+achangeofphase. Operator1andOperator2aretheorbitalssetsfortherotation. ForUHFcalculationsspin-up
+orbitalsbelongtooperator0andspin-downorbitalstooperator1. RHFandROHFcalculationsonlyhaveasingle
+orbitalset.
+Amongothers,theRotatefeaturecanbeusedtoproducebroken-symmetrysolutions,forexampleintransition
+metaldimers. Inordertodothat,firstperformahigh-spincalculation,thenfindthepairsofMOsthataresymmetric
+andantisymmetriccombinationsofeachother. TaketheseMOsastheinitialguessanduserotationsof45∘foreach
+pairtolocalizethestartingMOs. Ifyouareluckyandthebrokensymmetrysolutionexists,youhaveagoodchance
+offindingitthisway. SeesectionBroken-SymmetryWavefunctionsandExchangeCouplingsformoredetailson
+thebroken-symmetryapproach.
+7.6.8 Automatically Breaking of the Initial Guess Symmetry
+Another simple way to break the initial guess symmetry for more trivial cases, is to simply use the keyword !
+GUESSMIX.Thiswillautomaticallymix50%ofthealphaLUMOintothealphaHOMO.Thatisequivalenttoa45
+degreerotationasdoneaboveandonlyfortheseorbitals. Itmightbeusefulwhenonewantsanopen-shellsinglet
+andneedsthealphaandbetaorbitalstostartdifferently.
+Thespecificangleofrotationcanbecontrolledwith:
+%scf
+guessmix 75 # angle in degrees, default is 45
+end
+7.6. ChoiceofInitialGuessandRestartofSCFCalculations 509
+
+[... start of page 532 ...]
+ORCAManual,Release6.0.0
+7.6.9 Calculating only the energy of an input density
+In caseyou wantto givethe resultof a previousSCF andrecalculate theenergy, ormaybe someother property
+(liketheMP2energy)usingthatdensitywithoutchangingtheorbitals,youcanusetheflags!CALCGUESSENERGY
+NOITER.
+TheSCFprogramwillreadtheorbitals,computethedensityandoneFockmatrixnecessarytogettheenergyand
+moveonwithnoorbitalupdates. ThiscanbeusedtocombineDFTorbitalswithDLPNO-CCSD(T)forexample.
+Becarefulwiththeresultsyougetfromthisbecausetheseorbitalsarenotvariationalanymore!
+7.7 SCF Convergence
+SCFconvergenceisapressingprobleminanyelectronicstructurepackagebecausethetotalex

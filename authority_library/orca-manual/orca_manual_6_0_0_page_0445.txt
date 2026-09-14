@@ -1,0 +1,73 @@
+[... end of page 444 ...]
+converted.
+• Sometimes, lowfrequencieshavedisplacementsthatarejusttoolarge, ortheexperimentalmodesaretoo
+anharmonicandyoumightwanttoremovethem. ItispossibletodothatsettingtheTCUTFREQflag(in
+cm−1),andallfrequenciesbelowthegiventhresholdwillberemoved.
+• Ifyouwanttochangetheparametersrelatedtothefrequencycalculations,youcandothatunder%FREQ
+(Sec. VibrationalFrequencies). Thenumericalgradientsettingsareunder%NUMGRAD(Sec. Numerical
+Gradients).
+• Whencomputingrates, theuseofanyLINESbesidesDELTAisanapproximation. Itisrecommendedto
+compute the rate at much smaller lineshape (such as 10 cm−1) to get a better value, even if the spectrum
+needsalargerlineshapethanthat.
+422 Chapter6. RunningTypicalCalculations
+
+--- Page 445 ---
+ORCAManual,Release6.0.0
+• When in doubt, try setting a higher PRINTLEVEL. some extra printing might help with your particular
+problem.
+6.19 The ORCA DOCKER: An Automated Docking Algorithm
+Themostimportantaspectsofchemistry/physicsdonotoccurwithsinglemolecules,butwhentheyinteractwith
+eachother. Now,givenanytwomolecules,howtoputthemtogetherinthebestinteracting“pose”? Thatiswhat
+wetrytoanswerwhenusingtheORCADOCKER.Dockingherereferstotheprocessoftakingtwosystemsand
+puttingthemtogetherintheirbestpossibleinteraction.
+6.19.1 Example 1: A Simple Water Dimer
+Let us start with a very simple example. Given two water molecules, how to find the optimal dimer? With the
+DOCKERthatissimpleandcanbedonewith:
+!XTB
+%DOCKER GUEST "water.xyz" END
+* xyz 0 1
+O -2.13487 2.63905 -0.01809
+H -1.16698 2.61938 0.02397
+H -2.41372 2.24598 0.82256
+*
+where the file water.xyz is a .xyz file which contains the same water structure, optionally with charge and
+multiplicity(inthatorder)onthecommentline(thesecondlinebydefault):
+3
+0 1
+O -2.13487 2.63905 -0.01809
+H -1.16698 2.61938 0.02397
+H -2.41372 2.24598 0.82256
+ThemoleculegivenontheregularORCAinputwillbetheHOST,andtheGUESTisalwaysgiventhroughanexternal
+file.
+Theoutputwillstartwith:
+***************
+* ORCA Docker *
+***************
+Reading guests from file water.xyz
+Number of structures read from file 1
+Charge and multiplicity of guest from file
+Docking approach independent
+Docking level normal
+Optimizing host .... -5.070544 Eh
+Optimizing guest .... -5.070544 Eh
+whereitwritesthenameofthefilewiththeGUESTstructure,thenumberofstructuresread,someextrainfoand
+willoptimizebothhostandguest(inthiscasetheyarethesame),herebydefaultusingGFN2-XTB.
+Note: Ifnomultiplicityorchargearegiven,theGUESTisassumedtobeneutralandclosed-shell.
+Note: TheDOCKERrightnowisonlyworkingwiththeGFN-XTBandGFN-FFmethodsandtheALPBsolvation
+model. Itwillbeexpandedlatertoothers.
+6.19. TheORCADOCKER:AnAutomatedDockingAlgorithm 423
+
+[... start of page 446 ...]
+ORCAManual,Release6.0.0
+Thatisfollowedbysomeextrainfothatisexplainedinmoredetailsonitsowndetailedsection(seeMoredetails
+ontheORCADOCKER):
+Starting Docker
+---------------
+Guest structure .... structure number 1
+Guest charge and multiplicity .... (0 , 1)
+Final charge and multiplicity .... (0 , 1)
+PES used during evolution .... GFN2-XTB
+Setting random seed .... done
+Creating spatial grid
+Grid Max Dimension 5.50 Angs
+Angular Grid Step 32

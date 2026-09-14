@@ -1,0 +1,52 @@
+[... end of page 25 ...]
+e shell structure of ORCA
+Thewholeorganizationofthecodeandtheinformationflowcanbethoughtofasconsistingofashellstructure
+whereashellisalayerofsoftwarewithwell-definedfunctionsandawell-definedinterfacetotheshellsaboveand
+belowit.
+3
+
+--- Page 26 ---
+ORCAManual,Release6.0.0
+The lowest layer of the shell consists of the SHARK integral package. This is the “motor” of the program that
+takescareofmostcomputeintensivetasksandessentiallyallpartsthatinvolveintegralsoverbasisfunctions. This
+amountstocalculatingallone-andtwo-electronintegrals, formingFockandFock-likematricesandperforming
+integraltransformationsusingallkindsofbasissetsandkernels. MostoftheSHARKcodeisindependentofthe
+remainingORCAsourcecodeinfrastructure.
+The layer above SHARK is the actual ORCA source code. ORCA interacts with the user through the interface
+anditorchestratestheentireworkflowofthecalculation. Atthispointintime,italsoperformscomputeintensive
+tasks like forming diagonalizing and handling Fock-operators , solving large linear equation systems, forming
+sigma vectors, densities etc in correlated calculations and similar tasks. The ORCA source code interacts with
+SHARKthroughasmallsetofDRIVERS.ThedriversfeaturegenuineORCAdatastructuresaswellasSHARK
+infrastructure. The DRIVERS call the genuine SHARK functions (ORCA calls SHARK directly only in a few
+places)and,mostimportantly,theDRIVERStakecareoffindingtheirwaythroughtheapproximationjungle. By
+thiswemeantheyhandlethenecessarybasissets,auxiliarybasissets,grids,integralapproximations,solvation,
+relativity,pointchargesetc.
+Concentratingtheseimportantandhighlyerrorpronetasksinanumberofwelldocumentedroutinesprovidesa
+highlytransparentwayofidentifyingandproperlymaintainingthefunctionalitythatisattheheartoftheprogram.
+Above the ORCA software layer there are tools that orchestrate workflows. Workflows typically consisting of a
+numberofinterdependcomputationalstepsthatarelatercombinedintoasinglemeaningfulchemicalresult. For
+example, one may optimize the geometry with a DFT functional and calculate zero-point and thermodynamic
+correctionsatthesamelevelandfollowitupwithasinglepointcalculationatthecoupledclusterlevelthatmay
+or may not feature another correction for core correlation at the MP2 level or complete basis set extrapolation.
+Suchtasksandmanyothers,likerunningseriesofcalculationsonatest-setsofmoleculesorpermutingcalculation
+optionslikefunctionalsorbasissetsonagiventestsystemcanbeaddressedwithworkflowtools. InsideORCA,
+thereistheverypowerfulcompoundscriptinglanguagetoachieveandorganizesuchtasks. Onthecommercial
+branch,FAccTsdevelopstheWeaseltoolthatisapowerfulandhighlyreliableworkfloworganizer.
+Atthefinallayer,onemightenvisionagraphicaluserinterface(GUI)thathelpsbuildingmoleculesandfacilitates
+running calculations and analyzing results. At this point in time, ORCA does not have a dedicated GUI. There
+are many free and commercial solutions that interface to ORCA. This form of interfacing is facilitated by the
+orca_2jsoninterfaceandthepropertyfilethatORCAproduces. Wehopethatthetransparencyofthisinterface
+motivatesGUIdeveloperstoprovideeverimprovedGUIsthatinterfaceORCA.Wedonotexcludethepossibility
+thatORCAwillfeatureit’sownGUIsometimedowntheroad.
+4 Chapter2. TheArchitectureofORCA
+
+[... start of page 27 ...]
+ORCAManual,Release6.0.0
+2.3 The master/slave concept and the calling sequence
+WithinORCA,thecodefollowsa“master/slave”conceptinwhichthemainprogramisallowedtoknoweverything
+abouteverymodulewhilethemodulesarenotallowedtoknowanythingaboutthemainprogram. Thus,themain
+programisthepieceofsoftwarethatorchestratestheentireORCArunandtheinteractionwiththeuser. Themain
+programis,however,notsupposedtocarryoutcomputeintensivetasksorevenparallelizedtasksbyitself.
+AnORCAcalculationcommenceswithreadingandanalyzingtheORCAinputfile. Theplausibilityofthisinput
+ischeckedbyanelaborate“maincheck”routine. Quiteobviously,thenumberofpossiblecombinationsofORCA
+featuresisfarlargerthanwhatcouldpossiblybecheckedwithrealisticeffort. However,themainc

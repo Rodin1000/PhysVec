@@ -1,0 +1,76 @@
+[... end of page 996 ...]
+at
+thebeginningofthissection:
+%md
+Dump Position Stride 1 Filename "trajectory.xyz"
+end
+Here,“Dump”isthecommand,whichtakesonenon-optionalargumenttospecifywhichquantityshallbedumped
+–inthiscase,“Position”. The“Dump”commandhastwomodifiers,namely“Stride”and“Filename”. The
+formertakesoneintegerargument,thelatterastringargument. Swappingthetwomodifiers(togetherwiththeir
+respectivearguments,ofcourse)wouldnotchangethebehavior.
+974 Chapter7. DetailedDocumentation
+
+--- Page 997 ---
+ORCAManual,Release6.0.0
+SeparatingArguments
+Asshownabove,theargumentswhicharepassedtoacommanddonotneedtobeseparatedbycommas. However,
+itisallowed(andrecommended)tostillusecommas. First,itcanincreasethereadabilityoftheinputfile. Secondly,
+thereexistafewambiguouscasesinwhichcommas(orparentheses)shouldbeusedtoclarifytheintendedmeaning.
+Oneofthesecasesisthearithmeticminusoperator. Itcaneitherbeusedasbinaryoperator(subtractingonenumber
+fromanother),orasunaryoperator(returningthenegativeofanumber). Bydefault,theminusoperatorwillbe
+consideredasbinaryoperator(ifpossible).
+Consider the case in which you want to pass two integer arguments “10” and “-10” to a command. Without
+commas(orparentheses),theminusismistreatedasbinaryoperator,andonlyoneargumentwillbepassedtothe
+command:
+Command 10 -10 # Pitfall: treated as "Command (10 - 10)", i.e., "Command 0"
+Command 10, -10 # Two arguments, as intended
+Command 10 (-10) # Also works
+PhysicalUnits
+In many cases, it is required to specify quantities which bear a physical unit in an input file (e. g., temperature,
+time step lengths, ...). For many quantities, there are different units in widespread use, which always leads to
+some confusion (just consider the “kcal vs kJ” case). ORCA handles this problem by defining default units for
+eachquantityandrequiringthatallquantitiesaregivenintheirdefaultunit. ORCA’sdefaultunitsaretheatomic
+units, whichareheavilyusedinthequantumchemistrycommunity, butnotsomuchinthemoleculardynamics
+community. Asanabinitiomoleculardynamicsmoduleexistsinthesmalloverlapregionofbothcommunities,
+some“unitconflicts”mightarise. Topreventthosefromthebeginning,itisallowedtospecifyunitsofpersonal
+choicewithinORCA’sMDinput.
+Luckily,thisisassimpleandconvenientasitsounds. TheparseroftheMDmodulechecksifaunitisgivenafter
+anumericconstant,andautomaticallyconvertstheconstanttotheinternaldefaultunit. Ifnoexplicitunitisgiven,
+the default unit is assumed. Please note that the default units within the MD module are not necessarily atomic
+units(seetablebelow). Unitsareconnectedtotheprecedingnumericalvaluebyanunderscore:
+%md
+Timestep 1.0_fs
+Timestep 41.3_au # identical
+Timestep 1.0 # identical, as default time unit in MD module is fs
+end
+In the following, all units which are currently known to the MD module’s parser are listed, sorted by physical
+quantities. Thedefaultunitforeachquantityisprintedinbold letters. Additiveconstantandfactorareapplied
+to convert a unit into the default unit. The additive constant is applied before the factor. A “−” means that the
+constant/factorisnotapplied. Moreunitswillbeprobablyaddedinthefuture.
+7.51. AbinitioMolecularDynamicsSimulations 975
+
+[... start of page 998 ...]
+ORCAManual,Release6.0.0
+UnitSymbol AdditiveConstant Factor
+—LengthUnits—
+Angstrom − −
+A − −
+Bohr − 0.5291
+pm − 0.01
+nm − 10.0
+—TimeUnits—
+fs − −
+ps − 1000
+au − 0.02419
+—TemperatureUnits—
+Kelvin − −
+K − −
+Celsius 273.15 −
+C 273.15 −
+—AngleUnits—
+Deg − −
+Rad − 180/𝜋
+7.51.5 Discussion of Features
+RestartingSimulations
+Ab initio molecular dynamics simulation are computationally expensive, and will typically run for a long time
+even 

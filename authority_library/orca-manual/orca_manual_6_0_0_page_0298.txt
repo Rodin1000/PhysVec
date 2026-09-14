@@ -1,0 +1,66 @@
+[... end of page 297 ...]
+ properties like polarizabilities through coupled-perturbed SCF
+theory. Formagneticresponseproperties,suchastheg-tensor,theC-PCMresponsevanishes.
+• Calculations of solvent shifts on transition energies using the time-dependent DFT or CIS method. The
+refractiveindexofthesolventneedstobeprovidedinadditiontothedielectricconstant.
+• Firstorderperturbationestimateofsolventeffectsonstateandtransitionenergiesinmultireferencepertur-
+bationandconfiguration-interactioncalculations.
+Other implicit solvation strategies are available in ORCA. In particular, an interface to the open source imple-
+mentation of the COSMO-RS model (openCOSMO-RS), as well as different solvation models that can be used
+6.9. Solvation 275
+
+--- Page 298 ---
+ORCAManual,Release6.0.0
+inXTB(ALPB,ddCOSMO,andCPCM-X).Adetailedoverviewoftheavailableimplicitsolvationmethodsand
+theirusageisprovidedinSectionsONIOMMethods,andImplicitSolvationModels.
+Asasimpleexample,letuscomputethesolventeffectonthe𝑛→𝜋* transitionenergyinformaldehydewiththe
+C-PCM model. This effect can be obtained by subtracting the solution-phase and gas-phase transition energies.
+Thegas-phasetransitionenergy(4.633eV)canbecomputedbyusingthefollowinginput:
+! def2-TZVP
+%cis nroots 1 end
+*int 0 1
+C 0 0 0 0.000000 0.000 0.000
+O 1 0 0 1.200371 0.000 0.000
+H 1 2 0 1.107372 121.941 0.000
+H 1 2 3 1.107372 121.941 180.000
+*
+ByaddingtheCPCM(water)flagtotheinputusedforthegas-phasecalculation,thetransitionenergycannowbe
+computedusingtheC-PCMmodelwithwaterasthesolvent:
+! def2-TZVP CPCM(water)
+%cis nroots 1 end
+*int 0 1
+C 0 0 0 0.000000 0.000 0.000
+O 1 0 0 1.200371 0.000 0.000
+H 1 2 0 1.107372 121.941 0.000
+H 1 2 3 1.107372 121.941 180.000
+*
+ThisC-PCMcalculationyieldsatransitionenergyof4.857eV:
+-----------------------------
+CIS-EXCITED STATES (SINGLETS)
+-----------------------------
+the weights of the individual excitations are printed if larger than 1.0e-02
+STATE 1: E= 0.178499 au 4.857 eV 39176.0 cm**-1 <S**2> = 0.000000
+7a -> 8a : 0.929287 (c= -0.96399514)
+7a -> 13a : 0.039268 (c= 0.19816055)
+7a -> 18a : 0.016344 (c= 0.12784298)
+Hence,waterenvironmentincreasesthetransitionenergyby0.224eV.Thisincreasecanbeattributedtothestabi-
+lizationoflonepairorbitalsbythepresenceofwatermolecules.
+6.10 ORCA SOLVATOR: Automatic Placement of Explicit Solvent
+Molecules
+FromORCA6,wealsohaveatoolthatcanautomaticallyplaceexplicitsolventmoleculestoagivensystem. Itcan
+bedoneusingtwodifferentapproaches: aSTOCHASTICmethodwhichisveryfastbutlessaccurate,oraDOCKING
+approachwhichmakesuseoftheDOCKER.Thelaterisslower,butmoreaccurateandisthedefault.
+276 Chapter6. RunningTypicalCalculations
+
+[... start of page 299 ...]
+ORCAManual,Release6.0.0
+6.10.1 First Example: Adding Water to a Histidine
+Asaverysimpleinitialexample,let’stakeaHistidineaminoacidandaddthreeexplicitwatermoleculesatthebest
+positionsusingtheDOCKERandGFN2-XTB.Theinputtogetthisisassimpleas:
+!XTB ALPB(WATER) PAL16
+%SOLVATOR NSOLV 3 END
+* XYZ 0 1
+N 0.885996 -0.961304 -0.120339
+C 1.798313 0.104987 0.275069
+C 1.249714 0.744242 1.567548
+O 1.573032 1.831447 1.95

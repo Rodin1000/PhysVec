@@ -1,0 +1,54 @@
+[... end of page 19 ...]
+upiedorbitalsisalsoanidentifieroftheelectronicstructure.
+0.14 I can’t locate the transition state (TS) for a reaction expected
+to feature a low/very low barrier, what should I do?
+ForsuchcriticalcaseoflocatingtheTS,runningaveryfine(e.g. 0.01Åincrementofthebondlength)relaxed
+scanofthekeyreactioncoordinateisrecommended. Inthiswaythehighestenergypointonaveryshallowsurface
+canbeidentifiedandusedforthefinalTSoptimisation.
+0.10. Myoldinputsdon’tworkwiththenewORCAversion! Why? xi
+
+--- Page 20 ---
+ORCAManual,Release6.0.0
+0.15 During the geometry optimisation some atoms merge into
+each other and the optimisation fails. How can this problem
+be solved?
+Thisusuallyoccursduetothewrongorpoorconstructionofinitialmolecularorbitalinvolvingsomeatoms. Check
+thebasissetdefinitiononproblematicatomsandthenthecorrespondingMOs!
+0.16 While using MOREAD feature in ORCA, why am I getting an error
+saying, “no orbitals found in the .gbw file”?
+ORCA produces the .gbw file immediately after it reads the coordinates and basis set information. If you put a
+.gbwfilefromapreviouscalculationwithsamebasenameasyourcurrentinputintotheworkingdirectory,itwill
+beoverwrittenandthepreviousorbitaldatawillbelost. Therefore,itisrecommendedtochangethefilenameor
+.gbwextensiontosomethingelse(.gbw.old,forexample).
+0.17 With all the GRID and RI and associated basis set settings I’m
+getting slightly confused. Can you provide a brief overview?
+Hartree–Fock (HF) and DFT require the calculation of Coulomb and exchange integrals. While the Coulomb
+integralsareusuallydoneanalytically,theexchangeintegralscanbeevaluatedsemi-numericallyonagrid. Here,
+the pure DFT exchange is calculated on one type of grid (controlled through the GRID keyword) while the HF
+exchangecanbeevaluatedonadifferent,oftensmallergrid(GRIDX).Forbothparts,furtherapproximationscan
+bemade(RI-JandRI-K1 orCOSX,respectively). WhenRIisused,auxiliarybasissetsarerequired(<basis>/J
+forRI-Jand<basis>/JKforRI-JK).Thefollowingpossiblecombinationsarise:
+• HFcalculation
+– ExactJ+exactK:noauxiliaryfunctionsandnogridsneeded.
+– RIJ+exactK(RIJONX,RIJDX):<basis>/Jauxiliaries,nogrids.
+– RIJ+RIK=RIJK:<basis>/JKauxiliaries,nogrids.
+– RIJ+COSX:<basis>/Jauxiliaries,COSXgridcontrolledbytheGRIDXkeyword.
+• GGADFTfunctional
+– ExactJ+GGA-XC:noauxiliaryfunctionsneeded,DFTgridcontrolledbytheGRIDkeyword.
+– RIJ+GGA-XC:<basis>/Jauxiliaries,DFTgridcontrolledbytheGRIDkeyword.
+• HybridDFTfunctional
+– ExactJ+exactK+GGA-XC:noauxiliaryfunctionsneeded,DFTgridcontrolledbytheGRIDkeyword.
+– RIJ+exactK(RIJONX,RIJDX)+GGA-XC:<basis>/Jauxiliaries,DFTgridcontrolledbytheGRID
+keyword.
+– RIJ+RIK(RIJK)+GGA-XC:<basis>/JKauxiliaries,DFTgridcontrolledbytheGRIDkeyword.
+– RIJ+COSX+GGA-XC:<basis>/Jauxiliaries,COSXgridcontrolledbytheGRIDXkeyword,DFT
+gridcontrolledbytheGRIDkeyword.
+1NotethatORCAcanonlyuseRI-KinconjunctionwithRI-J;hencethecombinationRI-JK.
+xii Chapter0. FAQ–frequentlyaskedquestions
+
+[... start of page 21 ...]
+ORCAManual,Release6.0.0
+0.18 There are a lot of basis sets! Which basis should I use when?
+ORCAoffersavarietyofmethodsandalargechoiceofbasissetstogowiththem. Hereisanincompleteoverview:
+Method Approxima- basisset(andauxiliaries)
+tion

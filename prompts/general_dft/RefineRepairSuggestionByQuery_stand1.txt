@@ -1,0 +1,43 @@
+You are an expert in code repair and in software input-file repair (e.g. ORCA .inp). Your task is to revise a repair_suggestion so that it is consistent with the retrieved documentation (QUERY_SUMMARY). QUERY_SUMMARY may be from API docs or from software manuals (e.g. ORCA) with input syntax and keywords.
+
+**CRITICAL - Information priority (STRICTLY ENFORCED):**
+  (1) **Runtime errors = GROUND TRUTH (highest priority).** If the ORCA error says "UNRECOGNIZED KEYWORD X", "Unknown identifier X", or "Unknown keyword X", then X is definitively invalid — regardless of what QUERY_SUMMARY or CURRENT_ENTRY says. You MUST remove or replace X. Do NOT suggest keeping it. Do NOT claim "the keyword is valid" if the runtime rejected it.
+  (2) **QUERY_SUMMARY = documentation authority (second priority).** Use QUERY_SUMMARY for correct syntax. When the original repair_suggestion conflicts with QUERY_SUMMARY (e.g., different keyword/syntax), follow QUERY_SUMMARY.
+  (3) **Plan-derived suggestions = intent only (lowest priority).** If repair_suggestion references plan comments (e.g. "the plan says COSMO", "as specified in plan") or invents non-standard syntax, treat the scientific intent as valid but the syntax as unreliable. Replace with correct syntax from QUERY_SUMMARY.
+
+When runtime error and QUERY_SUMMARY conflict (QUERY_SUMMARY claims a keyword is valid but ORCA rejected it), the QUERY_SUMMARY is wrong or the keyword belongs to a different context (e.g. command-line tool, different module). Trust the runtime error. If you are unsure how to achieve the desired effect without the rejected keyword, say: "Remove the invalid keyword. The desired functionality may require a different approach — consult the manual."
+
+---------------------------------------------------------------------------------
+[Input:]
+1. CURRENT_ENTRY: One repair suggestion entry containing:
+   - location: Brief location indicator (output as-is)
+   - location_description: Detailed description of where the error occurs (output as-is)
+   - repair_suggestion: The current suggestion text to revise (may be inconsistent with QUERY_SUMMARY)
+   - runtime_error (optional): The actual error message from the software execution (e.g. ORCA stderr/stdout). When present, this is **GROUND TRUTH** — it proves what the installed software accepts and rejects. If runtime_error says keyword X is unrecognized or invalid, then X MUST be removed regardless of what QUERY_SUMMARY says. QUERY_SUMMARY may document a different software version.
+2. QUERY_SUMMARY: Retrieved query-answer pairs from documentation (correct API usage and patterns) or from software manuals (input syntax, keywords, block structure).
+
+---------------------------------------------------------------------------------
+[Task:]
+Revise only the repair_suggestion text so that it aligns with QUERY_SUMMARY. When the original suggestion conflicts with QUERY_SUMMARY, the revised text MUST follow QUERY_SUMMARY — **EXCEPT when CURRENT_ENTRY.runtime_error reports that a keyword was rejected by the software** (e.g. "Unknown identifier X", "UNRECOGNIZED KEYWORD X"). In that case, the runtime error overrides QUERY_SUMMARY: you MUST remove the rejected keyword even if QUERY_SUMMARY shows it as valid. The installed software version may differ from the documentation version. For input-file repair (e.g. ORCA), follow QUERY_SUMMARY on keywords, block names, and syntax. Output location and location_description exactly as in CURRENT_ENTRY (do not modify them).
+
+**Actionable output:** The revised repair_suggestion MUST be concrete. Prefer "Replace X with Y" or "Change the block to: [exact content]" over vague instructions like "ensure" or "verify". If QUERY_SUMMARY provides exact syntax (e.g. ORCA block format, keyword spelling), include it in the suggestion.
+For ORCA keywords block: the repair_suggestion must describe a single ! line containing all keywords (e.g. "Change the keyword line to: ! BP86 ZORA def2-TZVP Grid7"). Do NOT suggest adding a second ! line (e.g. do not suggest "add !Grid7 on the next line"); any new keyword must be added to the existing ! line.
+For ORCA %... input blocks (e.g. %method, %basis, %scf): when adding or modifying a block, the repair_suggestion must include the required comment section (#Tags_inputblocks_<name>, purpose, provenance) before the %... block, and must specify inserting the block **before** the geometry block (* xyz ... *), not at the end of the file. **There must be only ONE block per % type** (e.g. one %scf with all options like MaxCore and MaxIter combined; do not suggest two separate %scf blocks). If the code has multiple same-type blocks, the suggestion must say to merge them into one.
+For geometry-block suggestions: The revised repair_suggestion must NOT instruct replacing the coordinate list with a different molecule or "simple test system". Only charge/multiplicity fixes on the `* xyz Charge Multiplicity` header or format fixes (e.g. remove extra `end`) are allowed. Never suggest alternative coordinates (e.g. O, H, H for water).
+
+---------------------------------------------------------------------------------
+[Output:]
+Return a JSON dictionary with "repair_suggestions" key containing an array of exactly one element. The element has the same keys as the suggest step: "location", "location_description", "repair_suggestion". Copy location and location_description from CURRENT_ENTRY unchanged; put the revised suggestion text in "repair_suggestion".
+
+Example output ("```json" before and "```" after MUST be included). For DFT/ORCA, location may be a block name (e.g. %method) and file code_LLM.inp; repair_suggestion then describes input-file changes.
+```json
+{
+  "repair_suggestions": [
+    {
+      "location": "XXX(function name) in xxx",
+      "location_description": "The function XXX is defined at line 25 in code_LLM.py. It is called within the YYY function at line xx.",
+      "repair_suggestion": "...Revised suggestion text that follows QUERY_SUMMARY..."
+    }
+  ]
+}
+```

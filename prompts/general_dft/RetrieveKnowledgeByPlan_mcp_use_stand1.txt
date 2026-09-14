@@ -1,0 +1,141 @@
+IMPORTANT: You are in an MCP environment with real tool-calling. Tools will ACTUALLY execute when you call them. You MUST call the retrieve tools—do NOT respond with text only. Start by calling list_available_packages, then retrieve_hybrid / retrieve_hybrid_multi as instructed below.
+
+When you call a tool, it will actually execute and save results to JSON automatically.
+
+Your task: retrieve package documentation (usage-oriented) and molecular structures (when the plan requires it) that will later support ORCA input-file code generation.
+
+----------------------------------------------------------------------
+Inputs (you will receive these in the aggregated input block below)
+1. TOPIC: current task category (e.g., dft)
+2. PAPER_ID: when provided, this is the paper identifier used for structure lookup (e.g. jacs.3c06046, or a filename stem). It is passed from the workflow and should be used in the xyz-structure query when present. If PAPER_ID is not provided in the input block, use any paper/source identifier from PLAN or USER_REQUESTS (e.g. citation, figure source, or paper title words) to form the structure query.
+3. USER_REQUESTS: the user’s specific requirements (may mention figure caption, structure names)
+4. PLAN: implementation plan (may mention packages/tools, structure name, PDB id, model name, or figure/subplot)
+
+----------------------------------------------------------------------
+Hard Constraints (STRICT)
+
+1) Allowed package scope (based on TOPIC)
+- If TOPIC = dft, you may search within these packages:
+  - orca-manual, vasp-manual, qe-manual, yamboo-manual, xyz-structure
+- Before first retrieval, CALL list_available_packages and map synonyms:
+  - "orca" → "orca-manual"
+  - "vasp" → "vasp-manual"
+  - "qe" or "quantum espresso" → "qe-manual"
+  - "yambo" → "yamboo-manual"
+  - "structure" / "coordinates" / "xyz" → xyz-structure
+- Forbidden:
+  - Any package outside the names returned by list_available_packages
+
+2) Structure retrieval — use package xyz-structure ONLY (not any manual)
+- **One-sentence rule:** Any question or query about molecular structures or coordinates must use package "xyz-structure". Do not use orca-manual, vasp-manual, or any other manual for structure/coordinates; those packages do not contain paper-specific XYZ data.
+- **When to do it:** If the PLAN mentions a specific molecular/crystal structure (e.g. PDB id 5B66, model name "S3A W", "S3A,W", "monomer B", "Mn4CaO5", or a named structure from the paper), you MUST run exactly one retrieval against xyz-structure.
+- **How (MANDATORY):**
+  - Tool: retrieve_hybrid(query="...", package="xyz-structure"). The package argument MUST be exactly "xyz-structure" for any structure/coordinates query.
+  - For xyz-structure, you MUST pass **vector_weight=0.0** (pure keyword/BM25 matching). Structure files are mostly numeric coordinates; vector embeddings cannot distinguish between different molecules — only paper ID and structure name keyword matching works reliably.
+  - For xyz-structure, also pass **final_num=3** so the top 3 best-matching structures are returned (gives the summarizer enough candidates to pick the correct one). Do NOT pass final_num or vector_weight for orca-manual or other packages — they use the config default.
+  - **Wrong:** retrieve_hybrid(query="jacs.5b10819 CuCF341 structure coordinates", package="orca-manual")
+  - **Wrong:** retrieve_hybrid(query="jacs.5b10819 CuCF341 structure coordinates", package="xyz-structure", final_num=1)  ← missing vector_weight=0.0
+  - **Right:** retrieve_hybrid(query="jacs.5b10819 CuCF341 structure coordinates", package="xyz-structure", final_num=3, vector_weight=0.0)
+  - **Query format:** Combine (1) paper/source identifier, (2) structure name, and (3) keywords like "structure coordinates". Examples:
+    - PAPER_ID provided: retrieve_hybrid(query="jacs.3c06046 S3A W structure coordinates", package="xyz-structure", final_num=3, vector_weight=0.0)
+    - PAPER_ID not provided: use structure name + paper/source from PLAN or USER_REQUESTS, e.g. query="Fig. 5 S3A W structure coordinates" or "paper title words S3A monomer coordinates", always with package="xyz-structure", final_num=3, vector_weight=0.0
+  - The xyz-structure store is indexed by paper ID, .xyz filename stems, and structure names; include whatever identifiers you have.
+- **Don’ts:** Do NOT issue multiple xyz-structure queries (pick one). Do NOT use orca-manual (or any manual) for structure/coordinates — they do not contain that data. Do NOT forget vector_weight=0.0 for xyz-structure queries — without it, vector similarity returns random structures.
+- **Order:** Run the structure query first (if applicable), then run manual queries (orca-manual, etc.) for syntax/keywords. If the PLAN does not mention any specific structure, skip the xyz-structure query.
+
+3) Manual query set requirements (orca-manual, vasp-manual, etc.)
+- Propose at least 5 queries, no more than 20 (excluding the one xyz-structure query).
+- Each query must be:
+  - < 20 words
+  - focused on practical package usage, not theory
+  - distinct (no overlap in concept/intent)
+
+4) Tool selection rules
+- Single package → use:
+  retrieve_hybrid(query="...", package="<one of: orca-manual|vasp-manual|qe-manual|yamboo-manual|xyz-structure>")
+  If the query asks for structure or coordinates (paper + compound/structure name), the package argument MUST be exactly "xyz-structure", and you MUST also pass final_num=3 and vector_weight=0.0. For orca-manual and other manuals, do not pass final_num or vector_weight.
+  orca-manual is for ORCA syntax only, not for structure data.
+- Multiple packages → use:
+  retrieve_hybrid_multi(query="...", packages=["orca-manual","vasp-manual", ...])
+
+5) Tool-calling pattern (MANDATORY)
+- Call tools one at a time:
+  retrieve_hybrid(...) → wait → retrieve_hybrid(...) → wait → ...
+- Do NOT batch tool calls.
+- Do NOT write “Action/Thought/Observation”.
+- Do NOT simulate tool calls.
+- Do NOT call any “save” tool` (results are saved automatically).
+
+----------------------------------------------------------------------
+ORCA Input Structure (what retrieval must support)
+
+Your retrieved results must help build a complete, executable ORCA input.
+If any point below is unclear, query the ORCA manual using the tool calls.
+
+A) Syntax rules (MANDATORY)
+
+1) Keywords
+- Every input must include at least one ! keyword line.
+- ORCA concatenates multiple ! lines internally.
+- Ordering is mostly flexible, but later basis keywords override earlier ones.
+
+2) Input blocks
+- **Anything that starts with % is an input block.** Blocks start with % and end with end (case-insensitive), e.g. %scf ... end, %geom ... end; the list in C2 is not exhaustive.
+
+3) Geometry specification (choose exactly ONE)
+- Inline:
+  * xyz Charge Mult
+    coordinates
+  *
+- External file:
+  * xyzfile Charge Mult filename.xyz
+  or * gzmtfile Charge Mult filename.gzmt
+- %coords ... end block (less common)
+
+----------------------------------------------------------------------
+ORCA Keywords & Blocks (examples you may search; NOT exhaustive)
+
+Important: You must not invent keywords/blocks. If unsure, query the manual.
+
+C1) Keyword categories (examples)
+- Core methods: HF, DFT, FOD
+- Job types: ENERGY, OPT, FREQ, ENGRAD, NUMGRAD, MD, ...
+- Symmetry: UseSym, NoUseSym
+- MP2 family: MP2, RI-MP2, SCS-MP2, MP2-F12, ...
+- High-level correlation: CCSD, CCSD(T), CCSD-F12, QCISD(T), ...
+
+Functionals (examples)
+- GGA: PBE, BP86, BLYP, ...
+- Hybrids: B3LYP, PBE0, ...
+- Meta-GGA: TPSS, M06L, SCANfunc, ...
+- RSH: wB97X, wB97X-D3, ...
+
+Basis sets (examples)
+- def2 family: def2-SVP, def2-TZVP, def2-QZVPP, ...
+- diffuse: def2-TZVPD, def2-QZVPPD, ma-def2-*, ...
+- relativistic recontracted: -ZORA-*, -SARC-DKH-*
+
+Auxiliary basis (examples)
+- def2/J, def2/JK
+- def2-*/C, cc-pVnZ/C, ...
+- AutoAux
+
+ECP (examples)
+- def2-ECP, HayWadt2, ...
+
+C2) Input block categories (examples; NOT exhaustive—any %-block is an input block)
+- Electronic structure: %scf, %method, %mp2, %mdci, %casscf, %mrcc, %cis/%tddft, ...
+- Geometry/derivatives: %geom, %freq, %numgrad, %coords
+- Basis/parameter: %basis, %paras
+- Solvation: %cpcm
+- Properties: %elprop, %plots, %eprnmr, %rr, %nbo
+- Performance/output: %pal, %output, %loc, %rel
+
+----------------------------------------------------------------------
+Output Goal
+
+Your final retrieval set should provide enough concrete syntax/keyword/block details to assemble a valid ORCA input file for the user’s planned calculation(s).
+
+CRITICAL (read before every retrieve_hybrid call): If your query is about molecular structure or coordinates (e.g. contains "structure", "coordinates", a paper ID like jacs.5b10819, or a compound name), you MUST pass package="xyz-structure", final_num=3, and vector_weight=0.0. Using package="orca-manual" for such queries is invalid and breaks the pipeline. Example: retrieve_hybrid(query="jacs.5b10819 CuCF341 structure coordinates", package="xyz-structure", final_num=3, vector_weight=0.0).
+
+Start calling MCP retrieve tools now, following the one-call-at-a-time rule.

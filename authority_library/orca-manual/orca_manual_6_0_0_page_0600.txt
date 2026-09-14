@@ -1,0 +1,100 @@
+[... end of page 599 ...]
+Fcalculationistoprovidea
+qualitativelycorrectwavefunction,whichformsagoodstartingpointforatreatmentofdynamicelectroncorrela-
+tion.
+TheCASSCFmethodisfullyvariationalinthesensethattheenergyismadestationarywithrespecttovariations
+inbothsetsofMOandCIcoefficients. Atconvergence,thegradientoftheenergywithrespecttotheMOandCI
+coefficientsvanishes
+𝜕𝐸(c,C)
+=0, (7.151)
+𝜕𝑐
+𝜇𝑖
+𝜕𝐸(c,C)
+=0. (7.152)
+𝜕𝐶
+𝑘𝐼
+Orbitalspaces. InCASSCFcalculations,theMOspaceisdividedintothreeuserdefinedsubspaces:
+7.15. TheCompleteActiveSpaceSelf-ConsistentField(CASSCF)Module 577
+
+--- Page 600 ---
+ORCAManual,Release6.0.0
+• The“inactiveorbitals”aretheorbitalswhicharedoublyoccupiedinallconfigurationstatefunctions(labels
+𝑖,𝑗,𝑘,𝑙).
+• The“activeorbitals”aretheorbitalswithvariableoccupationnumbersinthevariousCSFs(labels𝑡,𝑢,𝑣,𝑤).
+• The“externalorbitals”(labels𝑎,𝑏,𝑐,𝑑)
+Notethatinolderpublications,theinactiveandactiveorbitalsaredistinguishedandreferredtoas“internal”or-
+bitals.
+Thewavefunctionandenergyisinvariantwithrespecttounitarytransformationswithinthethreesubspaces. The
+specialfeatureofaCASSCFwavefunctionisthatafixednumberofelectronsisassignedtoeachsubspace. The
+internalsubspaceisofcoursecompletelyfilledbuttheCSFsintheactivespaceconstituteafull-CIof𝑛-electrons
+in 𝑚-orbitals. The CSF list is constructed such, however, that a wavefunction of well defined total spin (and
+potential space) symmetry results. Such a wavefunction is referred to as a CASSCF(𝑛,𝑚) wavefunction. The
+CSFlistgrowsextremelyquicklywiththenumberofactiveorbitalsandthenumberofactiveelectrons(basically
+factorially). Dependingonthesystem,thelimitoffeasibilityisroughlyaround∼14activeorbitalsoraboutone
+millionCSFsintheactivespace. LargeractivespacesaretractablewithapproximateCIsolversuchastheIterative-
+Configuration-ExpansionCI(ICE-CI)describedinApproximateFullCICalculationsinSubspace: ICE-CI orthe
+DensityMatrixRenormalizationGroup(DMRG)discussedinDensityMatrixRenormalizationGroup.1
+Sincetheorbitalswithinthesubspacesareonlydefineduptoaunitarytransformation,theprogramneedstomake
+somecanonicalizationchoice.
+InORCA,thefinalorbitalsbydefaultare:
+1. naturalorbitalsintheactivespace,
+2. orbitalswhichdiagonalizetheCASSCFFockmatrixintheinternalspaceand
+3. orbitalswhichdiagonalizetheCASSCFFockmatrixintheexternalspace.
+Stateaveraging. Inmanycircumstances, itisdesirabletooptimizetheorbitalsnotforasinglestatebutforthe
+averageofseveralstates. Inordertoseewhatisdone,theenergyforstate𝐼 isre-writtenas:
+∑︁ ∑︁
+𝐸 𝐼 (c,C)= Γ𝑝 𝑞 (𝐼)ℎ 𝑝𝑞 + Γ 𝑞 𝑝 𝑠 𝑟(𝐼)(𝑝𝑞|𝑟𝑠) (7.153)
+𝑝𝑞 𝑝𝑞𝑟𝑠
+Here,Γ𝑝(𝐼)andΓ𝑝𝑟(𝐼)aretheone-andtwo-particlereducedelectrondensitymatricesforthisstate(labels𝑝,𝑞,𝑟,𝑠
+𝑞 𝑞𝑠
+spantheinternalandactivesubspaces):
+Γ𝑝(𝐼) = ⟨︀ Ψ𝑆⃒ ⃒𝐸𝑝⃒ ⃒Ψ𝑆⟩︀ (7.154)
+𝑞 𝐼 𝑞 𝐼
+Γ𝑝
+𝑞𝑠
+𝑟(𝐼) =
+2
+1⟨︀ Ψ𝑆
+𝐼
+⃒ ⃒𝐸
+𝑞
+𝑝𝐸
+𝑠
+𝑟−𝛿
+𝑞𝑟
+𝐸
+𝑠
+𝑝⃒ ⃒Ψ𝑆
+𝐼
+⟩︀ (7.155)
+Theaverageenergyissimplyobtainedfromaveragingthedensitymatricesusingarbitraryweights𝑤 thatareuser
+𝐼
+definedbutareconstrainedtosumtounity.
+∑︁
+Γ𝑝 𝑞 (𝑎𝑣) = 𝑤 𝐼 Γ𝑝 𝑞 (𝐼) (7.156)
+𝐼
+∑︁
+Γ 𝑞 𝑝 𝑠 𝑟(𝑎𝑣) = 𝑤 𝐼 Γ𝑝 𝑞𝑠 𝑟(𝐼) (7.157)
+𝐼
+∑︁
+𝑤 𝐼 =1 (7.158)
+𝐼
+OptimizationofCASSCFwavefunctions. Ingeneral,exceptfortrivialcases,CASSCFwavefunctionsarecon-
+siderablymoredifficulttooptimizethanRHF(orUHF)wavefunctions. Theunderlyingreasonisthatvariations
+incandCmaybestronglycoupledandtheenergyfunctionalmayhavemanylocalminimain(c,C)space. Conse-
+quently,thechoiceofstartingorbitalsisofreallyhighimportanceandthechoicewhichorbitalsandelectronsare
+includedintheactivespacehasdecisiveinfluenceonthesuccessofaCASSCFstudy. Ingeneral,aftertransforma-
+tiontonaturalorbitals,onecanclassifytheactivespaceorbitalsbytheiroccupationnumberswhichvarybetween
+0.0 and 2.0. In general, convergence problems are almost guaranteed if orbitals with occupation numbers close
+1ForapproximatefullCIapproaches,CASSCFisneitherinvarianttoactive-activerotationsnorexactlysize-consistent.
+578 Chapter7. DetailedDocumentation
+
+[... start of page 601 ...]
+ORCAManual,Release6.0.0
+tozeroorcloseto2.0areincludedintheactivespace. Occupationnumbersbetween0.02and1.98aretypically
+veryreasonableandshouldnotleadtolargeconvergenceproblems. Thereasonfortheoccurrenceofconvergence
+problemsisthattheenergyisonlyveryweaklydependentonrotationsbetweeninternalandactiveorbitalsifthe
+activeorbitalisalmostdoublyoccupiedandsimilarlyfortherotationsbetweenexternalandweaklyoccupiedactive
+orbitals. However,insomecases(forexampleinthestudyofpotentialenergysurfaces)itmaynotbeavoidable
+to include weakly or almost inactive orbitals in the active space and in these cases the use of the most powerful
+convergenceaidsisnecessary(videinfra). Asinthecaseofsingle-determinantwavefunctions(

@@ -1,0 +1,119 @@
+[... end of page 26 ...]
+izer.
+Atthefinallayer,onemightenvisionagraphicaluserinterface(GUI)thathelpsbuildingmoleculesandfacilitates
+running calculations and analyzing results. At this point in time, ORCA does not have a dedicated GUI. There
+are many free and commercial solutions that interface to ORCA. This form of interfacing is facilitated by the
+orca_2jsoninterfaceandthepropertyfilethatORCAproduces. Wehopethatthetransparencyofthisinterface
+motivatesGUIdeveloperstoprovideeverimprovedGUIsthatinterfaceORCA.Wedonotexcludethepossibility
+thatORCAwillfeatureit’sownGUIsometimedowntheroad.
+4 Chapter2. TheArchitectureofORCA
+
+--- Page 27 ---
+ORCAManual,Release6.0.0
+2.3 The master/slave concept and the calling sequence
+WithinORCA,thecodefollowsa“master/slave”conceptinwhichthemainprogramisallowedtoknoweverything
+abouteverymodulewhilethemodulesarenotallowedtoknowanythingaboutthemainprogram. Thus,themain
+programisthepieceofsoftwarethatorchestratestheentireORCArunandtheinteractionwiththeuser. Themain
+programis,however,notsupposedtocarryoutcomputeintensivetasksorevenparallelizedtasksbyitself.
+AnORCAcalculationcommenceswithreadingandanalyzingtheORCAinputfile. Theplausibilityofthisinput
+ischeckedbyanelaborate“maincheck”routine. Quiteobviously,thenumberofpossiblecombinationsofORCA
+featuresisfarlargerthanwhatcouldpossiblybecheckedwithrealisticeffort. However,themaincheckroutinehas
+evolvedovertheyearinawaythatallowstodetectthemostcommoncombinationsofinvalidorinconsistentinput
+keywordsandtakeappropriateaction(thatcanbechangingsomeparametersorabortingthejob).
+Afterthroughmaincheckthebasissetsusedinthecalculationsandthecoordinatesarecompletelyknown. Thisis
+thenthetimetoinitializetheSHARKintegralpackageandwillthencarryoutthebulkofthecomputationheavy
+tasks.
+Thefirstmodulethatisbeingcalledisorca_startup. Thismoduletakescareofcalculatingtheoneelectronin-
+tegralssuchastheHCOREandoverlapmatrices,themetricmatricesinRIcalculations,thepre-screeningmatrices
+fordirectSCFandpossiblyalsothetwo-electronintegralsforintegralconventionalruns.
+Thenextmoduledownstreamistheorca_guessprogram. Thismodulehasthetasktoproduceaninitialsetof
+molecularorbitalsandalsoaninitialdensitymatrixfromtheseorbitals. Tothisend,thereareanumberofoptions
+outofwhichthemostcommononesaretoamodeldensityguess(PMODEL)ortoreadorbitalsfromaprevious
+calculation(MOREAD).Inthelattercase,thecalculationmayfeatureadifferentgeometryand/oradifferentbasis
+setbutthenumber,natureandorderingofatomsneedtobeconsistentwiththetargetsystem.
+In the third step, the program branches out into either the SCF or the CASSCF module (orca_leanscf or
+orca_casscf). These modules produces converged orbitals and a self-consistent field energy as well as one-
+particledensitymatrix. ThelatterisstoredinintheDensityContainer,whichisacentralizedstoragefacility
+fordensitiesthatwillalsobeleftoverafterthecalculationandcanbeaccessedbytheusers.
+The next step of the calculation consists of calling various post-SCF programs like orca_mp2, orca_mdci or
+orca_autoci. NEVPT2andCASPT2arecalculatedbycodethatisintegratedwithorca_casscf. Thesecalcu-
+latecorrelationenergiesandexcitedstatesamongmanyotherthings.
+Therearemanydifferentpathwaysthattheprogramcantakenext,forexamplegeometryoptimizationorembedding
+calculationsormoleculardynamicstoonlynameafew. Ratherthangoingintoeachandeveryoneofthepossible
+pathways,wewilldescribethecalculationofmolecularpropertiesinsideORCA.
+2.4 The calculation of molecular properties
+Forthecalculationofmolecularproperties,ORCAhasafairlyuniqueandstronglystreamlinedinfrastructurethat
+isfocusingonthecommonalitiesinthecalculatedpropertiesandthatareindependentoftheunderlyingelectronic
+structuremethodused.
+TherearethreequalitativelydifferentsetsofpropertiesthatarecoveredinORCApropertycalculations:
+1) Responseproperties. Thesearepropertiesthatcanbeformulatedasderivativesofthetotalenergy.
+2) QDPTproperties. Thesearepropertiesthatarecalculatedbyquasi-degenerateperturbationtheory(QDPT).
+ThisamounttodiagonalizingtheHamiltoniancontainingexternalfieldsandrelativisticcorrectionsovera
+numberofrootsdeliveredbytheunderlyingelectronicstructuremethod
+3) Excitedstateproperties: theseare,atleastatthispointintime,transitionmomentsbetweendifferentelec-
+tronicstatesofthesystem.
+2.3. Themaster/slaveconceptandthecallingsequence 5
+
+[... start of page 28 ...]
+ORCAManual,Release6.0.0
+2.4.1 Response properties
+Alargenumberofpropertiescanbewrittenasderivativesofthetotalenergy. Thesearefirstorderproperties:
+𝜕𝐸 ∑︁ ⟨ ⃒ ⃒ ⟩
+𝑋
+𝑀
+=
+𝜕𝑀
+= 𝑃
+𝜇
+±
+𝜈
+𝜇⃒
+⃒
+̂︀ℎ
+𝑀
+⃒
+⃒
+𝜈
+𝜇𝜈
+Here,𝑃
+𝜇
+±
+𝜈
+isthefirst-orderelectron(‘+’)orspin(‘-‘)density ̂︀ℎ
+𝑀
+istheoperatorthatisdescribingthepropertyof
+interest(e.g. thedipolemomentoperator)andthebasissetis{𝜇}.
+Secondorderpropertiesare:
+𝑋
+𝑀𝑁
+=
+𝜕𝑀
+𝜕2
+𝜕
+𝐸
+𝑁
+= ∑︁ 𝑃
+𝜇
+±
+𝜈
+⟨ 𝜇 ⃒ ⃒
+⃒
+̂︀ℎ
+𝑀𝑁
+⃒ ⃒
+⃒
+𝜈 ⟩ + ∑︁𝜕
+𝜕
+𝑃
+𝑁
+𝜇 ± 𝜈 ⟨ 𝜇 ⃒ ⃒
+⃒
+̂︀ℎ
+𝑀
+⃒ ⃒
+⃒
+𝜈 ⟩
+𝜇𝜈 𝜇𝜈
+Heretheimportantquantityis 𝜕𝑃 𝜇 ± 𝜈,thefirstderivative(or“response”)oftheelectronorspindensitywithrespect
+𝜕𝑁
+to perturbation 𝑁. It can be shown that the order of perturbations 𝑀 and 𝑁 is immaterial and hence one can

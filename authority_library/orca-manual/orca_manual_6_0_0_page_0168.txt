@@ -1,0 +1,76 @@
+[... end of page 167 ...]
+espond to the
+doubletinthiscase)and“n”standsoftherelevantstate(n=0,1,2).
+ThesenaturalorbitalsarethenfedintounrestrictedQCISD(T)calculations:
+! ano-pVDZ TightSCF QCISD(T) MOREAD NoIter
+%moinp "H2O+.b0_s0.nat"
+* int 1 2
+O 0 0 0 0.000000 0.000 0.000
+H 1 0 0 1.012277 0.000 0.000
+H 1 2 0 1.012177 109.288 0.000
+*
+AsareferencewealsoperformaSORCIonthesamesystem
+6.1. SinglePointEnergiesandGradients 145
+
+--- Page 168 ---
+ORCAManual,Release6.0.0
+! ano-pVDZ TightSCF SORCI
+%casscf
+nel 7
+norb 6
+nroots 3
+mult 2
+end
+* int 1 2
+O 0 0 0 0.000000 0.000 0.000
+H 1 0 0 1.012277 0.000 0.000
+H 1 2 0 1.012177 109.288 0.000
+*
+weobtainthetransitionenergies:
+SORCI QCISD(T) (in cm-1)
+D0 0 0.0
+D1 16269 16293
+D2 50403 50509
+Thus, in this example the agreement between single- and multireference methods is good and the unrestricted
+QCISD(T)methodisabletodescribetheseexciteddoubletstates. Thenaturalorbitalshavebeenareliablewayto
+guidetheCCequationsintothedesiredsolutions. Thiswillworkinmanycases.
+LargeScaleCAS-SCFcalculationsusingICE-CI
+The CASSCF procedure can be used for the calculation of spin-state energetics of molecules showing a multi-
+reference character via the state-averaged CASSCF protocol as described in the CASSCF section The Complete
+Active Space Self-Consistent Field (CASSCF) Module. The main obstacle in getting qualitatively accurate spin-
+stateenergeticsformoleculeswithmanytransitionmetalcentersisthepropertreatmentofthestatic-correlation
+effects between the large number of open-shell electrons. In this section, we describe how one can effectively
+performCASSCFcalculationsonsuchsystemscontainingalargenumberofhigh-spinopen-shelltransitionmetal
+atoms.
+Asanexample,considertheIron-Sulfurdimer[Fe(III) SR ]2−molecule. Inthissystem,theFe(III)centerscan
+2 2
+beseenasbeingmadeupmostlyofS=5/2localspinstates(lowerspinstatessuchas3/2and1/2willhavesmall
+contributions due to Hunds’ rule.) The main hurdle while using the CASSCF protocol on such systems (with
+increasing number of metal atoms) is the exponential growth of the Hilbert space although the physics can be
+effectively seen as occurring in a very small set of configuration state functions (CSFs). Therefore, in order to
+obtain qualitatively correct spin-state energetics, one need not perform a Full-CI on such molecules but rather a
+CIPSIlikeprocedureusingtheICE-CIsolvershouldgivechemicallyaccurateresults. InthecaseoftheFe(III)
+dimer,onecanimaginethatthegroundsingletstateiscomposedalmostentirelyoftheCSFwherethetwoFe(III)
+centersarecoupledantiferromagnetically. SuchaCSFisrepresentedasfollows:
+⃒ ⃒Ψ𝑆=0⟩︀
+=[1,1,1,1,1,−1,−1,−1,−1,−1]
+0
+InordertomakesenseofthisCSFrepresentation,oneneedstoclarifyafewpointswhichareasfollows:
+• First,intheabovebasisthe10orbitalsarelocalizedto5oneachFecenter(followingahigh-spinUHF/UKS
+calculation.)
+• Second, theorbitalsareordered(asautomaticallydoneinORCA_LOC)suchthatthefirstfiveorbitalslie
+ononeFe(III)centerandthelastfiveorbitalsonthesecondFe(III)center.
+Using this ordering, one can read the CSF shown above in the following way: The first five 1 represent the five
+electronsonthefirstFe(III)coupledinaparallelfashiontogiveaS=5/2spin. Thenextfive-1representtwopoints:
+• First,thefiveconsecutive-1signifythepresenceoffiveferromagneticallycoupledelectronsonthesecond
+Fe(III)centerresultinginalocalS=5/2spinstate.
+146 Chapter6. RunningTypicalCalculations
+
+[... start of page 169 ...]
+ORCAManual,Release6.0.0
+• Second,thesecondsetofspinsarecoupledtothefirst1viaanti-parallelcouplingassignifiedbythesignof
+thelastfive-1entries.
+Therefore,wecanseethatusingtheCSFrepresentation,onecanobtainanextremelycompactrepresentationof
+thewavefunctionformoleculesconsistingofopen-shelltransitionmetalatoms. Thisprotocolofusinglocalized
+orbitalsinaspecifiedordertoformcompactCSFrepresentationsfortransitionmetalsystemscanbesystematically
+exten

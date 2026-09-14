@@ -1,0 +1,98 @@
+[... end of page 596 ...]
+︁
+𝐾(t ) = 𝑃(t ) (𝜇𝜅|𝜈𝜏)≈ 𝑄 𝐴 (r ) 𝑃(t ) 𝑋 ,
+1 𝜇𝜈 1 𝜅𝜏 𝜇𝑔 𝜈𝜏 𝑔 1 𝜅𝜏 𝜅𝑔
+𝜅𝜏 𝑔 𝜏 𝜅
+TheCOSXroutineisabletodealwithasymmetricdensitiesaswell, andthus, itcanbeusedheresimilartothe
+SCFcase.
+TheotherpossibilityistouseRIforexchange(RIK),
+∑︁ ∑︁
+𝐾(t ) = 𝑐𝑗𝐶(t )𝑗(𝜇𝜅|𝜈𝜏)≈ (𝜇𝑗|𝑟−1|𝐴)𝑉−1(𝐵|𝑟−1|𝜈˜𝑗),
+1 𝜇𝜈 𝜅 1 𝜏 12 𝐴𝐵 12
+𝑗𝜅𝜏 𝑗𝐴𝐵
+where
+∑︁
+𝐶(t )𝑗 = 𝑡𝑗𝑐𝑏,
+1 𝜏 𝑏 𝜏
+𝑏
+andthe˜𝑗 isan“orbital”transformedusing𝐶(t ).
+1
+574 Chapter7. DetailedDocumentation
+
+--- Page 597 ---
+ORCAManual,Release6.0.0
+Using these approximations, there are two approximations for the total singles Fock term, RIJCOSX called by
+thesimplekeywordRCSinglesFockandRIJKcalledbyRIJKSinglesFock,seeBasics. ForcanonicalandLPNO
+methods,bydefaulttheprogramchoosesthesameapproximationusedintheSCFcalculation. DLPNO2013uses
+RIJCOSXbydefault,whileinDLPNO,thesinglesFocktermisalsoevaluatedusingPNOsviaSinglesFockUseP-
+NOs,seeLocalcorrelation. Thisbehaviorcanalsobechangedbykeywordsinthemethodblock.
+%method RIJKSinglesFock 1 # 0 false, 1 true
+RCSinglesFock 0 # 0 false, 1 true
+end
+7.14.6 Use of the MDCI Module
+The MDCI module is fairly easy to use. The flags for the “simple” input lines have been described in section
+KeywordLines. Thedetailedlistingofoptionsisfoundbelow:
+%mdci citype CISD # CI singles+doubles
+QCISD # quadratic CI (singles+doubles)
+CCSD # coupled-cluster singles+doubles
+CEPA_1 # coupled-electron pair approximation ''1''
+CEPA_2 #
+CEPA_3 #
+NCEPA_1 # our slightly modified versions of CEPA
+NCEPA_2 # and CPF
+NCEPA_3 #
+NCPF_1 #
+NCPF_2 #
+NCPF_3 #
+ACPF # averaged coupled-pair functional
+ACPF_2 # Gdanitz modification of it
+NACPF # our modification of it
+AQCC # Szalay + Bartlett
+SEOI # a strictly size extensive energy functional
+# maintaining unitary invariance (not yet
+# available for UHF)
+ewin -3,1e3 # orbital energy window to determine which
+# MOs are included in the treatment
+# (respects settings in %method block)
+Singles true # include single excitations in the
+# treatment (default true)
+Triples 0 # (T) correction in CCSD(T)/QCISD(T)
+# default is no triples
+1 # Algorithm 1 (lots of memory, fast)
+2 # Algorithm 2 (less memory, about 2x slower,
+# not yet available for UHF)
+Brueckner true # use Brueckner orbitals
+# (default false)
+Denmat none # no evaluation of density matrices
+linearized # density matrix obtained by retaining
+# only CEPA_0-like terms, i.e., those
+# linear in the excitation amplitudes
+unrelaxed # unrelaxed density matrices, i.e.,
+# density matrices without orbital
+# relaxation
+orbopt # perform orbital optimization yielding
+# fully relaxed density matrices (if
+# citype chosen as CCSD or QCISD this option
+# implies evaluation of the Z vector).
+# (default: linearized)
+ZSimple true # simplified evaluation of the Z vector
+# in case of orbital optimized CCD
+(continuesonnextpage)
+7.14. TheSingleReferenceCorrelationModule 575
+
+[... start of page 598 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# (citype chosen as CCSD or QCISD and
+# Denmat as orbopt) by using an
+# analytical formula
+false # explicit solution of Z vector
+# equations
+# in case of orbital optimized CCD
+# (default: false)
+UseQROs # use of quasi-restricted orbitals
+# (default false)
+Localize 0 # use localized MOs. Presently very little
+# use is made of locality. It may help
+# for interpretations. Localization is
+# incompatible with the (T) correcti

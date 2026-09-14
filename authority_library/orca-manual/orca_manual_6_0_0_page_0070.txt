@@ -1,0 +1,63 @@
+[... end of page 69 ...]
+DEFGRID3, thatwillauto-
+maticallyfixallgridsthatareusedinthecalculations. DEFGRID1behavesessentiallyliketheolddefaults,but
+1Whereapplicable,referencemethodanddataaregiven(S:single-valence-electronion;M:neutralatom;HF:Hartree-Fock;WB:quasi-
+relativistic;DF:relativistic).
+2CorrespondstoLANL2andtoLANL1whereLANL2isunavailable.
+3I:OLD-SD(28,MDF)forcompatibilitywithTURBOMOLE.
+4Au,Hg:OLD-SD(60,MDF)forcompatibilitywithTURBOMOLE.
+4.4. NumericalIntegrationinORCA 47
+
+--- Page 70 ---
+ORCAManual,Release6.0.0
+itismorerobust. Thesecondisthenewdefault,andisexpectedtoyieldsufficientlysmallerrorsforallkindsof
+applications(seeSectionDetailsonthenumericalintegrationgridsfordetails). Thelastisaheavier,higher-quality
+grid,thatisclosetothelimitifoneconsidersanenormousgridasareference.
+InordertochangefromthedefaultDEFGRID2,onejustneedstoadd!DEFGRID1or!DEFGRID3tothemain
+input.
+It is also important to note that the COSX approximation is now the default for DFT, whenever HFexchange is
+neede. Thiscanalwaysbeturnedoffbyusing!NOCOSX.
+4.5 Input priority and processing order
+Inmorecomplicatedcalculations,theinputcangetquiteinvolved. Thereforeitisworthknowinghowitisinternally
+processedbytheprogram:
+• First,allthesimpleinputlines(startingwith“!”)arecollectedintoasinglestring.
+• Theprogramlooksforallknownkeywordsinapredefinedorder,regardlessoftheorderintheinputfile.
+• Anexceptionarebasissets: iftwodifferentorbitalbasissets(e.g. ! def2-SVPdef2-TZVP)aregiven,the
+lattertakespriority. Thesameappliestoauxiliarybasissetsofthesametype(e.g. ! def2/JSARC/J).
+• Some simple input keywords set multiple internal variables. Therefore, it is possible for one keyword to
+overwriteanoption,setbyanotherkeyword. Wehavetriedtoresolvemostsuchcasesinareasonableway
+(e.g. the more “specific” keyword should take precedence over a more “general” one) but it is difficult to
+forseeeverycombinationofoptions.
+• Next,theblockinputisparsedintheorderitisgivenintheinputfile.
+• Mostblockinputkeywordscontrolasinglevariable(althoughthereareexceptions). Ifakeywordisdupli-
+cated,thelattervalueisused.
+Considerthefollowing(bad)example:
+! def2-TZVP UKS
+%method
+functional BP86
+correlation C_LYP
+SpecialGridAtoms[1] 26, 27
+SpecialGridIntacc 8, 8, 8
+SpecialGridAtoms 28, 29
+end
+! PBE def2-SVP RKS
+Usingtherulesabove,onecanfigureoutwhyitisequivalenttothisone:
+! UKS BLYP def2-SVP
+%method
+SpecialGridAtoms 28, 29, 27
+SpecialGridIntacc 8, 8, 8
+end
+48 Chapter4. GeneralStructureoftheInputFile
+
+[... start of page 71 ...]
+ORCAManual,Release6.0.0
+4.6 ORCA and Symmetry
+Formostofitslife,ORCAdidnottakeadvantageofmolecularsymmetry. Startingfromversion2.8(releasedin
+September2010),therehasbeenatleastlimiteduse. Onrequest(usingthesimplekeywordUseSymforinstance,
+see below), the program detects the point group, orients the molecule, cleans up the coordinates and produces
+symmetry-adaptedmolecularorbitals.
+Onlyforgeometrycleanupthefullpointgroupistakenintoaccount. Forallotherpurposessuchastheconstruction
+ofsymmetry-adaptedmolecularorbitalsandortodescribeelectronicstates,only𝐷 andsubgroupsarecurrently
+2ℎ
+supported. Heretheuseofsymmetryhelpstocontrolthecalculationandtheinterpretationoftheresults.
+4.6.1 Getti

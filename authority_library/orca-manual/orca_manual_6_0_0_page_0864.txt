@@ -1,0 +1,82 @@
+[... end of page 863 ...]
+ied MOs and empty MOs. Important notes:
+# a) the number of electrons must be the same in all references
+# b) the number of orbitals is determined from the number of
+# definitions. Thus, in the example above we have three active
+# electrons and four active orbitals despite the fact that the
+# highest orbital is not occupied in any reference.
+# The program determines the internal, active and external spaces
+(continuesonnextpage)
+7.39. TheMultireferenceCorrelationModule 841
+
+--- Page 864 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# automatically from the number of active electrons and orbitals
+end
+end
+# there can be as many blocks as you want!!!
+# ----------------------------------
+# Density matrix generation flags
+# First Key= State densities <I|D|I>
+# =0: none
+# =1: Ground state only (lowest root of all blocks; Electron only)
+# =2: Ground state only (Electron and spin density)
+# =3: Lowest root from each block (Electron density)
+# =4: Lowest root from each block (Electron and spin density)
+# =5: All states (Electron density)
+# =6: All states (Electron and spin density)
+# Second Key= Transition densities <I|D|J>
+# needed for all transition intensities, g-tensor etc
+# =0: none
+# =1: from the ground state into all excited states (el)
+# =2: from the ground state into all excited states (el+spin)
+# =3: from all lowest states into all excited states (el)
+# =4: from all lowest states into all excited states (el+spin)
+# =5: all state pairs (el)
+# =6: all state pairs (el+spin)
+# Note that for perturbation theory the density is computed as
+# an expectation value over the first (second) order wavefunction.
+# which is renormalized for this purpose
+# ----------------------------------
+Densities 1,1
+# ----------------------------------
+# Complete printing of the wavefunction
+# ----------------------------------
+PrintWF 1 # CFG based printing (default)
+det # Determinant based wavefunction printing
+TPrintWF 3e-3 # Threshold for the printing of the CFGs/Dets
+# ----------------------------------
+# Algorithm for the solver
+# ----------------------------------
+Solver Diag # Davidson like solver
+DIIS # DIIS like solver
+# both solvers have their pros and cons. The DIIS may converge
+# better or use less time since it only recomputes the vectors that
+# have not yet converged; The DIIS may be less sensitive to root flipping
+# effects but occasionally it converges poorly and states of the same
+# symmetry are occasionally a little problematic
+# For perturbation theory DIIS is always used.
+# For both solvers
+MaxIter 100 # the maximum number of iterations
+Etol 1e-6 # convergence tolerance for energies in Eh
+Rtol 1e-6 # convergence tolerance for residual
+# For Solver=Diag (Davidson solver)
+Otol 1e-16 # Orthogonality threshold for Schmidt process
+NGuessMat 512 # Dimension of the guess matrix 512x512
+# be used to compute the initial guess of the actual MRCI calculation
+NGuessMatRefCI 512 # Dimension of the guess matrix
+# for the reference CI
+MaxDim 3 # Davidson expansion space = MaxDim * NRoots
+(continuesonnextpage)
+842 Chapter7. DetailedDocumentation
+
+[... start of page 865 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# For the Solver=DIIS. Particularly recommended for anything else but
+# straightforward CI and also for calculations in direct2 mode!
+MaxDIIS 5 # Maximum number of old vectors to be used in DIIS
+RelaxRefs true # Relax reference space coefficients in the CI or
+# freeze them to their zeroth order values
+LevelShift 0.4 # Level Shift for stabilizing the

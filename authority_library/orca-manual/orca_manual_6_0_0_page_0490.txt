@@ -1,0 +1,99 @@
+[... end of page 489 ...]
+ (7.27)
+𝐴<𝐵𝑛=6,8 𝐴𝐵
+where 𝐶𝐴𝐵 denotes the averaged (isotropic) 𝑛th-order dispersion coefficient for atom pair AB and 𝑟 is their
+𝑛 𝐴𝐵
+internuclear distance. 𝑠 is a functional-dependent scaling factor (see below). In the general case, an adequate
+𝑛
+dampingfunctionmustbeemployed.
+DampingFunctions
+Inordertoavoidnear-singularitiesforsmall𝑟 ,thedispersioncontributionneedstobedampedatshortdistances.
+𝐴𝐵
+OnepossiblewayistouserationaldampingasproposedbyBeckeandJohnson[90,424,425]:
+∑︁ ∑︁ 𝐶𝐴𝐵
+𝐸(2) =− 𝑠 𝑛 (7.28)
+𝑛 𝑟𝑛 +𝑓(𝑅𝐴𝐵)𝑛
+𝐴<𝐵𝑛=6,8 𝐴𝐵 0
+7.4. ChoiceofComputationalModel 467
+
+--- Page 490 ---
+ORCAManual,Release6.0.0
+with[425]
+√︃
+𝐶𝐴𝐵
+𝑅𝐴𝐵 = 8 (7.29)
+0 𝐶𝐴𝐵
+6
+and
+𝑓(𝑅𝐴𝐵)=𝑎 𝑅𝐴𝐵 +𝑎 . (7.30)
+0 1 0 2
+Dampingthedispersioncontributiontozeroforshortranges(asinRef. [324])isalsopossible:
+∑︁ ∑︁ 𝐶𝐴𝐵
+𝐸(2) =− 𝑠 𝑛 𝑓 (𝑟 ) (7.31)
+𝑛 𝑟𝑛 𝑑,𝑛 𝐴𝐵
+𝐴<𝐵𝑛=6,8 𝐴𝐵
+with
+1
+𝑓 = (7.32)
+𝑑,𝑛 1+6( 𝑟𝐴𝐵 )−𝛼𝑛
+𝑠𝑟,𝑛𝑅
+0
+𝐴𝐵
+Notethatthe𝑅𝐴𝐵 usedwiththisdampingarefromRef. [324]. Formoreinformationonthesupporteddamping
+0
+functions, see Ref [326]. The recommended variant is that with Becke-Johnson damping and is invoked by the
+keyword!D3BJorsimply!D3. Thedispersioncorrectionwithzerodampingisinvokedbythekeyword!D3ZERO.
+Three-bodyterm
+Itispossibletocalculatethethree-bodydispersioncontributionswithDFT-D3,accordingto
+𝐸(3) =− ∑︁ 𝐶 9 𝐴𝐵𝐶(3cos𝜃 𝑎 cos𝜃 𝑏 cos𝜃 𝑐 +1) 𝑓 (𝑟 ) (7.33)
+(𝑟 𝑟 𝑟 )3 𝑑,(3) 𝐴𝐵𝐶
+𝐴𝐵 𝐵𝐶 𝐶𝐴
+𝐴<𝐵<𝐶
+where 𝜃 , 𝜃 and 𝜃 are the internal angles of the triangle formed by 𝑟 , 𝑟 and 𝑟 . The 𝐶 coefficient is
+𝑎 𝑏 𝑐 𝐴𝐵 𝐵𝐶 𝐶𝐴 9
+approximatedby
+√︁
+𝐶𝐴𝐵𝐶 ≈− 𝐶𝐴𝐵𝐶𝐴𝐶𝐶𝐵𝐶 (7.34)
+9 6 6 6
+Thethree-bodycontributionhasasmalleffectonmedium-sizedmoleculesandisdampedaccordingtoequation
+(7.33). Thedampingfunction𝑓 (𝑟 )issimilartotheoneshowninequation (7.32)with𝑟 beingthe
+𝑑,(3) 𝐴𝐵𝐶 𝐴𝐵𝐶
+geometricmeanof𝑟 ,𝑟 and𝑟 . Itcanbeusedwithbothvariantsofthe𝐸(2)term,althoughthethree-body
+𝐴𝐵 𝐵𝐶 𝐶𝐴
+termitselfwillalwaysbecalculatedusingthezerodampingscheme. Addingthethree-bodycorrectionhasproven
+to give quite accurate results for the thermochemistry of supramolecular systems[322]. The three-body term is
+invoked by the keyword !ABC, along with either the !D3ZERO keyword for zero damping of 𝐸(2) or !D3BJ for
+Becke-Johnsondampingof𝐸(2).
+Options
+Note that correcting Hartree-Fock (HF) is only parametrized with BJ-damping. For a constantly updated list of
+supportedfunctionals,checkthewebsiteoftheGrimmegroup[329]. Ifthereisafunctionalonthiswebsitethat
+isparametrized,buttheparametersarenotyetimplementedintoORCA,youcanspecifytheparametersmanually
+asshownbelow(usingtherespectiveparametersfrom[329]). Inthesamefashion,onecouldalsouseone’sown
+parameters,butthisisnotrecommended.
+Important: GGA and hybrid functionals should only be used with 𝑠 = 1.0 to ensure asymptotically correct
+6
+behavior. Double-hybridfunctionalsalreadyaccountforpartsofthedispersioninteractionandshouldtherefore
+beusedwith𝑠 < 1.0. Inthe %methodblock, itispossibletochangethe𝑠 , 𝑎 , 𝑠 , and𝑎 parametersforthe
+6 6 1 8 2
+variantwithBecke-Johnsondamping:
+468 Chapter7. DetailedDocumentation
+
+[... start of page 491 ...]
+ORCAManual,Release6.0.0
+! d3bj b2plyp
+%method
+D3S6 0.64
+D3A1 0.3065
+D3S8 0.9147
+D3A2 5.0570
+end
+Thevariantwithzerodampingofferstheparameters𝑠 ,𝑟𝑠 ,𝑠 ,and𝛼 .
+6 6 8 6
+! d3zero blyp
+%method
+D3S6 1.0
+D3RS6 1.094
+D3S8 1.682
+D3alpha6 14
+end
+Ifageometryoptimizationisperformed(!OPT),thentheprogramautomaticallycallstheDFT-D3gradient. T

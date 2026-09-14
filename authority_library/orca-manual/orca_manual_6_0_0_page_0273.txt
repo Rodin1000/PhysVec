@@ -1,0 +1,76 @@
+[... end of page 272 ...]
+values = 12.000000
+Natural Orbital Occupation Numbers:
+N[ 2] ( A1)= 1.99831062
+N[ 3] ( A1)= 1.99761604
+N[ 4] ( A1)= 1.99479313
+N[ 5] ( B1)= 1.99016881
+N[ 6] ( B2)= 1.95818285
+N[ 7] ( B1)= 1.33014178
+N[ 8] ( B2)= 0.70688423
+(continuesonnextpage)
+250 Chapter6. RunningTypicalCalculations
+
+--- Page 273 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+N[ 9] ( B1)= 0.00988561
+N[ 10] ( A1)= 0.00436843
+Thisshowsthatthereisalow-occupancyorbital(MO6)thathasnotbeenpartofthereferencespace. Thus,wetry
+thesamecalculationagainbutnowwithonemoreactiveorbitalandtwomoreactiveelectrons:
+! moread
+%moinp "Test-SYM-MRCI-H2CO.gbw"
+%casscf nel 4
+norb 3
+irrep 0,1,1
+mult 1,1,3
+nroots 1,1,1
+end
+%mrci CIType SORCI
+tsel 1e-6
+tpre 1e-4
+tnat 1e-5
+AllSingles true
+doNatOrbs true
+IntMode FullTrafo
+# ground state 1A1
+NewBlock 1 0
+NRoots 1
+Excitations cisd
+Refs CAS(4,3) end
+End
+# HOMO LUMO transition 1A2
+NewBlock 1 1
+NRoots 1
+Excitations cisd
+Refs CAS(4,3) end
+End
+# HOMO LUMO triplet transition 3A2
+NewBlock 3 1
+NRoots 1
+Excitations cisd
+Refs CAS(4,3) end
+End
+end
+Thisgives:
+State Mult Irrep Root Block mEh eV 1/cm
+0 1 A1 0 0 0.000 0.000 0.0
+1 3 A2 0 2 145.494 3.959 31932.3
+2 1 A2 0 1 162.222 4.414 35603.6
+Whichisnowfinesinceallessentialphysicshasbeeninthereferencespace. Inspectionoftheoccupationnumbers
+showthatthereisnosuspiciousorbitalanymore. Notethatthisisstillamuchmorecompactcalculationthatthe
+MRCI+Q.
+Likewise,wegetanaccurateresultfromMRACPFwiththeextendedreferencespace.
+State Mult Irrep Root Block mEh eV 1/cm
+0 1 A1 0 0 0.000 0.000 0.0
+1 3 A2 0 2 134.985 3.673 29625.8
+2 1 A2 0 1 148.330 4.036 32554.6
+However, theSORCIcalculationismuchmorecompact. Forlargermoleculesthedifferencebecomesmoreand
+6.7. MultireferenceConfigurationInteractionandPertubationTheory 251
+
+[... start of page 274 ...]
+ORCAManual,Release6.0.0
+morepronouncedandSORCIorevenMRDDCI2(withorwithout+Q)maybetheonlyfeasiblemethods—ifatall.
+6.7.3 Excitation Energies between Different Multiplicities
+AsanexampleforarelativelyaccurateMRCI+Qcalculationconsiderthefollowingjobwhichcalculatesthetriplet-
+groundandasthefirste

@@ -1,0 +1,63 @@
+Your task is to generate executable and practical codes to reproduce results of a research paper, according to given informaiton. 
+During this process, you should strive to ensure that the code faithfully represents the task requirements while maintaining its executability. You should not provide a incomplete code. 
+You are requested to use MCP tools to look up into local library for related information. 
+
+-----------------------------------------------------------------------------------------------
+[Output format (CRITICAL)]:
+At the very end of the conversation, you MUST return the final result in a single fenced JSON block
+that can be parsed directly by a JSON parser. Follow these rules strictly:
+
+1. The final answer MUST be wrapped exactly as:
+    ```json
+    { ... }
+    ```
+    Do not add any text before or after this fenced block (no explanations, no "Final Answer:",
+    no "Thought:", no "Action:", no markdown headings).
+
+2. Inside the JSON object you MUST include at least the following keys:
+    - "subplot_name": string, e.g. "Fig. 2".
+    - "code_type": string, e.g. "python" or "julia" or "orca" (for ORCA-style input files).
+    - "code_content": string, containing the FULL content of the generated code file.
+    You MAY include additional keys such as "learned_facts" or "remaining_unclear_factors", but the
+    whole object MUST remain valid JSON.
+
+3. The JSON object MUST NOT be nested inside a string. It must be raw JSON, for example:
+    ```json
+    {
+      "subplot_name": "Fig. 2",
+      "code_type": "orca",
+      "code_content": "# Step 1: ...\n! BP86 TZVP ..."
+    }
+    ```
+
+4. You MAY think step-by-step using internal reasoning, but any such reasoning (Thought/Action/
+    Observation, tool logs, etc.) MUST NOT appear in the final output. Only the single ```json
+    fenced block described above is allowed as the last answer.
+
+These constraints are essential because an external parser will automatically extract this JSON
+block and write the code_content to a file under a specific logs directory.
+
+-----------------------------------------------------------------------------------------------
+[Input]:
+1. Plan_info: You will be given a task plan, whose name may be 'Plan_info', ...The task plan aims to instruct you to reproduce a subplot/table. It typically contains:
+    - "subplot_name": The user defined subplot that you will focus on. May be Fig. 1(c), Fig. 1(a)-inset, ...Insets should be regarded as seperate subplots. If you cannot find such subplot in the paper, this term is 'Subplot not found', and all items below is 'None'. 
+    - "User_requests": User's additional instructions for generating the subplot. Including specifying several items, specifying numerical methods, ...
+    - "plan": a detailed plan containing information about how to generate code, specific values that should be implemented...
+
+
+----------------------------------------------------------------------------------------------
+[MCP usage]:
+Before code generation process, please use MCP to get more related information/guides. 
+1. You may use MCP server: 'filesystem' to get information from local libraries. Please follow the searching strategy below:
+    - IMPORTANT: The summary file is in the reference project ("libs"), NOT necessarily in the filesystem-mcp working directory.
+   - First call filesystem-mcp `get_reference_projects` and confirm reference "libs" exists
+   - Then call filesystem-mcp `list_reference_directory(reference_name="libs")` to list available files
+   - Use filesystem-mcp `read_reference_file(reference_name="libs", file_path="<summary json relative path>")` to read the summary JSON
+        - file_path MUST be the exact RELATIVE path returned by list_reference_directory (no `..\\`, no absolute paths)
+    - Tool arguments must be a JSON object, not a JSON string. Never wrap the arguments object in quotes.
+
+
+-----------------------------------------------------------------------------------------------
+[Instructions]:
+You will generate a code file (py, julia, ) according to the task plan. 
+The code should be consist of a set of functions. You MUST STRICTLY FOLLOW the rules below. 

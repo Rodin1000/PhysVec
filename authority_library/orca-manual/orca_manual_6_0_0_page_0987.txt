@@ -1,0 +1,65 @@
+[... end of page 986 ...]
+PSIZEunder%DOCKER.
+Another important piece of information is the Min, Max Iterations, which define the minimum number of
+iterationsbeforecheckingforconvergence,andthemaximumpossiblenumberofiterations. Thesecanbechanged
+964 Chapter7. DetailedDocumentation
+
+--- Page 987 ---
+ORCAManual,Release6.0.0
+bysettingMINITERandMAXITERunderthe%DOCKER.
+Thenduringtheswarmsearchitself(herecalledthe“evolutionstep”),theHOSTandGUESTarepartiallyoptimized
+usingthesamecriteriaasfrom !SLOPPYOPT,andtheirenergyatconvergenceistakenasaconvergencecriteria.
+Theprinting,stillforthepreviousexample,reads:
+Note: Alloftheoptimizationsrespectconstraintsand/orwallpotentialsgivenonthe%GEOMblock. TheHOSTcan
+beeasilyfrozenwith%DOCKER FIXHOST TRUE END.
+Iter Emin avDE stdDE Time
+(Eh) (kcal/mol) (kcal/mol) (min)
+-------------------------------------------------------
+1 -10.147462 2.756033 1.821981 0.03
+2 -10.147462 2.121389 1.610208 0.03
+3 -10.148583 2.313606 1.365227 0.03
+4 -10.148583 1.846998 1.188680 0.02
+5 -10.148583 1.587332 1.168207 0.02
+No new minimum found after 3 (MinIter) steps.
+Herewehavethenumberofiterations,theenergyofthebestsolutionfoundduringtheprocess,theaverageenergy
+differencefromthelowestsolutionsanditsstandarddeviation. Thefirstnumbershowsifthesystemisevolving
+towardsalowerenergysolutionsandthelatertwogiveanideaofthe“spread”oftheenergiesfound.
+If no new minimum is found over MINITER iterations, the algorithm is considered to be converged and the best
+solutionsaretakentothefinaloptimizationstep.
+7.49.3 The final steps
+Aftertheevolutionstep,atotalof𝑚𝑎𝑥(𝑠𝑞𝑟𝑡(𝑃𝑜𝑝𝑆𝑖𝑧𝑒),5)structuresaretakenfromthesetofsolutionsforafinal
+fulloptimization. Theoutputlookslike:
+Running final optimization
+Maximum number of structures 7
+Minimum energy difference 0.10 kcal/mol
+Maximum RMSD 0.25 Angs
+Optimization strategy regular
+Coordinate system redundant 2022
+Fixed host false
+To avoid redundant solutions being optimized here, a check is made such that only structures with an energy
+difference of at least a Minimum energy difference and Maximum RMSD (obtained after an optimal rotation
+usingthequaternionapproach)aretaken. ThecoordinatesystemmightalsobeautomaticallysettoCartesianif
+thenumberofatomsisabove300tospeedup.
+Ifsomeoptimizationsfailduringtheprocess,theywillbeflaggedasoptimization failed,asintheexample
+below:
+Struc Eopt Interaction Energy Time
+(Eh) (kcal/mol) (min)
+------------------------------------------------
+1 -10.149006 -4.968378 0.01
+2 -10.149005 -4.967965 0.01
+3 optimization failed 0.01
+4 -10.149007 -4.968641 0.01
+(...)
+Thatonlymeanssomeofthesolutionsfailedtofullyoptimizeattheend,andontheprintedfiletheirenergyisset
+to1000Ehtoshowthejobwasnotcompleted. Ifyouwanttoincreasethenumberofiterations,orchangethefinal
+7.49. MoredetailsontheORCADOCKER 965
+
+[... start of page 988 ...]
+ORCAManual,Release6.0.0
+convergencecriteria,justchangethemusingthe%GEOMblockasusual.
+7.49.4 General Tips
+1. In order to quick change the PES of the docking process, you can use !DOCK(GFN2-XTB), !
+DOCK(GFN1-XTB),!DOCK(GFN0-XTB)or!DOCK(GFN-FF).
+2. Foraquickerandlessaccuratedockingtheinput!QUICKDOCKisalsoavailable.
+3. Therearefourlevelsof“docking”procedure,fromsimpletomoreelaborate: SCREENING,QUICK,NORMAL
+(default)andCOMPLETE,whichcanbeg

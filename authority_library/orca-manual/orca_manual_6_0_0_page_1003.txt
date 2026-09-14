@@ -1,0 +1,78 @@
+[... end of page 1002 ...]
+itched
+toelasticbythecommand“Cell Elastic ...”(thedotsrepresentthetworealarguments).
+By default, the size change of an elastic cell due to pressure is performed isotropically, i. e., the cell is scaled
+as a whole, and exactly retains its aspect ratio. By specifying the “Anisotropic” modifier after switching on
+anelasticcell,thecellpressureisbrokendownintoindividualcomponents,andthesizeofthecellisallowedto
+changeindependentlyintheindividualdirections. This,ofcourse,onlymakessenseforthecellgeometriesRect,
+Rhomb, and Ellipsoid. An already defined isotropic cell can be switched to anisotropic by simply executing
+“Cell Anisotropic”.
+Incaseofanelasticcell,theexternalpressureisdefinedbythemodifier“Pressure”,whichexpectseitheroneor
+threerealvaluesasarguments. Ifoneargumentisgiven,thisistheisotropicexternalpressure. Ifthreearguments
+are supplied, these are the components of the pressure in X, Y, and Z direction (in case of orthorhombic cells)
+980 Chapter7. DetailedDocumentation
+
+--- Page 1003 ---
+ORCAManual,Release6.0.0
+oralongthedirectionofthethreespecifiedvectors(incaseofparallelepiped-shapedandellipsoid-shapedcells).
+Thisallowsforanisotropicexternalpressure(probablyonlyusefulforsolidstatecomputations). Boththepressure
+andthepressurecomponentshavetospecifiedinunitsofbar(= 105 Nm−2),otherunitscannotbeused. Ifthis
+modifierisnotused, thedefaultpressurewillbesetto1.0bar(isotropic)ifanelasticcellisused. Theexternal
+pressureofanalreadydefinedcellcanbechangedbythecommand“Cell Pressure ...”(thedotsrepresent
+therealargument(s)).
+Asallcellsarenon-elasticbydefault,thereisnokeywordtoexplicitlyrequestthisatthetimeofcelldefinition.
+However,possibleapplicationsmightrequiretouseanelasticcellduringequilibrationperiod,andthen“freeze”
+thiscellatthefinalgeometryfortheproductionrun. Thiscanbeachievedbyusingthe“Cell Fixed”command
+(withoutanyadditionalarguments).
+If the cell is elastic, there is a volume work term which contributes to the total energy of the system. ORCA
+computes this term in every step and adds it to the potential energy. Without this contribution, the conserved
+quantitywoulddriftexcessivelyinelasticcellruns.
+Tocompletelyswitchoffapreviouslydefinedcell,simplyuse“Cell None”.
+PleasenotethatcellsarenotautomaticallyrestartedbyusingtheRestartcommand.
+Examples:
+Cubiccellwithedgelength10Åcenteredaroundorigin:
+Cell Cube 10
+Sphericalcellwithradius5Åcenteredaroundoriginand20kJmol−1Å−2wallsteepness:
+Cell Sphere 0, 0, 0, 5 Spring 20
+Elasticorthorhombiccellfrom(︀ −2,−2,0 )︀to(︀ 12,12,10 )︀,𝑡avg =100fs,𝑐response =0.001:
+Cell Rect -2, -2, 0, 12, 12, 10 Elastic 100, 0.001
+Ellipsoid-shapedcellcenteredonoriginwithpartialradii5,10,15ÅalongtheX,Y,Zaxes:
+Cell Ellipsoid 0, 0, 0 XYZ 5, 10, 15
+Thecommasareoptional,butmakesuretousethemwithnegativenumbers. Bydefault,theminusoperatorwill
+actasbinaryoperatorifpossible(seediscussionabove).
+Constraint
+MandatoryArguments: opera- Key- {Add,Remove,List}
+tion word
+type Key- { Cartesian, Distance, Angle, Dihedral, Center,
+word Rigid}
+atom(s) Integer —
+OptionalArguments: —
+Modifiers: Target value(s) Real —
+Ramp value(s) Real —
+Weights ... ... seetext
+All —
+Noprint —
+Managesconstraintsinthemoleculardynamicssimulation. UnlikeRestraints,constraintsaregeometricrela-
+tions which are strictly enforced at every time (i. e., they do not fluctuate around their target value). All atoms
+involved in constraints have to be included in the active region. In principle, constraints also work in Cartesian
+geometryoptimizationswiththeMinimize command, buttheperformancetogetherwithL-BFGSmaybepoor
+(exceptforCartesianconstraints,whichworkflawlesslyinL-BFGS).Inthesecases,trytousethesimulatedan-
+nealingmethodinstead.
+ThesimplestpossibilityistoconstraintheCartesianpositionofanatomtosomevalue. Azero-basedatomindexis
+required. ThecommandConstraint Add Cartesian 3wouldfixthefourthatominthesimulationatitscurrent
+7.51. AbinitioMolecularDynamicsSimulations 981
+
+[... start of page 1004 ...]
+ORCAManual,Release6.0.0
+positioninspace. Ifthedesiredpositionshallbeexplicitlygiven,itcanbespecifiedviatheTargetmodifier,e.
+g.,Constraint Add Cartesian 3 Target 5.0 1.0 1.0. Todeterminewhichdimensionstofix,oneofthe
+XYZ, XY, XZ, YZ, X, Y, or Z modifiers can be added. For example, Constraint Add Cartesian 3 X Target
+1.0wouldconstraintheXcoordinateofatom3totheabsolutevalue1.0,butwouldnotinfluencemovementalong
+theYandZcoordinateatall.
+By using the Distance keyword, distances between atoms can be fixed. The command Constraint Add
+Distance 3 5 would fix the distance between atom 3 and 5 to its current value. You need to specify exactly
+two atom indices; multiple distance constraints are entered via multiple Constraint commands. Also here, a
+desireddistancevaluecanbegivenviatheTargetmodifier,suchasConstraint Add Distance 3 5 Target
+350_pm.
+Similarly,anglesanddihedralanglesbetweenatomscanbefixedwiththeAngleandDihedralkeywords. Angles
+are defined by three atom indices, and dihedral an

@@ -1,0 +1,82 @@
+[... end of page 156 ...]
+]Wenotepassing,thatthereareinprinci-
+plethreedistinguishedauxiliarybasisslots,thatcanbeindividuallyassignedinthe%basisblock(sectionChoice
+ofBasisSet). Asanexample,werecomputethebenzenegroundstateexamplefromSectionStartingOrbitalswith
+aCAS(6,6).
+! SV(P) def2-svp/C
+! moread
+%moinp "Test-CASSCF-Benzene-2.mrci.nat"
+# Commented out: Detailed settings of the auxiliary basis in the %basis block,
+# where the AuxC slot is relevant for the option TrafoStep RI.
+(continuesonnextpage)
+134 Chapter6. RunningTypicalCalculations
+
+--- Page 157 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# %basis
+# auxC "def2-svp/C" # "AutoAux" or "def2/JK"
+# end
+%casscf nel 6
+norb 6
+nroots 1
+mult 1
+trafostep ri
+end
+Theenergyofthiscalculationis-230.590328 Ehcomparedtothepreviousresult-230.590271 Eh. Thus,the
+RIerrorisonly0.06mEhwhichiscertainlynegligibleforallintentsandpurposes. Withthelarger/JKauxiliary
+basistheerroristypicallymuchsmaller(0.02mEhinthisexample). Evenifmoreaccurateresultsarenecessary,
+itisagoodideatopre-convergetheCASSCFwithRI.Theresultingorbitalsshouldbeamuchbetterguessforthe
+subsequentcalculationwithoutRIandthussavecomputationtime.
+The TrafoStep RI only affects the integral transformation in CASSCF calculations while the Fock operators
+arestillcalculatedinthestandardwayusingfourindexintegrals. Inordertofullyavoidanyfour-indexintegral
+evaluation,youcansignificantlyspeedupthetimeneededineachiterationbyspecifying!RIJCOSX.Thekeyword
+impliesTrafoStep RI.TheCOSXapproximationisusedfortheconstructionoftheFockmatrices. Inthiscase,
+anadditionalauxiliarybasis(/Jauxiliarybasis)ismandatory.
+! SV(P) def2-svp/C RIJCOSX def2/J
+! moread
+%moinp "Test-CASSCF-Benzene-2.mrci.nat"
+# Commented out: Detailed settings of the auxiliary basis in the %basis block,
+# where the AuxJ and AuxC slot are mandatory.
+# %basis
+# auxJ "def2/J" # "AutoAux"
+# auxC "def2-svp/C" # "AutoAux", "def2/JK"
+# end
+%casscf nel 6
+norb 6
+nroots 1
+mult 1
+end
+ThespeedupandaccuracyissimilartowhatisobservedinRHFandUHFcalculations. InthisexampletheRIJCOSX
+leadstoanerrorof1mEh. Themethodologyperformsbetterforthecomputationofenergydifferences,whereit
+profitsfromerrorcancellation. TheRIJCOSXisideallysuitedtoconvergelarge-scalesystems. Notethatforlarge
+calculationstheintegralcut-offsandnumericalgridsshouldbetightened. SeesectionUsingtheRIApproximation
+for Hartree-Fock and Hybrid DFT (RIJCOSX) for details. With a floppy numerical grid setting the accuracy as
+well as the convergence behavior of CASSCF deteriorate. The RIJK approximation offers an alternative ansatz.
+Thelatterissetwith!RIJKandcanalsoberuninconventionalmode(conv)foradditionalspeed-up. Withconv,
+asingleauxiliarybasismustbeprovidedthatissufficientlylargertoapproximatetheFockmatricesaswellthe
+gradient/Hessianintegrals. IndirectmodeanadditionalauxiliarybasissetcanbesetfortheAuxCslot.
+! SV(P) RIJK def2/JK
+# Commented out: Detailed settings of the auxiliary basis in the %basis block,
+# where only the auxJK slot must be set.
+# %basis
+# auxJK "def2/JK" # or "AutoAux"
+# end
+TheRIJKmethodologyismoreaccurateandrobustforCASSCFe.g. heretheerrorisjust0.5mEH.
+6.1. SinglePointEnergiesandGradients 135
+
+[... start of page 158 ...]
+ORCAManual,Release6.0.0
+Organicmoleculeswithnearlydoubleoccupiedorbitalscanbechallengefortheorbitaloptimizationprocess. We
+comparecalculationsdonewith/withouttheNRsolver:
+! SV(P)
+! moread
+%moinp "Test-CASSCF-Benzene-2.mrci.nat"
+%casscf nel 6
+norb 6
+nroots 1
+mult 1
+# overwriting default settings with NR close to convergence
+switchstep NR
+end
+TheNRvarianttakes5cyclestoconverge,wh

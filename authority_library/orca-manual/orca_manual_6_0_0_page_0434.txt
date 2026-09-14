@@ -1,0 +1,51 @@
+[... end of page 433 ...]
+ngRRINTEStoTRUEunder%ESD.
+AndtheresultisshowninFig.6.67. Inthiscase,thedefaultmethodVGwasused. Ifonewantstoincludesolvent
+effects,thenCPCM(WATER)shouldbeadded. Ascanbeseen,thereisanoticeabledifferenceinthemainpeak
+6.18. ExcitedStateDynamics 411
+
+--- Page 434 ---
+ORCAManual,Release6.0.0
+whencalculatedinwater.
+It is important to clarify some differences from the ORCA_ASA usage here. Using the ESD module, you do not
+needtoselectwhichmodesyouwillaccountforinthespectra;weincludeallofthem. Additionally,wecanonly
+operateat0K,andthemaximum“RamanOrder”is2. Thismeansweaccountforallfundamentaltransitions,first
+overtones,andcombinationbands,withoutincludinghotbands. Thislevelofapproximationisgenerallysufficient
+formostapplications.
+Ifyouareworkingwithaverylargesystemandwanttoreducecalculationtime,youcanrequestRORDER1under
+the %ESD options. This setting includes only the fundamental transitions, omitting higher-order bands. This
+approach may be relevant, especially when including both Duschinsky rotations and the Herzberg-Teller effect,
+whichcansignificantlyincreasecomputationtime.
+TherRamanspectraareprintedwiththecontributionsfrom“RamanOrder”1and2separatedasfollows:
+Energy TotalSpectrum IntensityO1 IntensityO2
+0.000000 2.722264e-08 2.722264e-08 8.436299e-30
+0.305176 2.824807e-08 2.824807e-08 9.043525e-30
+0.610352 2.931074e-08 2.931074e-08 9.693968e-30
+...
+IsotopicLabeling
+IfyouwanttosimulatetheeffectofisotopiclabelingontherRamanspectrum,thereisnoneedtorecalculatethe
+Hessianagain. Instead,youcandirectlymodifythemassesoftherespectiveatomsintheHessianfiles. Thiscan
+bedonebyeditingthe$𝑎𝑡𝑜𝑚𝑠sectionoftheinputfileordirectlyintheHessianfileitself(seealsoSec. Isotope
+Shifts). Aftermakingtheseadjustments,youcanrerunESDusingthemodifiedHessianfiles,forexample:
+!PBE0 DEF2-SVP TIGHTSCF ESD(RR) CPCM(WATER)
+%TDDFT
+NROOTS 5
+IROOT 3
+END
+%ESD
+GSHESSIAN "PHE_WATER_ISO.hess"
+ESHESSIAN "PHE_WATER_ISO.ES.hess"
+END
+* XYZFILE 0 2 PHE_WATER.xyz
+Asdepictedin{numref}fig:esd_phe_rr_ISO,thedistinctionbetweenphenoxylanditsdeuteratedcounterpartis
+evident. Thepeakaround1000cm−1 correspondstoaC-Hbond,whichshiftstolowerenergyafterdeuteration.
+Thisdifferenceofapproximately150cm−1alignscloselywithexperimentalfindings[850].
+412 Chapter6. RunningTypicalCalculations
+
+[... start of page 435 ...]
+ORCAManual,Release6.0.0
+Fig.6.68: Thetheoretical(solidblack-C H Oandsolidblue-C D O)andexperimental(dashedred)resonant
+6 5 6 5
+Ramanspectrumforthephenoxylradical.
+OBS: Whenever an ES Hessian is calculated using the HESSFLAG methods, it is saved in a file named BASE-
+NAME.ES.hess. Ifyouwanttorepeatacalculation, youcansimplyusethisfileasan

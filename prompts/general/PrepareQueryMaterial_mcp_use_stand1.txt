@@ -1,0 +1,87 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is to prepare query materials for CodeVerifier library by generating queries, retrieving documentation, and summarizing Q-A pairs.
+
+**PURPOSE: The queries and retrieval results you prepare will be used by subsequent LLMs to generate reliable functions for {type} {element} in {topic}. Your goal is to ensure the retrieved documentation provides comprehensive, accurate information that enables function generation.**
+
+--------------------------------------------------------------------------
+[Input:]
+1. TYPE: {type} (e.g., boson, fermion)
+2. ELEMENT: {element} (e.g., hamiltonian, effector, observable...)
+3. ELEMENT_NOTE: {element_note} (key concepts/terms related to this element - if provided, use this to guide query generation; if empty, focus on {type} {element} general usage)
+4. TOPIC: {topic} (the package/library topic, e.g., itensor, netket, dft)
+5. LIBRARY_NAMES: {library_names} (list of package names to use for retrieval, e.g., ["itensors", "itensormps"])
+6. QUERY_NUM: {query_num} (number of queries to generate)
+7. QUERY_ELEMENT_DIR: {query_element_dir} (directory to save retrieval results)
+8. OUTPUT_SUMMARY_FILE: {output_summary_file} (filename for final summary JSON)
+
+Note: The filesystem-mcp working directory is already set to {query_element_dir}.
+IMPORTANT: For filesystem-mcp `read_file` / `save_file`, ALWAYS use ONLY filenames (relative paths) such as "{output_summary_file}".
+DO NOT include {query_element_dir} in file_path. DO NOT use `..\\` or absolute paths.
+
+
+-----------------------------------------------------------------------------
+[Instruction:]
+1. **Generate {query_num} queries:**
+   - **CRITICAL - PRIMARY SOURCE: ELEMENT_NOTE is the PRIMARY source for query generation**
+     * **If ELEMENT_NOTE is provided ({element_note}):** You MUST primarily base your queries on the key concepts, terms, and requirements specified in ELEMENT_NOTE
+     * **Use ELEMENT_NOTE as the foundation:** Each query should relate to specific aspects mentioned in ELEMENT_NOTE
+   - **Purpose: These queries will be used to retrieve documentation that enables LLM to generate reliable functions for {type} {element}**
+   - Each query MUST be <20 words, brief and focused on package usage for {type} {element} in {topic}
+   - Each query MUST cover a DISTINCT aspect (no concept overlap)
+   - Focus on practical usage, syntax, and implementation details that are ESSENTIAL for function generation
+   - Prioritize queries that cover: function signatures, parameter definitions, usage patterns, and common pitfalls - all based on ELEMENT_NOTE content
+
+2. **Retrieve documentation using retrieve-mcp:**
+   - For EACH query, call `retrieve_hybrid` or `retrieve_hybrid_multi` tool (use 'retrieve_hybrid_multi' first when there are multiple libraries).
+   - **CRITICAL: Use packages from LIBRARY_NAMES: {library_names}**. 
+      - **CRITICAL**: You are FORBIDDEN to retrieve from libraries NOT listed LIBRARY_NAMES. 
+      - **CRITICAL**: Every library listed in LIBRARY_NAMES MUST be retrieved. 
+   - Tool parameters: 
+     * Single package: query="...", package="packagename", final_num=15 (use one package from {library_names}, pass final_num=15 or higher for more comprehensive results)
+     * Multiple packages: query="...", packages=["pkg1", "pkg2"], final_num=15 (use multiple packages from {library_names} if query benefits from cross-package search, pass final_num=15 or higher for more comprehensive results)
+   - IMPORTANT: Always pass final_num=15 (or higher) to retrieve more comprehensive results per query
+   - Tools AUTOMATICALLY save results to JSON files in {query_element_dir}
+   - Call tools ONE AT A TIME: retrieve → wait for confirmation → next retrieve → ...
+   - DO NOT batch operations
+
+3. **Read all retrieval results using filesystem-mcp:**
+   - After all retrievals complete, call filesystem-mcp `list_directory` to list files in the current working directory ({query_element_dir})
+   - Identify the JSON files saved by retrieve-mcp tools
+   - Use filesystem-mcp `read_file(file_path="...")` to read each JSON file
+   - **CRITICAL: file_path must be ONLY the filename (no directories, no `..\\`, no absolute paths)**
+
+4. **Generate summary JSON file:**
+   - Create a summary file named {output_summary_file} in the current working directory ({query_element_dir})
+   - **Purpose: This summary will serve as reference material for LLM to generate reliable {type} {element} functions**
+   - For EACH query, extract and refine the answer from its corresponding retrieval result
+   - **CRITICAL: Answers must be accurate, complete, and directly useful for function generation**
+   - Format: JSON array with Q-A pairs, each containing:
+     * "query": the original query text
+     * "answer": refined answer extracted from retrieval result (must be actionable for function generation)
+   - Use filesystem-mcp `save_file(file_path="{output_summary_file}", content=<json>)` to write the summary JSON file
+   - **CRITICAL: file_path must be ONLY "{output_summary_file}" (no directories, no `..\\`, no absolute paths)**
+   - **CRITICAL - Error handling: If save_file fails with an error, analyze the error message, fix the file_path/content issue, then retry save_file**
+
+5. **CRITICAL - How to call tools:**
+   - You have REAL MCP tools available - when you call them, they EXECUTE and return results
+   - DO NOT write "Action:", "Thought:", "Observation:" - this is NOT ReAct format
+   - DO NOT describe what you will do - DIRECTLY call the tools
+   - DO NOT simulate tool calls - tools will actually run
+
+6. **Workflow sequence (MANDATORY):**
+   Step 1: **FIRST:** Read and analyze ELEMENT_NOTE ({element_note}) to understand key concepts, input/output parameters, and requirements
+   Step 2: Generate {query_num} queries PRIMARILY based on ELEMENT_NOTE content for {type} {element}
+   Step 3: For each query → call retrieve_hybrid/retrieve_hybrid_multi → wait for confirmation
+   Step 4: After all retrievals → use filesystem-mcp list_directory → read_file(file_path="<filename>") to read all JSON files
+   Step 5: Generate summary with Q-A pairs → use filesystem-mcp save_file(file_path="{output_summary_file}") to write summary JSON
+
+7. **Example summary JSON format:**
+   [
+     {{"query": "How to create element for type system?", "answer": "Use appropriate constructor with type-specific operators, parameters include dimension, operators, and boundary conditions..."}},
+     {{"query": "How to set element parameters?", "answer": "Set parameters in constructor or via setter methods, typical parameters include dimension, coupling strength, and boundary type..."}}
+   ]
+
+
+**Start executing the workflow NOW.**
+

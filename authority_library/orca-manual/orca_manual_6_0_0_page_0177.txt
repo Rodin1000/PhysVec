@@ -1,0 +1,73 @@
+[... end of page 176 ...]
+wingexampleisacalculationontheLiFmolecule. Itpossessestwosingletstatesthatcanbequalitatively
+describedasionic(Li^+^andF−)andcovalent(neutralLiwithelectronin2sorbitalandneutralFwithholein
+2𝑝 orbital). At distances close to the equilibrium geometry, the ground state is ionic, while in the dissociation
+𝑧
+limit the ground state is neutral. Somewhere in between, there is an avoided crossing of the adiabatic potential
+154 Chapter6. RunningTypicalCalculations
+
+--- Page 177 ---
+ORCAManual,Release6.0.0
+energycurveswherethecharacterofthetwostatesquicklychanges(seefigureFig.7.7forpotentialenergycurves
+forthissystematthe(QD)NEVPT2level). AttheCASSCFlevel,theneutralstateisdescribedbetterthantheionic
+state,withtheresultthatthelatteristoohighinenergyandtheavoidedcrossingoccursatatoosmallinteratomic
+distance. Intheregionwheretheavoidedcrossingactuallytakesplace,theCASSCFstatesarethenpurelyneutral
+orpurelyionic. DCD-CAS(2)allowsforaremixingofthestatesintheCASCIspaceundertheeffectofdynamic
+correlation,whichwilllowertheionicstatemoreinenergythantheneutralone. Theinputfileisasfollows:
+! def2-TZVP DCD-CAS(2)
+!moread
+%moinp "casorbs.gbw" # guess with active orbitals in place
+%casscf
+nel 2
+norb 2
+mult 1
+nroots 2
+actorbs locorbs
+end
+*xyz 0 1
+Li 0.0 0.0 0.0
+F 0.0 0.0 5.5
+*
+Since none of the standard guesses (!PAtom, !PModel, etc.) produces the correct active orbitals (Li 2s and F
+2p~z~),wereadthemfromthefilecasorbs.gbw. Wealsousetheactorbs locorbsoptiontopreservetheatomic
+characteroftheactiveorbitalsandinterpretthestatesintermsofneutralandioniccomponentseasier. Thefollowing
+isthestatecompositionofLiFataninteratomicdistanceof5.5angstromattheCASSCFandDCD-CAS(2)levels.
+---------------------------------------------
+CAS-SCF STATES FOR BLOCK 1 MULT= 1 NROOTS= 2
+---------------------------------------------
+ROOT 0: E= -106.8043590118 Eh
+0.99395 [ 1]: 11
+0.00604 [ 2]: 02
+ROOT 1: E= -106.7485794535 Eh 1.518 eV 12242.2 cm**-1
+0.99396 [ 2]: 02
+0.00604 [ 1]: 11
+---------------------------------------
+DCD-CAS(2) STATES
+---------------------------------------
+ROOT 0: E= -107.0917611937 Eh
+0.60590 [ 2]: 02
+0.39410 [ 1]: 11
+ROOT 1: E= -107.0837717163 Eh 0.217 eV 1753.5 cm**-1
+0.60590 [ 1]: 11
+0.39410 [ 2]: 02
+One can clearly see that while the CASSCF states are purely neutral (dominated by CFG 11) or purely ionic
+(dominatedbyCFG02),theDCD-CAS(2)statesaremixturesofneutralandioniccontributions. Thecalculation
+indicates that the interatomic distance of 5.5 is in the avoided crossing region. Note that the energies that are
+printedtogetherwiththeDCD-CAS(2)statecompositionaretheonesthatareobtainedfromdiagonalizationof
+the DCD-CAS(2) dressed Hamiltonian. For excited states, these energies suffer from what we call ground state
+bias(seetheoriginalpaperforadiscussion[652]). Aperturbativecorrectionhasbeendevisedtoovercomethis
+problem. Ourstandardchoiceisfirst-orderbiascorrection. Thecorrectedenergiesarealsoprintedintheoutput
+fileandthoseenergiesshouldbeusedinproductionuseoftheDCD-CAS(2)method:
+6.1. SinglePointEnergiesandGradients 155
+
+[... start of page 178 ...]
+ORCAManual,Release6.0.0
+---------------------------------------------------------
+BIAS-CORRECTED (ORDER 1) STATE AND TRANSITION ENERGIES
+=========================================================
+ROOT Energy/a.u. DE/a.u. DE/eV DE/cm**-1
+=========================================================
+0: -107.093214435 0.000000 0.000 0.0
+1: -107.084988306 0.008226 0.224 1805.4
+Lastbutnotleast,spinorbitcoupling(SOC)andspinspincoupling(SSC)areimplementedinconjunctionwiththe
+DCD-CAS(2)methodinaQDPT-likeprocedureand

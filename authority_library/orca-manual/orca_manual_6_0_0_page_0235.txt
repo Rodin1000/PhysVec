@@ -1,0 +1,83 @@
+[... end of page 234 ...]
+Tothisend, youcaninvokethe automaticlocalizationforXASwhichmodifiesthe
+inputto:
+! BP86 ZORA ZORA-def2-TZVP(-f) SARC/J TightSCF
+%tddft XASLoc[0] = 1,4
+OrbWin[0] = 1,1,-1,-1
+NRoots 25
+DoHigherMoments true
+DoFullSemiclassical true
+end
+* int 0 1
+Ti 0 0 0 0 0 0
+Cl 1 2 3 2.15 0 0
+Cl 1 2 3 2.15 109.4712 0
+Cl 1 2 3 2.15 109.4712 120
+Cl 1 2 3 2.15 109.4712 240
+*
+212 Chapter6. RunningTypicalCalculations
+
+--- Page 235 ---
+ORCAManual,Release6.0.0
+• Thislocalizestheorbitals1through4ofoperator0(theclosed-shell)andthenallowsexcitations(arbitrarily)
+fromcorehole1only. Youcouldchooseanyofthethreeotherlocalized1sorbitalsinsteadwithoutchanging
+theresult. Youcouldevendoallfourcoreholessimultaneously(theyproduceidenticalspectra)inwhich
+case you have the entire ligand K-edge intensity and not just the one normalized to a single chlorine (this
+wouldbeachievedwithOrbWin[0] = 1,4,-1,-1).
+• Ifyouhaveaspinunrestrictedcalculation,youneedtogivethesameXASLocandOrbWininformationfor
+thespin-downorbitalsaswell.
+Quiteniceresultshavebeenobtainedforanumberofsystemsinthisway.[712]
+ExcitedStateGeometryOptimization
+ForRPA,CIS,TDAandTD-DFTtheprogramcancalculateanalyticgradients. WiththehelpoftheIRootkey-
+word, a given state can be selected for geometry optimization. Note however, that if two states cross during the
+optimization it may fail to converge or fail to converge to the desired excited state (see section Root Following
+SchemeforDifficultCasesbelow)! Ifyouwanttofollowatripletstateinsteadofthesinglet,pleasesetIROOT-
+MULTtoTRIPLET.
+! HF DEF2-SVP Opt
+%CIS NRoots 1
+IRoot 1
+end
+* int 0 1
+C 0 0 0 0.00 0.0 0.00
+O 1 0 0 1.20 0.0 0.00
+H 1 2 0 1.08 120 0.00
+H 1 2 3 1.08 120 180.00
+*
+Note that this example converges to a saddle point as can be verified through a numerical frequency calculation
+(whichisalsopossiblewiththemethodsmentionedabove). Theexcitedstaterelaxeddensitymatrixisavailable
+fromsuchgradientruns(MyJob.cispwhenusingtheKeepDenskeyword)andcanbeusedforvarioustypesof
+analysis. Notethatthefrozencoreoptionisavailablestartingfromversion2.8.0.
+RootFollowingSchemeforDifficultCases
+Incasethereisarootflippingafterastepduringthegeometryoptimization,itmightbeimpossibletoconvergean
+excitedstategeometryusingtheregularmethods. Tohelpinthosecases,theflagFOLLOWIROOTmightbeset
+toTRUE.Then,excitedstatewavefunctionwillbeanalyzedandcomparedwiththereferenceone(morebelow),
+andtheIROOTwillbeautomaticallyadjustedtokeephomingthetargetstate.
+Oneexampleofsuchacalculationis:
+! wB97X OPT
+%TDDFT
+NROOTS 5
+IROOT 3
+FOLLOWIROOT TRUE
+END
+* xyz 0 1
+N 0.0 0.0 0.0
+H 0.0 0.0 1.0
+H 0.0 -0.9 0.5
+H 0.0 0.9 0.5
+*
+6.6. ExcitedStatesCalculations 213
+
+[... start of page 236 ...]
+ORCAManual,Release6.0.0
+Thiswillaskforanoptimizationofthethirdexcitedstateofammonia. Atsomepoint,thereisastatecrossingand
+what was state 3 now becomes state 2. The algorithm will recognize this and automatically change the IROOT
+flag,tokeepfollowingthesamestate. FOLLOWIROOTalsoworkswithspin-adaptedtripletsandspin-flipstates.
+Incaseswhereyouwanttokeepthecomparisononlywiththedensityfromtheveryfirstcomputedexcitedstate,
+e.g. theoneyougetonthefirstcycleofageometryoptimization,youcanuseKEEPFIRSTREF,asin:
+%TDDFT
+NROOTS 5
+IROOT 3
+FOLLOWIROOT TRUE
+KEEPFIRSTREF TRUE # default false
+END
+CriteriatoFollowIROOTs-star

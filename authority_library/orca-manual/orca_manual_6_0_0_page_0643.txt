@@ -1,0 +1,78 @@
+[... end of page 642 ...]
+nificant contributions to the response vector
+PrintWF CFG # print CI part in (CFG (default), CSF, or DET basis)
+TolPrintVec 1.e-2 # Threshold to print a contribution to the RHS/response vector
+# Minimum value of the SQUARE of a vector element to print
+PreCondType diag # (default) Use diagonal preconditioner (requires auxiliary basis!)
+none # Do not use a preconditioner
+PreCondMaxRed 400 # Hessian precondition subset size
+end
+Note that the solver-related options in the %elprop and %eprnmr blocks do not affect the solution of the CP-
+CASSCFequations.
+620 Chapter7. DetailedDocumentation
+
+--- Page 643 ---
+ORCAManual,Release6.0.0
+7.16.2 Technical Notes
+ItshouldbenotedthatCASSCFlinearresponseusestheoptimizedCASSCFwavefunctionasastartingpoint. Thus,
+a %casscf blockwiththeappropriateinputs(seeCompleteActiveSpaceSelf-ConsistentFieldMethod)mustbe
+providedintheinput. State-specific(SS-)CASSCFresponseisrunonSS(NRoots 1)CASSCFwavefunctions. If
+theCASSCFwavefunctionisstate-averaged(SA),theresponseisrunovertheaveragedmanifoldofstatesandnot
+onaspecificroot. Inthiscase,oneshouldanalyzetheoutputcarefully. Itiswisetoonlyaveragestateswhichare
+(nearly-)degenerate.
+Bydefault,aCASSCFcalculationwillberunfromscratchbeforerunningtheCASSCFResponse. Alternatively,
+orbitalsfromapreviouslyconvergedCASSCFcalculationmaybeusedwith!MOREAD NoIterandsupplyingthe
+appropriate.gbwfilevia%moinp. Inthiscase,besurethattheinputinthe%casscfblockmatchesthatfromthe
+sameinputblockofthepreviouslyconvergedcalculationandbesuretochecktheorbitalswell!
+The appropriate property flags in the %elprop and %eprnmr blocks must be set to calculate the properties that
+are wanted (see Electric Properties, EPR and NMR properties, and Calculation of Properties). While all first-
+derivativepropertiesworkwithCASSCF,notallsecond-derivativepropertiesarecurrentlyavailablewithCASSCF.
+Thestaticpropertiescurrentlyavailable(sortedbyperturbationtakenfortheresponse)include:
+• Electric(E)Field
+– Dipole/dipolePolarizability
+– Dipole/quadrupolePolarizability
+• Quadrupole(Q)Field
+– Quadrupole/QuadrupolePolarizability
+• Magnetic(B)Field(withoutGIAOs)
+– EPRg-Tensor
+– NMRChemicalShieldings
+• Velocity(v)
+– VelocityPolarizability
+The magnetic properties are currently implemented without gauge-including atomic orbitals (GIAOs). Thus, an
+appropriategauge-originmustbeprovidedinthe%eprnmrblock! FortheEPRg-tensor,usingalargebasissetwith
+achemicallyrelevantgaugeoriginisrecommended. However,oneshouldingeneralbewaryofNMRchemical
+shieldingswithoutGIAOs. GIAOsforCASSCFlinearresponsearecomingsoontoORCA!
+7.16.3 Notes on Printing
+The information on the types of property integrals computed can be found in the ORCA PROPERTY INTEGRAL
+CALCULATIONSsectionoftheoutputfile. Theorca_casscfrespoutputbeginswiththeheader ORCA CASSCF
+RESPONSE CALCULATION.Afterinformationaboutthetypesandnumberofperturbations, thecalculationsplits
+intothemajortypesofperturbations: realandimaginary. Allresponseequationsofthesametypecanbesolved
+simultaneously.
+Each of these types has its own section in the output file. These sections begin with information on the orbital
+rangesandtheCIspace,thengointotheiterativesolutionoftheequations. Theprintoutheregivesanoverview
+of the iteration number, the residual norm of each response equation, and if that response equation has met the
+convergencecriteria. Thefollowingisanexampleofthisoutput(withiterations3–7removedforsimplicity):
+--------------------------------------------------------------------------------------------
+LINSOL Davidson-type linear equation solver
+Iter. ||Error||_2 Conv. (TolR = 1.000e-08)
+--------------------------------------------------------------------------------------------
+0 (rhs 0) 1.645417e-01 No
+(continuesonnextpage)
+7.16. CASSCFLinearResponse 621
+
+[... start of page 644 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+(rhs 1) 1.826041e-01 No
+(rhs 2) 2.047543e-01 No
+1 (rhs 0) 7.069575e-02 No
+(rhs 1) 3.363295e-02 No
+(rhs 2) 7.229274e-02 No
+2 (rhs 0) 9.183136e-03 No
+(rhs 1) 3.922435e-03 No
+(rhs 2) 7.152764e-03 No
+(...)
+8 (rhs 0) 4.070240e-09 Yes
+(rhs 1) 1.186846e-09 Yes
+(rhs 2) 4.407666e-09 Yes
+Beforegoingontothenecessarypropertymodules,thesignificantcontributionstotheRHSand/orresponsevectors

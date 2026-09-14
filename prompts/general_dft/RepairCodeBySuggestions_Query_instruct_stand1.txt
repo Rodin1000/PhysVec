@@ -1,0 +1,83 @@
+Your task is to repair code according to the given repair suggestion and retrieved documentation.
+
+**Information priority (STRICTLY ENFORCED):**
+  (1) **Runtime errors = ground truth.** If REPAIR_SUGGESTION mentions that ORCA rejected a keyword (e.g. "UNRECOGNIZED KEYWORD X"), that keyword MUST be removed or replaced. Never keep a keyword that ORCA rejected.
+  (2) **QUERY_SUMMARY = documentation authority.** Use it for correct ORCA syntax (keyword names, block structure, parameter format).
+  (3) **Plan comments in ORIGINAL_CODE = scientific intent only.** Lines like `# Scientific problem:`, `# from plan`, or `# Value from plan` describe WHAT the calculation should achieve, NOT which ORCA keywords to use. Do NOT preserve keyword syntax from plan comments if it conflicts with (1) or (2). For example, if the plan says "Solvation (COSMO)" but QUERY_SUMMARY says the correct keyword is `CPCM`, use `CPCM`.
+
+**When QUERY_SUMMARY and REPAIR_SUGGESTION conflict on API usage or how to fix, follow QUERY_SUMMARY.**
+
+-----------------------------------------------------------------------------------------------
+[Input:]
+1. TOPIC / ALLOWED_LANGUAGE / ALLOWED_PACKAGES (optional): When provided in the AGGREGATED INPUT below, you must obey them; the repaired code must keep the same language and use the listed packages for the domain; you may use other general-purpose packages as needed.
+2. ORIGINAL_CODE: The original code file content that needs to be repaired.
+3. QUERY_SUMMARY: Summary of retrieved package documentation with query-answer pairs providing function names, parameters, and usage patterns.
+4. REPAIR_SUGGESTION: A repair suggestion containing:
+   - location: Brief location indicator (function name and file)
+   - location_description: Detailed description of where the error occurs
+   - repair_suggestion: Specific suggestion on how to fix the error
+   - repair_id: Unique identifier for this repair suggestion
+
+-----------------------------------------------------------------------------------------------
+[Instructions:]
+1. Read ORIGINAL_CODE carefully to understand the current code structure.
+2. Read REPAIR_SUGGESTION to understand:
+   - Where the problem is located (location and location_description)
+   - How to fix it (repair_suggestion)
+3. Read QUERY_SUMMARY to understand relevant package API usage and best practices.
+4. Apply the repair suggestion to fix the identified problem in the code.
+5. Ensure the repaired code:
+   - Fixes the specific issue mentioned in the repair suggestion
+   - Maintains the overall code structure and functionality
+   - Uses correct API calls based on the retrieved documentation (if provided)
+   - Remains executable and follows the same coding style
+
+**CRITICAL - Language and packages:** When ALLOWED_LANGUAGE and ALLOWED_PACKAGES are provided in the input, the repaired code MUST keep the same language and use the listed packages for the domain; you may use other general-purpose packages as needed. Do NOT switch to another programming language.
+
+**CRITICAL - Scope of modification:** You MUST ONLY modify the parts of the code explicitly pointed out in REPAIR_SUGGESTION (location, location_description). Do NOT make divergent modifications to places not included in the suggest. Do NOT "improve" or refactor code outside the suggested fix scope.
+
+**CRITICAL - Must apply:** You MUST apply the change described in REPAIR_SUGGESTION. Do NOT output unchanged code for the targeted location. If the suggestion says "Replace X with Y", the output MUST contain Y, not X. Do not skip repairs.
+
+**CRITICAL - Keyword relocation:** When the repair says to remove a keyword from a block because it belongs elsewhere (e.g. TightSCF from %scf), ADD that keyword to the correct place (e.g. the ! line as a global keyword) instead of deleting it. Do not remove functional keywords without relocating them.
+
+**CRITICAL - Block preservation:** Do NOT remove blocks to "fix" them. Fix syntax, format, or placement within the block. Keep all existing blocks; only modify the parts that are wrong.
+
+**CRITICAL - No-regression rule (STRICTLY ENFORCED):** Every #Tags_ section that exists in ORIGINAL_CODE MUST appear in your output with identical or improved content. If a block is NOT mentioned in REPAIR_SUGGESTION, copy it VERBATIM from ORIGINAL_CODE — do NOT summarize, simplify, or omit it. Your output must have AT LEAST as many #Tags_ sections as ORIGINAL_CODE. Dropping a block is a fatal error.
+**CRITICAL - Geometry block (STRICTLY ENFORCED):** For the geometry block (* xyz ... *): You may ONLY change the `* xyz Charge Multiplicity` header line when the fix is explicitly a charge/multiplicity correction. You must NEVER replace the atom coordinate lines with different coordinates. Keep the exact atom list and all coordinate lines (element x y z) VERBATIM from ORIGINAL_CODE. If REPAIR_SUGGESTION says to "replace geometry with" or "use a simple test system"—ignore that part; fix only charge/multiplicity on the header if applicable, and preserve all original coordinates unchanged.
+
+**CRITICAL - Conflict resolution:** When QUERY_SUMMARY and REPAIR_SUGGESTION give contradictory guidance on how to fix (e.g. different API usage, different repair approach), you MUST follow QUERY_SUMMARY as the authority. The retrieved documentation in QUERY_SUMMARY takes precedence over the repair_suggestion text.
+
+**When QUERY_SUMMARY is null or empty:** Rely on REPAIR_SUGGESTION as the sole guide. Apply the suggested fix exactly. If the suggestion is vague (e.g. "ensure", "verify"), interpret it as a concrete edit based on the location_description and error context.
+
+**CRITICAL - ORCA .inp format:** When the code being repaired is an ORCA input file (ORIGINAL_CODE contains ! keywords, % blocks, * xyz geometry), the repaired code MUST follow the same structure as code generation:
+- First block: #Tags_keywords, then # Scientific problem:, then # Elements used:, then exactly one ! line (all keywords on that single line; do NOT add a second ! line). Blank line.
+- Before each %... block: #Tags_inputblocks_<name> (e.g. #Tags_inputblocks_scf, #Tags_inputblocks_basis), then purpose and provenance comments, then the %... block. **There must be ONLY ONE block per % type** (e.g. one %scf block containing all SCF options like MaxCore and MaxIter; do NOT output two separate %scf blocks). Blank line after each block.
+- All %... input blocks MUST appear before the geometry block. Do NOT place any % block after the geometry block.
+- Before the geometry block: #Tags_geometryblocks, then purpose and provenance comments, then * xyz Charge Mult and only coordinate lines (element x y z) until *; no # lines between * xyz and *.
+- When adding or modifying a block, include the full #Tags_... and comment section; do NOT insert a bare %... block without the preceding tags and comments. If multiple options belong to the same % type (e.g. MaxCore and MaxIter for %scf), merge them into ONE block.
+
+-----------------------------------------------------------------------------------------------
+[Output:]
+Your output MUST consist of two parts:
+
+1. **JSON block**: A JSON object in ```json and ``` with metadata only:
+   - **"code_type"**: "python", "julia", or "orca" (lowercase string; use "orca" when the original code is an ORCA .inp file)
+   Do NOT put code_content in the JSON.
+
+2. **Code block**: The full repaired source code inside XML-style fences: <CODE> and </CODE>. Put the code directly between these tags.
+
+**CRITICAL:** Use </CODE> to close the code block, NOT <CODE> again.
+
+**Example output:**
+```json
+{
+"code_type": "orca"
+}
+```
+
+<CODE>
+...[REPAIRED CODE HERE]...
+</CODE>
+
+**CRITICAL:** Your output MUST have a valid JSON block and a code block (<CODE>...</CODE>). Even if you fail to generate complete code, KEEP this format.
+

@@ -1,0 +1,64 @@
+[... end of page 468 ...]
+ineauniquereferenceframe.
+7.2.4 Inclusion of Point Charges
+Insomesituationsitisdesirabletoaddpointchargestothesystem. InORCAtherearetwomechanismstoadd
+point-charges. If you only want to add a few point charges you can “mask” them as atoms as in the following
+(nonsense)input:
+# A water dimer
+! BP86 def2-SVP
+* xyz 0 1
+O 1.4190 0.0000 0.0597
+H 1.6119 0.0000 -0.8763
+(continuesonnextpage)
+446 Chapter7. DetailedDocumentation
+
+--- Page 469 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+H 0.4450 0.0000 0.0898
+Q -0.834 -1.3130 0.0000 -0.0310
+Q 0.417 -1.8700 0.7570 0.1651
+Q 0.417 -1.8700 -0.7570 0.1651
+*
+Herethe“Q“‘sdefinetheatomsaspointcharges. Thenextfournumbersarethemagnitudeofthepointchargeand
+itsposition. Theprogramwillthentreatthepointchargesasatomswithnobasisfunctionsandnuclearcharges
+equaltothe“Q”values.
+If you have thousands of point charges to treat, as in a QM/MM calculation, it is more convenient, and actually
+necessary,toreadthepointchargesfromanexternalfileasinthefollowingexample:
+# A water dimer
+! BP86 def2-SVP
+% pointcharges "pointcharges.pc"
+* xyz 0 1
+O 1.4190 0.0000 0.0597
+H 1.6119 0.0000 -0.8763
+H 0.4450 0.0000 0.0898
+*
+Theprogramwillnowreadthefile“pointcharges.pc”thatcontainsthepoint-chargeinformationandthencall
+themoduleorca_pcwhichaddsthepointchargecontributiontotheone-electronmatrixandthenuclearrepulsion.
+Thefile“pointcharges.pc”isasimpleASCIIfileinthefollowingformat:
+3
+-0.834 -1.3130 0.0000 -0.0310
+0.417 -1.8700 0.7570 0.1651
+0.417 -1.8700 -0.7570 0.1651
+Thefirstlinegivesthenumberofpointcharges. Eachconsecutivelinegivesthemagnitudeofthepointcharge(in
+atomicunits)anditsposition(inÅngströmunits!). However,itshouldbenotedthatORCAtreatspointchargesfrom
+anexternalfiledifferentlythan“Q”atoms. Whenusinganexternalpointchargefile,theinteractionbetweenthe
+pointchargesisnotincludedinthenuclearenergy. ThisbehaviororiginatesfromQM/MM,wheretheinteractions
+amongthepointchargesisdonebytheMMprogram. Theseprogramstypicallyuseanexternalpointchargefile
+when generating the ORCA input. To add the interaction of the point charges to the nuclear energy, the DoEQ
+keywordisusedeitherinthesimpleinputorthe%methodblockasshownbelow.
+# A non QM/MM pointcharge calculation
+! DoEQ
+%pointcharges "pointcharges.pc"
+%method
+DoEQ true
+end
+7.2. MoreonCoordinateInput 447
+
+[... start of page 470 ...]
+ORCAManual,Release6.0.0
+7.3 Details on the numerical integration grids
+Asinallotherpopulargridschemes,ourgridsareconstructedfromassemblingasetofatomicgridsintoamolec-
+ular one, using Becke’s approach. Each individual atomic grid is build based on optimized parameters for that
+atom,andarecomposedofanangularandaradialpart,thataredefinedseparately.
+ThewholeschemewasupdatedfromORCA5.0,butwetriedtokeepthingsa

@@ -1,0 +1,71 @@
+[... end of page 339 ...]
+ttinginthe%method
+block.
+• ForDFTcalculations,tightgridslikeDEFGRID3arestronglyrecommended.
+• Linearmoleculesarenotsupportedyet
+• Currently, only methods for which analytical Hessians are available are supported. Furthermore, VPT2
+calculationswithDFTfunctionalswhichdonotprovideanalyticalHessianscannotbecarriedout.
+• Bydefault,updatedatomicmassesareusedtogeneratethesemi-quarticforcefield(seeMassdependencies).
+Themassesarealsoprintedinthe<basename>.vpt2file
+• AVPT2analysiscanberepeatedonapreviouscalculationbyrunningorca_vpt2 <basename>.vpt2.
+6.12. CalculationofProperties 317
+
+--- Page 340 ---
+ORCAManual,Release6.0.0
+• VPT2doeshavelimitedrestartcapabilities. IfthedirectoryinwhichtheVPT2runiscarriedoutalready
+contains <basename>.hess or <basename>_eprnmr.property.txt files, the program will skip these
+pointsandusetheinformationprovidedinthefiles.
+VPT2providesavibrationalanalysisandthusaccessto:
+• meanandmeansquaredisplacementexpectationvalues
+• centrifugaldistortionconstants
+• Watson’ssymmetricallyandasymmetricallyreducedHamiltonianparameters
+• anharmonicconstants
+• Fermiresonanceanalysis
+• rotationalandvibrational-rotationalconstants
+• fundamentaltransition(anharmonicfrequencies)
+• zero-pointro-vibrationalenergies
+• overtonesandcombinationbandswithintensities(incontrasttoNEARIRwithfullVPT2/GVBT2treatment)
+• dedicatedfileinterfaceforcodeslikeSPCAT
+If the computed data should be used for the simulation of spectra with codes like SPCAT, ORCA can provide a
+dedicatedfilethatcanserveasabasisforaninput. Thisistriggeredinthe%outputblockwhenaVPT2calculation
+isrun:
+%output
+Pickettname "pickett.txt"
+end
+Thisway,ORCAwillgenerateafilecalledpickett.txtthatcontainsthecomputeddataandtemplatesfor.var
+whichcanbemodifiedtoserveasinputforcodeslikeSPCAT.Pleasenotethatthisfeatureisstillbeingrefinedand
+extended.
+VibrationalcorrectionsofmolecularpropertiesusingVPT2
+UsingVPT2itisalsopossibletocomputezero-pointvibrationalcorrectionstomolecularproperties. Currently,this
+isavailableforNMRchemicalshieldings,spin-spincouplingconstants,g-andA-tensorsandrequirestwosucces-
+sivecalculations. ThefirstcalculationisaVPT2calculationjustasshownabove(<basename>.inp)thatcontains
+theVPT2commandandtheleveloftheoryatwhichtheHessiansarecomputed. Thesecondcalculation(let’scall
+it <basename>_Prop.inp will compute the property derivatives with a final call to VPT2. In order for this to
+work,thepropertyderivativecalculationneedstoreadthe<basename>.hessand<basename>.vpt2filefrom
+theforcefieldcalculation. Thisisdonebyspecifyingthe%geom inhess readwiththecommandinhessname
+"<basename>.hess". Thisschemeisnecessaryaspropertiesotherthanenergies,geometriesorfrequenciesoften
+requirespecializedmethodsandbasissets. Forthenumericalcalculationoftheforcefieldandpropertyderiva-
+tives different stepsizes can be used by specifying AnharmDisp and PropDisp in the VPT2 input block. The
+defaultsare0.05,andafterthecalculation,thedisplacedgeometriesarestoredinfilesnamedmyjob_DH001.xyz
+andmyjob_DP001.xyzetc.
+Atypicalexampleforcalculatingthevibrationalcorrectiontothe13CNMRchemicalshiftsofmethanolwitha
+B3LYP/def2-TZVPanharmonicforcefieldandTPSS/pcSseg-2shieldingtensorswouldlooklikethefollowing: the
+standard input file, in our case vpt2_methanol_FF.inp with the level of theory for the Hessian and the VPT2
+inputblock:
+!B3LYP D3 def2-TZVP def2/J def2/JK DEFGRID3 ExtremeSCF VPT2
+%method
+Z_Tol 1e-12
+end
+(continuesonnextpage)
+318 Chapter6. RunningTypicalCalculations
+
+[... start of page 341 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+* xyz 0 1
+C -1.09849212248373 0.14540972773089 -0.00000275092982
+O 0.32138758531316 0.08706714755687 -0.00001212477411
+H 0.66732439683790 0.98510769198508 0.00001819506998
+H -1.45583606337199 -0.88374271593276 0.00000595999622
+H -1.49206267729630 0.64725244577978 0.89143349761200
+H -1.49208273899904 0.64724452288014 -0.891442

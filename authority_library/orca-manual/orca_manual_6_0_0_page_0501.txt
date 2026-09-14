@@ -1,0 +1,102 @@
+[... end of page 500 ...]
+ithadispersioncorrectionforDFT:gCP-D3iswelltested,butgCP-
+NLalsoworkswell(seesectionsTreatmentofDispersionInteractionswithDFT-D3andDFTCalculations
+withtheNon-Local,DensityDependentDispersionCorrection(VV10): DFT-NL)
+Note:
+• !GCP(HF/MINIS)automaticallysetstherefittedD3parameter,asproposedintheoriginalgCPpaper.
+• ThegCPmethodisimplementedviaanexternaltoolcalledotool_gcp,whichisbasedontheoriginalFortran
+478 Chapter7. DetailedDocumentation
+
+--- Page 501 ---
+ORCAManual,Release6.0.0
+programused inthepublication. Thus, the otool_gcpbinarycan alsobecalled directlyvia thecommand
+line(otool_gcp -hgivesanoverviewoftheoptions).
+• Itisalsopossibletoreadanexternalparameterfile($HOME/.gcppar)usingthe!GCP(FILE)keyword. For
+furtherinformation,pleaselookatthemanualforthegcpprogramasprovidedbyProf. S.Grimme8.
+• During the calculation, some temporary output files are written by ORCA: BASENAME.gcp.in.tmp and
+BASENAME.gcp.out.tmpwillcontaintheinputforotool_gcpanditsoutput,respectively.
+• IthasbeendemonstratedthatthepopularcombinationofB3LYPwith6-31G(d)canbestronglyimproved
+usingDFT-D3andgCP[475]. Forconvenience,thekeyword !B3LYP-gCP-D3/6-31G*hasbeendefined.
+Thisisequivalentto!B3LYP 6-31G* D3BJ GCP(DFT/631GD).
+HF-3c: Hartree-Fockwiththreecorrections
+HF-3cisafastHartree-Fockbasedmethoddevelopedforcomputationofstructures, vibrationalfrequenciesand
+non-covalentinteractionenergiesinhugemolecularsystems[832]. Thestartingpointforevaluatingtheelectronic
+energy is a standard HF calculation with a small Gaussian AO basis set. The used so-called MINIX basis set
+consistsofdifferentsetsofbasisfunctionsfordifferentgroupsofatomsasshownintableTable7.8.
+Table7.8: CompositionoftheMINIXbasisset.
+element basis
+H-He,B-Ne MINIS
+Li-Be MINIS+1(p)
+Na-Mg MINIS+1(p)
+Al-Ar MINIS+1(d)
+K-Zn SV
+Ga-Kr SVP
+Rb-Rn def2-SVPwithStuttgart-DresdenECPs
+ThreetermsareaddedtocorrecttheHFenergy𝐸HF/MINIX inordertoincludeLondondispersioninteractions,to
+tot
+accountfortheBSSEandtocorrectforbasissetdeficiencies,i.e. overestimatedbondlengths. Thecorrectedtotal
+energyisthereforecalculatedas
+𝐸
+t
+H
+ot
+F-3c =𝐸
+t
+H
+ot
+F/MINIX +𝐸
+d
+D
+is
+3
+p
+(BJ) +𝐸
+B
+gC
+SS
+P
+E
++𝐸SRB. (7.43)
+Thefirstcorrectionterm𝐸 D3(BJ) istheatom-pairwiseLondondispersionenergyfromtheD3dispersioncorrection
+disp
+scheme[324]applyingBecke-Johnson(BJ)damping[90,424,425](seesectionTreatmentofDispersionInterac-
+tionswithDFT-D3). Thesecondterm𝐸 gCP denotesthegeometricalcounterpoise(gCP)correction[476]totreat
+BSSE
+theBSSE(seesectionDFTandHFCalculationswiththeGeometricalCounterpoiseCorrection: gCP).Forthe
+HF-3cmethod,thethreeusualD3parameters𝑠 ,𝑎 and𝑎 werere-fittedusingreferenceinteractionenergiesof
+8 1 2
+thecomplexesoftheS66testset[6]. Thisresultsin𝑠 =0.8777,𝑎 =0.4171and𝑎 =2.9149. Theparameter
+8 1 2
+𝑠 wassettounityasusualtoenforcethecorrectasymptoticlimitandthegCPcorrectionwasalreadyappliedin
+6
+thisfittingstep.
+Thelastterm𝐸SRB isashort-rangedcorrectiontodealwithbasissetdeficiencieswhichoccurwhenusingsmallor
+minimalbasissets. Itcorrectsforsystematicallyoverestimatedcovalentbondlengthsforelectronegativeelements
+andiscalculatedasasumoverallatompairs:
+AtomsAtoms
+𝐸SRB =−𝑠 ∑︁ ∑︁ (𝑍
+𝐴
+𝑍
+𝐵
+)3/2exp(−𝛾(𝑅
+𝐴
+0,
+𝐵
+D3 )3/4𝑅
+𝐴𝐵
+)
+𝐴 𝐵̸=𝐴
+Here, 𝑅0,D3 are the default cut-off radii as determined ab initio for the D3 scheme [324] and 𝑍 , 𝑍 are the
+𝐴𝐵 𝐴 𝐵
+nuclearcharges. Thiscorrectionisappliedforallelementsuptoargon. Theempiricalfittingparameters𝑠=0.03
+8http://www.thch.uni-bonn.de/tc/
+7.4. ChoiceofComputationalModel 479
+
+[... start of page 502 ...]
+ORCAManual,Release6.0.0
+and 𝛾 = 0.7 were determined to produce vanishing HF-3c total atomic forces for B3LYP-D3(BJ)/def2-TZVPP
+equilibriumstructuresof107smallorganicmolecules. Moredetailscanbefoundintheoriginalpublication[832].
+TheHF-3cmethodcanonlybeinvokedwithasimplekeyword:
+! HF-3c
+! HF-3cisacompoundkeywordandequals! HF MINIX D3BJ GCP(HF/MINIX) PATOM,hencenobasissetetc.
+hastobespecified. The PATOMguessisselectedsincethegridconstruction

@@ -1,0 +1,104 @@
+[... end of page 1018 ...]
+stheVelocityVerletalgorithmastimeintegration
+method.
+ThegeneralequationsoftheVelocityVerletschemeread
+1
+⃗𝑥(𝑡+∆𝑡)=⃗𝑥(𝑡)+⃗𝑣(𝑡)∆𝑡+ ⃗𝑎(𝑡)∆𝑡2,
+2
+⃗𝑎(𝑡)+⃗𝑎(𝑡+∆𝑡)
+⃗𝑣(𝑡+∆𝑡)=⃗𝑣(𝑟)+ ∆𝑡.
+2
+Byinserting
+𝐹⃗ (𝑡)
+⃗𝑎 (𝑡)= 𝑖 , 𝑖=1...𝑁,
+𝑖 𝑚
+𝑖
+onearrivesatthetwo-stepmethod
+𝐹⃗ (𝑡)
+⃗𝑥 (𝑡+∆𝑡)=⃗𝑥 (𝑡)+⃗𝑣 (𝑡)∆𝑡+ 𝑖 ∆𝑡2, 𝑖=1...𝑁,
+𝑖 𝑖 𝑖 2𝑚
+𝑖
+𝐹⃗ (𝑡)+𝐹⃗ (𝑡+∆𝑡)
+⃗𝑣 (𝑡+∆𝑡)=⃗𝑣 (𝑟)+ 𝑖 𝑖 ∆𝑡, 𝑖=1...𝑁,
+𝑖 𝑖 2𝑚
+𝑖
+whichisimplementedinORCA’sMDmodule.
+3Hairer,Lubich,Wanner,“GeometricNumericalIntegration”,Springer2006.
+996 Chapter7. DetailedDocumentation
+
+--- Page 1019 ---
+ORCAManual,Release6.0.0
+VelocityInitialization
+InthebeginningofaMDsimulation,itisoftenthecasethatonlytheinitialpositionsoftheatomsareknown,but
+notthevelocities. AsMDsimulationsareperformedatsomefinitetemperature,itisagoodideatoinitializethe
+velocitiesinawaysuchthatthedesiredsimulationtemperatureisalreadypresentinthebeginning. Instatistical
+mechanics,itisoftenassumedthatthevelocitydistributionofatomsisgivenbyaMaxwell–Boltzmanndistribution
+(which is strictly only the case in idealized gases). Therefore, it is a reasonable choice to initialize the atom’s
+velocitiesaccordingtotheMaxwell–BoltzmannequationinthebeginningofaMDsimulation. Thegoalistofind
+aninitialvelocitydistributioninwhicheachdegreeoffreedompossessesasimilaramountofenergy,suchthatthe
+equipartitiontheoremisapproximatelyfulfilled.
+The scalar Maxwell–Boltzmann velocity distribution (leaving out the normalization factor) at temperature 𝑇 is
+givenby
+(︁ 𝑚𝑣2 )︁
+𝑓(𝑣)=𝑣2exp − .
+2𝑘 𝑇
+𝐵
+Toinitializetheparticle’svelocitiessuchthatthisdistributionfunctionisfulfilled,onestartswithaseriesofnormal-
+distributedrandomnumberswithmean0andvariance1,denotedby𝒩 (0,1). TheCartesianvelocitycomponents
+foreachatomarethencomputedby
+√︂
+𝑘 𝑇
+𝑣 := 𝐵 𝒩 (0,1), 𝛼∈{𝑥,𝑦,𝑧}, 𝑖=1...𝑁.
+𝑖,𝛼 𝑚
+𝑖
+AstheC++98standarddoesnotofferaplatform-independentwayofobtainingnormal-distributedrandomnum-
+bers,theseareinternallycomputedfromuniformlydistributedrandomnumbersbyapplyingtheBox–Mullertrans-
+form[115]: Assumingthat𝑢 and𝑢 aretwouniformlydistributedrandomnumbersfromtheinterval[0,1],the
+1 2
+equations
+√︀
+𝑧 := −2log(𝑢 )cos(2𝜋𝑢 ),
+1 1 2
+√︀
+𝑧 := −2log(𝑢 )sin(2𝜋𝑢 )
+2 1 2
+yieldtwonewrandomnumbers𝑧 and𝑧 whichobeyanormaldistributionwithmean0andvariance1.
+1 2
+Afterthevelocitieshavebeeninitialized,thetotallinearmomentumofthesystemwillprobablyhavesomefinite
+valueotherthanzero. Asthelinearmomentumis(approximately)conservedwithinamoleculardynamicssimu-
+lation,thiswouldresultinthesystemdriftingawayintoonedirectionduringthecourseofthesimulation,which
+is probably not desired. Therefore, the total momentum is explicitly set to zero after the Maxwell–Boltzmann
+initialization:
+𝑁
+𝑃⃗ := ∑︁ 𝑚⃗𝑣 ,
+tot 𝑖 𝑖,old
+𝑖=1
+𝑃⃗
+⃗𝑣 :=⃗𝑣 − tot , 𝑖=1...𝑁.
+𝑖,new 𝑖,old 𝑚 𝑁
+𝑖
+This, of course, might change the initial temperature. Therefore, a final step is performed, in which all velocity
+vectorsaremultipliedwithafactorthatisdeterminedsuchthattheinitialtemperatureexactlymatchesthetarget
+value.
+Thermostats
+Aftertheinitialvelocitieshavebeeninitializedtosomefinitetemperature,itmightbeassumedthatonecansimply
+startthetimeintegrationofthedynamicalsystem(equivalenttotheNVEensemble),andthestartingtemperature
+wouldbeapproximatelypreserved. Inarealsystem,however,thereare(atleast)tworeasonswhythetemperature
+will strongly deviate from the initial value already after a few steps. First, the initial velocity distribution only
+considers the kinetic energy of the particles, but some amount of energy will be exchanged with the potential
+energycontribution(e. g.,bondstretching)immediately,alteringthetemperature. Secondly,thenumericalerrors
+introducedduetothefinitetimestep(andincaseofabinitioMD,alsoduetotheapproximateforces)willleadto
+adriftinenergyandthereforeintemperature. Tocountertheseeffects,itisoftendesirabletohaveatemperature
+controlduringthecourseofthesimulation(whichthenrunsintheNVTensemble),whichiscalledathermostat.
+7.51. AbinitioMolecularDynamicsSimulations 997
+
+[... start of page 1020 ...]
+ORCAManual,Release6.0.0
+Thereexistmanydifferentkindsofthermostats,rangingfromsimpleexpressionsuptohighlycomplexdynamical
+systems on their own. But all of them share a common issue: If the thermostat is coupled only weakly to the
+system, the temperature will change anyway. However, if the thermostat is coupled more strongly to the system
+(i. e.,intervenesstronger),thenthedynamicsofthesimulationwillchange,nolongerresemblingtheundisturbed
+originaldynamicswhichonewantstoinvestigate. Therefore,itisalwaysatradeoffbetweentemperaturestability
+anddisturbeddynamicstodecidehowstrongathermostatshouldbecoupledtothesystem.
+InORCA,currentlythreethermostatsareimplemented: TheBerendsenthermostat[92],theNosé–Hooverchain
+thermostat(NHC)[562,563],andth

@@ -1,0 +1,67 @@
+[... end of page 116 ...]
+approximationisDLPNO-CCSD(T).While,thekeywordofimprovediterativeap-
+proximationisDLPNO-CCSD(T1). However,inourrecentpaper[341],the“semi-canonical”perturbativetriples
+correction approximation is named DLPNO-CCSD(T0), whereas the improved iterative one is called DLPNO-
+CCSD(T).Thus,thenamesusedinourpaperaredifferentfromthoseinORCAinputfiles. Anexampleinputfile
+toperformimprovediterativeperturbativetriplescorrectionforDLPNO-CCSDisgivenbelow,
+# DLPNO-CCSD(T1) calculation using the iterative triples correction
+! cc-pVTZ cc-pVTZ/C DLPNO-CCSD(T1)
+%mdci
+(continuesonnextpage)
+94 Chapter6. RunningTypicalCalculations
+
+--- Page 117 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+TNOSCALES 10.0 #TNO truncation scale for strong triples, TNOSCALES*TCutTNO.
+Default setting is 10.0
+TNOSCALEW 100.0 #TNO truncation scale for weak triples, TNOSCALEW*TCutTNO
+Default setting is 100.0
+TriTolE 1e-4 #(T) energy convergence tolerance
+Default setting is 1e-4
+%end
+* xyz 0 1
+... (coordinates)
+*
+SinceORCA4.2,theimprovediterativeperturbativetriplescorrectionforopen-shellDLPNO-CCSDisavailable
+aswell. Thekeywordofopen-shellDLPNO-CCSD(T)isthesameasthatoftheclosed-shellcase.
+SinceORCA4.0,thehigh-spinopen-shellversionoftheDLPNO-CISD/QCISD/CCSDimplementationshavebeen
+madeavailableontopofthesamemachineryasthe2016versionoftheRHF-DLPNO-CCSDcode. Thepresent
+UHF-DLPNO-CCSDisdesignedtobeanheirtotheUHF-LPNO-CCSDandservesasanaturalextensiontothe
+RHF-DLPNO-CCSD.AstrikingdifferencebetweenUHF-LPNOandnewlydevelopedUHF-DLPNOmethodsis
+that the UHF-DLPNO approach gives identical results to that of the RHF variant when applied to closed-shell
+specieswhileUHF-LPNOdoesnot. Usageofthisprogramisquitestraightforwardandshownbelow:
+# (1) In case of ROHF reference
+! ROHF DLPNO-CCSD def2-TZVPP def2-TZVPP/C TightSCF TightPNO
+# (2) In case of UHF reference, the QROs are constructed first and used for
+# the open-shell DLPNO-CCSD computations
+! UHF DLPNO-CCSD def2-TZVPP def2-TZVPP/C TightSCF TightPNO
+# (3) In case that UKS is specified, the QROs are constructed first and used as
+# "unconverged" UHF orbitals for the open-shell DLPNO-CCSD computations.
+# This approach is useful when the converged UHF wavefunction is qualitatively
+# wrong but the UKS wavefunction is not
+! UKS CAM-B3LYP DLPNO-CCSD def2-TZVPP def2-TZVPP/C TightSCF TightPNO
+Note: DLPNO-CISD/QCISD/CCSDmethodsarededicatedtoclosed-shellandhigh-spinopen-shellspecies,but
+not spin-polarized systems (e.g. open shell singlets or antiferromagnetically coupled transition metal clusters).
+PerformingDLPNO-CISD/QCISD/CCSDcalculationsuponopenshellsingletUHF/UKSwavefunctionswillgive
+results resembling the corresponding closed shell singlet calculations, because the DLPNO calculations will be
+done on the closed-shell determinant composed of the QRO orbitals. Similarly, calculations of spin-polarized
+systemsotherthanopenshellsingletsmaygivequalitativelywrongresults. Forspin-polarizedsystems,theUHF-
+LPNO-CCSDorMk-LPNO-CCSDmethodsareavailable,inadditiontoDLPNO-NEVPT2.
+Thesamesetoftruncationparametersasclosed-shellDLPNO-CCSDisusedalsoincaseofopen-shellDLPNO.
+Theopen-shellDLPNO-CCSDproducesmorethan99.9%ofthecanonicalCCSDcorrelationenergyasincase
+oftheclosed-shellvariant. ThisfeatureiscertainlydifferentfromtheUHF-LPNOmethodsbecausetheopen-shell
+DLPNO-CCSDisre-designedfromscratchonthebasisofanewPNOansatzwhichmakesuseofthehigh-spin
+open-shell NEVPT framework. The computational timings of the UHF-DLPNO-CCSD and RIJCOSX-UHF for
+linearalkanechainsintripletstateareshowninFig.6.7.
+6.1. SinglePointEnergiesandGradients 95
+
+[... start of page 118 ...]
+ORCAManual,Release6.0.0
+Fig.6.7:ComputationaltimesofRIJCOSX-UHFandUHF-DLPNO-CCSDforthelinearalkanechains(𝐶
+𝑛
+𝐻2n+2 )
+intripletstatewithdef2-TZVPPbasisanddefaultfrozencoresettings. 4CPUcoresand128GBofmemorywere
+usedonasingleclusternode.
+AlthoughthosesystemsaresomewhatidealizedfortheDLPNOmethodtobestperform,itisclearthatthepreceding
+R

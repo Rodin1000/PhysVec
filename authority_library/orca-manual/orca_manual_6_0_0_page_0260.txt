@@ -1,0 +1,75 @@
+[... end of page 259 ...]
+arsizeissuchthatstillallfourindexintegralscanbestoredinmemory.
+Table6.8: ComparisonoftheperformanceoftheMRCIandMDCImodulesforasinglereferencecalculationwith
+thebn-ANO-DZPbasissetonthezwitter-ionicformofserine(14atoms,133basisfunctions).
+6.7. MultireferenceConfigurationInteractionandPertubationTheory 237
+
+--- Page 260 ---
+ORCAManual,Release6.0.0
+Module Method T (Eh) Time(sec) Energy(Eh)
+sel
+MRCI ACPF 10−6 3277 -397.943250
+MDCI ACPF 0 1530 -397.946429
+MDCI CCSD 0 2995 -397.934824
+MDCI CCSD(T) 0 5146 -397.974239
+TheselectingACPFcalculationselectsabout15%ofthepossibledoubleexcitationsandsolvesasecularproblem
+ofsize≈360,000CSFs. TheMDCImoduleACPFcalculationoptimizesapproximately2.5millionwavefunction
+amplitudes—andthisisnotalargemoleculeoralargebasisset! DespitethefactthattheMDCImodulemakes
+no approximation, it runs twice as fast as the selected MRCI module and an estimated 50 times faster than the
+unselected MRCI module! This will become even more pronounced for the larger and more accurate basis sets
+thatoneshoulduseinsuchcalculationsanyways. Theerroroftheselectionisontheorderof3mEhor2kcal/mol
+inthetotalenergy. Onecanhopethatatleastpartofthiserrorcancelsupontakingenergydifferences.1 Themore
+rigorousCCSDcalculationtakesaboutafactoroftwolongerthantheACPFcalculationwhichseemsreasonable.
+Thetriplesaddanotherfactorofroughly2inthisexamplebutthiswillincreaseforlargercalculationssinceithas
+asteeperscalingwiththesystemsize. TheACPFenergyisintermediatebetweenCCSDandCCSD(T)whichis
+typical—ACPFovershootstheeffectsofdisconnectedquadrupleswhichpartiallycompensatesfortheneglectof
+triples.
+Thesetimingswillstronglydependonthesystemthatyourunthecalculationon. Nevertheless,whatyoushould
+takefromthisexamplearethemessagethatifyoucanusetheMDCImodule,doit.
+The MDCI module can avoid a full integral transformation for larger systems while the MRCI module can use
+selectionandtheRIapproximationforlargersystems. Bothtypesofcalculationwillbecomeveryexpensivevery
+quickly! ApproximateMDCIcalculationsareunderdevelopment.
+Symmetry
+The MRCI program really takes advantage of symmetry adapted orbitals. In this case the MRCI matrix can be
+blockedaccordingtoirreduciblerepresentationsandbediagonalizedirrepbyirrep. Thisisabigcomputational
+advantageandallowsonetoconvergeonspecificexcitedstatesmuchmorereadilythanifsymmetryisnottaken
+intoaccount.
+Thesyntaxisrelativelyeasy. Ifyouspecify:
+newblock 1 *
+nroots 8
+refs cas(4,4) end
+end
+Thenthe“*”indicatesthatthisistoberepeatedineachirrepofthepointgroup. Thus,inC theprogramwould
+2𝑣
+calculate8singletrootsineachofthefourirrepsoftheC pointgroupthusleadingtoatotalof32states.
+2𝑣
+Alternatively,youcancalculatejustafewrootsinthedesiredirreps:
+newblock 1 0
+nroots 3
+refs cas(4,4) end
+end
+newblock 1 2
+nroots 5
+refs cas(4,4) end
+end
+newblock 3 1
+nroots 1
+(continuesonnextpage)
+1Dependingonwhetheronewantstotakeapessimisticoranoptimisticviewonecouldeithersaythatthisresultshowswhatcanbeachieved
+withacodethatisdedicatedtoasingledeterminantreference.Alternativelyonecould(andperhapsshould)complainaboutthehighpriceone
+paysforthegeneralityoftheMRCIapproach.Inanycase,thenameofthegamewouldbetodevelopMRapproachesthatareequallyefficient
+tosinglereferenceapproaches.SeeFIC-MRCIchapterformoreinformation.
+238 Chapter6. RunningTypicalCalculations
+
+[... start of page 261 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+refs cas(4,4) end
+end
+Inthisexample,wewouldcalculate3singletrootsintheirrep“0”(whichisA ),thenfiverootsinirrep“2”(which
+1
+isB )andthen1tripletrootinirrep1(whichisB ).
+1 2
+Obviously,theresultswithandwithoutsymmetrywilldifferslightly. Thisisduetothefactthatwithoutsymmetry
+the reference space will contain references that belong to “wrong” symmetry but will carry with them excited
+conf

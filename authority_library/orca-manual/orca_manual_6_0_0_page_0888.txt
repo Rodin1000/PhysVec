@@ -1,0 +1,92 @@
+[... end of page 887 ...]
+many-bodytype
+(i.e.obtainedbysettingthecorrespondingelementsofthesimilaritytransformedHamiltoniantozero). Theonly
+exceptionistheresidualequationwhichdefinesthe𝑡𝑎amplitudes,whichisaprojectedequationoftheform
+𝑖
+𝑅
+𝑖
+𝑎 = ∑︁ 𝑤
+m
+⟨︀ Φ
+m
+|𝐸̂︀
+𝑎
+𝑖𝐻̂︀|Φ
+m
+⟩︀ .
+m
+Here,|Φ ⟩︀isthemth stateincludedinthestateaveragedCAS,withweight𝑤 . Thereasontheequationforthe
+m m
+singlesisoftheprojectedformisthatitsatisfiestheBrillouintheorem(i.e.thefirstordersinglesvanishforall𝑖
+and𝑎),whereasthecorrespondingmany-bodyequation(ℎ¯𝑎 =0)doesnot.
+𝑖
+Table7.25: DetailsofthethreeMR-EOMapproachesimplementedinORCA
+7.43. MultireferenceEquationofMotionCoupled-Cluster(MR-EOM-CC)Theory 865
+
+--- Page 888 ---
+ORCAManual,Release6.0.0
+Method InputKeyword Operators DiagonalizationManifold
+MR-EOM-TT†-h-v MR-EOM-TTd 𝑇̂︀ ;𝑇̂︀† CAS,2h1p,1h1p,2h,1h,1p
+MR-EOM-TT†SXD-h-v MR-EOM-TTdSXD 𝑇̂︀ ;𝑇̂︀†;𝑆̂︀+𝑋̂︀ +𝐷̂︀ CAS,2h,1h,1p
+MR-EOM-TT†SXDU-h-v MR-EOM 𝑇̂︀ ;𝑇̂︀†;𝑆̂︀+𝑋̂︀ +𝐷̂︀ ;𝑈̂︀ CAS,1h,1p
+NotethattherearethreedifferentMR-EOMapproacheswhichhavebeenimplementedinORCA.Namely,thecur-
+rentimplementationallowsforMR-EOM-TT†-h-v,MR-EOM-TT†SXD-h-vandMR-EOM-TT†SXDU-h-vcalcu-
+lations. At this point it is useful to discuss the naming convention used for these approaches. We use a vertical
+linetoseparateeachtransformationinvolvedinthesequenceoftransformationsdefiningthegivenMR-EOMap-
+proach. For example, TT†SXD indicates that a T transformation, is followed by a T† transformation, which is
+thenfollowedbyanSXDtransformation. Theh-vindicatesthattheelementsofthetransformedHamiltonianhave
+beenhermitized(h)andvertexsymmetrized(v)beforeenteringtheMRCIdiagonalization(seeRef.[407]formore
+information). Essentially,thismeansthatthefulleightfoldsymmetryofthetwo-electronintegrals(andhermiticity
+oftheone-bodyelements)havebeenenforcedupontheelementsofthetransformedHamiltonian. Thedetailsof
+thethreeMR-EOMapproachesaresummarizedinTableTable7.25. Thistableincludesthekeyword(inthefirst
+lineofinput)usedtoinitiatethecalculationinORCA,thevariousoperatorsinvolved,andtheconfigurationsin-
+cludedinthefinaldiagonalizationmanifold. OnecanclearlyseethattheMR-EOM-TT†SXDU-h-vapproachisthe
+mostcosteffective,asitonlyincludesthe1hand1pconfigurations,beyondtheCAS,inthefinaldiagonalization
+manifold.
+Thevarious%mdcikeywords, whichareimportantforcontrollingMR-EOMcalculationsare(i.e.defaultvalues
+aregivenhere):
+%mdci
+STol 1e-7 #Convergence Tolerance on Residual Equations
+MaxIter 100 #Maximum Number of Iterations
+DoSingularPT false #Activate the Singular PT/Projection Procedure
+SingularPTThresh 0.01 #Threshold for the Singular PT/Projection
+#Procedure
+PrintOrbSelect false #Print the Eigenvalues of the Orbital Selection
+#Densities (and R_core and R_virt values)
+#and Terminate the Calculation
+CoreThresh 0.0 #Core Orbital Selection Threshold
+VirtualThresh 1.0 #Virtual Orbital Selection Threshold
+end
+Asdiscussedbelow,theorbitalselectionschemeisactivatedbyadding!OrbitalSelectiontothesimpleinput
+line. KeywordsthatarespecifictotheCASSCFandMRCImodulesarediscussedinsectionsTheCompleteActive
+SpaceSelf-ConsistentField(CASSCF)ModuleandTheMultireferenceCorrelationModule,respectively. Wenote
+thatinMR-EOM-TT†-h-vandMR-EOM-TT†SXD-h-vcalculations,itispossibletooverridethedefaultexcitation
+classes in the final MRCI diagonalization. This is done by specifying excitations none and then explicitly
+settingtheexcitationflagswithinagivenmultiplicityblock. Forexample,ifwewantedtohave1h,1p,1h1p,2h
+and2h1pexcitationsinthefinaldiagonalizationmanifold,wewouldspecify(i.e.herewehaverequested6singlets
+andhaveaCAS(6,4)reference):
+%mrci
+newblock 1 *
+excitations none
+Flags[is] 1
+Flags[sa] 1
+Flags[ia] 1
+Flags[ijss] 1
+Flags[ijsa] 1
+nroots 6
+refs
+cas(6,4)
+end
+end
+end
+866 Chapter7. DetailedDocumentation
+
+[... start of page 889 ...]
+ORCAManual,Release6.0.0
+7.43.1 The Steps Required to Run an MR-EOM Calculation
+ToillustratethevariousstepsrequiredinatypicalMR-EOMcalculation,wewillconsiderthecalculationofthe
+excitationenergiesoftheneutralFeatomattheMR-EOM-TT†SXDU-h-vleveloftheory.
+State-AveragedCASSCFCalculation
+Evidently,thefirststepistodetermineasuitablestate-averagedCASSCFreferenceforthesubsequentMR-EOM
+calculation. In choosing the state-averaged CAS for an MR-EOM calculation, we typically include a few of the
+low-lyingmultipletsthathavethesamecharacterasthe(muchlargernumberof)st

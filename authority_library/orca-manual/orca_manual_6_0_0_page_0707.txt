@@ -1,0 +1,51 @@
+[... end of page 706 ...]
+hhundredsofatoms
+orthousandsofbasisfunctions. Thus,unlike,sayDLPNO-CCSD(T)whichisahighaccuracymethodfortreating
+largesytems,ICE-CIiseitherahighlyrobusthighaccuracymethodforverysmallsystemsora“buildingblock”
+forlargesystems. Byitselfitcantreatafewdozenelectronsandorbitals–e.g. muchmorethanfullCI–butit
+cannotdowonders. Itsscopeissimilartothedensitymatrixrenormalizationgroup(DMRG)orQuantumMonte
+CarloFullCI(QMCFCI)procedures.
+ICE-CIshouldbeviewedasamultireferenceapproach. Itisself-adaptiveandrobust,eveninthepresenceofnear
+orperfectdegeneracies. Ityieldsorthogonalstates(whenappliedtoseveralstates)andspineigenfunctions. Italso
+yieldsadensityandaspindensity.
+684 Chapter7. DetailedDocumentation
+
+--- Page 707 ---
+ORCAManual,Release6.0.0
+7.24.2 The ICE-CI and CIPSI Algorithms
+ThegeneralideaofICE-CIisstraightforward:Consideramany-particlestatethathasatleastasizeablecontribution
+fromagivenconfigurationn0 (thisisasetofoccupationnumbersfortheactiveorbitalsthatare𝑛0 = 0,1 𝑜𝑟 2
+𝑝
+(𝑝 = any active orbital). By nature of the non-relativisitic Hamiltonian only configurations that differ by at
+most two orbital occupations from n0 will interact with it. We can use perturbation theory to select the subset
+of singles and doubles that interact most strongly with n0 and then solve the variational problem. We can then
+analyzetheCIvectorforconfigurationsthatmakeadominantcontributiontothegroundstate. Say,wesingleout
+theconfigurationswith𝐶
+𝐼
+2 > 𝑇gen . Thisdefinesthe“generator”setofconfigurations. Theotherconfigurations
+arecalled“variational”configurations. Theyaretreatedtoinfiniteorderbythevariationalprinciple,butarenot
+important enough to bring in their single and double excitations. In the next iteration, we perform singles and
+doubles relative to these general configurations and select according to their interaction with the dominant part
+of the previous CI vector (truncated to the generators). This procedure can be repeated until no new important
+configurationsarefoundandthetotalenergyconverges(SeeFig.7.8).
+Fig.7.8: FlowchartoftheICE-CIprocedure.
+ThedescribedprocedureisverysimilartoMalrieu’sthreelevelCIPSIprocedure. Onemajortechnicaldifference,
+isthatICEiscenteredaroundconfigurationsandconfigurationstatefunctionsratherthandeterminants. Aconfig-
+urationisasetofoccupationnumbers0,1or2thatdescribeshowtheelectronsaredistributedamongtheavailable
+spatialorbitals. Aconfigurationstatefunction(CSF)iscreatedbycouplingtheunpairedspinsinagivenconfig-
+urationtoagiventotalspin𝑆. Ingeneralthereareseveral,ifnotmanywaystoconstructalinearlyindependent
+setofCSFs. CSFsontheotherhandcanbeexpandedintermsofSlaterdeterminants,buttherearemoreSlater
+determinants to a given configuration than CSFs. For example for a CAS(14,18) calculation one has about 109
+determinants, butonlyabout3x108 CSFsand3x107 configurations. IntheconfigurationbasedICE(CFG-ICE)
+alllogichappensatthelevelofconfigurations. Thatis,itistherelationshipbetweentwoconfigurationsthatdeter-
+mineswhetherandifyes,bywhichintegralstheCSFsordeterminantsoftwogivenconfigurationsinteract. Since
+theconfigurationspaceissomuchmorecompactthanthedeterminantspacesubstantialcomputationalbenefitcan
+7.24. ApproximateFullCICalculationsinSubspace: ICE-CI 685
+
+[... start of page 708 ...]
+ORCAManual,Release6.0.0
+berealizedbyorganizingthecalculationaroundtheconceptofaconfiguration. Ingeneral,inCFG-ICEallCSFs
+thatbelongtoagivenconfigurationareincludedandallselectionquantitiesaresummedoverallCSFsofagiven
+configurationbeforeitisdecidedwhetherthisCSFsisincludedornot. Intheconfigurationstatefunctionsbased
+ICE(CSF-ICE)thelogicofgenerationandselectionoccursatthelevelofindividualCSFsandthereforeweget
+ridoftherequirementtocarryaroundalltheCSFsforagivenconfiguration. Thisprovidessubstantialgainsin

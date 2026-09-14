@@ -1,0 +1,65 @@
+[... end of page 644 ...]
+s designating the overall orbital
+number. Furthertotheright,thecoefficient(i.e. thevectorelement)isgiveninparenthesesandthesquareofthat
+valueisgiventotheleftofit. Thisishowtherelativecontributionsofeachexcitationcanbeanalyzed.
+ThefinalcontributionshownisfromaCIexcitation. Itsweightislisted,followedbytheindexinbracketsandthe
+correspondingconfigurationoftheactiveelectronsamongtheactiveorbitals.
+622 Chapter7. DetailedDocumentation
+
+--- Page 645 ---
+ORCAManual,Release6.0.0
+7.16.4 Troubleshooting
+Ifthe%casrespblockisspecifiedandthecalculationdoesnotrunthroughtheCASSCFResponsesection,then
+the properties requested are not second-derivatives and therefore do not require linear response equations to be
+solved. If,however,thejobaborts,watchforthesepossibilities:
+• Atleastoneofthesecond-derivativepropertiesrequestedisnotavailableattheCASSCFlevel(seelistabove
+ofthosecurrentlyimplemented)
+• MaxItermayneedtobeincreasedorTolRdecreased
+• Amagneticpropertyisrequestedwithoutsettingthegauge-origininthe%eprnmrblock
+• Anappropriateauxiliarybasis(orthe!AutoAuxkeyword)mayberequired,especiallyfor:
+– Thediagonalpreconditioner(whichisonbydefault)
+– TrafoStep RIinthe%casscfblock
+– RIJCOSX,RIJONX
+• RIJKwasspecified(thisisNOTsupported)
+7.16.5 Minimal Input File
+Thefollowingisanoverviewoftheblocksrequiredforapropertycalculationwith
+! def2-TZVP AutoAux # (or other appropriate basis & auxiliary)
+%casscf
+...
+end
+%casresp # only required to change solver, printing, or preconditioner options
+...
+end
+%elprop # only required if electric property requested
+...
+end
+%eprnmr # only required if magnetic property requested
+...
+ORI ...
+end
+* xyzfile ...
+7.17 Interface to SINGLE_ANISO module
+7.17.1 General description
+TheSINGLE_ANISOprogramallowsthenon-perturbativecalculationofeffectivespin(pseudospin)Hamiltonians
+andstaticmagneticpropertiesofmononuclearcomplexesandfragmentsonthebasisofanabinitio,includingthe
+spin-orbitinteraction. AsastartingpointitusestheresultsofaCASSCF/NEVPT2/SOCcalculationfortheground
+andseveralexcitedspin-orbitmultiplets.
+Thefollowingquantitiescanbecomputed:
+• ParametersofpseudospinmagneticHamiltonians(themethodologyisdescribedin[168]):
+7.17. InterfacetoSINGLE_ANISOmodule 623
+
+[... start of page 646 ...]
+ORCAManual,Release6.0.0
+1. Firstorder(linearafterpseudospin)Zeemansplittingtensor(𝑔tensor),includingthedeterminationof
+thesignoftheproduct𝑔 ·𝑔 ·𝑔 .
+𝑋 𝑌 𝑍
+2. Secondorder(bilinearafterpseudospin)zero-fieldsplittingtensor(𝐷tensor).
+3. Higherorderzero-fieldsplittingtensors(𝐷2,𝐷4,𝐷6,...,𝑒𝑡𝑐.)
+4. HigherorderZeemansplittingtensors(𝐺1,𝐺3,𝐺5,...,𝑒𝑡𝑐.)
+• Crystal-Fieldparametersforthegroundatomic𝐽˜multipletforlanthanides. [414,857]
+• Crystal-Fieldparametersforthegroundatomic𝐿˜ termforlanthanidesandtransitionmetals.
+• Staticmagneticproperties[855,856]:
+1. VanVlecksusceptibilitytensor𝜒 (𝑇).
+𝛼𝛽
+2. Powdermagneticsusceptibilityfunction𝜒(𝑇).
+3. Ma

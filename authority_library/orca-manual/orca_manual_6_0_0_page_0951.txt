@@ -1,0 +1,79 @@
+[... end of page 950 ...]
+mentalone.
+928 Chapter7. DetailedDocumentation
+
+--- Page 951 ---
+ORCAManual,Release6.0.0
+Comparisonofthecalculatedandexperimentalspectrashowsthatsomeadjustmentofthelinewidthparameters
+isneceassybeforeconstructionoftheoreticalrRspectra. Onecandirectlycomparecalculatedandexperimental
+rR spectra upon the excitation at 16200 cm−1 which is in resonance with the 0-0 vibronic band. However, it is
+not consistent to use experimental values of the excitation energy in the calculation of rR spectrum which is in
+resonancewithoneoftheothervibronicbandssincetheseparationbetweenvibrationalpeaksintheexperimental
+and calculated spectra is different whereby positions of the peaks in both spectra do not coincide. Instead one
+shouldusetheexcitaitionenergywhichcorrespondstothesamevibronicpeakinthecalculatedabsorption
+spectrum as in the experimental one. Alternatively, one can adjust theoretical value of vibrational frequency
+suchthatpositionsofcorrespondingvibronicpeaksinthespectracoincide,andthenuseexperimentalvaluesof
+excitationenergiesforthecalculationofrRspectra.
+Example: Normal Mode Scan Calculations of Model Parameters for 1-1A → 1-1B Transition in
+𝑔 𝑢
+trans-1,3,5-Hexatriene
+Ifexcitedstategradientsarenotavailable(whichisthecaseformanyoftheelectronicstructuremethodssupported
+by ORCA), you have to resort to a more laborious procedure – single point calculations at geometries that are
+displacedalongthevariousnormalmodesofthesystem. Thisroughlycorrespondstotakingnumericalderivatives
+–however,oncethisextraeffortisinvestedmoreinformationcanbeobtainedfromthecalculationthanwhatwould
+bepossiblefromananalyticderivativecalculation.
+Thepresentexampleillustratestheapplicationofnormalmodescancalculationsfortheevaluationofexcitedstate
+harmonicparametersthatarenecessarytosimulateopticalspectrawithintheIMDHOmodel. Thismethodcanbe
+appliedwithanymethodlikeCIS,CASSCF,MRCIorTD-DFT.
+Thereferencewavefunctionsforthemultireferencecalculationsreportedbelowareofthestate-averagedCASSCF
+(SA-CASSCF)type. ThecompleteactivespaceCAS(6,6)includesall6valenceshell𝜋-orbitals. Theaverageis
+taken over the first four states which was found necessary in order to include the ground state and the strongly
+allowed1-1B state.
+𝑢
+#
+# example011.inp
+#
+# CASSCF normal mode scan calculations
+#
+# first do single point RHF calculation
+! RHF TZVP TightSCF
+* xyz 0 1
+C -0.002759 0.680006 0.000000
+H -0.966741 1.204366 0.000000
+C 1.187413 1.500920 0.000000
+H 2.146702 0.969304 0.000000
+C 1.187413 2.850514 0.000000
+H 0.254386 3.420500 0.000000
+H 2.116263 3.422544 0.000000
+C 0.002759 -0.680006 0.000000
+H 0.966741 -1.204366 0.000000
+C -1.187413 -1.500920 0.000000
+H -2.146702 -0.969304 0.000000
+C -1.187413 -2.850514 0.000000
+H -0.254386 -3.420500 0.000000
+H -2.116263 -3.422544 0.000000
+*
+# perform SA-CASSCF calculation upon appropriate rotation of MOs
+$new_job
+! TZVP TightSCF
+(continuesonnextpage)
+7.44. SimulationandFitofVibronicStructureinElectronicSpectra,ResonanceRaman 929
+ExcitationProfilesandSpectrawiththeorca_asaProgram
+
+[... start of page 952 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+%scf
+rotate {23,27} end
+end
+%casscf
+nel 6
+norb 6
+mult 1
+nroots 4
+end
+* xyz 0 1
+C -0.002759 0.680006 0.000000
+H -0.966741 1.204366 0.000000
+C 1.187413 1.500920 0.000000
+H 2.146702 0.96930

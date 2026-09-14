@@ -1,0 +1,72 @@
+[... end of page 589 ...]
+are affected by
+TScalePNO_CORE.
+! DLPNO-CCSD(T) def2-SVP def2-SVP/C
+%method
+FrozenCore FC_EWIN
+end
+%mdci
+EWIN -40, 10000
+end
+* xyz 0 1
+Ti 0.0001595288 0.0000775041 0.0000000000
+F 1.7595996122 0.0000634675 -0.0000000011
+F -0.5865076471 1.6586935196 0.0000000018
+F -0.5866248292 -0.8294172469 -1.4362516915
+F -0.5866248311 -0.8294172443 1.4362516907
+*
+AsummarywiththenumberofelectronsaffectedbyTScalePNO_Corefortheexamplesjustdiscussedisshown
+inTableTable7.19.
+7.14. TheSingleReferenceCorrelationModule 567
+
+--- Page 590 ---
+ORCAManual,Release6.0.0
+Table 7.19: Number of chemical core electrons included in the DLPNO calculation and affected by
+TScalePNO_CorefortheTiF examples
+4
+Keyword ChemicalCoreElectrons ValenceElectrons
+Frozen Included𝑎
+FrozenCore(default) 18 0 40
+NoFrozenCore 0 18 40
+EWIN-40,10000 16 2 40
+𝑎usingTScalePNO_Core.
+By default, ORCA provides a chemical meaningful definition for the number of electrons which belong to the
+chemical core of each element. As already discussed, these default values define which pairs are affected by
+TScalePNO_Core. However,theusercanmodifythenumberofchemicalcoreelectronsforaspecificelementvia
+theNewNCorekeyword.
+! DLPNO-CCSD(T) def2-SVP def2-SVP/C NoFrozenCore
+%method
+NewNCore Ti 8 end
+end
+* xyz 0 1
+Ti 0.0001595288 0.0000775041 0.0000000000
+F 1.7595996122 0.0000634675 -0.0000000011
+F -0.5865076471 1.6586935196 0.0000000018
+F -0.5866248292 -0.8294172469 -1.4362516915
+F -0.5866248311 -0.8294172443 1.4362516907
+*
+Inthepreviousexample,thenumberofchemicalcoreelectronsforTihasbeenfixedto8.
+StartingfromORCA6.0,inDLPNOcalculations,tightenedTCutPNOthresholdsareusedbydefaultfor“semicore”
+electronpairsinvolvingthe3sand3porbitalsoffirst-rowtransitionmetals.[32]Thisimprovesnotonlytheaccuracy
+oftheresultsnoticeablybutalsotheefficiencyofthecomputationsasthesystemsizegrows(ref.). Toreproduce
+resultsobtainedwithearlierversions,thenumberofsemicoreorbitalsonfirst-rowtransitionmetalsneedstobeset
+tozero(theolddefault)insteadofeight(thecurrentdefault),asdonebelowforaZnatomwiththeNewNSemiCore
+keywordinthemethodblock:
+%method NewNSemiCore Zn 0 end end
+NOTE
+• Ofcourse,ifelectronsarereplacedbyECPs,theyarenotincludedinthecorrelationtreatment.
+• IfECPsareused,thenumberforNewNCorehastoincludetheelectronsrepresentedbytheECPsaswell.
+E.g. ifanelementissupposedtohave60electronsintheECPandadditional8electronsshouldbefrozen
+inthecorrelationcalculation,NewNCoreshouldbe68.
+• The different sets of orbitals (chemical core electrons included in the correlation treatment and valence
+electrons)arelocalizedseparatelyinordertoavoidthemixingofcoreandvalenceorbitals.
+568 Chapter7. DetailedDocumentation
+
+[... start of page 591 ...]
+ORCAManual,Release6.0.0
+Multi-LevelCalculations
+Inmanyapplicationseventsareinvestigatedthatarelocatedinarelativelysmallregionofthesystemofinterest.
+Inthesecases,combinedquantum-mechanics/molecular-mechanics(QM/MM)approacheshavebeenprovedtobe
+extremelyuseful,especiallyinthemodelingofenzymaticreactions. ThebasicideaofanyQM/MMmethodisto
+treatasmallregionofthesystemattheQMlevelandtouseanMMtreatmentfortheremainingpartofthesystem.
+Alternatively, QM/QM methods, where different parts of a s

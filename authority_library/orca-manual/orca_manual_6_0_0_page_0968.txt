@@ -1,0 +1,92 @@
+[... end of page 967 ...]
+rethesumrunsoverallelectrons𝑖;pˆ isthelinearmomentumoperator;andℰ isthepolarizationvectorofthe
+𝑖
+incidentlight.
+Inordertotakeintoaccountalltheelectricandmagneticmechanismsinthetransition,itisnecessarytousethe
+fullfield-matterinteractionoperator(FFMIO).Fortransitionmoment,itleadstotheequation(7.272).
+𝑁
+𝑇
+𝑃˜𝑄˜
+=
+𝑚
+𝑒 ∑︁ ⟨𝑃˜|ℰ · [︁ 𝑒𝑖k·^r𝑖pˆ
+𝑖
+]︁ |𝑄˜⟩ (7.272)
+𝑒
+𝑖=1
+7.47. Simulationof(Magnetic)CircularDichroismandAbsorptionSpectra 945
+
+--- Page 968 ---
+ORCAManual,Release6.0.0
+where𝑟ˆ isthepositionoperatorofi-thelectronandkisthewavevectorthatpointsinthedirectionofthelight
+𝑖
+propagationwhosemagnitudeisrelatedtothewavelengthby𝜆=2𝜋/|k|.
+For free-rotating molecules, it is necessary to consider all possible orientations of the molecule with respect to
+thedirectionoftheincidentlight. Insomecases,suchastheabsorptionoflinear-polarizedlightunderadipolar
+approximation,theeffectoftheorientationcanbeaveragedanalytically. However,numericalintegrationoversome
+selectedmolecularorientations,labeledas𝑜inequation(7.273),isgenerallynecessary.
+∑︁ 4𝜋2
+<𝜎 >= 𝑤 |𝑇 (𝑜)|2 (7.273)
+𝑃˜𝑄˜ 𝑜𝑐(𝐸 (𝑜)−𝐸 (𝑜)) 𝑃˜𝑄˜
+𝑜
+𝑄˜ 𝑃˜
+where𝑤 istheweightoftheorientationinthequadrature.
+𝑜
+Theimplementationhasbeendesignedtocomputetheabsorptionofcircularly-polarizedlightonsystemsunderthe
+effectofanadditionalexternalmagneticfield,B,whichmodifiesthestates𝑃˜and𝑄˜foreachorientation𝑜through
+aZeemanperturbation. Thecomputedresultsarepresentedasthedifferenceintheabsorptionoftheleft(-)and
+right(+) circularly-polarizedlight(∆f )and asthesumof theoscillatorstrength (f ), whichcorresponds to
+𝑜𝑠𝑐 𝑜𝑠𝑐
+thelinearly-polarizedlightabsorption. Themolecularorientationsareconstructedbyusingrotationmatriceswith
+threeEulerangles: 𝜒,𝜃,and𝜑. Herein,𝜒(therotationangleonaplaneperpendiculartothedirectionofexternal
+magneticfield/incidentlight)isintegratedanalyticallywhereas𝜃and𝜑aretakenonagrid.
+Finally,thestates𝑃˜and𝑄˜areobtainedfromQDPTbyexpandingthestatesovernon-relativisticeigenstatesof𝐻ˆ
+0
+({𝐼,𝐽})andthecoefficientsoftheexpansion(𝑑 )areobtainedfromthediagonalizationofthecomplexmatrix,
+𝐼𝑄˜
+whichcontains𝐻ˆ aswellastheSOCandZeemancontributions(andSSC,ifitisimplementedintheselected
+0
+electronicstructuretheory)expressedin{𝐼,𝐽}.
+⟨Ψ𝑆𝑀|𝐻ˆ +𝐻ˆ +𝐻ˆ |Ψ𝑆′𝑀′ ⟩=𝛿 𝛿 𝛿 𝐸𝑆 +⟨Ψ𝑆𝑀|𝐻ˆ +𝐻ˆ |Ψ𝑆′𝑀′ ⟩ (7.274)
+𝐼 0 𝑆𝑂𝐶 𝑍𝑒𝑒𝑚𝑎𝑛 𝐽 𝐼𝐽 𝑆𝑆′ 𝑀𝑀′ 𝐼 𝐼 𝑆𝑂𝐶 𝑍𝑒𝑒𝑚𝑎𝑛 𝐽
+7.47.2 Running and analyzing MCD calculations in TDDFT module
+AminimuminputtocomputetheMagneticCircularDichroism(MCD)requiressettingthekeywordDoMCDto
+trueandtoincludeanintensityfortheexternalmagneticfieldB(inGauss). AnexampleinputfortheTD-DFT
+moduleisasfollows:
+! B3LYP def2-QZVPP
+%tddft
+TDA False
+NROOTS 10
+DoSOC True
+DoMCD True
+B 50000.0
+end
+*xyz 0 1
+O 0.24287127056830 0.00033994295362 0.29479344369591
+C 0.13113617562040 0.00013705972874 1.65093880501262
+C 1.35780003491446 -0.00017874911331 2.22574232397512
+C 2.30247996517358 -0.00017814489451 1.14947275232337
+C 1.57300244613625 0.00013652073221 0.00793218434497
+H -0.86951534119903 0.00025858475406 2.04160438459058
+H 1.56899490845286 -0.00038874637444 3.28047030533440
+H 3.37570289422870 -0.00038632501973 1.22171814100713
+H 1.83015664610447 0.00025985723335 -1.03506234028415
+*
+In the output file of this job, the estimated oscillator strengths (f ) and the difference between left and right
+𝑜𝑠𝑐
+circularlypolarizedlightabsorption(∆f )areprovided:
+𝑜𝑠𝑐
+946 Chapter7. DetailedDocumentation
+
+[... start of page 969 ...]
+ORCAManual,Release6.0.0
+------------------------------------------------------------------------------
+MCD Transitions via transition electric dipole moments
+B = 50000.00 Gauss T = 300.000 K
+------------------------------------------------------------------------------
+dfosc fosc dfosc/fosc
+0 -> 1 -0.0000000000 0.0000000003 -0.0663180503
+0 -> 2 0.0000000000 0.0000000005 0.0000209714
+0 -> 3 0.0000000000 0.0000000003 0.0661609417
+0 -> 4 -0.0000000001 0.0000000004 -0.2991916107
+0 -> 5 -0.0000

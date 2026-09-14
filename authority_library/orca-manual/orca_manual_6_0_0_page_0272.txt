@@ -1,0 +1,82 @@
+[... end of page 271 ...]
+eoftheMR-CImodule. Themoduleleavesseveralfilesondiskmost
+ofwhicharenotyetneededbutinthefuturewillallowmoreanalysisandrestartandthelike. The.ivofileisa
+standard.gbwtypefileandtheorbitalsthereincanbeusedforvisualization. Thisisimportantinordertofigure
+outtheidentityofthegeneratedIVOs. Perhapstheyarenottheonesyouwantedandthenyouneedtore-runthe
+MR-CIwiththeIVOsasinput,NoIterandtheIVOfeatureinthenewrunturnedoff! WecouldusetheIVOsas
+inputforastateaveragedCASSCFcalculation:
+! moread UseSym KDIIS
+%moinp "Test-SYM-MRCI-H2CO.ivo"
+%casscf nel 2
+(continuesonnextpage)
+6.7. MultireferenceConfigurationInteractionandPertubationTheory 249
+
+--- Page 272 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+norb 2
+irrep 0,1,1
+mult 1,1,3
+nroots 1,1,1
+end
+IfwebasedaMR-ACPFcalculationonthisreferencespacewewillfindthatthecalculatedtransitionenergiesare
+slightlypoorerthanintheMRCI+Qcalculation. Thisistypicalofapproximateclustermethodsthatusuallyrequire
+somewhatlargerreferencespacesforaccurateresults. AsimilarresultisobtainedwithSORCI.
+%mrci CIType SORCI
+tsel 1e-6
+tpre 1e-4
+tnat 1e-5
+AllSingles true
+doNatOrbs true
+IntMode FullTrafo
+# ground state 1A1
+NewBlock 1 0
+NRoots 1
+Excitations cisd
+Refs CAS(2,2) end
+End
+# HOMO LUMO transition 1A2
+NewBlock 1 1
+NRoots 1
+Excitations cisd
+Refs CAS(2,2) end
+End
+# HOMO LUMO triplet transition 3A2
+NewBlock 3 1
+NRoots 1
+Excitations cisd
+Refs CAS(2,2) end
+End
+end
+Thisgives:
+State Mult Irrep Root Block mEh eV 1/cm
+0 1 A1 0 0 0.000 0.000 0.0
+1 3 A2 0 2 144.563 3.934 31728.0
+2 1 A2 0 1 161.179 4.386 35374.7
+Thisissystematically0.4eVtoohigh. Butletuslookattheapproximateaveragenaturalorbital(AANOs)occu-
+pationnumbers:
+------------------------
+AVERAGE NATURAL ORBITALS
+------------------------
+Trace of the density to be diagonalized = 12.000000
+Sum of eigenvalues = 12.000000
+Natural Orbital Occupation Numbers:
+N[ 2] ( A1)= 1.99831062
+N[ 3] ( A1)= 1.99761604
+N[ 4] ( A1)= 1.99479313
+N[ 5] ( B1)= 1.99016881
+N[ 6] ( B2)= 1.95818285
+N[ 7] ( B1)= 1.33014178
+N[ 8] ( B2)= 0.70688423
+(continuesonnextpage)
+250 Chapter6. RunningTypicalCalculations
+
+[... start of page 273 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+N[ 9] ( B1)= 0.00988561
+N[ 10] ( A1)= 0.00436843
+Thisshowsthatthereisalow-occupancyorbital(MO6)thathasnotbeenpartofthereferencespace. Thus,wetry
+thesamecalculationagainbutnowwithonemoreactiveorbitalandtwomoreactiveelectrons:
+! moread
+%moin

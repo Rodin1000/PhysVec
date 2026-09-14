@@ -1,0 +1,139 @@
+[... end of page 332 ...]
+s)
+#
+# The IR spectrum
+# wavenumber T**2 TX TY TY
+#
+$ir_spectrum
+12
+... the IR intensities
+AfterchangingthemassofOfrom15.999to18.0asshownabove,letuscall:
+orca_vib Test-FREQ-H2CO.hess
+Thiswillrecomputevibrationalfrequenciesinthepresenceof18O.Letuscomparevibrationalfrequenciesinthe
+outputofthisrunwiththeoriginalfrequenciesincm−1:
+310 Chapter6. RunningTypicalCalculations
+
+--- Page 333 ---
+ORCAManual,Release6.0.0
+Mode H2C16O H2CO18O Shift
+-----------------------------------------
+6: 1284.36 1282.82 -1.54
+7: 1397.40 1391.74 -5.66
+8: 1766.60 1751.62 -14.98
+9: 2099.20 2061.49 -37.71
+10: 3499.11 3499.02 -0.09
+11: 3645.24 3645.24 0.00
+Anotherwaytoanalyzeisotopeshiftsistoplotthetwopredictedspectraandthensubtractonefromtheother. This
+willproducederivative-shapedpeakswithzerocrossingsatthepositionsoftheisotope-sensitivemodes.
+Note: Inthepresenceofpointchargesand/oranexternalelectricfield,thetranslationalandrotationalsymmetries
+of the system may be broken. In such cases, you may prefer NOT to project out the translational and rotational
+degreesoffreedomoftheHessian. Thiscanbeachievedas:
+orca_vib Test-FREQ-H2CO.hess -noproj
+6.12.4 Thermochemistry
+Thesecondthingthatyougetautomaticallyastheresultofafrequencycalculationisathermochemicalanalysis
+basedonidealgasstatisticalmechanics. Thiscanbeusedtostudyheatsofformation,dissociationenergiesand
+similarthermochemicalproperties. Tocorrectforthebreakdownoftheharmonicoscillatorapproximationforlow
+frequencies,entropiccontributionstothefreeenergiesarecomputed,bydefault,usingtheQuasi-RRHOapproach
+ofGrimme.[322]Toswitch-offtheQuasi-RRHOmethodandusetheRRHOmethod,use:
+%freq QuasiRRHO false
+CutOffFreq 35 # in cm-1
+end
+WheretheCutOffFreqparametercontrolsthecut-offforthelowfrequenciesmode(excludedfromthecalculation
+ofthethermochemicalproperties). NotethatthedefaultCutOffFreqis1(cm−1)whenQuasi-RRHOison,since
+Quasi-RRHO behaves much more reasonably for low frequencies than RRHO does. In particular, the entropy
+contributioncalculatedbyQuasi-RRHOapproachesaconstantvaluewhenthevibrationalfrequencyapproaches
+zero,whiletheRRHOcontributiondiverges.
+The Quasi-RRHO method smoothly interpolates between the entropy formulas of a harmonic oscillator and a
+rigid rotor, such that high frequency vibrations behave like harmonic vibrations, and low frequency vibrations
+behave like rotations with the same frequency. The frequency at which the entropy contribution is a half-half
+mixtureofrotationandvibrationiscalledthe“referencefrequency”𝜔 oftheQuasi-RRHOmethod, accessible
+0
+viatheQRRHORefFreqkeywordin %freq(seeFrequencycalculations-numericalandanalytical). Thedefault
+value(100cm−1)isconsistentwiththeoriginalQuasi-RRHOpaper[322],butotherpapersmaychoosedifferent
+values,suchas50cm−1. Meanwhile,ORCA’sQuasi-RRHOimplementationdeviatesfromtheoriginalpaperin
+thechoiceof“averagemolecularmomentofinertia”𝐵 ;whileintheoriginalpaperitischosenasafixedvalue
+av
+10−44kg·m2,inORCAitisgivenastheisotropicallyaveragedmomentofinertiaoftheactualmoleculeathand.
+Thisistheoreticallymorejustifiedthanusingthesamemomentofinertiaformoleculesofdifferentsizes,although
+theresultingdifferenceintheGibbsfreeenergiesisrathersmall,usuallywithin0.1kcal/mol.
+Note that the rotational contribution to the entropy is calculated using the expressions given by Herzberg [388]
+includingthesymmetrynumberobtainedfromtheorderofthepointgroup.4 Whilethisisagoodapproximation,
+4thecorrespondingequationforthepartitionfunction(assumingsufficientlyhightemperatures)ofalinearmoleculeis𝑄𝑖𝑛𝑡=
+𝜎
+𝑘
+ℎ
+𝑇
+𝑐𝐵
+and
+√︁
+fornon-linearmolecules𝑄𝑖𝑛𝑡 =
+𝜎
+1
+𝐴𝐵
+𝜋
+𝐶
+(𝑘
+ℎ
+𝑇
+𝑐
+)3. A,BandCarethecorrespondingrotationalconstants,𝜎isthesymmetrynumber. If
+youwanttochooseadifferentsymmetrynumber,ORCAalsoprovidesatablewiththevaluesforthisentropycontributionforothersymmetry
+numbers.HerzbergreportsthefollowingsymmetrynumbersforthepointgroupsC ,C ,C :1;C ,C ,C :2;C ,C ,C :3;C ,C ,C :
+1 𝑖 𝑠 2 2𝑣 2ℎ 3 3𝑣 3ℎ 4 4𝑣 4ℎ
+4;C
+6
+,C
+6𝑣
+,C
+6ℎ
+:6;D
+2
+,D
+2𝑑
+,D
+2ℎ
+=V
+ℎ
+:4;D
+3
+,D
+3𝑑
+,D
+3ℎ
+:6;D
+4
+,D
+4𝑑
+,D
+4ℎ
+:8;D
+6
+,D
+6𝑑
+,D
+6ℎ
+:12;S
+6
+:3;C
+∞𝑣
+:1;D
+∞ℎ
+:2;T,T
+𝑑
+:12;O
+ℎ
+:
+24.
+6.12. CalculationofProperties 311
+
+[... start of page 334 ...]
+ORCAManual,Release6.0.0
+onemightwanttomodifythesymmetrynumberoruseadifferentexpression[302]. Forthispurpose,therotational
+constants(incm−1)ofthemoleculearealsogiveninthethermochemistryoutput.
+Forexampleletuscalculateanumberfortheoxygen-oxygendissociationenergyintheH O molecule. Firstrun
+2 2
+thefollowingjobs:
+# Calculate a value for the O-O bond strength in H2O2
+! B3LYP DEF2-TZVP OPT FREQ BOHRS
+* xyz 0 1
+O -1.

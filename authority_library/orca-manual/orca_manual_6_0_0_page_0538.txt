@@ -1,0 +1,78 @@
+[... end of page 537 ...]
+blemsinthebeginningof
+theSCF,itmayhavetobeinvokedatalaterstage. ThestartoftheDIISprocedureiscontrolledbyDIISStart.
+Ithasadefaultvalueof0.2Eh,whichusuallystartsDIISafter0-3cycles. AdifferentwayofcontrollingtheDIIS
+startisadjustingthevalueDIISMaxIt,whichsetsthemaximumnumberofcyclesafterwhichDIISwillbestarted
+irrespectiveoftheerrorvalue.
+%scf
+# control of the DIIS procedure
+CNVDIIS true # default: true
+DIISStart 0.1 # default: 0.2
+DIISMaxIt 5 # default: 12
+DIISMaxEq 7 # default: 5
+DIISBFac 1.2 # default: 1.05
+DIISMaxC 15.0 # default: 10.0
+(continuesonnextpage)
+7.7. SCFConvergence 515
+
+--- Page 538 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# more convenient:
+DIIS Start 0.1 MaxIt 5 MaxEq 7 BFac 1.2 MaxC 15.0 end
+end
+NotethatfortroublesomeorlackingSCFconvergencetheTRAHalgorithmshouldbeused(seeSec. Trust-Region
+AugmentedHessian(TRAH)SCF).Ifnotturnedoffexplicitly,TRAHisswitchedonautomaticallywheneverconver-
+genceproblemsarepresentbymeansoftheAutoTRAHfeature(seeSec. Trust-RegionAugmentedHessian(TRAH)
+SCF).
+7.7.5 An alternative DIIS algorithm: KDIIS
+AnalternativealgorithmthatmakesuseoftheDIISconceptiscalledKDIIS(Kolmar’sDIIS[452,453])inORCA.
+TheKDIISalgorithmisdesignedtobringtheorbitalgradientofanyenergyexpressiontozerousingacombination
+ofDIISextrapolationandfirstorderperturbationtheory. Thus,themethodisdiagonalization-free. Inourhands
+it is superior to the standard DIIS algorithm in many cases, but not always. The algorithm is invoked with the
+keyword! KDIISandisavailableforRHF,UHFandCASSCF.
+7.7.6 Approximate Second Order SCF (SOSCF)
+SOSCF is an approximately quadratically convergent variant of the SCF procedure [264, 607]. The theory is
+relativelyinvolvedandwillnotbedescribedhere. Inshort–SOSCFcomputesaninitialguesstotheinverseorbital
+HessianandthenusestheBFGSformulainarecursivewaytoupdateorbitalrotationangles. Asinformationfrom
+afewiterationsaccumulates,theguesstotheinverseorbitalHessianbecomesbetterandbetterandthecalculation
+reaches a regime where itconverges superlinearly. As implemented, theprocedure converges as well or slightly
+betterthanDIISandtakesasomewhatlesstime. However,itisalsoalotlessrobust,sothatDIISisthemethodof
+choiceformanyproblems(seealsothedescriptionofthefullsecond-ordertrust-regionaugmentedHessian(TRAH)
+procedureinthenextsection). Ontheotherhand,SOSCFisusefulwhenDIISgetsstuckatsomeerroraround∼
+0.001or0.0001. SuchcasesweretheprimarymotivefortheimplementationofSOSCFintoORCA.
+ThedrawbackofSOSCFisthefollowing: inthebeginningoftheSCF,theorbitalgradient(thederivativeofthe
+totalenergywithrespecttorotationsthatdescribethemixingofoccupiedandvirtualMOs)islarge,sothatoneisfar
+fromthequadraticregime. Insuchcases,theprocedureisnotsuccessfulandmayevenwildlydiverge. Thereforeit
+isrecommendedtoonlyinvoketheSOSCFprocedureintheveryendoftheSCFwhereDIISmayleadto“trailing”
+convergence. SOSCFiscontrolledbythevariablesSOSCFStartand SOSCFMaxIt. SOSCFStartisathreshold
+for the orbital gradient. When the orbital gradient, or equivalently the DIIS Error, fall below SOSCFStart, the
+SOSCFprocedureisinitiated. SOSCFMaxItisthelatestiterationtostarttheSOSCFeveniftheorbitalgradientis
+stillaboveSOSCFStart.
+%scf
+# control of the SOSCF procedure
+CNVSOSCF true # default: false
+SOSCFStart 0.1 # default: 0.01
+SOSCFMaxIt 5 # default: 1000
+# more convenient:
+SOSCF Start 0.1 MaxIt 5 end
+end
+Formanycalculationsontransitionmetalcomplexes, itisagoodideatobeconservativeinthestartupcriterion
+forSOSCF,itmaydivergeotherwise. Achoiceof0.01orlowerisrecommended.
+516 Chapter7. DetailedDocumentation
+
+[... start of page 539 ...]
+ORCAManual,Release6.0.0
+7.7.7 Trust-Region Augmented Hessian (TRAH) SCF
+The trust-region augmented Hessian (! TRAH) approach[64, 349, 381, 733] should be used if the standard SCF
+solver[264,607,702,703]DIIS+SOSCFfailsorisexpectedtofail. TRAH-SCFshouldconvergeforanysystem.
+Convergence to the electronic ground state is also guaranteed because information of the electronic Hessian is
+exploited.
+TheTRAHapproachconstructsaquadraticmodeloftheSCFenergyasafunctionoftheorbitalrotationparameters
+x,
+1
+𝐸(x)=𝐸 +g𝑇x+ x𝑇Hx
+0 2
+andminimizes𝐸(x)w.r.txwiththeconstraintthatorbitalrotationsshouldliewithinatrustregionℎ
+||x||≤ℎ.
+Suchac

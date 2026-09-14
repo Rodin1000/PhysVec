@@ -1,0 +1,75 @@
+[... end of page 226 ...]
+f the lowest energy only.
+# at least one starts from the lowest (default TRUE).
+#
+# uphill step
+#
+UPHILLATOMS {0:2 5 14:29} END # if given, only those atoms listed will be pushed,
+# uphill others will just respond to it.
+GFNUPHILL GFNFF # use GFN-FF only during the uphill steps? GFN2XTB, GFN1XTB or
+# GFN0XTB are also valid options for the respective methods.
+(continuesonnextpage)
+204 Chapter6. RunningTypicalCalculations
+
+--- Page 227 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+#
+# filtering and screening
+#
+ALIGN FALSE # align all final conformers with respect to the
+# lowest energy one?
+ENDIFF 0.1 # minimum energy difference needed to differentiate
+# conformers, in kcal/mol.
+MAXEN 6.0 # the maximum relative energy of a conformer to
+# be taken, in kcal/mol. 6 kcal/mol by default.
+RMSD 0.125 # minimum RMSD to differentiate conformers, in Angstroem.
+ROTCONSTDIFF 0.01 # maximum difference for the rotational constant, in %.
+RMSDMETRIC EIGENVALUE # use eigenvalues of distance matrix for RMSD?
+# default is RMSD in general
+# and EIGENVALUE for GOAT-EXPLORE.
+#
+# entropy mode
+#
+MAXENTROPY FALSE # add delta Gconf as convergence criteria (default FALSE)?
+CONFTEMP 298.15 # temperature used to compute the free energy, in Kelvin.
+MINDELS 0.1 # the minimum entropy difference between two iterations
+# to signal convergence, in cal/(molK).
+CONFDEGEN 2 # set an arbitrary degeneracy per conformer?
+AUTO # find that automatically based on the RMSD.
+AUTOMAX # same as AUTO, but take the largest value as reference
+# for all conformers.
+#
+# free topology
+#
+FREEHETEROATOMS FALSE # free all atoms besides H and C.
+FREENONHATOMS FALSE # self explained.
+FREEFRAGMENTS FALSE # free interfragment topology, i.e., bonds between fragments
+might be formed or broken during the search but bonds
+within the same fragment will be kept.
+# we don't recommend changing these unless you really need to!
+FREEZEBONDS FALSE # freeze bonds uphill (default TRUE)?
+FREEZEANGLES FALSE # freeze sp2 angles and dihedrals uphill (default TRUE)?
+FREEZECISTRANS FALSE # freeze cis-trans isomers outside rings (default FALSE)?
+FREEZEAMIDES FALSE # freeze amide cis/trans chirality (default FALSE)?
+MAXCOORDNUMBER 10, 4, 11, 6 # a list of "atom number, coordination number" that
+# will define the maximum coordination number for
+# those listed atoms, taken from distance-based criteria.
+# in this case atom 10 will have a maximum of 4 and
+# atom 11 a maximum of 6. others follow defaults.
+#
+# goat react
+#
+MAXTOPODIFF 8 # the maximum topological difference that is allow. Topodiff
+# is simply defined based on number of broken + number of formed bonds
+# using ORCA's regular distance based criteria [1.3 * (sum of Cov. Radii)]
+END
+6.4. GOAT:globalgeometryoptimizationandensemblegenerator 205
+
+[... start of page 228 ...]
+ORCAManual,Release6.0.0
+6.5 Vibrational Frequencies
+VibrationalfrequencycalculationsareavailablethroughanalyticaldifferentiationoftheSCFenergyaswellasone-
+ortwo-sidednumericaldifferentiationofanalyticalgradients, i.e. forHartree-FockandDFTmodels. Formeth-
+odswithoutanalyticalgradientanumericallycalculatedgradientcanbeused(keyword NumGrad)fornumerical
+frequencies. Pleasenote,thatthiswillbeaverytimeconsu

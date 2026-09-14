@@ -1,0 +1,79 @@
+[... end of page 1032 ...]
+ussian).
+surfacetype Chargetype Gradient Hessian
+Analytical Numerical Analytical Numerical
+gepol_ses Point Yes Yes Yes Yes
+gepol_sas Point Yes Yes Yes Yes
+vdw_gaussian^* Gaussian Yes Yes Yes Yes
+gepol_ses_gaussian Gaussian No Yes No Yes
+Note: IftheuserwantstoturnofftheC-PCM,onehastowritethefollowingtaginthesimpleinput:
+! NOCPCM
+This is needed, for instance, in the context of concatenated calculations using the $new_job feature, where the
+previouscalculationinvolvedsolvation,butonewantstoturnitoffforthenextone.
+1010 Chapter7. DetailedDocumentation
+
+--- Page 1033 ---
+ORCAManual,Release6.0.0
+UseoftheGaussianChargeScheme
+TheGaussianchargeschemeavoidstheCoulombsingularitypresentinconventionalpointchargesurfaceelement
+models. Thisapproach,whenappliedtogetherwithaswitchingfunction,resultsinasmoothsolvationpotential
+and, more importantly, on smooth derivatives of this quantity with respect to external perturbations. Then, it is
+highly recommended to adopt this approach within the C-PCM. The Gaussian charge scheme can be used with
+twotypesofsolutecavitysurfaces: (1)ascaledvdWsurface,(2)asolvent-excludedsurface(SES).Toassignthe
+radii for the different atoms we follow the scheme proposed in ref. [494]. That is, we use Bondi radii [114] for
+allelements,exceptforhydrogenwhereweadopt1.1Å.For16ofthemain-groupelementsintheperiodictable,
+whereBondi’sradiiarenotdefined,weadopttheradiiproposedinref. [552]byMantinaetal. Thisisthecase
+forelements: Be,B,Al,Ca,Ge,Rb,Sr,Sb,Cs,Ba,Bi,Po,At,Rn,Fr,Ra. Fortheelementsthatarenotcovered
+neitherbyBondinorbyMantina,weconsideraradiusof2Å.
+• ScaledvdWcavity
+TheGaussianchargeschemewithascaledvdW-typecavityisnowthedefaultinORCA,soonejustneedstoadd
+theC-PCMtaginthe%cpcmblockintheinputfile. Thatwouldcorrespondto(althoughtheuserdoesnotneedto
+writethat,asitisinternallyprocessedbyORCA):
+%cpcm
+surfacetype vdw_gaussian
+end
+Inthiscase,theradius𝑅 ofatom𝐼 forthescaledvdWcavityiscalculatedas
+𝐼
+𝑅 =𝑓 𝑅vdW
+𝐼 𝑠𝑐𝑎𝑙 𝐼
+where𝑅vdW isthevdWradiusofatom𝐼 and𝑓 isascalingfactor. Thisparameterisbydefaultequalto1.2,
+𝐼 𝑠𝑐𝑎𝑙
+as suggested in ref. [494]. However, the user can modify its value through the scale_gauss tag in the %cpcm
+blockintheinputfile. ThenumberofC-PCMchargesperatomissuchthatwehaveanapproximatedensityof
+5.0charges/Å2 onthesurfaceofthecavity. Thisnumbercorrespondsapproximatelyto110pointsonahydrogen
+atom (110/(4𝜋 ×1.322) ≈ 5.0Å−2). ORCA will choose then different levels of discretization (Lebedev grids)
+dependingontheradiioftheatoms. Thisschemeiscalledisodensityscheme. Thethresholdforthenumberof
+charges per unit of area on hydrogens and non-hydrogen atoms can be specified by the user via thresh_h and
+thresh_noth,respectively. Alternatively,theusercanrequestafixednumberofLebedevpointspersphereinthe
+cavity(independentoftheradiusofthesphere). Thiscanbedoneviathenum_lebtag. Thisparametercanadopt
+thefollowingvalues: 50,110,194,302,434,590,770,974,and1202. ORCAversionsolderthanORCA6.0use
+thislastscheme.
+Theanalyticalgradient,aswellastheanalyticalHessianareavailableforthissolvationmethod.
+• Solvent-excludedsurface
+The GEPOL-generated SES can be used together with the Gaussian charge scheme. In this case, the Gaussian
+chargesarenotonlyplacedonthesurfaceoftheatomicspheresbutalsoonthesurfaceofthenewspheresgenerated
+throughtheGEPOLalgorithm. TousethisapproachweshouldmodifytheORCAinputfileasfollows
+%cpcm
+surfacetype gepol_ses_gaussian
+end
+TheSESisingeneralrecommendedwhenthesoluteisexplicitlysolvatedbyfewsolvationlayers. Inthiscase,the
+additionalGEPOLspherespreventthesolventtofillthespacebetweenexplicitsolventmoleculesorbetweenthose
+moleculesandthesolute. TheradiusofthesolventspherethatrollsoverthesolutevdW-typesurfacetogenerate
+theSESiscontrolledbytheparameter“rsolv”. Thisradiushasadefaultvalueof1.30Å,buttheusercanchange
+itbyspecifyinganothervaluefor“rsolv”inthe%cpcmblock. TheminimumradiusforanaddedGEPOLsphere
+iscontrolledby“rmin”.
+NeithertheanalyticalgradientnortheanalyticalHessianareavailableforthisstrategy. Theyshouldbecomputed
+numerically. DuetotheinterdependencybetweenGEPOLspheresandtheatomspresentinoursystem,theanalyt-
+icalgradientcomputedusingtheSESdoesnotconvergeassmoothascomparedtothatusingthevdW-typecavity
+7.53. ImplicitSolvationModels 1011
+
+[... start of page 1034 ...]
+ORCAManual,Release6.0.0
+(seeref. [287])andcanleadtowrongminima. TheHessianisaffectedinthesameway. Then,ORCA6.0does
+notsupportanymoretheanalyticalgradient/Hessianforsuchsurfacetopreventinaccurateresults.
+UseofthePointChargeScheme
+Withinthisscheme,thesolvationchargesaretreatedaspunctualandnoswitchingfunctionisusedtoaccept/discard
+chargesintheintersectionbetweenthespheresthatformthesolutecavity. Thesetwofactsleadtoadiscontinuous
+potential energy surface (numerical instabilities in the SCF energy and its derivatives). Then, the point charge
+scheme is not recommended within the C-PCM. If the user still wants to use this charge scheme it can be used
+togetherwithtwodifferenttypeofsurfacesforthes

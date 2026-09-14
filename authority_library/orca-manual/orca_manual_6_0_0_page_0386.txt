@@ -1,0 +1,70 @@
+[... end of page 385 ...]
+f interest. In the latter case it is important that the molecule is not active, since bonded parameters
+arenotavailable. However, itcanstillbeoptimizedasarigidbody, seesectionsGeometryOptimizationsusing
+theL-BFGSoptimizerandtheusageinQM/MMcalculationsinsectionOptimizationwiththeCartesianL-BFGS
+Minimizer,onMMlevel,optimizingitspositionandorientationwithrespecttothespecificenvironment.
+Inputoptions:
+6.15. ORCAMMModule 363
+
+--- Page 386 ---
+ORCAManual,Release6.0.0
+orca_mm -makeff <optional:-verbose> <XYZ/PDBFILE> <optional:-C CHARGE>
+<optional:-M MULT> <optional:-nproc N> <optional:-CHARGE_OPTIONS>
+Keywords:
+<CHARGE> = charge of system
+<MULT> = multiplicity of system
+<-nproc N> = number of processors (Default 1)
+<-CHARGE_OPTIONS> = Structure Charge calculation
+<-PBE> input PBE
+<-PBEOpt> PBE opt. PBE
+<-PBEOptH> PBE H-opt. PBE
+<-XTB> input XTB
+<-XTBOpt> XTB opt. XTB
+<-XTBOptH> XTB H-opt. XTB
+<-XTBOptPBE> XTB opt. PBE
+<-noChargeCalc> distribute net charge evenly
+PBE Opt and SP level: RI-PBE/def2-SVP CPCM(Water), CHELPG charges
+XTB Opt and SP level: GFN2-XTB GBSA(Water), Mulliken partial charges
+Example:
+orca_mm -makeff substrate_withH.xyz -M 2 -XTBOptPBE
+NotethatORCAgeneratesbondsbasedonsimpledistancerules,whichenablesORCAtodetectwheretoaddlink
+atomsbetweenQMandMMatoms,seealsosectionQM-MM,QM-QM2andQM2-MMBoundary. Buttheuseris
+advisedtotreatamolecule,forwhichtheORCAFF.prmsfilewasgeneratedwiththemakeffoption,eitherfullyin
+theQM,orfullyintheMMregion,unlessthechargedistributionhasbeenproperlytakencareof(duetotheneed
+ofintegerchargesinQMandMMsystem).
+Getstandardhydrogenbondlengths: getHDist
+ForthedefinitionofthelinkatomsstandardbondlengthsbetweenC,NandOandhydrogenaredirectlysetby
+ORCAbutcanbemodifiedbytheuser,seesectionQM-MM,QM-QM2andQM2-MMBoundary. Ifotheratom
+typesareontheQMsideoftheQM-MMboundary,theirdistancetothelinkatomhastobedefined. Inthiscase
+afilecanbeprovidedtoORCAwhichdefinesthestandardbondlengthtohydrogenforallpossibleatoms. Sucha
+filecanbegeneratedviathefollowingcommand:
+Inputoptions:
+orca_mm -getHDist <optional:-verbose> <XYZ/PDBFILE>
+Example:
+orca_mm -getHDist 1C1E.xyz
+Thisfilecanthenbemodified,therequiredvaluescanbeadded,andtheresultingfilecanbedefinedasinputfor
+theQMMMcalculation.
+CreateORCAFF.prmsfileforIONIC-CRYSTAL-QMMM
+ForIONIC-CRYSTAL-QMMMcalculations,sectionIONIC-CRYSTAL-QMMM,anORCAFF.prmsfilewithinitial
+chargesandconnectivitiesisrequired. Ifyouarenotusingtheorca_crystalpreptoolforsettingupsuchcalculations,
+seesectionorca_crystalprep,youcandirectlypreparetheORCAFF.prmsfilewiththecommand:
+orca_mm -makeff <XYZ/PDBFILE> -CEL <ELEMENT1> <OXIDATION_STATE1>
+-CEL <ELEMENT2> <OXIDATION_STATE2>
+Keywords:
+(continuesonnextpage)
+364 Chapter6. RunningTypicalCalculations
+
+[... start of page 387 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+<ELEMENT1> = element name
+<OXIDATION_STATE1> = formal oxidation state of element 1
+... = More elements possible
+Example:
+orca_mm -makeff na4cl4.xyz -CEL Na 1.0 -CEL Cl -1.0
+Here,na4cl4.xyzisthesupercellstructurefile(itcancontaintensofthousandsofatoms).
+Note:
+• For supercells with more complex oxidation states’, e.g. Co O , the ORCAFF.prms file can be generated
+3 4
+convenientlyviatheorca_crystalpreptool,orca_crystalprep.
+6.15.

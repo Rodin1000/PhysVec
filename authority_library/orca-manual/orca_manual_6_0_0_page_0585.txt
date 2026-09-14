@@ -1,0 +1,90 @@
+[... end of page 584 ...]
+ly,thehigh-spinopen-shellversionoftheDLPNOusesthesamestrategyastheclosed-shellvariant
+toefficientlygeneratetheopen-shellPNOsinaconsistentmannertotheclosed-shellformalism. Throughthe
+developmentoftheUHF-LPNO-CCSDmethod,wehaverealizedthatuseoftheunrestrictedMP2(UMP2)
+approach to define the open-shell PNOs introduces a few complexities; (1) the PNOs for 𝛽 spin orbitals
+cannotbedefinedfor𝛼-𝛼electronpairsandviceversa,(2)thediagonalPNOsforsinglyoccupiedorbitals
+cannot be properly defined, and (3) the PNO space does not become identical to that in the closed-shell
+LPNO framework in the closed-shell limit. However, to program all the unrestricted CCSD terms in the
+LPNO basis, those PNOs are certainly necessary. Therefore, in the UHF-LPNO-CCSD implementation,
+severalterms,which,inmanycases,giveratherminorcontributionsinthecorrelationenergyareomitted.
+Due tothese facts, theUHF-LPNO-CCSD does notgive identical resultsto that ofRHF-LPNO-CCSD in
+562 Chapter7. DetailedDocumentation
+
+--- Page 585 ---
+ORCAManual,Release6.0.0
+the closed-shell limit. In addition, screening of the weak pairs on the basis of the semi-canonical UMP2
+pair-energy results in somewhat unbalanced treatment of the closed- and open-shell states in some cases,
+leading to rather larger errors in the reaction energies. To overcome those issues, in the high-spin open-
+shellDLPNO-CCSDmethod,thePNOsaregeneratedintheframeworkofsemi-canonicalNEVPT2which
+smoothlyconvergestotheRHF-MP2counterpartintheclosed-shelllimit. Theopen-shellDLPNO-CCSD,
+whichismadeavailablefromORCA4.0,includesafullsetoftheopen-shellCCSDequationsandisdesigned
+asanaturalextensiontotheRHF-DLPNO-CCSD.
+5. Screeningoftheelectronpairsaccordingtoatruncationparameter(inORCAitiscalled𝑇 )isnot
+CutPairs
+sufficienttoobtainahighlyperforminglocalelectronicstructuremethod. TheoriginalworkofPulaysug-
+gestedtolimitexcitationsoutoftheinternalorbitals(𝑖)and(𝑗)tothedomainassociatedwiththepair(𝑖𝑗).
+WhilethisworkswellandhasbeenimplementedtoperfectionbyWerner,Schützandco-workersoverthe
+years,[753,754,773,774]thepre-factorofsuchcalculationsishigh,sincethedomainshavetobechosen
+largeinordertorecover99.9%ormoreofthecanonicalcorrelationenergy.
+6. TheORCAdevelopershavethereforeturnedtoanapproachthathasbeenusedwithahighdegreeofsuc-
+cessintheearly1970sbyMeyer,Kutzelnigg,Staemmlerandtheirco-workers,namelythemethodof“pair
+naturalorbitals”(PNOs).[10,582,583,885]
+AsshownbyLoewdininhisseminalpaperfrom1955,naturalorbitals(theeigenfunctionsoftheone-particle
+densitymatrix)providethefastestpossibleconvergenceofthecorrelatedwavefunctionwithrespecttothe
+numberofone-particlefunctionsincludedinthevirtualspace. Ithasbeenamplyestablishedthatapproxi-
+matenaturalorbitalsarealmostassuccesfulasthetruenaturalorbitals(whichwouldrequiretheknowledge
+oftheexactwavefunction)inthisrespect. Whilethesuccessofapproximatecorrelationtreatmentsofmany
+particlesystemsthatuseapproximatenaturalorbitalsofthewholesystemsaresomewhatlimited,thisisnot
+thecaseforpairnaturalorbitals. Thelatterhavefirstbeensuggestedasabasisforcorrelationcalculations
+byEnglandandco-workersand,atthetime,weregiventhename“pseudonaturalorbitals”,atermthatwas
+usedbyMeyerthroughouthispioneeringwork.
+7. ThePNOsareapproximatenaturalorbitalsofagivenelectronpair. Inordertogeneratethemonerequiresa
+oneparticlepairdensitymatrix𝐷 theeigenfunctionsofwhicharethePNOsthemselveswhilethecorre-
+𝑖𝑗
+spondingeigenvaluesarethePNOoccupationnumbers. Whiletherearemanycreativepossibilitiesthatcan
+leadtoslightlydifferentPNOsets,aquiteusefulandnaturalapproximationistogeneratesuchadensityfrom
+theMP2amplitudesasanexpectationvalue(the“unrelaxed”MP2density. Onethenusesasecondthresh-
+old(inORCA𝑇 )thatcontrolsthePNOstobeincludedinthecalculation. PNOswithanoccupation
+CutPNO
+number<𝑇 areneglected.
+CutPNO
+8. PNOsofagivenelectronpairformanorthonormalset. However,PNOsbelongingtodifferentelectronpairs
+are not orthonormal and hence they overlap. This non-orthogonality leads to surprisingly few complica-
+tionsbecausethePNOsstayorthogonaltoalloccupiedorbitals. Inpractice,theequationsforPNO-based
+correlationcalculationsarehardlymorecomplexthanthecanonicalequations.
+9. Thenicefeatureofthesepairdensitiesisthattheybecomesmallwhenthepairinteractionbecomessmall.
+HenceweakpairsarecorrelatedbyveryfewPNOs. Therefore,thePNOexpansionofthewavefunctionis
+extremelycompactandthereonlyisalinearscalingnumberofsignificantexcitationamplitudesthatneedto
+beconsidered.
+10. AgreatfeatureofthePNOsisthattheyare“self-adapting”tothecorrelationsituationthattheyaresupposed
+to describe. Hence, they are as delocalized as required by the physics and there is no ad-hoc assumption
+abouttheirlocationinspace. However,itisclearthatthePNOsarelocatedinthesameregionofspaceas
+theinternalorbitalsthattheycorrelatebecauseotherwisetheywouldnotcontributetothecorrelationenergy.
+11. In the iterative local MP2, a set of PNOs is calculated for the MP2 calculation from the semicanonical
+amplitudesfirstusingthecutoffTCutPNO×LMP2ScaleTCutPNO.ThesizeoftheresultingPNOspaceshould
+be comparable with DLPNO-MP2. After the iterations have converged, a (smaller) set of PNOs for the
+CCSDdoubleexcitationamplitudesisgeneratedfromtheiteratedlocalMP2amplitudesinthe(larger)PNO
+basis. The PNOs for the single excitation amplitudes are always calculated using the semicanonical MP2
+amplitudes,astheyrequireamuchmoreconservativePNOtruncationthreshold.
+12. Capitalizing on this feature one can define generous domains and expand the PNOs in terms of the PAOs
+andauxiliaryfitfunctions(fortheRIapproximations)thatarecontainedinthesedomains. InORCAthisis
+controlledbythethirdsignificanttruncationparameter𝑇 . ThisisthebasisoftheDLPNOmethod.
+CutMKN
+IntheolderLPNOmethod,thePNOsareexpandedintermsofthecanonicalvirtualorbitalsand𝑇
+CutMKN
+7.14. TheSingleReferenceCorrelationModule 563
+
+[... start of page 586 ...]
+ORCAManual,Release6.0.0
+isonlyusedforalocalfittothePNOs. Inthelinear-scalingDLPNOimplementationthedomainsexpanding
+thePNOsintermsofthePAOsarecontrolledvia𝑇 .
+CutDO
+13. PNOexpansionshavetheamazingadvantagethatthePNOsconvergetoawell-definedsetasthebasissetis
+approachingcompleteness. Hence,theincreaseinthenumberofPNOsperelectronpairisverysmallupon
+enlargement of the orbital basis. In other words, correlation calculations with large basis sets are not that
+muchmoreexpensivethancorrelationcalculationswithsmallbasissets. Thus,theadvantageofPNOover
+canonical calculations increases with the size of the basis set. This is a great feature as large and flexible
+basissetsarearequirementformeaningfulcorrelationcalculations.
+14. In summary, DLPNO and LPNO calculations are controlled by only three cut-off parameters with well-
+definedmeanings:a)𝑇 ,thecut-offfortheelectronpairstobei

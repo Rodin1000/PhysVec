@@ -1,0 +1,82 @@
+**Format Rules for Validating ORCA Input (.inp) Files**
+
+====================================================================================================
+## Purpose
+
+These rules are used to verify that a generated ORCA input file obeys the structure and syntax defined in GenerateCode_rules_stand1.txt. The checker must ensure the code is valid ORCA input and follows all mandatory block-format conventions.
+
+====================================================================================================
+## A) BLOCK STRUCTURE CHECKS
+====================================================================================================
+
+### A1) File-Level Description (First Block Only)
+- The **first** block MUST include, immediately after the #Tags_... line:
+  - A line:  # Scientific problem: <brief description>
+  - A line:  # Elements used: <comma-separated list, e.g. Cu, C, F>
+- **flag_obey = false** if either line is missing or malformed.
+
+### A2) Comment Section (Every Block)
+- Every block MUST have a comment section before the ORCA syntax.
+- First comment line MUST start with: #Tags_{block_type}_{sub_block_type}
+  - block_type is one of: {"keywords", "inputblocks", "geometryblocks"}
+  - **Any line/section that starts with '%' is an input block.** For "inputblocks", sub_block_type is REQUIRED and must match the block name after '%' (e.g. "scf", "basis", "cpcm", "geom", "pal", "output", "rel", "tddft"—the list is not exhaustive; any valid %-block name counts).
+  - For "keywords" and "geometryblocks", sub_block_type is optional.
+- Second comment: brief block purpose and manual category.
+- Third comment: parameter provenance (from paper or reasonable assumption).
+- **flag_obey = false** if any block lacks the #Tags_... line or required provenance comments.
+
+### A3) Keywords Block
+- There MUST be exactly one keyword line starting with '!' in the keywords block (all keywords on that single line; no second ! line).
+- The file must contain valid ORCA keyword syntax (no invented keywords).
+- **flag_obey = false** if no '!' line exists, if there is more than one '!' line in the keywords block, or if keywords appear invented/non-standard.
+
+### A4) Input Blocks (%...end)
+- **Anything that starts with '%' is an input block** (e.g. %scf, %basis, %cpcm, %geom, %pal, %output, %rel, %tddft; the list is not exhaustive).
+- Every inputblock MUST start with '%' and end with 'end' (case-insensitive).
+- Block names (e.g. %scf, %basis, %cpcm) must be valid ORCA block names.
+- Options inside blocks must follow ORCA manual syntax.
+- **flag_obey = false** if any block is unclosed or uses invalid block names.
+
+### A5) Geometry Block
+- The geometry block MUST have a comment section before the * xyz line, consistent with A2:
+  - First line: #Tags_geometryblocks (sub_block_type optional)
+  - Followed by purpose and provenance comments
+- *** xyzfile * and * gzmtfile * are NOT allowed.** Geometry MUST be inline: * xyz Charge Mult ... coordinates ... *
+- No # comment lines between * xyz and the closing *; only coordinate lines (element x y z).
+- **flag_obey = false** if geometry is missing, duplicated, malformed, uses * xyzfile * or * gzmtfile *, or lacks the #Tags_geometryblocks comment section.
+
+### A5b) Block order and comment section for every % block
+- All %... input blocks MUST appear **before** the geometry block. No % block (e.g. %method, %scf, %basis) may appear after the geometry block (* xyz ... *).
+- **Every** %... input block MUST have the comment section (e.g. #Tags_inputblocks_method, purpose, provenance) immediately before the % line. This includes %method and any other % block.
+- **flag_obey = false** if any % block appears after the geometry block, or if any % block lacks the #Tags_inputblocks_<name> and comment section.
+
+### A6) Separation Rule
+- Different blocks (keywords, inputblocks, geometryblocks) MUST be separated by blank lines.
+- Non-ORCA comments must use '# ...' or '##### ...'.
+- **flag_obey = false** if blocks are incorrectly merged or comments break ORCA syntax.
+
+====================================================================================================
+## B) STRICT RULES (NO INVENTION)
+====================================================================================================
+
+- **You MUST NOT** accept code that invents new ORCA keywords or block options.
+- Every keyword and block option must be verifiable against the ORCA manual.
+- **flag_obey = false** if the code contains obviously invented or undocumented syntax.
+
+====================================================================================================
+## C) CODE CONTENT REQUIREMENTS
+====================================================================================================
+
+- The code_content must contain exactly ONE complete ORCA input (single job).
+- Must be runnable as-is (assuming referenced external files like .xyz exist).
+- Any non-ORCA explanatory text MUST be commented with '# ...' or '##### ...'.
+- Output must be ASCII only; no scripts, wrappers, or multiple jobs.
+- **flag_obey = false** if the content is not a single valid ORCA job.
+
+====================================================================================================
+## D) CHECK SCOPE
+====================================================================================================
+
+- **Check ONLY** the ORCA input file content (code_content or the provided improved code).
+- Do NOT check JSON structure, learnedfacts, or remainingunclearfactors—only the ORCA .inp syntax and block format.
+- Apply all rules above and set **flag_obey = true** only if ALL checks pass; otherwise **flag_obey = false** with a clear **judge_reason** listing which rule(s) were violated.

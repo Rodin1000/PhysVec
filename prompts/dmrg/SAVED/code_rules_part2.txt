@@ -1,0 +1,61 @@
+**Detailed Rules for Generating [ITensors/ITensorMPS] Codes**
+
+====================================================================================================
+
+## **Notation**
+
+**Function Categories:**
+- **ELEMENT functions:** Functions with tags {'site', 'hamiltonian', 'observable', 'initialstate', 'effector'}. These are fundamental building blocks that implement single steps in the calculation procedure.
+- **Task functions:** Functions with tags {'run', 'item', 'plot'}. These orchestrate ELEMENT functions to complete calculation tasks.
+- **Entry point:** The 'main' function serves as the entry point of the program.
+
+**Scope of this part:** This part applies **ONLY to ELEMENT functions** (tags: 'site', 'hamiltonian', 'observable', 'initialstate', 'effector'). 
+**DO NOT modify functions with other tags** (task functions or main).**
+
+====================================================================================================
+
+## **ELEMENT Functions Definition**
+
+**Context:** This part defines the ELEMENT functions which are the fundamental building blocks of the code. These functions implement single steps in the calculation procedure and are used by higher-level functions (run, item, main).
+
+**CRITICAL RULE:** **You are FORBIDDEN** to combine multiple tags for one function. For example, `"site_hamiltonian_"` is **FORBIDDEN**. This rule ONLY applies to 'tag's mentioned above of ELEMENT functions. 
+
+### **Allowed ELEMENT Tags and Their Rules:**
+
+#### **1. "site"** - Lattice Site Definition
+- **Purpose:** Define a lattice site for the targeted model (realizing "phy_model" in task plan)
+- **Examples:** Fermion, Boson, Electron
+- **Implementation:** Use `siteinds()` from ITensors
+- **Input dependency:** None (creates base objects)
+
+#### **2. "hamiltonian"** - Hamiltonian Definition
+- **Purpose:** Define the Hamiltonian of the model (realizing "phy_model" in task plan)
+- **Input dependency:** Results from 'site' function
+- **Example:** Function that constructs MPO using AutoMPO
+
+#### **3. "initialstate"** - Initial State Definition
+- **Purpose:** Define the initial state used in following calculations
+- **Input dependency:** Results from 'site' function
+- **Example:** Function containing `randomMPS()`
+
+#### **4. "observable"** - Observable Definition
+- **Purpose:** Define and calculate observables needed in the research (according to "dependent" term in task plan)
+- **CRITICAL RULES:**
+  - **You are FORBIDDEN** to do dmrg calculations directly in this function, you ONLY process the calculations AFTER the dmrg calculations. 
+  - **You are FORBIDDEN** to call other ELEMENT functions like 'site_xxx', 'hamiltonian_xxx', 'effector_xxx' explicitly. 
+  - **You are FORBIDDEN** to split a measurement into an 'observable' function and another 'measure' function
+  - **You are REQUIRED** to wrap ALL commands in an 'observable' function for a single targeted observable
+- **Example:** Function that defines the correlation operator as "Cdag_i C_j"
+- **Note:** If multiple observables exist, each should correspond to a separate function
+
+#### **5. "effector"** - Main Calculation Operations
+- **Purpose:** Define main calculation operations (e.g., DMRG, TEBD)
+- It is okey to just wrap the dmrg() function. 
+- **CRITICAL RULES:**
+  - **You are FORBIDDEN** to name functions without any dmrg/tebd operation as 'effector'. **You are FORBIDDEN** to name functions with calculations for observables or post-process as 'effector'. 
+- **Examples:**
+  - Function that gives the ground state of a model
+  - Function that gives a specific excited state of a model
+
+====================================================================================================
+

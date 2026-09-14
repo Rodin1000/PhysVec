@@ -1,0 +1,82 @@
+[... end of page 238 ...]
+n excited state, the option
+DOTRANSmustbesettoTRUEandanIROOTshouldbegivenfortheinitialstate(thedefaultis1). If DOTRANS
+ALLisrequestedinstead, thetransitiondipolesbetweenallstatesarecomputed. Thetransienttransitiondipoles
+willthenbeprintedafterthenormalspectra. ThisoptioniscurrentlyonlyavailableforCIS/TDAandisdoneusng
+theexpectationvalueformalism,astheothertransitiondipolemomentsinORCA.
+%cis
+DOTRANS TRUE
+#or
+DOTRANS ALL
+end
+216 Chapter6. RunningTypicalCalculations
+
+--- Page 239 ---
+ORCAManual,Release6.0.0
+Non-adiabaticcouplingmatrixelements
+The CIS module can compute the non-adiabatic coupling matrix elements (NACME) between ground and an
+excited state given by an IROOT, ⟨Ψ | 𝜕 |Ψ ⟩ [781]. These can also include LR-CPCM effects if
+!CPCM(solvent) is chosen in the main 𝐺𝑆 inp 𝜕 u 𝑅 t𝑥, ZO 𝐼 R 𝑅𝑂 A 𝑂 e 𝑇 ffects and will make use of RIJ and COSX, if they are
+chosenfortheSCF.Theusageissimple,e.g.:
+!PBE0 DEF2-SVP TIGHTSCF
+%TDDFT NROOTS 5
+IROOT 2
+NACME TRUE
+END
+* xyz 0 1
+O 0.000000000 0.000000000 0.611403292
+C 0.000000000 0.000000000 -0.613232096
+H 0.931880792 0.000000000 -1.200880848
+H -0.931880792 0.000000000 -1.200880848
+*
+BychoosingNACMETRUEunder%TDDFT,aregulargradientcalculationwillbedone,andtheNACMEswill
+becomputedtogetherwithit. Aftertheusualgradientoutput,theNACMEswillbeprintedas:
+---------------------------------
+CARTESIAN NON-ADIABATIC COUPLINGS
+<GS|d/dx|ES>
+---------------------------------
+1 O : -0.161958900 -0.000000135 0.000001029
+2 C : -0.088213027 -0.000000024 0.000000167
+3 H : 0.226241398 0.000000001 -0.109102154
+4 H : 0.226241406 -0.000000000 0.109102161
+Difference to translation invariance:
+: 0.2023108777 -0.0000001585 0.0000012017
+Norm of the NACs ... 0.4002363416
+RMS NACs ... 0.1155382798
+MAX NAC ... 0.2262414063
+NACMEswithbuilt-inelectron-translationfactor
+Asyoucansee,thecalculationabovedoesnothavefulltranslationinvariance! ThatisafeatureofNACscalculated
+fromCIwavefunctions,duetotheBorn-Oppenheimerapproximation. Itcanbesomehowfixedbyincludingthe
+so-called“electron-translationfactors”(ETFs)[252], andthoseareaddedwithETFTRUEunder%TDDFT.By
+nowusingtheinput:
+!PBE0 DEF2-SVP
+%TDDFT NROOTS 5
+IROOT 2
+NACME TRUE
+ETF TRUE
+END
+* xyz 0 1
+O 0.000000000 0.000000000 0.611403292
+C 0.000000000 0.000000000 -0.613232096
+H 0.931880792 0.000000000 -1.200880848
+H -0.931880792 0.000000000 -1.200880848
+*
+onegetsthefollowingoutput:
+6.6. ExcitedStatesCalculations 217
+
+[... start of page 240 ...]
+ORCAManual,Release6.0.0
+---------------------------------
+CARTESIAN NON-ADIABATIC COUPLINGS
+<GS|d/dx|ES>
+with built-in ETFs
+---------------------------------
+1 O : -0.071334028 -0.000001941 0.000003727
+2 C : -0.362514525 -0.000000130 -0.000000776
+3 H : 0.217014763 0.000000003 -0.128968922
+4 H : 0.217014813 -0.000000002 0.128968939
+Difference to translation invariance:
+: 0.0001810232 -0.0000020693 0.0000029689
+Norm of the NACs ... 0.5137724505
+RMS NACs ... 0.1483133313
+MAX NAC ... 0.3

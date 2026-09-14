@@ -1,0 +1,93 @@
+[... end of page 1221 ...]
+------------------------\n");
+print( "Atom %20s %20s %20s\n", "X", "Y", "Z");
+for i from 0 to nAtoms-1 Do
+print("%4d %20lf %20lf %20lf\n", i, totalGradCBS[3*i], totalGradCBS[3*i+1],␣
+totalGradCBS[3*i+2]);
+˓→
+EndFor
+EndIf
+print( "----------------------------------------------------------------\n");
+if (produceEnGradFile) then
+# ------------------------------------------
+# Read the geometry of the last calculation
+# ------------------------------------------
+myGeom.Read();
+(continuesonnextpage)
+7.60. CompoundExamples 1199
+
+--- Page 1222 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Cartesians = myGeom.GetCartesians();
+atomicNumbers = myGeom.GetAtomicNumbers();
+EnGradFile = openFile(enGradFilename, "w");
+Write2File(EnGradFile, "\n\n\n");
+Write2File(EnGradFile, " %d\n", nAtoms);
+Write2File(EnGradFile, "\n\n\n");
+if (addCorrelation) then
+Write2File(EnGradFile, " %.12lf\n", scfEnCBS + corrEnCBS);
+else
+Write2File(EnGradFile, " %.12lf\n", scfEnCBS);
+EndIf
+Write2File(EnGradFile, "\n\n\n");
+for i from 0 to 3*nAtoms-1 Do
+if (addCorrelation) then
+Write2File(EnGradFile, " %20.12lf\n", totalGradCBS[i]);
+else
+Write2File(EnGradFile, " %20.12lf\n", scfGradCBS[i]);
+EndIf
+EndFor
+Write2File(EnGradFile, "\n\n\n");
+for i from 0 to nAtoms-1 Do
+Write2File(EnGradFile, "%5d %12.8lf %12.8lf %12.8lf\n", atomicNumbers[i],␣
+cartesians[i][0], cartesians[i][1], cartesians[i][2]);
+˓→
+EndFor
+closeFile(EnGradFile);
+EndIf
+End
+Comments
+7.60.9 BSSE Optimization
+Introduction
+This script optimizes the geometry of a molecule using gradients corrected for Basis Set Superposition Error
+(BSSE)correction. ThebasicstepistheusageofasecondscriptthatcalculatesBSSEcorrectedgradients.
+Filename
+BSSEOptimization.cmp
+SCRIPT
+# Author: Frank Neese and Dimitrios G. Liakos
+# Date : May of 2024
+# ---------------------------------------------------
+#
+# This is a script that will use a compound script to
+# calculate BSSE corrected gradients and use them
+# in combination with ORCA External Optimizer to
+# perform a geometry optimization.
+#
+# We perform the following steps.
+# 1. Choose a compound script that calculates the BSSE
+# corrected gradient.
+# We achieve this with the compoundFilename
+#
+# 2. Create a script to run an ORCA calculalation with
+# the external optimizer and the BSSE cprrected
+(continuesonnextpage)
+1200 Chapter7. DetailedDocumentation
+
+[... start of page 1223 ...]
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+# gradient. We do that by running a script that runs
+# an ORCA calculation that calculates the gradient
+# and then copy this gradient file back to the expected
+# name
+#
+# 3. Make a normal ORCA New_Step that calls the external
+# optimizer
+#
+# NOTE: Depending on the chosen method the property names of
+# myPropName has to be adjusted. For the gradient we do
+# not have this problem because we read the last
+# available in the corresponding property file.
+#
+# NOTE: Variable baseFilename should have the name o

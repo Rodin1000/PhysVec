@@ -1,0 +1,92 @@
+[... end of page 1000 ...]
+ermethodsforpredictingfreeenergyprofiles(apartfromverysimpleap-
+proximationssuchastheharmonicoscillator),andthepredictivepowerofcomputingfreeenergyprofilescomes
+ataprice.
+7.51.6 Command List
+Inthefollowing,analphabeticallistofallcommandscurrentlyknowntotheMDmoduleisgiven. Thedescription
+of each command starts with a small box which contains the command’s name and a table of arguments and
+modifiers. Thelast-but-onecolumninthetablespecifiesthetypeofeachargument. Possibletypesare“Integer”,
+“Real”,“String”,and“Keyword”. Inthelattercase,thelastcolumncontainsalistofallowedkeywordvaluesin
+{braces}. Ifthetypeis“Real”andisaphysicalquantitywithunit,thequantityisgiveninthelastcolumnin
+[squarebrackets]. Eachsuchboxisfollowedbyatextualdescriptionofthecorrespondingcommand.
+978 Chapter7. DetailedDocumentation
+
+--- Page 1001 ---
+ORCAManual,Release6.0.0
+7.51.7 Command Overview
+Command Description
+Cell Definesandmodifiescells
+Constraint Managesconstraints
+Dump Controlstrajectoryoutput
+Initvel Randomlyinitializesatomvelocities
+Manage_Colvar Managescollectivevariables(“Colvars”)
+Manage_Region Managesregions
+Metadynamics SetsparametersforMetadynamicsruns
+Minimize PerformsaCartesianenergyminimization
+PrintLevel Controlstheoutputverbosity
+Randomize Setstherandomseed
+Restart Restartsasimulationtoseamlesslycontinue
+Restraint ManagesrestraintsonColvars
+Run Performsamoleculardynamicsrun
+SCFLog ControlstheORCAlogfileoutput
+Screendump PrintscurrentMDstatetoscreen
+Thermostat Managesthermostats
+Timestep Setstheintegratortimestep∆𝑡
+Cell
+ManadoryArguments: -
+OptionalArguments: -
+Modifiers: Cube ... ... seetext
+Rect ... ... seetext
+Rhomb ... ... seetext
+Sphere ... ... seetext
+Ellipsoid ... ... seetext
+None — — —
+Spring 𝑘 Real seetext
+Elastic 𝑡avg Real [time]
+𝑐response Real seetext
+Anisotropic — — —
+Pressure ... ... seetext
+Fixed — — —
+Defines a harmonic repulsive wall around the system (the wall is “soft” with a spring constant and atoms can
+slightlypenetrate;“hard”repulsivewallsarenotsupported). Thishelpstokeepthemoleculesinsideofawell-
+definedvolume,ortokeepaconstantpressureinthesystem. Inthelattercase,thecellcanbedefinedaselastic,
+suchthatitexertsawell-definedpressure(seebelow). PleasenotethatORCAdoesnotfeatureperiodicbound-
+ary conditions, and therefore, all cells are non-periodic (just repulsive walls). There are several cell geometries
+available(onlyonetypeofcellcanbeactiveatatime):
+• Cube: Definesacubiccell. Iftworealvalues𝑝 and𝑝 arespecifiedascoordinates, thecellrangesfrom
+1 2
+(︀ 𝑝 ,𝑝 ,𝑝 )︀ to (︀ 𝑝 ,𝑝 ,𝑝 )︀. If only one real value 𝑝 is supplied, the cell ranges from (︀ −𝑝,−𝑝,−𝑝)︀ to
+1 1 1 2 2 2 2 2 2
+(︀𝑝,𝑝,𝑝)︀,i. e. itiscenteredattheoriginwithedgelength𝑝.
+2 2 2
+• Rect: Defines an orthorhombic cell. Six real values 𝑥 , 𝑦 , 𝑧 , 𝑥 , 𝑦 , and 𝑧 have to be specified as
+1 1 1 2 2 2
+coordinates(inthisorder). Thecellwillrangefrom(︀ 𝑥 ,𝑦 ,𝑧 )︀to(︀ 𝑥 ,𝑦 ,𝑧 )︀.
+1 1 1 2 2 2
+• Rhomb: Defines a parallelepiped-shaped cell (also termed as rhomboid sometimes). You have to specify
+twelverealvaluesintotal. Thefirstthreedefineonecornerpoint𝑝ofthecell,andtheremainingninedefine
+threecellvectors𝑣 ,𝑣 ,and𝑣 ,eachgivenasCartesianvectorcomponents. Thecellisthendefinedasthe
+1 2 3
+7.51. AbinitioMolecularDynamicsSimulations 979
+
+[... start of page 1002 ...]
+ORCAManual,Release6.0.0
+setofpoints{︀ 𝑝+𝑐 𝑣 +𝑐 𝑣 +𝑐 𝑣 |0 ≤ 𝑐 ,𝑐 ,𝑐 ≤ 1 }︀Thevectors𝑣 ,𝑣 ,and𝑣 donotneedtobe
+1 1 2 2 3 3 1 2 3 1 2 3
+orthogonaltoeachother,buttheymaynotallliewithinoneplane(cellvolumewouldbezero).
+• Sphere: Definesasphericalcell. Youneedtospecifyfourrealvalues𝑐 ,𝑐 ,𝑐 ,and𝑟. Thecellwillthen
+𝑥 𝑦 𝑧
+bedefinedasaspherearoundthecentralpoint(︀
+𝑐 ,𝑐 ,𝑐
+)︀withradius𝑟.
+𝑥 𝑦 𝑧
+• Ellipsoid: Definesanellipsoid-shapedcell. Asfirstthreearguments,youhavetospecifythreerealvalues
+𝑐 ,𝑐 ,𝑐 ,whichdefinethecenteroftheellipsoidtobe(︀ 𝑐 ,𝑐 ,𝑐 )︀. Asfourthargument,akeywordhasto
+𝑥 𝑦 𝑧 𝑥 𝑦 𝑧
+follow,whichmayeitherbe“XYZ”or“Vectors”. Inthe“XYZ”case,threemorerealvalues𝑟 ,𝑟 ,and𝑟
+𝑥 𝑦 𝑧
+havetobespecified,whichdefinethepartialradiioftheellipsoidalongtheX,Y,andZcoordinateaxes. If
+instead“Vectors”wasgiven,ninemorerealvalues𝑣1,𝑣1,𝑣1,𝑣2,𝑣2,𝑣2,𝑣3,𝑣3,𝑣3havetofollowafterthe
+𝑥 𝑦 𝑧 𝑥 𝑦 𝑧 𝑥 𝑦 𝑧
+keyword. Thesevaluesdefinethreevectors𝑣1 := (︀ 𝑣1,𝑣1,𝑣1)︀,𝑣2 := (︀ 𝑣2,𝑣2,𝑣2)︀,and𝑣3 := (︀ 𝑣3,𝑣3,𝑣3)︀,
+𝑥 

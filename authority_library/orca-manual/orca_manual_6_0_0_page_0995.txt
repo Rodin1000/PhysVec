@@ -1,0 +1,74 @@
+[... end of page 994 ...]
+lationisnowdisplayedineverystep(inunitsofKelvinperatom). Largeenergy
+driftcanbecausedbypoorSCFconvergence,orbyatimesteplengthchosentoolarge.
+• PhysicalunitsintheMDinputarenowconnectedtotheirnumericvaluesviaunderscore,suchas350_pm.
+Awhitespacebetweenvalueandunitisnolongeracceptable. Thisslightlybreaksbackwardcompatibility
+–sorry.
+• Fixedabuginthetimeintegrationoftheequationsofmotion,whichcompromisedenergyconservation.
+• FixedcrashesforsemiempiricsandifECPswereemployed. YoucannowrunMDsimulationswithmethods
+suchasPM3andwithECPs.
+972 Chapter7. DetailedDocumentation
+
+--- Page 995 ---
+ORCAManual,Release6.0.0
+7.51.4 Input Format
+The molecular dynamics module is activated by specifying “MD” in the simple input line. The actual MD input
+whichdescribesthesimulationfollowsinthe“%md”sectionatsomelaterpositionintheinputfile. Thecontents
+ofthissectionwillsubsequentlybereferredtoas“MDinput”.
+! MD BLYP D3 def2-SVP
+%md
+Timestep 0.5_fs # This is a comment
+Initvel 350_K
+Thermostat NHC 350_K Timecon 10.0_fs
+Dump Position Stride 1 Filename "trajectory.xyz"
+Run 200
+end
+* xyz 0 1
+O -4.54021 0.78439 0.09307
+H -3.64059 0.38224 -0.01432
+H -4.63463 1.39665 -0.67880
+*
+PleasenotethattheMDinputisnotprocessedbyORCA’smainparser,butbyadedicatedparserintheMDmodule.
+Therefore,theMDinputisnotrequiredtoobeythegeneralORCAsyntaxrules. Thesyntaxwillbedescribedin
+thefollowing.
+IncontrasttogeneralORCAinput,theMDinputisnotbasedonkeywords,butoncommands,whichareexecuted
+consecutivelyonaline-by-linebasisstartingatthetop(like,e. g.,inashellscript). Thismeansthatidenticalcom-
+mandswithdifferentargumentsmaybegiven,comingintoeffectwhentheinterpreterreachesthecorresponding
+line. This enables to perform multiple simulations (e. g., pre-equilibration and production run) within a single
+inputfile:
+%md
+Timestep 1.0_fs
+Run 200
+Timestep 2.0_fs
+Run 500
+end
+Workisalreadyunderwaytoaddvariabledefinitions, loops, andconditionalbranchingtotheMDinput.2 This
+willenableevenlargerflexibility(e. g.,torunasimulationuntilacertainquantityhasconverged). TheMDinput
+iswrittenintheSANscriptlanguage(“ScientificAlgorithmNotationScript”),whichisunderdevelopment. Afirst
+glimpsecanbefoundat
+https://brehm-research.de/sanscript
+As in standard ORCA input, comments in the MD input are initiated by a “#” sign and span to the end of the
+currentline. Commandscanbestartedbothatthebeginningofalineandafteracommand. Theonlyplacewhere
+a“#”isnottreatedasstartofacommentisinsideofastringliteral(e. g.,infilenames).
+%md
+# Comment
+Timestep 0.5_fs # Comment
+Dump Position Filename "trajectory#1.xyz"
+end
+SomemoreMDinputsyntaxrules:
+• The MD input is generally not case-sensitive. The only exception are file names on platforms with case-
+sensitivefilesystems(suchasGNULinux).
+• Emptylinesareallowed.
+2Technicallyspeaking,ORCAwillthenbeaTuring-completescriptinterpreter,suchthatanycomputationalproblemcanbesolvedwith
+ORCA:-)
+7.51. AbinitioMolecularDynamicsSimulations 973
+
+[... start of page 996 ...]
+ORCAManual,Release6.0.0
+• Commandsandoptionsareseparatedbyspaceortabulatorcharacters. Anycombinationofthesecharacters
+maybeusedasseparator.
+• BothDOSandUNIXlinebreakstyleisacceptable.
+Commands
+Asalreadynotedabove, thecentralitemoftheMDinputisacommand. Eachinputlinecontains(atmost)one
+command,andthesecommandsareexecutedinthegivenorder. Acommandtypicallytakesoneormorearguments,
+whicharegivenbehindthecommandname,separatedbywhitespaces,tabulatorcharacters,or

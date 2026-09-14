@@ -1,0 +1,60 @@
+[... end of page 989 ...]
+catedthanthat.
+Thealgorithmactuallyusesinformationfromself-consistentEEQcharges[132]aspartofanextremelysimplistic
+potentialtoguidetheplacingofpolarmoleculesinamorereasonableway.
+Aftertryingtodistributethesolventmoleculesomewhereandcheckingforclashes,wefirstcomputetheelectro-
+staticenergybetweensolventandsolute:
+𝑠𝑜𝑙𝑢𝑡𝑒𝑠𝑜𝑙𝑣𝑒𝑛𝑡
+𝐸 = ∑︁ ∑︁ 𝑄 𝐴 𝑄 𝐵 , (7.311)
+𝑒𝑙𝑒𝑐 𝑅 4𝜋𝜖
+𝐴𝐵 𝑠𝑜𝑙𝑣
+𝐴 𝐵
+7.50. MoreontheORCASOLVATOR 967
+
+--- Page 990 ---
+ORCAManual,Release6.0.0
+anddefineourtargetfunctiontobeminimized(𝑉)asadampedversionofthat,usingtheminimumdistance𝑅
+𝑚𝑖𝑛
+betweenthesoluteandsolventatoms:
+𝑉 =𝐸 𝑒𝑙𝑒𝑐 𝑒−𝑅 𝑚 2 𝑖𝑛 if𝐸 𝑒𝑙𝑒𝑐 <0 (7.312)
+=𝑅 otherwise,
+𝑚𝑖𝑛
+TheSTOCHASTICmodethenconsistsoffindingthecorrectsolventplacementthatminimizes𝑉 foragivensolute.
+Thedampingfunctionistheretoensurethat:
+1. Theelectrostaticinteractiondecaysstronglywithdistance,
+2. Repulsiveenergieswillbesounfavorablethatonlythedistancewillmatter.
+Theresultissuchthatsolventmoleculesareplacedascloseaspossibletothesoluteandmaximizingelectrostatic
+interactions. This helps to create the solvent shell such that is does look like the actual result one would expect
+fromamoreelaboratecalculation,butwithessentiallyzerocost.
+Thebestvaluefor𝑉 foundaftereachsolventwasaddediswhatisprintedintheoutputasTarget function:
+Iter Target function Time
+(min)
+-------------------------------
+1 -4.342597e-07 0.00
+2 -3.166857e-07 0.00
+3 -4.814590e-08 0.00
+WhenusingtheDROPLETmode,the𝑅 isdefinedasthedistancetothecentroidofthesolute,insteadofthatof
+𝑚𝑖𝑛
+theclosestatompairinstead.
+If you don’t want to include the electrostatic component for any reason, just set %SOLVATOR USEEEQCHARGES
+FALSE END.Inthefutureotherchargemodelswillbeavailableaswell.
+7.50.2 Adding Explicit Solvents with the Docker
+TheWallPotential
+IfoneusesthedefaultapproachusingtheDOCKER,afictitiouswallpotentialisaddedtoguaranteethatthesolvents
+areaddedsuchthattheyfillmostofthefirstsolvationspherearoundthesolutebeforebeingplacedfurther.
+Note: ThisresemblestosomeextentwhatwaspublishedrecentlybythegroupofProf. StefanGrimme(called
+“quantumclustergrowth”),buthereonlyasingleouterwallpotentialisused[811]. Otherwise,thepresentalgo-
+rithmisindependentandunrelatedtoit.
+As one can see from the output of the Histine example of the before mentioned section, by default an ellipsoid
+potentialisbuilt:
+Ellipsoid potential radii: .... 8.37, 6.28, 5.76 Angs
+withdimensionssuchthatitwillenclosethesoluteplusatleastonemoleculeofthesolventinalldirections.
+968 Chapter7. DetailedDocumentation
+
+[... start of page 991 ...]
+ORCAManual,Release6.0.0
+Fig.7.61: Asimpleschemetoshowhowthewallpotentialisbuilttokeepthesolventmoleculesclosetothesolute
+space.
+AsingleparametercontrolledbySOLVWALLFACunderthe%SOLVATORblockdefineshowfurtherthiswallisbuilt
+outsidethesolute. Itsdefaultvalueis1.0,andincreasingittolargervalueswillincreasethedefaultinitialwallby
+abouthalfthesumofthemaximumdimensionsofsolute

@@ -1,0 +1,77 @@
+[... end of page 998 ...]
+) arenotrestarted. Theyshouldallremainintheinputfile,asexecutedin
+thefirstrunofasequence. JustaddtheRestartcommandafterallotherrelevantcommandshavebeenexecuted,
+directlybeforetheRun command.
+Toconcludethisdiscussion,ashortexampleisgiven. IftheMDinputfile
+%md
+Timestep 0.5_fs
+Initvel 300_K
+Thermostat NHC 300_K Timecon 10.0_fs
+Dump Position Stride 1 Filename "trajectory.xyz"
+(continuesonnextpage)
+976 Chapter7. DetailedDocumentation
+
+--- Page 999 ---
+ORCAManual,Release6.0.0
+(continuedfrompreviouspage)
+Restart IfExists
+Run 100
+end
+issubsequentlyexecutedtentimes(withoutanymodification),theresultingtrajectoryfilewillbeidentical(apart
+fromnumericalnoise)tothatobtainedifthefollowinginputisexecutedonce:
+%md
+Timestep 0.5_fs
+Initvel 300_K
+Thermostat NHC 300_K Timecon 10.0_fs
+Dump Position Stride 1 Filename "trajectory.xyz"
+Run 1000
+end
+Regions
+IntheORCAMDmodule,regionscanbedefined. Thisconceptdoesnot refertoregionsinspace,butratherto
+subsetsofatomsinthesystem. Aregionisnothingmorethanalistofatoms. Regionsmayoverlap,i. e.,atoms
+canbepartofmorethanoneregionatatime. Theatomswhicharepartofacertainregionremainthesameuntil
+theregionismanuallyre-defined,i. e.,regionsarefixedanddonotadapttoanychangesinthesystem. Thereexist
+afewpre-definedregionswhichhaveaname. User-definedregions, incontrast, onlycarryanintegeridentifier.
+Thefollowingregionsarepre-definedinanycase:
+• all: Containsallatomsofthesystem. Thisisthedefaultifnoregionisspecifiedinsomecommands,soby
+default,thesecommandswillalwaysactonthewholesystem.
+• active: Thisregioncontainsallmovable(“non-frozen”)atoms. Bydefault,itisidenticaltotheallregion.
+Atomsinsideofthisregionareupdatedbythetimeintegrationinamoleculardynamicsrun,displacedina
+minimization,andareconsideredforcomputingthekineticenergy.
+• inactive: This region contains all atoms which are not part of the active region. These atoms are
+“frozen”; they are ignored by the time integration / minimization, and also not considered for the com-
+putationofthekineticenergy. Theysimplyremainontheirinitialpositions. Thisisinprincipleidenticalto
+applyingCartesianconstraintstotheatoms;however,itismuchfaster. Asconstraintshavetobesolvediter-
+atively(seebelow),Cartesianconstraintsbecomequitecomputationallydemandingifappliedtothousands
+ofatoms.
+From these three pre-defined regions, only the active region can be manually modified. Changes in the com-
+positionofthe activeregionautomaticallymodifythe inactiveregion. The allregionobviouslycannotbe
+changed.
+IncaseofaQM/MMsimulation,thefollowingfouradditionalregionscanbeused:
+• qm: Thisisthe“quantummechanics”region–itcontainsallatomswhicharetreatedbytheelectronstructure
+method.
+• mm: This is the “molecular mechanics” region – it contains all atoms which are treated by a force-field
+approach. Itexactlycontainsthoseatomswhicharenotpartoftheqmregion.
+• active_qm: Containsexactlythoseatomswhicharepartofboththeqmandtheactiveregions.
+• active_mm: Containsexactlythoseatomswhicharepartofboththemmandtheactiveregions.
+Theseregionscan not bemodifiedintheMDinput. TheMDmodulejustreadstheregiondefinitionsfromthe
+QM/MMmodule,butisnotabletomakeanychangeshere.
+Regionscanbeusefulformanypurposes. Forexample,a“realistic”wallofatomscanbebuiltaroundthesystem
+bydefiningtheactiveregionsuchthatitonlycontainsthenon-wallatoms. Thewallatomswillthenbefrozen.
+Apartfromthat,trajectoriesofregionscanbewrittentodisk,onlycontainingthe“interesting”partofasimulation.
+Furthermore,velocityinitializationcanbeappliedtoregions,enablingtostartasimulationinwhichdifferentsets
+of atoms possess different initial temperatures. Thermostats can be attached to regions to keep different sets of
+7.51. AbinitioMolecularDynamicsSimulations 977
+
+[... start of page 1000 ...]
+ORCAManual,Release6.0.0
+atomsatdifferenttemperaturesduringthewholesimulation. Thisallowsforsophisticatedsimulationsetups(cold
+soluteinhotsolvent,temperaturegradientthroughthesystem,etc).
+RegionsaredefinedormodifiedbytheManage_Regioncommand. Manyothercommandstakeregionsasoptional
+arguments. Pleaseseethecommandlistbelow.
+Metadynamics
+Metadynamicsisapowerfultooltoanalyzefreeenergyprofilesofreactionsandotherprocesses(solvation, ag-
+gregation, conformerchange, dissociation)basedonmoleculardynamicssimulations. Ithasbeendevelopedby
+LaioandParrinelloin2002[487]. Inprinciple,thefrequencyofobservingacertainprocessinMDsimulationsis
+directlyrelatedtothefreeenergybarrieroftheprocess. However,manyinterestingprocesses(suchaschemical
+reactions)possesssuchahighfreeenergybarrierthattheywillneveroccuronthetimesca

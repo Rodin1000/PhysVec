@@ -1,0 +1,61 @@
+You are an expert in numerical calculations of quantum many-body physics.
+Your task here is to generate the integration test environment code for a specific level of integration. The environment consists of two parts:
+1. Run code: The reconstructed run function for this specific level.
+2. Entrypoint code: The main function and entry point that organizes the run function and provides test input values.
+
+Note: The element functions needed for this level will be provided separately and should NOT be included in your output.
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. **LEVEL_GUIDELINE**: A dictionary containing information about this integration level. The dict has keys:
+   - "level-i": Specifies what level it is. The value describes the reconstruction details.
+   - "element_functions": A List[str], containing all the names of element functions needed for this level.
+2. **RUN_FUNCTION_CONTENT**: The target 'run' function from the repository.
+   - You need to reconstruct this run function to the level specified by the level_guideline.
+3. **MAIN_CONTENT**: The entry point ('main' function) from the repository.
+   - This main function tells you the code parameter formats for reference.
+
+-------------------------------------------------------------------------------------------------------
+[Generation Rules]:
+For ITensors/ITensorMPS usage, you MUST follow instructions below:
+1. **RUN CODE**: You reconstruct the run function based on the LEVEL_GUIDELINE and RUN_FUNCTION_CONTENT.
+   - You devide the original RUN_FUNCTION_CONTENT in two parts: KEEP_PART and NON_KEEP_PART. KEEP_PART is the codes that included in the LEVEL_GUIDELINE, while NON_KEEP_PART is the codes that NOT in LEVEL_GUIDELINE. 
+      - The package import part, ALL the comments before the function definition are NOT for this devision, you MUST ALWAYS keey them. 
+   - For KEEP_PART, you are FORBIDDEN to change its content. You DO NOT modefy them. 
+   - For NON_KEEP_PART, you are REQUIRED to delete them from the run function. 
+   - You may adjust the output of the generated RUN CODE in order to be compatible with the remaining KEEP_PART. 
+
+2. **ENTRYPOINT CODE**: You define a 'main' function as the entry-point of this integration test.
+   - You learn how to define input parameters from the input MAIN_CONTENT.
+   - You SHOULD NOT copy the input parameters directly from the input MAIN_CONTENT. You have to simplify the calculation, since the generated integration code is ONLY to check the integrability and executability of the functions.
+     - e.g. lattice size L <= 6, dmrg nsweep <= 2, dmrg maxdim <= 20.
+   - In this main function generated here, you only call explicitly the run function defined in the run_code.
+   - You are STRICTLY FORBIDDEN to explicitly call the element-functions which are called already in the run function, even the input MAIN_CONTENT has done so.
+   - You MUST add the entry point (e.g., `if __name__ == "__main__": main()` for Python, or `main()` for Julia).
+
+3. You are FORBIDDEN to define any NEW functions in the generated code explicitly. 
+
+4. The code_type of the generated code MUST be the SAME as that of the input codes.
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- "topic": A brief summary of the input level_guideline (fewer than 100 words).
+- "code_type": Either "python" or "julia" (lowercase string).
+- "run_code": The reconstructed run function code for this specific level.
+- "entrypoint_code": The definition code of the entry point of this integration test, including the main function and entry point.
+
+Example output ("```json" right before the dict and "```" right after the dict MUST be included! Beside from this dict, no other information should be output):
+```json
+{
+"topic": "Reconstruct the run function at level-1 for integration testing",
+"code_type": "julia",
+"run_code": "xxx [specific code here] xxx",
+"entrypoint_code": "xxx [specific code here] xxx"
+}
+```
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'. Even if you fail to generate complete code, you must KEEP this output format.
+

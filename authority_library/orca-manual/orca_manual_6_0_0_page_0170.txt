@@ -1,0 +1,70 @@
+[... end of page 169 ...]
+62543393 3.600795276
+H 2.347446507 -0.388292903 4.463380590
+H 3.319937516 -0.596731755 3.505882795
+H 2.472404709 0.485711203 3.404167343
+C -2.485663304 0.362543393 3.600795276
+H -3.319937516 0.596731755 3.505882795
+H -2.472404709 -0.485711203 3.404167343
+H -2.347446507 0.388292903 4.463380590
+*
+The main keyword that needs to be used here (unlike in other CAS-SCF calculations) is the actorbs keyword.
+6.1. SinglePointEnergiesandGradients 147
+
+--- Page 170 ---
+ORCAManual,Release6.0.0
+Since we are using a local basis with a specific ordering of the orbitals, in order to represent our wavefunction
+it is imperative to preserve the local nature of the orbitals as well as the orbital ordering. Therefore, we do not
+calculate natural orbitals at the end of the CASSCF calculation (as is traditionally done) instead we impose the
+orbitalstobeassimilartotheinputorbitalsaspossible. ThisisautomaticallyenabledforintermediateCASSCF
+macroiterations. TheresultingCASSCFcalculationprovidesachemicallyintuitiveandsimplewavefunctionand
+transitionenergyasshownbelow:
+---------------------------------------------
+CAS-SCF STATES FOR BLOCK 1 MULT=11 NROOTS= 1
+---------------------------------------------
+STATE 0 MULT=11: E= -5066.8462457411 Eh W= 0.5000 DE= 0.000 eV 0.0 cm**-1
+1.00000 ( 1.000000000) CSF = 1+1+1+1+1+1+1+1+1+1+
+---------------------------------------------
+CAS-SCF STATES FOR BLOCK 2 MULT= 1 NROOTS= 1
+---------------------------------------------
+STATE 0 MULT= 1: E= -5066.8548894831 Eh W= 0.5000 DE= 0.000 eV 0.0 cm**-1
+0.98159 (-0.990753235) CSF = 1+1+1+1+1+1-1-1-1-1-
+-----------------------------
+SA-CASSCF TRANSITION ENERGIES
+------------------------------
+LOWEST ROOT (ROOT 0 ,MULT 1) = -5066.854889483 Eh -137876.131 eV
+STATE ROOT MULT DE/a.u. DE/eV DE/cm**-1
+1: 0 11 0.008644 0.235 1897.1
+Aswecanseefromtheoutputabove,98%ofthewavefunctionforthesinglet-stateisgivenbyasingleCSFwhich
+we gave as a reference CSF. This CSF has a very simple chemical interpretation representing the anti-parallel
+couplingbetweenthetwohigh-spinFe(III)centers. SinceIron-Sulfurmoleculesshowastronganti-ferromagnetic
+coupling,weexpectthesingletstatetobelowerinenergythanthehigh-spin(S=5)state. TheCASSCFtransition
+energies show essentially this fact. The transition energy is about 2000cm−1 which is what one expects from a
+CASSCFcalculationonsuchsulfidebridgedtransition-metalmolecules.
+6.1.8 N-Electron Valence State Perturbation Theory (NEVPT2)
+NEVPT2isaninternallycontractedmultireferenceperturbationtheory,whichappliestoCASSCFtypewavefunc-
+tions. TheNEVPT2method,asdescribedintheoriginalpapersofAngelietal,comesintwoflavorthestrongly
+contracted NEVPT2 (SC-NEVPT2) and the so called partially contracted NEVPT2 (PC-NEVPT2).[44, 45, 46]
+In fact, the latter employs a fully internally contracted wavefunction and should more appropriately called FIC-
+NEVPT2. Both methods produces energies of similar quality as the CASPT2 approach.[366, 755] The strongly
+and fully internally contracted NEVPT2 are implemented in ORCA together with a number of approximations
+that makes the methodology very attractive for large scale applications. In conjunction with the RI approxima-
+tionsystemswithactivespaceofto16activeorbitalsand2000basisfunctionscanbecomputed. Withthenewly
+developed DLPNO version of the FIC-NEVPT2 the size of the molecules does not matter anymore.[344] For a
+morecompletelistofkeywordsandfeatures,werefertodetaileddocumentationsectionN-ElectronValenceState
+PertubationTheory.
+Besidescorrectionstothecorrelationenergy, ORCAfeaturesUV,IR,CDandMCDspectraaswellasEPRpa-
+rameters for NEVPT2. These properties are computed using the “quasi-degenerate perturbation theory” that is
+describedinsectionCASSCFProperties. TheNEVPT2correctionsenteras“improveddiagonalenergies”inthis
+formalism. ORCAalsofeaturesthemulti-stateextension(QD-NEVPT2)forthestronglycontractedNEVPT2vari-
+ant.[48, 493]Here, thereferencewavefunctionisrevisedinthepresenceofdynamicalcorrelation. Forsystems,
+148 Chapter6. RunningTypicalCalculations
+
+[... start of page 171 ...]
+ORCAManual,Release6.0.0
+wheresuchreferencerelaxationisimportant,thecomputedspectroscopicpropertieswillimprove.
+As a simple example for NEVPT2, consider the ground state of the nitrogen molecule N . After defining the
+2
+computationaldetailsofourCASSCFcalculation,weinsert“!SC-NEVPT2”assimpleinputorspecify“PTMethod
+SC_NEVPT2”inthe%casscf block. Pleasenotethedifferenceinthetwokeywords’spelling: Simpleinputuses
+hyphen,blockinputusesunderscorefortechnicalreasons. Therearemoreoptionalse
