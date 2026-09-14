@@ -83,26 +83,7 @@ For example, the tasks for 'dmrg' topic is under 'Paper_dataset/dmrg/tasks'. Eac
 ### Source articles
 The dataset also includes the source .tex file of every targetted article. The .tex files are downloaded from arxiv website. 
 
-For example, user can find the original .tex file under 'Paper_dataset/dmrg/sources'. 
-
-
-## Results
-The results supporting this work are stored under [`results/`](results/) directory. 
-
-### Formal data for programming tests
-- results_BATCH5_10000token_13_1_13: GPT-5.1 (denoted by index 13).
-- results_BATCH5_15000token_18_1_18: Gemini 2.5 Flash (denoted by index 18). 
-- results_BATCH5_15000token_28_1_28: Qwen3-Max (denoted by index 28). 
-- results_BATCH5_15000token_29_1_29: Claude Sonnet 4 (denoted by index 29).
-
-### Formal data for scientific tests
-- Sciresults_BATCH5_10000token_13_1_13: GPT-5.1 (denoted by index 13).
-- Sciresults_BATCH5_15000token_18_1_18: Gemini 2.5 Flash (denoted by index 18). 
-- Sciresults_BATCH5_15000token_28_1_28: Qwen3-Max (denoted by index 28). 
-- Sciresults_BATCH5_15000token_29_1_29: Claude Sonnet 4 (denoted by index 29).
-
-### Figures
-- The figures and plotting scripts are stored under [`plots_v2/`](plots_v2/) directory. 
+For example, user can find the original .tex file under 'Paper_dataset/dmrg/sources'.  
 
 
 ## Configurations
