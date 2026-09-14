@@ -186,6 +186,8 @@ You can adjust the settings in .sh scripts:
 - Saving directories. 
 - Sandbox directories. 
 
+You may begin with: run_sh/run_task_workflow_compprog_v2.sh (run_sh/run_task_ReAct_v2.sh) to produce PhysVEC (baseline) reproduction scripts. And run_sh/run_task_workflow_compscit_v4.sh (run_sh/run_task_baseline_compscit_v4.sh) for PhysVEC (baseline) scientific tests and final reproduction. 
+
 ## Addition: prepare Verifier library
 See more information in 'Methods' in our paper. 
 
