@@ -1,0 +1,143 @@
+{
+  "query": "itensor spin1 site tags and conservation laws in siteinds function",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_13__13",
+      "text": "s = siteinds(\"S=1/2\", N; conserve_qns=true)\n```\n\"\"\"\nfunction siteinds(tag::String, N::Integer; kwargs...)\n  st = SiteType(tag)\n\n  si = siteinds(st, N; kwargs...)\n  if !isnothing(si)\n    return si\n  end\n\n  return [siteind(st, j; kwargs...) for j in 1:N]\nend\n\n\"\"\"\n    siteinds(f::Function, N::Integer; kwargs...)\n\nCreate an array of `N` physical site indices where the site type at site `n` is given\nby `f(n)` (`f` should return a string).\n\"\"\"\nfunction siteinds(f::Function, N::Integer; kwargs...)\n  return [siteind(f(n), n; kwargs...) for n in 1:N]\nend\n\n# Special case of `siteinds` where integer (dim)\n# provided instead of a tag string\n\"\"\"\n    siteinds(d::Integer, N::Integer; kwargs...)\n\nCreate an array of `N` site indices, each of dimension `d`.\n\n# Keywords\n- `addtags::String`: additional tags to be added to all indices\n\"\"\"\nfunction siteinds(d::Integer, N::Integer; kwargs...)\n  return [siteind(d, n; kwargs...) for n in 1:N]\nend\n\n#---------------------------------------\n#\n# has_fermion_string system\n#\n#---------------------------------------\n\nhas_fermion_string(operator::AbstractArray{<:Number}, s::Index; kwargs...)::Bool = false\n\nhas_fermion_string(::OpName, ::SiteType) = nothing\n\nfunction has_fermion_string(opname::AbstractString, s::Index; kwargs...)::Bool\n  opname = strip(opname)\n\n  # Interpret operator names joined by *\n  # as acting sequentially on the same site\n  starpos = findfirst(isequal('*'), opname)\n  if !isnothing(starpos)\n    op1 = opname[1:prevind(opname, starpos)]\n    op2 = opname[nextind(opname, starpos):end]\n    return xor(has_fermion_string(op1, s; kwargs...), has_fermion_string(op2, s; kwargs...))\n  end\n\n  Ntags = length(tags(s))\n  stypes = _sitetypes(s)\n  opn = OpName(opname)\n  for st in stypes\n    res = has_fermion_string(opn, st)\n    !isnothing(res) && return res\n  end\n  return false\nend\n",
+      "metadata": {
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "package": "itensors",
+        "section_title": "sitetype.jl",
+        "section_id": "part_13"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.7289901667526841,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "site",
+        "tags",
+        "siteinds",
+        "function"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "Physics__3bf93049cd8ad58331d2a32084e34246__h2_0_0__0",
+      "text": "Given an Index carrying a \"physical\" tag such as \"Qubit\", \"S=1/2\", \"Boson\", etc.\nthere are a set of pre-defined operators for each tag. The entire set of operators\ncan be found in the section [SiteTypes Included with ITensor](@ref).\nIf you have an Index `s` carrying a \"S=1/2\" tag, for example, you can obtain the \"Sz\"\noperator like this:\n```julia\nusing ITensors, ITensorMPS\nop(\"Sz\",s)\n```\nUsually indices with physical tags come from an array of indices returned from the `siteinds` function\n```julia\nusing ITensors, ITensorMPS\nN = 10\nsites = siteinds(\"S=1/2\",N)\n```\nin which case one might want the \"Sz\" operator on site 4\n```julia\nusing ITensors, ITensorMPS\nSz4 = op(\"Sz\",sites[4])\n```",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "Obtaining a Predefined Operator",
+        "source_file": "docs\\src\\examples\\Physics.md",
+        "section_id": "h2_0"
+      },
+      "score": 0.8899069668309553,
+      "original_score": 0.8741793906639489,
+      "vector_score": 1.0,
+      "bm25_score": 0.1339857424276669,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensor",
+        "site",
+        "tags",
+        "siteinds",
+        "function"
+      ],
+      "match_ratio": 0.625,
+      "is_html": false
+    },
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_0__0",
+      "text": "using ChainRulesCore: @ignore_derivatives\nusing ..ITensors:\n  ITensors, Index, ITensor, itensor, dag, onehot, prime, product, swapprime, tags\nusing ..SmallStrings: SmallString\nusing ..TagSets: TagSets, TagSet, addtags, commontags\n\n@eval struct SiteType{T}\n  (f::Type{<:SiteType})() = $(Expr(:new, :f))\nend\n\n# Note that the complicated definition of\n# SiteType above is a workaround for performance\n# issues when creating parameterized types\n# in Julia 1.4 and 1.5-beta. Ideally we\n# can just use the following in the future:\n# struct SiteType{T}\n# end\n\n\"\"\"\nSiteType is a parameterized type which allows\nmaking Index tags into Julia types. Use cases\ninclude overloading functions such as `op`,\n`siteinds`, and `state` which generate custom\noperators, Index arrays, and IndexVals associated\nwith Index objects having a certain tag.\n\nTo make a SiteType type, you can use the string\nmacro notation: `SiteType\"MyTag\"`\n\nTo make a SiteType value or object, you can use\nthe notation: `SiteType(\"MyTag\")`\n\nThere are currently a few built-in site types\nrecognized by `jl`. The system is easily extensible\nby users. To add new operators to an existing site type,\nor to create new site types, you can follow the instructions\n[here](https://docs.itensor.org/ITensorMPS/stable/examples/Physics.html).\n\nThe current built-in site types are:\n\n- `SiteType\"S=1/2\"` (or `SiteType\"S=½\"`)\n- `SiteType\"S=1\"`\n- `SiteType\"Qubit\"`\n- `SiteType\"Qudit\"`\n- `SiteType\"Boson\"`\n- `SiteType\"Fermion\"`\n- `SiteType\"tJ\"`\n- `SiteType\"Electron\"`\n\n# Examples\n\nTags on indices get turned into SiteTypes internally, and then\nwe search for overloads of functions like `op` and `siteind`.\nFor example:\n\n```julia\njulia> s = siteind(\"S=1/2\")\n(dim=2|id=862|\"S=1/2,Site\")\n\njulia> @show op(\"Sz\", s);\nop(s, \"Sz\") = ITensor ord=2\nDim 1: (dim=2|id=862|\"S=1/2,Site\")'\nDim 2: (dim=2|id=862|\"S=1/2,Site\")\nNDTensors.Dense{Float64,Array{Float64,1}}\n 2×2\n 0.5   0.0\n 0.0  -0.5\n\njulia> @show op",
+      "metadata": {
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "section_id": "part_0",
+        "section_title": "sitetype.jl"
+      },
+      "score": 0.8066764788219115,
+      "original_score": 0.7851960875799017,
+      "vector_score": 0.7835000258982788,
+      "bm25_score": 0.5791844735449194,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensor",
+        "site",
+        "tags",
+        "siteinds"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "Physics__76dd2e2b1a4692ebd1e2d3b3298ad284__Obtaining-a-Predefined-Operator_0__0",
+      "text": "## Obtaining a Predefined Operator\nGiven an Index carrying a \"physical\" tag such as \"Qubit\", \"S=1/2\", \"Boson\", etc. there are a set of pre-defined operators for each tag. The entire set of operators can be found in the section SiteTypes Included with ITensor .\nIf you have an Index s carrying a \"S=1/2\" tag, for example, you can obtain the \"Sz\" operator like this:\n```code\nusing ITensors, ITensorMPS\n\nop(\"Sz\",s)\n```\nUsually indices with physical tags come from an array of indices returned from the siteinds function\n```code\nusing ITensors, ITensorMPS\n\nN = 10\nsites = siteinds(\"S=1/2\",N)\n```\nin which case one might want the \"Sz\" operator on site 4\n```code\nusing ITensors, ITensorMPS\nSz4 = op(\"Sz\",sites[4])\n```",
+      "metadata": {
+        "section_title": "Obtaining a Predefined Operator",
+        "package": "itensormps",
+        "section_id": "Obtaining-a-Predefined-Operator",
+        "source_file": "docs\\build\\examples\\Physics.html"
+      },
+      "score": 0.7167724980278827,
+      "original_score": 0.5468359968446123,
+      "vector_score": 0.6140199367427304,
+      "bm25_score": 0.1299023049336512,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensor",
+        "site",
+        "tags",
+        "siteinds",
+        "function"
+      ],
+      "match_ratio": 0.625,
+      "is_html": true
+    },
+    {
+      "id": "IncludedSiteTypes__7d74debdd1c692a6ddd9c2ac060aba29__\"S1\"-SiteType_2__0",
+      "text": "## \"S=1\" SiteType\nSite indices with the \"S=1\" site type represent $S=1$ spins with the states $|\\!\\uparrow\\rangle$ , $|0\\rangle$ , $|\\!\\downarrow\\rangle$ .\nMaking a single \"S=1\" site or collection of N \"S=1\" sites\n```code\ns = siteind(\"S=1\")\nsites = siteinds(\"S=1\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\nconserve_qns (default: false): conserve total $S^z$\nconserve_sz (default: conserve_qns): conserve total $S^z$\nqnname_sz (default: \"Sz\"): name of total $S^z$ QN\nFor example:\n```code\nsites = siteinds(\"S=1\",N; conserve_sz=true, qnname_sz=\"TotalSz\")\n```\nThe available state names for \"S=1\" sites are:\n\"Up\" (aliases: \"Z+\" , \"↑\" ) spin in the up state\n\"Z0\" (aliases: \"0\" ) spin in the Sz=0 state\n\"Dn\" (aliases: \"Z-\" , \"↓\" ) spin in the down state\nOperators associated with \"S=1\" sites can be made using the op function, for example\n```code\nSz = op(\"Sz\",s)\nSz4 = op(\"Sz\",sites[4])\n```\nSpin operators:\n\"Sz\" (aliases: \"Sᶻ\" )\n\"Sz2\" Square of S^z operator\n\"S+\" (alises: \"S⁺\" , \"Splus\" )\n\"S-\" (aliases: \"S⁻\" , \"Sminus\" )\n\"Sx\" (alises: \"Sˣ\" )\n\"Sx2\" Square of S^x operator\n\"iSy\" (aliases: \"iSʸ\" )\n\"Sy\" (aliases: \"Sʸ\" )\n\"Sy2\" Square of S^y operator\n\"S2\" (aliases: \"S²\"`)",
+      "metadata": {
+        "section_title": "\"S=1\" SiteType",
+        "source_file": "docs\\build\\IncludedSiteTypes.html",
+        "package": "itensormps",
+        "section_id": "\"S1\"-SiteType"
+      },
+      "score": 0.6609573074910745,
+      "original_score": 0.4977145296164066,
+      "vector_score": 0.5884217791014811,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "site",
+        "siteinds",
+        "function"
+      ],
+      "match_ratio": 0.375,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 110,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "query": "NetKet expect function observable expectation value calculation",
+  "package": "netket",
+  "results": [
+    {
+      "id": "custom_operators__d77535638254d55bf7a63dbad2e9a672__sec_3_3__3",
+      "text": " expectation values will match.\n```code\nx_localop\n=\nsum\n([\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\ni\n)\nfor\ni\nin\nrange\n(\nhi\n.\nsize\n)])\ndisplay\n(\nx_localop\n)\nvs\n.\nexpect\n(\nx_localop\n)\n```\n```code\nLocalOperator(dim=4, acting_on=[(0,), (1,), (2,), (3,)], constant=0.0, dtype=float64)\n```\n```code\n3.9983 ± 0.0021 [σ²=0.0048, R̂=1.0105, τ=1.2<3.1]\n```\nIt might be interesting to investigate the performance difference among the two operators:\n```code\n%\ntimeit\nvs.expect(x_op)\n%\ntimeit\nvs.expect(x_localop)\n```\n```code\n261 µs ± 10.2 µs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)\n955 µs ± 2.54 µs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)\n```\nAnd you can see that our jax-based approach is more efficient than NetKet’s built-in operators.\nThis is for two reasons: first, NetKet’s LocalOperator is a general object that can handle completely arbitrary operators, and this flexibility comes at the price of a slightly lower performance.\nUsually this is not an issue because if your model is complication enough, the cost of indexing the operator will be negligible with respect to the cost of evaluating the model itself.\nHowever, writing the operator in Jax has the added benefit that XLA (the Jax compiler) can introspect the code of the operator, and might uber-optimise the evaluation of the expectation value.",
+      "metadata": {
+        "section_title": "Defining an operator from scratch#",
+        "section_id": "sec_3",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\advanced\\custom_operators.html"
+      },
+      "score": 0.8857947959231779,
+      "original_score": 0.8203513643735383,
+      "vector_score": 1.0,
+      "bm25_score": 0.10175682186769137,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "expect",
+        "expectation",
+        "value"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "custom_operators__d77535638254d55bf7a63dbad2e9a672__sec_1_1__0",
+      "text": "## Contents\nIn this page we will show how to define custom operators and the relevant methods used to compute expectation values and their gradients.\nThis page assumes you have already read the Hilbert module and Operator module documentation and have a decent understanding of their class hierarchy.\nShow code cell content\nHide code cell content\n```code\n%\npip\ninstall netket --quiet\n```\nIf you want to define new quantities to be computed over variational states, such as the infidelity, a Renyi entropy or very peculiar observables, you can always write a function yourself that uses the attributes of variational states such as vstate._apply_fun , which is the function used to evaluate the log-wavefunction, vstate.samples , which returns a set of (possibly cached) samples and vstate.variables which returns the variational parameters.\nFor example, when working with a standard MCState you might try the following:\n```code\nimport\njax.numpy\nas\njnp\nimport\nnetket\nas\nnk\ndef\nexpect_avg_X\n(\nvstate\n):\n\"\"\"Compute average magnetization along X axis.\"\"\"\n# this only works with spins\nassert\nisinstance\n(\nvstate\n.\nhilbert\n,\nnk\n.\nhilbert\n.\nSpin\n)\nsamples\n=\nvstate\n.\nsamples\nsamples_flipped\n=\n-\nsamples\n# compute the local observable\nOloc\n=\njnp\n.\nexp\n(\nvstate\n.\nlog_val\n(\nsamples_flipped\n)\n-\nvstate\n.\nlog_val\n(\nsamples\n))\n# compute the expectation value\nreturn\nnk\n.\nstats\n.\nstatistics\n(\nOloc\n)\n```\nHowever this approach is not ideal. This will not work with existing drivers such as nk.driver.VMC , and it will not be consistent with the existing interface. Moreover, if you also want it to work with the Full-Summation variational state nk.vqs.FullSumState you will have to implement another function and use it accordingly.\nFor this reason, NetKet exposes an extensible interface to support arbitrary Observables and Operators within its expect() and expect_and_grad() methods.\nThe most general interface is to define a custom netket.experimental.observable.AbstractObservable and its expectation and gradient dispatch rules. This gives you total control and is least-likely to cause bugs.\nHowever, if your observable is an operator over a discrete hilbert space and can easily be converted to a density matrix and its expectation value can be written easily, you can also use more advanced base classes such as netket.operator.DiscreteOperator .",
+      "metadata": {
+        "section_title": "Contents",
+        "source_file": "docs\\_build\\html\\advanced\\custom_operators.html",
+        "section_id": "sec_1",
+        "package": "netket"
+      },
+      "score": 0.804463523582513,
+      "original_score": 0.6620357197722448,
+      "vector_score": 0.6546593737485362,
+      "bm25_score": 0.6915411038670792,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "netket",
+        "expect",
+        "function",
+        "observable",
+        "expectation",
+        "value"
+      ],
+      "match_ratio": 0.8571428571428571,
+      "is_html": true
+    },
+    {
+      "id": "timing__2d2506630cbc0b231e09cfeb01ef31d1__sec_4_4__3",
+      "text": "\n# Demonstrate the pattern\nobservables\n=\n{\n\"energy\"\n:\nha\n,\n\"magnetization\"\n:\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\n0\n)}\nwith\ntiming\n.\nTimer\n()\nas\ntimer\n:\nfor\ni\nin\nrange\n(\n3\n):\nwith\ntiming\n.\ntimed_scope\n(\nf\n\"iteration\n{\ni\n}\n\"\n):\nestimates\n=\nestimate_observables\n(\nvs\n,\nobservables\n)\nprint\n(\ntimer\n)\n```\n```code\n╭────────────────────────────────────────────── Timing Information ───────────────────────────────────────────────╮\n│ Total: 0.007                                                                                                    │\n│ ├── (39.0%) | iteration 0 : 0.003 s                                                                             │\n│ │   └── (97.9%) | estimate observables : 0.003 s                                                                │\n│ │       ├── (42.3%) | observable: energy : 0.001 s                                                              │\n│ │       │   └── (99.3%) | MCState.expect : 0.001 s                                                              │\n│ │       └── (55.7%) | observable: magnetization : 0.002 s                                                       │\n│ │           └── (99.4%) | MCState.expect : 0.002 s                                                              │\n│ ├── (29.4%) | iteration 1 : 0.002 s                                                                             │\n│ │   └── (97.7%) | estimate observables : 0.002 s                                                                │\n│ │       ├── (53.0%) | observable: energy : 0.001 s                                                              │\n│ │       │   └── (99.4%) | MCState.expect : 0.001 s                                                              │\n│ │       └── (44.9%) | observable: magnetization : 0.001 s                                                       │\n│ │           └── (99.0%) | MCState.expect : 0.001 s                                                              │\n│ └── (31.0%) | iteration 2 : 0.002 s                                                                             │\n│     └── (97.5%) | estimate observables : 0.002 s                                                                │\n│         ├── (50.7%) | observable: energy : 0.001 s                                                              │\n│         │   └── (99.2%) | MCState.expect : 0.001 s                                                              │\n│         └── (46.2%) | observable: magnetization : 0.001 s                                                       │\n│             └── (98.6%) | MCState.expect : 0.001 s                                                              │\n╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯\n```",
+      "metadata": {
+        "section_id": "sec_4",
+        "source_file": "docs\\_build\\html\\user-guides\\utils\\timing.html",
+        "package": "netket",
+        "section_title": "Interaction with NetKet Drivers#"
+      },
+      "score": 0.7306804299349815,
+      "original_score": 0.5945726902247033,
+      "vector_score": 0.6605660291277393,
+      "bm25_score": 0.33059933461255936,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "netket",
+        "expect",
+        "observable"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "timing__2d2506630cbc0b231e09cfeb01ef31d1__sec_4_4__1",
+      "text": "_and_backward : 0.619 s                                                               │\n│     └── (97.6%) | MCState.expect_and_grad : 0.604 s                                                             │\n│         └── (69.3%) | MCState.sample : 0.419 s                                                                  │\n│             └── (46.2%) | sampling n_discarded samples : 0.193 s                                                │\n╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯\n\n\nTotal timing breakdown:\n╭────────────────────────────────────────────── Timing Information ───────────────────────────────────────────────╮\n│ Total: 0.843                                                                                                    │\n│ └── (100.0%) | optimization : 0.843 s                                                                           │\n│     └── (86.3%) |                                                                                               │\n│         /Users/filippo.vicentini/Nextcloud/Codes/Python/netket/netket/driver/abstract_variational_driver.py:336 │\n│         : 0.728 s                                                                                               │\n│         └── (85.1%) | VMC._forward_and_backward : 0.619 s                                                       │\n│             └── (97.6%) | MCState.expect_and_grad : 0.604 s                                                     │\n│                 └── (69.3%) | MCState.sample : 0.419 s                                                          │\n│                     └── (46.2%) | sampling n_discarded samples : 0.193 s                                        │\n╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯\n```\nYou can also use the timing system to profile custom observable calculations within your NetKet workflows:\n```code\n# Example of how timing is used internally (simplified version)\n@timing\n.\ntimed\n(\nname\n=\n\"estimate observables\"\n)\ndef\nestimate_observables\n(\nstate\n,\nobservables\n):\n\"\"\"This mimics how NetKet drivers time observable estimation.\"\"\"\nresults\n=\n{}\nfor\nname\n,\nobs\nin\nobservables\n.\nitems\n():\nwith\ntiming\n.\ntimed_scope\n(\nf\n\"observable:\n{\nname\n}\n\"\n):\nresults\n[\nname\n]\n=\nstate\n.\nexpect\n(\nobs\n)\nreturn\nresults\n# Demonstrate the pattern\nobservables\n=\n{\n\"energy\"\n:\nha\n,\n\"magnetization\"\n:\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\n0\n)}\nwith\ntiming\n.\nTimer\n()\nas\ntimer\n:\nfor\ni\nin\nrange\n(\n3\n):\nwith\ntiming\n.\ntimed_scope\n(\nf\n\"iteration\n{\ni\n}\n\"\n):\nestimates\n=\nestimate_observables\n(\nvs\n,\nobservables\n)\nprint\n(\ntimer\n)\n```\n",
+      "metadata": {
+        "package": "netket",
+        "section_title": "Interaction with NetKet Drivers#",
+        "source_file": "docs\\_build\\html\\user-guides\\utils\\timing.html",
+        "section_id": "sec_4"
+      },
+      "score": 0.6066087264453253,
+      "original_score": 0.40779808282091967,
+      "vector_score": 0.5097476035261496,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "netket",
+        "expect",
+        "observable"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "changelog__775627bff97fcf0367c7035d3e792e5f__sec_15_15__0",
+      "text": "## NetKet 3.13 (11 July 2024)#\nAdded the observable netket.experimental.observable.VarianceObservable() to compute the value and the gradient of the variance of an arbitrary quantum operator #1687 .\nAdded the observable netket.experimental.observable.VarianceObservable() to compute the value and the gradient of the variance of an arbitrary quantum operator #1687 .\nAdded the function netket.jax.tree_norm() to compute the L-p norm of a PyTree, interpreted as a vector of values, without concatenating or ravelling the leaves #1819 .\nAdded the function netket.jax.tree_norm() to compute the L-p norm of a PyTree, interpreted as a vector of values, without concatenating or ravelling the leaves #1819 .\nThe default value of n_discard_per_chain has been changed to 5, which is a more reasonable number in most cases. It might be low for some applications.\nThe default value of n_discard_per_chain has been changed to 5, which is a more reasonable number in most cases. It might be low for some applications.\nThe sampler netket.sampler.MetropolisSampler and all its derivatives now support chunking for the evaluation of the wavefunction at every Metropolis step #1828 .\nThe sampler netket.sampler.MetropolisSampler and all its derivatives now support chunking for the evaluation of the wavefunction at every Metropolis step #1828 .\nAdd a new function netket.hilbert.DiscreteHilbert.local_indices_to_states() to convert integer indices to local configurations #1833 .\nAdd a new function netket.hilbert.DiscreteHilbert.local_indices_to_states() to convert integer indices to local configurations #1833 .\nSupport NetKet’s own linear solvers in netket.experimental.driver.VMC_SRt #1830 .\nSupport NetKet’s own linear solvers in netket.experimental.driver.VMC_SRt #1830 .\nFollowing the discovery and fix of the Parallel Tempering bugs, netket.experimental.sampler.MetropolisPt and related samplers have been stabilised, so they should be constructed with netket.sampler.ParallelTemperingSampler #1803 .\nFollowing the discovery and fix of the Parallel Tempering bugs, netket.experimental.sampler.MetropolisPt and related samplers have been stabilised, so they should be constructed with netket.sampler.ParallelTemperingSampler #1803 .\nDrivers now always log Monte Carlo acceptance if you are using a Monte Carlo sampler #1816 .\nDrivers now always log Monte Carlo acceptance if you are using a Monte Carlo sampler #1816 .\nnetket.sampler.rules.ExchangeRule now only proposes exchanges where the local degrees of freedom changes #1815 .\nnetket.sampler.rules.ExchangeRule now only proposes exchanges where the local degrees of freedom changes #1815 .\nAll solvers within netket.optimizer.solver now automatically return a partial capturing keyword arguments such as rtol and rcond",
+      "metadata": {
+        "section_title": "NetKet 3.13 (11 July 2024)#",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\changelog.html",
+        "section_id": "sec_15"
+      },
+      "score": 0.5721425971180494,
+      "original_score": 0.32696588310704394,
+      "vector_score": 0.397381240843721,
+      "bm25_score": 0.04530445216033554,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "function",
+        "observable",
+        "value"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 53,
+    "final_results_count": 5
+  }
+}

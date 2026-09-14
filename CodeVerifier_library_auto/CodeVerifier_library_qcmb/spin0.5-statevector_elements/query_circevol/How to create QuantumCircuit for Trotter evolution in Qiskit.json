@@ -1,0 +1,132 @@
+{
+  "query": "How to create QuantumCircuit for Trotter evolution in Qiskit",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms"
+  ],
+  "results": [
+    {
+      "id": "0.5_a_intro__813fc5460dd697d5c7b2bcf8d13688fc__part_0__0",
+      "text": "Qiskit Nature v0.5 Migration Guide\n==================================\n\nThis tutorial will guide you through the process of migrating your code\nfrom Qiskit Nature v0.4 to v0.5\n\nOverview\n--------\n\nLet us begin with an overview of the refactored design. A major\nmotivator for the refactoring of Qiskit Nature was the goal of readying\nQiskit Nature for more and tighter integrations with other\nclassical-computational codes. In order to achieve this in the most\nmodular and maintainable manner, we had to decouple the representation\nof our ``BaseProblem`` from our ``BaseDriver`` classes.\n\nThis led to the following abstract design of the Qiskit Nature package:\n|Qiskit Nature 0.5|\n\nAs you can see, the package is logically divided into two concepts:\n\n1. **problems**: which are representations of scientific problems to\n   which one seeks a solution\n2. **algorithms**: which provide the means to find solutions to said\n   problems\n\nIn each of these cases, Qiskit Nature has three pillars:\n\n1. **problems**:\n\n   1. *Electronic Structure Problem*: representing the problem of the\n      electronic Schrödinger equation of molecular systems\n   2. *Vibrational Structure Problem*: representing the problem posed by\n      the Watson Hamiltonian of molecular systems\n   3. *Lattice Model Problem*: representing problems defined on lattices\n\n2. **algorithms**:\n\n   1. *Ground State Solver*: for finding the ground state of a problem\n   2. *Excited States Solver*: for finding excited states of a problem\n   3. *Hamiltonian Simulation*: to simulate dynamics of a problem\n      (*planned for v0.6*)\n\nSome of these concepts have already been present in earlier versions of\nQiskit Nature, but were not as clearly separated. Furthermore, the\nintegration with classical codes has been very restrictive in older\nversions, limiting not only the potential applications of such\nintegrations, but also the capabilities of our ``BaseProblem``\nrepresentation, and its usage in the remainder of the package.\n\n.. |Qiskit Nature 0.5| image:: aux_files/qiskit_nature_0.5_overview.png\n\nHow to use this guide\n---------------------\n\nThis guide is split across multiple files allowing you to discover the\nchanges between v0.4 and v0.5 to each submodule as you find the need.\nThat means, you do not need to read all of the details at once and\njumping around is highly encouraged.\n\nGenerally speaking the refactoring largely relocated any code from\n``qiskit_nature.X.second_quantization`` to ``qiskit_nature.second_q.X``.\nThis should help you navigate the source code for most cases. However,\nin some specific cases we have re",
+      "metadata": {
+        "section_id": "part_0",
+        "source_file": "docs\\migration\\0.5_a_intro.rst",
+        "package": "qiskit-nature",
+        "section_title": "0.5_a_intro.rst"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.056791164842332806,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qiskit"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "test_serialize_value_objects__0d50cf48a3ee151f9dc17ad4a72275ca__part_1__1",
+      "text": " QuantumCircuit(evo.num_qubits)\n        circuit.append(evo, circuit.qubits)\n        version = 17\n\n        with io.BytesIO() as container:\n            qpy.dump(circuit, container, version=version)\n            qc_qpy_str = container.getvalue()\n\n        with io.BytesIO(qc_qpy_str) as container:\n            qc_from_qpy = qpy.load(container)[0]\n\n        self.assertEqual(circuit, qc_from_qpy)\n\n    def test_pauli_evolution_sparse_pauliop(self):\n        \"\"\"Test PauliEvolutionGate with SparsePauliOp\"\"\"\n        operator = SparsePauliOp.from_list([(\"ZZ\", 1), (\"XI\", -0.1)])\n\n        # build the evolution gate\n        evo = PauliEvolutionGate(operator, time=0.2)\n        circuit = QuantumCircuit(evo.num_qubits)\n        circuit.append(evo, circuit.qubits)\n        version = 16\n\n        with io.BytesIO() as container:\n            qpy.dump(circuit, container, version=version)\n            qc_qpy_str = container.getvalue()\n\n        with io.BytesIO(qc_qpy_str) as container:\n            qc_from_qpy = qpy.load(container)[0]\n\n        self.assertEqual(circuit, qc_from_qpy)\n\n    def test_pauli_evolution_operator_list(self):\n        \"\"\"Test PauliEvolutionGate with list of operators\"\"\"\n        op1 = SparseObservable.from_list([(\"XIX\", 0.1), (\"ZIZ\", 0.3)])\n        op2 = SparsePauliOp.from_list([(\"ZZI\", 1), (\"XIX\", -0.1)])\n\n        # build the evolution gate\n        evo = PauliEvolutionGate([op1, op2], time=0.5)\n        circuit = QuantumCircuit(evo.num_qubits)\n        circuit.append(evo, circuit.qubits)\n        version = 17\n\n        with io.BytesIO() as container:\n            qpy.dump(circuit, container, version=version)\n            qc_qpy_str = container.getvalue()\n\n        with io.BytesIO(qc_qpy_str) as container:\n            qc_from_qpy = qpy.load(container)[0]\n\n        self.assertEqual(circuit, qc_from_qpy)\n",
+      "metadata": {
+        "package": "qiskit",
+        "section_title": "test_serialize_value_objects.py",
+        "source_file": "test\\python\\qpy\\test_serialize_value_objects.py",
+        "section_id": "part_1"
+      },
+      "score": 0.9871208870430044,
+      "original_score": 0.9860009641771786,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "quantumcircuit",
+        "evolution"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "test_trotter_qrte__a555c154247a22ba41ca7abc48f5267e__part_3__3",
+      "text": " + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.84147098j]),\n        ),\n    )\n    @unpack\n    def test_trotter_qrte_trotter_two_qubits(self, operator, expected_state):\n        \"\"\"Test for TrotterQRTE on two qubits with various types of a Hamiltonian.\"\"\"\n        # LieTrotter with 1 rep\n        initial_state = QuantumCircuit(2)\n        evolution_problem = TimeEvolutionProblem(operator, 1, initial_state)\n\n        trotter_qrte = TrotterQRTE()\n        evolution_result = trotter_qrte.evolve(evolution_problem)\n\n        np.testing.assert_array_almost_equal(\n            Statevector.from_instruction(evolution_result.evolved_state).data, expected_state.data\n        )\n\n    @data(\n        (\n            QuantumCircuit(1),\n            Statevector([0.23071786 - 0.69436148j, 0.4646314 - 0.49874749j]),\n        ),\n        (\n            QuantumCircuit(1).compose(ZGate(), [0]),\n            Statevector([0.23071786 - 0.69436148j, 0.4646314 - 0.49874749j]),\n        ),\n    )\n    @unpack\n    def test_trotter_qrte_qdrift(self, initial_state, expected_state):\n        \"\"\"Test for TrotterQRTE with QDrift.\"\"\"\n        operator = SparsePauliOp([Pauli(\"X\"), Pauli(\"Z\")])\n        time = 1\n        evolution_problem = TimeEvolutionProblem(operator, time, initial_state)\n\n        trotter_qrte = TrotterQRTE(product_formula=QDrift(seed=0))\n\n        evolution_result = trotter_qrte.evolve(evolution_problem)\n\n        np.testing.assert_array_almost_equal(\n            Statevector.from_instruction(evolution_result.evolved_state).data,\n            expected_state.data,\n        )\n\n    @data((Parameter(\"t\"), {}), (None, {Parameter(\"x\"): 2}), (None, None))\n    @unpack\n    def test_trotter_qrte_trotter_param_errors(self, t_param, param_value_dict):\n        \"\"\"Test TrotterQRTE with raising errors for parameters.\"\"\"\n        operator = SparsePauliOp([Pauli(\"X\")], Parameter(\"t\")) + SparsePauliOp([Pauli(\"Z\")])\n        initial_state = QuantumCircuit(1)\n        self._run_error_test(initial_state, operator, None, None, t_param, param_value_dict)\n\n    @data(([Pauli(\"X\"), Pauli(\"Y\")], None))\n    @unpack\n    def test_trotter_qrte_trotter_aux_ops_errors(self, aux_ops, estimator):\n        \"\"\"",
+      "metadata": {
+        "source_file": "test\\time_evolvers\\test_trotter_qrte.py",
+        "section_id": "part_3",
+        "section_title": "test_trotter_qrte.py",
+        "package": "qiskit-algorithms"
+      },
+      "score": 0.9865609256100915,
+      "original_score": 0.9860009641771786,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "0.6_b_mes_factory__5be058b1bb2ec3513ea502c74424cb01__part_1__1",
+      "text": ":\n\n.. code:: ipython3\n\n   from qiskit_nature.second_q.drivers import PySCFDriver\n   from qiskit_nature.second_q.mappers import ParityMapper\n\n   driver = PySCFDriver(atom=\"H 0 0 0; H 0 0 0.735\")\n   problem = driver.run()\n\n   hamiltonian = problem.hamiltonian.second_q_op()\n\n   mapper = ParityMapper(num_particles=problem.num_particles)\n\n   qubit_op = mapper.map(hamiltonian)\n   aux_ops = {}\n   aux_ops.update(mapper.map(problem.properties.particle_number.second_q_ops()))\n   aux_ops.update(mapper.map(problem.properties.angular_momentum.second_q_ops()))\n\nVQEUCCFactory\n-------------\n\nThe old way:\n\n.. code:: ipython3\n\n   from qiskit.algorithms.optimizers import SLSQP\n   from qiskit.primitives import Estimator\n   from qiskit_nature.second_q.circuit.library import UCCSD\n   from qiskit_nature.second_q.algorithms import VQEUCCFactory\n\n   solver_factory = VQEUCCFactory(Estimator(), UCCSD(), SLSQP())\n\n   solver = solver_factory.get_solver(problem, mapper)\n\n   result = solver.compute_minimum_eigenvalue(qubit_op, aux_ops)\n   print(f\"Eigenvalue = {result.eigenvalue: .6f}\")\n\n.. parsed-literal::\n\n    Eigenvalue = -1.857275\n\nAnd the corresponding new way:\n\n.. code:: ipython3\n\n   from qiskit.algorithms.minimum_eigensolvers import VQE\n   from qiskit.algorithms.optimizers import SLSQP\n   from qiskit.primitives import Estimator\n   from qiskit_nature.second_q.circuit.library import HartreeFock, UCCSD\n   from qiskit_nature.second_q.algorithms.initial_points import HFInitialPoint\n\n   ansatz = UCCSD(\n       problem.num_spatial_orbitals,\n       problem.num_particles,\n       mapper,\n       initial_state=HartreeFock(\n           problem.num_spatial_orbitals,\n           problem.num_particles,\n           mapper,\n       ),\n   )\n\n   initial_point = HFInitialPoint()\n   initial_point.ansatz = ansatz\n   initial_point.problem = problem\n\n   solver = VQE(Estimator(), ansatz, SLSQP())\n   solver.initial_point = initial_point.to_numpy_array()\n\n   result = solver.compute_minimum_eigenvalue(qubit_op, aux_ops)\n   print(f\"Eigenvalue = {result.eigenvalue: .6f}\")\n\n.. parsed-literal::\n\n    Eigenvalue = -1.857275\n\nNumPyEigensolverFactory\n-----------------------\n\nThe old way:\n\n.. code:: ipython3\n\n   from qiskit_nature.second_q.algorithms import NumPyEigensolverFactory\n\n  ",
+      "metadata": {
+        "section_id": "part_1",
+        "source_file": "docs\\migration\\0.6_b_mes_factory.rst",
+        "package": "qiskit-nature",
+        "section_title": "0.6_b_mes_factory.rst"
+      },
+      "score": 0.9108022372902719,
+      "original_score": 0.9070856638440332,
+      "vector_score": 0.9199642767094042,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qiskit"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "ucc__75322347c7796822f4be2c351375ee91__part_4__4",
+      "text": " the default\n                generation method (i.e. not providing a ``Callable`` to ``excitations``), these will\n                always be constructed with respect to a\n                :class:`~qiskit_nature.second_q.circuit.library.HartreeFock` reference state.\n                When setting up a ``VQE`` algorithm using this ansatz and initial state, it is\n                likely you will also want to use a\n                :class:`~qiskit_nature.second_q.algorithms.initial_points.HFInitialPoint` that has\n                been configured using the corresponding ansatz parameters.\n        \"\"\"\n        self._qubit_mapper = qubit_mapper\n        self._num_particles = num_particles\n        self._num_spatial_orbitals = num_spatial_orbitals\n        self._excitations = excitations\n        self._alpha_spin = alpha_spin\n        self._beta_spin = beta_spin\n        self._max_spin_excitation = max_spin_excitation\n        self._generalized = generalized\n        self._preserve_spin = preserve_spin\n        self._include_imaginary = include_imaginary\n\n        super().__init__(reps=reps, initial_state=initial_state)\n\n        # To give read access to the actual excitation list that UCC is using.\n        self._excitation_list: list[tuple[tuple[int, ...], tuple[int, ...]]] | None = None\n\n        # We cache these, because the generation may be quite expensive (depending on the generator)\n        # and the user may want quick access to inspect these. Also, it speeds up testing for the\n        # same reason!\n        self._excitation_ops: list[SparseLabelOp] = None\n\n        # Our parent, EvolvedOperatorAnsatz, sets qregs when it knows the\n        # number of qubits, which it gets from the operators. Getting the\n        # operators here will build them if configuration already allows.\n        # This will allow the circuit to be fully built/valid when it's\n        # possible at this stage.\n        _ = self.operators\n\n    @property\n    def qubit_mapper(self) -> QubitMapper | None:\n        \"\"\"The qubit operator mapper.\"\"\"\n        return self._qubit_mapper\n\n    @qubit_mapper.setter\n    def qubit_mapper(self, mapper: QubitMapper | None) -> None:\n        \"\"\"Sets the qubit operator mapper.\"\"\"\n        self._operators = None\n        self._invalidate()\n        self._qubit_mapper = mapper\n\n    @property\n    def num_spatial_orbitals(self) -> int:\n        \"\"\"The number of spatial orbitals.\"\"\"\n        return self._num_spatial_orbitals\n\n    @num_spatial_orbitals.setter\n    def num_spatial_orbitals(self, n: int) -> None:\n        \"\"\"Sets the number of spatial orbitals.\"\"\"\n        self._operators = None\n",
+      "metadata": {
+        "section_title": "ucc.py",
+        "package": "qiskit-nature",
+        "section_id": "part_4",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\ansatzes\\ucc.py"
+      },
+      "score": 0.8106517012258324,
+      "original_score": 0.8106517012258324,
+      "vector_score": 0.8221611648243409,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 90,
+    "total_bm25_results_count": 90,
+    "merged_results_count": 167,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      }
+    }
+  }
+}

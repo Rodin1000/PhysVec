@@ -1,0 +1,135 @@
+{
+  "query": "Boson initial state usage patterns in DMRG",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "boson__68a4a48a32f91533144dbb5ef2f01694__full__0",
+      "text": "\nalias(::SiteType\"Boson\") = SiteType\"Qudit\"()\n\n\"\"\"\n    space(::SiteType\"Boson\";\n          dim = 2,\n          conserve_qns = false,\n          conserve_number = false,\n          qnname_number = \"Number\")\n\nCreate the Hilbert space for a site of type \"Boson\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nspace(st::SiteType\"Boson\"; kwargs...) = space(alias(st); kwargs...)\n\nval(vn::ValName, st::SiteType\"Boson\") = val(vn, alias(st))\n\nfunction state(sn::StateName, st::SiteType\"Boson\", s::Index; kwargs...)\n  return state(sn, alias(st), s; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", ds::Int...; kwargs...)\n  return op(on, alias(st), ds...; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", s1::Index, s_tail::Index...; kwargs...)\n  rs = reverse((s1, s_tail...))\n  ds = dim.(rs)\n  opmat = op(on, st, ds...; kwargs...)\n  return itensor(opmat, prime.(rs)..., dag.(rs)...)\nend\n",
+      "metadata": {
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\boson.jl",
+        "section_id": "full",
+        "section_title": "boson.jl",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "boson",
+        "state"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "DMRGObserver__80a7108125a0147871536d81b11e02a9__Sample-Usage_1__0",
+      "text": "## Sample Usage\nIn the following example, we have already made a Hamiltonian MPO H and initial MPS psi0 for a system of spins whose sites have an associated \"Sz\" operator defined. We construct a DMRGObserver which measures \"Sz\" on each site at each step of DMRG, and also stops the calculation early if the energy no longer changes to a relative precision of 1E-7.\n```code\nSz_observer = DMRGObserver([\"Sz\"],sites,energy_tol=1E-7)\n\nenergy, psi = dmrg(H,psi0,sweeps,observer=Sz_observer)\n\nfor (sw,Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n  println(\"Total Sz after sweep $sw = \", sum(Szs)/N)\nend\n```",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "Sample-Usage",
+        "section_title": "Sample Usage",
+        "source_file": "docs\\build\\DMRGObserver.html"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "initial",
+        "usage",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "DMRGObserver__77e713791fffb15aca3c48d3446c7a86__h2_1_1__0",
+      "text": "In the following example, we have already made a Hamiltonian MPO `H`\nand initial MPS `psi0` for a system of spins whose sites\nhave an associated \"Sz\" operator defined. We construct a\n`DMRGObserver` which measures \"Sz\" on each site at each\nstep of DMRG, and also stops the calculation early if\nthe energy no longer changes to a relative precision of 1E-7.\n```\nSz_observer = DMRGObserver([\"Sz\"],sites,energy_tol=1E-7)\nenergy, psi = dmrg(H,psi0,sweeps,observer=Sz_observer)\nfor (sw,Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n  println(\"Total Sz after sweep $sw = \", sum(Szs)/N)\nend\n```",
+      "metadata": {
+        "section_id": "h2_1",
+        "source_file": "docs\\src\\DMRGObserver.md",
+        "package": "itensormps",
+        "section_title": "Sample Usage"
+      },
+      "score": 0.8085568084641801,
+      "original_score": 0.7872853427379779,
+      "vector_score": 0.9573520732393593,
+      "bm25_score": 0.10701842073245228,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "initial",
+        "usage",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG"
+      },
+      "score": 0.5743901706996811,
+      "original_score": 0.377156347365387,
+      "vector_score": 0.47144543420673374,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "state",
+        "dmrg"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__Preventing-DMRG-from-getting-stuck-in-a-local-minimum_1__0",
+      "text": "## Preventing DMRG from getting stuck in a local minimum\nWhile DMRG has very robust convergence properties when the initial MPS is close to the global minimum, if it is far from the global minumum then there is no guarantee that DMRG will be able to find the true ground state. This problem is exacerbated for quantum number conserving DMRG where the search space is more constrained.\nThus it is very important to perform a number of checks to ensure that the result you get from DMRG is actually converged. To learn about these checks, see the previous question.\nWhen DMRG is failing to converge, here are some of the steps you can take to improve things:\nThe most important and useful technique is to turn on the noise term feature of DMRG. To do this, just set the noise parameter of each sweep to a small, non-zero value, making this value very small (1E-11, say) or zero by the last sweep. (Experiment with different values on small systems to see which noise magnitudes help.) Here is an example of defining DMRG accuracy or sweep parameters with a non-zero noise set for the first three sweeps: nsweeps = 10\nmaxdim = [100, 200, 400, 800, 1600]\ncutoff = [1E-6]\nnoise = [1E-6, 1E-7, 1E-8, 0.0]\n...\nenergy, psi = dmrg(H,psi0; nsweeps, maxdim, cutoff, noise)\nThe most important and useful technique is to turn on the noise term feature of DMRG. To do this, just set the noise parameter of each sweep to a small, non-zero value, making this value very small (1E-11, say) or zero by the last sweep. (Experiment with different values on small systems to see which noise magnitudes help.) Here is an example of defining DMRG accuracy or sweep parameters with a non-zero noise set for the first three sweeps:\n```code\nnsweeps = 10\nmaxdim = [100, 200, 400, 800, 1600]\ncutoff = [1E-6]\nnoise = [1E-6, 1E-7, 1E-8, 0.0]\n...\nenergy, psi = dmrg(H,psi0; nsweeps, maxdim, cutoff, noise)\n```\nTry using a initial MPS with properties close to the ground state you are looking for. For example, the ground state of a system of electrons typically has a density which is spread out over the whole system. So if your initial state has all of the electrons bunched up on the left-hand side only, it can take DMRG a very long time to converge.\nTry using a initial MPS with properties close to the ground state you",
+      "metadata": {
+        "section_title": "Preventing DMRG from getting stuck in a local minimum",
+        "package": "itensormps",
+        "source_file": "docs\\build\\faq\\DMRG.html",
+        "section_id": "Preventing-DMRG-from-getting-stuck-in-a-local-minimum"
+      },
+      "score": 0.5609242916215698,
+      "original_score": 0.3244989101870305,
+      "vector_score": 0.3536997131366924,
+      "bm25_score": 0.20769569838838262,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "initial",
+        "state",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 107,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      }
+    }
+  }
+}

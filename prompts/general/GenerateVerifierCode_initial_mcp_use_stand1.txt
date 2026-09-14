@@ -1,0 +1,63 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is to generate verifier code for {type} {element} based on query material summary and format requirements.
+
+**PURPOSE: Generate a verifier function that will be used to test and validate implementations of {type} {element} in {topic}. The function should be reliable, well-documented, and follow the specified format.**
+
+--------------------------------------------------------------------------
+[Input:]
+1. TYPE: {type} (e.g., boson, fermion)
+2. ELEMENT: {element} (e.g., site, hamiltonian, initialstate, effector, observable)
+3. TOPIC: {topic} (the package/library topic)
+4. SUMMARY_FILE: {summary_file_path} (path to query material summary JSON file)
+5. OUTPUT_DIR: {output_file_path} (directory to save generated verifier code)
+6. OUTPUT_FILENAME: {output_filename} (base filename for verifier function, extension determined by you)
+
+Note: ELEMENT_NOTE (description of what this element should do) will be provided in the format requirements section.
+
+
+-----------------------------------------------------------------------------
+[Instruction:]
+1. **Read summary file using filesystem-mcp:**
+   - **IMPORTANT: The summary file is in the reference project ("libs"), NOT necessarily in the filesystem-mcp working directory.**
+   - First call filesystem-mcp `get_reference_projects` and confirm reference "libs" exists
+   - Then call filesystem-mcp `list_reference_directory(reference_name="libs")` to list available files
+   - Find the summary JSON file that matches the filename of SUMMARY_FILE ({summary_file_path})
+   - Use filesystem-mcp `read_reference_file(reference_name="libs", file_path="<summary json relative path>")` to read the summary JSON
+     * **CRITICAL: file_path MUST be the exact RELATIVE path returned by list_reference_directory (no `..\\`, no absolute paths)**
+   - The summary contains Q-A pairs with documentation knowledge for {type} {element}
+   - Extract all relevant information for function generation
+   - **IMPORTANT: Generally, the summary file should provide sufficient information. Only query other files if the summary information is still insufficient for generating the verifier function.**
+
+2. **Generate verifier function code:**
+   - Combine summary knowledge with format requirements (provided in the next section)
+   - Follow all code format rules and requirements specified in the format requirements section (including ELEMENT_NOTE guidance)
+   - Use appropriate programming language (typically Julia for itensor, Python for netket, etc.)
+
+3. **Save code file using filesystem-mcp:**
+   - Use filesystem-mcp `save_file` tool to write the generated code
+   - **CRITICAL: The filesystem-mcp working directory is already set to {output_file_path}**
+   - **IMPORTANT: Use ONLY filename for file_path parameter: `{output_filename}.<ext>`**
+   - Example: if output_filename is "site_verifier_boson" and extension is ".jl", use file_path="site_verifier_boson.jl"
+   - DO NOT include `{output_file_path}` in file_path - it's already the working directory
+   - DO NOT use `..\\` or absolute paths - this will cause security errors
+   - **CRITICAL - Error handling: If save_file fails with an error, analyze the error message and fix the issue (e.g., correct file_path format, remove path traversal attempts) then retry save_file**
+   - **CRITICAL - File protection: DO NOT modify or overwrite other element verifier functions that are already saved. Only save the current {element} verifier function.**
+   - Ensure the file contains ONLY the verifier function code (no extra text or explanations)
+
+4. **CRITICAL - How to call tools:**
+   - You have REAL MCP tools available - when you call them, they EXECUTE and return results
+   - DO NOT write "Action:", "Thought:", "Observation:" - this is NOT ReAct format
+   - DO NOT describe what you will do - DIRECTLY call the tools
+   - DO NOT simulate tool calls - tools will actually run
+
+5. **Workflow sequence (MANDATORY):**
+   Step 1: Use filesystem-mcp get_reference_projects → list_reference_directory(reference_name="libs") → read_reference_file(reference_name="libs", file_path="<summary json>") to read {summary_file_path}
+   Step 2: Review format requirements (provided in next section)
+   Step 3: Generate verifier function code combining summary knowledge and format rules
+   Step 4: Use filesystem-mcp save_file to write code with file_path="{output_filename}.<ext>" (choose appropriate extension based on programming language)
+   Step 5: If save_file fails, analyze the error message, fix the issue (e.g., correct file_path format), and retry save_file until successful
+
+
+**Start executing the workflow NOW.**
+

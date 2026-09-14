@@ -1,0 +1,130 @@
+{
+  "query": "spin0.5 observable syntax in itensors for dmrg",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__root_0__0",
+      "text": "ITensor is a library for rapidly creating correct and efficient tensor network algorithms.\nThe source code for ITensors.jl can be found on Github .\nAdditional documentation can be found on the ITensor website itensor.org .\nAn ITensor is a tensor whose interface is independent of its memory layout. ITensor indices are objects which carry extra information and which 'recognize' each other (compare equal to each other).\nThe ITensorMPS.jl library includes composable and extensible algorithms for optimizing and transforming tensor networks, such as matrix product state and matrix product operators, such as the DMRG algorithm. If you are looking for information on running finite MPS/MPO calculations such as DMRG, take a look at the ITensorMPS.jl documentation .",
+      "metadata": {
+        "section_id": "root",
+        "section_title": "ROOT",
+        "source_file": "docs\\build\\index.html",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.4226717016946047,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "dmrg"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "dmrg__7888fe20fce412585dc62035ae11a5ee__full__0",
+      "text": "using ..ITensorMPS:\n  MPS,\n  alternating_update,\n  compose_observers,\n  default_observer,\n  eigsolve_updater,\n  values_observer\n\nfunction dmrg(\n  operator, init::MPS; updater=eigsolve_updater, (observer!)=default_observer(), kwargs...\n)\n  info_ref! = Ref{Any}()\n  info_observer! = values_observer(; info=(info_ref!))\n  observer! = compose_observers(observer!, info_observer!)\n  state = alternating_update(operator, init; updater, observer!, kwargs...)\n  return info_ref![].eigval, state\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "src\\lib\\Experimental\\src\\dmrg.jl",
+        "section_title": "dmrg.jl",
+        "package": "itensormps"
+      },
+      "score": 0.9082534583176621,
+      "original_score": 0.9044306857475647,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "dmrg"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__News_2__3",
+      "text": "TDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 9, 2024: A new package ITensorMPS.jl has been released. We plan to move all of the MPS/MPO functionality in ITensors.jl to ITensorMPS.jl . For now, ITensorMPS.jl just re-exports the MPS/MPO functionality of ITensors.jl (as well as of ITensorTDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 2, 2024: ITensors.jl v0.5 has been released. This version removes PackageCompiler.jl as a dependency and moves the package compilation functionality into a package extension. In order to use the ITensors.compile() function going forward, you need to install the PackageCompiler.jl package with using Pkg: Pkg; Pkg.add(\"PackageCompiler\") and put using PackageCompiler together with using ITensors in your code.\nMay 2, 202",
+      "metadata": {
+        "section_id": "News",
+        "source_file": "docs\\build\\index.html",
+        "section_title": "News",
+        "package": "itensors"
+      },
+      "score": 0.8314427292977488,
+      "original_score": 0.7484219840264907,
+      "vector_score": 0.6209341710795062,
+      "bm25_score": 0.8262880453620673,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "dmrg"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG",
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 0.7349047336095766,
+      "original_score": 0.6266263853656009,
+      "vector_score": 0.6928406955229053,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "dmrg"
+      ],
+      "match_ratio": 0.2,
+      "is_html": true
+    },
+    {
+      "id": "ITensors__829a5cf9db8b1983a9f0b261ee9af85d__part_0__0",
+      "text": "\"\"\"\nITensor is a library for rapidly creating correct and efficient tensor network algorithms.\n\nAn ITensor is a tensor whose interface is independent of its memory layout.\nITensor indices are 'intelligent' meaning they carry extra information and\n'recognize' each other automatically when contracting or adding ITensors.\n\nThe ITensor library includes composable and extensible algorithms for optimizing\nand transforming tensor networks, such as matrix product state and matrix product operators.\n\n# Example Usage\n\nDefine tensor indices i and j\n\n    i = Index(2, \"i\")\n    j = Index(3, \"j\")\n\nMake an ITensor with these indices\n\n    A = ITensor(i,j)\n\nSet the i==2,j==1 element to -2.6\n\n    A[j=>1,i=>2] = -2.6\n    A[i=>2,j=>1] = -2.6 #this has the same effect\n\nMake an ITensor with random elements\n\n    B = random_itensor(j,i)\n\nAdd ITensors A and B together (ok that indices in different order)\n\n    C = A + B\n\n# Other Features of ITensor\n\n  - Tools for **tensor networks**, such as matrix product states (MPS) / tensor trains (TT)\n  - **Algorithms** for solving linear equations in MPS form (such as DMRG) or\n    for integrating differential equations (\"time evolving MPS\")\n  - ITensors can have **sparse data** internally, such as block sparsity or diagonal\n    sparsity, while having the same interface as dense ITensors\n  - ITensors can have **symmetry properties** (invariance or equivariance) under\n    group transformations of the indices. In physics terminology such ITensors conserve quantum numbers.\n\n# Documentation and Resources\n\nITensor website: https://itensor.org/\n\nDocumentation: https://itensor.github.io/ITensors.jl/stable/\n\"\"\"\nmodule ITensors\ninclude(\"usings.jl\")\ninclude(\"utils.jl\")\ninclude(\"lib/LazyApply/src/LazyApply.jl\")\n# TODO: `using .LazyApply: LazyApply, ...`.\nusing .LazyApply\nusing .LazyApply: Prod, Scaled, Sum, coefficient\ninclude(\"lib/Ops/src/Ops.jl\")\n# TODO: `using .Ops: Ops, ...`.\nusing .Ops\nusing .Ops: Ops, Op, Trotter\nimport .Ops: sites, name\ninclude(\"exports.jl\")\ninclude(\"imports.jl\")\ninclude(\"global_variables.jl\")\n# TODO: Move to `lib/LastVals/src/LastVals.jl`.\ninclude(\"lastval.jl\")\ninclude(\"lib/SmallStrings/src/SmallStrings.jl\")\nusing .SmallStrings: SmallStrings, IntChar, SmallString, Tag, isint, isnull\ninclude(\"readwrite.jl\")\nexport readcpp\n# TODO: Move to `lib/Nots",
+      "metadata": {
+        "section_id": "part_0",
+        "source_file": "src\\ITensors.jl",
+        "package": "itensors",
+        "section_title": "ITensors.jl"
+      },
+      "score": 0.7152026194458533,
+      "original_score": 0.6904376298324492,
+      "vector_score": 0.7220085510229826,
+      "bm25_score": 0.165544763153137,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "dmrg"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 111,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      }
+    }
+  }
+}

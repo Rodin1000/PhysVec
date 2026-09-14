@@ -1,0 +1,38 @@
+**Format Rules for Generating [ITensors/ITensorMPS] Codes**
+
+====================================================================================================
+## **Notation**
+
+**Function Categories:**
+- **ELEMENT functions:** Functions with tags {'site', 'hamiltonian', 'observable', 'initialstate', 'effector'}. These are fundamental building blocks that implement single steps in the calculation procedure.
+    - Other functions whose names without these tags are NOT element functions, even though their functions are similar. e.g. 'correlation_matrix' is NOT an element function. 
+- **Task functions:** Functions with tags {'run'}. These orchestrate ELEMENT functions to complete calculation tasks.
+
+====================================================================================================
+
+## **CRITICAL Format Rules**
+
+### **Rule 1: ELEMENT Functions - No Cross-Calling**
+- Functions with tags {'site', 'hamiltonian', 'observable', 'initialstate', 'effector'}. Other functions whose names do not contain these tags are NOT element functions. 
+**You are STRICTLY FORBIDDEN** to call any other ELEMENT functions within the definition of any ELEMENT function.
+    - **Instead:** Define the required preceding variables as input parameters of the function.
+- **Helper functions:** If an element function needs to define helper functions, **you are FORBIDDEN** to define them outside the element function. **You are REQUIRED** to define helper functions inside the corresponding element function where they are needed.
+
+### **Rule 2: Run Functions (have 'run'/'run_' in names) - Complete ELEMENT Call Chain**
+**You are REQUIRED** to call ALL types of ELEMENT functions (at least one of each: 'site', 'hamiltonian', 'initialstate', 'effector'). If 'observable' function is defined, then it MUST be called in at least one run function. 
+- **You are REQUIRED** to implement a complete calculation procedure: you MUST BEGIN from constructing site, then call other element functions ('hamiltonian', 'observable', 'initialstate', 'effector'. Sequence of these four is NOT strictly restricted)
+- **You are FORBIDDEN** to call anthor 'run' function explicitly. 
+- **You are FORBIDDEN** to define explicitly site, Hamiltonian or use dmrg() directly in 'run' functions (must call ELEMENT functions instead). But you are ALLOWED to include some simple calculation/process if necessary. 
+- **You are FORBIDDEN** to include specific numeric values in function definitions. 
+
+### **Rule 3: Code Completeness**
+- **There MUST be** at least 1 run function (have 'run'/'run_' in names). 
+- **You are FORBIDDEN** to change existing run functions into other tags (such as illegal tags as 'task_'...)
+- **You are FORBIDDEN** to define custom itensor site/operators.
+  - You are FORBIDDEN to use ITensors.space and ITensors.op to define custom site types and operators. 
+
+### Check scope. 
+- **You are FORBIDDEN** to check and modefy 'item', 'plot', 'main' and other functions. **
+- **You are REQUIRED** to check ALL element functions and 'run' function definitions, not their applications in other functions. 
+
+====================================================================================================

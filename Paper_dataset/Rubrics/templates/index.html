@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Paper Rubrics Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --gap: 16px; --bg:#0f172a; --panel:#111827; --text:#e5e7eb; --muted:#94a3b8; --accent:#22d3ee;}
+    html,body {height:100%; margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+  .layout {display:grid; grid-template-columns: 0.9fr 1.1fr; gap:var(--gap); padding:var(--gap); height:100%;}
+    .card {background:var(--panel); border-radius:12px; padding:16px; box-shadow:0 0 0 1px #1f2937 inset;}
+    pre {white-space:pre-wrap; word-break:break-word; margin:0; background:#0b1220; padding:12px; border-radius:8px; max-height:70vh; overflow:auto;}
+    label {display:block; font-size:14px; color:var(--muted); margin-top:8px;}
+    input, textarea {width:100%; padding:10px 12px; border-radius:8px; border:1px solid #334155; background:#0b1220; color:var(--text);}
+    button {margin-top:12px; padding:10px 14px; border-radius:8px; border:1px solid #334155; background:#0b1220; color:var(--text); cursor:pointer;}
+    button.primary {background:linear-gradient(90deg, #06b6d4, #0ea5e9); border:none;}
+    .row {display:flex; gap:8px; align-items:center;}
+    .list {display:flex; flex-direction:column; gap:8px; max-height:60vh; overflow:auto; margin-top:12px;}
+    .item {display:flex; justify-content:space-between; gap:8px; padding:10px; background:#0b1220; border-radius:8px; border:1px solid #1f2937;}
+  /* stronger indentation per level for better readability */
+  .item.level-1 {margin-left:28px; background: linear-gradient(90deg,#04293a,#08324a); border-color:#06202e; color:#fff;}
+  .item.level-2 {margin-left:56px; background: linear-gradient(90deg,#073a51,#0b4b66); border-color:#0a2f3f; color:#fff;}
+  .item.level-3 {margin-left:84px; background: linear-gradient(90deg,#0b4b66,#13607f); border-color:#113d51; color:#fff;}
+  .item.level-4 {margin-left:112px; background: linear-gradient(90deg,#135f7f,#2a88a3); border-color:#1b5160; color:#fff;}
+  .item.level-5 {margin-left:140px; background: linear-gradient(90deg,#2a88a3,#4fb0d4); border-color:#2a6f80; color:#fff;}
+
+  /* Issue items: subdued dark-red background, independent of level */
+  .item.issue { background: linear-gradient(90deg,#3b0f0f,#6b1212); border-color: #2b0b0b; color: #fff; }
+  .item.issue .content, .item.issue .content-full, .item.issue .muted { color: #fff; }
+  .muted {color:var(--muted); font-size:12px;}
+  /* smaller content font inside each item */
+  .item .content { font-size:13px; }
+  .item .content-full { font-size:13px; }
+    .buttons {display:flex; gap:4px;}
+    .inline-field {display:flex; align-items:center; gap:2em;}
+    .inline-field label {margin-top:0; margin-right:0; flex-shrink:0;}
+    .section-divider {height:2px; background:#334155; margin:20px 0; border-radius:1px;}
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Left, jsonl preview -->
+    <div class="card">
+      <h3>jsonl preview</h3>
+      <pre id="jsonPreview">加载中...</pre>
+      <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <label style="margin:0; color:var(--muted); font-size:13px;">Load folder</label>
+          <select id="loadFolderSelect" style="flex:1; min-width:150px; padding:8px; border-radius:8px; background:#0b1220; color:var(--text); border:1px solid #334155;"></select>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <label style="margin:0; color:var(--muted); font-size:13px;">Rubrics file</label>
+          <select id="rubricsFiles" style="flex:1; min-width:180px; padding:8px; border-radius:8px; background:#0b1220; color:var(--text); border:1px solid #334155;"></select>
+          <button id="loadRubricsBtn">Load</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right, statements input -->
+    <div class="card">
+      <h3>Task information</h3>
+      <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+        <div class="row" style="justify-content: space-between;">
+          <div style="width: 48%;">
+            <label>Paper_id</label>
+            <input id="metaPaperId" placeholder="e.g. PhysRevB.58.R14741">
+          </div>
+          <div style="width: 48%;">
+            <label>Figure/Table</label>
+            <input id="metaFigureTable" placeholder="e.g. Fig. 1">
+          </div>
+        </div>
+        <div>
+          <label>Guide caption</label>
+          <input id="metaGuide" placeholder="Short caption for the guide">
+        </div>
+        <div>
+          <label>Task</label>
+          <input id="metaTask" placeholder="Task description">
+        </div>
+        <div>
+          <label>Target folder (optional)</label>
+          <div class="row" style="flex-wrap:wrap; gap:8px;">
+            <select id="metaFolderSelect" style="flex:1; min-width:150px;"></select>
+            <input id="metaFolderCustom" placeholder="Custom folder, e.g. dmrg/setA" style="flex:1; display:none;">
+          </div>
+          <div class="muted">Leave empty to save under Rubrics/.</div>
+        </div>
+        <div>
+          <button class="primary" id="saveMeta">Save task info</button>
+        </div>
+      </div>
+
+      <!-- 分隔线 -->
+      <div class="section-divider"></div>
+
+      <h3 style="margin-top:0">Add Statement or Issue</h3>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="inline-field">
+          <label>Type</label>
+          <select id="itemType">
+            <option value="statement">Statement</option>
+            <option value="issue">Issue</option>
+          </select>
+        </div>
+      </div>
+      
+      <label id="contentLabel">Content description</label>
+      <textarea id="req" rows="4" placeholder="e.g. define a Bose-Hubbard hamiltonian"></textarea>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div>
+          <label>weight</label>
+          <input id="weight" type="number" step="0.1" value="0.5" min="0" max="1">
+        </div>
+        <div class="inline-field">
+          <label>parent statement (leave empty for top-level)</label>
+          <select id="parentSelect">
+            <option value="">Top Level</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="primary" id="addBtn">Add Item</button>
+
+      <div class="list" id="taskList"></div>
+      <div class="muted">Note: web version 251030</div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const preview = $("#jsonPreview");
+    const list = $("#taskList");
+    const metaFolderSelect = $("#metaFolderSelect");
+    const metaFolderCustom = $("#metaFolderCustom");
+    const loadFolderSelect = $("#loadFolderSelect");
+    let cachedFolders = [];
+
+    async function refreshPreview() {
+      const res = await fetch("/api/tree");
+      const data = await res.json();
+      
+      function reorderStatement(item) {
+        // top-level dict structure: reorder the whole object
+        if (item && typeof item === 'object' && item.hasOwnProperty('source') && item.hasOwnProperty('guide_caption') && item.hasOwnProperty('task') && item.hasOwnProperty('children')) {
+          return {
+            source: item.source,
+            guide_caption: item.guide_caption,
+            task: item.task,
+            weight: item.weight,
+            children: Array.isArray(item.children) ? item.children.map(reorderStatement) : []
+          };
+        }
+        // nested statement/issue items
+        if (item.hasOwnProperty("issue")) {
+          // Issue类型：issue, weight, children(with judge and support)
+          return {
+            issue: item.issue,
+            weight: item.weight,
+            children: {
+              judge: item.children.judge,
+              support: item.children.support
+            }
+          };
+        } else {
+          // Statement类型：id, statement, weight, children(array)
+          return {
+            id: item.id,
+            statement: item.statement,
+            weight: item.weight,
+            children: Array.isArray(item.children) ? item.children.map(reorderStatement) : []
+          };
+        }
+      }
+      
+      const orderedData = reorderStatement(data);
+      
+      preview.textContent = JSON.stringify(orderedData, null, 2);
+    }
+
+    async function refreshList() {
+      const res = await fetch("/api/statements");
+      const statements = await res.json();
+      list.innerHTML = "";
+      
+      function renderStatement(item, level = 0, container = list) {
+        const div = document.createElement("div");
+        const isIssue = item.hasOwnProperty("issue");
+        const levelClass = level === 0 ? "" : ` level-${level}`;
+        const issueClass = isIssue ? ' issue' : '';
+        div.className = "item" + levelClass + issueClass;
+
+        const itemId = isIssue ? item.issue : item.id;
+        const displayText = isIssue ? item.issue : item.statement;
+
+        let childrenInfo = "";
+        if (isIssue) {
+          // Issue类型显示judge和support状态
+          childrenInfo = `judge=${item.children.judge} · support=${item.children.support}`;
+        } else {
+          // Statement类型显示children数量
+          const childrenCount = Array.isArray(item.children) ? item.children.length : 0;
+          childrenInfo = `children=${childrenCount}`;
+        }
+        // add a toggle button for statements that have children
+        const hasChildren = !isIssue && Array.isArray(item.children) && item.children.length > 0;
+
+        // prepare preview/full text toggling
+        const maxPreview = 120;
+        const previewText = (displayText && displayText.length > maxPreview) ? displayText.slice(0, maxPreview) + '...' : displayText;
+        const showExpand = displayText && displayText.length > maxPreview;
+
+        div.innerHTML = `
+          <div>
+            <div class="content"><strong>${isIssue ? 'Issue:' : 'Statement:'}</strong>
+              <span class="content-text">${escapeHtml(previewText || '')}</span>
+              <span class="content-full" style="display:none">${escapeHtml(displayText || '')}</span>
+            </div>
+            <div class="muted">weight=${item.weight} · ${childrenInfo}</div>
+          </div>
+          <div class="buttons">
+            ${hasChildren ? `<button class="toggleBtn" data-id="${itemId}">▾</button>` : ''}
+            ${showExpand ? `<button class="expandBtn">More</button>` : ''}
+            ${!isIssue ? `<button data-id="${itemId}" class="addChildBtn">+ child</button>` : ''}
+            <button data-id="${itemId}" class="editBtn">Edit</button>
+            <button data-id="${itemId}" class="delBtn">Delete</button>
+          </div>
+        `;
+
+        container.appendChild(div);
+
+        // wire edit/save button for inline editing (we have access to `item` here)
+        const editBtn = div.querySelector('.editBtn');
+        if (editBtn) {
+          editBtn.addEventListener('click', async (e) => {
+            // toggle edit mode inside this item div
+            const isEditing = editBtn.dataset.editing === '1';
+            const contentDiv = div.querySelector('.content');
+            const mutedDiv = div.querySelector('.muted');
+            if (!isEditing) {
+              // enter edit mode
+              const origContentHtml = contentDiv.innerHTML;
+              const origMutedHtml = mutedDiv.innerHTML;
+              div._origContentHtml = origContentHtml;
+              div._origMutedHtml = origMutedHtml;
+
+              // create editor elements
+              const ta = document.createElement('textarea');
+              ta.rows = 4;
+              ta.style.width = '100%';
+              ta.value = (isIssue ? (item.issue || '') : (item.statement || '')) || '';
+
+              const wIn = document.createElement('input');
+              wIn.type = 'number'; wIn.step = '0.1'; wIn.min = '0'; wIn.max = '1';
+              wIn.value = item.weight || 0;
+              wIn.style.width = '6em';
+
+              // replace display with editor
+              contentDiv.innerHTML = '';
+              const label = document.createElement('div');
+              label.innerHTML = `<strong>${isIssue ? 'Issue:' : 'Statement:'}</strong>`;
+              contentDiv.appendChild(label);
+              contentDiv.appendChild(ta);
+
+              mutedDiv.innerHTML = '';
+              const weightLabel = document.createElement('span');
+              weightLabel.textContent = 'weight: ';
+              mutedDiv.appendChild(weightLabel);
+              mutedDiv.appendChild(wIn);
+
+              editBtn.textContent = 'Save';
+              editBtn.dataset.editing = '1';
+            } else {
+              // save
+              const ta = div.querySelector('textarea');
+              const wIn = div.querySelector('input[type="number"]');
+              const newContent = ta ? ta.value : (isIssue ? (item.issue || '') : (item.statement || ''));
+              const newWeight = wIn ? parseFloat(wIn.value) : item.weight;
+
+              // call backend
+              const payload = { content: newContent, weight: newWeight };
+              const id = itemId;
+              try {
+                const res = await fetch(`/api/statements/${encodeURIComponent(id)}`, {
+                  method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                  const msg = await res.json().catch(()=>({error:'save failed'}));
+                  alert(msg.error || 'Save failed');
+                  return;
+                }
+              } catch (err) {
+                alert('Save failed: ' + err);
+                return;
+              }
+
+              // refresh full UI for simplicity
+              await refreshList();
+              await refreshPreview();
+            }
+          });
+        }
+
+        // expand/collapse long text
+        if (showExpand) {
+          const expandBtn = div.querySelector('.expandBtn');
+          const previewSpan = div.querySelector('.content-text');
+          const fullSpan = div.querySelector('.content-full');
+          expandBtn.addEventListener('click', () => {
+            if (fullSpan.style.display === 'none') {
+              fullSpan.style.display = '';
+              previewSpan.style.display = 'none';
+              expandBtn.textContent = 'Less';
+            } else {
+              fullSpan.style.display = 'none';
+              previewSpan.style.display = '';
+              expandBtn.textContent = 'More';
+            }
+          });
+        }
+
+        // If there are child statements, render them inside a dedicated container so they can be collapsed
+        if (hasChildren) {
+          const childrenContainer = document.createElement('div');
+          childrenContainer.className = 'children-container';
+          container.appendChild(childrenContainer);
+
+          // render children into the childrenContainer
+          for (const child of item.children) {
+            renderStatement(child, level + 1, childrenContainer);
+          }
+
+          // wire toggle button
+          const toggleBtn = div.querySelector('.toggleBtn');
+          if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+              if (childrenContainer.style.display === 'none') {
+                childrenContainer.style.display = '';
+                toggleBtn.textContent = '▾';
+              } else {
+                childrenContainer.style.display = 'none';
+                toggleBtn.textContent = '▸';
+              }
+            });
+          }
+        }
+      }
+      
+      for (const item of statements) {
+        renderStatement(item);
+      }
+      
+      // 绑定删除按钮
+      for (const btn of document.querySelectorAll(".delBtn")) {
+        btn.addEventListener("click", async (e) => {
+          const id = e.currentTarget.dataset.id;
+          await fetch(`/api/statements/${id}`, { method: "DELETE" });
+          await refreshList();
+          await refreshPreview();
+        });
+      }
+      
+      // 绑定添加子statement按钮
+      for (const btn of document.querySelectorAll(".addChildBtn")) {
+        btn.addEventListener("click", (e) => {
+          const parentId = e.currentTarget.dataset.id;
+          $("#parentSelect").value = parentId;
+          $("#req").focus();
+        });
+      }
+      
+      // 更新父级选择下拉菜单
+      updateParentSelect(statements);
+    }
+
+    function updateParentSelect(statements) {
+      const select = $("#parentSelect");
+      select.innerHTML = '<option value="">Top Level</option>';
+      
+      function addOptions(items, prefix = "") {
+        for (const item of items) {
+          const isIssue = item.hasOwnProperty("issue");
+          if (!isIssue) {  // 只有statement可以作为父级
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = prefix + item.statement;
+            select.appendChild(option);
+            
+            if (Array.isArray(item.children)) {
+              addOptions(item.children, prefix + "  ");
+            }
+          }
+        }
+      }
+      
+      addOptions(statements);
+    }
+
+    async function refreshFolders() {
+      const res = await fetch('/api/folders');
+      const data = await res.json();
+      cachedFolders = Array.isArray(data) ? data : [];
+      populateFolderSelect(metaFolderSelect, cachedFolders, true);
+      populateFolderSelect(loadFolderSelect, cachedFolders, false);
+    }
+
+    function populateFolderSelect(selectEl, folders, allowCustom) {
+      if (!selectEl) return;
+      const prev = selectEl.value;
+      selectEl.innerHTML = '';
+      folders.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.value;
+        opt.textContent = item.label;
+        selectEl.appendChild(opt);
+      });
+      if (allowCustom) {
+        const custom = document.createElement('option');
+        custom.value = '__custom__';
+        custom.textContent = 'Custom folder…';
+        selectEl.appendChild(custom);
+      }
+      const stillExists = Array.from(selectEl.options).some(opt => opt.value === prev);
+      selectEl.value = stillExists ? prev : '';
+      if (selectEl === metaFolderSelect) {
+        handleMetaFolderChange();
+      }
+    }
+
+    function handleMetaFolderChange() {
+      if (!metaFolderSelect) return;
+      if (metaFolderSelect.value === '__custom__') {
+        if (metaFolderCustom) {
+          metaFolderCustom.style.display = '';
+          metaFolderCustom.focus();
+        }
+      } else {
+        if (metaFolderCustom) {
+          metaFolderCustom.style.display = 'none';
+          if (metaFolderSelect.value === '') {
+            metaFolderCustom.value = '';
+          }
+        }
+      }
+    }
+
+    function getMetaFolderValue() {
+      if (!metaFolderSelect) return '';
+      if (metaFolderSelect.value === '__custom__') {
+        return metaFolderCustom ? (metaFolderCustom.value || '').trim() : '';
+      }
+      return metaFolderSelect.value || '';
+    }
+
+    function setMetaFolderValue(folderVal) {
+      if (!metaFolderSelect) return;
+      const fixedValue = folderVal || '';
+      const exists = Array.from(metaFolderSelect.options).some(opt => opt.value === fixedValue);
+      if (!fixedValue) {
+        metaFolderSelect.value = '';
+        if (metaFolderCustom) {
+          metaFolderCustom.style.display = 'none';
+          metaFolderCustom.value = '';
+        }
+        return;
+      }
+      if (exists) {
+        metaFolderSelect.value = fixedValue;
+        if (metaFolderCustom) {
+          metaFolderCustom.style.display = 'none';
+          metaFolderCustom.value = fixedValue;
+        }
+      } else {
+        metaFolderSelect.value = '__custom__';
+        if (metaFolderCustom) {
+          metaFolderCustom.style.display = '';
+          metaFolderCustom.value = fixedValue;
+        }
+      }
+    }
+
+    metaFolderSelect?.addEventListener('change', handleMetaFolderChange);
+    loadFolderSelect?.addEventListener('change', () => refreshFiles());
+
+    // 类型选择变化时更新标签
+    $("#itemType").addEventListener("change", () => {
+      const type = $("#itemType").value;
+      const label = $("#contentLabel");
+      const textarea = $("#req");
+      
+      if (type === "issue") {
+        label.textContent = "Issue description";
+        textarea.placeholder = "e.g. Whether the model correctly handles edge cases";
+      } else {
+        label.textContent = "Statement description";
+        textarea.placeholder = "e.g. define a Bose-Hubbard hamiltonian";
+      }
+    });
+
+    $("#addBtn").addEventListener("click", async () => {
+      const payload = {
+        type: $("#itemType").value,
+        content: $("#req").value,
+        weight: $("#weight").value,
+        parent_id: $("#parentSelect").value || null
+      };
+      const res = await fetch("/api/statements", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        const msg = await res.json().catch(()=>({error:"请求失败"}));
+        alert(msg.error || "请求失败");
+        return;
+      }
+      // 清空并刷新
+      $("#req").value = ""; $("#parentSelect").value = ""; $("#weight").value = 0.5;
+      await refreshList();
+      await refreshPreview();
+    });
+
+    // metadata load/save
+    async function loadMeta() {
+      const res = await fetch('/api/meta');
+      const meta = await res.json();
+      const sourceParts = (meta.source || "").split(', ');
+      $("#metaPaperId").value = sourceParts[0] || "";
+      $("#metaFigureTable").value = sourceParts[1] || "";
+      $("#metaGuide").value = meta.guide_caption || "";
+      $("#metaTask").value = meta.task || "";
+      const folderVal = meta.folder || '';
+      setMetaFolderValue(folderVal);
+      if (loadFolderSelect && Array.from(loadFolderSelect.options).some(opt => opt.value === folderVal)) {
+        loadFolderSelect.value = folderVal;
+        await refreshFiles(folderVal);
+      }
+    }
+
+    $("#saveMeta").addEventListener("click", async () => {
+      const paperId = $("#metaPaperId").value;
+      const figureTable = $("#metaFigureTable").value;
+      const source = paperId && figureTable ? `${paperId}, ${figureTable}` : paperId || figureTable;
+      const payload = {
+        source: source,
+        guide_caption: $("#metaGuide").value,
+        task: $("#metaTask").value,
+        folder: getMetaFolderValue()
+      };
+      const res = await fetch('/api/meta', {
+        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        alert('Failed to save task info');
+        return;
+      }
+      await refreshFolders();
+      await loadMeta();
+      await refreshPreview();
+      alert('Task info saved');
+    });
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // 初始加载
+    (async function(){
+      await refreshFolders();
+      await loadMeta();
+      await refreshList();
+      await refreshPreview();
+    })();
+
+    // Load list of rubrics json files scoped to the selected folder
+    async function refreshFiles(folderOverride) {
+      const folderValue = folderOverride !== undefined ? folderOverride : (loadFolderSelect ? loadFolderSelect.value : '');
+      const res = await fetch(`/api/files?folder=${encodeURIComponent(folderValue || '')}`);
+      const data = await res.json();
+      const files = Array.isArray(data) ? data : [];
+      const sel = document.getElementById('rubricsFiles');
+      sel.innerHTML = '';
+      if (!files.length) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'No json files found';
+        sel.appendChild(opt);
+        return;
+      }
+      for (const f of files) {
+        const opt = document.createElement('option');
+        opt.value = f; opt.textContent = f;
+        sel.appendChild(opt);
+      }
+    }
+
+    // Wire load button
+    document.getElementById('loadRubricsBtn').addEventListener('click', async () => {
+      const sel = document.getElementById('rubricsFiles');
+      const folder = loadFolderSelect ? (loadFolderSelect.value || '') : '';
+      if (!sel.value || sel.value === '') { alert('Please select a rubrics file'); return; }
+      const res = await fetch('/api/load_file', {
+        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({filename: sel.value, folder})
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        alert(data.error || 'Failed to load file');
+        return;
+      }
+      // refresh UI with loaded file
+      await loadMeta();
+      await refreshList();
+      await refreshPreview();
+      alert('Loaded ' + (folder ? folder + '/' : '') + sel.value);
+    });
+  </script>
+</body>
+</html>

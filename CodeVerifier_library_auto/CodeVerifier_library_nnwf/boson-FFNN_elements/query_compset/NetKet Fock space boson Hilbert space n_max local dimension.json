@@ -1,0 +1,136 @@
+{
+  "query": "NetKet Fock space boson Hilbert space n_max local dimension",
+  "package": "netket",
+  "results": [
+    {
+      "id": "netket.hilbert.Fock__2ffbc4bff7e99c2058774e039f126fda__sec_1_1__0",
+      "text": "## Contents\nBases: HomogeneousHilbert\nHilbert space obtained as tensor product of local fock basis.\nConstructs a new Boson given a maximum occupation number, number of sites\nand total number of bosons.\nn_max ( int | None ) – Maximum occupation for a site (inclusive). If None, the local\noccupation number is unbounded.\nn_max ( int | None ) – Maximum occupation for a site (inclusive). If None, the local\noccupation number is unbounded.\nN ( int ) – number of bosonic modes (default = 1)\nN ( int ) – number of bosonic modes (default = 1)\nn_particles ( int | None ) – Constraint for the number of particles. If None, no constraint\nis imposed.\nn_particles ( int | None ) – Constraint for the number of particles. If None, no constraint\nis imposed.\nconstraint ( DiscreteHilbertConstraint | None ) – A custom constraint on the allowed configurations. This argument\ncannot be specified at the same time as n_particles . The constraint\nmust be a subclass of DiscreteHilbertConstraint\nconstraint ( DiscreteHilbertConstraint | None ) – A custom constraint on the allowed configurations. This argument\ncannot be specified at the same time as n_particles . The constraint\nmust be a subclass of DiscreteHilbertConstraint\nExamples\nSimple boson hilbert space.\n```code\n>>>\nfrom\nnetket.hilbert\nimport\nFock\n>>>\nhi\n=\nFock\n(\nn_max\n=\n5\n,\nn_particles\n=\n11\n,\nN\n=\n3\n)\n>>>\nprint\n(\nhi\n.\nsize\n)\n3\n>>>\nprint\n(\nhi\n.\nn_states\n)\n15\n```\nThe hilbert space does not contain prod(hilbert.shape) basis states.\nTypical constraints are population constraints (such as fixed\nnumber of bosons, fixed magnetization…) which ensure that\nonly a subset of the total unconstrained space is populated.\nTypically, objects defined in the constrained space cannot be\nconverted to QuTiP or other formats.\nThe constraint inflicted upon this poor Hilbert space.\nInstead of all possible combinations of local states, only those satisfying\nthe constraint are part of this Hilbert space.\nWhether the local hilbert space is finite.\nWhether the space can be indexed with an integer\nSize of the local degrees of freedom that make the total hilbert space.\nA list of discrete local quantum numbers.\nIf the local states are infinitely many, None is returned.\nThe maximum number of bosons per site, or None\nif the number is unconstrained.\nThe total number of particles, or None\nif the number is unconstrained.\nThe total dimension of the many-body Hilbert space.\nThrows an exception iff the space is not indexable.\nThe size of the hilbert space on every site.\nThe total number number",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\hilbert\\netket.hilbert.Fock.html",
+        "package": "netket",
+        "section_title": "Contents",
+        "section_id": "sec_1"
+      },
+      "score": 0.9477302010692045,
+      "original_score": 0.9049640019440081,
+      "vector_score": 0.8812050024300101,
+      "bm25_score": 1.0,
+      "keyword_matches": 9,
+      "matched_keywords": [
+        "netket",
+        "fock",
+        "space",
+        "boson",
+        "hilbert",
+        "space",
+        "n_max",
+        "local",
+        "dimension"
+      ],
+      "match_ratio": 1.0,
+      "is_html": true
+    },
+    {
+      "id": "hilbert__76b15abe45e0ce5c1605c309fd2a562b__h2_5_5__0",
+      "text": "{class}`DiscreteHilbert` is also an abstract class from which any hilbert space with countable (or discrete) local degrees of freedom must inherit.\nExamples of such spaces are spins or bosons on a lattice.\nYou can always probe their {attr}`~DiscreteHilbert.shape`, which returns a tuple \nwith the size of the Hilbert space on every site/degree of freedom.\nFor example, for 4 spins-$1/2$ coupled to a bosonic mode with a cutoff of 5 bosons, the shape will be\n`[2,2,2,2,6]`.\n```python\n>>> from netket.hilbert import Spin, Fock\n>>> hi = Spin(1/2, 4)*Fock(5)\n>>> hi.shape\narray([2, 2, 2, 2, 6])\n```\nThe {attr}`~DiscreteHilbert.shape` is also linked to the local Hilbert basis, which lists all possible values that a basis elements can take on this particular lattice site/subsystem.\nFor example, on the first four sites of the example above, the basis elements are only 2: `[-1, 1]`, while on the last site they are 6: `[0,1,2,3,4,5]`.\nThis information can be extracted with the {meth}`~DiscreteHilbert.states_at_index` method, as shown below:\n```python\n>>> hi.states_at_index(0)\n[-1.0, 1.0]\n>>> hi.states_at_index(1)\n[-1.0, 1.0]\n>>> hi.states_at_index(4)\n[0, 1, 2, 3, 4, 5]\n```\nIt should be now evident why NetKet distinguishes locally discrete/countable spaces from arbitrary (e.g: continuous) spaces: if we can index the local basis, we can perform many optimisations and write efficient kernels to compute matrix elements of operators, but also Monte-Carlo samplers will propose transitions in a very different way than in continuous spaces.\nYou can also obtain the total size of the hilbert space by invoking {attr}`~DiscreteHilbert.n_states`, which in general is equivalent to calling `np.prod(hi.shape)`.\n```python\n>>> hi.n_states\n96\n```\nBear in mind that this attribute only works if the Hilbert space is indexable ({attr}`~DiscreteHilbert.is_indexable`), which is true if it has a dimension smaller than $2^{64}$. \nNetKet also supports discrete-but-infinite hilbert spaces, such as Fock spaces with no cutoff. \nThose hilbert spaces are of course not indexable ({attr}`~DiscreteHilbert.is_indexable` will return `False`) and they are further signaled by the attribute ({attr}`~DiscreteHilbert.is_finite`, which will be set to `False`.\nThe only non-finite (discrete) hilbert space implemented in NetKet is the Fock space, and it can be constructed by not specifying the cutoff, as shown below:\n```python\n>>> Fock() # 1 mode with no cutoff\nFock(n_max=INT_MAX, N=1)\n>>> Fock(None, N=3)  # 3 modes with no cutoff\nFock(n_max=INT_MAX, N=3)\n>>> Fock()**3  # 3 modes with no cutoff, alternative syntax\nFock(n_max=INT_MAX, N=3)\n```\nDo bear in mind that due to computational limitations, _infinite_ Hilbert spaces are not technically infinite, but simply have their cutoff set to $ 2^{63} $, the largest signed integer.",
+      "metadata": {
+        "package": "netket",
+        "section_id": "h2_5",
+        "section_title": "The `DiscreteHilbert` interface",
+        "source_file": "docs\\user-guides\\hilbert.md"
+      },
+      "score": 0.837888436072954,
+      "original_score": 0.802837287115755,
+      "vector_score": 0.8618299105982345,
+      "bm25_score": 0.5668667931858362,
+      "keyword_matches": 8,
+      "matched_keywords": [
+        "netket",
+        "fock",
+        "space",
+        "hilbert",
+        "space",
+        "n_max",
+        "local",
+        "dimension"
+      ],
+      "match_ratio": 0.8888888888888888,
+      "is_html": false
+    },
+    {
+      "id": "hilbert__3105bab9e63e79fe994319136ebf42ca__h2_5_5__0",
+      "text": "{class}`DiscreteHilbert` is also an abstract class from which any hilbert space with countable (or discrete) local degrees of freedom must inherit.\nExamples of such spaces are spins or bosons on a lattice.\nYou can always probe their {attr}`~DiscreteHilbert.shape`, which returns a tuple \nwith the size of the Hilbert space on every site/degree of freedom.\nFor example, for 4 spins-$1/2$ coupled to a bosonic mode with a cutoff of 5 bosons, the shape will be\n`[2,2,2,2,6]`.\n```python\n>>> from netket.hilbert import Spin, Fock\n>>> hi = Spin(1/2, 4)*Fock(5)\n>>> hi.shape\narray([2, 2, 2, 2, 6])\n```\nThe {attr}`~DiscreteHilbert.shape` is also linked to the local Hilbert basis, which lists all possible values that a basis elements can take on this particular lattice site/subsystem.\nFor example, on the first four sites of the example above, the basis elements are only 2: `[-1, 1]`, while on the last site they are 6: `[0,1,2,3,4,5]`.\nThis information can be extracted with the {meth}`~DiscreteHilbert.states_at_index` method, as shown below:\n```python\n>>> hi.states_at_index(0)\n[-1.0, 1.0]\n>>> hi.states_at_index(1)\n[-1.0, 1.0]\n>>> hi.states_at_index(4)\n[0, 1, 2, 3, 4, 5]\n```\nIt should be now evident why NetKet distinguishes locally discrete/countable spaces from arbitrary (e.g: continuous) spaces: if we can index the local basis, we can perform many optimisations and write efficient kernels to compute matrix elements of operators, but also Monte-Carlo samplers will propose transitions in a very different way than in continuous spaces.\nYou can also obtain the total size of the hilbert space by invoking {attr}`~DiscreteHilbert.n_states`, which in general is equivalent to calling `np.prod(hi.shape)`.\n```python\n>>> hi.n_states\n96\n```\nBear in mind that this attribute only works if the Hilbert space is indexable ({attr}`~DiscreteHilbert.is_indexable`), which is true if it has a dimension smaller than $2^{64}$. \nNetKet also supports discrete-but-infinite hilbert spaces, such as Fock spaces with no cutoff. \nThose hilbert spaces are of course not indexable ({attr}`~DiscreteHilbert.is_indexable` will return `False`) and they are further signaled by the attribute ({attr}`~DiscreteHilbert.is_finite`, which will be set to `False`.\nThe only non-finite (discrete) hilbert space implemented in NetKet is the Fock space, and it can be constructed by not specifying the cutoff, as shown below:\n```python\n>>> Fock() # 1 mode with no cutoff\nFock(n_max=INT_MAX, N=1)\n>>> Fock(None, N=3)  # 3 modes with no cutoff\nFock(n_max=INT_MAX, N=3)\n>>> Fock()**3  # 3 modes with no cutoff, alternative syntax\nFock(n_max=INT_MAX, N=3)\n```\nDo bear in mind that due to computational limitations, _infinite_ Hilbert spaces are not technically infinite, but simply have their cutoff set to $ 2^{63} $, the largest signed integer.",
+      "metadata": {
+        "package": "netket",
+        "section_id": "h2_5",
+        "source_file": "docs\\_build\\html\\_sources\\user-guides\\hilbert.md",
+        "section_title": "The `DiscreteHilbert` interface"
+      },
+      "score": 0.837888436072954,
+      "original_score": 0.802837287115755,
+      "vector_score": 0.8618299105982345,
+      "bm25_score": 0.5668667931858362,
+      "keyword_matches": 8,
+      "matched_keywords": [
+        "netket",
+        "fock",
+        "space",
+        "hilbert",
+        "space",
+        "n_max",
+        "local",
+        "dimension"
+      ],
+      "match_ratio": 0.8888888888888888,
+      "is_html": false
+    },
+    {
+      "id": "custom_hilbert_constraints__3478f3f26a02da6418c1b5dc5da24d73__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "section_title": "Integration with Variational States",
+        "section_id": "h2_20",
+        "package": "netket",
+        "source_file": "docs\\advanced\\custom_hilbert_constraints.md"
+      },
+      "score": 0.8088888888888889,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hilbert"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "custom_hilbert_constraints__6b1a6a577a4f7295fb5d8a8ae5beefc7__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "section_id": "h2_20",
+        "section_title": "Integration with Variational States",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\_sources\\advanced\\custom_hilbert_constraints.md"
+      },
+      "score": 0.8088888888888889,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hilbert"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 44,
+    "final_results_count": 5
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "query": "Fix BaseEstimatorV1.run missing observables error in VQE fermion-VQE qcmb",
+  "packages": [
+    "qiskit-algorithms",
+    "qiskit"
+  ],
+  "results": [
+    {
+      "id": "test_sampling_vqe__1096557e912fe83ed05b2e64cae3dbd5__part_2__2",
+      "text": "])\n\n        vqe = SamplingVQE(StatevectorSampler(), ansatz, SLSQP(), initial_point=initial_point)\n\n        with self.assertRaises(ValueError):\n            _ = vqe.compute_minimum_eigenvalue(operator=op)\n\n    # TODO: remove this test once BlueprintCircuit support has been removed\n    @data(PAULI_OP)\n    def test_ansatz_resize(self, op):\n        \"\"\"Test the ansatz is properly resized if it's a blueprint circuit.\"\"\"\n        ansatz = RealAmplitudes(1, reps=1)\n        vqe = SamplingVQE(StatevectorSampler(seed=42), ansatz, SPSA())\n        result = vqe.compute_minimum_eigenvalue(operator=op)\n        self.assertAlmostEqual(result.eigenvalue, self.optimal_value, places=5)\n\n    @data(PAULI_OP)\n    def test_invalid_ansatz_size(self, op):\n        \"\"\"Test an error is raised if the ansatz has the wrong number of qubits.\"\"\"\n        ansatz = QuantumCircuit(1)\n        ansatz.compose(real_amplitudes(1, reps=2))\n        vqe = SamplingVQE(StatevectorSampler(), ansatz, SLSQP())\n\n        with self.assertRaises(AlgorithmError):\n            _ = vqe.compute_minimum_eigenvalue(operator=op)\n\n    @data(PAULI_OP)\n    def test_missing_varform_params(self, op):\n        \"\"\"Test specifying a variational form with no parameters raises an error.\"\"\"\n        circuit = QuantumCircuit(op.num_qubits)\n        vqe = SamplingVQE(StatevectorSampler(), circuit, SLSQP())\n        with self.assertRaises(AlgorithmError):\n            vqe.compute_minimum_eigenvalue(operator=op)\n\n    @unittest.skip(\"SLSQP returns wrong results because of shot noise\")\n    @data(PAULI_OP)\n    def test_batch_evaluate_slsqp(self, op):\n        \"\"\"Test batching with SLSQP (as representative of SciPyOptimizer).\"\"\"\n        optimizer = SLSQP(max_evals_grouped=10)\n        vqe = SamplingVQE(\n            StatevectorSampler(default_shots=1_000_000, seed=42), real_amplitudes(2), optimizer\n        )\n        result = vqe.compute_minimum_eigenvalue(operator=op)\n        self.assertAlmostEqual(result.eigenvalue, self.optimal_value, places=5)\n\n    def test_batch_evaluate_with_qnspsa(self):\n        \"\"\"Test batch evaluating with QNSPSA works.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n\n        wrapped_sampler = StatevectorSampler(seed=42)\n        inner_sampler = StatevectorSampler(seed=43)\n\n        callcount = {\"count\": 0}\n\n        def wrapped_run(*args, **kwargs):\n            kwargs[\"callcount\"][\"count\"] += 1\n            return inner_sampler.run(*args)\n\n        wrapped",
+      "metadata": {
+        "section_title": "test_sampling_vqe.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_2",
+        "source_file": "test\\minimum_eigensolvers\\test_sampling_vqe.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9934234217159752,
+      "bm25_score": 0.8501501317146902,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "run",
+        "error",
+        "vqe",
+        "vqe"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "statevector_estimator__488263125ed47fe267798d6c614feda2__part_1__1",
+      "text": ".primitives import StatevectorEstimator\n        from qiskit.quantum_info import Pauli, SparsePauliOp\n\n        import matplotlib.pyplot as plt\n        import numpy as np\n\n        # Define a circuit with two parameters.\n        circuit = QuantumCircuit(2)\n        circuit.h(0)\n        circuit.cx(0, 1)\n        circuit.ry(Parameter(\"a\"), 0)\n        circuit.rz(Parameter(\"b\"), 0)\n        circuit.cx(0, 1)\n        circuit.h(0)\n\n        # Define a sweep over parameter values, where the second axis is over\n        # the two parameters in the circuit.\n        params = np.vstack([\n            np.linspace(-np.pi, np.pi, 100),\n            np.linspace(-4 * np.pi, 4 * np.pi, 100)\n        ]).T\n\n        # Define three observables. Many formats are supported here including\n        # classes such as qiskit.quantum_info.SparsePauliOp. The inner length-1\n        # lists cause this array of observables to have shape (3, 1), rather\n        # than shape (3,) if they were omitted.\n        observables = [\n            [SparsePauliOp([\"XX\", \"IY\"], [0.5, 0.5])],\n            [Pauli(\"XX\")],\n            [Pauli(\"IY\")]\n        ]\n\n        # Instantiate a new statevector simulation based estimator object.\n        estimator = StatevectorEstimator()\n\n        # Estimate the expectation value for all 300 combinations of\n        # observables and parameter values, where the pub result will have\n        # shape (3, 100). This shape is due to our array of parameter\n        # bindings having shape (100,), combined with our array of observables\n        # having shape (3, 1)\n        pub = (circuit, observables, params)\n        job = estimator.run([pub])\n\n        # Extract the result for the 0th pub (this example only has one pub).\n        result = job.result()[0]\n\n        # Error-bar information is also available, but the error is 0\n        # for this StatevectorEstimator.\n        result.data.stds\n\n        # Pull out the array-based expectation value estimate data from the\n        # result and plot a trace for each observable.\n        for idx, pauli in enumerate(observables):\n            plt.plot(result.data.evs[idx], label=pauli)\n        plt.legend()\n    \"\"\"\n\n    def __init__(\n        self, *, default_precision: float = 0.0, seed: np.random.Generator | int | None = None\n    ):\n        \"\"\"\n        Args:\n            default_precision: The default precision for the estimator if not specified during run.\n            seed: The seed or Generator object for random number generation.\n                If None, a random seeded default RNG will be used.\n       ",
+      "metadata": {
+        "source_file": "qiskit\\primitives\\statevector_estimator.py",
+        "section_title": "statevector_estimator.py",
+        "package": "qiskit",
+        "section_id": "part_1"
+      },
+      "score": 0.9135404202079516,
+      "original_score": 0.9080217236254804,
+      "vector_score": 1.0,
+      "bm25_score": 0.38015497864585157,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "run",
+        "observables",
+        "error"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    },
+    {
+      "id": "test_vqd__69bbcfe16b14a0e7e3cec7e7a51130fb__part_3__3",
+      "text": "qd.compute_eigenvalues(operator=op)\n        np.testing.assert_array_almost_equal(\n            result.eigenvalues.real, self.h2_energy_excited[:2], decimal=1\n        )\n\n    @data(H2_SPARSE_PAULI)\n    def test_missing_varform_params(self, op):\n        \"\"\"Test specifying a variational form with no parameters raises an error.\"\"\"\n        circuit = QuantumCircuit(op.num_qubits)\n        vqd = VQD(\n            estimator=self.estimator,\n            fidelity=self.fidelity,\n            ansatz=circuit,\n            optimizer=SLSQP(),\n            k=1,\n            betas=self.betas,\n        )\n        with self.assertRaises(AlgorithmError):\n            vqd.compute_eigenvalues(operator=op)\n\n    @data(H2_SPARSE_PAULI)\n    def test_callback(self, op):\n        \"\"\"Test the callback on VQD.\"\"\"\n        history = {\"eval_count\": [], \"parameters\": [], \"mean\": [], \"metadata\": [], \"step\": []}\n\n        def store_intermediate_result(eval_count, parameters, mean, metadata, step):\n            history[\"eval_count\"].append(eval_count)\n            history[\"parameters\"].append(parameters)\n            history[\"mean\"].append(mean)\n            history[\"metadata\"].append(metadata)\n            history[\"step\"].append(step)\n\n        optimizer = COBYLA(maxiter=10)\n        wavefunction = self.ry_wavefunction\n\n        vqd = VQD(\n            estimator=self.estimator,\n            fidelity=self.fidelity,\n            ansatz=wavefunction,\n            optimizer=optimizer,\n            callback=store_intermediate_result,\n            betas=self.betas,\n            initial_point=[1] * 8,\n        )\n\n        vqd.compute_eigenvalues(operator=op)\n\n        self.assertTrue(all(isinstance(count, int) for count in history[\"eval_count\"]))\n        self.assertTrue(all(isinstance(mean, float) for mean in history[\"mean\"]))\n        self.assertTrue(all(isinstance(metadata, dict) for metadata in history[\"metadata\"]))\n        self.assertTrue(all(isinstance(count, int) for count in history[\"step\"]))\n        for params in history[\"parameters\"]:\n            self.assertTrue(all(isinstance(param, float) for param in params))\n\n        ref_eval_count = [\n            1,\n            2,\n            3,\n            4,\n            5,\n            6,\n            7,\n            8,\n            9,\n            10,\n            1,\n            2,\n            3,\n            4,\n            5,\n            6,\n            7,\n            8,\n            9,\n            10,\n        ]\n\n        ref_mean = [\n            -1.08,\n            -1.08,\n            -1.01,\n            -1.14,\n            -1.17,\n            -1.38,\n            -1.01,\n            -1.63,\n            -1.46,\n            -1.56,\n            -0.",
+      "metadata": {
+        "source_file": "test\\eigensolvers\\test_vqd.py",
+        "section_title": "test_vqd.py",
+        "section_id": "part_3",
+        "package": "qiskit-algorithms"
+      },
+      "score": 0.8326299580642474,
+      "original_score": 0.8292142429227015,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "error"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    },
+    {
+      "id": "__init____2a31ba4b15ebcc0ad4872f9178e333d9__part_4__4",
+      "text": "    VQE,\n    VQEResult,\n)\n\nfrom .version import __version__\n\n__all__ = [\n    \"__version__\",\n    \"AlgorithmJob\",\n    \"AlgorithmResult\",\n    \"VariationalAlgorithm\",\n    \"VariationalResult\",\n    \"AmplitudeAmplifier\",\n    \"AmplificationProblem\",\n    \"Grover\",\n    \"GroverResult\",\n    \"AmplitudeEstimator\",\n    \"AmplitudeEstimatorResult\",\n    \"AmplitudeEstimation\",\n    \"AmplitudeEstimationResult\",\n    \"FasterAmplitudeEstimation\",\n    \"FasterAmplitudeEstimationResult\",\n    \"IterativeAmplitudeEstimation\",\n    \"IterativeAmplitudeEstimationResult\",\n    \"MaximumLikelihoodAmplitudeEstimation\",\n    \"MaximumLikelihoodAmplitudeEstimationResult\",\n    \"EstimationProblem\",\n    \"RealTimeEvolver\",\n    \"ImaginaryTimeEvolver\",\n    \"TimeEvolutionResult\",\n    \"TimeEvolutionProblem\",\n    \"HamiltonianPhaseEstimation\",\n    \"HamiltonianPhaseEstimationResult\",\n    \"PhaseEstimationScale\",\n    \"PhaseEstimation\",\n    \"PhaseEstimationResult\",\n    \"PVQD\",\n    \"PVQDResult\",\n    \"SciPyRealEvolver\",\n    \"SciPyImaginaryEvolver\",\n    \"TrotterQRTE\",\n    \"IterativePhaseEstimation\",\n    \"AlgorithmError\",\n    \"estimate_observables\",\n    \"run_estimator_job\",\n    \"VarQITE\",\n    \"VarQRTE\",\n    \"VarQTE\",\n    \"VarQTEResult\",\n    \"Eigensolver\",\n    \"EigensolverResult\",\n    \"NumPyEigensolver\",\n    \"NumPyEigensolverResult\",\n    \"VQD\",\n    \"VQDResult\",\n    \"AdaptVQE\",\n    \"AdaptVQEResult\",\n    \"MinimumEigensolver\",\n    \"MinimumEigensolverResult\",\n    \"NumPyMinimumEigensolver\",\n    \"NumPyMinimumEigensolverResult\",\n    \"QAOA\",\n    \"SamplingMinimumEigensolver\",\n    \"SamplingMinimumEigensolverResult\",\n    \"SamplingVQE\",\n    \"SamplingVQEResult\",\n    \"VQE\",\n    \"VQEResult\",\n]\n",
+      "metadata": {
+        "section_id": "part_4",
+        "section_title": "__init__.py",
+        "package": "qiskit-algorithms",
+        "source_file": "qiskit_algorithms\\__init__.py"
+      },
+      "score": 0.7811996044555616,
+      "original_score": 0.7720829213078767,
+      "vector_score": 0.9311018568452756,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "vqe",
+        "vqe"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "test_vqe__ffff26a28311a585190d400006adf82a__part_5__5",
+      "text": "            vqe.optimizer = L_BFGS_B()\n            run_check()\n\n    def test_default_batch_evaluation_on_spsa(self):\n        \"\"\"Test the default batching works.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n\n        wrapped_estimator = StatevectorEstimator(seed=42)\n        inner_estimator = StatevectorEstimator(seed=43)\n\n        callcount = {\"estimator\": 0}\n\n        def wrapped_estimator_run(*args, **kwargs):\n            kwargs[\"callcount\"][\"estimator\"] += 1\n            return inner_estimator.run(*args)\n\n        wrapped_estimator.run = partial(wrapped_estimator_run, callcount=callcount)\n\n        spsa = SPSA(maxiter=5)\n\n        vqe = VQE(wrapped_estimator, ansatz, spsa)\n        _ = vqe.compute_minimum_eigenvalue(Pauli(\"ZZ\"))\n\n        # 1 calibration + 5 loss + 1 return loss\n        expected_estimator_runs = 1 + 5 + 1\n\n        with self.subTest(msg=\"check callcount\"):\n            self.assertEqual(callcount[\"estimator\"], expected_estimator_runs)\n\n        with self.subTest(msg=\"check reset to original max evals grouped\"):\n            self.assertIsNone(spsa._max_evals_grouped)\n\n    def test_batch_evaluate_with_qnspsa(self):\n        \"\"\"Test batch evaluating with QNSPSA works.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n\n        wrapped_sampler = StatevectorSampler(seed=42)\n        inner_sampler = StatevectorSampler(seed=43)\n\n        wrapped_estimator = StatevectorEstimator(seed=44)\n        inner_estimator = StatevectorEstimator(seed=45)\n\n        callcount = {\"sampler\": 0, \"estimator\": 0}\n\n        def wrapped_estimator_run(*args):\n            callcount[\"estimator\"] += 1\n            return inner_estimator.run(*args)\n\n        def wrapped_sampler_run(*args):\n            callcount[\"sampler\"] += 1\n            return inner_sampler.run(*args)\n\n        wrapped_estimator.run = wrapped_estimator_run\n        wrapped_sampler.run = wrapped_sampler_run\n\n        fidelity = ComputeUncompute(wrapped_sampler)\n\n        def fidelity_callable(left, right):\n            batchsize = np.asarray(left).shape[0]\n            job = fidelity.run(batchsize * [ansatz], batchsize * [ansatz], left, right)\n            return job.result().fidelities\n\n        qnspsa = QNSPSA(fidelity_callable, maxiter=5)\n        qnspsa.set_max_evals_grouped(100)\n\n        vqe = VQE(\n            wrapped_estimator,\n            ansatz,\n            qnspsa,\n        )\n        _ = vqe.compute_minimum_eigenvalue(Pauli(\"ZZ\"))\n\n        # 5 (fidelity)\n        expected_sampler",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "source_file": "test\\minimum_eigensolvers\\test_vqe.py",
+        "section_id": "part_5",
+        "section_title": "test_vqe.py"
+      },
+      "score": 0.682947842053712,
+      "original_score": 0.6627104702699064,
+      "vector_score": 0.7049292462176491,
+      "bm25_score": 0.3770948206482028,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "run",
+        "vqe",
+        "vqe"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 105,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 49
+      },
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      }
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "query": "How to define neural backflow wave function ansatz in netket",
+  "package": "netket",
+  "results": [
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_9_9__0",
+      "text": "## Neural-Backflow Wave Function#\nAn alternative approach to go beyond the simple mean field approximation, and also effectively change the nodal structure of the wave functions is given by the Neural Backflow transformation of Reference [4].\nThe idea is to promote the matrix \\(M\\) appearing in the Slater determinant to be a function of all the occupation numbers, through a neural network. Specifically, we take an additive form of the backflow transformation:\nand parameterize \\(F\\) with a multilayer perceptron taking \\(N\\) inputs and having an output of \\(N\\times N_{\\mathrm{f}}\\) numbers.\n```code\nclass\nLogNeuralBackflow\n(\nnnx\n.\nModule\n):\nhilbert\n:\nnk\n.\nhilbert\n.\nSpinOrbitalFermions\ndef\n__init__\n(\nself\n,\nhilbert\n,\nhidden_units\n:\nint\n,\nkernel_init\n=\ndefault_kernel_init\n,\nparam_dtype\n=\nfloat\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n,\n):\nself\n.\nhilbert\n=\nhilbert\n# To generate random numbers we need to extract the key from the `rngs` object.\nkey\n=\nrngs\n.\nparams\n()\n# the N x Nf matrix of the orbitals\nself\n.\nM\n=\nnnx\n.\nParam\n(\nkernel_init\n(\nkey\n,\n(\nself\n.\nhilbert\n.\nn_orbitals\n,\nself\n.\nhilbert\n.\nn_fermions\n,\n),\nparam_dtype\n,\n)\n)\n# Construct the Backflow. Takes as input strings of $N$ occupation numbers, outputs an $N x Nf$ matrix\n# that modifies the bare orbitals.\nself\n.\nbackflow\n=\nnnx\n.\nSequential\n(\n# First layer, input (..., N,) output (..., hidden_units)\nnnx\n.\nLinear\n(\nin_features\n=\nhilbert\n.\nsize\n,\nout_features\n=\nhidden_units\n,\nparam_dtype\n=\nparam_dtype\n,\nrngs\n=\nrngs\n,\n),\nnnx\n.\ntanh\n,\n# Last layer, input (..., hidden_units,) output (..., N x Nf)\nnnx\n.\nLinear\n(\nin_features\n=\nhidden_units\n,\nout_features\n=\nhilbert\n.\nn_orbitals\n*\nhilbert\n.\nn_fermions\n,\nparam_dtype\n=\nparam_dtype\n,\nrngs\n=\nrngs\n,\n),\n# Reshape into the orbital shape, (..., N, Nf)\nlambda\nx\n:\nx\n.\nreshape\n(\nx\n.\nshape\n[:\n-\n1\n]\n+\n(\nhilbert\n.\nn_orbitals\n,\nhilbert\n.\nn_fermions\n)\n),\n)\ndef\n__call__\n(\nself\n,\nn\n:\njax\n.\nArray\n)\n->\njax\n.\nArray\n:\n# For simplicity, we",
+      "metadata": {
+        "section_title": "Neural-Backflow Wave Function#",
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "package": "netket",
+        "section_id": "sec_9"
+      },
+      "score": 0.9689579113705237,
+      "original_score": 0.9511697482232956,
+      "vector_score": 1.0,
+      "bm25_score": 0.7558487411164779,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "neural",
+        "backflow",
+        "wave",
+        "function"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_9_9__1",
+      "text": "rngs\n=\nrngs\n,\n),\n# Reshape into the orbital shape, (..., N, Nf)\nlambda\nx\n:\nx\n.\nreshape\n(\nx\n.\nshape\n[:\n-\n1\n]\n+\n(\nhilbert\n.\nn_orbitals\n,\nhilbert\n.\nn_fermions\n)\n),\n)\ndef\n__call__\n(\nself\n,\nn\n:\njax\n.\nArray\n)\n->\njax\n.\nArray\n:\n# For simplicity, we write a function that operates on a single configuration of size (N,)\n# and we vectorize it using `jnp.vectorize` with the signature='(n)->()' argument, which specifies\n# that the function is defined to operate on arrays of shape (n,) and return scalars.\n@partial\n(\njnp\n.\nvectorize\n,\nsignature\n=\n\"(n)->()\"\n)\ndef\nlog_sd\n(\nn\n):\n# Construct the Backflow. Takes as input strings of $N$ occupation numbers, outputs an $N x Nf$ matrix\n# that modifies the bare orbitals.\nF\n=\nself\n.\nbackflow\n(\nn\n)\n# Add the backflow correction to the bare orbitals\nM\n=\nself\n.\nM\n+\nF\n# Find the positions of the occupied, backflow-modified orbitals\nR\n=\nn\n.\nnonzero\n(\nsize\n=\nself\n.\nhilbert\n.\nn_fermions\n)[\n0\n]\nA\n=\nM\n[\nR\n]\nreturn\n_logdet_cmplx\n(\nA\n)\nreturn\nlog_sd\n(\nn\n)\n```\nWe can then proceed as above to optimize this variational state using VMC.\n```code\n# Create a neural backflow wave function\nmodel\n=\nLogNeuralBackflow\n(\nhi\n,\nhidden_units\n=\nN\n,\nrngs\n=\nnnx\n.\nRngs\n(\n3\n))\n# Define a Metropolis exchange sampler\nsa\n=\nnk\n.\nsampler\n.\nMetropolisFermionHop\n(\nhi\n,\ngraph\n=\ngraph\n)\n# Define an optimizer\nop\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.05\n)\n# Create a variational state\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nmodel\n,\nn_samples\n=\n2\n**\n12\n,\nn_discard_per_chain\n=\n16\n)\n# Create a Variational Monte Carlo driver\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nH\n,\nop\n,\nvariational_state\n=\nvstate\n,\ndiag_shift\n=\n0.05\n)\n# Construct the logger to visualize the data later on\nbf_log\n=\nnk\n.\nlogging\n.\nRuntimeLog\n()\n# Run the optimization for 300 iterations\ngs\n.\nrun\n(\nn_iter\n",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "section_id": "sec_9",
+        "section_title": "Neural-Backflow Wave Function#",
+        "package": "netket"
+      },
+      "score": 0.6269276955582306,
+      "original_score": 0.38552796915473275,
+      "vector_score": 0.2913081233166134,
+      "bm25_score": 0.7624073525072103,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "define",
+        "neural",
+        "backflow",
+        "wave",
+        "function"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_8_8__0",
+      "text": "## 6. Neural-Network Quantum State#\nWe now want to use a more sophisticated ansatz, based on a neural network representation of the wave function. At this point, this is quite straightforward, since we can again take advantage of automatic differentiation.\nLet us define a simple fully-connected feed-forward network with a ReLu activation function and a sum layer.\n```code\nclass\nFFN\n(\nnnx\n.\nModule\n):\ndef\n__init__\n(\nself\n,\nN\n:\nint\n,\nalpha\n:\nint\n=\n1\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\n\"\"\"\nConstruct a Feed-Forward Neural Network with a single hidden layer.\nArgs:\nN: The number of input nodes (number of spins in the chain).\nalpha: The density of the hidden layer. The hidden layer will have\nN*alpha nodes.\nrngs: The random number generator seed.\n\"\"\"\nself\n.\nalpha\n=\nalpha\n# We define a linear (or dense) layer with `alpha` times the number of input nodes\n# as output nodes.\n# We must pass forward the rngs object to the dense layer.\nself\n.\nlinear\n=\nnnx\n.\nLinear\n(\nin_features\n=\nN\n,\nout_features\n=\nalpha\n*\nN\n,\nrngs\n=\nrngs\n)\ndef\n__call__\n(\nself\n,\nx\n:\njax\n.\nArray\n):\n# we apply the linear layer to the input\ny\n=\nself\n.\nlinear\n(\nx\n)\n# the non-linearity is a simple ReLu\ny\n=\nnnx\n.\nrelu\n(\ny\n)\n# sum the output\nreturn\njnp\n.\nsum\n(\ny\n,\naxis\n=-\n1\n)\nmodel\n=\nFFN\n(\nN\n=\nN\n,\nalpha\n=\n1\n,\nrngs\n=\nnnx\n.\nRngs\n(\n2\n))\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n1008\n)\n```\nWe then proceed to the optimization as before.\n```code\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.1\n)\n# Notice the use, again of Stochastic Reconfiguration, which considerably improves the optimisation\ngs\n=\nnk\n.\ndriver\n.\nVMC\n(\nH\n,\noptimizer\n,\nvariational_state\n=\nvstate\n,\npreconditioner\n=\nnk\n.\noptimizer\n.\nSR\n(\ndiag_shift\n=\n0.1\n),\n)\nlog\n=\nnk\n.\nlogging\n.\nRuntimeLog\n()\ngs\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nlog\n)\nffn_energy\n=\nvstate\n.\nexpect\n(\nH\n)\nerror\n=\nabs\n((\nffn_energy\n.\nmean\n-\neig_vals\n[\n",
+      "metadata": {
+        "section_title": "6. Neural-Network Quantum State#",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html",
+        "section_id": "sec_8"
+      },
+      "score": 0.6212550547815037,
+      "original_score": 0.3761847961107119,
+      "vector_score": 0.40786033972016245,
+      "bm25_score": 0.24948262167290988,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "define",
+        "neural",
+        "wave",
+        "function",
+        "ansatz"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "gs-matrix-models__ef1b32ac39370be9a6422cd5bf62bbb1__sec_8_8__0",
+      "text": "## 6. Neural-Network Quantum State#\nWe now want to use a more sofisticated ansatz, based on a neural network representation of the wave function. At this point, this is quite straightforward, since we can again take advantage of automatic differentiation.\nLet us define a simple fully-connected feed-forward network with a ReLu activation function and a sum layer.\n```code\nclass\nFFN\n(\nnn\n.\nModule\n):\n# You can define attributes at the module-level\n# with a default. This allows you to easily change\n# some hyper-parameter without redefining the whole\n# flax module. This is the ratio of neurons to input dofs\nalpha\n:\nint\n=\n1\n@nn\n.\ncompact\ndef\n__call__\n(\nself\n,\nx\n):\n# here we construct the first dense layer using a\n# pre-built implementation in flax.\n# features is the number of output nodes\ndense\n=\nnn\n.\nDense\n(\nfeatures\n=\nself\n.\nalpha\n*\nx\n.\nshape\n[\n-\n1\n],\nparam_dtype\n=\ncomplex\n)\n# we apply the dense layer to the input\ny\n=\ndense\n(\nx\n)\n# the non-linearity is a simple ReLu\ny\n=\nnn\n.\nrelu\n(\ny\n)\n# sum the output\nreturn\njnp\n.\nsum\n(\ny\n,\naxis\n=-\n1\n)\n```\nWe will keep using the exact sampler to avoid ergodicity issues\n```code\n# it is easy here to pass the hyper-parameter value\nmodel\n=\nFFN\n(\nalpha\n=\n1\n)\n# Create the an exact sampler over the Hilber space , if it is not too large\nsampler\n=\nnk\n.\nsampler\n.\nExactSampler\n(\nhi\n)\n# create the VMC state\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n2\n**\n10\n)\n```\nWe then proceed to the optimization as before.\n```code\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.05\n)\npreconditioner\n=\nnk\n.\noptimizer\n.\nSR\n(\ndiag_shift\n=\n0.1\n)\n# Notice the use, again of Stochastic Reconfiguration, which considerably improves the optimisation\ngs\n=\nnk\n.\ndriver\n.\nVMC\n(\nH\n,\noptimizer\n,\nvariational_state\n=\nvstate\n,\npreconditioner\n=\npreconditioner\n)\n# logging and running : sometimes need to rung longer than 300 to exit a plateaux\nlog\n=\nnk\n.\nlogging\n.\nRuntimeLog\n()\ngs\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nlog\n)\nffn_energy\n=\nvstate\n.\nexpect\n(\nH\n)\nerror\n=\n",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-matrix-models.html",
+        "section_id": "sec_8",
+        "section_title": "6. Neural-Network Quantum State#"
+      },
+      "score": 0.6200055975758543,
+      "original_score": 0.3741268665955247,
+      "vector_score": 0.417805269799744,
+      "bm25_score": 0.19941325377864755,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "define",
+        "neural",
+        "wave",
+        "function",
+        "ansatz"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_9_9__2",
+      "text": "n_discard_per_chain\n=\n16\n)\n# Create a Variational Monte Carlo driver\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nH\n,\nop\n,\nvariational_state\n=\nvstate\n,\ndiag_shift\n=\n0.05\n)\n# Construct the logger to visualize the data later on\nbf_log\n=\nnk\n.\nlogging\n.\nRuntimeLog\n()\n# Run the optimization for 300 iterations\ngs\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nbf_log\n)\n```\n```code\n(RuntimeLog():\n  keys = ['acceptance', 'Energy'],)\n```\nWe can further check how good the optimized energy is:\n```code\nsd_energy\n=\nvstate\n.\nexpect\n(\nH\n)\nerror\n=\nabs\n((\nsd_energy\n.\nmean\n-\nE_gs\n)\n/\nE_gs\n)\nprint\n(\nf\n\"Optimized energy :\n{\nsd_energy\n}\n\"\n)\nprint\n(\nf\n\"Relative error   :\n{\nerror\n}\n\"\n)\n```\n```code\nOptimized energy : -6.784+0.000j ± 0.023 [σ²=0.588, R̂=1.0109]\nRelative error   : 0.010985338151858374\n```\nThus, as expected, the Neural Backflow achieves a significantly higher level of precision (~0.5%) versus the ~25% error of the mean field state. Notice that in this case the precision achieved is similar to the simpler Neural Jastrow-Slater wave function. However, the backflow result can be further improved by playing with the feedforward architecture defining the backflow, for example by increasing ‘hidden_units’ or by improving the optimization increasing the number of samples and/or the number of steps.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "section_id": "sec_9",
+        "section_title": "Neural-Backflow Wave Function#",
+        "package": "netket"
+      },
+      "score": 0.5688784268712065,
+      "original_score": 0.3218312332805495,
+      "vector_score": 0.21791360406941968,
+      "bm25_score": 0.7375017501250689,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "neural",
+        "backflow",
+        "wave",
+        "function"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 51,
+    "final_results_count": 5
+  }
+}

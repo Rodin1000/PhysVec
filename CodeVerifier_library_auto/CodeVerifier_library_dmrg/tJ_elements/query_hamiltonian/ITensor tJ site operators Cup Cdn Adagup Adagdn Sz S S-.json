@@ -1,0 +1,135 @@
+{
+  "query": "ITensor tJ site operators Cup Cdn Adagup Adagdn Sz S+ S-",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_2__2",
+      "text": " 0.0\n 0.0  0.0  0.0  1.0\n```\n\nMany operators are available, for example:\n\n- `SiteType\"S=1/2\"`: `\"Sz\"`, `\"Sx\"`, `\"Sy\"`, `\"S+\"`, `\"S-\"`, ...\n- `SiteType\"Electron\"`: `\"Nup\"`, `\"Ndn\"`, `\"Nupdn\"`, `\"Ntot\"`, `\"Cup\"`,\n   `\"Cdagup\"`, `\"Cdn\"`, `\"Cdagdn\"`, `\"Sz\"`, `\"Sx\"`, `\"Sy\"`, `\"S+\"`, `\"S-\"`, ...\n- ...\n\nYou can view the internal SiteType definitions and operators\n[here](https://docs.itensor.org/ITensorMPS/stable/IncludedSiteTypes.html).\n\"\"\"\nSiteType(s::AbstractString) = SiteType{SmallString(s)}()\n\nSiteType(t::Integer) = SiteType{SmallString(t)}()\nSiteType(t::SmallString) = SiteType{t}()\n\ntag(::SiteType{T}) where {T} = T\n\nmacro SiteType_str(s)\n  return SiteType{SmallString(s)}\nend\n\n# Keep TagType defined for backwards\n# compatibility; will be deprecated later\nconst TagType = SiteType\nmacro TagType_str(s)\n  return TagType{SmallString(s)}\nend\n\n#---------------------------------------\n#\n# op system\n#\n#---------------------------------------\n\n@eval struct OpName{Name}\n  (f::Type{<:OpName})() = $(Expr(:new, :f))\nend\n\n# Note that the complicated definition of\n# OpName above is a workaround for performance\n# issues when creating parameterized types\n# in Julia 1.4 and 1.5-beta. Ideally we\n# can just use the following in the future:\n# struct OpName{Name}\n# end\n\n\"\"\"\nOpName is a parameterized type which allows\nmaking strings into Julia types for the purpose\nof representing operator names.\nThe main use of OpName is overloading the\n`op!` method which generates operators\nfor indices with certain tags such as \"S=1/2\".\n\nTo make a OpName type, you can use the string\nmacro notation: `OpName\"MyTag\"`.\n\nTo make an OpName value or object, you can use\nthe notation: `OpName(\"myop\")`\n\"\"\"\nOpName(s::AbstractString) = OpName{Symbol(s)}()\nOpName(s::Symbol) = OpName{s}()\n# TODO: Avoid overloading `ITensors` version.\nITensors.name(::OpName{N}) where {N} = N\n\nmacro OpName_str(s)\n  return OpName{Symbol(s)}\nend\n\n# Default implementations of op and op!\nop(::OpName; kwargs...) = nothing\nop(::OpName, ::SiteType",
+      "metadata": {
+        "section_id": "part_2",
+        "section_title": "sitetype.jl",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.5867664439002277,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensor",
+        "operators",
+        "cup",
+        "cdn"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "tj__9d10a3364fe53958827560d0636b49b7__part_2__2",
+      "text": " 1.0\n  return Op[s' => 3, s => 3] = 1.0\nend\nfunction op!(Op::ITensor, on::OpName\"ntot\", st::SiteType\"tJ\", s::Index)\n  return op!(Op, alias(on), st, s)\nend\n\nfunction op!(Op::ITensor, ::OpName\"Cup\", ::SiteType\"tJ\", s::Index)\n  return Op[s' => 1, s => 2] = 1.0\nend\nfunction op!(Op::ITensor, on::OpName\"c↑\", st::SiteType\"tJ\", s::Index)\n  return op!(Op, alias(on), st, s)\nend\n\nfunction op!(Op::ITensor, ::OpName\"Cdagup\", ::SiteType\"tJ\", s::Index)\n  return Op[s' => 2, s => 1] = 1.0\nend\nfunction op!(Op::ITensor, on::OpName\"c†↑\", st::SiteType\"tJ\", s::Index)\n  return op!(Op, alias(on), st, s)\nend\n\nfunction op!(Op::ITensor, ::OpName\"Cdn\", ::SiteType\"tJ\", s::Index)\n  return Op[s' => 1, s => 3] = 1.0\nend\nfunction op!(Op::ITensor, on::OpName\"c↓\", st::SiteType\"tJ\", s::Index)\n  return op!(Op, alias(on), st, s)\nend\n\nfunction op!(Op::ITensor, ::OpName\"Cdagdn\", ::SiteType\"tJ\", s::Index)\n  return Op[s' => 3, s => 1] = 1.0\nend\nfunction op!(Op::ITensor, on::OpName\"c†↓\", st::SiteType\"tJ\", s::Index)\n  return op!(Op, alias(on), st, s)\nend\n\nfunction op!(Op::ITensor, ::OpName\"Aup\", ::SiteType\"tJ\", s::Index)\n  return Op[s' => 1, s => 2] = 1.0\nend\nfunction op!(Op::ITensor, on::OpName\"a↑\", st::SiteType\"tJ\", s::Index)\n  return op!(Op, alias(on), st, s)\nend\n\nfunction op!(Op::ITensor, ::OpName\"Adagup\", ::SiteType\"tJ\", s::Index)\n  return Op[s' => 2, s => 1] = 1.0\nend\nfunction op!(Op::ITensor, on::OpName\"a†↑\", st::SiteType\"tJ\", s::Index)\n  return op!(",
+      "metadata": {
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\tj.jl",
+        "section_title": "tj.jl",
+        "section_id": "part_2",
+        "package": "itensors"
+      },
+      "score": 0.8933004008439421,
+      "original_score": 0.8795327106302573,
+      "vector_score": 0.7585527808578683,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensor",
+        "cup",
+        "cdn",
+        "adagup"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "Physics__3bf93049cd8ad58331d2a32084e34246__h2_0_0__0",
+      "text": "Given an Index carrying a \"physical\" tag such as \"Qubit\", \"S=1/2\", \"Boson\", etc.\nthere are a set of pre-defined operators for each tag. The entire set of operators\ncan be found in the section [SiteTypes Included with ITensor](@ref).\nIf you have an Index `s` carrying a \"S=1/2\" tag, for example, you can obtain the \"Sz\"\noperator like this:\n```julia\nusing ITensors, ITensorMPS\nop(\"Sz\",s)\n```\nUsually indices with physical tags come from an array of indices returned from the `siteinds` function\n```julia\nusing ITensors, ITensorMPS\nN = 10\nsites = siteinds(\"S=1/2\",N)\n```\nin which case one might want the \"Sz\" operator on site 4\n```julia\nusing ITensors, ITensorMPS\nSz4 = op(\"Sz\",sites[4])\n```",
+      "metadata": {
+        "section_title": "Obtaining a Predefined Operator",
+        "source_file": "docs\\src\\examples\\Physics.md",
+        "package": "itensormps",
+        "section_id": "h2_0"
+      },
+      "score": 0.885092164819905,
+      "original_score": 0.8743195552717712,
+      "vector_score": 1.0,
+      "bm25_score": 0.01029959736633006,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensor",
+        "site",
+        "operators"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "Physics__76dd2e2b1a4692ebd1e2d3b3298ad284__Obtaining-a-Predefined-Operator_0__0",
+      "text": "## Obtaining a Predefined Operator\nGiven an Index carrying a \"physical\" tag such as \"Qubit\", \"S=1/2\", \"Boson\", etc. there are a set of pre-defined operators for each tag. The entire set of operators can be found in the section SiteTypes Included with ITensor .\nIf you have an Index s carrying a \"S=1/2\" tag, for example, you can obtain the \"Sz\" operator like this:\n```code\nusing ITensors, ITensorMPS\n\nop(\"Sz\",s)\n```\nUsually indices with physical tags come from an array of indices returned from the siteinds function\n```code\nusing ITensors, ITensorMPS\n\nN = 10\nsites = siteinds(\"S=1/2\",N)\n```\nin which case one might want the \"Sz\" operator on site 4\n```code\nusing ITensors, ITensorMPS\nSz4 = op(\"Sz\",sites[4])\n```",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\Physics.html",
+        "section_id": "Obtaining-a-Predefined-Operator",
+        "section_title": "Obtaining a Predefined Operator"
+      },
+      "score": 0.8834067605254324,
+      "original_score": 0.8244832954146295,
+      "vector_score": 0.943342980404312,
+      "bm25_score": 0.008340391346853354,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensor",
+        "site",
+        "operators"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "test_inference__390a80808ee111f0e281b854c75f14e5__full__0",
+      "text": "using ITensors\nusing ITensors.NDTensors\nusing Test\n\n@testset \"dmrg\" begin\n  N = 10\n  sites = siteinds(\"S=1\", N)\n  opsum = OpSum()\n  for j in 1:(N - 1)\n    opsum += \"Sz\", j, \"Sz\", j + 1\n    opsum += 0.5, \"S+\", j, \"S-\", j + 1\n    opsum += 0.5, \"S-\", j, \"S+\", j + 1\n  end\n  H = MPO(opsum, sites)\n  psi0 = random_mps(sites; linkdims=10)\n  sweeps = Sweeps(5)\n  setmaxdim!(sweeps, 10, 20, 100, 100, 200)\n  setcutoff!(sweeps, 1E-11)\n  @test @inferred(Tuple{Any,MPS}, dmrg(H, psi0, sweeps; outputlevel=0)) isa\n    Tuple{Float64,MPS}\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "test_inference.jl",
+        "package": "itensormps",
+        "source_file": "test\\base\\test_inference.jl"
+      },
+      "score": 0.8345818991722681,
+      "original_score": 0.8345818991722681,
+      "vector_score": 0.9570080624524705,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 105,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      }
+    }
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "query": "Convert second-quantized fermionic operators to PauliSumOp via mappers",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "pauli_feature_map__6f7e92c3780acb5d121d84f7e80c067c__part_3__3",
+      "text": "�───┘└─────────────┘└───┘└───┘└────────────────────────────────┘└───┘└───┘\n\n        >>> prep = pauli_feature_map(2, reps=1, paulis=[\"ZY\"])\n        >>> print(prep)\n             ┌───┐┌──────────┐                                            ┌───────────┐\n        q_0: ┤ H ├┤ RX(pi/2) ├──■──────────────────────────────────────■──┤ RX(-pi/2) ├\n             ├───┤└──────────┘┌─┴─┐┌────────────────────────────────┐┌─┴─┐└───────────┘\n        q_1: ┤ H ├────────────┤ X ├┤ P(2.0*(pi - x[0])*(pi - x[1])) ├┤ X ├─────────────\n             └───┘            └───┘└────────────────────────────────┘└───┘\n\n        >>> from qiskit.circuit.library import efficient_su2\n        >>> prep = pauli_feature_map(3, reps=3, paulis=[\"Z\", \"YY\", \"ZXZ\"])\n        >>> wavefunction = efficient_su2(3)\n        >>> classifier = prep.compose(wavefunction)\n        >>> classifier.num_parameters\n        27\n        >>> classifier.count_ops()\n        OrderedDict([('cx', 39), ('rx', 36), ('u1', 21), ('h', 15), ('ry', 12), ('rz', 12)])\n\n    References:\n\n    [1] Havlicek et al. Supervised learning with quantum enhanced feature spaces,\n    `Nature 567, 209-212 (2019) <https://www.nature.com/articles/s41586-019-0980-2>`__.\n    \"\"\"\n    # create parameter vector used in the Pauli feature map\n    parameters = ParameterVector(parameter_prefix, feature_dimension)\n\n    # the Rust implementation expects the entanglement to be a str or list[tuple[int]] (or the\n    # callable to return these types), therefore we normalize the entanglement here\n    if callable(entanglement):\n        normalized = lambda offset: _normalize_entanglement(entanglement(offset))\n    else:\n        normalized = _normalize_entanglement(entanglement)\n\n    # construct from Rust\n    circuit = QuantumCircuit._from_circuit_data(\n        _fast_map(\n            feature_dimension,\n            paulis=paulis,\n            entanglement=normalized,\n            reps=reps,\n            parameters=parameters,\n            data_map_func=data_map_func,\n            alpha=alpha,\n            insert_barriers=insert_barriers,\n        ),\n",
+      "metadata": {
+        "section_title": "pauli_feature_map.py",
+        "source_file": "qiskit\\circuit\\library\\data_preparation\\pauli_feature_map.py",
+        "section_id": "part_3",
+        "package": "qiskit"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "0.6_c_qubit_converter__b2ad6fe9af7ffae9b09fd8e83744238a__part_4__4",
+      "text": " -0.22575349 * ZIII\n    +0.16614543 * ZIIZ\n    +0.17464343 * ZIZI\n    +0.12091263 * ZZII\n\nThis is likely what you were doing when you were working with any of the following mappers:\n\n- :class:`~qiskit_nature.second_q.mappers.JordanWignerMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevSuperFastMapper`\n- :class:`~qiskit_nature.second_q.mappers.DirectMapper`\n- :class:`~qiskit_nature.second_q.mappers.LinearMapper`\n- :class:`~qiskit_nature.second_q.mappers.LogarithmicMapper`\n\nThe ParityMapper\n----------------\n\nHowever, when you were using the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, you were\nable to use the ``two_qubit_reduction=True`` option of the\n:class:`~qiskit_nature.second_q.mappers.QubitConverter`. This ability, which has always been unique\nto the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, is now directly built into said\nmapper. So if you were doing something along these lines:\n\n.. code:: ipython3\n\n   from qiskit_nature.second_q.mappers import ParityMapper\n\n   converter = QubitConverter(ParityMapper(), two_qubit_reduction=True)\n\n   reduced_op = converter.convert(hamiltonian, num_particles=problem.num_particles)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nThe equivalent code now looks like the following:\n\n.. code:: ipython3\n\n   mapper = ParityMapper(num_particles=problem.num_particles)\n\n   reduced_op = mapper.map(hamiltonian)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nZ2Symmetries\n------------\n\nFinally, the :class:`~qiskit_nature.second_q.mappers.QubitConverter` class also supported further\nreduction of qubit resources by exploiting",
+      "metadata": {
+        "source_file": "docs\\migration\\0.6_c_qubit_converter.rst",
+        "section_title": "0.6_c_qubit_converter.rst",
+        "package": "qiskit-nature",
+        "section_id": "part_4"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "convert",
+        "mappers"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "hamiltonian_phase_estimation__fe09fa7dc716801664052a1a15ef8c76__part_1__1",
+      "text": " sufficiently large to map positive :math:`\\lambda` to\n    :math:`[0,\\pi)` and negative :math:`\\lambda` to :math:`[\\pi,2\\pi)`. Each time the circuit is\n    run, one measures a phase corresponding to :math:`lambda_j` with probability :math:`|c_j|^2`.\n\n    If :math:`H` is a Pauli sum, the bound :math:`b` is computed from the sum of the absolute\n    values of the coefficients of the terms. There is no way to reliably recover eigenvalues\n    from phases very near the endpoints of these intervals. Because of this you should be aware\n    that for degenerate cases, such as :math:`H=Z`, the eigenvalues :math:`\\pm 1` will be\n    mapped to the same phase, :math:`\\pi`, and so cannot be distinguished. In this case, you need\n    to specify a larger bound as an argument to the method ``estimate``.\n\n    This class uses and works together with :class:`~qiskit_algorithms.PhaseEstimationScale` to\n    manage scaling the Hamiltonian and the phases that are obtained by the QPE algorithm. This\n    includes setting, or computing, a bound on the eigenvalues of the operator, using this\n    bound to obtain a scale factor, scaling the operator, and shifting and scaling the measured\n    phases to recover the eigenvalues.\n\n    Note that, although we speak of \"evolving\" the state according the Hamiltonian, in the\n    present algorithm, we are not actually considering time evolution. Rather, the role of time is\n    played by the scaling factor, which is chosen to best extract the eigenvalues of the\n    Hamiltonian.\n\n    A few of the ideas in the algorithm may be found in Ref. [1].\n\n    **Reference:**\n\n    [1]: Quantum phase estimation of multiple eigenvalues for small-scale (noisy) experiments\n         T.E. O'Brien, B. Tarasinski, B.M. Terhal\n         `arXiv:1809.09697 <https://arxiv.org/abs/1809.09697>`_\n\n    \"\"\"\n\n    def __init__(\n        self,\n        num_evaluation_qubits: int,\n        sampler: BaseSamplerV2 | None = None,\n        *,\n        transpiler: Transpiler | None = None,\n        transpiler_options: dict[str, Any] | None = None,\n    ) -> None:\n        r\"\"\"\n        Args:\n            num_evaluation_qubits: The number of qubits used in estimating the phase. The phase will\n                be estimated as a binary string with this many bits.\n            sampler: The sampler primitive on which the circuit will be sampled.\n            transpiler: An optional object with a `run` method allowing to transpile the circuits\n                that are produced within this",
+      "metadata": {
+        "source_file": "qiskit_algorithms\\phase_estimators\\hamiltonian_phase_estimation.py",
+        "section_title": "hamiltonian_phase_estimation.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_1"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "noise_transformation__1755877a4e48757a2feefb1dd9df6021__part_5__5",
+      "text": " operator_dict=operator_dict,\n            operator_list=operator_list,\n        )\n\n    return transform_noise_model(model, approximate)\n\n\n# pauli operators\n_PAULIS_Q0 = [[(IGate(), [0])], [(XGate(), [0])], [(YGate(), [0])], [(ZGate(), [0])]]\n_PAULIS_Q1 = [[(IGate(), [1])], [(XGate(), [1])], [(YGate(), [1])], [(ZGate(), [1])]]\n_PAULIS_Q0Q1 = [op_q0 + op_q1 for op_q0 in _PAULIS_Q0 for op_q1 in _PAULIS_Q1]\n# reset operators\n_RESET_Q0_TO_0 = [(Reset(), [0])]\n_RESET_Q0_TO_1 = [(Reset(), [0]), (XGate(), [0])]\n_RESET_Q0 = [[(IGate(), [0])], _RESET_Q0_TO_0, _RESET_Q0_TO_1]\n_RESET_Q1_TO_0 = [(Reset(), [1])]\n_RESET_Q1_TO_1 = [(Reset(), [1]), (XGate(), [1])]\n_RESET_Q1 = [[(IGate(), [1])], _RESET_Q1_TO_0, _RESET_Q1_TO_1]\n_RESET_Q0Q1 = [op_q0 + op_q1 for op_q0 in _RESET_Q0 for op_q1 in _RESET_Q1]\n# clifford operators\n_CLIFFORD_GATES = [\n    (IGate(),),\n    (SGate(),),\n    (SdgGate(),),\n    (ZGate(),),\n    # u2 gates\n    (HGate(),),\n    (HGate(), ZGate()),\n    (ZGate(), HGate()),\n    (HGate(), SGate()),\n    (SGate(), HGate()),\n    (HGate(), SdgGate()),\n    (SdgGate(), HGate()),\n    (SGate(), HGate(), SGate()),\n    (SdgGate(), HGate(), SGate()),\n    (ZGate(), HGate(), SGate()),\n    (SGate(), HGate(), SdgGate()),\n    (SdgGate(), HGate(), SdgGate()),\n    (ZGate(), HGate(), SdgGate()),\n    (SGate(), HGate(), ZGate()),\n    (SdgGate(), HGate(), ZGate()),\n    (ZGate(), HGate(), ZGate()),\n    # u3 gates\n    (XGate(),),\n    (YGate(),),\n    (SGate(), XGate()),\n    (SdgGate(), XGate()),\n]\n# preset operator table\n_PRESET_OPERATOR_TABLE = {\n    \"pauli\": {\n        1: _PAULIS_Q0[1:],\n        2: _PAULIS_Q0Q1[1:],\n    },\n    \"reset",
+      "metadata": {
+        "section_title": "noise_transformation.py",
+        "section_id": "part_5",
+        "package": "qiskit-aer",
+        "source_file": "qiskit_aer\\utils\\noise_transformation.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "operators"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "phase_estimation_scale__24807f118dc27c5e29091eb7b9edd83c__part_2__2",
+      "text": "value computed from the input phase.\n        \"\"\"\n        w = 2 * self._bound\n        if phi <= 0.5:\n            return phi * w + id_coefficient\n        else:\n            return (phi - 1) * w + id_coefficient\n\n    def scale_phases(self, phases: list | dict, id_coefficient: float = 0.0) -> dict | list:\n        \"\"\"Convert a list or dict of phases to eigenvalues.\n\n        The values in the list, or keys in the dict, are values of ``phi` and\n        are converted as described in the description of ``scale_phase``. In case\n        ``phases`` is a dict, the values of the dict are passed unchanged.\n\n        Args:\n            phases: a list or dict of values of ``phi``.\n            id_coefficient: All eigenvalues are shifted by this value.\n\n        Returns:\n            Eigenvalues computed from phases.\n        \"\"\"\n        if isinstance(phases, list):\n            phases = [self.scale_phase(x, id_coefficient) for x in phases]\n        else:\n            phases = {self.scale_phase(x, id_coefficient): phases[x] for x in phases.keys()}\n\n        return phases\n\n    @classmethod\n    def from_pauli_sum(\n        cls, pauli_sum: SparsePauliOp | Operator | BaseOperator\n    ) -> \"PhaseEstimationScale\":\n        \"\"\"Create a PhaseEstimationScale from a `SummedOp` representing a sum of Pauli Operators.\n\n        It is assumed that the ``pauli_sum`` is the sum of ``PauliOp`` objects. The bound on\n        the absolute value of the eigenvalues of the sum is obtained as the sum of the\n        absolute values of the coefficients of the terms. This is the best bound available in\n        the generic case. A ``PhaseEstimationScale`` object is instantiated using this bound.\n\n        Args:\n            pauli_sum: A ``SparsePauliOp`` or other suitable quantum info ``Operator``\n\n        Raises:\n            ValueError: if ``pauli_sum`` is not a sum of Pauli operators.\n\n        Returns:\n            A ``PhaseEstimationScale`` object\n        \"\"\"\n\n        if isinstance(pauli_sum, SparsePauliOp):\n            bound = sum(abs(coeff) for coeff in pauli_sum.coeffs)\n            return PhaseEstimationScale(bound)\n        elif isinstance(pauli_sum, Operator):\n            bound = np.sum(np.abs(np.linalg.eigvalsh(pauli_sum)))\n            return PhaseEstimationScale(bound)\n        elif isinstance(pauli_sum, BaseOperator):\n            raise ValueError(\n                f\"For the operator of type {type(pauli_sum)} the bound needs to be provided in the \"\n                f\"algorithm.\"\n            )\n        else:\n            if pauli_sum.primitive_strings() != {\"Pauli\"}:\n                raise ValueError(\n",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "source_file": "qiskit_algorithms\\phase_estimators\\phase_estimation_scale.py",
+        "section_title": "phase_estimation_scale.py",
+        "section_id": "part_2"
+      },
+      "score": 0.9792372084362981,
+      "original_score": 0.9781444299329454,
+      "vector_score": 0.8502971963600021,
+      "bm25_score": 0.5113889342917736,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "convert",
+        "operators"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 228,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

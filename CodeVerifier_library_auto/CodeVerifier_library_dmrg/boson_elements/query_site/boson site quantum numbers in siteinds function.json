@@ -1,0 +1,144 @@
+{
+  "query": "boson site quantum numbers in siteinds() function",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "boson__68a4a48a32f91533144dbb5ef2f01694__full__0",
+      "text": "\nalias(::SiteType\"Boson\") = SiteType\"Qudit\"()\n\n\"\"\"\n    space(::SiteType\"Boson\";\n          dim = 2,\n          conserve_qns = false,\n          conserve_number = false,\n          qnname_number = \"Number\")\n\nCreate the Hilbert space for a site of type \"Boson\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nspace(st::SiteType\"Boson\"; kwargs...) = space(alias(st); kwargs...)\n\nval(vn::ValName, st::SiteType\"Boson\") = val(vn, alias(st))\n\nfunction state(sn::StateName, st::SiteType\"Boson\", s::Index; kwargs...)\n  return state(sn, alias(st), s; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", ds::Int...; kwargs...)\n  return op(on, alias(st), ds...; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", s1::Index, s_tail::Index...; kwargs...)\n  rs = reverse((s1, s_tail...))\n  ds = dim.(rs)\n  opmat = op(on, st, ds...; kwargs...)\n  return itensor(opmat, prime.(rs)..., dag.(rs)...)\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\boson.jl",
+        "section_title": "boson.jl",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9858014398353175,
+      "bm25_score": 0.9307249656257979,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "boson",
+        "site",
+        "quantum",
+        "function"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "test_sitetype__4f218ef42b698a8d9918bec72dd1b284__part_6__6",
+      "text": "oson\"\n        # Qudit site types don't see Boson overloads\n        continue\n      end\n      d = 4\n      s = siteinds(st, 2; dim=d)\n      o = op(\"$(ot)_op_1\", s, 1)\n      @test o ≈ itensor([i * j for i in 1:d, j in 1:d], s[1]', dag(s[1]))\n\n      o = op(\"$(ot)_op_1\", s, 1, 2)\n      @test o ≈ itensor(\n        [i * j for i in 1:(d ^ 2), j in 1:(d ^ 2)], s[2]', s[1]', dag(s[2]), dag(s[1])\n      )\n\n      d = 4\n      s = siteinds(st, 2; dim=d)\n      o = op(\"$(ot)_op_2\", s, 1)\n      @test o ≈ itensor([i * j for i in 1:d, j in 1:d], s[1]', dag(s[1]))\n      @test_throws MethodError op(\"$(ot)_op_2\", s, 1, 2)\n    end\n  end\n\n  @testset \"Custom SiteType using op!\" begin\n    # Use \"_Custom_\" tag even though this example\n    # is for S=3/2, because we might define the\n    # \"S=3/2\" TagType inside ITensors.jl later\n    function ITensors.op!(Op::ITensor, ::OpName\"Sz\", ::SiteType\"_Custom_\", s::Index)\n      Op[s' => 1, s => 1] = +3 / 2\n      Op[s' => 2, s => 2] = +1 / 2\n      Op[s' => 3, s => 3] = -1 / 2\n      return Op[s' => 4, s => 4] = -3 / 2\n    end\n\n    function ITensors.op!(\n      Op::ITensor, ::OpName\"α\", ::SiteType\"_Custom_\", s1::Index, s2::Index\n    )\n      Op[s1' => 1, s2' => 2, s1 => 1, s2 => 2] = +3 / 2\n      Op[s1' => 2, s2' => 1, s1 => 2, s2 => 2] = +1 / 2\n      Op[s1' => 3, s2' => 3, s1 => 3, s2 => 4] = -1 / 2\n      return Op[s1' => 4, s2' => 1, s1 => ",
+      "metadata": {
+        "section_id": "part_6",
+        "package": "itensors",
+        "source_file": "test\\base\\test_sitetype.jl",
+        "section_title": "test_sitetype.jl"
+      },
+      "score": 0.9294071018758886,
+      "original_score": 0.9185466560106407,
+      "vector_score": 0.9887036463644774,
+      "bm25_score": 0.5221181835881085,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "boson",
+        "site",
+        "siteinds",
+        "function"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_13__13",
+      "text": "s = siteinds(\"S=1/2\", N; conserve_qns=true)\n```\n\"\"\"\nfunction siteinds(tag::String, N::Integer; kwargs...)\n  st = SiteType(tag)\n\n  si = siteinds(st, N; kwargs...)\n  if !isnothing(si)\n    return si\n  end\n\n  return [siteind(st, j; kwargs...) for j in 1:N]\nend\n\n\"\"\"\n    siteinds(f::Function, N::Integer; kwargs...)\n\nCreate an array of `N` physical site indices where the site type at site `n` is given\nby `f(n)` (`f` should return a string).\n\"\"\"\nfunction siteinds(f::Function, N::Integer; kwargs...)\n  return [siteind(f(n), n; kwargs...) for n in 1:N]\nend\n\n# Special case of `siteinds` where integer (dim)\n# provided instead of a tag string\n\"\"\"\n    siteinds(d::Integer, N::Integer; kwargs...)\n\nCreate an array of `N` site indices, each of dimension `d`.\n\n# Keywords\n- `addtags::String`: additional tags to be added to all indices\n\"\"\"\nfunction siteinds(d::Integer, N::Integer; kwargs...)\n  return [siteind(d, n; kwargs...) for n in 1:N]\nend\n\n#---------------------------------------\n#\n# has_fermion_string system\n#\n#---------------------------------------\n\nhas_fermion_string(operator::AbstractArray{<:Number}, s::Index; kwargs...)::Bool = false\n\nhas_fermion_string(::OpName, ::SiteType) = nothing\n\nfunction has_fermion_string(opname::AbstractString, s::Index; kwargs...)::Bool\n  opname = strip(opname)\n\n  # Interpret operator names joined by *\n  # as acting sequentially on the same site\n  starpos = findfirst(isequal('*'), opname)\n  if !isnothing(starpos)\n    op1 = opname[1:prevind(opname, starpos)]\n    op2 = opname[nextind(opname, starpos):end]\n    return xor(has_fermion_string(op1, s; kwargs...), has_fermion_string(op2, s; kwargs...))\n  end\n\n  Ntags = length(tags(s))\n  stypes = _sitetypes(s)\n  opn = OpName(opname)\n  for st in stypes\n    res = has_fermion_string(opn, st)\n    !isnothing(res) && return res\n  end\n  return false\nend\n",
+      "metadata": {
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "section_title": "sitetype.jl",
+        "section_id": "part_13",
+        "package": "itensors"
+      },
+      "score": 0.9290429835447263,
+      "original_score": 0.9211588706052514,
+      "vector_score": 1.0,
+      "bm25_score": 0.48966452201889843,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "site",
+        "siteinds",
+        "function"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "IncludedSiteTypes__7d74debdd1c692a6ddd9c2ac060aba29__\"Qudit\"-SiteType_4__0",
+      "text": "## \"Qudit\" SiteType\nMaking a single \"Qudit\" site or collection of N \"Qudit\" sites\n```code\ns = siteind(\"Qudit\")\nsites = siteinds(\"Qudit\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\ndim (default: 2): dimension of the index (number of qudit or boson values)\nconserve_qns (default: false): conserve total qudit or boson number\nconserve_number (default: conserve_qns): conserve total qudit or boson number\nqnname_number (default: \"Number\"): name of total qudit or boson number QN\nFor example:\n```code\nsites = siteinds(\"Qudit\",N; conserve_number=true)\n```\nOperators associated with \"Qudit\" sites can be made using the op function, for example\n```code\nA = op(\"A\",s)\nA4 = op(\"A\",sites[4])\n```\nSingle-qudit operators:\n\"A\" (aliases: \"a\" )\n\"Adag\" (aliases: \"adag\" , \"a†\" )\n\"N\" (aliases: \"n\" )\nTwo-qudit operators:\n\"ab\"\n\"a†b\"\n\"ab†\"\n\"a†b†\"",
+      "metadata": {
+        "source_file": "docs\\build\\IncludedSiteTypes.html",
+        "section_id": "\"Qudit\"-SiteType",
+        "package": "itensormps",
+        "section_title": "\"Qudit\" SiteType"
+      },
+      "score": 0.9195830912567247,
+      "original_score": 0.8537874386485903,
+      "vector_score": 0.8248359023241035,
+      "bm25_score": 0.8619572205238858,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "boson",
+        "site",
+        "quantum",
+        "numbers",
+        "siteinds",
+        "function"
+      ],
+      "match_ratio": 1.0,
+      "is_html": true
+    },
+    {
+      "id": "IncludedSiteTypes__10c3b7e95897ec39b67299563b29b049__h2_8_8__0",
+      "text": "Making a single \"Qudit\" site or collection of N \"Qudit\" sites\n```\ns = siteind(\"Qudit\")\nsites = siteinds(\"Qudit\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\n- `dim` (default: 2): dimension of the index (number of qudit or boson values)\n- `conserve_qns` (default: false): conserve total qudit or boson number\n- `conserve_number` (default: conserve_qns): conserve total qudit or boson number\n- `qnname_number` (default: \"Number\"): name of total qudit or boson number QN\nFor example:\n```\nsites = siteinds(\"Qudit\",N; conserve_number=true)\n```",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\src\\IncludedSiteTypes.md",
+        "section_title": "\"Qudit\" SiteType",
+        "section_id": "h2_8"
+      },
+      "score": 0.9184075959126795,
+      "original_score": 0.9020891150952154,
+      "vector_score": 0.8491799636802311,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "boson",
+        "site",
+        "quantum",
+        "numbers",
+        "siteinds"
+      ],
+      "match_ratio": 0.8333333333333334,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 98,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 46
+      }
+    }
+  }
+}

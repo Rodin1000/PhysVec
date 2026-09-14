@@ -1,0 +1,129 @@
+{
+  "query": "What is boson hopping term syntax in itensor Hamiltonian?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "boson__68a4a48a32f91533144dbb5ef2f01694__full__0",
+      "text": "\nalias(::SiteType\"Boson\") = SiteType\"Qudit\"()\n\n\"\"\"\n    space(::SiteType\"Boson\";\n          dim = 2,\n          conserve_qns = false,\n          conserve_number = false,\n          qnname_number = \"Number\")\n\nCreate the Hilbert space for a site of type \"Boson\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nspace(st::SiteType\"Boson\"; kwargs...) = space(alias(st); kwargs...)\n\nval(vn::ValName, st::SiteType\"Boson\") = val(vn, alias(st))\n\nfunction state(sn::StateName, st::SiteType\"Boson\", s::Index; kwargs...)\n  return state(sn, alias(st), s; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", ds::Int...; kwargs...)\n  return op(on, alias(st), ds...; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", s1::Index, s_tail::Index...; kwargs...)\n  rs = reverse((s1, s_tail...))\n  ds = dim.(rs)\n  opmat = op(on, st, ds...; kwargs...)\n  return itensor(opmat, prime.(rs)..., dag.(rs)...)\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\boson.jl",
+        "section_title": "boson.jl",
+        "section_id": "full"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9710094871941628,
+      "bm25_score": 0.617834884878575,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "boson",
+        "itensor"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Make-a-2D-Hamiltonian-for-DMRG_4__0",
+      "text": "## Make a 2D Hamiltonian for DMRG\nYou can use the OpSum system to make 2D Hamiltonians much in the same way you make 1D Hamiltonians: by looping over all of the bonds and adding the interactions on these bonds to the OpSum.\nTo help with the logic of 2D lattices, ITensor pre-defines some helper functions which return an array of bonds. Each bond object has an \"s1\" field and an \"s2\" field which are the integers numbering the two sites the bond connects. (You can view the source for these functions at this link .)\nThe two provided functions currently are square_lattice and triangular_lattice . It is not hard to write your own similar lattice functions as all they have to do is define an array of ITensorMPS.LatticeBond structs or even a custom struct type you wish to define. We welcome any user contributions of other lattices that ITensor does not currently offer.\nEach lattice function takes an optional named argument \"yperiodic\" which lets you request that the lattice should have periodic boundary conditions around the y direction, making the geometry a cylinder.\nFull example code:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  Ny = 6\n  Nx = 12\n\n  N = Nx*Ny\n\n  sites = siteinds(\"S=1/2\", N;\n                   conserve_qns = true)\n\n  # Obtain an array of LatticeBond structs\n  # which define nearest-neighbor site pairs\n  # on the 2D square lattice (wrapped on a cylinder)\n  lattice = square_lattice(Nx, Ny; yperiodic = false)\n\n  # Define the Heisenberg spin Hamiltonian on this lattice\n  os = OpSum()\n  for b in lattice\n    os += 0.5, \"S+\", b.s1, \"S-\", b.s2\n    os += 0.5, \"S-\", b.s1, \"S+\", b.s2\n    os +=      \"Sz\", b.s1, \"Sz\", b.s2\n  end\n  H = MPO(os,sites)\n\n  state = [isodd(n) ? \"Up\" : \"Dn\" for n=1:N]\n  # Initialize wavefunction to a random MPS\n  # of bond-dimension 10 with same quantum\n  # numbers as `state`\n  psi0 = random_mps(sites,state;linkdims=20)\n\n  nsweeps = 10\n  maxdim = [20,60,100,100,200,400,800]\n  cutoff = [1E-8]\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "section_title": "Make a 2D Hamiltonian for DMRG",
+        "section_id": "Make-a-2D-Hamiltonian-for-DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "package": "itensormps"
+      },
+      "score": 0.9238213852316612,
+      "original_score": 0.8885191003390165,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "test_sitetype__4f218ef42b698a8d9918bec72dd1b284__part_6__6",
+      "text": "oson\"\n        # Qudit site types don't see Boson overloads\n        continue\n      end\n      d = 4\n      s = siteinds(st, 2; dim=d)\n      o = op(\"$(ot)_op_1\", s, 1)\n      @test o ≈ itensor([i * j for i in 1:d, j in 1:d], s[1]', dag(s[1]))\n\n      o = op(\"$(ot)_op_1\", s, 1, 2)\n      @test o ≈ itensor(\n        [i * j for i in 1:(d ^ 2), j in 1:(d ^ 2)], s[2]', s[1]', dag(s[2]), dag(s[1])\n      )\n\n      d = 4\n      s = siteinds(st, 2; dim=d)\n      o = op(\"$(ot)_op_2\", s, 1)\n      @test o ≈ itensor([i * j for i in 1:d, j in 1:d], s[1]', dag(s[1]))\n      @test_throws MethodError op(\"$(ot)_op_2\", s, 1, 2)\n    end\n  end\n\n  @testset \"Custom SiteType using op!\" begin\n    # Use \"_Custom_\" tag even though this example\n    # is for S=3/2, because we might define the\n    # \"S=3/2\" TagType inside ITensors.jl later\n    function ITensors.op!(Op::ITensor, ::OpName\"Sz\", ::SiteType\"_Custom_\", s::Index)\n      Op[s' => 1, s => 1] = +3 / 2\n      Op[s' => 2, s => 2] = +1 / 2\n      Op[s' => 3, s => 3] = -1 / 2\n      return Op[s' => 4, s => 4] = -3 / 2\n    end\n\n    function ITensors.op!(\n      Op::ITensor, ::OpName\"α\", ::SiteType\"_Custom_\", s1::Index, s2::Index\n    )\n      Op[s1' => 1, s2' => 2, s1 => 1, s2 => 2] = +3 / 2\n      Op[s1' => 2, s2' => 1, s1 => 2, s2 => 2] = +1 / 2\n      Op[s1' => 3, s2' => 3, s1 => 3, s2 => 4] = -1 / 2\n      return Op[s1' => 4, s2' => 1, s1 => ",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "part_6",
+        "section_title": "test_sitetype.jl",
+        "source_file": "test\\base\\test_sitetype.jl"
+      },
+      "score": 0.8943444536350021,
+      "original_score": 0.8867976288946452,
+      "vector_score": 0.9358060167797222,
+      "bm25_score": 0.24902608735178297,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "boson",
+        "itensor"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "section_id": "h2_2",
+        "source_file": "docs\\src\\examples\\DMRG.md"
+      },
+      "score": 0.890805700187606,
+      "original_score": 0.8830061073438635,
+      "vector_score": 0.9937953016507474,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "spinone__6cdfb2ad242e7abe7e1c97294d9e4e9d__part_0__0",
+      "text": "using ..ITensors: complex!, QN\n\nalias(::SiteType\"SpinOne\") = SiteType\"S=1\"()\n\n\"\"\"\n    space(::SiteType\"S=1\";\n          conserve_qns = false,\n          conserve_sz = conserve_qns,\n          qnname_sz = \"Sz\")\n\nCreate the Hilbert space for a site of type \"S=1\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nfunction space(\n  ::SiteType\"S=1\"; conserve_qns=false, conserve_sz=conserve_qns, qnname_sz=\"Sz\"\n)\n  if conserve_sz\n    return [QN(qnname_sz, +2) => 1, QN(qnname_sz, 0) => 1, QN(qnname_sz, -2) => 1]\n  end\n  return 3\nend\n\nval(::ValName\"Up\", ::SiteType\"S=1\") = 1\nval(::ValName\"Z0\", ::SiteType\"S=1\") = 2\nval(::ValName\"Dn\", ::SiteType\"S=1\") = 3\n\nval(::ValName\"↑\", st::SiteType\"S=1\") = 1\nval(::ValName\"0\", st::SiteType\"S=1\") = 2\nval(::ValName\"↓\", st::SiteType\"S=1\") = 3\n\nval(::ValName\"Z+\", ::SiteType\"S=1\") = 1\n# -- Z0 is already defined above --\nval(::ValName\"Z-\", ::SiteType\"S=1\") = 3\n\nstate(::StateName\"Up\", ::SiteType\"S=1\") = [1.0, 0.0, 0.0]\nstate(::StateName\"Z0\", ::SiteType\"S=1\") = [0.0, 1.0, 0.0]\nstate(::StateName\"Dn\", ::SiteType\"S=1\") = [0.0, 0.0, 1.0]\n\nstate(::StateName\"↑\", st::SiteType\"S=1\") = [1.0, 0.0, 0.0]\nstate(::StateName\"0\", st::SiteType\"S=1\") = [0.0, 1.0, 0.0]\nstate(::StateName\"↓\", st::SiteType\"S=1\") = [0.0, 0.0, 1.0]\n\nstate(::StateName\"Z+\", st::SiteType\"S=1\") = [1.0, 0.0, 0.0]\n# -- Z0 is already defined above --\nstate(::StateName\"Z-\", st::SiteType\"S=1\") = [0.0, 0.0, 1.0]\n\nstate(::StateName\"X",
+      "metadata": {
+        "section_id": "part_0",
+        "package": "itensors",
+        "section_title": "spinone.jl",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\spinone.jl"
+      },
+      "score": 0.8885191003390165,
+      "original_score": 0.8885191003390165,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 109,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      }
+    }
+  }
+}

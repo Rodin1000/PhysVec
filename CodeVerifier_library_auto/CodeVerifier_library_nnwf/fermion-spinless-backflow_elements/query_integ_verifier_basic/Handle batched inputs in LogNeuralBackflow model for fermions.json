@@ -1,0 +1,122 @@
+{
+  "query": "Handle batched inputs in LogNeuralBackflow model for fermions",
+  "packages": [
+    "netket"
+  ],
+  "results": [
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_9_9__0",
+      "text": "## Neural-Backflow Wave Function#\nAn alternative approach to go beyond the simple mean field approximation, and also effectively change the nodal structure of the wave functions is given by the Neural Backflow transformation of Reference [4].\nThe idea is to promote the matrix \\(M\\) appearing in the Slater determinant to be a function of all the occupation numbers, through a neural network. Specifically, we take an additive form of the backflow transformation:\nand parameterize \\(F\\) with a multilayer perceptron taking \\(N\\) inputs and having an output of \\(N\\times N_{\\mathrm{f}}\\) numbers.\n```code\nclass\nLogNeuralBackflow\n(\nnnx\n.\nModule\n):\nhilbert\n:\nnk\n.\nhilbert\n.\nSpinOrbitalFermions\ndef\n__init__\n(\nself\n,\nhilbert\n,\nhidden_units\n:\nint\n,\nkernel_init\n=\ndefault_kernel_init\n,\nparam_dtype\n=\nfloat\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n,\n):\nself\n.\nhilbert\n=\nhilbert\n# To generate random numbers we need to extract the key from the `rngs` object.\nkey\n=\nrngs\n.\nparams\n()\n# the N x Nf matrix of the orbitals\nself\n.\nM\n=\nnnx\n.\nParam\n(\nkernel_init\n(\nkey\n,\n(\nself\n.\nhilbert\n.\nn_orbitals\n,\nself\n.\nhilbert\n.\nn_fermions\n,\n),\nparam_dtype\n,\n)\n)\n# Construct the Backflow. Takes as input strings of $N$ occupation numbers, outputs an $N x Nf$ matrix\n# that modifies the bare orbitals.\nself\n.\nbackflow\n=\nnnx\n.\nSequential\n(\n# First layer, input (..., N,) output (..., hidden_units)\nnnx\n.\nLinear\n(\nin_features\n=\nhilbert\n.\nsize\n,\nout_features\n=\nhidden_units\n,\nparam_dtype\n=\nparam_dtype\n,\nrngs\n=\nrngs\n,\n),\nnnx\n.\ntanh\n,\n# Last layer, input (..., hidden_units,) output (..., N x Nf)\nnnx\n.\nLinear\n(\nin_features\n=\nhidden_units\n,\nout_features\n=\nhilbert\n.\nn_orbitals\n*\nhilbert\n.\nn_fermions\n,\nparam_dtype\n=\nparam_dtype\n,\nrngs\n=\nrngs\n,\n),\n# Reshape into the orbital shape, (..., N, Nf)\nlambda\nx\n:\nx\n.\nreshape\n(\nx\n.\nshape\n[:\n-\n1\n]\n+\n(\nhilbert\n.\nn_orbitals\n,\nhilbert\n.\nn_fermions\n)\n),\n)\ndef\n__call__\n(\nself\n,\nn\n:\njax\n.\nArray\n)\n->\njax\n.\nArray\n:\n# For simplicity, we",
+      "metadata": {
+        "section_title": "Neural-Backflow Wave Function#",
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "package": "netket",
+        "section_id": "sec_9"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.4112700326166867,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "inputs",
+        "logneuralbackflow"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "models__d0c41dbca36594765ce48f14a0845f4e__sec_6_6__0",
+      "text": "## Experimental models#\nThe following models are experimental, meaning that we could change them at some point, and we actively seeking for feedback and opinions on their usage and APIs.\nThe following models are for 2nd-quantisation fermionic hilbert spaces ( SpinOrbitalFermions ).\nSlater2nd\nA slater determinant ansatz for second-quantised spinless or spin-full fermions.\nMultiSlater2nd\nA slater determinant ansatz for second-quantised spinless or spin-full fermions with a sum of determinants.\nThe following are abstract models for Recurrent neural networks (and their fast versions).\nRNN\nBase class for recurrent neural networks.\nFastRNN\nBase class for recurrent neural networks with fast sampling.\nThe following are concrete, ready to use versions of Recurrent Neural Networks\nLSTMNet\nLong short-term memory network.\nFastLSTMNet\nLong short-term memory network with fast sampling.\nGRUNet1D\nGated recurrent unit network.\nFastGRUNet1D\nGated recurrent unit network with fast sampling.",
+      "metadata": {
+        "section_title": "Experimental models#",
+        "section_id": "sec_6",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\models.html"
+      },
+      "score": 0.9264188759832448,
+      "original_score": 0.8973286641626672,
+      "vector_score": 0.9895897614071842,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "fermions"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "changelog__775627bff97fcf0367c7035d3e792e5f__sec_36_36__0",
+      "text": "## NetKet 3.5 (☀️ 18 August 2022)#\nGitHub commits .\nThis release adds support and needed functions to run TDVP for neural networks with real/non-holomorphic parameters, an experimental HDF5 logger, and an MCState method to compute the local estimators of an observable for a set of samples.\nThis release also drops support for older version of flax, while adopting the new interface which completely supports complex-valued neural networks. Deprecation warnings might be raised if you were using some layers from netket.nn that are now avaiable in flax.\nA new, more accurate, estimation of the autocorrelation time has been introduced, but it is disabled by default. We welcome feedback.\nThe method local_estimators() has been added, which returns the local estimators O_loc(s) = 〈s|O|ψ〉 / 〈s|ψ〉 (which are known as local energies if O is the Hamiltonian). #1179\nThe method local_estimators() has been added, which returns the local estimators O_loc(s) = 〈s|O|ψ〉 / 〈s|ψ〉 (which are known as local energies if O is the Hamiltonian). #1179\nThe permutation equivariant netket.models.DeepSetRelDistance for use with particles in periodic potentials has been added together with an example. #1199\nThe permutation equivariant netket.models.DeepSetRelDistance for use with particles in periodic potentials has been added together with an example. #1199\nThe class HDF5Log has been added to the experimental submodule. This logger writes log data and variational state variables into a single HDF5 file. #1200\nThe class HDF5Log has been added to the experimental submodule. This logger writes log data and variational state variables into a single HDF5 file. #1200\nAdded a new method serialize() to store the content of the logger to disk #1255 .\nAdded a new method serialize() to store the content of the logger to disk #1255 .\nNew netket.callbacks.InvalidLossStopping which stops optimisation if the loss function reaches a NaN value. An optional patience argument can be set. #1259\nNew netket.callbacks.InvalidLossStopping which stops optimisation if the loss function reaches a NaN value. An optional patience argument can be set. #1259\nAdded a new method netket.graph.SpaceGroupBuilder.one_arm_irreps() to construct GCNN projection coefficients to project on single-wave-vector components of irreducible representations. #1260 .\nAdded a new method netket.graph.SpaceGroupBuilder.one_arm_irreps() to construct GCNN projection coefficients to project on single-wave-vector components of irreducible representations. #1260 .\nNew method expect_and_forces() has been added, which can be used to compute the variational",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\changelog.html",
+        "section_title": "NetKet 3.5 (☀️ 18 August 2022)#",
+        "section_id": "sec_36"
+      },
+      "score": 0.720921039698514,
+      "original_score": 0.6278947195980186,
+      "vector_score": 0.6924532900502491,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_9_9__1",
+      "text": "rngs\n=\nrngs\n,\n),\n# Reshape into the orbital shape, (..., N, Nf)\nlambda\nx\n:\nx\n.\nreshape\n(\nx\n.\nshape\n[:\n-\n1\n]\n+\n(\nhilbert\n.\nn_orbitals\n,\nhilbert\n.\nn_fermions\n)\n),\n)\ndef\n__call__\n(\nself\n,\nn\n:\njax\n.\nArray\n)\n->\njax\n.\nArray\n:\n# For simplicity, we write a function that operates on a single configuration of size (N,)\n# and we vectorize it using `jnp.vectorize` with the signature='(n)->()' argument, which specifies\n# that the function is defined to operate on arrays of shape (n,) and return scalars.\n@partial\n(\njnp\n.\nvectorize\n,\nsignature\n=\n\"(n)->()\"\n)\ndef\nlog_sd\n(\nn\n):\n# Construct the Backflow. Takes as input strings of $N$ occupation numbers, outputs an $N x Nf$ matrix\n# that modifies the bare orbitals.\nF\n=\nself\n.\nbackflow\n(\nn\n)\n# Add the backflow correction to the bare orbitals\nM\n=\nself\n.\nM\n+\nF\n# Find the positions of the occupied, backflow-modified orbitals\nR\n=\nn\n.\nnonzero\n(\nsize\n=\nself\n.\nhilbert\n.\nn_fermions\n)[\n0\n]\nA\n=\nM\n[\nR\n]\nreturn\n_logdet_cmplx\n(\nA\n)\nreturn\nlog_sd\n(\nn\n)\n```\nWe can then proceed as above to optimize this variational state using VMC.\n```code\n# Create a neural backflow wave function\nmodel\n=\nLogNeuralBackflow\n(\nhi\n,\nhidden_units\n=\nN\n,\nrngs\n=\nnnx\n.\nRngs\n(\n3\n))\n# Define a Metropolis exchange sampler\nsa\n=\nnk\n.\nsampler\n.\nMetropolisFermionHop\n(\nhi\n,\ngraph\n=\ngraph\n)\n# Define an optimizer\nop\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.05\n)\n# Create a variational state\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nmodel\n,\nn_samples\n=\n2\n**\n12\n,\nn_discard_per_chain\n=\n16\n)\n# Create a Variational Monte Carlo driver\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nH\n,\nop\n,\nvariational_state\n=\nvstate\n,\ndiag_shift\n=\n0.05\n)\n# Construct the logger to visualize the data later on\nbf_log\n=\nnk\n.\nlogging\n.\nRuntimeLog\n()\n# Run the optimization for 300 iterations\ngs\n.\nrun\n(\nn_iter\n",
+      "metadata": {
+        "package": "netket",
+        "section_title": "Neural-Backflow Wave Function#",
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "section_id": "sec_9"
+      },
+      "score": 0.6797206946067701,
+      "original_score": 0.5312985774733221,
+      "vector_score": 0.47701191149093286,
+      "bm25_score": 0.43565384721620914,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "logneuralbackflow",
+        "model"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "netket.models.AbstractARNN__374a1663c9332373347a42fd31a650c6__sec_1_1__0",
+      "text": "## Contents\nBases: Module\nBase class for autoregressive neural networks.\nSubclasses must implement the method conditionals_log_psi() ,\nor override the methods __call__() and conditionals() if desired.\nThey can override conditional() to\nimplement the caching for fast autoregressive sampling.\nSee netket.models.FastARNNConv1D for an example.\nThey must also implement the field machine_pow ,\nwhich specifies the exponent to normalize the outputs of __call__() .\nthe Hilbert space. Only homogeneous unconstrained\nHilbert spaces are supported.\nComputes the log wave-functions for input configurations.\ninputs ( Union [ ndarray , Array ] ) – configurations with dimensions (batch, Hilbert.size).\nUnion [ ndarray , Array ]\nThe log psi with dimension (batch,).\nComputes the conditional probabilities for one site to take each value.\nIt should only be called successively with indices 0, 1, 2, …,\nas in the autoregressive sampling procedure.\ninputs ( Union [ ndarray , Array ] ) – configurations of partially sampled sites with dimensions (batch, Hilbert.size),\nwhere the sites that index depends on must be already sampled.\ninputs ( Union [ ndarray , Array ] ) – configurations of partially sampled sites with dimensions (batch, Hilbert.size),\nwhere the sites that index depends on must be already sampled.\nindex ( int ) – index of the site being queried.\nindex ( int ) – index of the site being queried.\nUnion [ ndarray , Array ]\nThe probabilities with dimensions (batch, Hilbert.local_size).\nComputes the conditional probabilities for each site to take each value.\ninputs ( Union [ ndarray , Array ] ) – configurations with dimensions (batch, Hilbert.size).\nUnion [ ndarray , Array ]\nThe probabilities with dimensions (batch, Hilbert.size, Hilbert.local_size).\nExamples\n```code\n>>>\nimport\npytest\n;\npytest\n.\nskip\n(\n\"skip automated test of this docstring\"\n)\n>>>\n>>>\np\n=\nmodel\n.\napply\n(\nvariables\n,\nσ\n,\nmethod\n=\nmodel\n.\nconditionals\n)\n>>>\nprint\n(\np\n[\n2\n,\n3\n,\n:])\n[0.3 0.7]\n# For the 3rd spin of the 2nd sample in the batch,\n# it takes probability 0.3 to be spin down (local state index 0),\n# and probability 0.7 to be spin up (local state index 1).\n```\nComputes the log of the conditional wave-functions for each\nsite to take each value.\ninputs ( Union [ ndarray , Array ] ) – configurations with dimensions (batch, Hilbert.size).\nUnion [ ndarray , Array ]\nThe log psi with dimensions (batch, Hilbert.size, Hilbert.local_size).\nTransforms an array from ordered to unordered. See reorder .\ninputs ( Union [ ndarray , Array ] ) – an array with ordered layout along a dimension.\n",
+      "metadata": {
+        "section_title": "Contents",
+        "source_file": "docs\\_build\\html\\api\\_generated\\models\\netket.models.AbstractARNN.html",
+        "section_id": "sec_1",
+        "package": "netket"
+      },
+      "score": 0.5945662600921164,
+      "original_score": 0.4066823318421216,
+      "vector_score": 0.3509119006010195,
+      "bm25_score": 0.39033798084574817,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "inputs",
+        "model"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 30,
+    "total_bm25_results_count": 30,
+    "merged_results_count": 55,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "netket": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

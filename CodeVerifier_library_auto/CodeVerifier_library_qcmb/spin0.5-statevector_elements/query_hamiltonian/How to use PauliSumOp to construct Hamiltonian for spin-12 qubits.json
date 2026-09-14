@@ -1,0 +1,127 @@
+{
+  "query": "How to use PauliSumOp to construct Hamiltonian for spin-1/2 qubits?",
+  "packages": [
+    "qiskit",
+    "qiskit-nature"
+  ],
+  "results": [
+    {
+      "id": "parity_mapper__80537db4cca20eea36803122965b6008__part_2__2",
+      "text": "1), dtype=bool)\n            b_x = np.asarray(b_x + [1] + [1] * (register_length - i - 1), dtype=bool)\n            pauli_table.append((Pauli((a_z, a_x)), Pauli((b_z, b_x))))\n\n        return pauli_table\n\n    def _two_qubit_reduce(self, operator: SparsePauliOp) -> SparsePauliOp:\n        \"\"\"\n        Applies the two qubit reduction to the operator. This method hard codes the ``Z2Symmetries``\n        corresponding to the spin orbitals ordering. The tapering values required to identify the eigen\n        sector of the problem are calculated when :attr:`num_particles` is set.\n\n        Args:\n            operator: To be tapered operator.\n        Returns:\n            A new operator whose qubit number is reduced by 2.\n        \"\"\"\n        num_qubits = operator.num_qubits\n        last_idx = num_qubits - 1\n        mid_idx = num_qubits // 2 - 1\n        sq_list = [mid_idx, last_idx]\n\n        # build symmetries, sq_paulis:\n        symmetries, sq_paulis = [], []\n        for idx in sq_list:\n            pauli_str = [\"I\"] * num_qubits\n\n            pauli_str[idx] = \"Z\"\n            z_sym = \"\".join(pauli_str)[::-1]\n            symmetries.append(z_sym)\n\n            pauli_str[idx] = \"X\"\n            sq_pauli = \"\".join(pauli_str)[::-1]\n            sq_paulis.append(sq_pauli)\n\n        symmetries = PauliList(symmetries)\n        sq_paulis = PauliList(sq_paulis)\n        z2_symmetries = Z2Symmetries(symmetries, sq_paulis, sq_list, self._tapering_values)\n\n        return z2_symmetries.taper(operator)\n\n    def _map_single(\n        self, second_q_op: FermionicOp, *, register_length: int | None = None\n    ) -> SparsePauliOp:\n        mapped_op = self.mode_based_mapping(second_q_op, register_length=register_length)\n\n        reduced_op = mapped_op\n        if self.num_particles is not None:\n            if mapped_op.num_qubits > 2:\n                reduced_op = self._two_qubit_reduce(mapped_op)\n            else:\n                logger.warning(\n                    \"The original qubit operator only contains %s qubits! \"\n                    \"Skipping the requested two-qubit reduction!\",\n                    mapped_op.num_qubits,\n                )\n\n        return reduced_op\n",
+      "metadata": {
+        "source_file": "qiskit_nature\\second_q\\mappers\\parity_mapper.py",
+        "package": "qiskit-nature",
+        "section_id": "part_2",
+        "section_title": "parity_mapper.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.09189327657381602,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "spin",
+        "qubits"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "pauli_feature_map__6f7e92c3780acb5d121d84f7e80c067c__part_3__3",
+      "text": "�───┘└─────────────┘└───┘└───┘└────────────────────────────────┘└───┘└───┘\n\n        >>> prep = pauli_feature_map(2, reps=1, paulis=[\"ZY\"])\n        >>> print(prep)\n             ┌───┐┌──────────┐                                            ┌───────────┐\n        q_0: ┤ H ├┤ RX(pi/2) ├──■──────────────────────────────────────■──┤ RX(-pi/2) ├\n             ├───┤└──────────┘┌─┴─┐┌────────────────────────────────┐┌─┴─┐└───────────┘\n        q_1: ┤ H ├────────────┤ X ├┤ P(2.0*(pi - x[0])*(pi - x[1])) ├┤ X ├─────────────\n             └───┘            └───┘└────────────────────────────────┘└───┘\n\n        >>> from qiskit.circuit.library import efficient_su2\n        >>> prep = pauli_feature_map(3, reps=3, paulis=[\"Z\", \"YY\", \"ZXZ\"])\n        >>> wavefunction = efficient_su2(3)\n        >>> classifier = prep.compose(wavefunction)\n        >>> classifier.num_parameters\n        27\n        >>> classifier.count_ops()\n        OrderedDict([('cx', 39), ('rx', 36), ('u1', 21), ('h', 15), ('ry', 12), ('rz', 12)])\n\n    References:\n\n    [1] Havlicek et al. Supervised learning with quantum enhanced feature spaces,\n    `Nature 567, 209-212 (2019) <https://www.nature.com/articles/s41586-019-0980-2>`__.\n    \"\"\"\n    # create parameter vector used in the Pauli feature map\n    parameters = ParameterVector(parameter_prefix, feature_dimension)\n\n    # the Rust implementation expects the entanglement to be a str or list[tuple[int]] (or the\n    # callable to return these types), therefore we normalize the entanglement here\n    if callable(entanglement):\n        normalized = lambda offset: _normalize_entanglement(entanglement(offset))\n    else:\n        normalized = _normalize_entanglement(entanglement)\n\n    # construct from Rust\n    circuit = QuantumCircuit._from_circuit_data(\n        _fast_map(\n            feature_dimension,\n            paulis=paulis,\n            entanglement=normalized,\n            reps=reps,\n            parameters=parameters,\n            data_map_func=data_map_func,\n            alpha=alpha,\n            insert_barriers=insert_barriers,\n        ),\n",
+      "metadata": {
+        "section_id": "part_3",
+        "section_title": "pauli_feature_map.py",
+        "package": "qiskit",
+        "source_file": "qiskit\\circuit\\library\\data_preparation\\pauli_feature_map.py"
+      },
+      "score": 0.9782911817707359,
+      "original_score": 0.9775426018317958,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "construct"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "linear_mapper__8ea1add40edf0002cef8e95591efc125__part_1__1",
+      "text": " -> list[SparsePauliOp]:\n        \"\"\"\n        Generates a 'linear_encoding' of the spin S operators 'X', 'Y', 'Z' and 'identity'\n        to qubit operators (linear combinations of pauli strings).\n        In this 'linear_encoding' each individual spin S system is represented via\n        2S+1 qubits and the state |s> is mapped to the state |00...010..00>, where the s-th qubit is\n        in state 1.\n\n        Returns:\n            The 4-element list of transformed spin S 'X', 'Y', 'Z' and 'identity' operators.\n            I.e. spin_op_encoding[0]` corresponds to the linear combination of pauli strings needed\n            to represent the embedded 'X' operator\n        \"\"\"\n\n        dspin = int(2 * spin + 1)\n        nqubits = dspin\n\n        # quick functions to generate a pauli with X / Y / Z at location `i`\n        pauli_id = Pauli(\"I\" * nqubits)\n\n        def pauli_x(i):\n            return Pauli(\"I\" * i + \"X\" + \"I\" * (nqubits - i - 1))\n\n        def pauli_y(i):\n            return Pauli(\"I\" * i + \"Y\" + \"I\" * (nqubits - i - 1))\n\n        def pauli_z(i):\n            return Pauli(\"I\" * i + \"Z\" + \"I\" * (nqubits - i - 1))\n\n        # 1. build the non-diagonal X operator\n        x_summands = []\n        for i, coeff in enumerate(np.diag(SpinOp.x(spin).to_matrix(), 1)):\n            x_summands.append(\n                coeff / 2.0 * SparsePauliOp(pauli_x(i).dot(pauli_x(i + 1)))\n                + coeff / 2.0 * SparsePauliOp(pauli_y(i).dot(pauli_y(i + 1)))\n            )\n\n        # 2. build the non-diagonal Y operator\n        y_summands = []\n        for i, coeff in enumerate(np.diag(SpinOp.y(spin).to_matrix(), 1)):\n            y_summands.append(\n                -1j * coeff / 2.0 * SparsePauliOp(pauli_x(i).dot(pauli_y(i + 1)))\n                + 1j * coeff / 2.0 * SparsePauliOp(pauli_y(i).dot(pauli_x(i + 1)))\n            )\n\n        # 3. build the diagonal Z\n        z_summands = []\n        for i, coeff in enumerate(np.diag(SpinOp.z(spin).to_matrix())):\n            # get the first upper diagonal of coeff.\n            z",
+      "metadata": {
+        "section_title": "linear_mapper.py",
+        "source_file": "qiskit_nature\\second_q\\mappers\\linear_mapper.py",
+        "package": "qiskit-nature",
+        "section_id": "part_1"
+      },
+      "score": 0.9693342096635791,
+      "original_score": 0.9671437960681204,
+      "vector_score": 0.8776562282154431,
+      "bm25_score": 0.44682428374944777,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "spin",
+        "qubits"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "ternary_tree_mapper__5bfad8f1be608c042319553e2732013c__part_2__2",
+      "text": "_x, pauli_y, pauli_z = tuple(pauli_priority)\n        pauli_list: list[tuple[str, list, int]] = [(\"\", [], 1)]\n        qubit_index = 0\n        for _ in range(tree_height):\n            new_pauli_list = []\n            for paulis, qubits, coeff in pauli_list:\n                new_pauli_list.append((paulis + pauli_x, qubits + [qubit_index], coeff))\n                new_pauli_list.append((paulis + pauli_y, qubits + [qubit_index], coeff))\n                new_pauli_list.append((paulis + pauli_z, qubits + [qubit_index], coeff))\n                qubit_index += 1\n            pauli_list = new_pauli_list\n        while add_nodes > 0:\n            paulis, qubits, coeff = pauli_list.pop(0)\n            pauli_list.append((paulis + pauli_x, qubits + [qubit_index], coeff))\n            pauli_list.append((paulis + pauli_y, qubits + [qubit_index], coeff))\n            add_nodes -= 1\n            if add_nodes > 0:\n                pauli_list.append((paulis + pauli_z, qubits + [qubit_index], coeff))\n                add_nodes -= 1\n            qubit_index += 1\n\n        num_qubits = qubit_index\n        pauli_list.pop()  # only 2n of the 2n+1 operators are independent\n        pauli_ops = [(SparsePauliOp.from_sparse_list([pauli], num_qubits),) for pauli in pauli_list]\n        return num_qubits, pauli_ops\n\n    def sparse_pauli_operators(\n        self, register_length: int\n    ) -> tuple[list[SparsePauliOp], list[SparsePauliOp]]:\n        times_creation_annihiliation_op = []\n\n        for paulis in self._pauli_table(self._pauli_priority, register_length)[1]:\n            # For Majorana ops (self adjoint) pauli_table is a list of 1-element tuples\n            creation_op = SparsePauliOp(paulis[0], coeffs=[1])\n            times_creation_annihiliation_op.append(creation_op)\n\n        return (times_creation_annihiliation_op, times_creation_annihiliation_op)\n",
+      "metadata": {
+        "section_title": "ternary_tree_mapper.py",
+        "source_file": "qiskit_nature\\second_q\\mappers\\ternary_tree_mapper.py",
+        "package": "qiskit-nature",
+        "section_id": "part_2"
+      },
+      "score": 0.9401921630577018,
+      "original_score": 0.938129823852795,
+      "vector_score": 0.9596817796941576,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qubits"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "bksf_lih__0a998911150915e555501f7956b68a04__part_9__9",
+      "text": "0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.07049784 + 0.0j,\n            0.0616872 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00240961 + 0.0j,\n            0.06754287 + 0.0j,\n            0.06017866 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00240961 + 0.0j,\n        ]\n    )\n\n    return SparsePauliOp(pauli_list, coeffs=coeffs)\n\n\nQUBIT_HAMILTONIAN = _qubit_operator()\n",
+      "metadata": {
+        "source_file": "test\\second_q\\mappers\\resources\\bksf_lih.py",
+        "section_title": "bksf_lih.py",
+        "package": "qiskit-nature",
+        "section_id": "part_9"
+      },
+      "score": 0.92028246544439,
+      "original_score": 0.92028246544439,
+      "vector_score": 0.9414244082251686,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 117,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "query": "What gates to use for spin-1/2 state preparation in quantum circuit",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "hartree_fock__973a80b2a7462da2917d3311e3e913f7__part_3__3",
+      "text": "_mapper,\n            )\n            self.qregs = [QuantumRegister(len(self._bitstr), name=\"q\")]\n\n    def _build(self) -> None:\n        \"\"\"\n        Construct the Hartree-Fock initial state given its parameters.\n        Returns:\n            QuantumCircuit: a quantum circuit preparing the Hartree-Fock\n            initial state given a number of spatial orbitals, number of particles and\n            a qubit mapper.\n        \"\"\"\n        if self._is_built:\n            return\n\n        super()._build()\n\n        # Construct the circuit for bitstring. Since this is defined as an initial state\n        # circuit its assumed that this is applied first to the qubits that are initialized to\n        # the zero state. Hence we just need to account for all True entries and set those.\n        if self._bitstr is not None:\n            for i, bit in enumerate(self._bitstr):\n                if bit:\n                    self.x(i)\n\n\ndef hartree_fock_bitstring_mapped(\n    num_spatial_orbitals: int,\n    num_particles: tuple[int, int],\n    qubit_mapper: QubitMapper,\n) -> list[bool]:\n    # pylint: disable=unused-argument\n    \"\"\"Compute the bitstring representing the mapped Hartree-Fock state for the specified system.\n\n    Args:\n        num_spatial_orbitals: The number of spatial orbitals, has a min. value of 1.\n        num_particles: The number of particles as a tuple (alpha, beta) containing the number of\n            alpha- and  beta-spin electrons, respectively.\n        qubit_mapper: A QubitMapper.\n\n    Returns:\n        The bitstring representing the mapped state of the Hartree-Fock state as array of bools.\n    \"\"\"\n    # get the bitstring encoding the Hartree Fock state\n    bitstr = hartree_fock_bitstring(num_spatial_orbitals, num_particles)\n\n    # encode the bitstring as a `FermionicOp`\n    bitstr_op = FermionicOp(\n        {\" \".join(f\"+_{idx}\" for idx, bit in enumerate(bitstr) if bit): 1.0},\n        num_spin_orbitals=2 * num_spatial_orbitals,\n    )\n\n    # map the `FermionicOp` to a qubit operator\n    qubit_op: SparsePauliOp\n    if isinstance(qubit_mapper, TaperedQubitMapper):\n        # To avoid checking commutativity, we call the two methods separately.\n        qubit_op = qubit_mapper.map_clifford(bitstr_op)\n        qubit_op = qubit_mapper.taper_clifford(qubit_op, check_commutes=False)\n    else:\n        qubit_op = qubit_mapper.map(bitstr_op)\n\n    # We check the mapped operator `x` part of the paulis because we want to have particles\n    # i.e. True,",
+      "metadata": {
+        "package": "qiskit-nature",
+        "section_id": "part_3",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\hartree_fock.py",
+        "section_title": "hartree_fock.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9589220027084394,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "spin",
+        "state",
+        "quantum",
+        "circuit"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "reverse_qgt__487125e90628d4bd4b1467cd5bb2b658__part_2__2",
+      "text": "_int(0, (2,) * circuit.num_qubits)\n\n            # Get the analytic gradient of the first unitary\n            # Note: We currently only support gates with a single parameter -- which is reflected\n            # in self.SUPPORTED_GATES -- but generally we could also support gates with multiple\n            # parameters per gate. This is the reason for the second 0-index.\n            # We skip the check since we know the circuit has unique, valid parameters.\n            deriv = derive_circuit(unitaries[0], paramlist[0][0], check=False)\n            for _, gate in deriv:\n                bind(gate, parameter_binds, inplace=True)\n\n            grad_coeffs = [coeff for coeff, _ in deriv]\n            grad_states = [phi.evolve(gate) for _, gate in deriv]\n\n            # compute phase fix (optional) and the hessian part\n            if self._phase_fix:\n                phase_fixes[0] = _phasefix_term(chi, grad_coeffs, grad_states)\n\n            metric[0, 0] = _l_term(grad_coeffs, grad_states, grad_coeffs, grad_states)\n\n            for j in range(1, num_parameters):\n                lam = psi.copy()\n                phi = psi.copy()\n\n                # get the analytic gradient d U_j / d p_j and apply it\n                deriv = derive_circuit(unitaries[j], paramlist[j][0], check=False)\n\n                for _, gate in deriv:\n                    bind(gate, parameter_binds, inplace=True)\n\n                # compute |phi> (in general it's a sum of states and coeffs)\n                grad_coeffs = [coeff for coeff, _ in deriv]\n                grad_states = [phi.evolve(gate) for _, gate in deriv]\n\n                # compute the diagonal element L_{j, j}\n                metric[j, j] += _l_term(grad_coeffs, grad_states, grad_coeffs, grad_states)\n\n                # compute the off diagonal elements L_{i, j}\n                for i in reversed(range(j)):\n                    # apply U_{i + 1}_dg\n                    unitary_ip_inv = bound_unitaries[i + 1].inverse()\n                    grad_states = [state.evolve(unitary_ip_inv) for state in grad_states]\n\n                    lam = lam.evolve(bound_unitaries[i].inverse())\n\n                    # get the gradient d U_i / d p_i and apply it\n                    deriv = derive_circuit(unitaries[i], paramlist[i][0], check=False)\n                    for _, gate in deriv:\n                        bind(gate, parameter_binds, inplace=True)\n\n                    grad_coeffs_mu = [coeff for coeff, _ in deriv]\n                    grad_states_mu = [lam.evolve(gate) for _, gate in deriv]\n\n                    metric[i, j] += _l_term(\n                        grad_coeffs_mu, grad_states_mu, grad_coeffs, grad_states\n                    )\n\n                if self._phase_fix:\n                    phase_fixes[j",
+      "metadata": {
+        "section_title": "reverse_qgt.py",
+        "package": "qiskit-algorithms",
+        "source_file": "qiskit_algorithms\\gradients\\reverse\\reverse_qgt.py",
+        "section_id": "part_2"
+      },
+      "score": 0.9126530568020315,
+      "original_score": 0.9044642808772219,
+      "vector_score": 1.0,
+      "bm25_score": 0.3737070792653576,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "gates",
+        "state",
+        "circuit"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "test_clifford_passes__e3392ca481b208744fc2f3da915fd5cb__part_14__14",
+      "text": " 1], [1, 1]])\n        lf2 = LinearFunction([[0, 1, 0], [1, 0, 0], [0, 0, 1]])\n\n        pauli_gate1 = PauliGate(\"X\")\n        pauli_gate2 = PauliGate(\"YZX\")\n\n        qc = QuantumCircuit(3)\n        qc.h(0)\n        qc.cx(0, 1)\n        qc.append(cliff0, [1])\n        qc.cy(0, 1)\n\n        # not a clifford gate (separating the circuit)\n        qc.t(0)\n\n        qc.append(pauli_gate2, [0, 2, 1])\n        qc.append(lf2, [2, 1, 0])\n        qc.x(0)\n        qc.append(pauli_gate1, [1])\n        qc.append(lf1, [1, 0])\n        qc.h(2)\n        qc.append(cliff1, [1, 2])\n\n        # Collect clifford gates from the circuit (we should get two Clifford blocks separated by\n        # the RX gate).\n        qct = PassManager(CollectCliffords()).run(qc)\n        self.assertEqual(len(qct.data), 3)\n\n        # Make sure that the operator for the initial quantum circuit is equivalent to the\n        # operator for the circuit with the collected cliffords.\n        op1 = Operator(qc)\n        op2 = Operator(qct)\n        self.assertTrue(op1.equiv(op2))\n\n    def test_collect_all_clifford_gates(self):\n        \"\"\"Assert that CollectClifford collects all basis gates\n        (including certain rotation gates with pi/2 angles)\"\"\"\n        gates_1q = [\n            XGate(),\n            YGate(),\n            ZGate(),\n            IGate(),\n            HGate(),\n            SGate(),\n            SdgGate(),\n            SXGate(),\n            SXdgGate(),\n            RXGate(theta=np.pi / 2),\n            RYGate(theta=np.pi / 2),\n            RZGate(phi=np.pi / 2),\n            UGate(np.pi / 2, np.pi / 2, np.pi / 2),\n        ]\n        gates_2q = [\n            CXGate(),\n            CYGate(),\n            CZGate(),\n            DCXGate(),\n            ECRGate(),\n            SwapGate(),\n            iSwapGate(),\n            CPhaseGate(theta=np.pi),\n            CRXGate(theta=np.pi),\n            CRYGate(theta=np.pi),\n            CRZGate(theta=np.pi),\n            RXXGate(theta=np.pi / 2),\n            RYYGate(theta=np.pi / 2),\n            RZZGate(theta=np.pi / 2),\n            RZXGate(theta=np.pi / 2),\n            XXMinusYYGate(theta=np.pi),\n            XXPlusYYGate(theta=-np.pi),\n        ]\n\n        qc = QuantumC",
+      "metadata": {
+        "source_file": "test\\python\\transpiler\\test_clifford_passes.py",
+        "package": "qiskit",
+        "section_title": "test_clifford_passes.py",
+        "section_id": "part_14"
+      },
+      "score": 0.8419960906920849,
+      "original_score": 0.8271832241944679,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "gates",
+        "quantum",
+        "circuit"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "interleaved_qubit_mapper__04508d35904b02d555caf8a9af520518__part_1__1",
+      "text": " the alpha-spin\n    and beta-spin components in a blocked fashion. I.e. the first half of the qubit register\n    corresponds to the alpha-spin components, and the second half to the beta-spin one, like so:\n\n    .. code-block::\n\n       a1, a2, ..., aN, b1, b2, ..., bN\n\n    This class allows you to wrap such a ``FermionicMapper`` to produce qubit operators which have\n    an interleaved order of qubits, instead. Taking the example from before, the outcome will be the\n    following:\n\n    .. code-block::\n\n       a1, b1, a2, b2, ..., aN, bN\n\n    .. note::\n\n       This reordering is intended for an even total number of spin orbitals (i.e. the alpha-spin\n       and beta-spin components should be identical in length; which they usually are). However,\n       this is not asserted, so reordering a qubit operator label of odd length will still happen.\n\n    Here is a very simple usage example:\n\n    .. code-block:: python\n\n       from qiskit_nature.second_q.mappers import JordanWignerMapper, InterleavedQubitMapper\n       from qiskit_nature.second_q.operators import FermionicOp\n\n       blocked_mapper = JordanWignerMapper()\n       interleaved_mapper = InterleavedQubitMapper(blocked_mapper)\n\n       ferm_op = FermionicOp({\"+_0 -_1\": 1}, num_spin_orbitals=4)\n\n       blocked_op = blocked_mapper.map(ferm_op)\n       # SparsePauliOp(['IIXY', 'IIYY', 'IIXX', 'IIYX'], coeffs=[-0.25j, 0.25, 0.25, 0.25j])\n\n       print(interleaved_mapper.map(ferm_op))\n       # SparsePauliOp(['IXIY', 'IYIY', 'IXIX', 'IYIX'], coeffs=[-0.25j, 0.25, 0.25, 0.25j])\n\n    The following attributes can be set via the initializer but can also be read and updated once\n    the ``InterleavedQubitMapper`` object has been constructed.\n\n    Attributes:\n        mapper (FermionicMapper): the actual mapper for mapping from :class:`.FermionicOp` to qubit\n            operators.\n    \"\"\"\n\n    def __init__(self, mapper: FermionicMapper):\n        \"\"\"\n        Args:\n            mapper: the actual ``FermionicMapper`` mapping :class:`.FermionicOp` to qubit operators.\n        \"\"\"\n        self.mapper = mapper\n\n    def _map_single(\n        self, second_q_op: FermionicOp, *, register_length: int | None = None\n    ) -> SparsePauliOp:\n        if",
+      "metadata": {
+        "package": "qiskit-nature",
+        "section_id": "part_1",
+        "source_file": "qiskit_nature\\second_q\\mappers\\interleaved_qubit_mapper.py",
+        "section_title": "interleaved_qubit_mapper.py"
+      },
+      "score": 0.8321208463603402,
+      "original_score": 0.8271832241944679,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "spin"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "ref_multiplexer__9af4c80f7ccfdfa03a449acc4ddb8020__part_5__5",
+      "text": "), [0])\n    vector_circuit = vector_circuit.inverse()\n    qc.append(vector_circuit, [0])\n\n    sv = Statevector(qc)\n    gate_list = [np.array([[sv[0], -sv[1]], [sv[1], sv[0]]])]\n    qc = QuantumCircuit(1, 1)\n    qc.append(UCGate(gate_list), [0])\n\n    if final_measure:\n        qc.measure(0, 0)\n\n    target = Target.from_configuration(\n        basis_gates=[\"multiplexer\", \"measure\"], custom_name_mapping={\"multiplexer\": None}\n    )\n\n    return [transpile(qc, target=target)]\n",
+      "metadata": {
+        "section_id": "part_5",
+        "package": "qiskit-aer",
+        "section_title": "ref_multiplexer.py",
+        "source_file": "test\\terra\\reference\\ref_multiplexer.py"
+      },
+      "score": 0.8271832241944679,
+      "original_score": 0.8271832241944679,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 223,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

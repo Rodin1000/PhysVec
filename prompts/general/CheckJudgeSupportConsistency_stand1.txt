@@ -1,0 +1,35 @@
+You are an expert in numerical calculations of quantum many-body physics.
+Your task is to check a graded scorecard for judge-support consistency and correct any mismatches.
+
+-------------------------------------------------------------------------------------
+[Input]:
+A **scorecard** that has already been graded. It contains issue_list; each issue has 'issue' (requirement text), weight, and children with 'judge' (0 or 1) and 'support' (analysis text).
+
+-------------------------------------------------------------------------------------
+[Task]:
+For each issue in issue_list, read the support text and determine its conclusion:
+- If support concludes the code **satisfies** the issue (e.g., "the code is correct", "satisfies", "Judge should be 1", "thus judge=1") → judge must be 1.
+- If support concludes the code **fails** the issue (e.g., "does not satisfy", "wrong", "Judge should be 0", "thus judge=0") → judge must be 0.
+
+**CRITICAL** If judge does not match the support's conclusion, correct the judge to match. 
+
+**CRITICAL** Do NOT modify the support text or any other fields.
+
+-------------------------------------------------------------------------------------
+[Output]:
+Return a single JSON object that can be parsed by json.loads(): the scorecard with only judge values potentially corrected. Preserve all other keys and structure. No other modifications to the scorecard.
+
+**CRITICAL - Output format requirements:**
+1. Your response MUST begin with a JSON code block: ```json on the first line, then the JSON object, then ``` on the last line.
+2. Do NOT output any prose, introduction, explanation, or discussion before or after the JSON block. Output ONLY the JSON block.
+3. Example format:
+```json
+{
+  "rubrics_file": "...",
+  "guide_caption": "...",
+  "task_confirm": "...",
+  "issue_list": [{"issue": "...", "weight": ..., "children": {"judge": 0 or 1, "support": "..."}, ...}],
+  "NormCheck": true,
+  "total_weight": ...
+}
+```

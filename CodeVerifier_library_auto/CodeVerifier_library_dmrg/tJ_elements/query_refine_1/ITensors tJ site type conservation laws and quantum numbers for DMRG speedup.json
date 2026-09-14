@@ -1,0 +1,143 @@
+{
+  "query": "ITensors tJ site type conservation laws and quantum numbers for DMRG speedup",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "QN_DMRG__629a0c9d83a6c48625080be07715c0ee__h1_0_0__0",
+      "text": "An important technique in DMRG calculations of quantum Hamiltonians\nis the conservation of _quantum numbers_. Examples of these are the\ntotal number of particles of a model of fermions, or the total of all\n``S^z`` components of a system of spins. Not only can conserving quantum\nnumbers make DMRG calculations run more quickly and use less memory, but\nit can be important for simulating physical systems with conservation\nlaws and for obtaining ground states in different symmetry sectors.\nNote that ITensor currently only supports Abelian quantum numbers.",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\src\\tutorials\\QN_DMRG.md",
+        "section_id": "h1_0",
+        "section_title": "Quantum Number Conserving DMRG"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "conservation",
+        "laws",
+        "quantum",
+        "numbers",
+        "dmrg"
+      ],
+      "match_ratio": 0.5555555555555556,
+      "is_html": false
+    },
+    {
+      "id": "QN_DMRG__bc3c6420aed7848d7641f75f5ed3386c__root_0__0",
+      "text": "An important technique in DMRG calculations of quantum Hamiltonians is the conservation of quantum numbers . Examples of these are the total number of particles of a model of fermions, or the total of all $S^z$ components of a system of spins. Not only can conserving quantum numbers make DMRG calculations run more quickly and use less memory, but it can be important for simulating physical systems with conservation laws and for obtaining ground states in different symmetry sectors. Note that ITensor currently only supports Abelian quantum numbers.\nSetting up a quantum-number conserving DMRG calculation in ITensor requires only very small changes to a DMRG code. The main changes are:\nusing tensor indices ( Index objects) which carry quantum number (QN) information to build your Hamiltonian and  initial state\ninitializing your MPS to have well-defined total quantum numbers\nImportantly, the total QN of your state throughout the calculation will remain the same as the initial state passed to DMRG . The total QN of your state is not set separately, but determined implicitly from the initial QN of the state when it is first constructed.\nOf course, your Hamiltonian should conserve all of the QN's that you would like to use. If it doesn't, you will get an error when you try to construct it out of the QN-enabled tensor indices.\nLet's see how to make these two changes to the DMRG Tutorial code from the previous section. At the end, we will put together these changes for a complete, working code.\nChange 1: QN Site Indices\nTo make change (1), we will change the line\n```code\nsites = siteinds(\"S=1\",N)\n```\nby setting the conserve_qns keyword argument to true :\n```code\nsites = siteinds(\"S=1\",N; conserve_qns=true)\n```\nSetting conserve_qns=true tells the siteinds function to conserve every possible quantum number associated to the site type (which is \"S=1\" in this example). For $S=1$ spins, this will turn on total- $S^z$ conservation. (For other site types that conserve multiple QNs, there are specific keyword arguments available to track just a subset of conservable QNs.) We can check this by printing out some of the site indices, and seeing that the subspaces of each Index are labeled by QN values:\n```code\n@show sites[1]\n@show sites[2]\n```\nSample output:\n```code\nsites[1] = (dim=3|id=794|\"S=1,Site,n=1\") <Out>\n 1: QN(\"Sz\",2) => 1\n 2: QN(\"Sz\",0) => 1\n 3: QN(\"Sz\",-2) => 1\n sites[2] = (dim=3|id=806|\"S=",
+      "metadata": {
+        "section_title": "ROOT",
+        "section_id": "root",
+        "package": "itensormps",
+        "source_file": "docs\\build\\tutorials\\QN_DMRG.html"
+      },
+      "score": 0.9370736148869832,
+      "original_score": 0.8941425297164202,
+      "vector_score": 0.9199946860184163,
+      "bm25_score": 0.7907339045084358,
+      "keyword_matches": 7,
+      "matched_keywords": [
+        "site",
+        "type",
+        "conservation",
+        "laws",
+        "quantum",
+        "numbers",
+        "dmrg"
+      ],
+      "match_ratio": 0.7777777777777778,
+      "is_html": true
+    },
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "source_file": "examples\\src\\trg.jl",
+        "section_title": "trg.jl",
+        "section_id": "full",
+        "package": "itensors"
+      },
+      "score": 0.8088888888888889,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "site"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Compute-excited-states-with-DMRG_5__0",
+      "text": "## Compute excited states with DMRG\nITensor DMRG accepts additional MPS wavefunctions as a optional, extra argument. These additional 'penalty states' are provided as an array of MPS just after the Hamiltonian, like this:\n```code\nenergy,psi3 = dmrg(H,[psi0,psi1,psi2],psi3_init;nsweeps,maxdim,cutoff)\n```\nHere the penalty states are [psi0,psi1,psi2] . When these are provided, the DMRG code minimizes the energy of the current MPS while also reducing its overlap (inner product) with the previously provided MPS. If these overlaps become sufficiently small, then the computed MPS is an excited state. So by finding the ground state, then providing it to DMRG as a \"penalty state\" or previous state one can compute the first excited state. Then providing both of these, one can get the second excited state, etc.\nA  keyword argument called weight can also be provided to the dmrg function when penalizing overlaps to previous states. The weight parameter is multiplied by the overlap with the previous states, so sets the size of the penalty. It should be chosen at least as large as the (estimated) gap between the ground and first excited states. Otherwise the optimal value of the weight parameter is not so obvious, and it is best to try various weights during initial test calculations.\nNote that when the system has conserved quantum numbers, a superior way to find excited states can be to find ground states of quantum number (or symmetry) sectors other than the one containing the absolute ground state. In that context, the penalty method used below is a way to find higher excited states within the same quantum number sector.\nFull Example code:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 20\n\n  sites = siteinds(\"S=1/2\",N)\n\n  h = 4.0\n\n  weight = 20*h # use a large weight\n                # since gap is expected to be large\n\n\n  #\n  # Use the OpSum feature to create the\n  # transverse field Ising model\n  #\n  # Factors of 4 and 2 are to rescale\n  # spin operators into Pauli matrices\n  #\n  os = OpSum()\n  for j=1:N-1\n    os -= 4,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:N\n    os -= 2*h,\"Sx\",j;\n  end\n  H = MPO(os,sites)\n\n\n  #\n  # Make sure to do lots of sweeps\n  # when finding excited states\n  #\n  nsweeps = 30\n  maxdim = [10,10,10,20,20,40,80,100,200,200]\n  cutoff = [1E-8]\n",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "Compute excited states with DMRG",
+        "section_id": "Compute-excited-states-with-DMRG"
+      },
+      "score": 0.7535219335512435,
+      "original_score": 0.6271760339430574,
+      "vector_score": 0.7839700424288217,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensors",
+        "quantum",
+        "numbers",
+        "dmrg"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": true
+    },
+    {
+      "id": "tj__9d10a3364fe53958827560d0636b49b7__part_0__0",
+      "text": "\n\"\"\"\n    space(::SiteType\"tJ\";\n          conserve_qns = false,\n          conserve_sz = conserve_qns,\n          conserve_nf = conserve_qns,\n          conserve_nfparity = conserve_qns,\n          qnname_sz = \"Sz\",\n          qnname_nf = \"Nf\",\n          qnname_nfparity = \"NfParity\")\n\nCreate the Hilbert space for a site of type \"tJ\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nfunction space(\n  ::SiteType\"tJ\";\n  conserve_qns=false,\n  conserve_sz=conserve_qns,\n  conserve_nf=conserve_qns,\n  conserve_nfparity=conserve_qns,\n  qnname_sz=\"Sz\",\n  qnname_nf=\"Nf\",\n  qnname_nfparity=\"NfParity\",\n  # Deprecated\n  conserve_parity=nothing,\n)\n  if !isnothing(conserve_parity)\n    conserve_nfparity = conserve_parity\n  end\n  if conserve_sz && conserve_nf\n    return [\n      QN((qnname_nf, 0, -1), (qnname_sz, 0)) => 1\n      QN((qnname_nf, 1, -1), (qnname_sz, +1)) => 1\n      QN((qnname_nf, 1, -1), (qnname_sz, -1)) => 1\n    ]\n  elseif conserve_nf\n    return [\n      QN(qnname_nf, 0, -1) => 1\n      QN(qnname_nf, 1, -1) => 2\n    ]\n  elseif conserve_sz\n    return [\n      QN((qnname_sz, 0), (qnname_nfparity, 0, -2)) => 1\n      QN((qnname_sz, +1), (qnname_nfparity, 1, -2)) => 1\n      QN((qnname_sz, -1), (qnname_nfparity, 1, -2)) => 1\n    ]\n  elseif conserve_nfparity\n    return [\n      QN(qnname_nfparity, 0, -2) => 1\n      QN(qnname_nfparity, 1, -2) => 2\n    ]\n  end\n  return 3\nend\n\nval(::ValName\"Emp\", ::SiteType\"tJ\") = 1\nval(::ValName\"Up\", ::SiteType\"tJ\") = 2\nval(::ValName\"Dn\", ::SiteType\"tJ\") = 3\nval(::ValName\"0\", st::SiteType\"tJ\") = val(ValName(\"Emp\"), st)\nval(::ValName\"↑\", st::SiteType\"tJ\") = val(ValName(\"",
+      "metadata": {
+        "package": "itensors",
+        "section_title": "tj.jl",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\tj.jl",
+        "section_id": "part_0"
+      },
+      "score": 0.7352215930119516,
+      "original_score": 0.7163088496556623,
+      "vector_score": 0.684714435895941,
+      "bm25_score": 0.8426865046945478,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "site",
+        "type",
+        "quantum"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 108,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

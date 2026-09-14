@@ -1,0 +1,84 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is Phase 2 of a 3-phase refinement workflow: generate queries based on errors and retrieve documentation to help fix the code.
+
+**PURPOSE: Generate queries based on Phase 1 errors, retrieve documentation, and create a summary that will be used in Phase 3 to fix the code.**
+
+--------------------------------------------------------------------------
+[Input:]
+1. TYPE: {type} (e.g., boson, fermion, spin0.5-RBM)
+2. TOPIC: {topic} (the package/library topic, e.g., dmrg, netket, nnwf)
+3. LIBRARY_NAMES: {library_names} (list of package names to use for retrieval)
+4. QUERY_NUM: {query_num} (number of queries to generate)
+5. QUERY_DIR: {query_dir} (directory where retrieval results will be saved)
+6. OUTPUT_SUMMARY_FILE: {output_summary_file} (filename for final summary JSON")
+7. STDERR_INFO: {stderr_info} (error messages from Phase 1 execution, passed directly)
+
+Note: The filesystem-mcp and retrieve-mcp working directories are both set to {query_dir}.
+IMPORTANT: For filesystem-mcp `read_file` / `save_file`, ALWAYS use ONLY filenames (relative paths).
+DO NOT include {query_dir} in file_path. DO NOT use `..\\` or absolute paths.
+
+-----------------------------------------------------------------------------
+[Instruction:]
+1. **Understand errors from STDERR_INFO:**
+   - Analyze the error messages in {stderr_info}
+   - Identify the specific errors, error types, and failure patterns
+   - Understand what needs to be fixed
+
+2. **Generate {query_num} queries based on errors:**
+   - **Purpose: These queries will be used to retrieve documentation that helps fix the specific errors**
+   - **CRITICAL: Base your queries on the actual errors in STDERR_INFO**
+   - Each query MUST be <20 words, brief and focused on fixing the specific error
+   - Each query MUST cover a DISTINCT aspect (no concept overlap)
+   - Focus on: error resolution, correct usage patterns, common pitfalls, and troubleshooting for {type} in {topic}
+   - **IMPORTANT: Incorporate {type} and {topic} information into queries**
+   - Prioritize queries that address: the specific error messages, correct API usage, parameter requirements, and error handling
+
+3. **Retrieve documentation using retrieve-mcp:**
+   - For EACH query, call `retrieve_hybrid` or `retrieve_hybrid_multi` tool
+   - **CRITICAL: Use packages from LIBRARY_NAMES: {library_names}**
+     * You are FORBIDDEN to retrieve from libraries NOT listed in the LIBRARY_NAMES
+   - Tool parameters: 
+     * Single package: query="...", package="packagename" (use one package from {library_names})
+     * Multiple packages: query="...", packages=["pkg1", "pkg2"] (use multiple packages from {library_names} if query benefits from cross-package search)
+   - Tools AUTOMATICALLY save results to JSON files in {query_dir}
+   - Call tools ONE AT A TIME: retrieve → wait for confirmation → next retrieve → ...
+
+4. **Read all retrieval results using filesystem-mcp:**
+   - After all retrievals complete, call filesystem-mcp `list_directory` to list files in the current working directory ({query_dir})
+   - Identify the JSON files saved by retrieve-mcp tools
+   - Use filesystem-mcp `read_file(file_path="...")` to read each retrieval result JSON file
+   - **CRITICAL: file_path must be ONLY the filename (no directories, no `..\\`, no absolute paths)**
+
+5. **Generate summary JSON file:**
+   - Create a summary file named {output_summary_file} in the current working directory ({query_dir})
+   - **Purpose: This summary will serve as reference material for Phase 3 to fix errors**
+   - For EACH query, extract and refine the answer from its corresponding retrieval result
+   - **CRITICAL: Answers must be accurate, complete, and directly useful for error fixing**
+   - Format: JSON array with Q-A pairs, each containing:
+     * "query": the original query text
+     * "answer": refined answer extracted from retrieval result (must be actionable for error fixing)
+   - Use filesystem-mcp `save_file(file_path="{output_summary_file}", content=<json>)` to write the summary JSON file
+   - **CRITICAL: file_path must be ONLY "{output_summary_file}" (no directories, no `..\\`, no absolute paths)**
+
+6. **CRITICAL - How to call tools:**
+   - You have REAL MCP tools available - when you call them, they EXECUTE and return results
+   - DO NOT write "Action:", "Thought:", "Observation:" - this is NOT ReAct format
+   - DO NOT describe what you will do - DIRECTLY call the tools
+   - Wait for tool execution to complete before proceeding
+
+7. **Workflow sequence (MANDATORY):**
+   Step 1: Analyze errors from STDERR_INFO
+   Step 2: Generate {query_num} queries based on the errors, incorporating {type} and {topic} information
+   Step 3: For each query → call retrieve_hybrid/retrieve_hybrid_multi → wait for confirmation
+   Step 4: After all retrievals → use filesystem-mcp list_directory → read_file(file_path="<filename>") to read all retrieval result JSON files
+   Step 5: Generate summary with Q-A pairs → use filesystem-mcp save_file(file_path="{output_summary_file}") to write summary JSON
+
+8. **Example summary JSON format:**
+   [
+     {{"query": "How to fix X error for {type} in {topic}?", "answer": "The error occurs because... To fix it, use the correct API: ..."}},
+     {{"query": "What are common pitfalls for {type} in {topic}?", "answer": "Common issues include: ... Make sure to ..."}}
+   ]
+
+**Start executing the workflow NOW.**
+

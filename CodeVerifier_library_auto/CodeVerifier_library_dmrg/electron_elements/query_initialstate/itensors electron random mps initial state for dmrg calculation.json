@@ -1,0 +1,133 @@
+{
+  "query": "itensors electron random mps initial state for dmrg calculation",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__Preventing-DMRG-from-getting-stuck-in-a-local-minimum_1__1",
+      "text": " nsweeps, maxdim, cutoff, noise)\n```\nTry using a initial MPS with properties close to the ground state you are looking for. For example, the ground state of a system of electrons typically has a density which is spread out over the whole system. So if your initial state has all of the electrons bunched up on the left-hand side only, it can take DMRG a very long time to converge.\nTry using a initial MPS with properties close to the ground state you are looking for. For example, the ground state of a system of electrons typically has a density which is spread out over the whole system. So if your initial state has all of the electrons bunched up on the left-hand side only, it can take DMRG a very long time to converge.\nTry using a random MPS with a modestly large bond dimension. ITensor offers a function called random_mps which can be used to make random MPS in both the quantum number (QN) conserving and non-QN conserving cases. Because random MPS have properties which are \"typical\" of most ground states, they can be good initial states for DMRG.\nTry using a random MPS with a modestly large bond dimension. ITensor offers a function called random_mps which can be used to make random MPS in both the quantum number (QN) conserving and non-QN conserving cases. Because random MPS have properties which are \"typical\" of most ground states, they can be good initial states for DMRG.\nTry DMRG on a closely related Hamiltonian for which convergence is easier to obtain (be creative here: it could be your Hamiltonian with interactions turned off, or  with interactions only within, but not between, small local patches). Take the output of this first calculation and use it as input for DMRG with the full Hamiltonian.\nTry DMRG on a closely related Hamiltonian for which convergence is easier to obtain (be creative here: it could be your Hamiltonian with interactions turned off, or  with interactions only within, but not between, small local patches). Take the output of this first calculation and use it as input for DMRG with the full Hamiltonian.\nIn stubborn cases, try other methods for finding the ground state which are slower, but have a better chance of succeeding. A key example is imaginary time evolution, which always reaches the ground state if (a) performed accurately on (b) a state which is not orthogonal to the ground state. After doing some amount of imaginary time evolution, use the resulting MPS as an initial state for DMRG obtain a higher-accuracy solution.\nIn stubborn cases, try other methods for finding the ground state which are slower, but have a better chance of succeeding. A key example is imaginary time evolution, which always reaches the ground state if (a) performed accurately on (b) a state which is not orthogonal to the ground state. After doing some",
+      "metadata": {
+        "section_title": "Preventing DMRG from getting stuck in a local minimum",
+        "source_file": "docs\\build\\faq\\DMRG.html",
+        "package": "itensormps",
+        "section_id": "Preventing-DMRG-from-getting-stuck-in-a-local-minimum"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.7963344301218681,
+      "bm25_score": 1.0,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "random",
+        "mps",
+        "initial",
+        "state",
+        "dmrg",
+        "calculation"
+      ],
+      "match_ratio": 0.75,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG",
+        "section_title": "Use a Sum of MPOs in DMRG"
+      },
+      "score": 0.9690021658930501,
+      "original_score": 0.9557173798472144,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "state",
+        "dmrg"
+      ],
+      "match_ratio": 0.25,
+      "is_html": true
+    },
+    {
+      "id": "test_trg__2f4865721f7c7ba535be3f8ee717655a__full__0",
+      "text": "using ITensors\nusing Test\nusing Random\n\nRandom.seed!(12345)\n\ninclude(joinpath(pkgdir(ITensors), \"examples\", \"src\", \"trg.jl\"))\ninclude(joinpath(pkgdir(ITensors), \"examples\", \"src\", \"2d_classical_ising.jl\"))\n\n@testset \"trg\" begin\n  # Make Ising model partition function\n  β = 1.1 * βc\n  d = 2\n  s = Index(d)\n  l = addtags(s, \"left\")\n  u = addtags(s, \"up\")\n  T = ising_mpo(l, u, β)\n\n  χmax = 20\n  nsteps = 20\n  κ, T = trg(T; χmax=χmax, nsteps=nsteps)\n\n  @test κ ≈ exp(-β * ising_free_energy(β)) atol = 1e-4\nend\n",
+      "metadata": {
+        "section_title": "test_trg.jl",
+        "source_file": "test\\base\\test_trg.jl",
+        "package": "itensors",
+        "section_id": "full"
+      },
+      "score": 0.9579315108548536,
+      "original_score": 0.9557173798472144,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "random"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_3__3",
+      "text": " -1) => 1], \"sn\")\n\n      N1 = ITensor(s', dag(s))\n      N1[s' => 2, s => 2] = 1.0\n\n      N2 = ITensor(dag(s), s')\n      N2[s' => 2, s => 2] = 1.0\n\n      NN = N1 + N2\n      @test NN[s' => 2, s => 2] ≈ 2.0\n\n      NN = N1 + N1\n      @test NN[s' => 2, s => 2] ≈ 2.0\n\n      NN = N2 + N2\n      @test NN[s' => 2, s => 2] ≈ 2.0\n    end\n\n    @testset \"Wavefunction Tests\" begin\n      s = [Index([QN(\"N\", 0, -2) => 2, QN(\"N\", 1, -2) => 2], \"s$n\") for n in 1:4]\n\n      psi0 = ITensor(s...)\n\n      psi0[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] = 1111\n      psi0[s[1] => 3, s[2] => 3, s[3] => 1, s[4] => 1] = 3311\n      psi0[s[1] => 1, s[2] => 3, s[3] => 1, s[4] => 3] = 1313\n\n      psi1 = permute(psi0, s[2], s[1], s[3], s[4])\n      @test norm(psi1 - psi0) ≈ 0.0\n\n      @test psi0[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi1[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi0[s[2] => 1, s[1] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi1[s[2] => 1, s[1] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n\n      @test psi0[s[1] => 3, s[2] => 3, s[3] => 1,",
+      "metadata": {
+        "section_title": "test_fermions.jl",
+        "source_file": "test\\base\\test_fermions.jl",
+        "section_id": "part_3",
+        "package": "itensors"
+      },
+      "score": 0.945603017947399,
+      "original_score": 0.945603017947399,
+      "vector_score": 0.9894169949055104,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_5_5__0",
+      "text": "One version of the ITensor `dmrg` function accepts an array of MPOs\n`[H1,H2,H3]` (or any number of MPOs you want). This version of DMRG\nwill find the ground state of `H1+H2+H3`. Internally it does not\nactually sum these MPOs, but loops over them during each step of\nthe \"eigensolver\" at the core of the DMRG algorithm, so it is usually\nmore efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs `H1`, `H2`, and `H3`.\nThen call DMRG like this:\n```julia\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "section_id": "h2_5",
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "package": "itensormps",
+        "section_title": "Use a Sum of MPOs in DMRG"
+      },
+      "score": 0.8690605592101233,
+      "original_score": 0.8621690096948665,
+      "vector_score": 0.9021171194278135,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "state",
+        "dmrg"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 111,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      }
+    }
+  }
+}

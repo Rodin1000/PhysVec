@@ -1,0 +1,138 @@
+{
+  "query": "itensors tJ model product state initialization with electron filling constraints",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "2d_hubbard_conserve_particles__aad747f19b81de0756ace6c93b6ee664__full__0",
+      "text": "using ITensors, ITensorMPS\n\nfunction main(; Nx=6, Ny=3, U=4.0, t=1.0)\n  N = Nx * Ny\n\n  nsweeps = 10\n  maxdim = [100, 200, 400, 800, 1600]\n  cutoff = [1E-6]\n  noise = [1E-6, 1E-7, 1E-8, 0.0]\n\n  sites = siteinds(\"Electron\", N; conserve_qns=true)\n\n  lattice = square_lattice(Nx, Ny; yperiodic=true)\n\n  os = OpSum()\n  for b in lattice\n    os -= t, \"Cdagup\", b.s1, \"Cup\", b.s2\n    os -= t, \"Cdagup\", b.s2, \"Cup\", b.s1\n    os -= t, \"Cdagdn\", b.s1, \"Cdn\", b.s2\n    os -= t, \"Cdagdn\", b.s2, \"Cdn\", b.s1\n  end\n  for n in 1:N\n    os += U, \"Nupdn\", n\n  end\n  H = MPO(os, sites)\n\n  # Half filling\n  state = [isodd(n) ? \"Up\" : \"Dn\" for n in 1:N]\n\n  # Initialize wavefunction to a random MPS\n  # of bond-dimension 10 with same quantum\n  # numbers as `state`\n  psi0 = random_mps(sites, state)\n\n  energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, noise)\n  @show t, U\n  @show flux(psi)\n  @show maxlinkdim(psi)\n  @show energy\n\n  return nothing\nend\n\nmain()\n",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "full",
+        "source_file": "examples\\dmrg\\2d_hubbard_conserve_particles.jl",
+        "section_title": "2d_hubbard_conserve_particles.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.7586055235187191,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensors",
+        "state",
+        "electron",
+        "filling"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "full",
+        "source_file": "examples\\src\\trg.jl",
+        "section_title": "trg.jl"
+      },
+      "score": 0.844567829424989,
+      "original_score": 0.8405823891538349,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Compute-excited-states-with-DMRG_5__0",
+      "text": "## Compute excited states with DMRG\nITensor DMRG accepts additional MPS wavefunctions as a optional, extra argument. These additional 'penalty states' are provided as an array of MPS just after the Hamiltonian, like this:\n```code\nenergy,psi3 = dmrg(H,[psi0,psi1,psi2],psi3_init;nsweeps,maxdim,cutoff)\n```\nHere the penalty states are [psi0,psi1,psi2] . When these are provided, the DMRG code minimizes the energy of the current MPS while also reducing its overlap (inner product) with the previously provided MPS. If these overlaps become sufficiently small, then the computed MPS is an excited state. So by finding the ground state, then providing it to DMRG as a \"penalty state\" or previous state one can compute the first excited state. Then providing both of these, one can get the second excited state, etc.\nA  keyword argument called weight can also be provided to the dmrg function when penalizing overlaps to previous states. The weight parameter is multiplied by the overlap with the previous states, so sets the size of the penalty. It should be chosen at least as large as the (estimated) gap between the ground and first excited states. Otherwise the optimal value of the weight parameter is not so obvious, and it is best to try various weights during initial test calculations.\nNote that when the system has conserved quantum numbers, a superior way to find excited states can be to find ground states of quantum number (or symmetry) sectors other than the one containing the absolute ground state. In that context, the penalty method used below is a way to find higher excited states within the same quantum number sector.\nFull Example code:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 20\n\n  sites = siteinds(\"S=1/2\",N)\n\n  h = 4.0\n\n  weight = 20*h # use a large weight\n                # since gap is expected to be large\n\n\n  #\n  # Use the OpSum feature to create the\n  # transverse field Ising model\n  #\n  # Factors of 4 and 2 are to rescale\n  # spin operators into Pauli matrices\n  #\n  os = OpSum()\n  for j=1:N-1\n    os -= 4,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:N\n    os -= 2*h,\"Sx\",j;\n  end\n  H = MPO(os,sites)\n\n\n  #\n  # Make sure to do lots of sweeps\n  # when finding excited states\n  #\n  nsweeps = 30\n  maxdim = [10,10,10,20,20,40,80,100,200,200]\n  cutoff = [1E-8]\n",
+      "metadata": {
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_id": "Compute-excited-states-with-DMRG",
+        "package": "itensormps",
+        "section_title": "Compute excited states with DMRG"
+      },
+      "score": 0.8193886788267262,
+      "original_score": 0.722136428964194,
+      "vector_score": 0.853485714738366,
+      "bm25_score": 0.022419540649632436,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensors",
+        "model",
+        "product",
+        "state"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_10_10__0",
+      "text": "ITensor DMRG accepts additional MPS wavefunctions as a optional, extra argument.\nThese additional 'penalty states' are provided as an array of MPS just\nafter the Hamiltonian, like this:\n```julia\nenergy,psi3 = dmrg(H,[psi0,psi1,psi2],psi3_init;nsweeps,maxdim,cutoff)\n```\nHere the penalty states are `[psi0,psi1,psi2]`.\nWhen these are provided, the DMRG code minimizes the\nenergy of the current MPS while also reducing its overlap\n(inner product) with the previously provided MPS. If these overlaps become sufficiently small,\nthen the computed MPS is an excited state. So by finding the ground\nstate, then providing it to DMRG as a \"penalty state\" or previous state\none can compute the first excited state. Then providing both of these, one can\nget the second excited state, etc.\nA  keyword argument called `weight` can also be provided to\nthe `dmrg` function when penalizing overlaps to previous states. The\n`weight` parameter is multiplied by the overlap with the previous states,\nso sets the size of the penalty. It should be chosen at least as large\nas the (estimated) gap between the ground and first excited states.\nOtherwise the optimal value of the weight parameter is not so obvious,\nand it is best to try various weights during initial test calculations.\nNote that when the system has conserved quantum numbers, a superior way\nto find excited states can be to find ground states of quantum number (or symmetry)\nsectors other than the one containing the absolute ground state. In that\ncontext, the penalty method used below is a way to find higher excited states\nwithin the same quantum number sector.\n**Full Example code:**\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 20\n  sites = siteinds(\"S=1/2\",N)\n  h = 4.0\n  weight = 20*h # use a large weight",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_title": "Compute excited states with DMRG",
+        "section_id": "h2_10"
+      },
+      "score": 0.6426994495527041,
+      "original_score": 0.613729134651572,
+      "vector_score": 0.7301237125243336,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensors",
+        "product",
+        "state"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "1d_hubbard_extended__27ce7ffcd58748203cd171f724582799__part_0__0",
+      "text": "using ITensors, ITensorMPS\n\n#\n# DMRG calculation of the extended Hubbard model\n# ground state wavefunction, and spin densities\n#\n\nlet\n  N = 20\n  Npart = 10\n  t1 = 1.0\n  t2 = 0.2\n  U = 1.0\n  V1 = 0.5\n\n  sites = siteinds(\"Electron\", N; conserve_qns=true)\n\n  os = OpSum()\n  for b in 1:(N - 1)\n    os -= t1, \"Cdagup\", b, \"Cup\", b + 1\n    os -= t1, \"Cdagup\", b + 1, \"Cup\", b\n    os -= t1, \"Cdagdn\", b, \"Cdn\", b + 1\n    os -= t1, \"Cdagdn\", b + 1, \"Cdn\", b\n    os += V1, \"Ntot\", b, \"Ntot\", b + 1\n  end\n  for b in 1:(N - 2)\n    os -= t2, \"Cdagup\", b, \"Cup\", b + 2\n    os -= t2, \"Cdagup\", b + 2, \"Cup\", b\n    os -= t2, \"Cdagdn\", b, \"Cdn\", b + 2\n    os -= t2, \"Cdagdn\", b + 2, \"Cdn\", b\n  end\n  for i in 1:N\n    os += U, \"Nupdn\", i\n  end\n  H = MPO(os, sites)\n\n  nsweeps = 6\n  maxdim = [50, 100, 200, 400, 800, 800]\n  cutoff = [1E-12]\n\n  state = [\"Emp\" for n in 1:N]\n  p = Npart\n  for i in N:-1:1\n    if p > i\n      println(\"Doubly occupying site $i\")\n      state[i] = \"UpDn\"\n      p -= 2\n    elseif p > 0\n      println(\"Singly occupying site $i\")\n      state[i] = (isodd(i) ? \"Up\" : \"Dn\")\n      p -= 1\n    end\n  end\n  # Initialize wavefunction to be bond\n  # dimension 10 random MPS with number\n  # of particles the same as `state`\n  psi0 = random_mps(sites, state; linkdims=10)\n\n  # Check total number of particles:\n  @show flux(psi0)\n\n  # Start DMRG calculation:\n  energy, psi = dmrg(H, psi0; nsweeps, maxdim",
+      "metadata": {
+        "source_file": "examples\\dmrg\\1d_hubbard_extended.jl",
+        "section_title": "1d_hubbard_extended.jl",
+        "section_id": "part_0",
+        "package": "itensormps"
+      },
+      "score": 0.6412391598733163,
+      "original_score": 0.6013768443036848,
+      "vector_score": 0.6449646606371581,
+      "bm25_score": 0.2818565304711383,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensors",
+        "model",
+        "state",
+        "electron"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 111,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      }
+    }
+  }
+}

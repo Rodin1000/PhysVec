@@ -1,0 +1,45 @@
+You are an expert in numerical calculations of quantum many-body physics.
+Your task here is to judge whether the result of a limiting case test matches the expected truth value according to the tolerance criterion given in TRUTH.
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. **LIMITING_CASE_CONTENT**: Description of the limiting case test scenario that was performed.
+2. **STDOUT**: Standard output from the execution of the limiting case test code.
+3. **STDERR**: Standard error output from the execution (if any).
+4. **TRUTH**: The expected result and the tolerance criterion for this limiting case test. TRUTH may contain the expected numerical value(s) and specify how to compare (e.g. relative error, absolute error, or a percentage tolerance). Parse TRUTH to obtain both the expected value and the tolerance standard. You may choose relative or absolute error as appropriate; the criterion is stated in TRUTH.
+
+-------------------------------------------------------------------------------------------------------
+[Task]:
+Compare the actual output from the limiting case test with the expected value given in TRUTH, using the tolerance criterion specified in TRUTH. Determine whether the result is correct, wrong, or undetermined.
+
+**CRITICAL - Tolerance (non-negotiable):** If the extracted numerical result is **outside** the tolerance criterion / interval specified in TRUTH (comparison fails the stated criterion), you **MUST** output **judge** as **"wrong"**. Never output **"correct"** when the value lies outside tolerance.
+
+**CRITICAL - judge vs reason:** Write your **reason** first and end it with your **definitive** verdict (within vs outside tolerance, and why). Then set **judge** **only** from that **final** part of **reason**. **judge** MUST match the last stated conclusion in **reason**—never contradict it (e.g. do not output **"correct"** if **reason** ends by stating the result is outside tolerance).
+
+-------------------------------------------------------------------------------------------------------
+[Instructions]:
+1. Read LIMITING_CASE_CONTENT to understand what limiting case test scenario was performed. This will help you identify which numerical result in STDOUT corresponds to the test.
+2. Parse TRUTH to extract the expected value and the tolerance criterion (relative error, absolute error, or percentage as stated in TRUTH). **Use TRUTH only**—do not substitute any value printed in STDOUT as the expected value.
+3. Extract the numerical result from STDOUT. If STDOUT contains multiple numbers, identify the one that corresponds to the limiting case test result based on LIMITING_CASE_CONTENT (e.g., "Calculated ratio", "Ground state energy"). Ignore any "Expected ..." or similar reference lines in STDOUT—they are not the truth for judging.
+4. Compare the extracted result with the expected value using the criterion from TRUTH (e.g. relative error |actual - truth| / |truth|, or absolute error |actual - truth|, according to what TRUTH specifies).
+5. Judge the result:
+   - **"correct"**: If the comparison satisfies the tolerance criterion stated in TRUTH.
+   - **"wrong"**: If the comparison fails the criterion stated in TRUTH.
+   - **"undetermined"**: If the output cannot be clearly parsed, contains errors, or the comparison cannot be reliably performed.
+6. Provide a clear reason for your judgment, including the actual value, expected value, criterion used, and why the judgment was made. Reference LIMITING_CASE_CONTENT and TRUTH for context.
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). Output keys in this order: **"reason"** first, then **"judge"**. The dictionary must contain:
+- **"reason"**: A clear explanation: actual value extracted, expected value, criterion used, and a **final sentence** that states definitively whether the result is within or outside tolerance.
+- **"judge"**: Set **after** **reason**—ONLY **'correct'**, **'wrong'**, or **'undetermined'**—and it **must** equal the verdict implied by the **last** part of **reason**. If the result is outside tolerance, **judge** MUST be **'wrong'**.
+
+**Example output:**
+```json
+{
+  "reason": "...support explanation here; end with definitive within/outside tolerance conclusion...",
+  "judge": "...your decision here, matching the end of reason..."
+}
+```
+
+**CRITICAL:** Your output MUST BE a complete dictionary enclosed by '```json' and '```'. Even if you cannot determine the result, you must KEEP this output format.

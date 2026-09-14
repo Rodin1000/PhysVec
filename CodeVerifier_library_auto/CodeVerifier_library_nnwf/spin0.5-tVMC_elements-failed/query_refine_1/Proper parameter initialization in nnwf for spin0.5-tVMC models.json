@@ -1,0 +1,106 @@
+{
+  "query": "Proper parameter initialization in nnwf for spin0.5-tVMC models",
+  "package": "netket",
+  "results": [
+    {
+      "id": "index__d0fafb4c3aae6226a48355272e87ed22__root_0__0",
+      "text": "Repository\nOpen issue\n.md\n.pdf\nTutorials on using symmetries in NetKet.\nEquivariant NQS: GCNN for Spin models\nSymmetries, Representations and Projectors for arbitrary NQS",
+      "metadata": {
+        "section_title": "ROOT",
+        "package": "netket",
+        "section_id": "root",
+        "source_file": "docs\\_build\\html\\tutorials\\symmetries\\index.html"
+      },
+      "score": 0.8557142857142858,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "models"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": true
+    },
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_5_5__0",
+      "text": "## 3) Variational Monte Carlo Optimisation#\nWe have now set up our model (Hamiltonian, Graph, Hilbert Space) and can proceed to optimise the variational ansatz we chose, namely the ffnn machine.\nTo setup the variational Monte Carlo optimisation tool, we have to provide a sampler nk.sampler and an optimizer nk.optimizer .\n```code\n# We shall use an exchange Sampler which preserves the global magnetization (as this is a conserved quantity in the model)\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n,\nd_max\n=\n2\n)\n# Construct the variational state\nvs\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nmodel\n,\nn_samples\n=\n1008\n)\n# We choose a basic, albeit important, Optimizer: the Stochastic Gradient Descent\nopt\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.01\n)\n# We can then specify a Variational Monte Carlo object, using the Hamiltonian, sampler and optimizers chosen.\n# Note that we also specify the method to learn the parameters of the wave-function: here we choose the efficient\n# Stochastic reconfiguration (Sr), here in an iterative setup\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nhamiltonian\n=\nop\n,\noptimizer\n=\nopt\n,\nvariational_state\n=\nvs\n,\ndiag_shift\n=\n0.01\n)\n```",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_5",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html",
+        "section_title": "3) Variational Monte Carlo Optimisation#"
+      },
+      "score": 0.8446272415240352,
+      "original_score": 0.7928363220320469,
+      "vector_score": 0.9910454025400586,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "netket.errors.InsufficientSamplesForSRWarning__318015a84f58aaee2dd77413e41cdde8__sec_3_3__0",
+      "text": "## Recommended solution#\nSwitch to the kernel/minSR formulation which uses the Neural Tangent Kernel (NTK):\nThis formulation inverts a \\(N_s \\times N_s\\) matrix instead of \\(N_p \\times N_p\\) ,\nwhich is much more efficient and stable when \\(N_s < N_p\\) .\nUse :class:`netket.driver.VMC_SR` instead of :class:`netket.driver.VMC` with SR.\nThe VMC_SR driver automatically chooses the optimal formulation and provides the same\nmathematical result but with better performance and stability.\nReferences\nThe kernel trick for SR was introduced by Chen & Heyl and Rende et al. .\nThe kernel trick for SR was introduced by Chen & Heyl and Rende et al. .\nFor a comprehensive discussion see the netket.driver.VMC_SR documentation.\nFor a comprehensive discussion see the netket.driver.VMC_SR documentation.",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\_generated\\errors\\netket.errors.InsufficientSamplesForSRWarning.html",
+        "section_title": "Recommended solution#",
+        "section_id": "sec_3"
+      },
+      "score": 0.8241521160446839,
+      "original_score": 0.7655361547262451,
+      "vector_score": 0.9569201934078064,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "ViT-wave-function__d9e54e914b31ad265a3124d7768bb4b3__sec_4_4__2",
+      "text": "=-\n2\n),\nj\n,\naxis\n=-\n1\n)\nreturn\nspins\n.\nreshape\n(\nspins\n.\nshape\n[\n0\n],\n-\n1\n)\nclass\nFMHA\n(\nnn\n.\nModule\n):\nd_model\n:\nint\n# dimensionality of the embedding space\nn_heads\n:\nint\n# number of heads\nn_patches\n:\nint\n# lenght of the input sequence\ntransl_invariant\n:\nbool\n=\nFalse\nparam_dtype\n=\njnp\n.\nfloat64\ndef\nsetup\n(\nself\n):\nself\n.\nv\n=\nnn\n.\nDense\n(\nself\n.\nd_model\n,\nkernel_init\n=\nnn\n.\ninitializers\n.\nxavier_uniform\n(),\nparam_dtype\n=\nself\n.\nparam_dtype\n,\n)\nself\n.\nW\n=\nnn\n.\nDense\n(\nself\n.\nd_model\n,\nkernel_init\n=\nnn\n.\ninitializers\n.\nxavier_uniform\n(),\nparam_dtype\n=\nself\n.\nparam_dtype\n,\n)\nif\nself\n.\ntransl_invariant\n:\nself\n.\nalpha\n=\nself\n.\nparam\n(\n\"alpha\"\n,\nnn\n.\ninitializers\n.\nxavier_uniform\n(),\n(\nself\n.\nn_heads\n,\nself\n.\nn_patches\n),\nself\n.\nparam_dtype\n,\n)\nsq_n_patches\n=\nint\n(\nself\n.\nn_patches\n**\n0.5\n)\nassert\nsq_n_patches\n*\nsq_n_patches\n==\nself\n.\nn_patches\nself\n.\nalpha\n=\nroll2d\n(\nself\n.\nalpha\n,\njnp\n.\narange\n(\nsq_n_patches\n),\njnp\n.\narange\n(\nsq_n_patches\n)\n)\nself\n.\nalpha\n=\nself\n.\nalpha\n.\nreshape\n(\nself\n.\nn_heads\n,\n-\n1\n,\nself\n.\nn_patches\n)\nelse\n:\nself\n.\nalpha\n=\nself\n.\nparam\n(\n\"alpha\"\n,\nnn\n.\ninitializers\n.\nxavier_uniform\n(),\n(\nself\n.\nn_heads\n,\nself\n.\nn_patches\n,\nself\n.\nn_patches\n),\nself\n.\nparam_dtype\n,\n)\ndef\n__call__\n(\nself\n,\nx\n):\n# apply the value matrix in paralell for each head\nv\n=\nself\n.\nv\n(\nx\n)\n# split the representations of the different heads\nv\n=\nrearrange\n(\nv\n,\n\"batch n_patches (n_heads d_eff) -> batch n_patches n_heads d_eff\"\n,\nn_heads\n=\nself\n.\nn_heads\n,\n)\n# factored attention mechanism\nv\n=\nrearrange\n(\nv\n,\n\"batch n_patches n_heads d_eff -> batch n_heads n_patches d_eff\"\n)\nx\n=\njnp\n.\nmatmul\n(\nself\n.\nalpha\n,\nv\n)\nx\n=\nre",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\ViT-wave-function.html",
+        "package": "netket",
+        "section_id": "sec_4",
+        "section_title": "2. Transformer Encoder#"
+      },
+      "score": 0.7850612017271018,
+      "original_score": 0.7134149356361358,
+      "vector_score": 0.8917686695451696,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "gs-matrix-models__ef1b32ac39370be9a6422cd5bf62bbb1__sec_7_7__0",
+      "text": "## 5. Jastrow Ansatz#\nWe have seen that the mean field ansatz yields about sub-10% error on the ground-state energy. Let’s now try to do better, using a more correlated ansatz.\nWe will now take a short-range Jastrow ansatz which is already inlcuded in NetKet as nk.models.Jastrow :\nwhere \\(W_{ij}\\) is a symmetric matrix of learnable complex parameters (the kernel of the quadratic form).\n```code\n# change the model: initialize weights with normal distributions\nmodel\n=\nnk\n.\nmodels\n.\nJastrow\n(\nkernel_init\n=\nnn\n.\ninitializers\n.\nnormal\n())\n# we use the same MetropolicLocal sapmler as before. Now we sample for longer to get a more accurate result\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n2\n**\n10\n)\n```\n```code\n# look at the parameters\nprint\n(\nvstate\n.\nparameters\n)\n```\n```code\nFrozenDict({\n    kernel: DeviceArray([[ 0.01049682+0.01166978j,  0.00682185+0.00620781j,\n                   0.00733915+0.01080751j,  0.00185571+0.00749652j,\n                  -0.00214337+0.00025017j, -0.00318804-0.00774995j],\n                 [-0.00512184-0.00538546j,  0.00184588-0.01090576j,\n                   0.00651656-0.00574499j,  0.00724852-0.00697769j,\n                  -0.01310518-0.00781628j,  0.0107602 +0.00490359j],\n                 [-0.00207881-0.00916165j,  0.00700885+0.00145953j,\n                   0.00113884-0.00484843j, -0.00317073-0.01036345j,\n                   0.00207871+0.01423066j,  0.01065844+0.00981316j],\n                 [ 0.00393085+0.01117876j,  0.00657261+0.00599069j,\n                  -0.01086216-0.00661874j,  0.00182235+0.00389626j,\n                  -0.00074458+0.0142108j ,  0.00068885+0.00487905j],\n                 [ 0.003",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_7",
+        "section_title": "5. Jastrow Ansatz#",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-matrix-models.html"
+      },
+      "score": 0.7432491903696908,
+      "original_score": 0.6441077886312546,
+      "vector_score": 0.8051347357890682,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "models"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 59,
+    "final_results_count": 5
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "query": "itensor custom tJ site type definition and op function overloading",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "Physics__76dd2e2b1a4692ebd1e2d3b3298ad284__custom_op_2__0",
+      "text": "## Making a Custom op Definition\nThe function op is used to obtain operators defined for a given \"site type\". ITensor includes pre-defined site types such as \"S=1/2\", \"S=1\", \"Electron\" and others. Or you can define your own site type as discussed in detail in the code examples further below.\nExtending op Function Definitions\nPerhaps the most common part of the site type system one wishes to extend are the various op or op! function overloads which allow code like\n```code\nusing ITensors, ITensorMPS\ns = siteind(\"S=1/2\")\nSz = op(\"Sz\",s)\n```\nto automatically create the $S^z$ operator for an Index s based on the \"S=1/2\" tag it carries. A major reason to define such op overloads is to allow the OpSum system to recognize new operator names, as discussed more below.\nLet's see how to introduce a new operator name into the ITensor site type system for this existing site type of \"S=1/2\" . The operator we will introduce is the projector onto the up spin state $P_\\uparrow$ which we will denote with the string \"Pup\" .\nAs a matrix acting on the space $\\{ |\\!\\uparrow\\rangle, |\\!\\downarrow\\rangle \\}$ , the $P_\\uparrow$ operator is given by\n\\[\\begin{aligned}\n\nP_\\uparrow &=\n\\begin{bmatrix}\n 1 &  0 \\\\\n 0  & 0 \\\\\n\\end{bmatrix}\n\n\\end{aligned}\\]\nTo add this operator to the ITensor op system, we just need to introduce the following code\n```code\nusing ITensors, ITensorMPS\nITensors.op(::OpName\"Pup\",::SiteType\"S=1/2\") =\n [1 0\n  0 0]\n```\nThis code can be defined anywhere, such as in your own personal application code and does not have to be put into the ITensor library source code.\nNote that we have to name the function ITensors.op and not just op so that it overloads other functions of the name op inside the ITensors module.\nHaving defined the above code, we can now do things like\n```code\nusing ITensors, ITensorMPS\ns = siteind(\"S=1/2\")\nPup = op(\"Pup\",s)\n```\nto obtain the \"Pup\" operator for our \"S=1/2\" Index s . Or we can do a similar thing for an array of site indices:\n```code\nusing ITensors, ITensorMPS\nN = 40\ns = siteinds(\"S=1/2\",N)\nPup1 = op(\"Pup\",s[1])\nPup3 = op(\"Pup\",s[3])\n",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\Physics.html",
+        "section_title": "Making a Custom op Definition",
+        "section_id": "custom_op"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9691667792919386,
+      "bm25_score": 0.6781977215664184,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "itensor",
+        "custom",
+        "site",
+        "type",
+        "definition",
+        "function"
+      ],
+      "match_ratio": 0.8571428571428571,
+      "is_html": true
+    },
+    {
+      "id": "Physics__76dd2e2b1a4692ebd1e2d3b3298ad284__Make-a-Custom-Local-Hilbert-Space-/-Physical-Degree-of-Freedom_4__2",
+      "text": " most languages. However, if we can map a tag to a type in the Julia type system, we can create function overloads for that type. ITensor does this for certain functions for you, and we will discuss a few of these functions below. So if the code encounters an Index such as Index(4,\"S=3/2\") it can call these functions which are specialized for indices carrying the \"S=3/2\" tag.\nThe space Function\nOne of the overloadable SiteType functions is space , whose job is to describe the vector space corresponding to that site type. For our SiteType\"S=3/2\" overload of space , which gets called for any Index carrying the \"S=3/2\" tag, the definition is\n```code\nusing ITensors, ITensorMPS\nITensors.space(::SiteType\"S=3/2\") = 4\n```\nNote that the function name is prepended with ITensors. before space . This prefix makes sure the function is overloading other versions of the space inside the ITensors module.\nThe only information needed about the vector space of a \"S=3/2\" Index in this example is that it is of dimension four. So the space function returns the integer 4 . We will see in more advanced examples that the returned value can instead be an array which specifies not only the dimension of a \"S=3/2\" Index, but also additional subspace structure it has corresponding to quantum numbers.\nAfter defining this space function, you can just write code like:\n```code\nusing ITensors, ITensorMPS\ns = siteind(\"S=3/2\")\n```\nto obtain a single \"S=3/2\" Index, or write code like\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=3/2\",N)\n```\nto obtain an array of N \"S=3/2\" indices. The custom space function will be used to determine the dimension of these indices, and the siteind or siteinds functions provided by ITensor will help with extra things like putting other Index tags that are conventional for site indices.\nThe op Function\nThe op function lets you define custom local operators associated to the physical degrees of freedom of your SiteType . Then for example you can use indices carrying your custom tag with OpSum and the OpSum system will know how to automatically convert names of operators such as \"Sz\" or \"S+\" into ITensors so that it can make an actual MPO.\nIn our example above, we defined this function for the case of the \"Sz\" operator as:\n```code\nusing ITensors, ITensorMPS\nITensors.op(::OpName\"Sz\",::SiteType\"S=3/2\") =\n  [+3/2   0    0    0\n     0  +1/",
+      "metadata": {
+        "section_title": "Make a Custom Local Hilbert Space / Physical Degree of Freedom",
+        "package": "itensormps",
+        "section_id": "Make-a-Custom-Local-Hilbert-Space-/-Physical-Degree-of-Freedom",
+        "source_file": "docs\\build\\examples\\Physics.html"
+      },
+      "score": 0.9806445220197529,
+      "original_score": 0.9648082218540962,
+      "vector_score": 0.8703453659226662,
+      "bm25_score": 0.9131895821541973,
+      "keyword_matches": 7,
+      "matched_keywords": [
+        "itensor",
+        "custom",
+        "site",
+        "type",
+        "definition",
+        "function",
+        "overloading"
+      ],
+      "match_ratio": 1.0,
+      "is_html": true
+    },
+    {
+      "id": "Physics__3bf93049cd8ad58331d2a32084e34246__h2_2_2__0",
+      "text": "The function `op` is used to obtain operators defined for a\ngiven \"site type\". ITensor includes pre-defined site types such\nas \"S=1/2\", \"S=1\", \"Electron\" and others. Or you can define your own site type\nas discussed in detail in the code examples further below.\n**Extending op Function Definitions**\nPerhaps the most common part of the site type system one wishes to extend\nare the various `op` or `op!` function overloads which allow code like\n```julia\nusing ITensors, ITensorMPS\ns = siteind(\"S=1/2\")\nSz = op(\"Sz\",s)\n```\nto automatically create the ``S^z`` operator for an Index `s` based on the\n`\"S=1/2\"` tag it carries. A major reason to define such `op` overloads\nis to allow the OpSum system to recognize new operator names, as\ndiscussed more below.\nLet's see how to introduce a new operator name into the ITensor site type\nsystem for this existing site type of `\"S=1/2\"`. The operator we will\nintroduce is the projector onto the up spin state ``P_\\uparrow`` which\nwe will denote with the string `\"Pup\"`.\nAs a matrix acting on the space ``\\{ |\\!\\uparrow\\rangle, |\\!\\downarrow\\rangle \\}``,\nthe ``P_\\uparrow`` operator is given by\n```math\n\\begin{aligned}\nP_\\uparrow &=\n\\begin{bmatrix}\n 1 &  0 \\\\\n 0  & 0 \\\\\n\\end{bmatrix}\n\\end{aligned}\n```\nTo add this operator to the ITensor `op` system, we just need to introduce the following\ncode\n```julia\nusing ITensors, ITensorMPS\nITensors.op(::OpName\"Pup\",::SiteType\"S=1/2\") =\n [1 0\n  0 0]\n```\nThis code can be defined anywhere, such as in your own personal application code and does\nnot have to be put into the ITensor library source code.\nNote that we have to name the function `ITensors.op` and not just `op` so that it overloads\nother functions of the name `op` inside the ITensors module.\nHaving defined the above code, we can now do things like\n```julia\nusing ITensors, ITensorMPS\ns = siteind(\"S=1/2\")\nPup = op(\"Pup\",s)\n```\nto obtain the `\"Pup\"` operator for our `\"S=1/2\"` Index `s`. Or we can do a similar\nthing for an array of site indices:\n```julia\nusing ITensors, ITensorMPS\nN = 40\ns",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "h2_2",
+        "source_file": "docs\\src\\examples\\Physics.md",
+        "section_title": "[Making a Custom op Definition](@id custom_op)"
+      },
+      "score": 0.9185489951758817,
+      "original_score": 0.9016970631433056,
+      "vector_score": 1.0,
+      "bm25_score": 0.10710824810130994,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "itensor",
+        "custom",
+        "site",
+        "type",
+        "definition",
+        "function"
+      ],
+      "match_ratio": 0.8571428571428571,
+      "is_html": false
+    },
+    {
+      "id": "ops_itensor__affa3c82ed8d1be94bbe675053e1287f__full__0",
+      "text": "using .SiteTypes: SiteTypes, op\n\nfunction SiteTypes.op(I::UniformScaling, s::Index...)\n  return I.λ * op(\"Id\", s...)\nend\n\nfunction ITensor(o::Op, s::Vector{<:Index})\n  return op(o.which_op, map(n -> s[n], o.sites)...; o.params...)\nend\n\nfunction ITensor(o::Scaled, s::Vector{<:Index})\n  c = coefficient(o)\n  if isreal(c)\n    c = real(c)\n  end\n  return c * ITensor(argument(o), s)\nend\n\nfunction ITensor(o::Prod, s::Vector{<:Index})\n  T = ITensor(true)\n  for a in o.args[1]\n    Tₙ = ITensor(a, s)\n    # TODO: Implement this logic inside `apply`\n    if hascommoninds(T, Tₙ)\n      T = T(Tₙ)\n    else\n      T *= Tₙ\n    end\n  end\n  return T\nend\n\nfunction ITensor(o::Sum, s::Vector{<:Index})\n  T = ITensor()\n  for a in o.args[1]\n    T += ITensor(a, s)\n  end\n  return T\nend\n\nfunction ITensor(o::Exp, s::Vector{<:Index})\n  return exp(ITensor(argument(o), s))\nend\n\nfunction ITensor(o::LazyApply.Adjoint, s::Vector{<:Index})\n  return swapprime(dag(ITensor(o', s)), 0 => 1)\nend\n\nfunction Sum{ITensor}(o::Sum, s::Vector{<:Index})\n  return Applied(sum, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Prod, s::Vector{<:Index})\n  return Applied(prod, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Scaled{C,Prod{Op}}, s::Vector{<:Index}) where {C}\n  t = Prod{ITensor}(argument(o), s)\n  t1 = coefficient(o) * only(t.args)[1]\n  return Applied(prod, (vcat([t1], only(t.args)[2:end]),))\nend\n\nfunction apply(o::Prod{ITensor}, v::ITensor; kwargs...)\n  ov = v\n  for oₙ in reverse(only(o.args))\n    ov = apply(oₙ, ov; kwargs...)\n  end\n  return ov\nend\n\nfunction (o::Prod{ITensor})(v::ITensor; kwargs...)\n  return apply(o, v; kwargs...)\nend\n",
+      "metadata": {
+        "source_file": "src\\lib\\Ops\\ops_itensor.jl",
+        "section_id": "full",
+        "package": "itensors",
+        "section_title": "ops_itensor.jl"
+      },
+      "score": 0.8851429636129048,
+      "original_score": 0.878181931104596,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "function"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_0__0",
+      "text": "using ChainRulesCore: @ignore_derivatives\nusing ..ITensors:\n  ITensors, Index, ITensor, itensor, dag, onehot, prime, product, swapprime, tags\nusing ..SmallStrings: SmallString\nusing ..TagSets: TagSets, TagSet, addtags, commontags\n\n@eval struct SiteType{T}\n  (f::Type{<:SiteType})() = $(Expr(:new, :f))\nend\n\n# Note that the complicated definition of\n# SiteType above is a workaround for performance\n# issues when creating parameterized types\n# in Julia 1.4 and 1.5-beta. Ideally we\n# can just use the following in the future:\n# struct SiteType{T}\n# end\n\n\"\"\"\nSiteType is a parameterized type which allows\nmaking Index tags into Julia types. Use cases\ninclude overloading functions such as `op`,\n`siteinds`, and `state` which generate custom\noperators, Index arrays, and IndexVals associated\nwith Index objects having a certain tag.\n\nTo make a SiteType type, you can use the string\nmacro notation: `SiteType\"MyTag\"`\n\nTo make a SiteType value or object, you can use\nthe notation: `SiteType(\"MyTag\")`\n\nThere are currently a few built-in site types\nrecognized by `jl`. The system is easily extensible\nby users. To add new operators to an existing site type,\nor to create new site types, you can follow the instructions\n[here](https://docs.itensor.org/ITensorMPS/stable/examples/Physics.html).\n\nThe current built-in site types are:\n\n- `SiteType\"S=1/2\"` (or `SiteType\"S=½\"`)\n- `SiteType\"S=1\"`\n- `SiteType\"Qubit\"`\n- `SiteType\"Qudit\"`\n- `SiteType\"Boson\"`\n- `SiteType\"Fermion\"`\n- `SiteType\"tJ\"`\n- `SiteType\"Electron\"`\n\n# Examples\n\nTags on indices get turned into SiteTypes internally, and then\nwe search for overloads of functions like `op` and `siteind`.\nFor example:\n\n```julia\njulia> s = siteind(\"S=1/2\")\n(dim=2|id=862|\"S=1/2,Site\")\n\njulia> @show op(\"Sz\", s);\nop(s, \"Sz\") = ITensor ord=2\nDim 1: (dim=2|id=862|\"S=1/2,Site\")'\nDim 2: (dim=2|id=862|\"S=1/2,Site\")\nNDTensors.Dense{Float64,Array{Float64,1}}\n 2×2\n 0.5   0.0\n 0.0  -0.5\n\njulia> @show op",
+      "metadata": {
+        "section_title": "sitetype.jl",
+        "section_id": "part_0",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "package": "itensors"
+      },
+      "score": 0.8248861427228331,
+      "original_score": 0.7886556894930744,
+      "vector_score": 0.648055017484915,
+      "bm25_score": 1.0,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "itensor",
+        "custom",
+        "site",
+        "type",
+        "definition",
+        "overloading"
+      ],
+      "match_ratio": 0.8571428571428571,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 96,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 48
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 48
+      }
+    }
+  }
+}

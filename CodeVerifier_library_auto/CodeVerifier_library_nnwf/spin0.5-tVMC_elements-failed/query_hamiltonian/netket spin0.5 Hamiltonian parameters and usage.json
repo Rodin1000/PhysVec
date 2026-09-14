@@ -1,0 +1,115 @@
+{
+  "query": "netket spin0.5 Hamiltonian parameters and usage",
+  "package": "netket",
+  "results": [
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_1_1__0",
+      "text": "## Contents\nThe goal of this tutorial series is to guide you through writing a simple VMC code from (almost) scratch to compute the ground-state of a paradigmatic spin model: the transverse-field Ising model in 2 dimensions.\nIn this first tutorial, we will focus on:\nUnderstanding NetKet’s graph and operator system\nUnderstanding NetKet’s graph and operator system\nDefining Hamiltonians using building blocks\nDefining Hamiltonians using building blocks\nWorking with different operator formats\nWorking with different operator formats\nValidating our implementation with exact diagonalization\nValidating our implementation with exact diagonalization\nThe hamiltonian we will study is the transverse-field Ising model in 2 dimensions:\nIn the following we assume periodic boundary conditions with \\(h=1\\) and \\(J=1\\) .\nNote\nIf you are executing this notebook on Colab , you will need to install NetKet.\nYou can do so by uncommenting and running the following cell.\nKeep in mind that this notebook was designed for NetKet version 3.9.1 , which requires Python >=3.8.\n```code\n# %pip install --quiet netket\n```\nPlease verify that you are running on the correct version of NetKet:\n```code\nimport\nplatform\nimport\nnetket\nas\nnk\nprint\n(\n\"Python version (requires >=3.9)\"\n,\nplatform\n.\npython_version\n())\nprint\n(\n\"NetKet version (requires >=3.9.1)\"\n,\nnk\n.\n__version__\n)\n```\n```code\nPython version (requires >=3.9) 3.12.11\nNetKet version (requires >=3.9.1) 3.19.dev26+gd94cf4597.d20250713\n```\nShow code cell content\nHide code cell content\n```code\n# Import necessary libraries\nimport\nnetket\nas\nnk\nimport\nnumpy\nas\nnp\n```",
+      "metadata": {
+        "package": "netket",
+        "section_title": "Contents",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "section_id": "sec_1"
+      },
+      "score": 0.866,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "custom_hilbert_constraints__a202136a3fd70552ecbc1a6ad0f2024f__sec_6_6__0",
+      "text": "## Integration with Variational States#\nConstrained Hilbert spaces work seamlessly with all NetKet variational states:\n```code\n# Create constrained system\nhilbert\n=\nnk\n.\nhilbert\n.\nSpin\n(\n0.5\n,\nN\n=\n10\n,\nconstraint\n=\nSumConstraint\n(\n0\n))\n# Zero magnetization\ngraph\n=\nnk\n.\ngraph\n.\nChain\n(\n10\n)\nhamiltonian\n=\nnk\n.\noperator\n.\nIsing\n(\nhilbert\n,\ngraph\n,\nh\n=\n1.0\n)\n# Standard NetKet workflow\nmodel\n=\nnk\n.\nmodels\n.\nRBM\n(\nalpha\n=\n1\n)\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n,\ngraph\n)\n# Respects magnetization\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n)\n# Optimization works as usual\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\n0.01\n)\ndriver\n=\nnk\n.\ndriver\n.\nVMC\n(\nhamiltonian\n,\noptimizer\n)\ndriver\n.\nrun\n(\nvstate\n,\nn_iter\n=\n100\n)\n```",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_6",
+        "source_file": "docs\\_build\\html\\advanced\\custom_hilbert_constraints.html",
+        "section_title": "Integration with Variational States#"
+      },
+      "score": 0.712253660977496,
+      "original_score": 0.5705278522052178,
+      "vector_score": 0.6627224365563551,
+      "bm25_score": 0.20174951480066852,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_3_3__0",
+      "text": "## 1. Defining the Hamiltonian#\nNetKet covers quite a few standard Hamiltonians and lattices, so let’s use this to quickly define the antiferromagnetic Heisenberg chain.\nFor the moment we assume \\(L=22\\) and simply define a chain lattice in this way (using periodic boundary conditions for now).\n```code\n# Define a 1d chain\nL\n=\n22\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n1\n,\npbc\n=\nTrue\n)\n```\nNext, we need to define the Hilbert space on this graph.\nWe have here spin-half degrees of freedom, and as we know that the ground-state sits in the zero magnetization sector, we can already impose this as a constraint in the Hilbert space.\nThis is not mandatory, but will nicely speeds things up in the following.\n```code\n# Define the Hilbert space based on this graph\n# We impose to have a fixed total magnetization of zero\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n0.5\n,\ntotal_sz\n=\n0\n,\nN\n=\ng\n.\nn_nodes\n)\n```\nThe final element of the triptych is of course the Hamiltonian acting in this Hilbert space, which in our case in already defined in NetKet.\nNote that the NetKet Hamiltonian uses Pauli Matrices (if you prefer to work with spin- \\(1/2\\) operators, it’s pretty trivial to define your own custom Hamiltonian, as covered in another tutorial)\n```code\n# calling the Heisenberg Hamiltonian\nha\n=\nnk\n.\noperator\n.\nHeisenberg\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n)\n```",
+      "metadata": {
+        "package": "netket",
+        "section_title": "1. Defining the Hamiltonian#",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "section_id": "sec_3"
+      },
+      "score": 0.7102075234433383,
+      "original_score": 0.567473915587072,
+      "vector_score": 0.6870719806698794,
+      "bm25_score": 0.08908165525584247,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "02-variational-states-full-summation__9df6c03baad2cbefd9c913ee6748c0df__sec_2_2__0",
+      "text": "## 1. Setup from Previous Tutorial#\nLet’s quickly recreate the system from Part 1:\n```code\n# Define the system\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\ng\n.\nn_nodes\n)\n# Build the Hamiltonian (solution from Part 1)\nhamiltonian\n=\nnk\n.\noperator\n.\nLocalOperator\n(\nhi\n)\n# Add transverse field terms\nfor\nsite\nin\ng\n.\nnodes\n():\nhamiltonian\n=\nhamiltonian\n-\n1.0\n*\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\nsite\n)\n# Add Ising interaction terms\nfor\ni\n,\nj\nin\ng\n.\nedges\n():\nhamiltonian\n=\nhamiltonian\n+\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\ni\n)\n@\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\nj\n)\n# Convert to JAX format\nhamiltonian_jax\n=\nhamiltonian\n.\nto_pauli_strings\n()\n.\nto_jax_operator\n()\n# Compute exact ground state for comparison\nfrom\nscipy.sparse.linalg\nimport\neigsh\ne_gs\n,\npsi_gs\n=\neigsh\n(\nhamiltonian\n.\nto_sparse\n(),\nk\n=\n1\n)\ne_gs\n=\ne_gs\n[\n0\n]\npsi_gs\n=\npsi_gs\n.\nreshape\n(\n-\n1\n)\nprint\n(\nf\n\"Exact ground state energy:\n{\ne_gs\n:\n.6f\n}\n\"\n)\n```\n```code\nExact ground state energy: -34.010598\n```",
+      "metadata": {
+        "section_id": "sec_2",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\02-variational-states-full-summation.html",
+        "section_title": "1. Setup from Previous Tutorial#",
+        "package": "netket"
+      },
+      "score": 0.6479562402381557,
+      "original_score": 0.5041637186452896,
+      "vector_score": 0.630204648306612,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "hamiltonian"
+      ],
+      "match_ratio": 0.2,
+      "is_html": true
+    },
+    {
+      "id": "custom_hilbert_constraints__a202136a3fd70552ecbc1a6ad0f2024f__sec_2_2__0",
+      "text": "## Built-in Constraints#\nNetKet provides several built-in constraints for common use cases:\nHilbert Space\nConstraint Parameter\nImplementation\nDescription\nExample\nSpin\ntotal_sz\nSumConstraint\nFixed total magnetization \\(\\sum_i \\sigma_i\\)\nSpin(0.5, N=4, total_sz=0)\nFock\nn_particles\nSumConstraint\nFixed total particle number \\(\\sum_i n_i\\)\nFock(n_max=3, N=4, n_particles=2)\nSpinOrbitalFermions\nn_fermions_per_spin\nSumOnPartitionConstraint\nFixed fermion number per spin subspace\nSpinOrbitalFermions(n_orbitals=4, s=0.5, n_fermions_per_spin=(2, 1))\nWe also ship the following extra classes:\nDiscreteHilbertConstraint - Base class for implementing custom constraints\nDiscreteHilbertConstraint - Base class for implementing custom constraints\nExtraConstraint - Combine two constraints using logical AND\nExtraConstraint - Combine two constraints using logical AND\nFor more complex constraints or combinations of conditions, you’ll need to implement custom constraints as described below.\nDo you need custom constraints?\nConstraints are used in 2 places throughout NetKet.\nTo enumerate the full Hilbert Space, therefore when converting a NetKet operator to a numpy dense or scipy sparse matrix to perform exact diagonalisation.\nTo enumerate the full Hilbert Space, therefore when converting a NetKet operator to a numpy dense or scipy sparse matrix to perform exact diagonalisation.\nTo generate valid random configurations belonging to the subspace, used when initialising Markov Chain samplers.\nTo generate valid random configurations belonging to the subspace, used when initialising Markov Chain samplers.\nIn most serious VMC calculations, point 1 is not relevant because the system is too large to do ED anyway, and so you only really need 2.\nHowever there are other, simpler methods of initialising MCMC samplers. For example, you could initialise them manually with a few valid configurations.\nSo, while it’s generally useful to implement your own constraints, you might not really need to do it.",
+      "metadata": {
+        "section_id": "sec_2",
+        "source_file": "docs\\_build\\html\\advanced\\custom_hilbert_constraints.html",
+        "package": "netket",
+        "section_title": "Built-in Constraints#"
+      },
+      "score": 0.6084512408388845,
+      "original_score": 0.4485228744209641,
+      "vector_score": 0.5606535930262051,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.2,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 58,
+    "final_results_count": 5
+  }
+}

@@ -1,0 +1,52 @@
+Your task is to scale down numerical parameters in a given code file for faster testing, while keeping the code structure and logic unchanged.
+
+-----------------------------------------------------------------------------------------------
+[Input]:
+1. TOPIC / ALLOWED_LANGUAGE / ALLOWED_PACKAGES: When provided in the AGGREGATED INPUT below, you must strictly follow them.
+2. CODE_FORMER: the input code file whose parameters need to be scaled down.
+
+-----------------------------------------------------------------------------------------------
+[Instructions]:
+1. If TOPIC, ALLOWED_LANGUAGE, and ALLOWED_PACKAGES are provided in the input, you MUST strictly obey them: the scaled-down code MUST use the specified language and use the listed packages for the domain; you may also use other general-purpose or standard library packages as needed. You are FORBIDDEN to change to another programming language.
+
+2. You read the CODE_FORMER to understand the code structure and parameter usage.
+
+3. You scale down numerical parameters for faster execution. Keep the code structure, logic, and function definitions unchanged.
+   - Lattice/system size: reduce (e.g., lattice L <= 6 or 10, number of sites/particles smaller).
+   - DMRG/iterative settings: reduce nsweeps (e.g., < 3), maxdim (e.g., < 30), cutoff.
+   - Quantum circuit: reduce num_qubits (e.g., < 6), evolution time (e.g., < 1.0) if applicable.
+   - Other calculation parameters: choose small values for simplicity and feasibility.
+   - **CRITICAL**: Scale down to the smallest values that do NOT contradict non-main function definitions (e.g. hardcoded indices/params). Avoid extremely small values (e.g. 0, 1) that may cause degeneracy or invalid inputs.
+
+4. You MUST NOT change the code type (python or julia), function names, or overall structure.
+
+-----------------------------------------------------------------------------------------------
+[Critical constraints]:
+- **Entrypoint execution:** You MUST preserve the executable entrypoint that invokes main (or equivalent). You must not only define the entrypoint, but also ensure it is actually executed. You are STRICTLY FORBIDDEN to omit, comment out, or skip the entrypoint execution part. The scaled-down code must remain runnable as a standalone script.
+- **Exception handling:** Do NOT use try/except (Python) or try/catch (Julia) to silently swallow errors. Such patterns cause exitcode=0 even when the computation fails, which breaks the workflow's success detection. **Python:** Forbidden: `except Exception as e: print(e); continue` (or similar) without re-raising or sys.exit(1). **Julia:** Forbidden: `catch e; println(e); # continue` (or similar) without rethrow(e) or exit(1). When an error occurs in the core computation, the process MUST exit with a non-zero code so that the workflow can trigger repair. If the input code contains such patterns, remove or fix them.
+
+-----------------------------------------------------------------------------------------------
+[Output]:
+Your output consists of two parts:
+
+1. **JSON block** (enclosed by ```json and ```): A dictionary with keys:
+   - **"code_type"**: either "python" or "julia" (lowercase string, same as input)
+   Do NOT put code content in the JSON.
+   The JSON must be valid (proper escaping, e.g. `"` as `\"`) so it can be loaded by json.loads().
+
+2. **Code block** (enclosed by <CODE> and </CODE>): The full scaled-down code as raw text.
+   - Place the complete code between <CODE> and </CODE>
+   - No JSON escaping is needed.
+   - **CRITICAL:** You MUST output a COMPLETE code block. The block MUST include both <CODE> and </CODE>. Do NOT omit or truncate the closing tag.
+
+**CRITICAL:** You MUST NOT include this prompt itself in your output.
+
+**Example output:**
+```json
+{"code_type": "...code type here..."}
+```
+<CODE>
+...code content here...
+</CODE>
+
+**CRITICAL:** Your output MUST include both the JSON block and the code block.

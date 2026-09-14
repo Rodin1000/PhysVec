@@ -1,0 +1,67 @@
+**Detailed Rules for Generating [ITensors/ITensorMPS] Codes**
+
+====================================================================================================
+
+## **Notation**
+
+**Function Categories:**
+- **ELEMENT functions:** Functions with tags {'site', 'hamiltonian', 'observable', 'initialstate', 'effector'}. These are fundamental building blocks that implement single steps in the calculation procedure.
+- **Task functions:** Functions with tags {'run', 'item', 'plot'}. These orchestrate ELEMENT functions to complete calculation tasks.
+- **Entry point:** The 'main' function serves as the entry point of the program.
+
+**Scope of this part:** This part applies to the **entire codebase** (all functions and the overall code structure). The requirements specified here (package usage, character encoding, parameter value placement, etc.) must be followed throughout the code.
+
+**IMPORTANT:** When applying rules in this part, you should ensure compliance across all parts of the code, but you should **NOT modify the function category structure** (i.e., do not change which functions are ELEMENT functions vs task functions).
+
+====================================================================================================
+
+## **Packages and Other Coding Requirements**
+
+**Context:** This part specifies package usage, character encoding, parameter value placement, and other coding standards that apply to the entire codebase.
+
+## **Common "case" Choices for ITensors/ITensorMPS**
+
+Examples:
+- "BoseHubbard1D"
+- "XXZchain"
+- "groundstate"
+- "correlation"
+- ... (use appropriate case names based on the task)
+
+====================================================================================================
+
+## **Other Coding Requirements**
+
+### **1. Package Usage**
+- **You are REQUIRED** to import (with julia command 'using') BOTH ITensors and ITensorMPS packages in the code as external packages. 
+- You may import other necessary packages (with julia command 'using')
+
+### **2. Language**
+- Julia syntax: If the code_type is 'julia', you MAKE SURE that in the code you use 'function' rather than 'def' to define all functions.
+
+### **3. Plotting**
+- Results from different data_sets and tasks are plotted in a single figure
+
+### **4. Character Encoding (CRITICAL)**
+- **You are REQUIRED** to generate code that contains only ASCII characters
+- **You are FORBIDDEN** to use Unicode letters, symbols, or punctuation
+- **Forbidden examples (non-exhaustive):**
+  - Greek letters: ψ, Δ, ω, φ, μ, λ
+  - Math/logic symbols: ÷, ≤, ≥, ≠, ∈, →, ←
+  - Typographic quotes: " " ' '
+  - Primes: ′
+  - Ellipsis: …
+  - Nonbreaking/zero-width spaces
+- **Use ASCII equivalents instead:**
+  - ψ → psi, φ → phi, ω → omega, μ → mu, λ → lambda, Δ → Delta
+  - a ÷ b → div(a, b), ≤ → <=, ≥ → >=, ≠ → !=, ∈ → in
+  - Use straight quotes " ' and plain ASCII punctuation only
+
+### **5. Parameter Values (CRITICAL)**
+- **You are FORBIDDEN** to include specific values in function definitions (except 'main')
+- **You are REQUIRED** to enter all concrete parameter values in 'main' when you call model functions (such as 'site', 'hamiltonian'...)
+- **For DMRG calculations:** When using `dmrg()` function, sweep parameters (nsweep, maxdim, cutoff) MUST be set in the 'main' function explicitly. You SHOULD NOT include specific values in 'effector' function definition.
+- **In 'main' function:** You MUST choose values according to the target research paper. You choose values according to your own preferences ONLY WHEN the original paper does NOT provide related parameter values.
+
+====================================================================================================
+

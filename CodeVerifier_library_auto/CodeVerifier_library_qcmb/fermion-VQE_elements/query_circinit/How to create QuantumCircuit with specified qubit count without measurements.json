@@ -1,0 +1,144 @@
+{
+  "query": "How to create QuantumCircuit with specified qubit count without measurements?",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "hartree_fock__973a80b2a7462da2917d3311e3e913f7__part_3__3",
+      "text": "_mapper,\n            )\n            self.qregs = [QuantumRegister(len(self._bitstr), name=\"q\")]\n\n    def _build(self) -> None:\n        \"\"\"\n        Construct the Hartree-Fock initial state given its parameters.\n        Returns:\n            QuantumCircuit: a quantum circuit preparing the Hartree-Fock\n            initial state given a number of spatial orbitals, number of particles and\n            a qubit mapper.\n        \"\"\"\n        if self._is_built:\n            return\n\n        super()._build()\n\n        # Construct the circuit for bitstring. Since this is defined as an initial state\n        # circuit its assumed that this is applied first to the qubits that are initialized to\n        # the zero state. Hence we just need to account for all True entries and set those.\n        if self._bitstr is not None:\n            for i, bit in enumerate(self._bitstr):\n                if bit:\n                    self.x(i)\n\n\ndef hartree_fock_bitstring_mapped(\n    num_spatial_orbitals: int,\n    num_particles: tuple[int, int],\n    qubit_mapper: QubitMapper,\n) -> list[bool]:\n    # pylint: disable=unused-argument\n    \"\"\"Compute the bitstring representing the mapped Hartree-Fock state for the specified system.\n\n    Args:\n        num_spatial_orbitals: The number of spatial orbitals, has a min. value of 1.\n        num_particles: The number of particles as a tuple (alpha, beta) containing the number of\n            alpha- and  beta-spin electrons, respectively.\n        qubit_mapper: A QubitMapper.\n\n    Returns:\n        The bitstring representing the mapped state of the Hartree-Fock state as array of bools.\n    \"\"\"\n    # get the bitstring encoding the Hartree Fock state\n    bitstr = hartree_fock_bitstring(num_spatial_orbitals, num_particles)\n\n    # encode the bitstring as a `FermionicOp`\n    bitstr_op = FermionicOp(\n        {\" \".join(f\"+_{idx}\" for idx, bit in enumerate(bitstr) if bit): 1.0},\n        num_spin_orbitals=2 * num_spatial_orbitals,\n    )\n\n    # map the `FermionicOp` to a qubit operator\n    qubit_op: SparsePauliOp\n    if isinstance(qubit_mapper, TaperedQubitMapper):\n        # To avoid checking commutativity, we call the two methods separately.\n        qubit_op = qubit_mapper.map_clifford(bitstr_op)\n        qubit_op = qubit_mapper.taper_clifford(qubit_op, check_commutes=False)\n    else:\n        qubit_op = qubit_mapper.map(bitstr_op)\n\n    # We check the mapped operator `x` part of the paulis because we want to have particles\n    # i.e. True,",
+      "metadata": {
+        "section_id": "part_3",
+        "section_title": "hartree_fock.py",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\hartree_fock.py",
+        "package": "qiskit-nature"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.11667851169790405,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "quantumcircuit",
+        "specified",
+        "qubit"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "ref_measure__0fc7c7da1987920f76ea2f2ee39bd53f__part_5__5",
+      "text": "allow_sampling=True):\n    \"\"\"Multi-qubit measure test circuits with non-deterministic count output.\"\"\"\n    circuits = []\n\n    def measure_n(num_qubits):\n        \"\"\"Multi-qubit measure instruction.\"\"\"\n        return Instruction(\"measure\", num_qubits, num_qubits, [])\n\n    # 2-qubit measure |++>\n    qr = QuantumRegister(2)\n    cr = ClassicalRegister(2)\n    circuit = QuantumCircuit(qr, cr)\n    circuit.h(qr[0])\n    circuit.h(qr[1])\n    circuit.barrier(qr)\n    circuit.append(measure_n(2), [0, 1], [0, 1])\n    if not allow_sampling:\n        circuit.barrier(qr)\n        circuit.id(qr)\n        circuit.barrier(qr)\n        circuit.append(measure_n(2), [0, 1], [0, 1])\n    circuits.append(circuit)\n\n    # 3-qubit measure |++0>\n    qr = QuantumRegister(3)\n    cr = ClassicalRegister(3)\n    circuit = QuantumCircuit(qr, cr)\n    circuit.h(qr[0])\n    circuit.h(qr[1])\n    circuit.barrier(qr)\n    circuit.append(measure_n(3), [0, 1, 2], [0, 1, 2])\n    if not allow_sampling:\n        circuit.barrier(qr)\n        circuit.id(qr)\n        circuit.barrier(qr)\n        circuit.append(measure_n(3), [0, 1, 2], [0, 1, 2])\n    circuits.append(circuit)\n\n    return circuits\n\n\ndef multiqubit_measure_counts_nondeterministic(shots, hex_counts=True):\n    \"\"\"Multi-qubit measure test circuits reference counts.\"\"\"\n\n    targets = []\n    if hex_counts:\n        # 2-qubit measure |++>\n        targets.append({\"0x0\": shots / 4, \"0x1\": shots / 4, \"0x2\": shots / 4, \"0x3\": shots / 4})\n        # 3-qubit measure |0++>\n        targets.append({\"0x0\": shots / 4, \"0x1\": shots / 4, \"0x2\": shots / 4, \"0x3\": shots / 4})\n    else:\n        # 2-qubit measure |++>\n        targets.append({\"00\": shots / 4, \"01\": shots / 4, \"10\": shots / 4, \"11\": shots / 4})\n        # 3-qubit measure |0++>\n        targets.append({\"000\": shots / 4, \"001\": shots / 4, \"010\": shots / 4, \"011\": shots / 4})\n    return targets\n",
+      "metadata": {
+        "package": "qiskit-aer",
+        "section_title": "ref_measure.py",
+        "source_file": "test\\terra\\reference\\ref_measure.py",
+        "section_id": "part_5"
+      },
+      "score": 0.9740865126809444,
+      "original_score": 0.9716571232447829,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "quantumcircuit",
+        "qubit",
+        "count"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "circuit_construction__23d952d810e0265575243b1019cbe3ac__part_2__2",
+      "text": "Q\n        QV circit from scratch.\n        \"\"\"\n        return quantum_volume(circuit_size, num_qubits, seed=SEED)\n\n    def time_DTC100_set_build(self, circuit_size, num_qubits):\n        \"\"\"Measures an SDKs ability to build a set\n        of 100Q DTC circuits out to 100 layers of\n        the underlying unitary\n        \"\"\"\n        max_cycles = circuit_size\n        initial_state = QuantumCircuit(num_qubits)\n        dtc_circuit = dtc_unitary(num_qubits, g=0.95, seed=SEED)\n\n        circs = [initial_state]\n        for tt in range(max_cycles):\n            qc = circs[tt].compose(dtc_circuit)\n            circs.append(qc)\n            result = circs[-1]\n\n        return result\n\n\nclass MultiControl:\n    param_names = [\"width\"]\n    params = [10, 16, 20]\n\n    def time_multi_control_circuit(self, width):\n        \"\"\"Measures an SDKs ability to build a circuit\n        with a multi-controlled X-gate\n        \"\"\"\n        out = multi_control_circuit(width)\n        return out\n\n\nclass ParameterizedCirc:\n    param_names = [\"num_qubits\"]\n    params = [5, 10, 16]\n\n    def time_param_circSU2_100_build(self, num_qubits):\n        \"\"\"Measures an SDKs ability to build a\n        parameterized efficient SU2 circuit with circular entanglement\n        over 100Q utilizing 4 repetitions.  This will yield a\n        circuit with 1000 parameters\n        \"\"\"\n        out = efficient_su2(num_qubits, reps=4, entanglement=\"circular\")\n        return out\n\n\nclass QasmImport:\n    def setup(self):\n        qv_circuit = quantum_volume(100, seed=2025_12345)\n        qv_circuit.measure_all()\n        backend = GenericBackendV2(100, coupling_map=CouplingMap.from_line(100), seed=2025_12345)\n        t_qv = transpile(qv_circuit, backend, optimization_level=0, seed_transpiler=2025_12345)\n        self.qasm = qasm2.dumps(t_qv)\n\n    def time_QV100_qasm2_import(self):\n        \"\"\"QASM import of QV100 circuit\"\"\"\n        QuantumCircuit.from_qasm_str(self.qasm)\n\n\nclass CliffordSynthesis:\n    param_names = [\"num_qubits\"]\n    params = [10, 50, 100]\n\n    def time_clifford_synthesis(self, num_qubits):\n        cliff = random_clifford(num_qubits)\n        qc = cliff.to_circuit()\n        return qc\n",
+      "metadata": {
+        "section_title": "circuit_construction.py",
+        "section_id": "part_2",
+        "package": "qiskit",
+        "source_file": "test\\benchmarks\\circuit_construction.py"
+      },
+      "score": 0.9724669197235034,
+      "original_score": 0.9716571232447829,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "phase_estimation__ebb06fd81b96c6f4a6840dff4badd3cd__part_2__2",
+      "text": " be provided.\")\n\n        self._measurements_added = False\n        if num_evaluation_qubits is not None:\n            self._num_evaluation_qubits = num_evaluation_qubits\n\n        self._sampler = sampler\n        self._transpiler = transpiler\n        self._transpiler_options = transpiler_options if transpiler_options is not None else {}\n\n    def construct_circuit(\n        self, unitary: QuantumCircuit, state_preparation: QuantumCircuit | None = None\n    ) -> QuantumCircuit:\n        \"\"\"Return the circuit to be executed to estimate phases.\n\n        This circuit includes as sub-circuits the core phase estimation circuit,\n        with the addition of the state-preparation circuit and possibly measurement instructions.\n        \"\"\"\n        num_evaluation_qubits = self._num_evaluation_qubits\n        num_unitary_qubits = unitary.num_qubits\n\n        pe_circuit = circuit.library.PhaseEstimation(num_evaluation_qubits, unitary)\n\n        if state_preparation is not None:\n            pe_circuit.compose(\n                state_preparation,\n                qubits=range(num_evaluation_qubits, num_evaluation_qubits + num_unitary_qubits),\n                inplace=True,\n                front=True,\n            )\n\n        return pe_circuit\n\n    def _add_measurement_if_required(self, pe_circuit):\n\n        # Measure only the evaluation qubits.\n        regname = \"meas\"\n        creg = ClassicalRegister(self._num_evaluation_qubits, regname)\n        pe_circuit.add_register(creg)\n        pe_circuit.barrier()\n        pe_circuit.measure(range(self._num_evaluation_qubits), range(self._num_evaluation_qubits))\n\n        return circuit\n\n    def _compute_phases(self, circuit_result: Result) -> numpy.ndarray | qiskit.result.Counts:\n        \"\"\"Compute frequencies/counts of phases from the result of running the QPE circuit.\n\n        How the frequencies are computed depends on whether the backend computes amplitude or\n        samples outcomes.\n\n        1) If the backend is a statevector simulator, then the reduced density matrix of the\n        phase-reading register is computed from the combined phase-reading- and input-state\n        registers. The elements of the diagonal :math:`(i, i)` give the probability to measure the\n        each of the states `i`. The index `i` expressed as a binary integer with the LSB rightmost\n        gives the state of the phase-reading register with the LSB leftmost when interpreted as a\n        phase. In order to maintain the compact representation, the phases are maintained as decimal\n        integers.  They may be converted to other forms via the results object,\n        `PhaseEstimationResult` or `HamiltonianPhaseEstimationResult`.\n\n         2) If the backend samples bitstrings, then the counts are first retrieved as a dict.  The\n        binary strings (the keys) are then reversed so that the LSB is rightmost and the",
+      "metadata": {
+        "section_id": "part_2",
+        "section_title": "phase_estimation.py",
+        "source_file": "qiskit_algorithms\\phase_estimators\\phase_estimation.py",
+        "package": "qiskit-algorithms"
+      },
+      "score": 0.9724669197235034,
+      "original_score": 0.9716571232447829,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "chc__a4607c73dfc1aaa14bb2b2fb009d79f6__part_1__1",
+      "text": "bounds = None\n        self._ladder = ladder\n        self._num_qubits = None\n        self._excitations = None\n        self._initial_state = None\n        self._num_parameters = None\n        self._support_parameterized_circuit = True\n\n        if num_qubits is not None:\n            self.num_qubits = num_qubits\n\n        if excitations is not None:\n            self.excitations = excitations\n\n        if initial_state is not None:\n            self.initial_state = initial_state\n\n    @property\n    def num_qubits(self) -> int | None:\n        \"\"\"Number of qubits of the ansatz.\n\n        Returns:\n           int:  An integer indicating the number of qubits.\n        \"\"\"\n        return self._num_qubits\n\n    @num_qubits.setter\n    def num_qubits(self, num_qubits: int) -> None:\n        \"\"\"Set the number of qubits of the ansatz.\n\n        Args:\n           num_qubits: An integer indicating the number of qubits.\n        \"\"\"\n        if self._num_qubits != num_qubits:\n            # invalidate the circuit\n            self._invalidate()\n            self._num_qubits = num_qubits\n            self.qregs = [QuantumRegister(num_qubits, name=\"q\")]\n\n    @property\n    def excitations(self) -> list[tuple[tuple[Any, ...], ...]] | None:\n        \"\"\"The excitation indices to be included in the circuit.\"\"\"\n        return self._excitations\n\n    @excitations.setter\n    def excitations(self, excitations: list[tuple[tuple[Any, ...], ...]]) -> None:\n        \"\"\"Sets the excitation indices to be included in the circuit.\"\"\"\n        self._invalidate()\n        self._excitations = excitations\n        self._num_parameters = len(excitations) * self._reps\n        self._bounds = [(-np.pi, np.pi)] * self._num_parameters\n\n    @property\n    def initial_state(self) -> QuantumCircuit | None:\n        \"\"\"The initial state.\"\"\"\n        return self._initial_state\n\n    @initial_state.setter\n    def initial_state(self, initial_state: QuantumCircuit) -> None:\n        \"\"\"Sets the initial state.\"\"\"\n        self._invalidate()\n        self._initial_state = initial_state\n\n    def _check_configuration(self, raise_on_failure: bool = True) -> bool:\n        \"\"\"Check if the configuration of the CHC class is valid.\n\n        Args:\n            raise_on_failure: Whether to raise on failure.\n\n        Returns:\n            True, if the configuration is valid and the circuit can be constructed. Otherwise\n            an ValueError is raised.\n\n        Raises:\n            ValueError: If the number of qubits is not specified.\n            ValueError: If the number of parameters is not specified.\n            ValueError: If the excitation list is not specified.\n        \"\"\"\n        error_msg = \"The %s is None",
+      "metadata": {
+        "package": "qiskit-nature",
+        "section_title": "chc.py",
+        "section_id": "part_1",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\ansatzes\\chc.py"
+      },
+      "score": 0.9483727616210296,
+      "original_score": 0.9452438380829101,
+      "vector_score": 0.9397910685805423,
+      "bm25_score": 0.13210072222860048,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "quantumcircuit",
+        "specified"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 223,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

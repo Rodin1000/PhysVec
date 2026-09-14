@@ -1,0 +1,62 @@
+Your task is to judge whether a given code file fully complies with all format rules specified in FORMATCHECK_RULES.
+
+**Scope of judgment:** You judge ONLY format/structure compliance with FORMATCHECK_RULES. Do NOT flag substantive errors (e.g. logic errors, syntax errors, wrong API usage). Only report violations of the rules (function call structure, parameter placement, naming tags, completeness, etc.).
+
+-----------------------------------------------------------------------------------------------
+[Input]:
+1. IMPROVED_CODE: the code file to be judged. This code has been improved according to the format rules.
+2. FORMATCHECK_RULES: the format rules that specify critical requirements for function call structure and parameter placement.
+
+-----------------------------------------------------------------------------------------------
+[Instructions - your workflow]:
+**CRITICAL:** You MUST provide concise reasoning and output concise content. Avoid lengthy reasoning and verbose output. Focus on essential information only.
+
+1. You read the input IMPROVED_CODE and check compliance with FORMATCHECK_RULES only (structure and form).
+   - Compare the code against ALL rules specified in FORMATCHECK_RULES
+   - Check for violations of format requirements (do not judge correctness, syntax, or API usage)
+
+2. You determine whether the code fully complies with ALL format rules.
+   - Set flag_obey to True ONLY if the code fully complies with EVERY rule in FORMATCHECK_RULES
+   - Set flag_obey to False if there are ANY format violations or non-compliance problems
+   - Provide a clear reason explaining your judgment
+
+3. You MUST be strict and thorough in your judgment.
+   - Do NOT set flag_obey to True if there are any remaining format issues
+   - Be specific in your reason about what format violations remain (if flag_obey is False) or confirm full compliance (if flag_obey is True)
+
+-----------------------------------------------------------------------------------------------------
+[Output format - CRITICAL]:
+**You MUST output ONLY a single ```json ... ``` block. NO other content allowed.**
+
+- **STRICT:** Your ENTIRE response must be EXACTLY: ```json followed by the JSON dict, then ```. Nothing before, nothing after.
+- **NO reasoning outside JSON:** Do NOT output any text, bullet points, "No.", "Okay.", "Wait...", or step-by-step reasoning before or after the JSON block. Output the result directly.
+- **JSON escaping:** In string values (e.g. judge_reason), any double quote (`"`) must be escaped as `\"` so the output can be parsed by json.loads().
+
+The dictionary must contain keys:
+- "flag_obey": either True or False (boolean)
+  * Set to True ONLY if the code fully complies with ALL format rules in FORMATCHECK_RULES
+  * Set to False if there are ANY format violations or non-compliance problems
+- "judge_reason": a clear explanation of your judgment (string)
+  * If flag_obey is True: explain that the code fully complies with all format rules and list the key aspects that were verified
+  * If flag_obey is False: clearly list the specific format violations that remain
+
+**You MUST NOT include this prompt itself in your output.**
+
+Example output (your response must start with ```json and end with ```, with the dict in between. NO other text):
+{{
+"flag_obey": true,
+"judge_reason": "The code fully complies with all format rules. Verified: (1) Function call structure follows all requirements, (2) Parameter placement follows all requirements, (3) All format rules are satisfied."
+}}
+
+Example output when code does NOT comply:
+{{
+"flag_obey": false,
+"judge_reason": "The code has the following format violations: (1) Function 'process_data' calls 'validate_input', violating the format rules, (2) Function 'run_analysis' does not call all required function types, (3) Function 'item_result' directly calls lower-level functions instead of higher-level functions."
+}}
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST start with ```json and end with ```. The entire response must be ONLY this block - no preamble, no reasoning, no explanation outside the block.
+2. The dictionary inside MUST be complete (with '{' and '}'), containing flag_obey and judge_reason.
+3. The flag_obey field MUST be included and set to True or False based on strict compliance with ALL format rules.
+4. The judge_reason field MUST be included and provide a clear explanation of your judgment.

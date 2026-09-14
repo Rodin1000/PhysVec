@@ -1,0 +1,133 @@
+{
+  "query": "NetKet variational state MCState creation with model and sampler",
+  "package": "netket",
+  "results": [
+    {
+      "id": "varstate__4b783c6d62f77e5727d266f56e2c22f1__h3_3_3__0",
+      "text": "Let's now assume we have a Flax module, {class}`~netket.models.RBM` and we want to construct a variational state\non sampled with a simple {func}`~netket.sampler.MetropolisLocal` sampler.\nTo do this, first you need to construct the model and the sampler, and then you can pass them, together with several\nparameters, to the constructor.\n```python\nhilbert = nk.hilbert.Spin(0.5)**10\nsampler = nk.sampler.MetropolisLocal(hilbert)\nmodel = nk.models.RBM(alpha=1, param_dtype=float, kernel_init=nn.initializers.normal(stddev=0.01))\nvstate = nk.vqs.MCState(sampler, model, n_samples=500)\n```\nWhen constructed, the variational state will call the model's init method to generate the state and the\nparameters, and will also initialize the sampler.\nWhen constructing a variational state you can also pass a seed, that will be used to initialize both the\nweights and the sampler. You can also pass two different seeds for the sampler and the weights.\n(warn-chunking)=\n:::{warning}\nSometimes you might be working on very large models that run on GPUs, or you might want to compute expectation values with a very high number of samples, which might cause out-of-memory errors. To prevent this, {code}`MCState` exposes the attribute {py:attr}`~netket.vqs.MCState.chunk_size`, which controls the size of the chunks used in the forward and backward computation of expectation values.\nWhen this value is set, computations are not performed on huge matrices, but instead we split the inputs into smaller matrices and loop through them. In general, setting {py:attr}`~netket.vqs.MCState.chunk_size` to a low value will address the majority of memory issues, but will increase the computational cost.\nA value of at least 128 is suggested, but will greatly depend on your model. You should try to use the largest value you can for your system. Setting it to {code}`None` is equivalent to setting it to infinity.\n:::",
+      "metadata": {
+        "section_title": "MCState",
+        "package": "netket",
+        "section_id": "h3_3",
+        "source_file": "docs\\user-guides\\varstate.md"
+      },
+      "score": 0.9457556869199288,
+      "original_score": 0.9345327255930176,
+      "vector_score": 1.0,
+      "bm25_score": 0.672663627965088,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "netket",
+        "variational",
+        "state",
+        "mcstate",
+        "model",
+        "sampler"
+      ],
+      "match_ratio": 0.8571428571428571,
+      "is_html": false
+    },
+    {
+      "id": "varstate__2eb209004b91a9c3d6c0f3367408c584__h3_3_3__0",
+      "text": "Let's now assume we have a Flax module, {class}`~netket.models.RBM` and we want to construct a variational state\non sampled with a simple {func}`~netket.sampler.MetropolisLocal` sampler.\nTo do this, first you need to construct the model and the sampler, and then you can pass them, together with several\nparameters, to the constructor.\n```python\nhilbert = nk.hilbert.Spin(0.5)**10\nsampler = nk.sampler.MetropolisLocal(hilbert)\nmodel = nk.models.RBM(alpha=1, param_dtype=float, kernel_init=nn.initializers.normal(stddev=0.01))\nvstate = nk.vqs.MCState(sampler, model, n_samples=500)\n```\nWhen constructed, the variational state will call the model's init method to generate the state and the\nparameters, and will also initialize the sampler.\nWhen constructing a variational state you can also pass a seed, that will be used to initialize both the\nweights and the sampler. You can also pass two different seeds for the sampler and the weights.\n(warn-chunking)=\n:::{warning}\nSometimes you might be working on very large models that run on GPUs, or you might want to compute expectation values with a very high number of samples, which might cause out-of-memory errors. To prevent this, {code}`MCState` exposes the attribute {py:attr}`~netket.vqs.MCState.chunk_size`, which controls the size of the chunks used in the forward and backward computation of expectation values.\nWhen this value is set, computations are not performed on huge matrices, but instead we split the inputs into smaller matrices and loop through them. In general, setting {py:attr}`~netket.vqs.MCState.chunk_size` to a low value will address the majority of memory issues, but will increase the computational cost.\nA value of at least 128 is suggested, but will greatly depend on your model. You should try to use the largest value you can for your system. Setting it to {code}`None` is equivalent to setting it to infinity.\n:::",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\_sources\\user-guides\\varstate.md",
+        "package": "netket",
+        "section_title": "MCState",
+        "section_id": "h3_3"
+      },
+      "score": 0.9457556869199288,
+      "original_score": 0.9345327255930176,
+      "vector_score": 1.0,
+      "bm25_score": 0.672663627965088,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "netket",
+        "variational",
+        "state",
+        "mcstate",
+        "model",
+        "sampler"
+      ],
+      "match_ratio": 0.8571428571428571,
+      "is_html": false
+    },
+    {
+      "id": "netket.vqs.MCMixedState__236f324aa7463039c69053cdc977bb8a__sec_1_1__0",
+      "text": "## Contents\nBases: VariationalMixedState , MCState\nVariational State for a Mixed Variational Neural Quantum State.\nThe state is sampled according to the provided sampler, and it’s diagonal is sampled\naccording to another sampler.\nConstructs the MCMixedState.\nArguments are the same as MCState .\nsampler – The sampler\nsampler – The sampler\nmodel – (Optional) The model. If not provided, you must provide init_fun and apply_fun.\nmodel – (Optional) The model. If not provided, you must provide init_fun and apply_fun.\nn_samples – the total number of samples across chains and processes when sampling (default=1000).\nn_samples – the total number of samples across chains and processes when sampling (default=1000).\nn_samples_per_rank – the total number of samples across chains on one process when sampling. Cannot be\nspecified together with n_samples (default=None).\nn_samples_per_rank – the total number of samples across chains on one process when sampling. Cannot be\nspecified together with n_samples (default=None).\nn_discard_per_chain – number of discarded samples at the beginning of each monte-carlo chain (default=n_samples/10).\nn_discard_per_chain – number of discarded samples at the beginning of each monte-carlo chain (default=n_samples/10).\nn_samples_diag ( int | None ) – the total number of samples across chains and processes when sampling the diagonal\nof the density matrix (default=1000).\nn_samples_diag ( int | None ) – the total number of samples across chains and processes when sampling the diagonal\nof the density matrix (default=1000).\nn_samples_per_rank_diag ( int | None ) – the total number of samples across chains on one process when sampling the diagonal.\nCannot be specified together with n_samples_diag (default=None).\nn_samples_per_rank_diag ( int | None ) – the total number of samples across chains on one process when sampling the diagonal.\nCannot be specified together with n_samples_diag (default=None).\nn_discard_per_chain_diag ( int | None ) – number of discarded samples at the beginning of each monte-carlo chain used when sampling\nthe diagonal of the density matrix for observables (default=n_samples_diag/10).\nn_discard_per_chain_diag ( int | None ) – number of discarded samples at the beginning of each monte-carlo chain used when sampling\nthe diagonal of the density matrix for observables (default=n_samples_diag/10).\nparameters – Optional PyTree of weights from which to start.\nparameters – Optional PyTree of weights from which to start.\nseed – rng seed used to generate a set of parameters (only if parameters is not passed). Defaults to a random one.\nseed – rng seed used to generate a set of parameters (only if parameters is not passed). Defaults to a random one.\nsampler_seed ( int | None ) – rng seed used to initialise the sampler. Defaults",
+      "metadata": {
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\_generated\\vqs\\netket.vqs.MCMixedState.html"
+      },
+      "score": 0.7324646064004253,
+      "original_score": 0.5593534693654064,
+      "vector_score": 0.6830722890970562,
+      "bm25_score": 0.06447819043880709,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "variational",
+        "state",
+        "mcstate",
+        "model",
+        "sampler"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "netket.vqs.MCState__4d4592edd9029ef799fca2b61ce593cc__sec_1_1__0",
+      "text": "## Contents\nBases: VariationalState\nVariational State for a Variational Neural Quantum State.\nThe state is sampled according to the provided sampler.\nConstructs the MCState.\nsampler ( Sampler ) – The sampler\nsampler ( Sampler ) – The sampler\nmodel – (Optional) The neural quantum state ansatz, encoded into a model.\nThis should be a flax.linen.Module instance, or any other supported\nneural network framework. If not provided, you must specify init_fun and apply_fun.\nmodel – (Optional) The neural quantum state ansatz, encoded into a model.\nThis should be a flax.linen.Module instance, or any other supported\nneural network framework. If not provided, you must specify init_fun and apply_fun.\nn_samples ( int | None ) – the total number of samples across chains and processes when sampling (default=1000).\nn_samples ( int | None ) – the total number of samples across chains and processes when sampling (default=1000).\nn_samples_per_rank ( int | None ) – the total number of samples across chains on one process when sampling. Cannot be\nspecified together with n_samples (default=None).\nn_samples_per_rank ( int | None ) – the total number of samples across chains on one process when sampling. Cannot be\nspecified together with n_samples (default=None).\nn_discard_per_chain ( int | None ) – number of discarded samples at the beginning of each monte-carlo chain (default=5, except for\n‘direct’ samplers where it is 0).\nn_discard_per_chain ( int | None ) – number of discarded samples at the beginning of each monte-carlo chain (default=5, except for\n‘direct’ samplers where it is 0).\nseed ( Union [ int , Any , None ] ) – rng seed used to generate a set of parameters (only if parameters is not passed). Defaults to a random one.\nseed ( Union [ int , Any , None ] ) – rng seed used to generate a set of parameters (only if parameters is not passed). Defaults to a random one.\nsampler_seed ( Union [ int , Any , None ] ) – rng seed used to initialise the sampler. Defaults to a random one.\nsampler_seed ( Union [ int , Any , None ] ) – rng seed used to initialise the sampler. Defaults to a random one.\nmutable ( Union [ bool , str , Collection [ str ], DenyList ] ) – Name or list of names of mutable arguments. Use it to specify if the model has a state that can change\nduring evaluation, but that should not be optimised. See also flax.linen.Module.apply() documentation\n(default=False)\nmutable ( Union [ bool , str , Collection [ str ], DenyList ] ) – Name or list of names of mutable arguments. Use it to specify if the model has a state that can change\nduring evaluation",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\vqs\\netket.vqs.MCState.html",
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "package": "netket"
+      },
+      "score": 0.7255792451623571,
+      "original_score": 0.5480128743850586,
+      "vector_score": 0.6500461306154012,
+      "bm25_score": 0.13987984946368834,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "variational",
+        "state",
+        "mcstate",
+        "model",
+        "sampler"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "varstate__131c41f1883b2f479c8f7c8c01d342e1__sec_1_1__0",
+      "text": "## Contents\nA central element of NetKet is the VariationalState interface.\nA Variational State represents an approximate, variational description of a system, and can be used to\nprobe it.\nAs of now, NetKet has two types of Variational state implementations:\nMCState , which is a classical variational approximation of a pure state.\nMCState , which is a classical variational approximation of a pure state.\nMCMixedState , which is a classical variational approximation of a mixed state.\nMCMixedState , which is a classical variational approximation of a mixed state.\nFullSumState , which is a version of MCState without sampling, performing the full summation over the whole Hilbert space and computing expectation values and gradients exactly.\nFullSumState , which is a version of MCState without sampling, performing the full summation over the whole Hilbert space and computing expectation values and gradients exactly.\nIt is our plan to build upon this interface for new kind of variational states in the future. For example, we\nare interested in implementing a new kind of variational state that encodes a state into a Qiskit circuit.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\user-guides\\varstate.html",
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "package": "netket"
+      },
+      "score": 0.7148320163281612,
+      "original_score": 0.5514211492802537,
+      "vector_score": 0.689276436600317,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "variational",
+        "state",
+        "mcstate"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 48,
+    "final_results_count": 5
+  }
+}

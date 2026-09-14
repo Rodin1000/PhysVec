@@ -1,0 +1,120 @@
+{
+  "query": "NetKet optimizer configuration for variational calculations with FFNN",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_5_5__0",
+      "text": "## 3) Variational Monte Carlo Optimisation#\nWe have now set up our model (Hamiltonian, Graph, Hilbert Space) and can proceed to optimise the variational ansatz we chose, namely the ffnn machine.\nTo setup the variational Monte Carlo optimisation tool, we have to provide a sampler nk.sampler and an optimizer nk.optimizer .\n```code\n# We shall use an exchange Sampler which preserves the global magnetization (as this is a conserved quantity in the model)\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n,\nd_max\n=\n2\n)\n# Construct the variational state\nvs\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nmodel\n,\nn_samples\n=\n1008\n)\n# We choose a basic, albeit important, Optimizer: the Stochastic Gradient Descent\nopt\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.01\n)\n# We can then specify a Variational Monte Carlo object, using the Hamiltonian, sampler and optimizers chosen.\n# Note that we also specify the method to learn the parameters of the wave-function: here we choose the efficient\n# Stochastic reconfiguration (Sr), here in an iterative setup\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nhamiltonian\n=\nop\n,\noptimizer\n=\nopt\n,\nvariational_state\n=\nvs\n,\ndiag_shift\n=\n0.01\n)\n```",
+      "metadata": {
+        "section_id": "sec_5",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html",
+        "package": "netket",
+        "section_title": "3) Variational Monte Carlo Optimisation#"
+      },
+      "score": 0.8784568131218325,
+      "original_score": 0.8130104817258963,
+      "vector_score": 0.7769681364090857,
+      "bm25_score": 0.9571798629931388,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "optimizer",
+        "variational",
+        "ffnn"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "custom_hilbert_constraints__3478f3f26a02da6418c1b5dc5da24d73__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "section_title": "Integration with Variational States",
+        "section_id": "h2_20",
+        "package": "netket",
+        "source_file": "docs\\advanced\\custom_hilbert_constraints.md"
+      },
+      "score": 0.8133333333333334,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "variational"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "custom_hilbert_constraints__6b1a6a577a4f7295fb5d8a8ae5beefc7__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "package": "netket",
+        "section_id": "h2_20",
+        "section_title": "Integration with Variational States",
+        "source_file": "docs\\_build\\html\\_sources\\advanced\\custom_hilbert_constraints.md"
+      },
+      "score": 0.8133333333333334,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "variational"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_8_8__2",
+      "text": ")\nplt\n.\nshow\n()\n```\nThe results are clearly better than a simple (non-symmetrized RBB), and perform slightly better than the Jastrow ansatz. Let us increase the number of layers by adding a fully-connected layer with bias and Lncosh activation (with \\(2L\\) inputs and outputs) before the final SumOutput layer.\n```code\nclass\nModel2\n(\nnnx\n.\nModule\n):\ndef\n__init__\n(\nself\n,\nN\n:\nint\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\nself\n.\nlinear1\n=\nnnx\n.\nLinear\n(\nin_features\n=\nN\n,\nout_features\n=\n2\n*\nN\n,\ndtype\n=\njnp\n.\ncomplex128\n,\nrngs\n=\nrngs\n)\nself\n.\nlinear2\n=\nnnx\n.\nLinear\n(\nin_features\n=\n2\n*\nN\n,\nout_features\n=\nN\n,\ndtype\n=\njnp\n.\ncomplex128\n,\nrngs\n=\nrngs\n)\ndef\n__call__\n(\nself\n,\nx\n:\njax\n.\nArray\n):\nx\n=\nself\n.\nlinear1\n(\nx\n)\nx\n=\nnk\n.\nnn\n.\nactivation\n.\nlog_cosh\n(\nx\n)\nx\n=\nself\n.\nlinear2\n(\nx\n)\nx\n=\nnk\n.\nnn\n.\nactivation\n.\nlog_cosh\n(\nx\n)\nreturn\njnp\n.\nsum\n(\nx\n,\naxis\n=-\n1\n)\nffnn2\n=\nModel2\n(\nN\n=\nhi\n.\nsize\n,\nrngs\n=\nnnx\n.\nRngs\n(\n1\n))\n# The variational state\nvs\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nffnn\n,\nn_samples\n=\n1008\n)\nopt\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.05\n)\n# The ground-state optimization loop\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nhamiltonian\n=\nha\n,\noptimizer\n=\nop\n,\ndiag_shift\n=\n0.1\n,\nvariational_state\n=\nvs\n)\nstart\n=\ntime\n.\ntime\n()\ngs\n.\nrun\n(\nout\n=\n\"FF2\"\n,\nn_iter\n=\n600\n)\nend\n=\ntime\n.\ntime\n()\nprint\n(\n\"### Feed Forward (more layers) calculation\"\n)\nprint\n(\n\"Has\"\n,\nvs\n.\nn_parameters\n,\n\"parameters\"\n)\nprint\n(\n\"The Feed Forward (more layers) calculation took\"\n,\nend\n-\nstart\n,\n\"seconds\"\n)\n```\n```code\n### Feed Forward (more layers) calculation\nHas 1012 parameters\nThe Feed Forward (more layers) calculation took 99.36077523231506",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "package": "netket",
+        "section_title": "5. Learning with Feed Forward Neural Networks#",
+        "section_id": "sec_8"
+      },
+      "score": 0.6370296519082945,
+      "original_score": 0.4415840798589147,
+      "vector_score": 0.4546084668725427,
+      "bm25_score": 0.3894865318044024,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "optimizer",
+        "variational",
+        "ffnn"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "symmetry_tutorial__b193a05ba167aa16fb4ac01ff2376452__sec_5_5__1",
+      "text": "\n(\nhamiltonian\n=\nH\n,\noptimizer\n=\noptimizer\n,\nlinear_solver\n=\nsolver\n,\nvariational_state\n=\nunsymmetrized_vstate\n,\ndiag_shift\n=\ndiag_shift\n,\nuse_ntk\n=\nFalse\n)\ndriver\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nunsymmetrized_log\n);\n```\nTo construct a symmetry projected wavefunction in netket, we use project method of the Representation class.\nThis method takes in a variational state as well as the integer correspond to the id of the irrep. It converts a state \\(\\psi\\) to the symmetrized one \\(\\psi_\\mu\\) by implementing the projection described above.\n```code\n# Create a new variational state to symmetrize it, using same seed\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n512\n,\nseed\n=\nseed\n)\n# Project on the trivial represention\ntranslation_symmetric_vstate\n=\ntranslation_group_representation\n.\nproject\n(\nstate\n=\nvstate\n,\ncharacter_index\n=\n0\n)\n```\nThen we just run the optimization as usual!\n```code\ndriver\n=\nVMC_SR\n(\nhamiltonian\n=\nH\n,\noptimizer\n=\noptimizer\n,\nlinear_solver\n=\nsolver\n,\nvariational_state\n=\ntranslation_symmetric_vstate\n,\ndiag_shift\n=\ndiag_shift\n,\nuse_ntk\n=\nFalse\n,\n)\n# Takes a bit of time to run. Roughly 16 times longer\ndriver\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nnk\n.\nlogging\n.\nRuntimeLog\n())\n```\n```code\n(RuntimeLog():\n  keys = ['acceptance', 'Energy'],)\n```\nImportant In general, the ground state is not necessarily in the trivial sector. In practice, all relevant sectors should be scanned to find which one is energetically favorable.\nIn the case of the translation group, this means all the points in the irreducible Brillouin zone should be checked.\nWe can now compare the performance of the two models.\n```code\ndef\nrelative_error\n(\napprox\n,\nexact\n):\nreturn\nnp\n.\nabs\n((\napprox\n-\nexact\n)\n/\nexact\n)\nE_no_symm\n=\nfloat\n(\nunsymmetrized_vstate\n.\nexpect\n(\nH\n)\n.\nmean\n.\nreal\n)\nE_symm\n=\nfloat\n(\ntranslation_symmetric_vstate\n.\nexpect\n(\nH\n)\n.\nmean\n.\nreal\n)\nerr_no\n=\n100\n*\nrelative_error\n(\nE_no_symm\n,\nevals\n[\n0\n])\nerr_sym\n=\n100\n*\nrelative_error\n(\nE_symm\n,\nevals\n[\n0\n])\nprint\n(\nf\n\"Energy without symmetrization:\n{\n",
+      "metadata": {
+        "section_title": "VMC#",
+        "package": "netket",
+        "section_id": "sec_5",
+        "source_file": "docs\\_build\\html\\tutorials\\symmetry_tutorial.html"
+      },
+      "score": 0.5955237303083126,
+      "original_score": 0.37772881585894247,
+      "vector_score": 0.4721610198236781,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "netket",
+        "optimizer",
+        "variational"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 55,
+    "final_results_count": 5
+  }
+}

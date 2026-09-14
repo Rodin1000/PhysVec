@@ -1,0 +1,147 @@
+{
+  "query": "State preparation circuits for fermionic Hamiltonians using Qiskit Nature",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "fermionic_gaussian_state__80f84e9eb39382ac27685324204d154b__part_1__1",
+      "text": " and \"\n            \"W1 @ W2.T + W2 @ W1.T = 0.\"\n        )\n\n\nclass FermionicGaussianState(QuantumCircuit):\n    r\"\"\"A circuit that prepares a fermionic Gaussian state.\n\n    A fermionic Gaussian state is a state of the form\n\n    .. math::\n        b^\\dagger_1 \\cdots b^\\dagger_{N_p} \\lvert \\overline{\\text{vac}} \\rangle,\n\n    where\n\n    .. math::\n        \\begin{pmatrix}\n            b^\\dagger_1 \\\\\n            \\vdots \\\\\n            b^\\dagger_N \\\\\n        \\end{pmatrix}\n        = W\n        \\begin{pmatrix}\n            a^\\dagger_1 \\\\\n            \\vdots \\\\\n            a^\\dagger_N \\\\\n            a_1 \\\\\n            \\vdots \\\\\n            a_N\n        \\end{pmatrix}.\n\n    - :math:`a^\\dagger_1, \\ldots, a^\\dagger_{N}` are the fermionic creation operators.\n    - :math:`W` is an :math:`N \\times 2N` matrix such that\n      :math:`b^\\dagger_1, \\ldots, b^\\dagger_{N}` also satisfy the\n      fermionic anticommutation relations.\n    - :math:`\\lvert \\overline{\\text{vac}} \\rangle` is the mutual 0-eigenvector of\n      the operators :math:`\\{b_j^\\dagger b_j\\}`.\n\n    The matrix :math:`W` has the block form\n\n    .. math::\n        \\begin{pmatrix}\n            W_1 & W_2\n        \\end{pmatrix},\n\n    where :math:`W_1` and :math:`W_2` must satisfy\n\n    .. math::\n        W_1 W_1^\\dagger + W_2 W_2^\\dagger = I \\\\\n        W_1 W_2^T + W_2 W_1^T = 0.\n\n    The matrix :math:`W` is commonly obtained by calling the\n    :meth:`~.QuadraticHamiltonian.diagonalizing_bogoliubov_transform`\n    method of the :class:`~.QuadraticHamiltonian` class.\n    This matrix is used to create circuits that prepare eigenstates of the\n    quadratic Hamiltonian.\n\n    Currently, only the Jordan-Wigner transformation is supported.\n\n    Reference: `arXiv:1711.05395`_\n\n    .. _arXiv:1711.05395: https://arxiv.org/abs/1711.05395\n    \"\"\"\n\n    def __init__(\n        self,\n        transformation_matrix: np.ndarray,\n        occupied_orbitals: Sequence[int] | None = None,\n        qubit_mapper: QubitMapper | None =",
+      "metadata": {
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\fermionic_gaussian_state.py",
+        "section_id": "part_1",
+        "package": "qiskit-nature",
+        "section_title": "fermionic_gaussian_state.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.4943391468708522,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "state",
+        "circuits",
+        "fermionic"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "__init____c21336c1bae2d0fe5fb31594219db6ee__part_8__8",
+      "text": "qp\n   quantum_volume\n   phase_estimation\n   grover_operator\n   unitary_overlap\n   GraphStateGate\n   PauliEvolutionGate\n   HamiltonianGate\n\nBelow we provide the same operations as classes deriving :class:`.QuantumCircuit`. For better\nruntime and compiler performance, however, we suggest using above functions and gates.\n\n.. autosummary::\n   :toctree: ../stubs/\n   :template: autosummary/class_no_inherited_members.rst\n\n   FourierChecking\n   GraphState\n   HiddenLinearFunction\n   IQP\n   QuantumVolume\n   PhaseEstimation\n   GroverOperator\n   UnitaryOverlap\n\n.. _n-local:\n\nN-local circuits\n================\n\nThe following functions return a parameterized :class:`.QuantumCircuit` to use as ansatz in\na broad set of variational quantum algorithms.\n\nFor example, we can build a variational circuit\n\n.. plot::\n   :alt: The efficient SU2 ansatz circuit...\n   :context:\n\n   from qiskit.circuit.library import efficient_su2\n\n   num_qubits = 4\n   ansatz = efficient_su2(num_qubits, entanglement=\"pairwise\")\n   ansatz.draw(\"mpl\")\n\nand combine it with\n\n.. plot::\n   :alt: ... combined with the ZZ feature map.\n   :include-source:\n   :context:\n\n   from qiskit.circuit.library import zz_feature_map\n\n   circuit = zz_feature_map(num_qubits)\n   circuit.barrier()\n   circuit.compose(ansatz, inplace=True)\n\n   circuit.draw(\"mpl\")\n\nto obtain a circuit for variational quantum classification.\n\nThe following functions all construct variational circuits and are optimized for a fast\nconstruction:\n\n.. autosummary::\n   :toctree: ../stubs/\n\n   n_local\n   efficient_su2\n   real_amplitudes\n   pauli_two_design\n   excitation_preserving\n   qaoa_ansatz\n   hamiltonian_variational_ansatz\n   evolved_operator_ansatz\n\nWhile we suggest using the above functions, we also continue supporting the following\n:class:`.BlueprintCircuit`, which wrap the circuits into a block\nand allow for inplace mutations of the circuits:\n\n.. autosummary::\n   :toctree: ../stubs/\n   :template: autosummary/class_no_inherited_members.rst\n\n   NLocal\n   TwoLocal\n   PauliTwoDesign\n   RealAmplitudes\n   EfficientSU2\n   EvolvedOperatorAnsatz\n   ExcitationPreserving\n   QAOAAnsatz\n\n\n.. _data-encoding:\n\nData encoding circuits\n======================\n\nThe following functions return a parameterized :class:`.QuantumCircuit` to use as data\nencoding circuits in a series of variational quantum algorithms:\n\n.. autosummary::\n   :toctree: ../stubs/\n\n   pauli",
+      "metadata": {
+        "package": "qiskit",
+        "section_id": "part_8",
+        "section_title": "__init__.py",
+        "source_file": "qiskit\\circuit\\library\\__init__.py"
+      },
+      "score": 0.8982578537327552,
+      "original_score": 0.8900084905218976,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "circuits",
+        "using",
+        "qiskit"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "base_state_fidelity__4af80df8c9120cca15c3cbd952a6f649__part_3__3",
+      "text": " )\n\n        circuits = []\n        for circuit_1, circuit_2 in zip(circuits_1, circuits_2):\n\n            # Use the same key for circuits as qiskit.primitives use.\n            circuit = self._circuit_cache.get((_circuit_key(circuit_1), _circuit_key(circuit_2)))\n\n            if circuit is not None:\n                circuits.append(circuit)\n            else:\n                self._check_qubits_match(circuit_1, circuit_2)\n\n                # re-parametrize input circuits\n                # TODO: make smarter checks to avoid unnecessary re-parametrizations\n                parameters_1 = ParameterVector(\"x\", circuit_1.num_parameters)\n                parametrized_circuit_1 = circuit_1.assign_parameters(parameters_1)\n                parameters_2 = ParameterVector(\"y\", circuit_2.num_parameters)\n                parametrized_circuit_2 = circuit_2.assign_parameters(parameters_2)\n\n                circuit = self.create_fidelity_circuit(\n                    parametrized_circuit_1, parametrized_circuit_2\n                )\n                circuits.append(circuit)\n                # update cache\n                self._circuit_cache[_circuit_key(circuit_1), _circuit_key(circuit_2)] = circuit\n\n        if self._transpiler is not None:\n            return self._transpiler.run(circuits, **self._transpiler_options)\n\n        return circuits\n\n    def _construct_value_list(\n        self,\n        circuits_1: Sequence[QuantumCircuit],\n        circuits_2: Sequence[QuantumCircuit],\n        values_1: Sequence[float] | Sequence[Sequence[float]] | None = None,\n        values_2: Sequence[float] | Sequence[Sequence[float]] | None = None,\n    ) -> list[list[float]]:\n        \"\"\"\n        Preprocesses input parameter values to match the fidelity\n        circuit parametrization, and return in list format.\n\n        Args:\n           circuits_1: (Parametrized) quantum circuits preparing the\n                        first list of quantum states.\n           circuits_2: (Parametrized) quantum circuits preparing the\n                        second list of quantum states.\n           values_1: Numerical parameters to be bound to the first circuits.\n           values_2: Numerical parameters to be bound to the second circuits.\n\n        Returns:\n             List of lists of parameter values for fidelity circuit.\n\n        \"\"\"\n        values_1 = self._preprocess_values(circuits_1, values_1)\n        values_2 = self._preprocess_values(circuits_2, values_2)\n        # now, values_1 and values_2 are explicitly made 2d lists\n\n        values = []\n        if len(values_2[0]) == 0:\n            values = list(values_1)\n        elif len(values_1[0]) == 0:\n            values = list(values_2)\n        else:\n           ",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "section_id": "part_3",
+        "source_file": "qiskit_algorithms\\state_fidelities\\base_state_fidelity.py",
+        "section_title": "base_state_fidelity.py"
+      },
+      "score": 0.8955080659958027,
+      "original_score": 0.8900084905218976,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "circuits",
+        "qiskit"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "ref_1q_clifford__c789f1dcb7b84d499f6bb16045764fab__part_3__3",
+      "text": ")\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # HZZH = I\n    circuit = QuantumCircuit(*regs)\n    circuit.h(qr)\n    circuit.barrier(qr)\n    circuit.z(qr)\n    circuit.barrier(qr)\n    circuit.z(qr)\n    circuit.barrier(qr)\n    circuit.h(qr)\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    return circuits\n\n\ndef z_gate_counts_deterministic(shots, hex_counts=True):\n    \"\"\"Z-gate circuits reference counts.\"\"\"\n    targets = []\n    if hex_counts:\n        # Z\n        targets.append({\"0x0\": shots})\n        # HZH = X\n        targets.append({\"0x1\": shots})\n        # HZZH = I\n        targets.append({\"0x0\": shots})\n    else:\n        # Z\n        targets.append({\"0\": shots})\n        # HZH = X\n        targets.append({\"1\": shots})\n        # HZZH = I\n        targets.append({\"0\": shots})\n    return targets\n\n\ndef z_gate_statevector_deterministic():\n    \"\"\"Z-gate circuits reference statevectors.\"\"\"\n    targets = []\n    # Z\n    targets.append(np.array([1, 0]))\n    # HZH = X\n    targets.append(np.array([0, 1]))\n    # HZZH = I\n    targets.append(np.array([1, 0]))\n    return targets\n\n\ndef z_gate_unitary_deterministic():\n    \"\"\"Z-gate circuits reference unitaries.\"\"\"\n    targets = []\n    # Z\n    targets.append(np.array([[1, 0], [0, -1]]))\n    # HZH = X\n    targets.append(np.array([[0, 1], [1, 0]]))\n    # HZZH = I\n    targets.append(np.eye(2))\n    return targets\n\n\n# ==========================================================================\n# Y-gate\n# ==========================================================================\n\n\ndef y_gate_circuits_deterministic(final_measure=True):\n    \"\"\"Y-gate test circuits with deterministic counts.\"\"\"\n    circuits = []\n    qr = QuantumRegister(1)\n    if final_measure:\n        cr = ClassicalRegister(1)\n        regs = (qr, cr)\n    else:\n        regs = (qr,)\n\n    # Y\n    circuit = QuantumCircuit(*regs)\n    circuit.y(qr)\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n    # YY = I\n    circuit = QuantumCircuit(*regs)\n    circuit.y(qr)\n    circuit.barrier(qr)\n    circuit.y(qr)\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits",
+      "metadata": {
+        "package": "qiskit-aer",
+        "section_id": "part_3",
+        "source_file": "test\\terra\\reference\\ref_1q_clifford.py",
+        "section_title": "ref_1q_clifford.py"
+      },
+      "score": 0.8927582782588501,
+      "original_score": 0.8900084905218976,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "circuits"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "graph_state__d938045e20a7572fc807f3a24422049b__part_1__1",
+      "text": "arxiv.org/pdf/quant-ph/0307130.pdf>`_\n    [2] D. Koh, Further Extensions of Clifford Circuits & their Classical Simulation Complexities.\n        `arXiv:1512.07892 <https://arxiv.org/pdf/1512.07892.pdf>`_\n    \"\"\"\n\n    @deprecate_func(\n        since=\"2.1\",\n        additional_msg=\"Use qiskit.circuit.library.GraphStateGate instead.\",\n        removal_timeline=\"in Qiskit 3.0\",\n    )\n    def __init__(self, adjacency_matrix: list | np.ndarray) -> None:\n        \"\"\"Create graph state preparation circuit.\n\n        Args:\n            adjacency_matrix: input graph as n-by-n list of 0-1 lists\n\n        Raises:\n            CircuitError: If adjacency_matrix is not symmetric.\n\n        The circuit prepares a graph state with the given adjacency\n        matrix.\n        \"\"\"\n\n        adjacency_matrix = np.asarray(adjacency_matrix)\n        if not np.allclose(adjacency_matrix, adjacency_matrix.transpose()):\n            raise CircuitError(\"The adjacency matrix must be symmetric.\")\n\n        graph_state_gate = GraphStateGate(adjacency_matrix)\n        super().__init__(graph_state_gate.num_qubits, name=f\"graph: {adjacency_matrix}\")\n        self.compose(graph_state_gate, qubits=self.qubits, inplace=True)\n\n\nclass GraphStateGate(Gate):\n    r\"\"\"A gate representing a graph state.\n\n    Given a graph G = (V, E), with the set of vertices V and the set of edges E,\n    the corresponding graph state is defined as\n\n    .. math::\n\n        |G\\rangle = \\prod_{(a,b) \\in E} CZ_{(a,b)} {|+\\rangle}^{\\otimes V}\n\n    Such a state can be prepared by first preparing all qubits in the :math:`+`\n    state, then applying a :math:`CZ` gate for each corresponding graph edge.\n\n    Graph state preparation circuits are Clifford circuits, and thus\n    easy to simulate classically. However, by adding a layer of measurements\n    in a product basis at the end, there is evidence that the circuit becomes\n    hard to simulate [2].\n\n    Reference Circuit:\n\n    .. plot::\n        :alt: Circuit diagram output by the previous code.\n        :include-source:\n\n        from qiskit.circuit import QuantumCircuit\n        from qiskit.circuit.library import GraphStateGate\n        import rustworkx as rx\n\n        G = rx.generators.cycle_graph(5)\n        circuit = QuantumCircuit(5)\n        circuit.append(GraphStateGate(rx.adjacency_matrix(G)), [0, 1, 2, 3, 4])\n        circuit.decompose().draw('mpl')\n\n    References:\n\n    [1] M. Hein, J. Eisert, H.J. Briegel, Multi-party Entanglement in Graph States,\n    `ar",
+      "metadata": {
+        "section_title": "graph_state.py",
+        "package": "qiskit",
+        "section_id": "part_1",
+        "source_file": "qiskit\\circuit\\library\\graph_state.py"
+      },
+      "score": 0.888477093508663,
+      "original_score": 0.87608565945407,
+      "vector_score": 0.829132437212433,
+      "bm25_score": 0.6208963264468604,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "state",
+        "preparation",
+        "circuits",
+        "qiskit"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 223,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      }
+    }
+  }
+}

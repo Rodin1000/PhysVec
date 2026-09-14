@@ -1,0 +1,108 @@
+{
+  "query": "How to avoid initialization in circevol function",
+  "package": "qiskit",
+  "results": [
+    {
+      "id": "data_bin__f768cd5243fc770d86d27f4e07259f77__part_2__2",
+      "text": " = [f\"{name}={_value_repr(val)}\" for name, val in self.items()]\n        if self.ndim:\n            vals.append(f\"shape={self.shape}\")\n        return f\"{type(self).__name__}({', '.join(vals)})\"\n\n    def __getitem__(self, key: str) -> Any:\n        try:\n            return self._data[key]\n        except KeyError as ex:\n            raise KeyError(f\"Key ({key}) does not exist in this data bin.\") from ex\n\n    def __contains__(self, key: str) -> bool:\n        return key in self._data\n\n    def __iter__(self) -> Iterable[str]:\n        return iter(self._data)\n\n    def keys(self) -> KeysView[str]:\n        \"\"\"Return a view of field names.\"\"\"\n        return self._data.keys()\n\n    def values(self) -> ValuesView[Any]:\n        \"\"\"Return a view of values.\"\"\"\n        return self._data.values()\n\n    def items(self) -> ItemsView[str, Any]:\n        \"\"\"Return a view of field names and values\"\"\"\n        return self._data.items()\n\n    # The following properties exist to provide support to legacy private class attributes which\n    # gained widespread prior to qiskit 1.1. These properties will be removed once the internal\n    # projects have made the appropriate changes.\n\n    @property\n    def _FIELDS(self) -> tuple[str, ...]:  # pylint: disable=invalid-name\n        return tuple(self._data)\n\n    @property\n    def _FIELD_TYPES(self) -> tuple[Any, ...]:  # pylint: disable=invalid-name\n        return tuple(map(type, self.values()))\n\n    @property\n    def _SHAPE(self) -> tuple[int, ...]:  # pylint: disable=invalid-name\n        return self.shape\n\n\n# pylint: disable=unused-argument\ndef make_data_bin(\n    fields: Iterable[tuple[str, type]], shape: tuple[int, ...] | None = None\n) -> type[DataBin]:\n    \"\"\"Return the :class:`~DataBin` type.\n\n    .. note::\n        This class used to return a subclass of :class:`~DataBin`. However, that caused confusion\n        and didn't have a useful purpose. Several internal projects made use of this internal\n        function prior to qiskit 1.1. This function will be removed once these internal projects\n        have made the appropriate changes.\n\n    Args:\n        fields: Tuples ``(name, type)`` specifying the attributes of the returned class.\n        shape: The intended shape of every attribute of this class.\n\n    Returns:\n        The :class:`DataBin` type.\n    \"\"\"\n    return DataBin\n",
+      "metadata": {
+        "section_id": "part_2",
+        "package": "qiskit",
+        "source_file": "qiskit\\primitives\\containers\\data_bin.py",
+        "section_title": "data_bin.py"
+      },
+      "score": 0.81,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "function"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "test_initializer__e4eb8be2fbbe1c4012d78950a5f400ef__part_8__8",
+      "text": " \"\"\"Initialize from labels.\"\"\"\n        desired_sv = Statevector.from_label(\"01+-lr\")\n        qc = QuantumCircuit(6)\n        qc.initialize(\"01+-lr\", range(6))\n        actual_sv = Statevector.from_instruction(qc)\n        self.assertTrue(desired_sv == actual_sv)\n\n    def test_from_int(self):\n        \"\"\"Initialize from int.\"\"\"\n        desired_sv = Statevector.from_label(\"110101\")\n        qc = QuantumCircuit(6)\n        qc.initialize(53, range(6))\n        actual_sv = Statevector.from_instruction(qc)\n        self.assertTrue(desired_sv == actual_sv)\n\n    def _remove_resets(self, circ):\n        circ.data = [instr for instr in circ.data if instr.operation.name != \"reset\"]\n\n    def test_global_phase_random(self):\n        \"\"\"Test global phase preservation with random state vectors\"\"\"\n        from qiskit.quantum_info.random import random_statevector\n\n        repeats = 5\n        for n_qubits in [1, 2, 4]:\n            for irep in range(repeats):\n                with self.subTest(i=f\"{n_qubits}_{irep}\"):\n                    dim = 2**n_qubits\n                    qr = QuantumRegister(n_qubits)\n                    initializer = QuantumCircuit(qr)\n                    target = random_statevector(dim)\n                    initializer.initialize(target, qr)\n                    uninit = initializer.data[0].operation.definition\n                    self._remove_resets(uninit)\n                    evolve = Statevector(uninit)\n                    self.assertEqual(target, evolve)\n\n    def test_global_phase_1q(self):\n        \"\"\"Test global phase preservation with some simple 1q statevectors\"\"\"\n        target_list = [\n            Statevector([1j, 0]),\n            Statevector([0, 1j]),\n            Statevector([1j / np.sqrt(2), 1j / np.sqrt(2)]),\n        ]\n        n_qubits = 1\n        dim = 2**n_qubits\n        qr = QuantumRegister(n_qubits)\n        for target in target_list:\n            with self.subTest(i=target):\n                initializer = QuantumCircuit(qr)\n                initializer.initialize(target, qr)\n                # need to get rid of the resets in order to use the Operator class\n                disentangler = Operator(initializer.data[0].operation.definition.data[1].operation)\n                zero = Statevector.from_int(0, dim)\n                actual = zero & disentangler\n                self.assertEqual(target, actual)\n\n    @data(2, \"11\", [1 / math.sqrt(2), 0, 0, 1 / math.sqrt(2)])\n    def test_decompose_contains_stateprep(self, state):\n        \"\"\"Test initialize decomposes to a StatePreparation and reset\"\"\"\n        qc = QuantumCircuit(2)\n        qc.initialize(state)\n        decom_circ = qc.decompose()\n\n        self.assertEqual(decom_circ.data[0",
+      "metadata": {
+        "package": "qiskit",
+        "section_id": "part_8",
+        "section_title": "test_initializer.py",
+        "source_file": "test\\python\\circuit\\test_initializer.py"
+      },
+      "score": 0.741811362382791,
+      "original_score": 0.741811362382791,
+      "vector_score": 0.9272642029784887,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "test_circuit_vars__6afb76445ef54b00abcfb5f57c41a7b0__part_6__6",
+      "text": ")\n        qc_init = QuantumCircuit(declarations=[(a, a_init), (b, b_init)])\n        self.assertEqual(list(qc_init.iter_vars()), list(qc_manual.iter_vars()))\n        self.assertEqual(qc_init.data, qc_manual.data)\n\n    def test_declarations_widen_integer_literals(self):\n        a = expr.Var.new(\"a\", types.Uint(8))\n        b = expr.Var.new(\"b\", types.Uint(16))\n        qc = QuantumCircuit(declarations=[(a, 3)])\n        qc.add_var(b, 5)\n        actual_initializers = [\n            (op.lvalue, op.rvalue)\n            for instruction in qc\n            if isinstance((op := instruction.operation), Store)\n        ]\n        expected_initializers = [\n            (a, expr.Value(3, types.Uint(8))),\n            (b, expr.Value(5, types.Uint(16))),\n        ]\n        self.assertEqual(actual_initializers, expected_initializers)\n\n    def test_declaration_does_not_widen_bool_literal(self):\n        # `bool` is a subclass of `int` in Python (except some arithmetic operations have different\n        # semantics...).  It's not in Qiskit's value type system, though.\n        a = expr.Var.new(\"a\", types.Uint(8))\n        qc = QuantumCircuit()\n        with self.assertRaisesRegex(CircuitError, \"explicit cast is required\"):\n            qc.add_var(a, True)\n\n    def test_cannot_shadow_vars(self):\n        \"\"\"Test that exact duplicate ``Var`` nodes within different combinations of the inputs are\n        detected and rejected.\"\"\"\n        a = expr.Var.new(\"a\", types.Bool())\n        a_init = expr.lift(True)\n        with self.assertRaisesRegex(CircuitError, \"already present\"):\n            QuantumCircuit(inputs=[a, a])\n        with self.assertRaisesRegex(CircuitError, \"already present\"):\n            QuantumCircuit(captures=[a, a])\n        with self.assertRaisesRegex(CircuitError, \"already present\"):\n            QuantumCircuit(declarations=[(a, a_init), (a, a_init)])\n        with self.assertRaisesRegex(CircuitError, \"already present\"):\n            QuantumCircuit(inputs=[a], declarations=[(a, a_init)])\n        with self.assertRaisesRegex(CircuitError, \"already present\"):\n            QuantumCircuit(captures=[a], declarations=[(a, a_init)])\n\n    def test_cannot_shadow_stretches(self):\n        \"\"\"Test that exact duplicate ``Stretch`` nodes within different combinations of the inputs are\n        detected and rejected.\"\"\"\n        a = expr.Stretch.new(\"a\")\n        with self.assertRaisesRegex(CircuitError, \"already present\"):\n            QuantumCircuit(captures=[a, a])\n        qc = QuantumCircuit(captures=[a])\n        with self.assertRaisesRegex(CircuitError, \"already present\"):\n            qc.add_stretch(a)\n        qc = QuantumCircuit()\n        with self",
+      "metadata": {
+        "package": "qiskit",
+        "section_title": "test_circuit_vars.py",
+        "section_id": "part_6",
+        "source_file": "test\\python\\circuit\\test_circuit_vars.py"
+      },
+      "score": 0.532792057363486,
+      "original_score": 0.532792057363486,
+      "vector_score": 0.6659900717043574,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "test_parse_errors__089518281c436f5abb70cb5f64af0895__part_17__17",
+      "text": "_classical=[qiskit.qasm2.CustomClassical(\"f\", n_good, lambda *_: 0)]\n            )\n\n    def test_output_type_error_is_caught(self):\n        program = \"\"\"\n            qreg q[1];\n            U(f(), 0, 0) q[0];\n        \"\"\"\n        with self.assertRaisesRegex(qiskit.qasm2.QASM2ParseError, r\"user.*returned non-float\"):\n            qiskit.qasm2.loads(\n                program,\n                custom_classical=[qiskit.qasm2.CustomClassical(\"f\", 0, lambda: \"not a float\")],\n            )\n\n    def test_inner_exception_is_wrapped(self):\n        inner_exception = Exception(\"custom exception\")\n\n        def raises():\n            raise inner_exception\n\n        program = \"\"\"\n            qreg q[1];\n            U(raises(), 0, 0) q[0];\n        \"\"\"\n        with self.assertRaisesRegex(\n            qiskit.qasm2.QASM2ParseError, \"caught exception when constant folding\"\n        ) as excinfo:\n            qiskit.qasm2.loads(\n                program, custom_classical=[qiskit.qasm2.CustomClassical(\"raises\", 0, raises)]\n            )\n        assert excinfo.exception.__cause__ is inner_exception\n\n    def test_cannot_be_used_as_gate(self):\n        program = \"\"\"\n            qreg q[1];\n            f(0) q[0];\n        \"\"\"\n        with self.assertRaisesRegex(\n            qiskit.qasm2.QASM2ParseError, r\"'f' is a custom classical function\"\n        ):\n            qiskit.qasm2.loads(\n                program, custom_classical=[qiskit.qasm2.CustomClassical(\"f\", 1, lambda x: x)]\n            )\n\n    def test_cannot_be_used_as_qarg(self):\n        program = \"\"\"\n            U(0, 0, 0) f;\n        \"\"\"\n        with self.assertRaisesRegex(\n            qiskit.qasm2.QASM2ParseError, r\"'f' is a custom classical function\"\n        ):\n            qiskit.qasm2.loads(\n                program, custom_classical=[qiskit.qasm2.CustomClassical(\"f\", 1, lambda x: x)]\n            )\n\n    def test_cannot_be_used_as_carg(self):\n        program = \"\"\"\n            qreg q[1];\n            measure q[0] -> f;\n        \"\"\"\n        with self.assertRaisesRegex(\n            qiskit.qasm2.QASM2ParseError, r\"'f' is a custom classical function\"\n        ):\n            qiskit.qasm2.loads(\n                program, custom_classical=[qiskit.qasm2.CustomClassical(\"f\", 1, lambda x: x)]\n            )\n\n\n@ddt.ddt\nclass TestStrict(QiskitTestCase):\n    @ddt.data(\n        \"gate my_gate(p0, p",
+      "metadata": {
+        "section_title": "test_parse_errors.py",
+        "package": "qiskit",
+        "source_file": "test\\python\\qasm2\\test_parse_errors.py",
+        "section_id": "part_17"
+      },
+      "score": 0.4640490899062327,
+      "original_score": 0.4358411472697187,
+      "vector_score": 0.5448014340871483,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "function"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "test_expr_constructors__73329f429887ce36855f405defa6492a__part_6__6",
+      "text": " cr = ClassicalRegister(8, \"c\")\n        clbit = Clbit()\n\n        self.assertEqual(\n            function(cr, clbit),\n            expr.Binary(\n                opcode,\n                expr.Cast(expr.Var(cr, types.Uint(cr.size)), types.Bool(), implicit=True),\n                expr.Var(clbit, types.Bool()),\n                types.Bool(),\n            ),\n        )\n        self.assertFalse(function(cr, clbit).const)\n\n        self.assertEqual(\n            function(cr, 3),\n            expr.Binary(\n                opcode,\n                expr.Cast(expr.Var(cr, types.Uint(cr.size)), types.Bool(), implicit=True),\n                expr.Cast(expr.Value(3, types.Uint(2)), types.Bool(), implicit=True),\n                types.Bool(),\n            ),\n        )\n        self.assertFalse(function(cr, 3).const)\n\n        self.assertEqual(\n            function(False, clbit),\n            expr.Binary(\n                opcode,\n                expr.Value(False, types.Bool()),\n                expr.Var(clbit, types.Bool()),\n                types.Bool(),\n            ),\n        )\n        self.assertFalse(function(False, clbit).const)\n\n    @ddt.data(expr.logic_and, expr.logic_or)\n    def test_binary_logic_forbidden(self, function):\n        with self.assertRaisesRegex(TypeError, \"invalid types\"):\n            function(3.0, 3.0)\n        with self.assertRaisesRegex(TypeError, \"invalid types\"):\n            function(3, 3.0)\n        with self.assertRaisesRegex(TypeError, \"invalid types\"):\n            function(3.0, 3)\n        with self.assertRaisesRegex(TypeError, \"invalid types\"):\n            function(Duration.dt(1000), Duration.dt(1000))\n\n    @ddt.data(\n        (expr.equal, expr.Binary.Op.EQUAL),\n        (expr.not_equal, expr.Binary.Op.NOT_EQUAL),\n    )\n    @ddt.unpack\n    def test_binary_equal_explicit(self, function, opcode):\n        cr = ClassicalRegister(8, \"c\")\n        clbit = Clbit()\n\n        self.assertEqual(\n            function(cr, 255),\n            expr.Binary(\n                opcode, expr.Var(cr, types.Uint(8)), expr.Value(255, types.Uint(8)), types.Bool()\n            ),\n        )\n        self.assertFalse(function(cr, 255).const)\n\n        self.assertEqual(\n            function(7, cr),\n            expr.Binary(\n                opcode,\n                expr.Value(7, types.Uint(8)),\n                expr.Var(cr, types.Uint(8)),\n                types.Bool(),\n            ),\n        )\n        self.assertFalse(function(7, cr).const)\n\n        self.assertEqual(\n            function(clbit, True),\n            expr.Binary(\n                opcode,\n                expr.Var(clbit, types.Bool()),\n                expr.Value(True, types.Bool()),\n                types.Bool(),\n            ),\n        )\n        self.assertFalse(function(clbit, True).const)\n\n        self.assertEqual(\n            function(expr.lift(7.0), 7.0),\n            expr.Binary(\n                opcode,\n                expr.Value(7.0, types.Float()),\n                expr.Value(7.",
+      "metadata": {
+        "section_title": "test_expr_constructors.py",
+        "package": "qiskit",
+        "section_id": "part_6",
+        "source_file": "test\\python\\circuit\\classical\\test_expr_constructors.py"
+      },
+      "score": 0.3925156094870381,
+      "original_score": 0.36054274682846116,
+      "vector_score": 0.4506784335355764,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "function"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 59,
+    "final_results_count": 5
+  }
+}

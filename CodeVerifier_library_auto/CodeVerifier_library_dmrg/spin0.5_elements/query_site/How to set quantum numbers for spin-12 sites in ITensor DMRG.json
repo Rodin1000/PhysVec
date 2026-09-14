@@ -1,0 +1,137 @@
+{
+  "query": "How to set quantum numbers for spin-1/2 sites in ITensor DMRG?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "package": "itensormps",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "section_id": "h2_2"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9289410067322021,
+      "bm25_score": 0.8703093340222174,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "set",
+        "spin",
+        "sites",
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": false
+    },
+    {
+      "id": "QN_DMRG__629a0c9d83a6c48625080be07715c0ee__h4_1_1__0",
+      "text": "Setting up a quantum-number conserving DMRG calculation in ITensor requires\nonly very small changes to a DMRG code. The main changes are:\n1. using tensor indices (`Index` objects) which carry quantum number (QN) information to build your Hamiltonian and  initial state\n2. initializing your MPS to have well-defined total quantum numbers\nImportantly, _the total QN of your state throughout the calculation will\nremain the same as the initial state passed to DMRG_.\nThe total QN of your state is not set separately, but determined\nimplicitly from the initial QN of the state when it is first constructed.\nOf course, your Hamiltonian should conserve all of the QN's that you would\nlike to use. If it doesn't, you will get an error when you try to construct\nit out of the QN-enabled tensor indices.",
+      "metadata": {
+        "section_title": "Necessary Changes",
+        "section_id": "h4_1",
+        "package": "itensormps",
+        "source_file": "docs\\src\\tutorials\\QN_DMRG.md"
+      },
+      "score": 0.9106534291963472,
+      "original_score": 0.895762334062405,
+      "vector_score": 1.0,
+      "bm25_score": 0.1080317779869097,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "set",
+        "quantum",
+        "numbers",
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": false
+    },
+    {
+      "id": "UpgradeGuide_0.1_to_0.2__cd8727a7c4be2179bde8bba8a697829f__Miscellaneous-breaking-changes_3__1",
+      "text": ".7071067811865475\n```\nwhich will be used for making more general MPS product states.\nThis should not affect end users in general, besides ones who had customized the previous state function, such as with overloads like:\n```code\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Up\") = 1\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Dn\") = 2\n```\nwhich should be changed now to:\n```code\nITensors.val(::SiteType\"My_S=1/2\", ::StateName\"Up\") = 1\nITensors.val(::SiteType\"My_S=1/2\", ::StateName\"Dn\") = 2\n```\nThe QN convention of the \"Qubit\" site type is changed to track the total number of 1 bits instead of the net number of 1 bits vs 0 bits (i.e. change the QN from +1/-1 to 0/1) ( PR #676 ).\n```code\njulia> s = siteinds(\"Qubit\", 4; conserve_number=true)\n4-element Vector{Index{Vector{Pair{QN, Int64}}}}:\n (dim=2|id=925|\"Qubit,Site,n=1\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=799|\"Qubit,Site,n=2\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=8|\"Qubit,Site,n=3\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=385|\"Qubit,Site,n=4\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n```\nBefore it was +1/-1 like \"S=1/2\" :\n```code\njulia> s = siteinds(\"S=1/2\", 4; conserve_sz=true)\n4-element Vector{Index{Vector{Pair{QN, Int64}}}}:\n (dim=2|id=364|\"S=1/2,Site,n=1\") <Out>\n 1: QN(\"Sz\",1) => 1\n 2: QN(\"Sz\",-1) => 1\n (dim=2|id=823|\"S=1/2,Site,n=2\") <Out>\n 1: QN(\"Sz\",1) => 1\n 2: QN(\"",
+      "metadata": {
+        "source_file": "docs\\build\\UpgradeGuide_0.1_to_0.2.html",
+        "package": "itensors",
+        "section_id": "Miscellaneous-breaking-changes",
+        "section_title": "Miscellaneous breaking changes"
+      },
+      "score": 0.9041543852185309,
+      "original_score": 0.8722058469580412,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types_2__0",
+      "text": "## DMRG Calculation with Mixed Local Hilbert Space Types\nThe following fully-working example shows how to set up a calculation mixing S=1/2 and S=1 spins on every other site of a 1D system. The Hamiltonian involves Heisenberg spin interactions with adjustable couplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation is that the sites array has Index objects which alternate in dimension and in which physical tag type they carry, whether \"S=1/2\" or \"S=1\" . (Try printing out the sites array to see!) These tags tell the OpSum system which local operators to use for these sites when building the Hamiltonian MPO.\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n\n  # Make an array of N Index objects with alternating\n  # \"S=1/2\" and \"S=1\" tags on odd versus even sites\n  # (The first argument n->isodd(n) ... is an\n  # on-the-fly function mapping integers to strings)\n  sites = siteinds(n->isodd(n) ? \"S=1/2\" : \"S=1\",N)\n\n  # Couplings between spin-half and\n  # spin-one sites:\n  Jho = 1.0 # half-one coupling\n  Jhh = 0.5 # half-half coupling\n  Joo = 0.5 # one-one coupling\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5*Jho,\"S+\",j,\"S-\",j+1\n    os += 0.5*Jho,\"S-\",j,\"S+\",j+1\n    os += Jho,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:2:N-2\n    os += 0.5*Jhh,\"S+\",j,\"S-\",j+2\n    os += 0.5*Jhh,\"S-\",j,\"S+\",j+2\n    os += Jhh,\"Sz\",j,\"Sz\",j+2\n  end\n  for j=2:2:N-2\n    os += 0.5*Joo,\"S+\",j,\"S-\",j+2\n    os += 0.5*Joo,\"S-\",j,\"S+\",j+2\n    os += Joo,\"Sz\",j,\"Sz\",j+2\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 10\n  maxdim = [10,10,20,40,80,100,140,180,200]\n  cutoff = [1E-8]\n\n  psi0 = random_mps(sites;linkdims=4)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "package": "itensormps",
+        "section_id": "DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types"
+      },
+      "score": 0.8650440269385933,
+      "original_score": 0.7777195737812125,
+      "vector_score": 0.7246784847683078,
+      "bm25_score": 0.6679650805349737,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "set",
+        "spin",
+        "sites",
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "qubit__04eb5b322e8470823b519f30a361d1bd__part_10__10",
+      "text": " ]\nend\n\n# spin-full operators\nop(::OpName\"Sz\", ::SiteType\"Qubit\") = [\n  0.5 0.0\n  0.0 -0.5\n]\n\nop(on::OpName\"Sᶻ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S+\", ::SiteType\"Qubit\") = [\n  0 1\n  0 0\n]\n\nop(on::OpName\"S⁺\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Splus\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S-\", ::SiteType\"Qubit\") = [\n  0 0\n  1 0\n]\n\nop(on::OpName\"S⁻\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Sminus\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"Sx\", ::SiteType\"Qubit\") = [\n  0.0 0.5\n  0.5 0.0\n]\n\nop(on::OpName\"Sˣ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"iSy\", ::SiteType\"Qubit\") = [\n  0.0 0.5\n  -0.5 0.0\n]\n\nop(on::OpName\"iSʸ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"Sy\", ::SiteType\"Qubit\") = [\n  0.0 -0.5im\n  0.5im 0.0\n]\n\nop(on::OpName\"Sʸ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S2\", ::SiteType\"Qubit\") = [\n  0.75 0.0\n  0.0 0.75\n]\n\nop(on::OpName\"S²\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"ProjUp\", ::SiteType\"Qubit\") = [\n  1 0\n  0 0\n]\n\nop(on::OpName\"projUp\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Proj0\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"ProjDn\", ::SiteType\"Qubit\") = [\n  0 0\n  0 1\n]\n\nop(on::OpName\"projDn\", t::SiteType\"Qubit\") = op(alias(on),",
+      "metadata": {
+        "section_id": "part_10",
+        "section_title": "qubit.jl",
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\qubit.jl"
+      },
+      "score": 0.7955943668608395,
+      "original_score": 0.7895824364743936,
+      "vector_score": 0.9052707445475057,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "spin"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 96,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 43
+      }
+    }
+  }
+}

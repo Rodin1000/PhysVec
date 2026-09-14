@@ -1,0 +1,129 @@
+{
+  "query": "Common pitfalls when combining quantum circuits in Qiskit effector functions",
+  "packages": [
+    "qiskit",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "test_circuits__5e61e8b39b8671e85b6338a14d3ed1df__part_2__2",
+      "text": ".QuantumCircuit(2)\n            source_embodiment.append(UnitaryGate(canonical_matrix(*source_coordinate)), [0, 1])\n            interaction_embodiment = qiskit.QuantumCircuit(2)\n            interaction_embodiment.append(UnitaryGate(canonical_matrix(*interaction)), [0, 1])\n\n            prefix_circuit, affix_circuit = itemgetter(\"prefix_circuit\", \"affix_circuit\")(\n                xx_circuit_step(\n                    source_coordinate, interaction[0], target_coordinate, interaction_embodiment\n                )\n            )\n\n            target_embodiment = QuantumCircuit(2)\n            target_embodiment.compose(prefix_circuit, inplace=True)\n            target_embodiment.compose(source_embodiment, inplace=True)\n            target_embodiment.compose(affix_circuit, inplace=True)\n            self.assertTrue(\n                np.all(\n                    np.abs(\n                        qiskit.quantum_info.operators.Operator(target_embodiment).data\n                        - canonical_matrix(*target_coordinate)\n                    )\n                    < EPSILON\n                )\n            )\n",
+      "metadata": {
+        "source_file": "test\\python\\synthesis\\xx_decompose\\test_circuits.py",
+        "section_id": "part_2",
+        "package": "qiskit",
+        "section_title": "test_circuits.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qiskit"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "test_gate_direction__5bc5fab3b4f2b107cb1cfadf32a32e22__part_3__3",
+      "text": "1: -[H]-(+)-[H]--|--\n                           |\n        cr0: --------------.--\n        \"\"\"\n        qr = QuantumRegister(2, \"qr\")\n        cr = ClassicalRegister(1, \"cr\")\n\n        circuit = QuantumCircuit(qr, cr)\n        circuit.cx(qr[1], qr[0])\n        circuit.measure(qr[0], cr[0])\n        coupling = CouplingMap([[0, 1]])\n        dag = circuit_to_dag(circuit)\n\n        expected = QuantumCircuit(qr, cr)\n        expected.h(qr[0])\n        expected.h(qr[1])\n        expected.cx(qr[0], qr[1])\n        expected.h(qr[0])\n        expected.h(qr[1])\n        expected.measure(qr[0], cr[0])\n\n        pass_ = GateDirection(coupling)\n        after = pass_.run(dag)\n\n        self.assertEqual(circuit_to_dag(expected), after)\n\n    def test_regression_gh_8387(self):\n        \"\"\"Regression test for flipping of CZ gate\"\"\"\n        qc = QuantumCircuit(3)\n        qc.cz(1, 0)\n        qc.barrier()\n        qc.cz(2, 0)\n\n        coupling_map = CouplingMap([[0, 1], [1, 2]])\n        _ = transpile(\n            qc,\n            basis_gates=[\"cz\", \"cx\", \"u3\", \"u2\", \"u1\"],\n            coupling_map=coupling_map,\n            optimization_level=2,\n        )\n\n    @ddt.data(CXGate(), CZGate(), ECRGate())\n    def test_target_static(self, gate):\n        \"\"\"Test that static 2q gates are swapped correctly both if available and not available.\"\"\"\n        circuit = QuantumCircuit(2)\n        circuit.append(gate, [0, 1], [])\n\n        matching = Target(num_qubits=2)\n        matching.add_instruction(gate, {(0, 1): None})\n        self.assertEqual(GateDirection(None, target=matching)(circuit), circuit)\n\n        swapped = Target(num_qubits=2)\n        swapped.add_instruction(gate, {(1, 0): None})\n        self.assertNotEqual(GateDirection(None, target=swapped)(circuit), circuit)\n\n    @ddt.data(CZGate(), RZXGate(pi / 3), RXXGate(pi / 3), RYYGate(pi / 3), RZZGate(pi / 3))\n    def test_target_trivial(self, gate):\n        \"\"\"Test that trivial 2q gates are swapped correctly both if available and not available.\"\"\"\n        circuit = QuantumCircuit(2)\n        circuit.append(gate, [0, 1], [])\n\n        matching = Target(num_qubits=2)\n        matching.add_instruction(gate, {(0, 1): None})\n        self.assertEqual(GateDirection(None,",
+      "metadata": {
+        "package": "qiskit",
+        "section_id": "part_3",
+        "source_file": "test\\python\\transpiler\\test_gate_direction.py",
+        "section_title": "test_gate_direction.py"
+      },
+      "score": 0.9605643064845926,
+      "original_score": 0.9605643064845926,
+      "vector_score": 0.9605643064845926,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "test_transpile__bd2013c9b8aac24ee8495300a2780538__part_3__3",
+      "text": "combine(opt_level=[0, 1, 2, 3], basis=[[\"rz\", \"x\"], [\"rx\", \"z\"], [\"rz\", \"y\"], [\"ry\", \"x\"]])\n    def test_paulis_to_constrained_1q_basis(self, opt_level, basis):\n        \"\"\"Test that Pauli-gate circuits can be transpiled to constrained 1q bases that do not\n        contain any root-Pauli gates.\"\"\"\n        qc = QuantumCircuit(1)\n        qc.x(0)\n        qc.barrier()\n        qc.y(0)\n        qc.barrier()\n        qc.z(0)\n        target = ffi.build_homogenous_target(CouplingMap.from_line(1), basis, 42, True)\n        self.addCleanup(ffi.LIB.qk_target_free, target)\n        c_qc = ffi.build_circuit_from_python(qc)\n        self.addCleanup(ffi.LIB.qk_circuit_free, c_qc)\n        transpiled = ffi.transpile_from_c(c_qc, target, opt_level, 1.0, 42)\n        self.assertGreaterEqual(set(basis) | {\"barrier\"}, transpiled.count_ops().keys())\n        self.assertEqual(Operator(qc), Operator(transpiled))\n\n    @ddt.data(0, 1, 2, 3)\n    def test_single_qubit_circuit_deterministic_output(self, optimization_level):\n        \"\"\"Test that the transpiler's output is deterministic in a single qubit example.\n\n        Reproduce from `#14729 <https://github.com/Qiskit/qiskit/issues/14729>`__\"\"\"\n        params = [math.pi, math.pi / 2, math.pi * 2, math.pi / 4, 0]\n\n        circ = QuantumCircuit(len(params))\n        for i, par in enumerate(params):\n            circ.rx(par, i)\n        circ.measure_all()\n        target = ffi.build_homogenous_target(\n            CouplingMap.from_full(10), [\"cx\", \"rz\", \"sx\", \"x\"], 123\n        )\n        self.addCleanup(ffi.LIB.qk_target_free, target)\n        c_circ = ffi.build_circuit_from_python(circ)\n        self.addCleanup(ffi.LIB.qk_circuit_free, c_circ)\n        isa_circs = []\n        for _ in range(10):\n            isa_circs.append(ffi.transpile_from_c(c_circ, target, optimization_level, 1.0, 123))\n        for i in range(10):\n            self.assertEqual(isa_circs[0], isa_circs[i])\n\n    @ddt.data(2, 3)\n    def test_size_optimization(self, level):\n        \"\"\"Test the levels for optimization based on size of circuit\"\"\"\n        target = ffi.build_homogenous_target(CouplingMap.from_full",
+      "metadata": {
+        "section_id": "part_3",
+        "section_title": "test_transpile.py",
+        "package": "qiskit",
+        "source_file": "test\\python\\c_api\\test_transpile.py"
+      },
+      "score": 0.9385720744325596,
+      "original_score": 0.9353390257184838,
+      "vector_score": 0.9353390257184838,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "circuits",
+        "qiskit"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "fourier_checking__4b72f312372ec208b23fd984701d195c__part_1__1",
+      "text": "2] S. Aaronson, A. Ambainis, Forrelation: a problem that\n    optimally separates quantum from classical computing, 2014.\n    `arXiv:1411.5729 <https://arxiv.org/abs/1411.5729>`_\n    \"\"\"\n\n    @deprecate_func(\n        since=\"2.1\",\n        additional_msg=\"Use qiskit.circuit.library.fourier_checking instead.\",\n        removal_timeline=\"in Qiskit 3.0\",\n    )\n    def __init__(self, f: Sequence[int], g: Sequence[int]) -> None:\n        \"\"\"Create Fourier checking circuit.\n\n        Args:\n            f: truth table for f, length 2**n list of {1,-1}.\n            g: truth table for g, length 2**n list of {1,-1}.\n\n        Raises:\n            CircuitError: if the inputs f and g are not valid.\n\n        Reference Circuit:\n            .. plot::\n               :alt: Diagram illustrating the previously described circuit.\n\n               from qiskit.circuit.library import FourierChecking\n               from qiskit.visualization.library import _generate_circuit_library_visualization\n               f = [1, -1, -1, -1]\n               g = [1, 1, -1, -1]\n               circuit = FourierChecking(f, g)\n               _generate_circuit_library_visualization(circuit)\n        \"\"\"\n        num_qubits = math.log2(len(f))\n\n        if len(f) != len(g) or num_qubits == 0 or not num_qubits.is_integer():\n            raise CircuitError(\n                \"The functions f and g must be given as truth \"\n                \"tables, each as a list of 2**n entries of \"\n                \"{1, -1}.\"\n            )\n\n        # This definition circuit is not replaced by the circuit produced by fourier_checking,\n        # as the latter produces a slightly different circuit, with DiagonalGates instead\n        # of Diagonal circuits.\n        circuit = QuantumCircuit(int(num_qubits), name=f\"fc: {f}, {g}\")\n        circuit.h(circuit.qubits)\n        circuit.compose(Diagonal(f), inplace=True)\n        circuit.h(circuit.qubits)\n        circuit.compose(Diagonal(g), inplace=True)\n        circuit.h(circuit.qubits)\n        super().__init__(*circuit.qregs, name=circuit.name)\n        self.compose(circuit.to_gate(), qubits=self.qubits, inplace=True)\n\n\ndef fourier_checking(f: Sequence[int], g: Sequence[int]) -> QuantumCircuit:\n    \"\"\"Fourier checking circuit.\n\n    The circuit for the Fourier checking algorithm, introduced in [1],\n    involves a layer of Hadamards, the function :math:`f`, another layer of\n    Hadamards, the function :math:`g`, followed by a final layer of Hadamards",
+      "metadata": {
+        "section_title": "fourier_checking.py",
+        "package": "qiskit",
+        "source_file": "qiskit\\circuit\\library\\fourier_checking.py",
+        "section_id": "part_1"
+      },
+      "score": 0.8994389815357111,
+      "original_score": 0.888265535039679,
+      "vector_score": 0.8882655350396789,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "quantum",
+        "circuits",
+        "qiskit",
+        "functions"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "decomposer__049717f489a3248e3d73d077561d384d__part_6__6",
+      "text": "(circuit, [0, 1], inplace=True)\n            corrected_circuit.rz(-np.pi, [0])\n            circuit = corrected_circuit\n        else:\n            # else they're in the \"positive\" scissors part...\n            corrected_circuit = QuantumCircuit(2)\n            _, source_reflection, _ = apply_reflection(\"reflect XX, ZZ\", [0, 0, 0])\n            _, source_shift, _ = apply_shift(\"X shift\", [0, 0, 0])\n\n            corrected_circuit.compose(source_reflection.inverse(), inplace=True)\n            corrected_circuit.rz(np.pi, [0])\n            corrected_circuit.compose(circuit, [0, 1], inplace=True)\n            corrected_circuit.rz(-np.pi, [0])\n            corrected_circuit.compose(source_shift.inverse(), inplace=True)\n            corrected_circuit.compose(source_reflection, inplace=True)\n            corrected_circuit.global_phase += np.pi / 2\n\n            circuit = corrected_circuit\n\n        circ = QuantumCircuit(2, global_phase=weyl_decomposition.global_phase)\n\n        circ.append(UnitaryGate(weyl_decomposition.K2r), [0])\n        circ.append(UnitaryGate(weyl_decomposition.K2l), [1])\n        circ.compose(circuit, [0, 1], inplace=True)\n        circ.append(UnitaryGate(weyl_decomposition.K1r), [0])\n        circ.append(UnitaryGate(weyl_decomposition.K1l), [1])\n\n        circ = self._decomposer1q(circ)\n        if use_dag:\n            from qiskit.converters import circuit_to_dag\n\n            return circuit_to_dag(circ, copy_operations=False)\n        return circ\n",
+      "metadata": {
+        "section_id": "part_6",
+        "source_file": "qiskit\\synthesis\\two_qubit\\xx_decompose\\decomposer.py",
+        "section_title": "decomposer.py",
+        "package": "qiskit"
+      },
+      "score": 0.8417059687843573,
+      "original_score": 0.8376471474711357,
+      "vector_score": 0.8376471474711357,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qiskit"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 30,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 90,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "qiskit-aer": {
+        "vector_results_count": 0,
+        "bm25_results_count": 30,
+        "merged_results_count": 30
+      }
+    }
+  }
+}

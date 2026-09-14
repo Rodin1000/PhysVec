@@ -1,0 +1,133 @@
+{
+  "query": "ITensor DMRG inner product for energy and observable expectation values",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "1d_ising_with_observer__82f90a8d4a7ed5b00346b555230baebb__part_0__0",
+      "text": "# In this example we show how to pass a DMRGObserver to\n# the dmrg function which allows tracking energy convergence and\n# convergence of local operators.\nusing ITensors, ITensorMPS\n\n\"\"\"\n  Get MPO of transverse field Ising model Hamiltonian with field strength h\n\"\"\"\nfunction tfimMPO(sites, h::Float64)\n  # Input operator terms which define a Hamiltonian\n  N = length(sites)\n  os = OpSum()\n  for j in 1:(N - 1)\n    os -= 1, \"Z\", j, \"Z\", j + 1\n  end\n  for j in 1:N\n    os += h, \"X\", j\n  end\n  # Convert these terms to an MPO tensor network\n  return MPO(os, sites)\nend\n\nlet\n  N = 100\n  sites = siteinds(\"S=1/2\", N)\n  psi0 = random_mps(sites; linkdims=10)\n\n  # define parameters for DMRG sweeps\n  nsweeps = 15\n  maxdim = [10, 20, 100, 100, 200]\n  cutoff = [1E-10]\n\n  #=\n  create observer which will measure Sᶻ at each\n  site during the dmrg sweeps and track energies after each sweep.\n  in addition it will stop the computation if energy converges within\n  1E-7 tolerance\n  =#\n  let\n    Sz_observer = DMRGObserver([\"Sz\"], sites; energy_tol=1E-7)\n\n    # we will now run DMRG calculation for different values\n    # of the transverse field and check how local observables\n    # converge to their ground state values\n\n    println(\"Running DMRG for TFIM with h=0.1\")\n    println(\"================================\")\n    H = tfimMPO(sites, 0.1)\n    energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, observer=Sz_observer)\n\n    for (i, Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n      println(\"<Σ Sz> after sweep $i = \", sum(Szs) / N)\n    end\n  end\n\n  let\n    println(\"\\nRunning DMRG for TFIM with h=1.0 (critical point)\")\n    println(\"================================\")\n    Sz_observer = DMRGObserver([\"Sz\"], sites; energy_tol=1E-7)\n    H = tfimMPO(sites, 1.0)\n    energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, observer=Sz_observer)\n\n    for (i, Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n      println(\"<Σ Sz",
+      "metadata": {
+        "source_file": "examples\\dmrg\\1d_ising_with_observer.jl",
+        "package": "itensormps",
+        "section_id": "part_0",
+        "section_title": "1d_ising_with_observer.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9921773416749489,
+      "bm25_score": 0.6694315161951434,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "dmrg",
+        "energy",
+        "values"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_5_5__0",
+      "text": "One version of the ITensor `dmrg` function accepts an array of MPOs\n`[H1,H2,H3]` (or any number of MPOs you want). This version of DMRG\nwill find the ground state of `H1+H2+H3`. Internally it does not\nactually sum these MPOs, but loops over them during each step of\nthe \"eigensolver\" at the core of the DMRG algorithm, so it is usually\nmore efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs `H1`, `H2`, and `H3`.\nThen call DMRG like this:\n```julia\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "section_id": "h2_5"
+      },
+      "score": 0.8727334223816442,
+      "original_score": 0.8624145106828586,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensor",
+        "dmrg",
+        "energy"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "ctmrg_isotropic__3af4213eb7e13bdc1c45eaa2b10337a1__full__0",
+      "text": "using ITensors\n\nfunction ctmrg(T::ITensor, Cₗᵤ::ITensor, Aₗ::ITensor; χmax::Int, cutoff=0.0, nsteps::Int)\n  sₕ = commonind(T, Aₗ)\n  sᵥ = uniqueind(T, Aₗ, Aₗ'; plev=0)\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = uniqueind(Cₗᵤ, Aₗ)\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  Cₗᵤ = dense(Cₗᵤ)\n  for i in 1:nsteps\n    ## Get the grown corner transfer matrix (CTM)\n    Cₗᵤ⁽¹⁾ = Aₗ * Cₗᵤ * Aᵤ * T\n\n    ## Diagonalize the grown CTM\n    # TODO: replace with\n    # eigen(Cₗᵤ⁽¹⁾, \"horiz\" => \"vert\"; tags = \"horiz\" => \"vert\", kwargs...)\n    Cₗᵤ, Uᵥ = eigen(\n      Cₗᵤ⁽¹⁾,\n      (lₕ', sₕ'),\n      (lᵥ', sᵥ');\n      ishermitian=true,\n      cutoff,\n      maxdim=χmax,\n      lefttags=tags(lₕ),\n      righttags=tags(lᵥ),\n    )\n    Cₗᵤ = dense(Cₗᵤ)\n    lᵥ = commonind(Cₗᵤ, Uᵥ)\n    lₕ = uniqueind(Cₗᵤ, Uᵥ)\n\n    # The renormalized CTM is the diagonal matrix of eigenvalues\n    # Normalize the CTM\n    Cₗ = Cₗᵤ * prime(dag(Cₗᵤ), lₕ)\n    normC = (Cₗ * dag(Cₗ))[]^(1 / 4)\n    Cₗᵤ = Cₗᵤ / normC\n\n    # Calculate the renormalized half row transfer matrix (HRTM)\n    Uᵥ = noprime(Uᵥ)\n    Aₗ = Aₗ * Uᵥ * T * dag(Uᵥ')\n    Aₗ = replaceinds(Aₗ, sₕ' => sₕ)\n\n    # Normalize the HRTM\n    ACₗ = Aₗ * Cₗᵤ * prime(dag(Cₗᵤ))\n    normA = √((ACₗ * dag(ACₗ))[])\n    Aₗ = Aₗ / normA\n    Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  end\n  return Cₗᵤ, Aₗ\nend\n",
+      "metadata": {
+        "source_file": "examples\\src\\ctmrg_isotropic.jl",
+        "package": "itensors",
+        "section_id": "full",
+        "section_title": "ctmrg_isotropic.jl"
+      },
+      "score": 0.8658541479157871,
+      "original_score": 0.8624145106828586,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "trg.jl",
+        "package": "itensors",
+        "source_file": "examples\\src\\trg.jl"
+      },
+      "score": 0.8593721858950367,
+      "original_score": 0.8557663445077299,
+      "vector_score": 0.9922912171667142,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG",
+        "package": "itensormps"
+      },
+      "score": 0.8406487374797567,
+      "original_score": 0.7639240555255654,
+      "vector_score": 0.885796848340007,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensor",
+        "dmrg",
+        "energy"
+      ],
+      "match_ratio": 0.375,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 110,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      }
+    }
+  }
+}

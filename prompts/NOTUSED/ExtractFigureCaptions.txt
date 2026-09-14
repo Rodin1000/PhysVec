@@ -1,0 +1,135 @@
+It is well known that research articles in the field of physics often heavily rely on figures for presenting their core findings. Consequently, focusing on the content of each figure is a highly effective way to understand and organize the overall logic and flow of the research.
+
+Your task is to read the caption for every figure and then provide a concise summary of the specific information each figure conveys.
+
+If only part of the paper is provided, please regard it as a complete paper and summerize the figure info as described below. 
+
+-----------------------------------------------------------------------------------------
+You will output a JSON file containg the following fields:
+- "num_figures": The total number of figures shown in the paper
+- "Fig. 1": # The total number of 'Fig' should match the num_figures. 
+    - "discription": A summary of the content and findings of this figure. 
+    - "num_subplots": The total number of subplots inside this figure. Inset should be counted independently. 
+    - "Subplot. 1": # The total number of 'Subplot' should match the num_subplots. 
+        - "name": such as Fig. 1 (if there is only one figure), Fig. 1(a) (if there are multiple subplots), Fig. 1(a)-inset...
+        - "description": The content and findings of this subplot.
+        - "Isdemo": Whether this image is merely a conceptual diagram for illustrating ideas, containing no actual data. Output as true or false. 
+        - "num_items": The total number of items (e.g. different lines or curves) in this subplot. Example: if the subplot contains 3 curves and 1 horizontal line, then num_items = 4. Example: if the subplot contains a mesh and a curve on it, then num_item = 2. If Isdemo is true, num_items is 1.
+        - "Item. 1": # The total number of 'Item' should match the num_items. 
+            - "description": A description about this item, inluding the dependent variable, independent variable(s), the physical model/formula this item describes, the calculation methods, ....(as detailed as possible) 
+            - "dimensions": A brief description about the plot dimension of this item: 1 for 1D items (curves, lines,...), 2 for 2D items (mesh, contours,...), 3 for 3D items. In other words, this 'dimensions' equals to the number of independent variables of the item. If Isdemo is true, dimensions = 0. 
+            - "independent": The independent variables of this item. The number of variables here may be multiple. If Isdemo is true, independent is empty. 
+            - "dependent“: The dependent variables of this item. The number of variables here may be multiple. If Isdemo is true, dependent is empty. 
+            - "params": All other parameters of this item. You list their definitions and values for this item if possible. Each parameter should only have one value choice. If Isdemo is true, params is empty. 
+        - "Item. 2": 
+            ......
+    - "Subplot. 2":
+        ......
+- "Fig. 2":
+    ......
+
+-------------------------------------------------------------------------------------------
+Check:
+# For each item (in each subplot and in each Figure), every parameter included must not have multiple values (by which you mix two items into one). e.g. "params": ["U = 10, 20", ...] is forbidden, this item should be divided into two with ["U = 10'] and ["U = 20"]
+
+
+--------------------------------------------------------------------------------------------
+Example response format:
+
+{
+  "num_figures": 2,
+  "Fig. 1": {
+    "discription": "Schematic illustration of a one-dimensional Bose–Hubbard lattice showing lattice sites, tunneling (hopping) amplitude J between nearest neighbors, on-site repulsion U, and the chemical potential μ. The cartoon emphasizes the competing processes (delocalization by J vs localization by U) that lead to superfluid and Mott-insulating behavior.",
+    "num_subplots": 1,
+    "Subplot. 1": {
+      "name": "Fig. 1",
+      "description": "Conceptual diagram of a 1D Bose–Hubbard chain: a line of lattice sites with arrows indicating nearest-neighbor hopping (amplitude J), labels on sites for on-site interaction U and local occupancy, and an inset cartoon contrasting a delocalized superfluid waveform across sites with a localized Mott state (fixed integer occupation).",
+      "Isdemo": true,
+      "num_items": 1,
+      "Item. 1": {
+        "description": "Schematic (non-data) representation of the Bose–Hubbard model in 1D. It illustrates the Hamiltonian terms H = -J Σ_{⟨i,j⟩} (a_i^† a_j + h.c.) + (U/2) Σ_i n_i(n_i-1) - μ Σ_i n_i and the physical intuition (hopping J vs on-site repulsion U) that produces superfluid and Mott-insulating regimes.",
+        "dimensions": 0,
+        "independent": [],
+        "dependent": [],
+        "params": []
+      }
+    }
+  },
+  "Fig. 2": {
+    "discription": "Left panel: a schematic phase diagram (qualitative) in the (J/U, μ/U) plane showing Mott lobes and the superfluid region. Right panel: quantitative results — condensate fraction (largest eigenvalue of the single-particle density matrix normalized by N) as a function of interaction strength U/J for three finite 1D systems (different L) at unit filling, computed by exact diagonalization.",
+    "num_subplots": 2,
+    "Subplot. 1": {
+      "name": "Fig. 2(a)",
+      "description": "Qualitative phase diagram for the 1D Bose–Hubbard model plotted in axes (J/U horizontally, μ/U vertically). Displays Mott lobes at commensurate fillings (shaded lobes) surrounded by the superfluid region. Arrows indicate direction of increasing quantum fluctuations (increasing J/U). This is a conceptual illustration used to relate the numerical results in the right panel to the expected phase structure.",
+      "Isdemo": true,
+      "num_items": 1,
+      "Item. 1": {
+        "description": "Conceptual phase diagram (no raw data). Marks Mott lobes (integer fillings) and the surrounding superfluid phase, illustrating how increasing J/U drives transitions from Mott insulator to superfluid at fixed μ/U.",
+        "dimensions": 0,
+        "independent": [],
+        "dependent": [],
+        "params": []
+      }
+    },
+    "Subplot. 2": {
+      "name": "Fig. 2(b)",
+      "description": "Calculated condensate fraction (order parameter) |ψ|^2 (taken as the largest eigenvalue λ_0 of the single-particle density matrix ρ_{ij} = ⟨a_i^† a_j⟩ normalized by total particle number N) plotted versus U/J for three finite 1D systems at unit filling (N = L). Curves compare finite-size evolution of the superfluid order parameter and show suppression of condensate fraction as U/J increases; the onset of a small-λ_0 plateau signals approach to the finite-size analogue of the Mott regime.",
+      "Isdemo": false,
+      "num_items": 3,
+      "Item. 1": {
+        "description": "Condensate fraction λ_0/N (dependent) as a function of the interaction ratio U/J (independent), computed for a 1D Bose–Hubbard chain using exact diagonalization (Lanczos) for finite size L = 6 at unit filling (N = 6). Ground state is obtained for each U/J; the single-particle density matrix ρ_{ij} = ⟨a_i^† a_j⟩ is constructed and its largest eigenvalue λ_0 is extracted; condensate fraction = λ_0 / N. Local occupation truncated at n_max = 5. Periodic boundary conditions used.",
+        "dimensions": 1,
+        "independent": [
+          "U/J (dimensionless, varied continuously over a chosen grid, e.g. 0 → 30)"
+        ],
+        "dependent": [
+          "Condensate fraction λ_0 / N (dimensionless)"
+        ],
+        "params": [
+          "L = 6",
+          "N = 6",
+          "Boundary conditions = periodic",
+          "Method = exact diagonalization (Lanczos) of Bose–Hubbard Hamiltonian",
+          "Local occupation cutoff n_max = 5",
+          "Energy units: J = 1 (so U is given in units of J)"
+        ]
+      },
+      "Item. 2": {
+        "description": "Condensate fraction λ_0/N (dependent) vs U/J (independent) computed as in Item. 1 but for a larger finite system L = 8 (unit filling N = 8). Same procedure: ground-state diagonalization, single-particle density matrix, largest eigenvalue extraction. Comparison with L = 6 shows finite-size trend toward sharper suppression of condensate fraction with increasing U/J.",
+        "dimensions": 1,
+        "independent": [
+          "U/J (dimensionless, varied continuously over a chosen grid, e.g. 0 → 30)"
+        ],
+        "dependent": [
+          "Condensate fraction λ_0 / N (dimensionless)"
+        ],
+        "params": [
+          "L = 8",
+          "N = 8",
+          "Boundary conditions = periodic",
+          "Method = exact diagonalization (Lanczos) of Bose–Hubbard Hamiltonian",
+          "Local occupation cutoff n_max = 5",
+          "Energy units: J = 1 (so U is given in units of J)"
+        ]
+      },
+      "Item. 3": {
+        "description": "Condensate fraction λ_0/N (dependent) vs U/J (independent) computed as in Item. 1 but for system size L = 10 (unit filling N = 10). Provides the largest system of the three; used to illustrate finite-size scaling tendencies (e.g. steeper drop of λ_0/N around the finite-size crossover compared to smaller L).",
+        "dimensions": 1,
+        "independent": [
+          "U/J (dimensionless, varied continuously over a chosen grid, e.g. 0 → 30)"
+        ],
+        "dependent": [
+          "Condensate fraction λ_0 / N (dimensionless)"
+        ],
+        "params": [
+          "L = 10",
+          "N = 10",
+          "Boundary conditions = periodic",
+          "Method = exact diagonalization (Lanczos) of Bose–Hubbard Hamiltonian",
+          "Local occupation cutoff n_max = 5",
+          "Energy units: J = 1 (so U is given in units of J)"
+        ]
+      }
+    }
+  }
+}

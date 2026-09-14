@@ -1,0 +1,142 @@
+{
+  "query": "Define particle number, spin, and qubit reduction during fermion-to-qubit mapping",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "initializer__b7a2e57b4d98270c23298f876535fd8e__part_1__1",
+      "text": "                * Labels of basis states of the Pauli eigenstates Z, X, Y. See\n                  :meth:`.Statevector.from_label`. Notice the order of the labels is reversed with\n                  respect to the qubit index to be applied to. Example label '01' initializes the\n                  qubit zero to :math:`|1\\rangle` and the qubit one to :math:`|0\\rangle`.\n                * An integer that is used as a bitmap indicating which qubits to initialize to\n                  :math:`|1\\rangle`. Example: setting params to 5 would initialize qubit 0 and qubit\n                  2 to :math:`|1\\rangle` and qubit 1 to :math:`|0\\rangle`.\n\n            num_qubits: This parameter is only used if params is an int. Indicates the total\n                number of qubits in the `initialize` call. Example: `initialize` covers 5 qubits\n                and params is 3. This allows qubits 0 and 1 to be initialized to :math:`|1\\rangle`\n                and the remaining 3 qubits to be initialized to :math:`|0\\rangle`.\n            normalize: Whether to normalize an input array to a unit vector.\n        \"\"\"\n        self._stateprep = StatePreparation(params, num_qubits, normalize=normalize)\n\n        super().__init__(\"initialize\", self._stateprep.num_qubits, 0, self._stateprep.params)\n\n    def _define(self):\n        q = QuantumRegister(self.num_qubits, \"q\")\n        initialize_circuit = QuantumCircuit(q, name=\"init_def\")\n        initialize_circuit.reset(q)\n        initialize_circuit.append(self._stateprep, q)\n        self.definition = initialize_circuit\n\n    def gates_to_uncompute(self) -> QuantumCircuit:\n        \"\"\"Call to create a circuit with gates that take the desired vector to zero.\n\n        Returns:\n            QuantumCircuit: circuit to take ``self.params`` vector to :math:`|{00\\\\ldots0}\\\\rangle`\n        \"\"\"\n\n        isom = Isometry(self.params, 0, 0)\n        return isom._gates_to_uncompute()\n\n    @property\n    def params(self):\n        \"\"\"Return initialize params.\"\"\"\n        return self._stateprep.params\n\n    @params.setter\n    def params(self, parameters: Statevector | Sequence[complex] | str | int) -> None:\n        \"\"\"Set initialize params.\"\"\"\n        self._stateprep.params = parameters\n\n    def broadcast_arguments(self, qargs, cargs):\n        return self._stateprep.broadcast_arguments(qargs, cargs)\n",
+      "metadata": {
+        "section_title": "initializer.py",
+        "source_file": "qiskit\\circuit\\library\\data_preparation\\initializer.py",
+        "package": "qiskit",
+        "section_id": "part_1"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "number",
+        "qubit",
+        "qubit"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    },
+    {
+      "id": "test_uccsd__3a987dbbf4e3d466f4a9164cf563a68c__part_8__8",
+      "text": "5 +_2 -_3 -_0\": -1j}, num_spin_orbitals=6),\n                FermionicOp({\"+_0 +_3 -_4 -_5\": 1j, \"+_5 +_4 -_3 -_0\": -1j}, num_spin_orbitals=6),\n            ],\n        ),\n    )\n    def test_uccsd_ansatz_preserve_spin(self, num_spatial_orbitals, num_particles, expect):\n        \"\"\"Tests UCCSD Ansatz with spin flips.\"\"\"\n        mapper = JordanWignerMapper()\n\n        ansatz = UCCSD(\n            qubit_mapper=mapper,\n            num_particles=num_particles,\n            num_spatial_orbitals=num_spatial_orbitals,\n            preserve_spin=False,\n        )\n        assert_ucc_like_ansatz(self, ansatz, num_spatial_orbitals, expect)\n\n    @unpack\n    @data(\n        (\n            2,\n            (1, 1),\n            [\n                FermionicOp({\"+_0 -_1\": 1j, \"+_1 -_0\": -1j}, num_spin_orbitals=4),\n                FermionicOp({\"+_0 -_1\": -1, \"+_1 -_0\": -1}, num_spin_orbitals=4),\n                FermionicOp({\"+_2 -_3\": 1j, \"+_3 -_2\": -1j}, num_spin_orbitals=4),\n                FermionicOp({\"+_2 -_3\": -1, \"+_3 -_2\": -1}, num_spin_orbitals=4),\n                FermionicOp({\"+_0 +_2 -_1 -_3\": 1j, \"+_3 +_1 -_2 -_0\": -1j}, num_spin_orbitals=4),\n                FermionicOp({\"+_0 +_2 -_1 -_3\": -1, \"+_3 +_1 -_2 -_0\": -1}, num_spin_orbitals=4),\n            ],\n        ),\n    )\n    def test_uccsd_ansatz_include_imaginary(self, num_spatial_orbitals, num_particles, expect):\n        \"\"\"Tests UCCSD Ansatz with imaginary terms included.\"\"\"\n        mapper = JordanWignerMapper()\n\n        ansatz = UCCSD(\n            qubit_mapper=mapper,\n            num_particles=num_particles,\n            num_spatial_orbitals=num_spatial_orbitals,\n            include_imaginary=True,\n        )\n        assert_ucc_like_ansatz(self, ansatz, num_spatial_orbitals, expect)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "section_id": "part_8",
+        "package": "qiskit-nature",
+        "section_title": "test_uccsd.py",
+        "source_file": "test\\second_q\\circuit\\library\\ansatzes\\test_uccsd.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "spin"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    },
+    {
+      "id": "vqe_application__0a14c61f464a058fb9d6c3d130273bc1__part_1__1",
+      "text": "_mapping, two_qubit_reduction, z2_symmetries\n        ):\n            initial_state = HartreeFock(\n                num_orbitals,\n                num_particles,\n                qubit_mapping,\n                two_qubit_reduction,\n                z2_symmetries.sq_list,\n            )\n            var_form = UCCSD(\n                num_orbitals=num_orbitals,\n                num_particles=num_particles,\n                initial_state=initial_state,\n                qubit_mapping=qubit_mapping,\n                two_qubit_reduction=two_qubit_reduction,\n                z2_symmetries=z2_symmetries,\n            )\n            vqe = VQE(\n                var_form=var_form,\n                include_custom=True,\n                optimizer=SLSQP(maxiter=5000),\n                max_evals_grouped=256,\n            )\n            vqe.quantum_instance = AerProvider.get_backend(\"qasm_simulator\")\n            vqe.quantum_instance.backend_options[\"backend_options\"] = {\n                \"max_parallel_experiments\": threads,\n                \"method\": method,\n            }\n\n            return vqe\n\n        mgse = MolecularGroundStateEnergy(driver)\n        result = mgse.compute_energy(cb_create_solver)\n\n    def time_statevector(self, mol_name):\n        threads = multiprocessing.cpu_count()\n        mol_string = self.mol_strings[mol_name][0]\n        qubit = self.mol_strings[mol_name][1]\n        self._run_uccsd_vqe(mol_string, \"statevector\", threads)\n\n    def time_statevector_gpu(self, mol_name):\n        threads = 1\n        mol_string = self.mol_strings[mol_name][0]\n        qubit = self.mol_strings[mol_name][1]\n        self._run_uccsd_vqe(mol_string, \"statevector_gpu\", threads)\n",
+      "metadata": {
+        "source_file": "test\\benchmark\\vqe_application.py",
+        "section_title": "vqe_application.py",
+        "section_id": "part_1",
+        "package": "qiskit-aer"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "qubit",
+        "qubit"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "test_succd__a4eea4c63990addafe488d219db3614f__part_1__1",
+      "text": " -_2 -_7\": 1j, \"+_7 +_2 -_5 -_0\": -1j}, num_spin_orbitals=8),\n                FermionicOp({\"+_0 +_4 -_3 -_7\": 1j, \"+_7 +_3 -_4 -_0\": -1j}, num_spin_orbitals=8),\n                FermionicOp({\"+_0 +_5 -_3 -_6\": 1j, \"+_6 +_3 -_5 -_0\": -1j}, num_spin_orbitals=8),\n                FermionicOp({\"+_0 +_5 -_3 -_7\": 1j, \"+_7 +_3 -_5 -_0\": -1j}, num_spin_orbitals=8),\n                FermionicOp({\"+_1 +_5 -_2 -_6\": 1j, \"+_6 +_2 -_5 -_1\": -1j}, num_spin_orbitals=8),\n                FermionicOp({\"+_1 +_5 -_2 -_7\": 1j, \"+_7 +_2 -_5 -_1\": -1j}, num_spin_orbitals=8),\n                FermionicOp({\"+_1 +_5 -_3 -_7\": 1j, \"+_7 +_3 -_5 -_1\": -1j}, num_spin_orbitals=8),\n            ],\n        ),\n    )\n    def test_succd_ansatz(self, num_spatial_orbitals, num_particles, expect):\n        \"\"\"Tests the SUCCD Ansatz.\"\"\"\n        mapper = JordanWignerMapper()\n\n        ansatz = SUCCD(\n            qubit_mapper=mapper,\n            num_particles=num_particles,\n            num_spatial_orbitals=num_spatial_orbitals,\n        )\n        assert_ucc_like_ansatz(self, ansatz, num_spatial_orbitals, expect)\n\n    @unpack\n    @data(\n        (\n            2,\n            (1, 1),\n            (True, True),\n            [\n                FermionicOp({\"+_0 -_1\": 1j, \"+_1 -_0\": -1j}, num_spin_orbitals=4),\n                FermionicOp({\"+_2 -_3\": 1j, \"+_3 -_2\": -1j}, num_spin_orbitals=4),\n                FermionicOp({\"+_0 +_2 -_1 -_3\": 1j, \"+_3 +_1 -_2 -_0\": -1j}, num_spin_orbitals=4),\n            ],\n        ),\n        (\n            2,\n            (1, 1),\n            (True, False),\n            [\n                FermionicOp({\"+_0",
+      "metadata": {
+        "section_title": "test_succd.py",
+        "package": "qiskit-nature",
+        "source_file": "test\\second_q\\circuit\\library\\ansatzes\\test_succd.py",
+        "section_id": "part_1"
+      },
+      "score": 0.9202795360615934,
+      "original_score": 0.9202795360615934,
+      "vector_score": 0.9202795360615934,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "test_logarithmic_mapper__8b916249cd214ece431a60ef33993888__part_1__1",
+      "text": "j)])\n\n    spin_op5 = SpinOp({\"X_0\": 4 + 0j}, 0.5, 8) + SpinOp({\"\": 8 + 0j}, 0.5, 8)\n    ref_qubit_op5 = SparsePauliOp([\"IIIIIIIX\", \"IIIIIIII\"], coeffs=[(2.0 + 0j), (8.0 + 0j)])\n\n    spin_op6 = SpinOp({\"Z_0\": -0.875 - 0.075j}, 1, 1)\n    ref_qubit_op6 = SparsePauliOp(\n        [\"II\", \"IZ\", \"ZZ\"], coeffs=[(-0.4375 - 0.0375j), (0.4375 + 0.0375j), (-0.875 - 0.075j)]\n    )\n    ref_qubit_op7 = SparsePauliOp(\n        [\"II\", \"IZ\", \"ZI\"], coeffs=[(-0.4375 - 0.0375j), (-0.4375 - 0.0375j), (-0.875 - 0.075j)]\n    )\n\n    @data(\n        (spin_op1, ref_qubit_op1),\n        (spin_op2, ref_qubit_op2),\n        (spin_op3, ref_qubit_op3),\n        (spin_op4, ref_qubit_op4),\n        (spin_op5, ref_qubit_op5),\n        (spin_op6, ref_qubit_op6, 2),\n        (spin_op6, ref_qubit_op7, 2, False),\n    )\n    @unpack\n    def test_mapping(self, spin_op, ref_qubit_op, padding=1, embed_upper=True):\n        \"\"\"Test mapping to qubit operator\"\"\"\n        mapper = LogarithmicMapper(padding=padding, embed_upper=embed_upper)\n        qubit_op = mapper.map(spin_op)\n        self.assertEqualSparsePauliOp(qubit_op, ref_qubit_op)\n\n    def test_mapping_overwrite_reg_len(self):\n        \"\"\"Test overwriting the register length.\"\"\"\n        op = SpinOp({\"Y_0\": -0.432 + 1.32j}, 0.5, 1)\n        expected = SpinOp({\"Y_0\": -0.432 + 1.32j}, 0.5, 3)\n        mapper = LogarithmicMapper()\n        self.assertEqual(mapper.map(op, register_length=3), mapper.map(expected))\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "source_file": "test\\second_q\\mappers\\test_logarithmic_mapper.py",
+        "package": "qiskit-nature",
+        "section_id": "part_1",
+        "section_title": "test_logarithmic_mapper.py"
+      },
+      "score": 0.8863419992494675,
+      "original_score": 0.8790872332441144,
+      "vector_score": 0.8790872332441144,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "qubit",
+        "qubit",
+        "mapping"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 90,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 199,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 0,
+        "bm25_results_count": 30,
+        "merged_results_count": 30
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "query": "How to create Hamiltonian object in NetKet for boson systems",
+  "package": "netket",
+  "results": [
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_1_1__0",
+      "text": "## Contents\nThe goal of this tutorial series is to guide you through writing a simple VMC code from (almost) scratch to compute the ground-state of a paradigmatic spin model: the transverse-field Ising model in 2 dimensions.\nIn this first tutorial, we will focus on:\nUnderstanding NetKet’s graph and operator system\nUnderstanding NetKet’s graph and operator system\nDefining Hamiltonians using building blocks\nDefining Hamiltonians using building blocks\nWorking with different operator formats\nWorking with different operator formats\nValidating our implementation with exact diagonalization\nValidating our implementation with exact diagonalization\nThe hamiltonian we will study is the transverse-field Ising model in 2 dimensions:\nIn the following we assume periodic boundary conditions with \\(h=1\\) and \\(J=1\\) .\nNote\nIf you are executing this notebook on Colab , you will need to install NetKet.\nYou can do so by uncommenting and running the following cell.\nKeep in mind that this notebook was designed for NetKet version 3.9.1 , which requires Python >=3.8.\n```code\n# %pip install --quiet netket\n```\nPlease verify that you are running on the correct version of NetKet:\n```code\nimport\nplatform\nimport\nnetket\nas\nnk\nprint\n(\n\"Python version (requires >=3.9)\"\n,\nplatform\n.\npython_version\n())\nprint\n(\n\"NetKet version (requires >=3.9.1)\"\n,\nnk\n.\n__version__\n)\n```\n```code\nPython version (requires >=3.9) 3.12.11\nNetKet version (requires >=3.9.1) 3.19.dev26+gd94cf4597.d20250713\n```\nShow code cell content\nHide code cell content\n```code\n# Import necessary libraries\nimport\nnetket\nas\nnk\nimport\nnumpy\nas\nnp\n```",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "section_title": "Contents",
+        "section_id": "sec_1"
+      },
+      "score": 0.8633333333333334,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "gs-matrix-models__ef1b32ac39370be9a6422cd5bf62bbb1__sec_3_3__1",
+      "text": "N\n==\nhi\n.\nn_states\n```\nWe have checked that all the dimensions correspond to our expectations. We can think of this as the Hilbert state of a many-body system with \\(N\\) bosonic sites, each with excitations up to level \\(\\Lambda\\) (inclusive, starting from 0 to \\(\\Lambda-1\\) ).\nIn other words, it is a collection of harmonic oscillators in the \\(\\mid n \\rangle\\) basis.\nWe now need to specify the Hamiltonian.\nWe will use some predefined operators for bosons, such as the create and destroy operators for each boson in the Hilber state (see the API documentation here ).\nIn this specifc case, \\(\\hat{a}^\\dagger_I\\) for each boson \\(I\\) (we can regard this index as a site index in NetKet ).\n```code\nfrom\nnetket.operator.boson\nimport\ncreate\n,\ndestroy\n```\nWe now start by defining the free part of the Hamiltonian, which is just a collection of harmonic oscillators (for this part we could also use the number operator which is pre-defined in NetKet )\n```code\n# we loop over all \"sites\" -> loop over N bosons\nH_free\n=\nsum\n([\n0.5\n+\ncreate\n(\nhi\n,\ni\n)\n@\ndestroy\n(\nhi\n,\ni\n)\nfor\ni\nin\nrange\n(\nN\n)])\n```\nNetKet automatically recognizes products of local operators as tensor products and the addition of scalars as if they were multiplied by the identity matrix in the tensor space. In this case, H_free acts on a 4096 dimensional space.\nIn general, when manipulating NetKet objects, you should always assume that you can safely operate on them like\nyou would in mathematical equations, therefore you can sum and multiply them with ease.\nLet us check this free Hamiltonian, whose eigenvectors are analytically known: the ground state has vacuum energy for \\(N\\) independent harmonic oscillators: \\(0.5N = 0.5 \\cdot 6 = 3\\)\nIn NetKet we can  convert our Hamiltonian operator into a sparse matrix of size \\(\\Lambda^N \\times \\Lambda^N \\) .\nOr we can use the fact that NetKet provides a wrapper for eigsh in the form of a Lanczos exact solver which does not require to manipulate the Hamiltonian into a sparse matrix using .to_sparse .\n```code\neig_vals\n=\nnk\n.\nexact\n.\nlanczos_ed\n(\nH_free\n,\nk\n=\n13\n,\ncompute_eigenvectors\n=\nFalse\n)\n# args to scipy.sparse.linalg.eighs like can be passed with scipy_args={'tol':1e-8}\nprint\n(\nf\n\"Eigenvalues with exact lanczos (sparse):\n{\neig_vals\n",
+      "metadata": {
+        "section_id": "sec_3",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-matrix-models.html",
+        "package": "netket",
+        "section_title": "1. Defining The Hamiltonian#"
+      },
+      "score": 0.8451447505442599,
+      "original_score": 0.7488833792609619,
+      "vector_score": 0.7385497663415486,
+      "bm25_score": 0.7902178309386159,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "create",
+        "hamiltonian",
+        "netket",
+        "boson"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_3_3__0",
+      "text": "## 1. Defining The Hamiltonian#\nThe first step in our journey consists in defining the Hamiltonian we are interested in.\nFor this purpose, we first need to define the kind of degrees of freedom we are dealing with (i.e. if we have spins, bosons, fermions etc).\nThis is done specifying the Hilbert space of the problem. For example, let us concentrate on a problem with 20 spins-1/2.\nWhen building hilbert spaces, in general, the first argument determines the size of the local basis and the latter defines how many modes you have.\n```code\nimport\nnetket\nas\nnk\nN\n=\n20\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\nN\n)\n```\nNetKet’s Hilbert spaces define the computational basis of the calculation, and are used to label and generate elements from it.\nThe standard Spin-basis implicitly selects the z basis and elements of that basis will be elements \\( v\\in\\{\\pm 1\\}^N \\) .\nIt is possible to generate random basis elements through the function random_state(rng, shape, dtype) , where the first argument must be a jax RNG state (usually built with jax.random.key(seed) , second is an integer or a tuple giving the shape of the samples and the last is the dtype of the generated states.\n```code\nimport\njax\nhi\n.\nrandom_state\n(\njax\n.\nrandom\n.\nkey\n(\n0\n),\n3\n)\n```\n```code\nArray([[-1, -1, -1, -1, -1, -1,  1,  1,  1,  1,  1, -1,  1,  1, -1,  1,\n         1, -1, -1,  1],\n       [ 1,  1,  1, -1, -1,  1,  1,  1, -1, -1,  1,  1,  1, -1, -1,  1,\n        -1,  1,  1,  1],\n       [ 1, -1,  1, -1, -1,  1,  1,  1,  1, -1,  1,  1, -1,  1, -1, -1,\n         1,  1, -1, -1]], dtype=int8)\n```\nWe now need to specify the Hamiltonian. For this purpose, we will use NetKet’s LocalOperator (see details here ) which is the sum of arbitrary k-local operators.\nIn this specific case, we have a 1",
+      "metadata": {
+        "section_title": "1. Defining The Hamiltonian#",
+        "package": "netket",
+        "section_id": "sec_3",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html"
+      },
+      "score": 0.764143931020664,
+      "original_score": 0.6548447771034108,
+      "vector_score": 0.8185559713792635,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "03-monte-carlo-sampling__41d6b7963280c521f74cf679f9477a50__sec_2_2__0",
+      "text": "## 1. Setup from Previous Tutorials#\nLet’s recreate the complete system from Parts 1 and 2:\n```code\n# Define the system\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\ng\n.\nn_nodes\n)\n# Build the Hamiltonian\nhamiltonian\n=\nnk\n.\noperator\n.\nLocalOperator\n(\nhi\n)\n# Add transverse field terms\nfor\nsite\nin\ng\n.\nnodes\n():\nhamiltonian\n=\nhamiltonian\n-\n1.0\n*\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\nsite\n)\n# Add Ising interaction terms\nfor\ni\n,\nj\nin\ng\n.\nedges\n():\nhamiltonian\n=\nhamiltonian\n+\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\ni\n)\n@\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\nj\n)\n# Convert to JAX format\nhamiltonian_jax\n=\nhamiltonian\n.\nto_pauli_strings\n()\n.\nto_jax_operator\n()\n# Compute exact ground state for comparison\nfrom\nscipy.sparse.linalg\nimport\neigsh\ne_gs\n,\npsi_gs\n=\neigsh\n(\nhamiltonian\n.\nto_sparse\n(),\nk\n=\n1\n)\ne_gs\n=\ne_gs\n[\n0\n]\npsi_gs\n=\npsi_gs\n.\nreshape\n(\n-\n1\n)\nprint\n(\nf\n\"Exact ground state energy:\n{\ne_gs\n:\n.6f\n}\n\"\n)\n```\n```code\nExact ground state energy: -34.010598\n```",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\03-monte-carlo-sampling.html",
+        "section_title": "1. Setup from Previous Tutorials#",
+        "package": "netket",
+        "section_id": "sec_2"
+      },
+      "score": 0.6574602651360908,
+      "original_score": 0.5220375792596615,
+      "vector_score": 0.6525469740745768,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "hamiltonian"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "02-variational-states-full-summation__9df6c03baad2cbefd9c913ee6748c0df__sec_2_2__0",
+      "text": "## 1. Setup from Previous Tutorial#\nLet’s quickly recreate the system from Part 1:\n```code\n# Define the system\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\ng\n.\nn_nodes\n)\n# Build the Hamiltonian (solution from Part 1)\nhamiltonian\n=\nnk\n.\noperator\n.\nLocalOperator\n(\nhi\n)\n# Add transverse field terms\nfor\nsite\nin\ng\n.\nnodes\n():\nhamiltonian\n=\nhamiltonian\n-\n1.0\n*\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\nsite\n)\n# Add Ising interaction terms\nfor\ni\n,\nj\nin\ng\n.\nedges\n():\nhamiltonian\n=\nhamiltonian\n+\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\ni\n)\n@\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\nj\n)\n# Convert to JAX format\nhamiltonian_jax\n=\nhamiltonian\n.\nto_pauli_strings\n()\n.\nto_jax_operator\n()\n# Compute exact ground state for comparison\nfrom\nscipy.sparse.linalg\nimport\neigsh\ne_gs\n,\npsi_gs\n=\neigsh\n(\nhamiltonian\n.\nto_sparse\n(),\nk\n=\n1\n)\ne_gs\n=\ne_gs\n[\n0\n]\npsi_gs\n=\npsi_gs\n.\nreshape\n(\n-\n1\n)\nprint\n(\nf\n\"Exact ground state energy:\n{\ne_gs\n:\n.6f\n}\n\"\n)\n```\n```code\nExact ground state energy: -34.010598\n```",
+      "metadata": {
+        "section_title": "1. Setup from Previous Tutorial#",
+        "package": "netket",
+        "section_id": "sec_2",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\02-variational-states-full-summation.html"
+      },
+      "score": 0.6523564707986185,
+      "original_score": 0.5149160057655142,
+      "vector_score": 0.6436450072068928,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "hamiltonian"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 55,
+    "final_results_count": 5
+  }
+}

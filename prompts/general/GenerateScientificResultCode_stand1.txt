@@ -1,0 +1,48 @@
+You are an expert in numerical calculations of quantum many-body physics.
+Your task here is to minimally modify the existing code so that when run, it prints the checkpoint values required by SCIENTIFIC_RESULT_CONTENT for comparison.
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. **CODE_CONTENT**: The original code file. Its entrypoint (e.g., `main` function) already calls functions to perform the calculation. The code typically produces the same data as the scientific result; often the original code outputs by plotting/visualization (e.g., drawing figures) rather than printing numerical values.
+2. **SCIENTIFIC_RESULT_CONTENT**: Description of the scientific result and the checkpoints (specific numerical values or quantities) that must be printed for comparison.
+3. **TOPIC**: The topic name (dmrg, nnwf, or qcmb), which determines the element and run functions used in the code.
+
+-------------------------------------------------------------------------------------------------------
+[Element Functions and Run Functions by Topic]:
+For context, the code typically uses the following. **Element functions** (by prefix, and should NOT be called directly in the entrypoint):
+- **dmrg**: `site`, `hamiltonian`, `initialstate`, `observable`, `effector`
+- **nnwf**: `hilbert`, `statemodel`, `compset`, `hamiltonian`, `observable`, `effector`
+- **qcmb**: `hamiltonian`, `circinit`, `circevol`, `effector`, `observable`
+**Run functions** have the prefix `run` (common to all topics, and should NOT be called directly in the entrypoint). 
+**Item functions** have the prefix 'item' (common to 'run' and directly called in the entrypoint)
+
+-------------------------------------------------------------------------------------------------------
+[Task]:
+The program does NOT need major restructuring. The entrypoint already uses various functions (such as 'item' function, which calls 'run' functions) and produces the same underlying data. Your job is to **minimally adjust** the entrypoint (and if necessary, slightly adjust the relevant other functions) so that when the code runs, it **directly prints** the checkpoint values described in SCIENTIFIC_RESULT_CONTENT, making them easy to compare with expected values. You are NOT rebuilding the entrypoint from scratch; you are adding or redirecting output so that the existing computation results are printed as checkpoints.
+
+-------------------------------------------------------------------------------------------------------
+[Instructions]:
+1. Read CODE_CONTENT to understand the existing flow: what the entrypoint does, which functions it calls, and what numerical results are already computed (even if they are only used for plotting).
+2. Read SCIENTIFIC_RESULT_CONTENT to identify which checkpoints (numerical values) must appear in the printed output.
+3. Make minimal modifications:
+   - **In the entrypoint**: Keep the existing calls and logic. Add or adjust code so that the checkpoint values are **printed** (e.g., via print statements) in a clear form for comparison. If the code already computes these values but only passes them to plotting, add prints of those same values. Do NOT rewrite the overall structure of the entrypoint.
+   - **In element/run functions**: Only if needed (e.g., a value is not currently returned or exposed), make minimal changes (e.g., add or adjust a return value) so that the entrypoint can print the checkpoint. Do NOT change the logic or core implementation of these functions.
+4. Ensure the run output (stdout) clearly contains the checkpoint values corresponding to SCIENTIFIC_RESULT_CONTENT.
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- **"code_type"**: Either "python" or "julia" (lowercase string), matching the original code file type.
+- **"code_content"**: The full source code as a string (plain source, do not include ``` fences). The code should retain the original structure with only minimal changes to expose checkpoint values via print (or equivalent) for comparison.
+
+**CRITICAL:** You MUST NOT include this prompt itself (including the example below) in your output, in order to avoid the case that the example code itself is extracted as your generated code.
+
+**Example output:**
+```json
+{
+"code_type": "xxx",
+"code_content": "...code content here..."
+}
+```
+
+**CRITICAL:** Your output MUST BE a complete dictionary enclosed by '```json' and '```'. Even if you fail to generate complete code_content, you must KEEP this output format.

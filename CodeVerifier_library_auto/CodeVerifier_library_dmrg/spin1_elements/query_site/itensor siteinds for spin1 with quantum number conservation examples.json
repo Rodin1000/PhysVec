@@ -1,0 +1,130 @@
+{
+  "query": "itensor siteinds for spin1 with quantum number conservation examples",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "qubit__04eb5b322e8470823b519f30a361d1bd__part_10__10",
+      "text": " ]\nend\n\n# spin-full operators\nop(::OpName\"Sz\", ::SiteType\"Qubit\") = [\n  0.5 0.0\n  0.0 -0.5\n]\n\nop(on::OpName\"Sᶻ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S+\", ::SiteType\"Qubit\") = [\n  0 1\n  0 0\n]\n\nop(on::OpName\"S⁺\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Splus\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S-\", ::SiteType\"Qubit\") = [\n  0 0\n  1 0\n]\n\nop(on::OpName\"S⁻\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Sminus\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"Sx\", ::SiteType\"Qubit\") = [\n  0.0 0.5\n  0.5 0.0\n]\n\nop(on::OpName\"Sˣ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"iSy\", ::SiteType\"Qubit\") = [\n  0.0 0.5\n  -0.5 0.0\n]\n\nop(on::OpName\"iSʸ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"Sy\", ::SiteType\"Qubit\") = [\n  0.0 -0.5im\n  0.5im 0.0\n]\n\nop(on::OpName\"Sʸ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S2\", ::SiteType\"Qubit\") = [\n  0.75 0.0\n  0.0 0.75\n]\n\nop(on::OpName\"S²\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"ProjUp\", ::SiteType\"Qubit\") = [\n  1 0\n  0 0\n]\n\nop(on::OpName\"projUp\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Proj0\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"ProjDn\", ::SiteType\"Qubit\") = [\n  0 0\n  0 1\n]\n\nop(on::OpName\"projDn\", t::SiteType\"Qubit\") = op(alias(on),",
+      "metadata": {
+        "section_id": "part_10",
+        "section_title": "qubit.jl",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\qubit.jl",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "package": "itensormps",
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_id": "h2_2"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "test_phys_site_types__060210c943032a0fd9694bbf30890d18__part_0__0",
+      "text": "using ITensors, LinearAlgebra, Test\nusing ITensors.SiteTypes: has_fermion_string, op, siteind, siteinds, state\n\n@testset \"Physics Sites\" begin\n  N = 10\n\n  @testset \"Generic sites\" for eltype in (Float32, Float64, ComplexF32, ComplexF64)\n    d1, d2 = 3, 4\n    i1, i2 = Index(d1), Index(d2)\n\n    o = op(\"I\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"F\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"I\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    U1 = op(\"RandomUnitary\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U1 = op(\"randU\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U12 = op(\"RandomUnitary\", i1, i2)\n    @test hassameinds(U12, (i1', i2', i1, i2))\n    @test apply(transpose(dag(U12)), U12) ≈\n      itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n  end\n\n  @testset \"Qubit sites\" begin\n   ",
+      "metadata": {
+        "section_title": "test_phys_site_types.jl",
+        "source_file": "test\\base\\test_phys_site_types.jl",
+        "section_id": "part_0",
+        "package": "itensors"
+      },
+      "score": 0.8826770759764797,
+      "original_score": 0.87556659573263,
+      "vector_score": 0.87556659573263,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "siteinds"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_12__12",
+      "text": " s2)\n    C[s2 => 2, i => 3, s1 => 2] = -223\n    @test A ≈ C\n  end\n\n  @testset \"Fermionic SVD\" begin\n    N = 4\n    s = siteinds(\"Fermion\", N; conserve_qns=true)\n\n    A = random_itensor(QN(\"Nf\", 2, -1), s[1], s[2], s[3], s[4])\n    for n1 in 1:4, n2 in 1:4\n      (n1 == n2) && continue\n      U, S, V = svd(A, (s[n1], s[n2]))\n      @test norm(U * S * V - A) < 1E-10\n    end\n    for n1 in 1:4, n2 in 1:4, n3 in 1:4\n      (n1 == n2) && continue\n      (n1 == n3) && continue\n      (n2 == n3) && continue\n      U, S, V = svd(A, (s[n1], s[n2], s[n3]))\n      @test norm(U * S * V - A) < 1E-10\n    end\n\n    B = random_itensor(QN(\"Nf\", 3, -1), s[1], s[2], s[3], s[4])\n    for n1 in 1:4, n2 in 1:4\n      (n1 == n2) && continue\n      U, S, V = svd(B, (s[n1], s[n2]))\n      @test norm(U * S * V - B) < 1E-10\n    end\n    for n1 in 1:4, n2 in 1:4, n3 in 1:4\n      (n1 == n2) && continue\n      (n1 == n3) && continue\n      (n2 == n3) && continue\n      U, S, V = svd(B, (s[n1], s[n2], s[n3]))\n      @test norm(U * S * V - B) < 1E-10\n    end\n  end # Fermionic SVD tests\n\n  @testset \"Fermionic SVD Arrow Cases\" begin\n    s = siteinds(\"Fermion\", 3; conserve_qns=true)\n\n    function id(i)\n      if dir(i) == Out\n        I = ITensor(i, dag(i)')\n      else\n        I = ITensor(dag(i)', i)\n      end\n      for n in 1:dim(i)\n        I[n, n] = 1.0\n      end\n",
+      "metadata": {
+        "source_file": "test\\base\\test_fermions.jl",
+        "section_title": "test_fermions.jl",
+        "section_id": "part_12",
+        "package": "itensors"
+      },
+      "score": 0.858360487468256,
+      "original_score": 0.8497762745875442,
+      "vector_score": 0.8497762745875442,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "siteinds"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__f094f5e8791cdf634eeca852150d8932__root_0__1",
+      "text": "\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1\",N)\n```\ntells the function siteinds to make an array of ITensor Index objects which have the properties of $S=1$ spins. This means their dimension will be 3 and they will carry the \"S=1\" tag, which will enable the next part of the code to know how to make appropriate operators for them.\nTry printing out some of these indices to verify their properties:\n```code\n@show sites[1]\n```\n```code\n(dim=3|id=747|\"S=1,Site,n=1\")\n```\nThe next part of the code builds the Hamiltonian:\n```code\nos = OpSum()\nfor j=1:N-1\n  os += \"Sz\",j,\"Sz\",j+1\n  os += 1/2,\"S+\",j,\"S-\",j+1\n  os += 1/2,\"S-\",j,\"S+\",j+1\nend\nH = MPO(os,sites)\n```\nAn OpSum is an object which accumulates Hamiltonian terms such as \"Sz\",1,\"Sz\",2 so that they can be summed afterward into a matrix product operator (MPO) tensor network. The line of code H = MPO(os,sites) constructs the Hamiltonian in the MPO format, with physical indices given by the array sites .\nThe line\n```code\npsi0 = random_mps(sites;linkdims=10)\n```\nconstructs an MPS psi0 which has the physical indices sites and a bond dimension of 10. It is made by a random quantum circuit that is reshaped into an MPS, so that it will have as generic and unbiased properties as an MPS of that size can have. This choice can help prevent the DMRG calculation from getting stuck in a local minimum.\nThe lines\n```code\nnsweeps = 5\nmaxdim = [10,20,100,100,200]\ncutoff = [1E-10]\n```\ndefine the number of DMRG sweeps (five) we will instruct the code to do, as well as the parameters that will control the speed and accuracy of the DMRG algorithm within each sweep. The array maxdim limits the maximum MPS bond dimension allowed during each sweep and cutoff defines the truncation error goal of each sweep (if fewer values are specified than sweeps, the last value is used for all remaining sweeps).\nFinally the call\n```code\nenergy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n```\nruns the DMRG algorithm included in ITensor, using psi0 as an initial guess for the ground state wavefunction. The optimized MPS psi and its eigenvalue energy are returned.\nAfter the dmrg function returns, you can take the returned MPS psi and",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\build\\tutorials\\DMRG.html",
+        "section_id": "root",
+        "section_title": "ROOT"
+      },
+      "score": 0.8239361149264136,
+      "original_score": 0.7230455740415495,
+      "vector_score": 0.7230455740415495,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensor",
+        "siteinds",
+        "quantum",
+        "number"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 111,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      }
+    }
+  }
+}

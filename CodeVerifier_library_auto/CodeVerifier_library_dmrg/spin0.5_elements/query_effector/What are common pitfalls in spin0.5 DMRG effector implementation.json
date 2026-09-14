@@ -1,0 +1,126 @@
+{
+  "query": "What are common pitfalls in spin0.5 DMRG effector implementation?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_decomp__d58fa8bdf4dfddcdd43899e50a9362b2__part_7__7",
+      "text": " 1]\n    @test A ≈ Q * R atol = 1e-13\n    # blocksparse - diag is not supported so we must convert Q*Q_dagger to dense.\n    # Also fails with error in permutedims so below we use norm(a-b)≈ 0.0 instead.\n    # @test dense(Q*dag(prime(Q, q))) ≈ δ(Float64, q, q') atol = 1e-13\n    @test norm(dense(Q * dag(prime(Q, q))) - δ(Float64, q, q')) ≈ 0.0 atol = 1e-13\n\n    Q, L, q = ql(A, Ainds[1:ninds]) #calling  qr(A) triggers not supported error.\n    @test length(inds(L)) == 3 - ninds + 1 #+1 to account for new rq,Link index.\n    @test length(inds(Q)) == ninds + 1\n    @test flux(Q) == expected_Qflux[ninds + 1]\n    @test flux(L) == expected_RLflux[ninds + 1]\n    @test A ≈ Q * L atol = 1e-13\n    @test norm(dense(Q * dag(prime(Q, q))) - δ(Float64, q, q')) ≈ 0.0 atol = 1e-13\n\n    R, Q, q = rq(A, Ainds[1:ninds]) #calling  qr(A) triggers not supported error.\n    @test length(inds(R)) == ninds + 1 #+1 to account for new rq,Link index.\n    @test length(inds(Q)) == 3 - ninds + 1\n    @test flux(Q) == expected_Qflux[ninds + 1]\n    @test flux(R) == expected_RLflux[ninds + 1]\n    @test A ≈ Q * R atol = 1e-13\n    @test norm(dense(Q * dag(prime(Q, q))) - δ(Float64, q, q')) ≈ 0.0 atol = 1e-13\n\n    L, Q, q = lq(A, Ainds[1:ninds]) #calling  qr(A) triggers not supported error.\n    @test length(inds(L)) == ninds + 1 #+1 to account for new rq,Link index.\n    @test length(inds(Q)) == 3 - ninds + 1\n    @test flux(Q) == expected_Qflux[ninds + 1]\n    @test flux(L) == expected_RLflux[ninds + 1]\n    @test A ≈ Q * L atol = 1e-13\n    @test norm(dense(Q * dag(prime(Q, q))) - δ(Float64,",
+      "metadata": {
+        "section_title": "test_decomp.jl",
+        "section_id": "part_7",
+        "source_file": "test\\base\\test_decomp.jl",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "DMRGObserver__80a7108125a0147871536d81b11e02a9__Sample-Usage_1__0",
+      "text": "## Sample Usage\nIn the following example, we have already made a Hamiltonian MPO H and initial MPS psi0 for a system of spins whose sites have an associated \"Sz\" operator defined. We construct a DMRGObserver which measures \"Sz\" on each site at each step of DMRG, and also stops the calculation early if the energy no longer changes to a relative precision of 1E-7.\n```code\nSz_observer = DMRGObserver([\"Sz\"],sites,energy_tol=1E-7)\n\nenergy, psi = dmrg(H,psi0,sweeps,observer=Sz_observer)\n\nfor (sw,Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n  println(\"Total Sz after sweep $sw = \", sum(Szs)/N)\nend\n```",
+      "metadata": {
+        "source_file": "docs\\build\\DMRGObserver.html",
+        "section_id": "Sample-Usage",
+        "section_title": "Sample Usage",
+        "package": "itensormps"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "dmrg"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": true
+    },
+    {
+      "id": "DMRGObserver__77e713791fffb15aca3c48d3446c7a86__h2_1_1__0",
+      "text": "In the following example, we have already made a Hamiltonian MPO `H`\nand initial MPS `psi0` for a system of spins whose sites\nhave an associated \"Sz\" operator defined. We construct a\n`DMRGObserver` which measures \"Sz\" on each site at each\nstep of DMRG, and also stops the calculation early if\nthe energy no longer changes to a relative precision of 1E-7.\n```\nSz_observer = DMRGObserver([\"Sz\"],sites,energy_tol=1E-7)\nenergy, psi = dmrg(H,psi0,sweeps,observer=Sz_observer)\nfor (sw,Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n  println(\"Total Sz after sweep $sw = \", sum(Szs)/N)\nend\n```",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "Sample Usage",
+        "source_file": "docs\\src\\DMRGObserver.md",
+        "section_id": "h2_1"
+      },
+      "score": 0.9962636146069062,
+      "original_score": 0.996153720918874,
+      "vector_score": 0.996153720918874,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "dmrg"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__ee249f64f89e6651115ee4527b6ea283__h2_0_0__0",
+      "text": "While DMRG calculations can be extremely quick to converge in the best cases,\nconvergence can be slower for cases such as gapless systems or quasi-two-dimensional systems.\nSo it becomes important to know if a DMRG calculation is converged i.e. has been run\nlong enough with enough resources (large enough MPS bond dimension).\nUnfortunately **there is no automatic or bulletproof check for DMRG convergence**.\nHowever, there are a number of reliable heuristics you can use to check convergence.\nWe list some of these with the most fundamental and important ones first:\n* Run your DMRG calculation on a **smaller system** and compare with another method, such\n  as an exact diagonalization. If the agreement is good, then gradually try larger\n  systems and see if the physical properties are roughly consistent and similar (i.e.\n  the density profile has similar features).\n* Make sure to check a **wide range of properties** - not just the energy. See if these\n  look plausible by plotting and visually inspecting them. For example: if your system has\n  left-right reflection symmetry, does the density or magnetization also have this symmetry?\n  If the ground  state of your system is expected to have a total ``S^z`` of zero, does your\n  ground state have this property?\n* Make sure to run your DMRG calculation for **different numbers of sweeps** to see if\n  the results change. For example, if you run DMRG for 5 sweeps but are unsure of convergence,\n  try running it for 10 sweeps: is the energy the same or has it significantly decreased?\n  If 10 sweeps made a difference, try 20 sweeps.\n* Try setting the `eigsolve_krylovdim` keyword argument to a higher value (the default is 3).\n  This can be particularily helpful when the Hamiltonian is close to a critical point.\n  This may make slowly-converging calculations converge in fewer sweeps, but setting it\n  too high can make each sweep run slowly.\n* Inspect the the **DMRG output**.\n  The ITensor DMRG code reports the maximum bond or link dimension and maximum truncation error\n  after each sweep. (The maximums here mean over each DMRG substep making up one sweep.)\n  Is the maximum dimension or \"maxlinkdim\" reported by the DMRG output quickly reaching\n  and saturating the maxdim value you set for each sweep? Is the maximum truncation error\n  \"maxerr\" consistently reaching large values, larger than 1E-5?\n  Then it you may need to raise the maxdim parameter for your later sweeps,\n  so that DMRG is allowed to use a larger bond dimension and thus reach a better accuracy.\n* Compute the **energy variance** of an MPS to check whether it is an eigenstate. To do this\n  in ITensor, you can use the following code where `H` is your Hamiltonian MPO\n  and `psi` is the wavefunction you want to check:\n  ```julia\n  H2 = inner(H,psi,H,psi)\n  E = inner(psi',H,psi)\n  var = H2-E^2\n  @show var\n  ```\n  Here `var` is the quantity ``\\langle H^2 \\rangle - \\langle H \\rangle^2``.\n  The closer `var` is to zero, the more precisely `psi` is an eigenstate of `H`. Note\n  that this check does not ensure that `psi` is the ground state, but only one of the\n  eigenstates.",
+      "metadata": {
+        "section_id": "h2_0",
+        "source_file": "docs\\src\\faq\\DMRG.md",
+        "section_title": "Ensuring a DMRG calculation is converged",
+        "package": "itensormps"
+      },
+      "score": 0.9710878428508632,
+      "original_score": 0.9693355909024307,
+      "vector_score": 0.9693355909024307,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "are",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "test_dmrg__331a78ba2f4acb4c4da3149efdb573bc__part_0__0",
+      "text": "using ITensors, Test, Random\nusing ITensorMPS: dmrg, nsite, set_nsite!, siteinds, site_range\n\n@testset \"Basic DMRG\" begin\n  @testset \"Spin-one Heisenberg\" begin\n    N = 10\n    sites = siteinds(\"S=1\", N)\n\n    os = OpSum()\n    for j in 1:(N - 1)\n      add!(os, \"Sz\", j, \"Sz\", j + 1)\n      add!(os, 0.5, \"S+\", j, \"S-\", j + 1)\n      add!(os, 0.5, \"S-\", j, \"S+\", j + 1)\n    end\n    H = MPO(os, sites)\n\n    psi = random_mps(sites)\n\n    sweeps = Sweeps(3)\n    @test length(sweeps) == 3\n    maxdim!(sweeps, 10, 20, 40)\n    mindim!(sweeps, 1, 10)\n    cutoff!(sweeps, 1E-11)\n    noise!(sweeps, 1E-10)\n    str = split(sprint(show, sweeps), '\\n')\n    @test length(str) > 1\n    energy, psi = dmrg(H, psi, sweeps; outputlevel=0)\n    @test energy < -12.0\n  end\n\n  @testset \"QN-conserving Spin-one Heisenberg\" begin\n    N = 10\n    sites = siteinds(\"S=1\", N; conserve_qns=true)\n\n    os = OpSum()\n    for j in 1:(N - 1)\n      os += \"Sz\", j, \"Sz\", j + 1\n      os += 0.5, \"S+\", j, \"S-\", j + 1\n      os += 0.5, \"S-\", j, \"S+\", j + 1\n    end\n    H = MPO(os, sites)\n\n    state = [isodd(n) ? \"Up\" : \"Dn\" for n in 1:N]\n    psi = random_mps(sites, state; linkdims=4)\n\n    sweeps = Sweeps(3)\n    @test length(sweeps) == 3\n    maxdim!(sweeps, 10, 20, 40)\n    mindim!(sweeps, 1, 10)\n    cutoff!(sweeps, 1E-11)\n    noise!(sweeps, 1E-10)\n    str = split(sprint(show, sweeps), '\\n')\n    @test length(str) > 1\n    energy, psi = dmrg(H, psi, sweeps; outputlevel=0)\n    @test energy < -12.0\n",
+      "metadata": {
+        "section_id": "part_0",
+        "section_title": "test_dmrg.jl",
+        "package": "itensormps",
+        "source_file": "test\\base\\test_dmrg.jl"
+      },
+      "score": 0.9508042589909318,
+      "original_score": 0.9493573254318416,
+      "vector_score": 0.9493573254318415,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "dmrg"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 116,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      }
+    }
+  }
+}

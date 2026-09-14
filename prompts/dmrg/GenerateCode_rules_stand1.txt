@@ -1,0 +1,208 @@
+**Detailed Rules for Generating [ITensors/ITensorMPS] Codes**
+
+====================================================================================================
+
+## **CRITICAL: Function Format Requirements (MANDATORY)**
+
+**Every function MUST follow this exact format:**
+
+```
+# Input dependency: ...(elements needed as input, from user or other functions. Format: "name"[brief description, data format])
+# Output results: ...(output variables of this function)
+function FUNCTION_NAME(parameters):
+```
+
+**Key Requirements:**
+1. **Function naming:** MUST be in form of `"tag_xxx"` (e.g., `site_BoseHubbard1D`, `hamiltonian_XXZchain`)
+2. **Type annotations:** MUST append type annotations (::T, e.g., ::Int, ::Float64) to ALL function INPUT parameters
+3. **Common ITensors/ITensorMPS data types:**
+   - `H` (hamiltonian): `MPO`
+   - `psi` (quantum state, e.g., psi_g, psi_0): `MPS`
+   - `sites` (lattice): `Vector{<:Index}`
+   - `nsweeps`: `Int`
+4. **CRITICAL: Type annotations for package-specific data types:**
+   - **You MUST omit type annotations** for ITensors/ITensorMPS types (e.g., `sites`, `H`, `psi`, `os`) in both function parameters and intermediate variables.
+   - **If type annotations are absolutely necessary**, you MUST use compatible forms: `sites::Vector{<:Index}` (NOT `sites::Vector{Index}`), `H::MPO`, `psi::MPS`.
+   - **Rationale:** ITensors/ITensorMPS types are parameterized, and overly specific type annotations cause MethodError.
+
+**CRITICAL:** You MUST STRICTLY FOLLOW this format for ALL functions.
+
+====================================================================================================
+
+## **Function Decomposition Principle**
+
+**You MUST avoid monolithic functions.** Decompose logic into smaller units using different tags (listed below).
+
+====================================================================================================
+
+## **Notation**
+
+**Function Categories:**
+- **ELEMENT functions:** Functions with tags {'site', 'hamiltonian', 'observable', 'initialstate', 'effector'}. These are fundamental building blocks that implement single steps in the calculation procedure.
+- **Task functions:** Functions with tags {'run', 'item', 'plot'}. These orchestrate ELEMENT functions to complete calculation tasks.
+- **Entry point:** the main function
+
+**Terminology:**
+- **"task"**: The whole reproduction process of the specified subplot/table
+- **"item"**: Individual elements in a subplot (e.g., curves, lines, point sets)
+
+**CRITICAL RULE:** **You are FORBIDDEN** to combine multiple tags for one function. For example, `"site_hamiltonian_"` is **FORBIDDEN**.
+
+====================================================================================================
+
+## **Element function rules**
+
+### **General rules for ALL element functions**
+
+1. **Purpose:** Functions with ELEMENT tags aim to implement a SINGLE function/step in the whole calculation procedure
+
+2. **You are REQUIRED** to create ALL tags in 'ELEMENT' (you cannot skip any)
+
+3. **You are FORBIDDEN** to absorb some 'ELEMENT' function definitions into other ELEMENT function definitions
+
+4. **You are STRICTLY FORBIDDEN** to call any other 'ELEMENT' functions in the definition of any function in 'ELEMENT'
+   - **Instead:** Define the required preceding variables as the input parameters of the function
+
+5. **You are FORBIDDEN** to use global parameters or specific values directly
+  - **You are REQUIRED** to include every parameter used in each function definition in the input parameters of this function and DO NOT include specific values.
+
+6. **You are FORBIDDEN** to define custom itensor site/operators. 
+  - You are FORBIDDEN to use ITensors.space and ITensors.op to define custom site types and operators. You MUST use standard site types and operators. 
+
+7. **Helper functions:** If an element function needs to define helper functions, **you are FORBIDDEN** to define them outside the element function. **You are REQUIRED** to define helper functions inside the corresponding element function where they are needed. 
+
+
+### **Detailed rules for each ELEMENT TAG:**
+
+#### **1. "site"** - Lattice Site Definition
+- **Purpose:** Define a lattice site for the targeted model (realizing "phy_model" in task plan)
+- **Examples:** Fermion, Boson, Electron
+- **Implementation:** Use `siteinds()` from ITensors
+- **Input dependency:** None (creates base objects)
+
+#### **2. "hamiltonian"** - Hamiltonian Definition
+- **Purpose:** Define the Hamiltonian of the model (realizing "phy_model" in task plan)
+- **Input dependency:** Results from 'site' function
+- **Example:** Function that constructs MPO using AutoMPO
+
+#### **3. "initialstate"** - Initial State Definition
+- **Purpose:** Define the initial state used in following calculations
+- **Input dependency:** Results from 'site' function
+- **Example:** Function containing `randomMPS()`
+
+#### **4. "observable"** - Observable Definition
+- **Purpose:** Define and calculate observables needed in the research (according to "dependent" term in task plan)
+- **CRITICAL RULES:**
+  - **You are FORBIDDEN** to do dmrg calculations directly in this function, you ONLY process the calculations AFTER the dmrg calculations. 
+  - **You are FORBIDDEN** to split a measurement into an 'observable' function and another 'measure' function
+  - **You are REQUIRED** to wrap ALL commands in an 'observable' function for a single targeted observable
+- **Example:** Function that defines the correlation operator as "Cdag_i C_j"
+- **Note:** If multiple observables exist, each should correspond to a separate function
+
+#### **5. "effector"** - Main Calculation Operations
+- **Purpose:** Define main calculation operations (e.g., DMRG)
+- **CRITICAL RULES:**
+  - **You are FORBIDDEN** to name functions without any dmrg operation as 'effector'. **You are FORBIDDEN** to name functions with calculations for observables or post-process as 'effector'. 
+- **Input dependency:** Results from 'site', 'hamiltonian' and 'initialstate' and other functions. Other parameters related to the calculation settings (maxdim, cutoff, ...)
+- **Examples:**
+  - Function that gives the ground state of a model
+
+
+====================================================================================================
+
+## **Task function rules**
+
+### **1. "run"** - Complete Calculation for Single Parameter Set
+- **Purpose:** Implement calculation for a SINGLE set of inputs, DO NOT scan parameters here (Scanning process all in 'item' functions). 
+- **CRITICAL RULES:**
+  - **You are REQUIRED** to call 'site'/'hamiltonian'/'observable'/'initialstate'/'effector' tagged functions (AT LEAST ONE for each). You are REQUIRED** to implement a complete calculation procedure: you MUST BEGIN from constructing site, then call other element functions
+  - **You are FORBIDDEN** to define explicitly site, Hamiltonian, observables in this function
+  - **You are STRICTLY FORBIDDEN** to use other 'run' functions in the definition
+  - **You are STRICTLY FORBIDDEN** to include specific parameter values in 'run' functions
+- **Example:** In 'run_excited_state' definition, you should NOT use 'run_ground_state' directly. Instead, use 'site'/'hamiltonian'/... functions to calculate the ground state.
+- **Note:** You are ALLOWED to define multiple 'run' functions (e.g., run_state_1, run_state_2 for independent calculations)
+
+### **2. "item"** - Data Generation/Parameter scanning for Task Items
+- **Purpose:** Generate data/Scan parameters needed in this task
+- **CRITICAL RULES:**
+  - **You are REQUIRED** to call 'run' tagged functions directly. You MUST include at least ONE 'run' function. You are REQUIRED** to ONLY explicitly call 'run' functions to scan parameters
+  - **You are FORBIDDEN** to call explicitly site/hamiltonian/initialstate/observable/effector functions
+  - **You are FORBIDDEN** to call another 'item' function explicitly. 
+  - **You are STRICTLY FORBIDDEN** to include specific parameter values in 'item' functions
+- **Example:** Function that calculates a correlation-interaction dependency in the targeted figure
+- **Note:** You are ALLOWED to define different 'item' functions for different items needed in the task
+
+### **3. "plot"** - Data Visualization
+- **Purpose:** Demonstrate given data
+- **You are REQUIRED** to include plot function if your task is to reproduce a figure
+- **Note:** You are ALLOWED to define multiple 'plot' functions
+
+
+====================================================================================================
+
+## **Entry point rules**
+
+### ** "main"** - Entry Point
+- **Purpose:** Serve as the entry point
+- **CRITICAL RULES:**
+  - **You are FORBIDDEN** to call explicitly site/hamiltonian/observable/initialstate/effector functions
+  - **You are FORBIDDEN** to call 'run' functions
+  - **You are REQUIRED** to call 'item' functions and 'plot' functions DIRECTLY and EXPLICITLY to fulfill the reproduction task
+  - **You are REQUIRED** to include specific parameter values in the 'main' definition
+  - **You are FORBIDDEN** to define GLOBAL parameters
+- **Note:** You MUST choose parameter values according to the target research paper. Choose values according to your own preferences ONLY WHEN the original paper does NOT provide related parameter values.
+
+**CRITICAL:** You are FORBIDDEN to define functions with other tags.
+
+====================================================================================================
+
+## **Other Coding Requirements**
+
+### **1. Package Usage**
+- **You are REQUIRED** to import (with julia command 'using') BOTH ITensors and ITensorMPS packages in the code as external packages. 
+- You may import other necessary packages (with julia command 'using')
+
+### **2. Plotting**
+- Results from different data_sets and tasks are plotted in a single figure
+
+### **3. Character Encoding (CRITICAL)**
+- **You are REQUIRED** to generate code that contains only ASCII characters
+- **You are FORBIDDEN** to use Unicode letters, symbols, or punctuation
+- **Forbidden examples (non-exhaustive):**
+  - Greek letters: ψ, Δ, ω, φ, μ, λ
+  - Math/logic symbols: ÷, ≤, ≥, ≠, ∈, →, ←
+  - Typographic quotes: " " ' '
+  - Primes: ′
+  - Ellipsis: …
+  - Nonbreaking/zero-width spaces
+- **Use ASCII equivalents instead:**
+  - ψ → psi, φ → phi, ω → omega, μ → mu, λ → lambda, Δ → Delta
+  - a ÷ b → div(a, b), ≤ → <=, ≥ → >=, ≠ → !=, ∈ → in
+  - Use straight quotes " ' and plain ASCII punctuation only
+
+====================================================================================================
+
+## **Output Format**
+
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+
+- **"subplot_name"**: the subplot name specified in task plan
+- **"code_type"**: either "python" or "julia" (lowercase string)
+- **"code_content"**: the full source code as a string (plain source, do not include ``` fences)
+
+**CRITICAL:** You MUST NOT include this prompt itself (including the example below) in your output, in order to avoid the case that the example code itself is extracted as your generated code.
+
+**Example output** (exact dictionary form, shown here for clarity. You MUST add a "```json" right before the dict and "```" right after the dict! (not shown here) Beside from this dict, NO other information should be output (e.g. this prompt itself should NOT be included in your final response)):
+{{
+"subplot_name": "Fig. 2(a)",
+"code_type": "julia",
+"code_content": "using xxx ...(The whole code here)"
+}}
+
+====================================================================================================
+
+## **Final Checklist**
+
+1. **Output format:** Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'. Even you fail to generate a complete code_content, you must KEEP this output format.
+
+2. **Julia syntax:** If the code_type is 'julia', you MAKE SURE that in the code you use 'function' rather than 'def' to define all functions.

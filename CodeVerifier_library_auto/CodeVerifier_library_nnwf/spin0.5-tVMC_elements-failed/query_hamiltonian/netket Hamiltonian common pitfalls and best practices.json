@@ -1,0 +1,117 @@
+{
+  "query": "netket Hamiltonian common pitfalls and best practices",
+  "package": "netket",
+  "results": [
+    {
+      "id": "timing__2d2506630cbc0b231e09cfeb01ef31d1__sec_4_4__0",
+      "text": "## Interaction with NetKet Drivers#\nHere’s how the timing system is used in actual NetKet simulations:\n```code\n# Create a simple quantum system\nL\n=\n8\ng\n=\nnk\n.\ngraph\n.\nChain\n(\nlength\n=\nL\n,\npbc\n=\nTrue\n)\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n0.5\n,\nN\n=\ng\n.\nn_nodes\n)\n# Define the Hamiltonian\nha\n=\nnk\n.\noperator\n.\nIsing\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n,\nh\n=\n1.0\n)\n# Define the variational ansatz\nmodel\n=\nnk\n.\nmodels\n.\nRBM\n(\nalpha\n=\n1\n)\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisLocal\n(\nhi\n)\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.1\n)\n# Create the variational state\nvs\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n1000\n)\n# Time the creation and execution of a VMC driver\nwith\ntiming\n.\nTimer\n()\nas\ntimer\n:\nwith\ntiming\n.\ntimed_scope\n(\n\"driver setup\"\n):\ndriver\n=\nnk\n.\ndriver\n.\nVMC\n(\nha\n,\noptimizer\n,\nvariational_state\n=\nvs\n)\nwith\ntiming\n.\ntimed_scope\n(\n\"optimization\"\n):\n# Run a few optimization steps with timing enabled\ndriver\n.\nrun\n(\nn_iter\n=\n5\n,\ntimeit\n=\nTrue\n)\nprint\n(\n\"\n\\n\nTotal timing breakdown:\"\n)\nprint\n(\ntimer\n)\n```\n```code\n/Users/filippo.vicentini/Nextcloud/Codes/Python/netket/netket/vqs/mc/mc_state/state.py:299: UserWarning: n_samples=1000 (250 per JAX device) does not divide n_chains=64, increased to 1024 (256 per JAX device)\n  self.n_samples = n_samples\n```\n```code\n╭────────────────────────────────────────────── Timing Information ───────────────────────────────────────────────╮\n│ Total: 0.728                                                                                                    │\n│ └── (85.1%) | VMC._forward_and_backward : 0.619 s                                                               │\n│     └── (97.6%) | MCState.expect_and_grad : 0.604 s                                                             │\n│         └── (69.3%) | MCState.sample : 0.419 s                                                                  │\n│             └── (46.2%) | sampling n_discarded samples : 0.193 s                                                │\n╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\user-guides\\utils\\timing.html",
+        "package": "netket",
+        "section_title": "Interaction with NetKet Drivers#",
+        "section_id": "sec_4"
+      },
+      "score": 0.8633333333333334,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "custom_hilbert_constraints__a202136a3fd70552ecbc1a6ad0f2024f__sec_6_6__0",
+      "text": "## Integration with Variational States#\nConstrained Hilbert spaces work seamlessly with all NetKet variational states:\n```code\n# Create constrained system\nhilbert\n=\nnk\n.\nhilbert\n.\nSpin\n(\n0.5\n,\nN\n=\n10\n,\nconstraint\n=\nSumConstraint\n(\n0\n))\n# Zero magnetization\ngraph\n=\nnk\n.\ngraph\n.\nChain\n(\n10\n)\nhamiltonian\n=\nnk\n.\noperator\n.\nIsing\n(\nhilbert\n,\ngraph\n,\nh\n=\n1.0\n)\n# Standard NetKet workflow\nmodel\n=\nnk\n.\nmodels\n.\nRBM\n(\nalpha\n=\n1\n)\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n,\ngraph\n)\n# Respects magnetization\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n)\n# Optimization works as usual\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\n0.01\n)\ndriver\n=\nnk\n.\ndriver\n.\nVMC\n(\nhamiltonian\n,\noptimizer\n)\ndriver\n.\nrun\n(\nvstate\n,\nn_iter\n=\n100\n)\n```",
+      "metadata": {
+        "section_id": "sec_6",
+        "source_file": "docs\\_build\\html\\advanced\\custom_hilbert_constraints.html",
+        "package": "netket",
+        "section_title": "Integration with Variational States#"
+      },
+      "score": 0.7270261163484645,
+      "original_score": 0.6005260239245822,
+      "vector_score": 0.7506575299057276,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_3_3__0",
+      "text": "## 2. Defining Graphs and Lattices#\nNetKet covers quite a few standard lattices, so let’s use this to quickly define a 2D square lattice with periodic boundary conditions.\nFor the moment we assume \\(L=4\\) ( \\(N=16\\) sites total).\n```code\n# Define a 2D square lattice\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\n```\nThe graph object is handy to quickly write the hamiltonian because it gives you easy access to the vertices (called nodes) and edges of the graph:\n```code\n# The number of sites (called nodes):\nprint\n(\n\"g.n_nodes:\"\n,\ng\n.\nn_nodes\n)\n# You can iterate through the nodes:\nprint\n(\n\"g.nodes:\"\n,\n[\nnode\nfor\nnode\nin\ng\n.\nnodes\n()])\n# You can check the number of edges:\nprint\n(\n\"g.n_edges:\"\n,\ng\n.\nn_edges\n)\n# You can iterate through the edges, which are stored as a 2-tuple with the start and end node:\nprint\n(\n\"g.edges:\"\n,\nlist\n(\ng\n.\nedges\n()))\n```\n```code\ng.n_nodes: 16\ng.nodes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]\ng.n_edges: 32\ng.edges: [(3, 7), (12, 13), (8, 9), (8, 12), (2, 14), (13, 14), (4, 5), (5, 6), (4, 8), (12, 15), (5, 9), (14, 15), (3, 15), (8, 11), (0, 1), (9, 10), (1, 2), (0, 4), (9, 13), (10, 11), (1, 5), (10, 14), (6, 7), (6, 10), (4, 7), (0, 3), (0, 12), (2, 3), (1, 13), (2, 6), (11, 15), (7, 11)]\n```\nYou can also visualize the lattice:\n```code\ng\n.\ndraw\n()\n```\n```code\n<Axes: title={'center': '2D Lattice (Distance Order: 1)'}, xlabel='X', ylabel='Y'>\n```",
+      "metadata": {
+        "section_id": "sec_3",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "section_title": "2. Defining Graphs and Lattices#"
+      },
+      "score": 0.6687779450209934,
+      "original_score": 0.5152847975916978,
+      "vector_score": 0.6441059969896221,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_1_1__0",
+      "text": "## Contents\nThe goal of this tutorial series is to guide you through writing a simple VMC code from (almost) scratch to compute the ground-state of a paradigmatic spin model: the transverse-field Ising model in 2 dimensions.\nIn this first tutorial, we will focus on:\nUnderstanding NetKet’s graph and operator system\nUnderstanding NetKet’s graph and operator system\nDefining Hamiltonians using building blocks\nDefining Hamiltonians using building blocks\nWorking with different operator formats\nWorking with different operator formats\nValidating our implementation with exact diagonalization\nValidating our implementation with exact diagonalization\nThe hamiltonian we will study is the transverse-field Ising model in 2 dimensions:\nIn the following we assume periodic boundary conditions with \\(h=1\\) and \\(J=1\\) .\nNote\nIf you are executing this notebook on Colab , you will need to install NetKet.\nYou can do so by uncommenting and running the following cell.\nKeep in mind that this notebook was designed for NetKet version 3.9.1 , which requires Python >=3.8.\n```code\n# %pip install --quiet netket\n```\nPlease verify that you are running on the correct version of NetKet:\n```code\nimport\nplatform\nimport\nnetket\nas\nnk\nprint\n(\n\"Python version (requires >=3.9)\"\n,\nplatform\n.\npython_version\n())\nprint\n(\n\"NetKet version (requires >=3.9.1)\"\n,\nnk\n.\n__version__\n)\n```\n```code\nPython version (requires >=3.9) 3.12.11\nNetKet version (requires >=3.9.1) 3.19.dev26+gd94cf4597.d20250713\n```\nShow code cell content\nHide code cell content\n```code\n# Import necessary libraries\nimport\nnetket\nas\nnk\nimport\nnumpy\nas\nnp\n```",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "section_id": "sec_1",
+        "package": "netket",
+        "section_title": "Contents"
+      },
+      "score": 0.667701761335129,
+      "original_score": 0.5137098946367742,
+      "vector_score": 0.6421373682959677,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "symmetry_tutorial__b193a05ba167aa16fb4ac01ff2376452__sec_5_5__1",
+      "text": "\n(\nhamiltonian\n=\nH\n,\noptimizer\n=\noptimizer\n,\nlinear_solver\n=\nsolver\n,\nvariational_state\n=\nunsymmetrized_vstate\n,\ndiag_shift\n=\ndiag_shift\n,\nuse_ntk\n=\nFalse\n)\ndriver\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nunsymmetrized_log\n);\n```\nTo construct a symmetry projected wavefunction in netket, we use project method of the Representation class.\nThis method takes in a variational state as well as the integer correspond to the id of the irrep. It converts a state \\(\\psi\\) to the symmetrized one \\(\\psi_\\mu\\) by implementing the projection described above.\n```code\n# Create a new variational state to symmetrize it, using same seed\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n512\n,\nseed\n=\nseed\n)\n# Project on the trivial represention\ntranslation_symmetric_vstate\n=\ntranslation_group_representation\n.\nproject\n(\nstate\n=\nvstate\n,\ncharacter_index\n=\n0\n)\n```\nThen we just run the optimization as usual!\n```code\ndriver\n=\nVMC_SR\n(\nhamiltonian\n=\nH\n,\noptimizer\n=\noptimizer\n,\nlinear_solver\n=\nsolver\n,\nvariational_state\n=\ntranslation_symmetric_vstate\n,\ndiag_shift\n=\ndiag_shift\n,\nuse_ntk\n=\nFalse\n,\n)\n# Takes a bit of time to run. Roughly 16 times longer\ndriver\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nnk\n.\nlogging\n.\nRuntimeLog\n())\n```\n```code\n(RuntimeLog():\n  keys = ['acceptance', 'Energy'],)\n```\nImportant In general, the ground state is not necessarily in the trivial sector. In practice, all relevant sectors should be scanned to find which one is energetically favorable.\nIn the case of the translation group, this means all the points in the irreducible Brillouin zone should be checked.\nWe can now compare the performance of the two models.\n```code\ndef\nrelative_error\n(\napprox\n,\nexact\n):\nreturn\nnp\n.\nabs\n((\napprox\n-\nexact\n)\n/\nexact\n)\nE_no_symm\n=\nfloat\n(\nunsymmetrized_vstate\n.\nexpect\n(\nH\n)\n.\nmean\n.\nreal\n)\nE_symm\n=\nfloat\n(\ntranslation_symmetric_vstate\n.\nexpect\n(\nH\n)\n.\nmean\n.\nreal\n)\nerr_no\n=\n100\n*\nrelative_error\n(\nE_no_symm\n,\nevals\n[\n0\n])\nerr_sym\n=\n100\n*\nrelative_error\n(\nE_symm\n,\nevals\n[\n0\n])\nprint\n(\nf\n\"Energy without symmetrization:\n{\n",
+      "metadata": {
+        "section_title": "VMC#",
+        "section_id": "sec_5",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\symmetry_tutorial.html"
+      },
+      "score": 0.6364361350973091,
+      "original_score": 0.4679553196545988,
+      "vector_score": 0.5849441495682485,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 57,
+    "final_results_count": 5
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "query": "how to return model object ma in netket state model function",
+  "package": "netket",
+  "results": [
+    {
+      "id": "models__12b95c8a73db5e6711fe975ef876c861__root_0__0",
+      "text": "(netket_models_api)=",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\api\\models.md",
+        "section_id": "root",
+        "section_title": "models"
+      },
+      "score": 0.8,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "models__09041a73079b0c73875a7031ae8e8795__root_0__0",
+      "text": "(netket_models_api)=",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\_sources\\api\\models.md",
+        "package": "netket",
+        "section_title": "models",
+        "section_id": "root"
+      },
+      "score": 0.8,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_5_5__1",
+      "text": "Module\n):\n\"\"\"\nA class implementing a uniform mean-field model.\n\"\"\"\n# The __init__ function is used to define the parameters of the model\n# The RNG argument is used to initialize the parameters of the model.\ndef\n__init__\n(\nself\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\n# To generate random numbers we need to extract the key from the\n# `rngs` object.\nkey\n=\nrngs\n.\nparams\n()\n# We store the log-wavefunction on a single site, and we call it\n# `log_phi_local`. This is a variational parameter, and it will be\n# optimized during training.\n#\n# We store a single real parameter, as we assume the wavefunction\n# is normalised, and initialise it according to a normal distibution.\nself\n.\nlog_phi_local\n=\nnnx\n.\nParam\n(\njax\n.\nrandom\n.\nnormal\n(\nkey\n,\n(\n1\n,)))\n# The __call__(self, x) function should take as\n# input a batch of states x.shape = (n_samples, L)\n# and should return a vector of n_samples log-amplitudes\ndef\n__call__\n(\nself\n,\nx\n:\njax\n.\nArray\n):\n# compute the probabilities\np\n=\nnnx\n.\nlog_sigmoid\n(\nself\n.\nlog_phi_local\n*\nx\n)\n# sum the output\nreturn\n0.5\n*\njnp\n.\nsum\n(\np\n,\naxis\n=-\n1\n)\n```\nHere we use flax.nnx to construct the model, which is a more modern and simpler neural-network library when compared to flax.linen , which is what was used in NetKet for many years. In fact, you can use both those libraries with NetKet! Just be careful that the two are quite different.\nTo actually create a variational state the easiest way is to construct a Monte-Carlo-sampled Variational State.\nTo do this, we first need to define a sampler.\nIn netket.sampler several samplers are defined, each with its own peculiarities.\nIn the following example, we will be using a simple sampler that flips the spins in the configurations one by one.\nYou can read more about how the sampler works by checking the documentation with ?nk.sampler.MetropolisLocal\n```code\n# Create an instance of the model, using the seed 0\nmf_model\n=\nMF\n(\nrngs\n=\nnnx\n.\nRngs\n(\n0\n))\n# If you want to learn more about how to use this model, check the nnx tutorial\n# https://flax.readthedocs.io/en/latest/nnx_basics.html\n# Create the local sampler on the hilbert space\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisLocal\n(\nhi\n)\n# Construct the",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html",
+        "section_title": "3. Mean-Field Ansatz#",
+        "section_id": "sec_5"
+      },
+      "score": 0.5448717088988988,
+      "original_score": 0.17249401617981594,
+      "vector_score": null,
+      "bm25_score": 0.86247008089908,
+      "keyword_matches": 7,
+      "matched_keywords": [
+        "return",
+        "model",
+        "object",
+        "netket",
+        "state",
+        "model",
+        "function"
+      ],
+      "match_ratio": 1.0,
+      "is_html": true
+    },
+    {
+      "id": "netket.errors.HolomorphicUndeclaredWarning__30fbdbfd665d818de51f858dccc80ae3__sec_1_1__0",
+      "text": "## Contents\nComplex-to-Complex model detected. Defaulting to holomorphic = False for the calculation of its jacobian.\nHowever, holomorphic = False might lead to slightly increased\ncomputational cost, some disabled features and/or worse quality of\nsolutions found with iterative solvers.\nIf your model is actually holomorphic, you should specify holomorphic = True to unblock some extra, possibly more performant algorithms.\nIf you are unsure whether your variational function is holomorphic or not,\nyou should check if it satisfies the Cauchy-Riemann equations .\nTo check numerically those conditions on a random set of samples you can use the\nfunction netket.utils.is_probably_holomorphic() . If this function returns\nFalse then your ansatz is surely not holomorphic, while if it returns True your\nansatz is likely but not guaranteed to be holomorphic.\nTo check those conditions numerically, you can check by following this\nexample:\n```code\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\n0.5\n,\n2\n)\nsa\n=\nnk\n.\nsampler\n.\nMetropolisLocal\n(\nhi\n)\nma\n=\nnk\n.\nmodels\n.\nRBM\n(\nparam_dtype\n=\ncomplex\n)\n# construct the variational state\nvs\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nma\n)\nnk\n.\nutils\n.\nis_probably_holomorphic\n(\nvs\n.\n_apply_fun\n,\nvs\n.\nparameters\n,\nvs\n.\nsamples\n,\nmodel_state\n=\nvs\n.\nmodel_state\n)\n```\nTo suppress this warning correctly specify the keyword argument holomorphic .\nNote\na  detailed discussion, explaining how to easily check those conditions\nanalitically is found in the documentation of netket.utils.is_probably_holomorphic() ).",
+      "metadata": {
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\_generated\\errors\\netket.errors.HolomorphicUndeclaredWarning.html"
+      },
+      "score": 0.5085926838856143,
+      "original_score": 0.19062324404689407,
+      "vector_score": null,
+      "bm25_score": 0.9531162202344705,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "model",
+        "netket",
+        "state",
+        "model",
+        "function"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "index__c60cd5fdd5e4c1d2bcd0141d39aa65df__root_0__0",
+      "text": "Repository\nOpen issue\n.md\n.pdf\nThis is a list of some simple yet complete applications of NQS and NetKet to the study of some problems.\nIt’s a good way to learn specific details of how to use NetKet to treat those specific problems.\nGround-State: Ising model\nGround-State: Bosons in a 3D Harmonic trap\nGround-State: Heisenberg model\nGround-State: J1-J2 model\nVision Transformer wave function\nGround-State: Bosonic Matrix Model\nLattice Fermions, from Slater Determinants to Neural Backflow Transformations\nInfidelity Minimization with Stochastic Reconfiguration in NetKet\nSymmetries Equivariant NQS: GCNN for Spin models Symmetries, Representations and Projectors for arbitrary NQS\nEquivariant NQS: GCNN for Spin models\nSymmetries, Representations and Projectors for arbitrary NQS",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\index.html",
+        "package": "netket",
+        "section_title": "ROOT",
+        "section_id": "root"
+      },
+      "score": 0.4932630892439681,
+      "original_score": 0.16537449993124156,
+      "vector_score": null,
+      "bm25_score": 0.826872499656208,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "model",
+        "netket",
+        "state",
+        "model",
+        "function"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 60,
+    "final_results_count": 5
+  }
+}

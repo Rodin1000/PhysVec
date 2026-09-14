@@ -1,0 +1,137 @@
+{
+  "query": "ITensors measure energy and Hamiltonian expectation value for tJ model DMRG",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "1d_ising_with_observer__82f90a8d4a7ed5b00346b555230baebb__part_0__0",
+      "text": "# In this example we show how to pass a DMRGObserver to\n# the dmrg function which allows tracking energy convergence and\n# convergence of local operators.\nusing ITensors, ITensorMPS\n\n\"\"\"\n  Get MPO of transverse field Ising model Hamiltonian with field strength h\n\"\"\"\nfunction tfimMPO(sites, h::Float64)\n  # Input operator terms which define a Hamiltonian\n  N = length(sites)\n  os = OpSum()\n  for j in 1:(N - 1)\n    os -= 1, \"Z\", j, \"Z\", j + 1\n  end\n  for j in 1:N\n    os += h, \"X\", j\n  end\n  # Convert these terms to an MPO tensor network\n  return MPO(os, sites)\nend\n\nlet\n  N = 100\n  sites = siteinds(\"S=1/2\", N)\n  psi0 = random_mps(sites; linkdims=10)\n\n  # define parameters for DMRG sweeps\n  nsweeps = 15\n  maxdim = [10, 20, 100, 100, 200]\n  cutoff = [1E-10]\n\n  #=\n  create observer which will measure Sᶻ at each\n  site during the dmrg sweeps and track energies after each sweep.\n  in addition it will stop the computation if energy converges within\n  1E-7 tolerance\n  =#\n  let\n    Sz_observer = DMRGObserver([\"Sz\"], sites; energy_tol=1E-7)\n\n    # we will now run DMRG calculation for different values\n    # of the transverse field and check how local observables\n    # converge to their ground state values\n\n    println(\"Running DMRG for TFIM with h=0.1\")\n    println(\"================================\")\n    H = tfimMPO(sites, 0.1)\n    energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, observer=Sz_observer)\n\n    for (i, Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n      println(\"<Σ Sz> after sweep $i = \", sum(Szs) / N)\n    end\n  end\n\n  let\n    println(\"\\nRunning DMRG for TFIM with h=1.0 (critical point)\")\n    println(\"================================\")\n    Sz_observer = DMRGObserver([\"Sz\"], sites; energy_tol=1E-7)\n    H = tfimMPO(sites, 1.0)\n    energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, observer=Sz_observer)\n\n    for (i, Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n      println(\"<Σ Sz",
+      "metadata": {
+        "source_file": "examples\\dmrg\\1d_ising_with_observer.jl",
+        "section_title": "1d_ising_with_observer.jl",
+        "package": "itensormps",
+        "section_id": "part_0"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "itensors",
+        "measure",
+        "energy",
+        "hamiltonian",
+        "model",
+        "dmrg"
+      ],
+      "match_ratio": 0.75,
+      "is_html": false
+    },
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "section_title": "trg.jl",
+        "source_file": "examples\\src\\trg.jl",
+        "package": "itensors",
+        "section_id": "full"
+      },
+      "score": 0.805,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "ctmrg_isotropic__3af4213eb7e13bdc1c45eaa2b10337a1__full__0",
+      "text": "using ITensors\n\nfunction ctmrg(T::ITensor, Cₗᵤ::ITensor, Aₗ::ITensor; χmax::Int, cutoff=0.0, nsteps::Int)\n  sₕ = commonind(T, Aₗ)\n  sᵥ = uniqueind(T, Aₗ, Aₗ'; plev=0)\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = uniqueind(Cₗᵤ, Aₗ)\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  Cₗᵤ = dense(Cₗᵤ)\n  for i in 1:nsteps\n    ## Get the grown corner transfer matrix (CTM)\n    Cₗᵤ⁽¹⁾ = Aₗ * Cₗᵤ * Aᵤ * T\n\n    ## Diagonalize the grown CTM\n    # TODO: replace with\n    # eigen(Cₗᵤ⁽¹⁾, \"horiz\" => \"vert\"; tags = \"horiz\" => \"vert\", kwargs...)\n    Cₗᵤ, Uᵥ = eigen(\n      Cₗᵤ⁽¹⁾,\n      (lₕ', sₕ'),\n      (lᵥ', sᵥ');\n      ishermitian=true,\n      cutoff,\n      maxdim=χmax,\n      lefttags=tags(lₕ),\n      righttags=tags(lᵥ),\n    )\n    Cₗᵤ = dense(Cₗᵤ)\n    lᵥ = commonind(Cₗᵤ, Uᵥ)\n    lₕ = uniqueind(Cₗᵤ, Uᵥ)\n\n    # The renormalized CTM is the diagonal matrix of eigenvalues\n    # Normalize the CTM\n    Cₗ = Cₗᵤ * prime(dag(Cₗᵤ), lₕ)\n    normC = (Cₗ * dag(Cₗ))[]^(1 / 4)\n    Cₗᵤ = Cₗᵤ / normC\n\n    # Calculate the renormalized half row transfer matrix (HRTM)\n    Uᵥ = noprime(Uᵥ)\n    Aₗ = Aₗ * Uᵥ * T * dag(Uᵥ')\n    Aₗ = replaceinds(Aₗ, sₕ' => sₕ)\n\n    # Normalize the HRTM\n    ACₗ = Aₗ * Cₗᵤ * prime(dag(Cₗᵤ))\n    normA = √((ACₗ * dag(ACₗ))[])\n    Aₗ = Aₗ / normA\n    Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  end\n  return Cₗᵤ, Aₗ\nend\n",
+      "metadata": {
+        "section_title": "ctmrg_isotropic.jl",
+        "package": "itensors",
+        "section_id": "full",
+        "source_file": "examples\\src\\ctmrg_isotropic.jl"
+      },
+      "score": 0.793008056336266,
+      "original_score": 0.7877005706012985,
+      "vector_score": 0.9846257132516231,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "test_trg__2f4865721f7c7ba535be3f8ee717655a__full__0",
+      "text": "using ITensors\nusing Test\nusing Random\n\nRandom.seed!(12345)\n\ninclude(joinpath(pkgdir(ITensors), \"examples\", \"src\", \"trg.jl\"))\ninclude(joinpath(pkgdir(ITensors), \"examples\", \"src\", \"2d_classical_ising.jl\"))\n\n@testset \"trg\" begin\n  # Make Ising model partition function\n  β = 1.1 * βc\n  d = 2\n  s = Index(d)\n  l = addtags(s, \"left\")\n  u = addtags(s, \"up\")\n  T = ising_mpo(l, u, β)\n\n  χmax = 20\n  nsteps = 20\n  κ, T = trg(T; χmax=χmax, nsteps=nsteps)\n\n  @test κ ≈ exp(-β * ising_free_energy(β)) atol = 1e-4\nend\n",
+      "metadata": {
+        "source_file": "test\\base\\test_trg.jl",
+        "section_id": "full",
+        "section_title": "test_trg.jl",
+        "package": "itensors"
+      },
+      "score": 0.7463047646022883,
+      "original_score": 0.7329523837918824,
+      "vector_score": 0.8556450207552313,
+      "bm25_score": 0.24218183593848708,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "model"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "index__1de0221505bf56b6e61f33e29f10859a__Example-DMRG-Calculation_3__0",
+      "text": "## Example DMRG Calculation\nDMRG is an iterative algorithm for finding the dominant eigenvector of an exponentially large, Hermitian matrix. It originates in physics with the purpose of finding eigenvectors of Hamiltonian (energy) matrices which model the behavior of quantum systems.\n```code\nusing ITensors, ITensorMPS\nlet\n  # Create 100 spin-one indices\n  N = 100\n  sites = siteinds(\"S=1\", N)\n\n  # Input operator terms which define\n  # a Hamiltonian matrix, and convert\n  # these terms to an MPO tensor network\n  # (here we make the 1D Heisenberg model)\n  os = OpSum()\n  for j in 1:(N - 1)\n    os += \"Sz\", j, \"Sz\", j + 1\n    os += 0.5, \"S+\", j, \"S-\", j + 1\n    os += 0.5, \"S-\", j, \"S+\", j + 1\n  end\n  H = MPO(os, sites)\n\n  # Create an initial random matrix product state\n  psi0 = random_mps(sites)\n\n  # Plan to do 5 passes or 'sweeps' of DMRG,\n  # setting maximum MPS internal dimensions\n  # for each sweep and maximum truncation cutoff\n  # used when adapting internal dimensions:\n  nsweeps = 5\n  maxdim = [10, 20, 100, 100, 200]\n  cutoff = 1E-10\n\n  # Run the DMRG algorithm, returning energy\n  # (dominant eigenvalue) and optimized MPS\n  energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff)\n  println(\"Final energy = $energy\")\n\n  nothing\nend\n\n# output\n\n# After sweep 1 energy=-137.954199761732 maxlinkdim=9 maxerr=2.43E-16 time=9.356\n# After sweep 2 energy=-138.935058943878 maxlinkdim=20 maxerr=4.97E-06 time=0.671\n# After sweep 3 energy=-138.940080155429 maxlinkdim=92 maxerr=1.00E-10 time=4.522\n# After sweep 4 energy=-138.940086009318 maxlinkdim=100 maxerr=1.05E-10 time=11.644\n# After sweep 5 energy=-138.940086058840 maxlinkdim=96 maxerr=1.00E-10 time=12.771\n# Final energy = -138.94008605883985\n```\n```code\nAfter sweep 1 energy=-137.05349579858472  maxlinkdim=9 maxerr=3",
+      "metadata": {
+        "section_id": "Example-DMRG-Calculation",
+        "source_file": "docs\\build\\index.html",
+        "package": "itensormps",
+        "section_title": "Example DMRG Calculation"
+      },
+      "score": 0.7167509924073526,
+      "original_score": 0.5468015878517642,
+      "vector_score": 0.5039952343393803,
+      "bm25_score": 0.7180270019013003,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensors",
+        "energy",
+        "hamiltonian",
+        "model",
+        "dmrg"
+      ],
+      "match_ratio": 0.625,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 108,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      }
+    }
+  }
+}

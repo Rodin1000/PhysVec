@@ -1,0 +1,136 @@
+{
+  "query": "Boson initial state function signature in DMRG",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "boson__68a4a48a32f91533144dbb5ef2f01694__full__0",
+      "text": "\nalias(::SiteType\"Boson\") = SiteType\"Qudit\"()\n\n\"\"\"\n    space(::SiteType\"Boson\";\n          dim = 2,\n          conserve_qns = false,\n          conserve_number = false,\n          qnname_number = \"Number\")\n\nCreate the Hilbert space for a site of type \"Boson\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nspace(st::SiteType\"Boson\"; kwargs...) = space(alias(st); kwargs...)\n\nval(vn::ValName, st::SiteType\"Boson\") = val(vn, alias(st))\n\nfunction state(sn::StateName, st::SiteType\"Boson\", s::Index; kwargs...)\n  return state(sn, alias(st), s; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", ds::Int...; kwargs...)\n  return op(on, alias(st), ds...; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", s1::Index, s_tail::Index...; kwargs...)\n  rs = reverse((s1, s_tail...))\n  ds = dim.(rs)\n  opmat = op(on, st, ds...; kwargs...)\n  return itensor(opmat, prime.(rs)..., dag.(rs)...)\nend\n",
+      "metadata": {
+        "section_title": "boson.jl",
+        "section_id": "full",
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\boson.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "boson",
+        "state",
+        "function"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Compute-excited-states-with-DMRG_5__0",
+      "text": "## Compute excited states with DMRG\nITensor DMRG accepts additional MPS wavefunctions as a optional, extra argument. These additional 'penalty states' are provided as an array of MPS just after the Hamiltonian, like this:\n```code\nenergy,psi3 = dmrg(H,[psi0,psi1,psi2],psi3_init;nsweeps,maxdim,cutoff)\n```\nHere the penalty states are [psi0,psi1,psi2] . When these are provided, the DMRG code minimizes the energy of the current MPS while also reducing its overlap (inner product) with the previously provided MPS. If these overlaps become sufficiently small, then the computed MPS is an excited state. So by finding the ground state, then providing it to DMRG as a \"penalty state\" or previous state one can compute the first excited state. Then providing both of these, one can get the second excited state, etc.\nA  keyword argument called weight can also be provided to the dmrg function when penalizing overlaps to previous states. The weight parameter is multiplied by the overlap with the previous states, so sets the size of the penalty. It should be chosen at least as large as the (estimated) gap between the ground and first excited states. Otherwise the optimal value of the weight parameter is not so obvious, and it is best to try various weights during initial test calculations.\nNote that when the system has conserved quantum numbers, a superior way to find excited states can be to find ground states of quantum number (or symmetry) sectors other than the one containing the absolute ground state. In that context, the penalty method used below is a way to find higher excited states within the same quantum number sector.\nFull Example code:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 20\n\n  sites = siteinds(\"S=1/2\",N)\n\n  h = 4.0\n\n  weight = 20*h # use a large weight\n                # since gap is expected to be large\n\n\n  #\n  # Use the OpSum feature to create the\n  # transverse field Ising model\n  #\n  # Factors of 4 and 2 are to rescale\n  # spin operators into Pauli matrices\n  #\n  os = OpSum()\n  for j=1:N-1\n    os -= 4,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:N\n    os -= 2*h,\"Sx\",j;\n  end\n  H = MPO(os,sites)\n\n\n  #\n  # Make sure to do lots of sweeps\n  # when finding excited states\n  #\n  nsweeps = 30\n  maxdim = [10,10,10,20,20,40,80,100,200,200]\n  cutoff = [1E-8]\n",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "Compute excited states with DMRG",
+        "section_id": "Compute-excited-states-with-DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 0.8708230723386072,
+      "original_score": 0.7905239010896333,
+      "vector_score": 0.9881548763620416,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "initial",
+        "state",
+        "function",
+        "dmrg"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "DMRGObserver__77e713791fffb15aca3c48d3446c7a86__h2_1_1__0",
+      "text": "In the following example, we have already made a Hamiltonian MPO `H`\nand initial MPS `psi0` for a system of spins whose sites\nhave an associated \"Sz\" operator defined. We construct a\n`DMRGObserver` which measures \"Sz\" on each site at each\nstep of DMRG, and also stops the calculation early if\nthe energy no longer changes to a relative precision of 1E-7.\n```\nSz_observer = DMRGObserver([\"Sz\"],sites,energy_tol=1E-7)\nenergy, psi = dmrg(H,psi0,sweeps,observer=Sz_observer)\nfor (sw,Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n  println(\"Total Sz after sweep $sw = \", sum(Szs)/N)\nend\n```",
+      "metadata": {
+        "source_file": "docs\\src\\DMRGObserver.md",
+        "package": "itensormps",
+        "section_title": "Sample Usage",
+        "section_id": "h2_1"
+      },
+      "score": 0.8588516420336587,
+      "original_score": 0.8487696164646343,
+      "vector_score": 1.0,
+      "bm25_score": 0.2438480823231716,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "initial",
+        "dmrg"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "DMRGObserver__80a7108125a0147871536d81b11e02a9__Sample-Usage_1__0",
+      "text": "## Sample Usage\nIn the following example, we have already made a Hamiltonian MPO H and initial MPS psi0 for a system of spins whose sites have an associated \"Sz\" operator defined. We construct a DMRGObserver which measures \"Sz\" on each site at each step of DMRG, and also stops the calculation early if the energy no longer changes to a relative precision of 1E-7.\n```code\nSz_observer = DMRGObserver([\"Sz\"],sites,energy_tol=1E-7)\n\nenergy, psi = dmrg(H,psi0,sweeps,observer=Sz_observer)\n\nfor (sw,Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n  println(\"Total Sz after sweep $sw = \", sum(Szs)/N)\nend\n```",
+      "metadata": {
+        "section_id": "Sample-Usage",
+        "section_title": "Sample Usage",
+        "package": "itensormps",
+        "source_file": "docs\\build\\DMRGObserver.html"
+      },
+      "score": 0.8211369698423955,
+      "original_score": 0.7382492241596031,
+      "vector_score": 0.8653518537260061,
+      "bm25_score": 0.22983870589399114,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "initial",
+        "dmrg"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "QN_DMRG__629a0c9d83a6c48625080be07715c0ee__h4_1_1__0",
+      "text": "Setting up a quantum-number conserving DMRG calculation in ITensor requires\nonly very small changes to a DMRG code. The main changes are:\n1. using tensor indices (`Index` objects) which carry quantum number (QN) information to build your Hamiltonian and  initial state\n2. initializing your MPS to have well-defined total quantum numbers\nImportantly, _the total QN of your state throughout the calculation will\nremain the same as the initial state passed to DMRG_.\nThe total QN of your state is not set separately, but determined\nimplicitly from the initial QN of the state when it is first constructed.\nOf course, your Hamiltonian should conserve all of the QN's that you would\nlike to use. If it doesn't, you will get an error when you try to construct\nit out of the QN-enabled tensor indices.",
+      "metadata": {
+        "source_file": "docs\\src\\tutorials\\QN_DMRG.md",
+        "package": "itensormps",
+        "section_id": "h4_1",
+        "section_title": "Necessary Changes"
+      },
+      "score": 0.6866070993640914,
+      "original_score": 0.6517856659601016,
+      "vector_score": 0.6090307998515669,
+      "bm25_score": 0.8228051303942402,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "initial",
+        "state",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 108,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      }
+    }
+  }
+}

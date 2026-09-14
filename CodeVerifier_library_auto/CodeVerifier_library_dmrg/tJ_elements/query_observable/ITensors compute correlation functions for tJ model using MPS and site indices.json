@@ -1,0 +1,138 @@
+{
+  "query": "ITensors compute correlation functions for tJ model using MPS and site indices",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "ITensors__829a5cf9db8b1983a9f0b261ee9af85d__part_0__0",
+      "text": "\"\"\"\nITensor is a library for rapidly creating correct and efficient tensor network algorithms.\n\nAn ITensor is a tensor whose interface is independent of its memory layout.\nITensor indices are 'intelligent' meaning they carry extra information and\n'recognize' each other automatically when contracting or adding ITensors.\n\nThe ITensor library includes composable and extensible algorithms for optimizing\nand transforming tensor networks, such as matrix product state and matrix product operators.\n\n# Example Usage\n\nDefine tensor indices i and j\n\n    i = Index(2, \"i\")\n    j = Index(3, \"j\")\n\nMake an ITensor with these indices\n\n    A = ITensor(i,j)\n\nSet the i==2,j==1 element to -2.6\n\n    A[j=>1,i=>2] = -2.6\n    A[i=>2,j=>1] = -2.6 #this has the same effect\n\nMake an ITensor with random elements\n\n    B = random_itensor(j,i)\n\nAdd ITensors A and B together (ok that indices in different order)\n\n    C = A + B\n\n# Other Features of ITensor\n\n  - Tools for **tensor networks**, such as matrix product states (MPS) / tensor trains (TT)\n  - **Algorithms** for solving linear equations in MPS form (such as DMRG) or\n    for integrating differential equations (\"time evolving MPS\")\n  - ITensors can have **sparse data** internally, such as block sparsity or diagonal\n    sparsity, while having the same interface as dense ITensors\n  - ITensors can have **symmetry properties** (invariance or equivariance) under\n    group transformations of the indices. In physics terminology such ITensors conserve quantum numbers.\n\n# Documentation and Resources\n\nITensor website: https://itensor.org/\n\nDocumentation: https://itensor.github.io/ITensors.jl/stable/\n\"\"\"\nmodule ITensors\ninclude(\"usings.jl\")\ninclude(\"utils.jl\")\ninclude(\"lib/LazyApply/src/LazyApply.jl\")\n# TODO: `using .LazyApply: LazyApply, ...`.\nusing .LazyApply\nusing .LazyApply: Prod, Scaled, Sum, coefficient\ninclude(\"lib/Ops/src/Ops.jl\")\n# TODO: `using .Ops: Ops, ...`.\nusing .Ops\nusing .Ops: Ops, Op, Trotter\nimport .Ops: sites, name\ninclude(\"exports.jl\")\ninclude(\"imports.jl\")\ninclude(\"global_variables.jl\")\n# TODO: Move to `lib/LastVals/src/LastVals.jl`.\ninclude(\"lastval.jl\")\ninclude(\"lib/SmallStrings/src/SmallStrings.jl\")\nusing .SmallStrings: SmallStrings, IntChar, SmallString, Tag, isint, isnull\ninclude(\"readwrite.jl\")\nexport readcpp\n# TODO: Move to `lib/Nots",
+      "metadata": {
+        "section_title": "ITensors.jl",
+        "section_id": "part_0",
+        "package": "itensors",
+        "source_file": "src\\ITensors.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.3537104239354186,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensors",
+        "using",
+        "mps",
+        "indices"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    },
+    {
+      "id": "MPSandMPO__85ff8e4a2a3bbd8ef8316257bf7d9a30__h4_2_2__0",
+      "text": "If you have a tensor `T` which is an ITensor and has indices `i,j,k,l,m`,\nyou can create an MPS approximation of `T` where the MPS has site indices\n`i,j,k,l,m` as follows:\n```julia\ncutoff = 1E-8\nmaxdim = 10\nT = random_itensor(i,j,k,l,m)\nM = MPS(T,(i,j,k,l,m);cutoff=cutoff,maxdim=maxdim)\n```\nHere we used a random ITensor for illustrative purposes, but it could be any ITensor and\ntypically tensors with additional structure are more well approximated by MPS.",
+      "metadata": {
+        "section_id": "h4_2",
+        "source_file": "docs\\src\\examples\\MPSandMPO.md",
+        "section_title": "ITensor to MPS Example",
+        "package": "itensormps"
+      },
+      "score": 0.9241727866898464,
+      "original_score": 0.9187565571676926,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "mps",
+        "site",
+        "indices"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "source_file": "examples\\src\\trg.jl",
+        "package": "itensors",
+        "section_id": "full",
+        "section_title": "trg.jl"
+      },
+      "score": 0.922876273281672,
+      "original_score": 0.9153520072603717,
+      "vector_score": 0.9962943938949222,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensors",
+        "using",
+        "site",
+        "indices"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    },
+    {
+      "id": "ctmrg_isotropic__3af4213eb7e13bdc1c45eaa2b10337a1__full__0",
+      "text": "using ITensors\n\nfunction ctmrg(T::ITensor, Cₗᵤ::ITensor, Aₗ::ITensor; χmax::Int, cutoff=0.0, nsteps::Int)\n  sₕ = commonind(T, Aₗ)\n  sᵥ = uniqueind(T, Aₗ, Aₗ'; plev=0)\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = uniqueind(Cₗᵤ, Aₗ)\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  Cₗᵤ = dense(Cₗᵤ)\n  for i in 1:nsteps\n    ## Get the grown corner transfer matrix (CTM)\n    Cₗᵤ⁽¹⁾ = Aₗ * Cₗᵤ * Aᵤ * T\n\n    ## Diagonalize the grown CTM\n    # TODO: replace with\n    # eigen(Cₗᵤ⁽¹⁾, \"horiz\" => \"vert\"; tags = \"horiz\" => \"vert\", kwargs...)\n    Cₗᵤ, Uᵥ = eigen(\n      Cₗᵤ⁽¹⁾,\n      (lₕ', sₕ'),\n      (lᵥ', sᵥ');\n      ishermitian=true,\n      cutoff,\n      maxdim=χmax,\n      lefttags=tags(lₕ),\n      righttags=tags(lᵥ),\n    )\n    Cₗᵤ = dense(Cₗᵤ)\n    lᵥ = commonind(Cₗᵤ, Uᵥ)\n    lₕ = uniqueind(Cₗᵤ, Uᵥ)\n\n    # The renormalized CTM is the diagonal matrix of eigenvalues\n    # Normalize the CTM\n    Cₗ = Cₗᵤ * prime(dag(Cₗᵤ), lₕ)\n    normC = (Cₗ * dag(Cₗ))[]^(1 / 4)\n    Cₗᵤ = Cₗᵤ / normC\n\n    # Calculate the renormalized half row transfer matrix (HRTM)\n    Uᵥ = noprime(Uᵥ)\n    Aₗ = Aₗ * Uᵥ * T * dag(Uᵥ')\n    Aₗ = replaceinds(Aₗ, sₕ' => sₕ)\n\n    # Normalize the HRTM\n    ACₗ = Aₗ * Cₗᵤ * prime(dag(Cₗᵤ))\n    normA = √((ACₗ * dag(ACₗ))[])\n    Aₗ = Aₗ / normA\n    Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  end\n  return Cₗᵤ, Aₗ\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "itensors",
+        "source_file": "examples\\src\\ctmrg_isotropic.jl",
+        "section_title": "ctmrg_isotropic.jl"
+      },
+      "score": 0.7256700365490868,
+      "original_score": 0.7129105033653234,
+      "vector_score": 0.7759514724586636,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "using"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "abstractprojmpo__6fbdcdea0861315f06c16b062fce88e3__part_3__3",
+      "text": " - 1] * P.H[rl - 1] * dag(prime(psi[rl - 1]))\n    P.LR[rl - 1] = R\n    rl -= 1\n  end\n  P.rpos = k\n  return R\nend\n\nfunction makeR!(P::AbstractProjMPO, psi::MPS, k::Int)\n  _makeR!(P, psi, k)\n  return P\nend\n\n\"\"\"\n    position!(P::ProjMPO, psi::MPS, pos::Int)\n\nGiven an MPS `psi`, shift the projection of the\nMPO represented by the ProjMPO `P` such that\nthe set of unprojected sites begins with site `pos`.\nThis operation efficiently reuses previous projections\nof the MPO on sites that have already been projected.\nThe MPS `psi` must have compatible bond indices with\nthe previous projected MPO tensors for this\noperation to succeed.\n\"\"\"\nfunction position!(P::AbstractProjMPO, psi::MPS, pos::Int)\n  makeL!(P, psi, pos - 1)\n  makeR!(P, psi, pos + nsite(P))\n  return P\nend\n\n\"\"\"\n    noiseterm(P::ProjMPO,\n              phi::ITensor,\n              ortho::String)\n\nReturn a \"noise term\" or density matrix perturbation\nITensor as proposed in Phys. Rev. B 72, 180403 for aiding\nconvergence of DMRG calculations. The ITensor `phi`\nis the contracted product of MPS tensors acted on by the\nProjMPO `P`, and `ortho` is a String which can take\nthe values `\"left\"` or `\"right\"` depending on the\nsweeping direction of the DMRG calculation.\n\"\"\"\nfunction noiseterm(P::AbstractProjMPO, phi::ITensor, ortho::String)::ITensor\n  if nsite(P) != 2\n    error(\"noise term only defined for 2-site ProjMPO\")\n  end\n\n  site_range_P = site_range(P)\n  if ortho == \"left\"\n    AL = P.H[first(site_range_P)]\n    AL = lproj(P) * AL\n    nt = AL * phi\n  elseif ortho == \"right\"\n    AR = P.H[last(site_range_P)]\n    AR = AR * rproj(P)\n    nt = phi * AR\n  else\n    error(\"In noiseterm, got ortho = $ortho, only supports `left` and `right`\")\n  end\n  nt = nt * dag(noprime(nt))\n\n  return nt\nend\n\nfunction checkflux(P::AbstractProjMPO)\n  checkflux(P.H)\n  for n in length(P.LR)\n    if isassigned(P.LR, n)\n      checkflux(P.LR[n])\n   ",
+      "metadata": {
+        "source_file": "src\\abstractprojmpo\\abstractprojmpo.jl",
+        "section_id": "part_3",
+        "package": "itensormps",
+        "section_title": "abstractprojmpo.jl"
+      },
+      "score": 0.690916120625788,
+      "original_score": 0.6688387006704871,
+      "vector_score": 0.7279825057601302,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "mps",
+        "site",
+        "indices"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 114,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

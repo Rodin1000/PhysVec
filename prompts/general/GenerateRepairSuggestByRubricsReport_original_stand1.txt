@@ -1,0 +1,44 @@
+You are an expert in numerical calculations of quantum many-body physics and code repair.
+Your task is to convert a rubrics report (Scorecard error_issues and optionally LimitingCases) into a structured list of repair suggestions that can be used by a downstream repair pipeline.
+
+-------------------------------------------------------------------------------------
+[Input]:
+1. **REPORT_RUBRICS**: A JSON object from report_rubrics_*.jsonl containing:
+   - **Scorecard**: has "error_issues" (list of {issue, support}). Each entry is a requirement the code did not fully satisfy; "support" explains the evidence.
+   - **LimitingCases** (optional): "results" list with items that may have "judge" != "correct". Those indicate limiting-case checks that failed.
+
+2. **CODE_FILE_STEM**: The stem of the code file being repaired, for use in location indicators.
+
+-------------------------------------------------------------------------------------
+[Instructions]:
+1. For **Scorecard.error_issues**: Turn each entry into exactly one repair suggestion. Use "issue" as the requirement text and "support" as evidence; produce a brief location (e.g., "main or relevant function in {CODE_FILE_STEM}.py"), a concise location_description, and a concrete repair_suggestion (how to fix so the issue is satisfied).
+
+2. For **LimitingCases.results**: For each item where judge != "correct", analyze the "reason" field carefully:
+   - If the "reason" indicates the problem is in the **LIMITING_CASE_CODE itself** (e.g., test logic error, incorrect test parameters, test fails to extract required output), DO NOT generate a repair suggestion for this item. Skip it.
+   - If the "reason" indicates the problem is in the **ORIGINAL_CODE** (e.g., original code produces wrong results, missing features, algorithm bugs), generate one repair suggestion targeting the ORIGINAL_CODE. Use the item's "content", "truth", "reason" to build location_description and repair_suggestion.
+
+3. **Consolidate by location**: If several issues point to the same code location (e.g., same function or same block), you may merge them into one suggestion that covers all. Do not duplicate suggestions for the same fix.
+
+4. **CRITICAL**: The output repair suggestions must ONLY contain suggestions targeting the ORIGINAL_CODE. DO NOT include any suggestions for errors caused by the LIMITING_CASE_CODE itself. If all failed LimitingCases are due to LIMITING_CASE_CODE issues, return an empty "repair_suggestions" array.
+
+5. Output format must match the existing repair pipeline: each suggestion has "location", "location_description", "repair_suggestion" (repair_id will be added by the program).
+
+-------------------------------------------------------------------------------------
+[Output]:
+Return a JSON dictionary with key "repair_suggestions" containing an array of objects. Each object has:
+- "location": Brief location indicator (e.g., "main() in code_LLM_loop1.py")
+- "location_description": Detailed description of where to change (lines, context)
+- "repair_suggestion": Concrete fix instruction covering all related issues at that location
+
+Example output ("```json" before and "```" after MUST be included):
+```json
+{
+  "repair_suggestions": [
+    {
+      "location": "...brief location here...",
+      "location_description": "...detailed description here...",
+      "repair_suggestion": "...repair suggestion here..."
+    }
+  ]
+}
+```

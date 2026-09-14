@@ -1,0 +1,129 @@
+{
+  "query": "ITensors calculate expectation values of local operators for tJ model MPS",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "2d_classical_ising__d30e54e4e402a00b85ee89ff1e3c79bd__part_1__1",
+      "text": "�′ = itensor(vec(X), s̃ₕ′, sₕ′)\n  Xᵥ = itensor(vec(X), s̃ᵥ, sᵥ)\n  Xᵥ′ = itensor(vec(X), s̃ᵥ′, sᵥ′)\n  return T̃ * Xₕ′ * Xᵥ′ * Xₕ * Xᵥ\nend\n\nfunction ising_mpo(sₕ::Index, sᵥ::Index, args...; kwargs...)\n  return ising_mpo(sₕ => sₕ', sᵥ => sᵥ', args...; kwargs...)\nend\n\nfunction ising_mpo_dual(\n  sh::Tuple{Index,Index}, sv::Tuple{Index,Index}, β::Real, J::Real=1.0\n)\n  d = dim(sh[1])\n  T = ITensor(sh[1], sh[2], sv[1], sv[2])\n  sig(s) = 1.0 - 2.0 * (s - 1)\n  E0 = -4.0\n  for s1 in 1:d, s2 in 1:d, s3 in 1:d, s4 in 1:d\n    E = sig(s1) * sig(s2) + sig(s2) * sig(s3) + sig(s3) * sig(s4) + sig(s4) * sig(s1)\n    val = exp(-β * (E - E0))\n    T[sh[1] => s1, sv[2] => s2, sh[2] => s3, sv[1] => s4] = val\n  end\n  return T\nend\n\nfunction ising_partition(sh, sv, β)\n  ny, nx = size(sh)\n  T = Matrix{ITensor}(undef, ny, nx)\n  for iy in 1:ny, ix in 1:nx\n    ixp = per(ix + 1, nx)\n    iyp = per(iy + 1, ny)\n    T[iy, ix] = ising_mpo(sh[iy, ix] => sh[iy, ixp], sv[iy, ix] => sv[iyp, ix], β)\n  end\n  return T\nend\n\n#\n# Exact results\n#\n\nconst βc = 0.5 * log(√2 + 1)\n\nfunction ising_free_energy(β::Real, J::Real=1.0)\n  k = β * J\n  c = cosh(2 * k)\n  s = sinh(2 * k)\n  xmin = 0.0\n  xmax = π\n  integrand(x) = log(c^2 + √(s^4",
+      "metadata": {
+        "section_id": "part_1",
+        "section_title": "2d_classical_ising.jl",
+        "source_file": "examples\\src\\2d_classical_ising.jl",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "MPSandMPO__85ff8e4a2a3bbd8ef8316257bf7d9a30__h4_2_2__0",
+      "text": "If you have a tensor `T` which is an ITensor and has indices `i,j,k,l,m`,\nyou can create an MPS approximation of `T` where the MPS has site indices\n`i,j,k,l,m` as follows:\n```julia\ncutoff = 1E-8\nmaxdim = 10\nT = random_itensor(i,j,k,l,m)\nM = MPS(T,(i,j,k,l,m);cutoff=cutoff,maxdim=maxdim)\n```\nHere we used a random ITensor for illustrative purposes, but it could be any ITensor and\ntypically tensors with additional structure are more well approximated by MPS.",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\MPSandMPO.md",
+        "section_id": "h4_2",
+        "package": "itensormps",
+        "section_title": "ITensor to MPS Example"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "mps"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "ITensors__829a5cf9db8b1983a9f0b261ee9af85d__part_0__0",
+      "text": "\"\"\"\nITensor is a library for rapidly creating correct and efficient tensor network algorithms.\n\nAn ITensor is a tensor whose interface is independent of its memory layout.\nITensor indices are 'intelligent' meaning they carry extra information and\n'recognize' each other automatically when contracting or adding ITensors.\n\nThe ITensor library includes composable and extensible algorithms for optimizing\nand transforming tensor networks, such as matrix product state and matrix product operators.\n\n# Example Usage\n\nDefine tensor indices i and j\n\n    i = Index(2, \"i\")\n    j = Index(3, \"j\")\n\nMake an ITensor with these indices\n\n    A = ITensor(i,j)\n\nSet the i==2,j==1 element to -2.6\n\n    A[j=>1,i=>2] = -2.6\n    A[i=>2,j=>1] = -2.6 #this has the same effect\n\nMake an ITensor with random elements\n\n    B = random_itensor(j,i)\n\nAdd ITensors A and B together (ok that indices in different order)\n\n    C = A + B\n\n# Other Features of ITensor\n\n  - Tools for **tensor networks**, such as matrix product states (MPS) / tensor trains (TT)\n  - **Algorithms** for solving linear equations in MPS form (such as DMRG) or\n    for integrating differential equations (\"time evolving MPS\")\n  - ITensors can have **sparse data** internally, such as block sparsity or diagonal\n    sparsity, while having the same interface as dense ITensors\n  - ITensors can have **symmetry properties** (invariance or equivariance) under\n    group transformations of the indices. In physics terminology such ITensors conserve quantum numbers.\n\n# Documentation and Resources\n\nITensor website: https://itensor.org/\n\nDocumentation: https://itensor.github.io/ITensors.jl/stable/\n\"\"\"\nmodule ITensors\ninclude(\"usings.jl\")\ninclude(\"utils.jl\")\ninclude(\"lib/LazyApply/src/LazyApply.jl\")\n# TODO: `using .LazyApply: LazyApply, ...`.\nusing .LazyApply\nusing .LazyApply: Prod, Scaled, Sum, coefficient\ninclude(\"lib/Ops/src/Ops.jl\")\n# TODO: `using .Ops: Ops, ...`.\nusing .Ops\nusing .Ops: Ops, Op, Trotter\nimport .Ops: sites, name\ninclude(\"exports.jl\")\ninclude(\"imports.jl\")\ninclude(\"global_variables.jl\")\n# TODO: Move to `lib/LastVals/src/LastVals.jl`.\ninclude(\"lastval.jl\")\ninclude(\"lib/SmallStrings/src/SmallStrings.jl\")\nusing .SmallStrings: SmallStrings, IntChar, SmallString, Tag, isint, isnull\ninclude(\"readwrite.jl\")\nexport readcpp\n# TODO: Move to `lib/Nots",
+      "metadata": {
+        "section_id": "part_0",
+        "source_file": "src\\ITensors.jl",
+        "package": "itensors",
+        "section_title": "ITensors.jl"
+      },
+      "score": 0.8867721294412585,
+      "original_score": 0.877591491287847,
+      "vector_score": 0.6772962689796507,
+      "bm25_score": 0.8011808892327854,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensors",
+        "operators",
+        "mps"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "matrix_algebra__08a168ce4aee5cc6efcfa3b09c4ccea2__part_0__0",
+      "text": "# Fix for AD\nfunction _tr(T::ITensor; plev::Pair{Int,Int}=0 => 1, tags::Pair=ts\"\" => ts\"\")\n  trpairs = indpairs(T; plev=plev, tags=tags)\n  Cᴸ = combiner(first.(trpairs))\n  Cᴿ = combiner(last.(trpairs))\n  Tᶜ = T * Cᴸ * Cᴿ\n  cᴸ = uniqueind(Cᴸ, T)\n  cᴿ = uniqueind(Cᴿ, T)\n  Tᶜ *= δ(eltype(T), dag((cᴸ, cᴿ)))\n  if order(Tᶜ) == 0\n    return Tᶜ[]\n  end\n  return Tᶜ\nend\n\n# Trace an ITensor over pairs of indices determined by\n# the prime levels and tags. Indices that are not in pairs\n# are not traced over, corresponding to a \"batched\" trace.\nfunction tr(T::ITensor; kwargs...)\n  return _tr(T; kwargs...)\nend\n\n\"\"\"\n    exp(A::ITensor, Linds=Rinds', Rinds=inds(A,plev=0); ishermitian = false)\n\nCompute the exponential of the tensor `A` by treating it as a matrix ``A_{lr}`` with\nthe left index `l` running over all indices in `Linds` and `r` running over all\nindices in `Rinds`.\n\nOnly accepts index lists `Linds`,`Rinds` such that: (1) `length(Linds) +\nlength(Rinds) == length(inds(A))` (2) `length(Linds) == length(Rinds)` (3) For\neach pair of indices `(Linds[n],Rinds[n])`, `Linds[n]` and `Rinds[n]` represent\nthe same Hilbert space (the same QN structure in the QN case, or just the same\nlength in the dense case), and appear in `A` with opposite directions.\n\nWhen `ishermitian=true` the exponential of `Hermitian(A_{lr})` is\ncomputed internally.\n\"\"\"\nfunction exp(A::ITensor, Linds, Rinds; ishermitian=false)\n  @debug_check begin\n    if hasqns(A)\n      @assert flux(A) == QN()\n    end\n  end\n\n  NL = length(Linds)\n  NR = length(Rinds)\n  NL != NR && error(\"Must have equal number of left and right indices\")\n  ndims(A) != NL + NR &&\n    error(\"Number of left and right indices must add up to total number of indices\")\n\n  # Replace Linds and Rinds with index sets having\n  # same id's but arrow directions as on",
+      "metadata": {
+        "section_title": "matrix_algebra.jl",
+        "package": "itensors",
+        "section_id": "part_0",
+        "source_file": "src\\tensor_operations\\matrix_algebra.jl"
+      },
+      "score": 0.8794691821366072,
+      "original_score": 0.8794691821366072,
+      "vector_score": 0.8794691821366072,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "MPSandMPO__4f952b2b5288acd3875bfc705c1cbf3d__Expected-Value-of-Local-Operators_3__0",
+      "text": "## Expected Value of Local Operators\nWhen using an MPS to represent a quantum wavefunction $|\\psi\\rangle$ a common operation is computing the expected value $\\langle\\psi|\\hat{A}_j|\\psi\\rangle$ of a local operator $\\hat{A}_j$ acting on site $j$ . This can be accomplished efficiently and conveniently using the expect function as:\n```code\nAvals = expect(psi,\"A\")\n```\nwhere \"A\" must be an operator associated with the physical site type, or site tags, of the sites of the MPS psi . For example, the operator name could be \"Sz\" for spin sites or \"Ntot\" for electron sites. (For more information about defining such operators yourself, see the section on Extending op Function Definitions .)\nAs a concrete example, consider computing the expectation value of $S^z_j$ on every site of an MPS representing a system of N spins of size $S=1/2$ . In the following example we will use a random MPS of bond dimension $\\chi=4$ but the MPS could be obtained other ways such as through a DMRG calculation.\n```code\nusing ITensors, ITensorMPS\nN = 10\nchi = 4\nsites = siteinds(\"S=1/2\",N)\npsi = random_mps(sites;linkdims=chi)\nmagz = expect(psi,\"Sz\")\nfor (j,mz) in enumerate(magz)\n    println(\"$j $mz\")\nend\n```\n```code\n1 -0.20664215213542336\n2 0.1970673965273388\n3 0.15954216007934816\n4 0.07239573702368153\n5 0.11215142540189235\n6 -0.025203792527598308\n7 -0.10802997278812701\n8 -0.20602986676441615\n9 -0.09655901150411036\n10 -0.11725014699120238\n```",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "Expected-Value-of-Local-Operators",
+        "section_title": "Expected Value of Local Operators",
+        "source_file": "docs\\build\\examples\\MPSandMPO.html"
+      },
+      "score": 0.8335292376209292,
+      "original_score": 0.7336467801934867,
+      "vector_score": 0.4836467801934867,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensors",
+        "expectation",
+        "local",
+        "operators",
+        "mps"
+      ],
+      "match_ratio": 0.625,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 113,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

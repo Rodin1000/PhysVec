@@ -1,0 +1,125 @@
+{
+  "query": "itensor siteinds tJ conserve_qns and conserve_sz parameters",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "IndexType__6e37357dcb2fa53f32ed9d38a3139a66__h2_0_0__0",
+      "text": "```@docs\nIndex\nITensors.QNIndex\n```",
+      "metadata": {
+        "package": "itensors",
+        "section_title": "Description",
+        "source_file": "docs\\src\\IndexType.md",
+        "section_id": "h2_0"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "MPSTimeEvolution__e9c02ce52c6a9c6e68ab4f8e4e9e0607__h0_1_1__0",
+      "text": "s = siteinds(\"S=1/2\", N; conserve_qns=true)",
+      "metadata": {
+        "source_file": "docs\\src\\tutorials\\MPSTimeEvolution.md",
+        "section_title": "Make an array of 'site' indices",
+        "package": "itensormps",
+        "section_id": "h0_1"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "siteinds",
+        "conserve_qns"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "SiteTypes__c774f95869a6174e9ce75e61d1a4214f__full__0",
+      "text": "module SiteTypes\n# TODO: This is a bit strange, but required for backwards\n# compatibility since `val` is also used by `QNVal`.\nimport ..ITensors: val\n# TODO: Use explicit overloading with `NDTensors.space`.\nimport ..ITensors: space\ninclude(\"sitetype.jl\")\ninclude(\"SiteTypesChainRulesCoreExt.jl\")\ninclude(\"sitetypes/aliases.jl\")\ninclude(\"sitetypes/generic_sites.jl\")\ninclude(\"sitetypes/qubit.jl\")\ninclude(\"sitetypes/spinhalf.jl\")\ninclude(\"sitetypes/spinone.jl\")\ninclude(\"sitetypes/fermion.jl\")\ninclude(\"sitetypes/electron.jl\")\ninclude(\"sitetypes/tj.jl\")\ninclude(\"sitetypes/qudit.jl\")\ninclude(\"sitetypes/boson.jl\")\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "src\\lib\\SiteTypes\\src\\SiteTypes.jl",
+        "section_title": "SiteTypes.jl",
+        "package": "itensors"
+      },
+      "score": 0.9392017597704977,
+      "original_score": 0.9392017597704977,
+      "vector_score": 0.9392017597704977,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "ops_itensor__affa3c82ed8d1be94bbe675053e1287f__full__0",
+      "text": "using .SiteTypes: SiteTypes, op\n\nfunction SiteTypes.op(I::UniformScaling, s::Index...)\n  return I.λ * op(\"Id\", s...)\nend\n\nfunction ITensor(o::Op, s::Vector{<:Index})\n  return op(o.which_op, map(n -> s[n], o.sites)...; o.params...)\nend\n\nfunction ITensor(o::Scaled, s::Vector{<:Index})\n  c = coefficient(o)\n  if isreal(c)\n    c = real(c)\n  end\n  return c * ITensor(argument(o), s)\nend\n\nfunction ITensor(o::Prod, s::Vector{<:Index})\n  T = ITensor(true)\n  for a in o.args[1]\n    Tₙ = ITensor(a, s)\n    # TODO: Implement this logic inside `apply`\n    if hascommoninds(T, Tₙ)\n      T = T(Tₙ)\n    else\n      T *= Tₙ\n    end\n  end\n  return T\nend\n\nfunction ITensor(o::Sum, s::Vector{<:Index})\n  T = ITensor()\n  for a in o.args[1]\n    T += ITensor(a, s)\n  end\n  return T\nend\n\nfunction ITensor(o::Exp, s::Vector{<:Index})\n  return exp(ITensor(argument(o), s))\nend\n\nfunction ITensor(o::LazyApply.Adjoint, s::Vector{<:Index})\n  return swapprime(dag(ITensor(o', s)), 0 => 1)\nend\n\nfunction Sum{ITensor}(o::Sum, s::Vector{<:Index})\n  return Applied(sum, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Prod, s::Vector{<:Index})\n  return Applied(prod, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Scaled{C,Prod{Op}}, s::Vector{<:Index}) where {C}\n  t = Prod{ITensor}(argument(o), s)\n  t1 = coefficient(o) * only(t.args)[1]\n  return Applied(prod, (vcat([t1], only(t.args)[2:end]),))\nend\n\nfunction apply(o::Prod{ITensor}, v::ITensor; kwargs...)\n  ov = v\n  for oₙ in reverse(only(o.args))\n    ov = apply(oₙ, ov; kwargs...)\n  end\n  return ov\nend\n\nfunction (o::Prod{ITensor})(v::ITensor; kwargs...)\n  return apply(o, v; kwargs...)\nend\n",
+      "metadata": {
+        "source_file": "src\\lib\\Ops\\ops_itensor.jl",
+        "package": "itensors",
+        "section_id": "full",
+        "section_title": "ops_itensor.jl"
+      },
+      "score": 0.8988296074443088,
+      "original_score": 0.8946141744211551,
+      "vector_score": 0.8946141744211551,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "test_qnitensor__5d1e0d2c34ea3d43883beb63c5249d81__lines_0_500__0",
+      "text": "@eval module $(gensym())\nusing ITensors\nusing ITensors.NDTensors\nusing ITensors.SiteTypes: op, siteind, siteinds\nusing LinearAlgebra\nusing Random\nusing Test\n\nRandom.seed!(1234)\n\n@testset \"BlockSparse ITensor\" begin\n  @testset \"Constructor\" begin\n    i = Index([QN(0) => 1, QN(1) => 2], \"i\")\n    j = Index([QN(0) => 3, QN(1) => 4, QN(2) => 5], \"j\")\n\n    A = ITensor(QN(0), i, dag(j))\n\n    @test flux(A) == QN(0)\n    @test nnzblocks(A) == 2\n  end\n\n  @testset \"Construct from Array\" begin\n    i = Index([QN(0) => 1, QN(1) => 2], \"i\")\n\n    A = [\n      1.0 0.0 0.0\n      0.0 2.0 3.0\n      0.0 1e-10 4.0\n    ]\n    T = ITensor(A, i', dag(i))\n    @test flux(T) == QN(0)\n    @test nnzblocks(T) == 2\n    @test Block(1, 1) in nzblocks(T)\n    @test Block(2, 2) in nzblocks(T)\n    @test T[1, 1] == 1.0\n    @test T[2, 2] == 2.0\n    @test T[2, 3] == 3.0\n    @test T[3, 2] == 1e-10\n    @test T[3, 3] == 4.0\n\n    T = ITensor(A, i', dag(i))\n    @test flux(T) == QN(0)\n    @test nnzblocks(T) == 2\n    @test Block(1, 1) in nzblocks(T)\n    @test Block(2, 2) in nzblocks(T)\n    @test T[1, 1] == 1.0\n    @test T[2, 2] == 2.0\n    @test T[2, 3] == 3.0\n    @test T[3, 2] == 1e-10\n    @test T[3, 3] == 4.0\n\n    T = ITensor(A, i', dag(i); tol=1e-9)\n    @test flux(T) == QN(0)\n    @test nnzblocks(T) == 2\n    @test Block(1, 1) in nzblocks(T)\n    @test Block(2, 2) in nzblocks(T)\n    @test T[1, 1] == 1.0\n    @test T[2, 2] == 2.0\n    @test T[2, 3] == 3.0\n    @test T[3, 2] == 0.0\n    @test T[3, 3] == 4.0\n\n    A = [\n      1e-9 0.0 0.0\n      0.0 2.0 3.0\n      0.0 1e-10 4.0\n    ]\n    T = ITensor(A, i', dag(i); tol=1e-8)\n    @test flux(T) == QN(0)\n    @test nnzblocks(T) == 1\n    @test Block(2, 2) in nzblocks(T)\n    @test T[1, 1] == 0.0\n    @test T[2, 2] == 2.0\n    @test T[2, 3] == 3.0\n    @test T[3, 2] == 0.0\n    @test T[3, 3] == 4.0\n\n    A = [\n      1e-9 2.0 3.0\n      1e-9 1e-10 2e-10\n      2e-9 1e-10 4e-10\n    ]\n    T = ITensor(A, i', dag(i); tol=1e-8)\n    @test flux(T) == QN(-1)\n    @test nnzblocks(T) == 1\n    @test Block(1, 2) in nzblocks(T)\n    @test T[1, 1] == 0.0\n    @test T[1, 2] == 2.0\n    @test T[1, 3] == 3.0\n    @test T[2, 2] == 0.0\n    @test T[2, 3] == 0.0\n    @test T[3, 2] == 0.0\n    @test T[3, 3] == 0.0\n\n    A = [\n      1e-9 2.0 3.0\n      1e-5 1e-10 2e-10\n      2e-9 1e-10 4e-10\n    ]\n    @test_throws ErrorException ITensor(A, i', dag(i); tol=1e-8)\n    @test ITensor(A, i', dag(i); tol=1e-8, checkflux=false) isa ITensor\n\n    # Construct from zero matrix. Flux check should still pass\n    # (Regression test for issue #1209)\n    @test ITensor(zeros(3, 3), i', dag(i)) isa ITensor\n  end\n\n  @testset \"reductions (sum, prod)\" for elt in (\n    Float32, Float64, Complex{Float32}, Complex{Float64}\n  )\n    s = [QN(0) => 2, QN(1) => 2]\n    a = random_itensor(elt, Index(s), dag(Index(s)))\n    @test sum(a) ≈ sum(array(a))\n    @test sum(a) isa elt\n    @test prod(a) ≈ prod(array(a))\n    @test prod(a) isa elt\n\n    # All blocks are nonzero\n    s = [QN(0) => 2, QN(0) => 2]\n    a = random_itensor(elt, Index(s), dag(Index(s)))\n    @test sum(a) ≈ sum(array(a))\n    @test sum(a) isa elt\n    @test prod(a) ≈ prod(array(a))\n    @test prod(a) isa elt\n  end\n\n  @testset \"Regression test for in-place operations with mismatched block structure (eltype=$elt)\" for elt in\n                                                                                                       (\n    Float32, Float64, Complex{Float32}, Complex{Float64}\n  )\n    # Regression test for https://github.com/ITensor/ITensors.jl/pull/1318\n    i = Index([QN(0) => 1, QN(1) => 1])\n    src = ITensor(i', dag(i))\n    x12 = randn(elt)\n    src[1, 2] = x12\n    dest = ITensor(i', dag(i))\n    x21 = randn(elt)\n    dest[2, 1] = x21\n    α = elt(2)\n    dest .= α .* src\n    @test nnz(src) == 1\n    @test src[1, 2] == x12\n    @test nnz(dest) == 2\n    @test dest[1, 2] == α * x12\n    @test dest[2, 1] == zero(elt)\n  end\n\n  @testset \"similartype regression test\" begin\n    # Regression test for issue seen in:\n    # https://github.com/ITensor/ITensorInfiniteMPS.jl/pull/77\n    # Previously, `similartype` wasn't using information about the dimensions\n    # properly and was returning a `BlockSparse` storage of the dimensions\n    # of the input tensor.\n    i = Index([QN() => 2])\n    A = ITensor(i, i')\n    B = ITensor(i'')\n    C = A * B\n    @test NDTensors.ndims(NDTensors.storagetype(C)) == 3\n    @test C + ITensor(i, i', i'') == ITensor(i, i', i'')\n  end\n\n  @testset \"Construct from Array regression test\" begin\n    i = Index([QN(0) => 2, QN(1) => 2])\n    T = itensor([0, 0, 1, 2], i)\n    @test flux(T) == QN(1)\n    @test nnzblocks(T) == 1\n    @test !(Block(1) in nzblocks(T))\n    @test Block(2) in nzblocks(T)\n    @test T[1] == 0\n    @test T[2] == 0\n    @test T[3] == 1\n    @test T[4] == 2\n    # Test fluxes of specific elements:\n    @test flux(T, 1) == QN(0)\n    @test flux(T, 2) == QN(0)\n    @test flux(T, 3) == QN(1)\n    @test flux(T, 4) == QN(1)\n    @test_throws BoundsError flux(T, 5)\n    @test_throws BoundsError flux(T, 0)\n    # Test fluxes of specific Blocks\n    @test flux(T, Block(1)) == QN(0)\n    @test flux(T, Block(2)) == QN(1)\n    @test_throws BoundsError flux(T, Block(0))\n    @test_throws BoundsError flux(T, Block(3))\n  end\n\n  @testset \"trace (tr)\" begin\n    si = [QN(0) => 1, QN(1) => 2, QN(2) => 3]\n    sj = [QN(0) => 2, QN(1) => 3, QN(2) => 4]\n    sk = [QN(0) => 3, QN(1) => 4, QN(2) => 5]\n    sl = [QN(0) => 2]\n    i, j, k, l = Index.((si, sj, sk, sl), (\"i\", \"j\", \"k\", \"l\"))\n    T = random_itensor(dag(j), k', i', dag(k), j', dag(i))\n    trT1 = tr(T)\n    trT2 = (T * δ(i, dag(i)') * δ(j, dag(j)') * δ(k, dag(k)'))[]\n    @test trT1 ≈ trT2\n\n    T = random_itensor(dag(j), k', i', l, dag(k), j', dag(i))\n    trT1 = tr(T)\n    trT2 = T * δ(i, dag(i)') * δ(j, dag(j)') * δ(k, dag(k)')\n    @test trT1 ≈ trT2\n  end\n\n  @testset \"QN ITensor Array constructor view behavior\" begin\n    d = 2\n    i = Index([QN(0) => d ÷ 2, QN(1) => d ÷ 2])\n\n    # no view\n    A = diagm(randn(Float64, d))\n    T = ITensor(A, i', dag(i); tol=1e-12)\n    @test storage(T) isa NDTensors.BlockSparse{Float64}\n    A[1, 1] = 2.0\n    T[1, 1] ≠ 2.0\n\n    # no view\n    A = diagm(rand(Int, d))\n    T = ITensor(Int, A, i', dag(i); tol=1e-12)\n    @test storage(T) isa NDTensors.BlockSparse{Int}\n    A[1, 1] = 2\n    T[1, 1] ≠ 2\n\n    # no view\n    A = diagm(rand(Int, d))\n    T = ITensor(A, i', dag(i); tol=1e-12)\n    @test storage(T) isa NDTensors.BlockSparse{Float64}\n    A[1, 1] = 2\n    T[1, 1] ≠ 2\n\n    # no view\n    A = diagm(randn(Float64, d))\n    T = ITensor(A, i', dag(i); tol=1e-12)\n    @test storage(T) isa NDTensors.BlockSparse{Float64}\n    A[1, 1] = 2\n    T[1, 1] ≠ 2\n\n    # no view\n    A = diagm(rand(Int, d))\n    T = ITensor(Int, A, i', dag(i); tol=1e-12)\n    @test storage(T) isa NDTensors.BlockSparse{Int}\n    A[1, 1] = 2\n    T[1, 1] ≠ 2\n\n    # no view\n    A = diagm(rand(Int, d))\n    T = ITensor(A, i', dag(i); tol=1e-12)\n    @test storage(T) isa NDTensors.BlockSparse{Float64}\n    A[1, 1] = 2\n    T[1, 1] ≠ 2\n  end\n\n  @testset \"Constructor Leads to No Blocks\" begin\n    i = Index(QN(0) => 2, QN(1) => 3; tags=\"i\")\n    j = Index(QN(1) => 2, QN(2) => 1; tags=\"j\")\n    A = ITensor(i, j)\n    @test storage(A) isa NDTensors.EmptyStorage\n    @test_throws ErrorException ITensor(QN(0), i, j)\n  end\n\n  @testset \"ITensor iteration\" begin\n    i = Index([QN(0) => 1, QN(1) => 2], \"i\")\n    j = Index([QN(0) => 3, QN(1) => 4, QN(2) => 5], \"j\")\n\n    A = random_itensor(i, dag(j))\n    Is = eachindex(A)\n    @test length(Is) == dim(A)\n    sumA = 0.0\n    for I in Is\n      sumA += A[I]\n    end\n    @test sumA ≈ sum(ITensors.data(A))\n    sumA = 0.0\n    for a in A\n      sumA += a\n    end\n    @test sumA ≈ sum(A)\n  end\n\n  @testset \"Constructor (from Tuple)\" begin\n    i = Index([QN(0) => 1, QN(1) => 2], \"i\")\n    j = Index([QN(0) => 3, QN(1) => 4, QN(2) => 5], \"j\")\n\n    A = ITensor(QN(0), (i, dag(j)))\n\n    @test flux(A) == QN(0)\n    @test nnzblocks(A) == 2\n  end\n\n  @testset \"Constructor (no flux specified)\" begin\n    i = Index([QN(0) => 1, QN(1) => 2], \"i\")\n    j = Index([QN(0) => 3, QN(1) => 4, QN(2) => 5], \"j\")\n\n    A = ITensor(i, dag(j))\n\n    @test flux(A) === nothing\n    @test nnzblocks(A) == 0\n  end\n\n  @testset \"Constructor (Tuple, no flux specified)\" begin\n    i = Index([QN(0) => 1, QN(1) => 2], \"i\")\n    j = Index([QN(0) => 3, QN(1) => 4, QN(2) => 5], \"j\")\n\n    A = ITensor((i, dag(j)))\n\n    @test flux(A) === nothing\n    @test nnzblocks(A) == 0\n  end\n\n  @testset \"No indices getindex\" begin\n    T = ITensor(QN())\n    @test order(T) == 0\n    @test flux(T) == nothing\n    @test nnzblocks(T) == 1\n    @test T[] == 0\n\n    s = Index(QN(-1) => 1, QN(1) => 1)\n    A = ITensor(s, dag(s'))\n    B = ITensor(s', dag(s))\n    A[1, 1] = 1\n    B[2, 2] = 1\n    C = A * B\n    @test order(C) == 0\n    @test flux(C) == nothing\n    @test nnzblocks(C) == 0\n    @test C[] == 0\n  end\n\n  @testset \"Empty constructor\" begin\n    i = Index([QN(0) => 1, QN(1) => 2], \"i\")\n\n    A = ITensor(i, dag(i'))\n\n    @test nnzblocks(A) == 0\n    @test nnz(A) == 0\n    @test hasinds(A, i, i')\n    @test isnothing(flux(A))\n\n    A[i => 1, i' => 1] = 1.0\n\n    @test nnzblocks(A) == 1\n    @test nnz(A) == 1\n    @test flux(A) == QN(0)\n\n    A[i => 2, i' => 2] = 1.0\n\n    @test nnzblocks(A) == 2\n    @test nnz(A) == 5\n    @test flux(A) == QN(0)\n  end\n\n  @testset \"Check flux when setting elements\" begin\n    i = Index(QN(0) => 1, QN(1) => 1; tags=\"i\")\n    A = random_itensor(QN(0), i, dag(i'))\n    @test_throws ErrorException A[i => 1, i' => 2] = 1.0\n  end\n\n  @testset \"Random constructor\" begin\n    i = Index([QN(0) => 1, QN(1) => 2], \"i\")\n    j = Index([QN(0) => 3, QN(1) => 4, QN(2) => 5], \"j\")\n\n    A = random_itensor(QN(1), i, dag(j))\n\n    @test flux(A) == QN(1)\n    @test nnzblocks(A) == 1\n\n    B = random_itensor(i, dag(j))\n\n    @test flux(B) == QN()\n    @test nnzblocks(B) == 2\n\n    # Scalar algebra\n    C = 2 * B\n    @test C[1, 1] == 2 * B[1, 1]\n    @test flux(B) == QN()\n    @test flux(C) == QN()\n    @test nnzblocks(B) == 2\n    @test nnzblocks(C) == 2\n\n    C = B / 2\n    @test C[1, 1] == B[1, 1] / 2\n    @test flux(B) == QN()\n    @test flux(C) == QN()\n    @test nnzblocks(B) == 2\n    @test nnzblocks(C) == 2\n  end\n\n  @testset \"eltype promotion with scalar * and /\" begin\n    i = Index([QN(0) => 2, QN(1) => 3])\n    @test eltype(ITensor(1.0f0, i', dag(i)) * 2) === Float32\n    @test eltype(ITensor(1.0f0, i', dag(i)) .* 2) === Float32\n    @test eltype(ITensor(1.0f0, i', dag(i)) / 2) === Float32\n    @test eltype(ITensor(1.0f0, i', dag(i)) ./ 2) === Float32\n    @test eltype(ITensor(1.0f0, i', dag(i)) * 2.0f0) === Float32\n    @test eltype(ITensor(1.0f0, i', dag(i)) .* 2.0f0) === Float32\n    @test eltype(ITensor(1.0f0, i', dag(i)) / 2.0f0) === Float32\n    @test eltype(ITensor(1.0f0, i', dag(i)) ./ 2.0f0) === Float32\n    @test eltype(ITensor(1.0f0, i', dag(i)) * 2.0) === Float64\n    @test eltype(ITensor(1.0f0, i', dag(i)) .* 2.0) === Float64\n    @test eltype(ITensor(1.0f0, i', dag(i)) / 2.0) === Float64\n    @test eltype(ITensor(1.0f0, i', dag(i)) ./ 2.0) === Float64\n  end\n\n  @testset \"Complex Number Operations\" begin\n    i = Index([QN(0) => 1, QN(1) => 2], \"i\")\n    j = Index([QN(0) => 3, QN(1) => 4, QN(2) => 5], \"j\")\n\n    A = random_itensor(ComplexF64, QN(0), i, dag(j))\n\n    @test flux(A) == QN(0)\n    @test nnzblocks(A) == 2\n\n    rA = real(A)\n    iA = imag(A)\n    @test nnzblocks(rA) == nnzblocks(A)\n    @test nnzblocks(iA) == nnzblocks(A)\n    @test norm(rA + 1im * iA - A) < 1E-8\n    @test eltype(rA) == Float64\n    @test eltype(iA) == Float64\n\n    cA = conj(A)\n    @test eltype(cA) == ComplexF64\n    @test norm(cA) ≈ norm(A)\n\n    B = random_itensor(Float64, QN(0), i, dag(j))\n\n    cB = conj(B)\n    @test eltype(cB) == Float64\n    @test norm(cB) ≈ norm(B)\n  end\n\n  @testset \"QN onehot\" begin\n    i = Index(QN(0) => 2, QN(1) => 2; tags=\"i\")\n\n    T = onehot(i => 1)\n    @test T[i => 1] ≈ 1.0\n    @test T[i => 2] ≈ 0.0\n    @test T[i => 3] ≈ 0.0\n    @test T[i => 4] ≈ 0.0\n\n    T = onehot(i => 2)\n    @test T[i => 1] ≈ 0.0\n    @test T[i => 2] ≈ 1.0\n    @test T[i => 3] ≈ 0.0\n    @test T[i => 4] ≈ 0.0\n  end\n\n  @testset \"setindex!\" begin\n    @testset \"Test 1\" begin\n      s1 = Index([QN(\"N\", 0, -1) => 1, QN(\"N\", 1, -1) => 1], \"s1\")\n      s2 = Index([QN(\"N\", 0, -1) => 1, QN(\"N\", 1, -1) => 1], \"s2\")\n      A = ITensor(s1, s2)\n\n      @test nnzblocks(A) == 0\n      @test nnz(A) == 0\n      @test hasinds(A, s1, s2)\n      @test isnothing(flux(A))\n\n      A[2, 1] = 1.0 / sqrt(2)\n\n      @test nnzblocks(A) == 1\n      @test nnz(A) == 1\n      @test A[s1 => 2, s2 => 1] ≈ 1.0 / sqrt(2)\n      @test flux(A) == QN(\"N\", 1, -1)\n\n      A[1, 2] = 1.0 / sqrt(2)\n\n      @test nnzblocks(A) == 2\n      @test nnz(A) == 2\n      @test A[s1 => 2, s2 => 1] ≈ 1.0 / sqrt(2)\n      @test A[s1 => 1, s2 => 2] ≈ 1.0 / sqrt(2)\n      @test flux(A) == QN(\"N\", 1, -1)\n    end\n\n    @testset \"Test 2\" begin\n      s1 = Index([QN(\"N\", 0, -1) => 1, QN(\"N\", 1, -1) => 1], \"s1\")\n      s2 = Index([QN(\"N\", 0, -1) => 1, QN(\"N\", 1, -1) => 1], \"s2\")\n      A = ITensor(s1, s2)\n\n      @test nnzblocks(A) == 0\n      @test nnz(A) == 0\n      @test hasinds(A, s1, s2)\n      @test isnothing(flux(A))\n\n      A[1, 2] = 1.0 / sqrt(2)\n\n      @test nnzblocks(A) == 1\n      @test nnz(A) == 1\n      @test A[s1 => 1, s2 => 2] ≈ 1.0 / sqrt(2)\n      @test flux(A) == QN(\"N\", 1, -1)\n\n      A[2, 1] = 1.0 / sqrt(2)\n\n      @test nnzblocks(A) == 2\n      @test nnz(A) == 2\n      @test A[s1 => 2, s2 => 1] ≈ 1.0 / sqrt(2)\n      @test A[s1 => 1, s2 => 2] ≈ 1.0 / sqrt(2)\n      @test flux(A) == QN(\"N\", 1, -1)\n    end\n  end\n\n  @testset \"Multiply by scalar\" begin",
+      "metadata": {
+        "section_title": "Lines 1-500",
+        "section_id": "lines_0_500",
+        "source_file": "test\\base\\test_qnitensor.jl",
+        "package": "itensors"
+      },
+      "score": 0.5646122019380829,
+      "original_score": 0.5267523934109597,
+      "vector_score": 0.5267523934109597,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "siteinds"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 110,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      }
+    }
+  }
+}

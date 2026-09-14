@@ -1,0 +1,129 @@
+{
+  "query": "netket graph and lattice setup for spin 1/2 hamiltonian",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_3_3__0",
+      "text": "## 1. Defining the Hamiltonian#\nNetKet covers quite a few standard Hamiltonians and lattices, so let’s use this to quickly define the antiferromagnetic Heisenberg chain.\nFor the moment we assume \\(L=22\\) and simply define a chain lattice in this way (using periodic boundary conditions for now).\n```code\n# Define a 1d chain\nL\n=\n22\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n1\n,\npbc\n=\nTrue\n)\n```\nNext, we need to define the Hilbert space on this graph.\nWe have here spin-half degrees of freedom, and as we know that the ground-state sits in the zero magnetization sector, we can already impose this as a constraint in the Hilbert space.\nThis is not mandatory, but will nicely speeds things up in the following.\n```code\n# Define the Hilbert space based on this graph\n# We impose to have a fixed total magnetization of zero\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n0.5\n,\ntotal_sz\n=\n0\n,\nN\n=\ng\n.\nn_nodes\n)\n```\nThe final element of the triptych is of course the Hamiltonian acting in this Hilbert space, which in our case in already defined in NetKet.\nNote that the NetKet Hamiltonian uses Pauli Matrices (if you prefer to work with spin- \\(1/2\\) operators, it’s pretty trivial to define your own custom Hamiltonian, as covered in another tutorial)\n```code\n# calling the Heisenberg Hamiltonian\nha\n=\nnk\n.\noperator\n.\nHeisenberg\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n)\n```",
+      "metadata": {
+        "section_title": "1. Defining the Hamiltonian#",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "package": "netket",
+        "section_id": "sec_3"
+      },
+      "score": 0.8802062334418732,
+      "original_score": 0.7946392573289255,
+      "vector_score": 0.8756719317474522,
+      "bm25_score": 0.47050855965481864,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "netket",
+        "graph",
+        "lattice",
+        "spin",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.8333333333333334,
+      "is_html": true
+    },
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_3_3__0",
+      "text": "## 1) Defining a Custom Hamiltonian#\nThe first thing to do is to define the graph (lattice) on which to specify the Hamiltonian. Here we would like to build a one-dimensional graph with both nearest and next nearest neighbour bonds. The graph is created in the nk.graph.CustomGraph class. To initialise the class we simply provide a list of edges in the [[site_i, site_j, edge_color], ...]\n```code\n# Couplings J1 and J2\nJ\n=\n[\n1\n,\n0.2\n]\nL\n=\n14\n```\n```code\n# Define custom graph\nedge_colors\n=\n[]\nfor\ni\nin\nrange\n(\nL\n):\nedge_colors\n.\nappend\n([\ni\n,\n(\ni\n+\n1\n)\n%\nL\n,\n1\n])\nedge_colors\n.\nappend\n([\ni\n,\n(\ni\n+\n2\n)\n%\nL\n,\n2\n])\n# Define the netket graph object\ng\n=\nnk\n.\ngraph\n.\nGraph\n(\nedges\n=\nedge_colors\n)\n```\nWe specify a different color for each type of bond so as to define a different operator for each of them.\nNext, we define the relevant bond operators.\n```code\n# Sigma^z*Sigma^z interactions\nsigmaz\n=\n[[\n1\n,\n0\n],\n[\n0\n,\n-\n1\n]]\nmszsz\n=\nnp\n.\nkron\n(\nsigmaz\n,\nsigmaz\n)\n# Exchange interactions\nexchange\n=\nnp\n.\nasarray\n([[\n0\n,\n0\n,\n0\n,\n0\n],\n[\n0\n,\n0\n,\n2\n,\n0\n],\n[\n0\n,\n2\n,\n0\n,\n0\n],\n[\n0\n,\n0\n,\n0\n,\n0\n]])\nbond_operator\n=\n[\n(\nJ\n[\n0\n]\n*\nmszsz\n)\n.\ntolist\n(),\n(\nJ\n[\n1\n]\n*\nmszsz\n)\n.\ntolist\n(),\n(\n-\nJ\n[\n0\n]\n*\nexchange\n)\n.\ntolist\n(),\n(\nJ\n[\n1\n]\n*\nexchange\n)\n.\ntolist\n(),\n]\nbond_color\n=\n[\n1\n,\n2\n,\n1\n,\n2\n]\n```\nSide Remark : Notice the minus sign in front of the exchange. This is simply a basis rotation corresponding to the Marshall sign rule (as an exercise, change the sign of this exchange and observe that the exact diagonalization results in Section 6 do not change). The goal of this basis rotation is to speed up the convergence of the Monte Carlo simulations of the wave-function (by providing a good variational sign structure to start with), but in principle the converged results should be identical in both bases. Note further that this sign change is useful at low frustration (such as here \\(J_2=0.2\\) ), but may actually be not optimal at stronger frustration. As",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html",
+        "section_id": "sec_3",
+        "section_title": "1) Defining a Custom Hamiltonian#",
+        "package": "netket"
+      },
+      "score": 0.8766666666666667,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "graph",
+        "lattice",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_1_1__0",
+      "text": "## Contents\nThe goal of this tutorial series is to guide you through writing a simple VMC code from (almost) scratch to compute the ground-state of a paradigmatic spin model: the transverse-field Ising model in 2 dimensions.\nIn this first tutorial, we will focus on:\nUnderstanding NetKet’s graph and operator system\nUnderstanding NetKet’s graph and operator system\nDefining Hamiltonians using building blocks\nDefining Hamiltonians using building blocks\nWorking with different operator formats\nWorking with different operator formats\nValidating our implementation with exact diagonalization\nValidating our implementation with exact diagonalization\nThe hamiltonian we will study is the transverse-field Ising model in 2 dimensions:\nIn the following we assume periodic boundary conditions with \\(h=1\\) and \\(J=1\\) .\nNote\nIf you are executing this notebook on Colab , you will need to install NetKet.\nYou can do so by uncommenting and running the following cell.\nKeep in mind that this notebook was designed for NetKet version 3.9.1 , which requires Python >=3.8.\n```code\n# %pip install --quiet netket\n```\nPlease verify that you are running on the correct version of NetKet:\n```code\nimport\nplatform\nimport\nnetket\nas\nnk\nprint\n(\n\"Python version (requires >=3.9)\"\n,\nplatform\n.\npython_version\n())\nprint\n(\n\"NetKet version (requires >=3.9.1)\"\n,\nnk\n.\n__version__\n)\n```\n```code\nPython version (requires >=3.9) 3.12.11\nNetKet version (requires >=3.9.1) 3.19.dev26+gd94cf4597.d20250713\n```\nShow code cell content\nHide code cell content\n```code\n# Import necessary libraries\nimport\nnetket\nas\nnk\nimport\nnumpy\nas\nnp\n```",
+      "metadata": {
+        "section_id": "sec_1",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "section_title": "Contents"
+      },
+      "score": 0.8118535291828821,
+      "original_score": 0.6948976148911602,
+      "vector_score": 0.8686220186139502,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "graph",
+        "spin",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "symmetry_tutorial__b193a05ba167aa16fb4ac01ff2376452__sec_2_2__0",
+      "text": "## Definining the lattice a and computational basis (Hilbert space)#\nFirst, we need to define a square lattice. This is done using the Square class. For this tutorial, we will pick \\(L=4\\) .\nThen, we need to define the Hilbert space on which this model is defined. The relevant class here is Spin .\nFinally, we will construct the Hamiltonian of this system. NetKet has built in Hamiltonians.\n```code\nimport\nnetket\nas\nnk\nimport\nnumpy\nas\nnp\nimport\njax\nseed\n=\njax\n.\nrandom\n.\nPRNGKey\n(\n1234\n)\n# For reproducibility\n```\n```code\n#define the square lattice\nsquare_lattice\n=\nnk\n.\ngraph\n.\nSquare\n(\nlength\n=\n4\n,\npbc\n=\nTrue\n)\n# 4x4 square lattice with periodic boundary conditions\n# Hilbert space\nhilbert\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n0.5\n,\nN\n=\nsquare_lattice\n.\nn_nodes\n)\n#16 spin 1/2 particles\nH\n=\nnk\n.\noperator\n.\nHeisenberg\n(\nhilbert\n=\nhilbert\n,\ngraph\n=\nsquare_lattice\n,\nJ\n=\n1.0\n,\nsign_rule\n=\nFalse\n)\n```\nWe can investigate the lattice by using the draw() method.\n```code\nsquare_lattice\n.\ndraw\n()\n```\n```code\n<Axes: title={'center': '2D Lattice (Distance Order: 1)'}, xlabel='X', ylabel='Y'>\n```",
+      "metadata": {
+        "section_title": "Definining the lattice a and computational basis (Hilbert space)#",
+        "section_id": "sec_2",
+        "source_file": "docs\\_build\\html\\tutorials\\symmetry_tutorial.html",
+        "package": "netket"
+      },
+      "score": 0.8056875935779477,
+      "original_score": 0.666893017562196,
+      "vector_score": 0.6749296370887463,
+      "bm25_score": 0.6347465394559951,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "netket",
+        "graph",
+        "lattice",
+        "spin",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.8333333333333334,
+      "is_html": true
+    },
+    {
+      "id": "gs-gcnn-honeycomb__211379d69213be55c6fdfefcaa402884__sec_7_7__0",
+      "text": "## Simulating A Larger Lattice#\nLets see how the GCNN does on a larger lattice that cannot be simulated with exact diagonalization. We’ll do a \\(6 \\times 6\\) lattice which has \\(72\\) sites. We need to redefine a few things:\n```code\n# Redefine bigger graph\ndimensions\n=\n[\n6\n,\n6\n]\n# Define the graph\ngraph\n=\nnk\n.\ngraph\n.\nLattice\n(\nbasis_vectors\n=\nbasis_vectors\n,\natoms_coord\n=\natom_positions\n,\nextent\n=\ndimensions\n)\n# Redefine the Hilbert/Hamiltonian for larger lattice space\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\ngraph\n.\nn_nodes\n,\ntotal_sz\n=\n0\n)\nha\n=\nnk\n.\noperator\n.\nHeisenberg\n(\nhilbert\n=\nhi\n,\ngraph\n=\ngraph\n,\nsign_rule\n=\nTrue\n)\n# Compute the symmetries for the bigger graph\nsymmetries\n=\ngraph\n.\nautomorphisms\n()\nprint\n(\nlen\n(\nsymmetries\n))\n# Redefine everything on bigger graph\nma\n=\nnk\n.\nmodels\n.\nGCNN\n(\nsymmetries\n=\nsymmetries\n,\nlayers\n=\nnum_layers\n,\nfeatures\n=\nfeature_dims\n)\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n=\nhi\n,\ngraph\n=\ngraph\n,\nd_max\n=\n2\n)\nvstate\n=\nnk\n.\nvariational\n.\nMCState\n(\nsampler\n=\nsa\n,\nmodel\n=\nma\n,\nn_samples\n=\n100\n,\nn_discard_per_chain\n=\n100\n)\ngs\n=\nnk\n.\ndriver\n.\nVMC\n(\nha\n,\nop\n,\nsr\n=\nsr\n,\nvariational_state\n=\nvstate\n)\n```\n```code\n432\n```\nLooks like we have no extra symmetries this time, since \\(6 \\times 6 \\times 12 = 432\\) . Let’s run this model for 100 iterations. You will see that we quickly get close  to the ground state. This takes 15 minutes on a P100 GPU\n```code\nenergy\n=\n[]\nvariance\n=\n[]\ngs\n.\nrun\n(\nn_iter\n=\n100\n,\nout\n=\n\"out\"\n)\ndata\n=\njson\n.\nload\n(\nopen\n(\n\"out.log\"\n))\nfor\nen\nin\ndata\n[\n\"Energy\"\n][\n\"Mean\"\n]:\nenergy\n.\nappend\n(\nen\n)\nfor\nvar\nin\ndata\n[\n\"Energy\"\n][\n\"Variance\"\n]:\nvariance\n.\nappend\n(\nvar\n)\n```\n```code\n100%|██████████| 100/100 [14:53<00:00",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-gcnn-honeycomb.html",
+        "section_title": "Simulating A Larger Lattice#",
+        "section_id": "sec_7",
+        "package": "netket"
+      },
+      "score": 0.7961784583015061,
+      "original_score": 0.6694785810294694,
+      "vector_score": 0.7564542122392696,
+      "bm25_score": 0.3215760561902685,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "graph",
+        "lattice",
+        "spin",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 53,
+    "final_results_count": 5
+  }
+}

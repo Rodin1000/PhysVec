@@ -1,0 +1,106 @@
+{
+  "query": "Best practices for spin0.5-tVMC effector implementation",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-gcnn-honeycomb__211379d69213be55c6fdfefcaa402884__sec_5_5__0",
+      "text": "## Variational Monte Carlo#\nIn order to perform VMC we need to define a sampler and an optimizer. We sample using Metropolis-Hastings, which uses the exchange rule to propose new states. The exchange rule swaps the spin of two neighbouring sites, keeping the magnetization fixed (in this case, 0). We optimize using stochastic reconfiguration, which uses curvature information to find the best direction of descent.\n```code\n# Metropolis-Hastings with two spins flipped that are at most second nearest neighbors\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n=\nhi\n,\ngraph\n=\ngraph\n,\nd_max\n=\n2\n)\n# Stochastic reconfiguration\nop\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n1e-2\n)\nsr\n=\nnk\n.\noptimizer\n.\nSR\n(\ndiag_shift\n=\n0.01\n)\n# Define a variational state so we can keep the parameters if we like\nvstate\n=\nnk\n.\nvariational\n.\nMCState\n(\nsampler\n=\nsa\n,\nmodel\n=\nma\n,\nn_samples\n=\n100\n)\n# Define a driver that performs VMC\ngs\n=\nnk\n.\ndriver\n.\nVMC\n(\nha\n,\nop\n,\nsr\n=\nsr\n,\nvariational_state\n=\nvstate\n)\n```\nLets start by running for 100 iterations. This took about 15 seconds per iteration on my CPU and about 1 second per iteration on the Tesla P100 GPU (If you’re using the free version of Colab you may get a Tesla K80 which is slightly slower). GPUs are fast! As you’ll see later, the speedup is even more pronounced on larger lattices.\n```code\n# Run the optimization\ngs\n.\nrun\n(\nn_iter\n=\n100\n,\nout\n=\n\"out\"\n)\n```\n```code\n100%|██████████| 100/100 [01:06<00:00,  1.51it/s, Energy=-40.471 ± 0.046 [σ²=0.238, R̂=0.9744]]\n```\n```code\n(<netket.logging.json_log.JsonLog at 0x7fea898371d0>,)\n```\nThis should get us under 0.1% error. Lets see how the energy evolves as we train.\n```code\n# Get data from log and\nenergy\n=\n[]\ndata\n=\njson\n.\nload\n(\nopen\n(\n\"out.log\"\n))\nfor\nen\nin\ndata\n[\n\"Energy\"\n][\n\"Mean\"\n]:\nenergy\n.\nappend\n(\nen\n)\n# plot the energy during the optimization\nplt\n.\nxlabel\n(\n\"Number of Iterations\"\n)\nplt\n.\nylabel\n(\n\"Energy\"\n)\nplt\n.\nplot\n(\nenergy\n)\n",
+      "metadata": {
+        "section_title": "Variational Monte Carlo#",
+        "package": "netket",
+        "section_id": "sec_5",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-gcnn-honeycomb.html"
+      },
+      "score": 0.8566666666666667,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "best"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "netket.errors.InsufficientSamplesForSRWarning__318015a84f58aaee2dd77413e41cdde8__sec_3_3__0",
+      "text": "## Recommended solution#\nSwitch to the kernel/minSR formulation which uses the Neural Tangent Kernel (NTK):\nThis formulation inverts a \\(N_s \\times N_s\\) matrix instead of \\(N_p \\times N_p\\) ,\nwhich is much more efficient and stable when \\(N_s < N_p\\) .\nUse :class:`netket.driver.VMC_SR` instead of :class:`netket.driver.VMC` with SR.\nThe VMC_SR driver automatically chooses the optimal formulation and provides the same\nmathematical result but with better performance and stability.\nReferences\nThe kernel trick for SR was introduced by Chen & Heyl and Rende et al. .\nThe kernel trick for SR was introduced by Chen & Heyl and Rende et al. .\nFor a comprehensive discussion see the netket.driver.VMC_SR documentation.\nFor a comprehensive discussion see the netket.driver.VMC_SR documentation.",
+      "metadata": {
+        "section_id": "sec_3",
+        "source_file": "docs\\_build\\html\\api\\_generated\\errors\\netket.errors.InsufficientSamplesForSRWarning.html",
+        "package": "netket",
+        "section_title": "Recommended solution#"
+      },
+      "score": 0.689239169783999,
+      "original_score": 0.5856522263786654,
+      "vector_score": 0.7320652829733317,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "netket.driver.VMC_SR__987c2ac7b75e6e840301d1c6434cfa22__sec_5_5__0",
+      "text": "## Implementation details#\nThe kernel-trick/NTK based implementation can run with both a direct calculation of the jacobian\n( on_the_fly=False ) or with a lazy evaluation of the NTK ( on_the_fly=True ). The latter is more\ncomputationally efficient for networks that reuse the parameters many times for every forward pass\n(convolutions, attention layers, but not dense layers…) and generally uses less memory.\nHowever, the on the fly implementation relies on some JAX compiler behaviour, so it might at times\nhave worse performance. We suggest you check on your specific model. For a more detailed explanation\nof the on-the-fly implementation of the NTK, we refer to Novak et Al 2022 .\nThe algorithm netket uses is the layer-wise jacobian contraction method (sec 3.2) of the manuscript.\nThe default choice is to use the on_the_fly=True mode.\nReferences\nStochastic Reconfiguration was originally introduced in the QMC field by Sorella .\nThe method was later shown to be equivalent to the Natural Gradient Descent method introduced by Amari for the Fubini-Study metric.\nStochastic Reconfiguration was originally introduced in the QMC field by Sorella .\nThe method was later shown to be equivalent to the Natural Gradient Descent method introduced by Amari for the Fubini-Study metric.\nThe kernel trick which makes NGD/SR feasible in the large-parameter count limit was originally introduced\nto the field of NQS by Chen & Heyl under the name of minSR . Rende & Al proposed a simpler derivation in terms of the Kernel trick. It’s interesting to note that those tricks were first mentioned by Ren & Goldfarb in the ML community.\nThe kernel trick which makes NGD/SR feasible in the large-parameter count limit was originally introduced\nto the field of NQS by Chen & Heyl under the name of minSR . Rende & Al proposed a simpler derivation in terms of the Kernel trick.\nIt’s interesting to note that those tricks were first mentioned by Ren & Goldfarb in the ML community.\nWhen using Momentum you should cite G.Goldshlager et Al. (2024) .\nWhen using Momentum you should cite G.Goldshlager et Al. (2024) .\nInitialize the driver with the given arguments.\nWarning\nThe optimizer should be an instance of optax.sgd . Other optimizers, while they might work,\nwill not make mathematical sense in the context of the SR/NGD optimization.\nhamiltonian ( AbstractOperator ) – The Hamiltonian of which the ground-state is to be found.\nhamiltonian ( AbstractOperator ) – The Hamiltonian of which the ground-state is to be found.\noptimizer ( Any ) – The optimizer to use for the parameter updates. To perform proper\nSR/NGD optimization this should be an instance of optax.sgd() , but can be\nany other optimizer",
+      "metadata": {
+        "section_title": "Implementation details#",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\_generated\\driver\\netket.driver.VMC_SR.html",
+        "section_id": "sec_5"
+      },
+      "score": 0.6536516747401266,
+      "original_score": 0.5167232670792464,
+      "vector_score": 0.645904083849058,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "implementation"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "drivers__b3e34d56ed68515a7a2c041c3ee97ace__sec_3_3__0",
+      "text": "## Concrete drivers#\nThose are the optimization drivers already implemented in Netket.\nRegarding VMC (ground-state optimization), we reccomend to use VMC_SR instead of the normal VMC in most cases.\nVMC\nEnergy minimization using Variational Monte Carlo (VMC).\nVMC_SR\nEnergy minimization using Variational Monte Carlo (VMC) and Stochastic Reconfiguration/Natural Gradient Descent .\nSteadyState\nSteady-state driver minimizing L^†L.",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_3",
+        "section_title": "Concrete drivers#",
+        "source_file": "docs\\_build\\html\\api\\drivers.html"
+      },
+      "score": 0.650593011429261,
+      "original_score": 0.5341240152390146,
+      "vector_score": 0.6676550190487683,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "api__8b60d0ae13135a81361cb5bb4f065619__sec_3_3__0",
+      "text": "## Default drivers#\nVMC\nEnergy minimization using Variational Monte Carlo (VMC).\nSteadyState\nSteady-state driver minimizing L^†L.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\api.html",
+        "section_title": "Default drivers#",
+        "package": "netket",
+        "section_id": "sec_3"
+      },
+      "score": 0.5679635918564361,
+      "original_score": 0.4239514558085815,
+      "vector_score": 0.5299393197607268,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 60,
+    "final_results_count": 5
+  }
+}

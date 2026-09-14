@@ -1,0 +1,102 @@
+{
+  "query": "Fix RK4 dt argument error in spin0.5-tVMC with nnwf",
+  "package": "netket",
+  "results": [
+    {
+      "id": "netket.errors.InsufficientSamplesForSRWarning__318015a84f58aaee2dd77413e41cdde8__sec_3_3__0",
+      "text": "## Recommended solution#\nSwitch to the kernel/minSR formulation which uses the Neural Tangent Kernel (NTK):\nThis formulation inverts a \\(N_s \\times N_s\\) matrix instead of \\(N_p \\times N_p\\) ,\nwhich is much more efficient and stable when \\(N_s < N_p\\) .\nUse :class:`netket.driver.VMC_SR` instead of :class:`netket.driver.VMC` with SR.\nThe VMC_SR driver automatically chooses the optimal formulation and provides the same\nmathematical result but with better performance and stability.\nReferences\nThe kernel trick for SR was introduced by Chen & Heyl and Rende et al. .\nThe kernel trick for SR was introduced by Chen & Heyl and Rende et al. .\nFor a comprehensive discussion see the netket.driver.VMC_SR documentation.\nFor a comprehensive discussion see the netket.driver.VMC_SR documentation.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\errors\\netket.errors.InsufficientSamplesForSRWarning.html",
+        "package": "netket",
+        "section_title": "Recommended solution#",
+        "section_id": "sec_3"
+      },
+      "score": 0.8500000000000001,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "changelog__775627bff97fcf0367c7035d3e792e5f__sec_39_39__1",
+      "text": ") #1069\nIn the statistics returned by netket.stats.statistics , the .R_hat diagnostic has been updated to be able to detect non-stationary chains via the split-Rhat diagnostic (see, e.g., Gelman et al., Bayesian Data Analysis , 3rd edition). This changes (generally increases) the numerical values of R_hat for existing simulations, but should strictly improve its capabilities to detect MCMC convergence failure. #1138\nIn the statistics returned by netket.stats.statistics , the .R_hat diagnostic has been updated to be able to detect non-stationary chains via the split-Rhat diagnostic (see, e.g., Gelman et al., Bayesian Data Analysis , 3rd edition). This changes (generally increases) the numerical values of R_hat for existing simulations, but should strictly improve its capabilities to detect MCMC convergence failure. #1138\nThe gradient obtained with VarState.expect_and_grad for models with real-parameters was off by a factor of \\( 1/2 \\) from the correct value. This has now been corrected. As a consequence, the correct gradient for real-parameter models is equal to the old times 2. If your model had real parameters you might need to change the learning rate and halve it. #1069\nThe gradient obtained with VarState.expect_and_grad for models with real-parameters was off by a factor of \\( 1/2 \\) from the correct value. This has now been corrected. As a consequence, the correct gradient for real-parameter models is equal to the old times 2. If your model had real parameters you might need to change the learning rate and halve it. #1069\nSupport for coloured edges in nk.graph.Grid , removed in #724 , is now restored. #1074\nSupport for coloured edges in nk.graph.Grid , removed in #724 , is now restored. #1074\nFixed bug that prevented calling .quantum_geometric_tensor on netket.vqs.ExactState . #1108\nFixed bug that prevented calling .quantum_geometric_tensor on netket.vqs.ExactState . #1108\nFixed bug where the gradient of C->C models (complex parameters, complex output) was computed incorrectly with nk.vqs.ExactState . #1110\nFixed bug where the gradient of C->C models (complex parameters, complex output) was computed incorrectly with nk.vqs.ExactState . #1110\nFixed bug where QGTJacobianDense.state and QGTJacobianPyTree.state would not correctly transform the starting point x0 if holomorphic=False . #1115\nFixed bug where QGTJacobianDense.state and QGTJacobianPyTree.state would not correctly transform the starting point x0 if holomorphic=False . #1115\nThe gradient of the expectation value obtained with VarState.expect_and_grad for SquaredOperator s was off by a factor of ",
+      "metadata": {
+        "section_title": "NetKet 3.4 (Special 🧱 edition)#",
+        "source_file": "docs\\_build\\html\\changelog.html",
+        "section_id": "sec_39",
+        "package": "netket"
+      },
+      "score": 0.7906388715202138,
+      "original_score": 0.7208518286936184,
+      "vector_score": 0.901064785867023,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "netket.driver.VMC_SR__987c2ac7b75e6e840301d1c6434cfa22__sec_5_5__5",
+      "text": " the Neural Tangent Kernel (NTK)\ninstead of the Quantum Geometric Tensor (QGT), aka switching between\nSR and minSR. (Defaults to None, which will automatically choose the best\nmethod)\nuse_ntk ( bool | None ) – Wheter to compute the updates using the Neural Tangent Kernel (NTK)\ninstead of the Quantum Geometric Tensor (QGT), aka switching between\nSR and minSR. (Defaults to None, which will automatically choose the best\nmethod)\nlinear_solver_fn ( Callable [ [ ndarray | Array , ndarray | Array ] , ndarray | Array ] | DeprecatedArg )\nlinear_solver_fn ( Callable [ [ ndarray | Array , ndarray | Array ] , ndarray | Array ] | DeprecatedArg )\nChunk size for backward-mode differentiation. This reduces memory pressure at a potential cost of higher computation time.\nIf computing the jacobian, the jacobian is computed in blocks of chunk_size_bwd rows.\nIf computing the NTK lazily, this is the number of rows of NTK evaluated in a single sweep.\nThe chunk size does not affect the result, up to numerical precision.\nThe diagonal shift \\(\\lambda\\) in the curvature matrix.\nThis can be a scalar or a schedule. If it is a schedule, it should be\na function that takes the current step as input and returns the value of the shift.\nPyTree to pass on information from the solver,e.g, the quadratic model.\nThe mode used to compute the jacobian of the variational state. Can be ‘real’ , ‘complex’ , or ‘onthefly’.\n‘real’ mode truncates imaginary part of the wavefunction, useful for real-valued wf with a sign.\n‘real’ mode truncates imaginary part of the wavefunction, useful for real-valued wf with a sign.\n‘complex’ is the general implementation that always works.\n‘complex’ is the general implementation that always works.\nonthefly uses a lazy implementation of the neural tangent kernel and does not compute the jacobian.\nonthefly uses a lazy implementation of the neural tangent kernel and does not compute the jacobian.\nThis internally uses netket.jax.jacobian() . See that function for a more complete documentation.\nFlag specifying whether to use momentum in the optimisation.\nIf True , the optimizer will use momentum to accumulate previous updates\nfollowing the SPRING optimizer from G.Goldshlager, N.Abrahamsen and L.Lin to accumulate previous updates for better approximation of the exact SR with\nno significant performance penalty.\nWhether to use a lazy implementation of th NTK or QGT which does not concretize the jacobian.\nThis usually requires less memory.\nThe optimizer used to update the parameters at every iteration.\nReturns the machine that is optimized by this driver.\nReturns a monotonic integer labelling all the steps performed by this driver.\nThis can be used, for example, to identify the line in a log file.\nWhether to use",
+      "metadata": {
+        "section_title": "Implementation details#",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\_generated\\driver\\netket.driver.VMC_SR.html",
+        "section_id": "sec_5"
+      },
+      "score": 0.7653771412841963,
+      "original_score": 0.6871695217122618,
+      "vector_score": 0.8589619021403272,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__F_7__1",
+      "text": "ket.experimental.models.RNN attribute)\n(netket.experimental.nn.rnn.GRU1DCell attribute)\n(netket.experimental.nn.rnn.LSTMCell attribute)\n(netket.experimental.nn.rnn.RNNCell attribute)\n(netket.models.ARNNConv1D attribute)\n(netket.models.ARNNConv2D attribute)\n(netket.models.ARNNDense attribute)\n(netket.models.FastARNNConv1D attribute)\n(netket.models.FastARNNConv2D attribute)\n(netket.nn.FastMaskedConv1D attribute)\n(netket.nn.FastMaskedConv2D attribute)\n(netket.nn.FastMaskedDense1D attribute)\n(netket.nn.MaskedConv1D attribute)\n(netket.nn.MaskedConv2D attribute)\n(netket.nn.MaskedDense1D attribute)\nfeatures_phi (netket.models.DeepSetMLP attribute) (netket.models.DeepSetRelDistance attribute) (netket.nn.blocks.DeepSetMLP attribute)\n(netket.models.DeepSetRelDistance attribute)\n(netket.nn.blocks.DeepSetMLP attribute)\nfeatures_rho (netket.models.DeepSetMLP attribute) (netket.models.DeepSetRelDistance attribute) (netket.nn.blocks.DeepSetMLP attribute)\n(netket.models.DeepSetRelDistance attribute)\n(netket.nn.blocks.DeepSetMLP attribute)\nFermiHubbardJax (class in netket.experimental.operator)\nFermionHopRule (class in netket.sampler.rules)\nFermionOperator2nd (in module netket.operator._fermion2nd)\nFermionOperator2ndBase (class in netket.operator._fermion2nd)\nFermionOperator2ndJax (class in netket.operator)\nFermionOperator2ndNumba (class in netket.operator)\nfield() (in module netket.utils.struct)\nFiniteGroup (class in netket.symmetry.group) (class in netket.utils.group)\n(class in netket.utils.group)\nFixedRule (class in netket.sampler.rules)\nflip_state() (in module netket.hilbert.random) (netket.utils.StaticRange method)\n(netket.utils.StaticRange method)\nflush() (netket.experimental.logging.HDF5Log method) (netket.logging.AbstractLog method) (netket.logging.JsonLog method) (netket.logging.RuntimeLog method) (netket.logging.StateLog method) (netket.logging.TensorBoardLog method)\n(netket.logging.AbstractLog method)\n(netket.logging.JsonLog method)\n(netket.logging.RuntimeLog method)\n(netket.logging.StateLog method)\n(netket.logging.TensorBoardLog method)\nFock (class in netket.hilbert)\nFreeSpace (class in netket.experimental.geometry)\nfrom_fermionoperator2nd() (netket.experimental.operator.FermiHubbardJax class method) (netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd class method) (netket.experimental.operator.ParticleNumber",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\genindex.html",
+        "section_id": "F",
+        "package": "netket",
+        "section_title": "F"
+      },
+      "score": 0.7166551213082957,
+      "original_score": 0.6222068284110609,
+      "vector_score": 0.7777585355138261,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__M_14__3",
+      "text": ".vqs.VariationalMixedState attribute)\n(netket.vqs.VariationalState attribute)\nmodule netket.symmetry.group.axial netket.symmetry.group.cubic netket.symmetry.group.icosa netket.symmetry.group.planar\nnetket.symmetry.group.axial\nnetket.symmetry.group.cubic\nnetket.symmetry.group.icosa\nnetket.symmetry.group.planar\nmodule (netket.nn.blocks.SymmExpSum attribute)\nmomentum (netket.driver.VMC_SR attribute) (netket.experimental.driver.Infidelity_SR attribute)\n(netket.experimental.driver.Infidelity_SR attribute)\nMomentum() (in module netket.optimizer)\nmomentum_irrep() (netket.graph.space_group.TranslationGroup method)\nmonitor (netket.callbacks.ConvergenceStopping attribute) (netket.callbacks.EarlyStopping attribute) (netket.callbacks.InvalidLossStopping attribute)\n(netket.callbacks.EarlyStopping attribute)\n(netket.callbacks.InvalidLossStopping attribute)\nMPDOOpen (class in netket.models.tensor_networks)\nMPDOPeriodic (class in netket.models.tensor_networks)\nMPSOpen (class in netket.models.tensor_networks)\nMPSPeriodic (class in netket.models.tensor_networks)\nmu (netket.operator.BoseHubbardJax attribute) (netket.operator.BoseHubbardNumba attribute)\n(netket.operator.BoseHubbardNumba attribute)\nMultipleRules (class in netket.sampler.rules)\nMultiSlater2nd (class in netket.experimental.models)\nmutable (netket.vqs.FullSumState attribute) (netket.vqs.MCMixedState attribute) (netket.vqs.MCState attribute) (netket.vqs.VariationalMixedState attribute) (netket.vqs.VariationalState attribute)\n(netket.vqs.MCMixedState attribute)\n(netket.vqs.MCState attribute)\n(netket.vqs.VariationalMixedState attribute)\n(netket.vqs.VariationalState attribute)",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\genindex.html",
+        "section_id": "M",
+        "section_title": "M",
+        "package": "netket"
+      },
+      "score": 0.7164144917338272,
+      "original_score": 0.6218859889784363,
+      "vector_score": 0.7773574862230453,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 58,
+    "final_results_count": 5
+  }
+}

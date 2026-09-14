@@ -1,0 +1,136 @@
+{
+  "query": "itensor electron hamiltonian function input parameters and return type requirements",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_3__3",
+      "text": " -1) => 1], \"sn\")\n\n      N1 = ITensor(s', dag(s))\n      N1[s' => 2, s => 2] = 1.0\n\n      N2 = ITensor(dag(s), s')\n      N2[s' => 2, s => 2] = 1.0\n\n      NN = N1 + N2\n      @test NN[s' => 2, s => 2] ≈ 2.0\n\n      NN = N1 + N1\n      @test NN[s' => 2, s => 2] ≈ 2.0\n\n      NN = N2 + N2\n      @test NN[s' => 2, s => 2] ≈ 2.0\n    end\n\n    @testset \"Wavefunction Tests\" begin\n      s = [Index([QN(\"N\", 0, -2) => 2, QN(\"N\", 1, -2) => 2], \"s$n\") for n in 1:4]\n\n      psi0 = ITensor(s...)\n\n      psi0[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] = 1111\n      psi0[s[1] => 3, s[2] => 3, s[3] => 1, s[4] => 1] = 3311\n      psi0[s[1] => 1, s[2] => 3, s[3] => 1, s[4] => 3] = 1313\n\n      psi1 = permute(psi0, s[2], s[1], s[3], s[4])\n      @test norm(psi1 - psi0) ≈ 0.0\n\n      @test psi0[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi1[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi0[s[2] => 1, s[1] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi1[s[2] => 1, s[1] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n\n      @test psi0[s[1] => 3, s[2] => 3, s[3] => 1,",
+      "metadata": {
+        "section_id": "part_3",
+        "package": "itensors",
+        "section_title": "test_fermions.jl",
+        "source_file": "test\\base\\test_fermions.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "2d_hubbard_conserve_particles__aad747f19b81de0756ace6c93b6ee664__full__0",
+      "text": "using ITensors, ITensorMPS\n\nfunction main(; Nx=6, Ny=3, U=4.0, t=1.0)\n  N = Nx * Ny\n\n  nsweeps = 10\n  maxdim = [100, 200, 400, 800, 1600]\n  cutoff = [1E-6]\n  noise = [1E-6, 1E-7, 1E-8, 0.0]\n\n  sites = siteinds(\"Electron\", N; conserve_qns=true)\n\n  lattice = square_lattice(Nx, Ny; yperiodic=true)\n\n  os = OpSum()\n  for b in lattice\n    os -= t, \"Cdagup\", b.s1, \"Cup\", b.s2\n    os -= t, \"Cdagup\", b.s2, \"Cup\", b.s1\n    os -= t, \"Cdagdn\", b.s1, \"Cdn\", b.s2\n    os -= t, \"Cdagdn\", b.s2, \"Cdn\", b.s1\n  end\n  for n in 1:N\n    os += U, \"Nupdn\", n\n  end\n  H = MPO(os, sites)\n\n  # Half filling\n  state = [isodd(n) ? \"Up\" : \"Dn\" for n in 1:N]\n\n  # Initialize wavefunction to a random MPS\n  # of bond-dimension 10 with same quantum\n  # numbers as `state`\n  psi0 = random_mps(sites, state)\n\n  energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, noise)\n  @show t, U\n  @show flux(psi)\n  @show maxlinkdim(psi)\n  @show energy\n\n  return nothing\nend\n\nmain()\n",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "2d_hubbard_conserve_particles.jl",
+        "source_file": "examples\\dmrg\\2d_hubbard_conserve_particles.jl",
+        "section_id": "full"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "electron",
+        "function",
+        "return"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__a66c72fb80b8de79ef95561260b92e23__h1_0_0__1",
+      "text": "]\n  cutoff = [1E-10]\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n  return\nend\n```\n**Steps of The Code**\nThe first two lines\n```@example siteinds; continued=true\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1\",N)\n```\ntells the function `siteinds` to make an array of ITensor [Index](https://docs.itensor.org/ITensors/stable/IndexType.html) objects which\nhave the properties of ``S=1`` spins. This means their dimension will be 3 and\nthey will carry the `\"S=1\"` tag, which will enable the next part of the code to know\nhow to make appropriate operators for them.\nTry printing out some of these indices to verify their properties:\n```@example siteinds\n@show sites[1]\n```\nThe next part of the code builds the Hamiltonian:\n```julia\nos = OpSum()\nfor j=1:N-1\n  os += \"Sz\",j,\"Sz\",j+1\n  os += 1/2,\"S+\",j,\"S-\",j+1\n  os += 1/2,\"S-\",j,\"S+\",j+1\nend\nH = MPO(os,sites)\n```\nAn `OpSum` is an object which accumulates Hamiltonian terms such as `\"Sz\",1,\"Sz\",2`\nso that they can be summed afterward into a matrix product operator (MPO) tensor network.\nThe line of code `H = MPO(os,sites)` constructs the Hamiltonian in the MPO format, with\nphysical indices given by the array `sites`.\nThe line\n```julia\npsi0 = random_mps(sites;linkdims=10)\n```\nconstructs an MPS `psi0` which has the physical indices `sites` and a bond dimension of 10.\nIt is made by a random quantum circuit that is reshaped into an MPS, so that it will have as generic and unbiased properties as an MPS of that size can have.\nThis choice can help prevent the DMRG calculation from getting stuck in a local minimum.\nThe lines\n```julia\nnsweeps = 5\nmaxdim = [10,20,100,100,200]\ncutoff = [1E-10]\n```\ndefine the number of DMRG sweeps (five) we will instruct the code to do, as well as the\nparameters that will control the speed and accuracy of the DMRG algorithm within\neach sweep. The array `maxdim` limits the maximum MPS bond dimension allowed during\neach sweep and `cutoff` defines the truncation error goal of each sweep (if fewer values are\nspecified than sweeps, the last value is used for all remaining sweeps).\nFinally the",
+      "metadata": {
+        "source_file": "docs\\src\\tutorials\\DMRG.md",
+        "package": "itensormps",
+        "section_id": "h1_0",
+        "section_title": "[DMRG Tutorial](@id dmrg_tutorial)"
+      },
+      "score": 0.9729793810221739,
+      "original_score": 0.9696018036499455,
+      "vector_score": 0.9302403415046919,
+      "bm25_score": 0.15744584858101454,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensor",
+        "hamiltonian",
+        "function",
+        "parameters",
+        "return"
+      ],
+      "match_ratio": 0.5555555555555556,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_10_10__0",
+      "text": "ITensor DMRG accepts additional MPS wavefunctions as a optional, extra argument.\nThese additional 'penalty states' are provided as an array of MPS just\nafter the Hamiltonian, like this:\n```julia\nenergy,psi3 = dmrg(H,[psi0,psi1,psi2],psi3_init;nsweeps,maxdim,cutoff)\n```\nHere the penalty states are `[psi0,psi1,psi2]`.\nWhen these are provided, the DMRG code minimizes the\nenergy of the current MPS while also reducing its overlap\n(inner product) with the previously provided MPS. If these overlaps become sufficiently small,\nthen the computed MPS is an excited state. So by finding the ground\nstate, then providing it to DMRG as a \"penalty state\" or previous state\none can compute the first excited state. Then providing both of these, one can\nget the second excited state, etc.\nA  keyword argument called `weight` can also be provided to\nthe `dmrg` function when penalizing overlaps to previous states. The\n`weight` parameter is multiplied by the overlap with the previous states,\nso sets the size of the penalty. It should be chosen at least as large\nas the (estimated) gap between the ground and first excited states.\nOtherwise the optimal value of the weight parameter is not so obvious,\nand it is best to try various weights during initial test calculations.\nNote that when the system has conserved quantum numbers, a superior way\nto find excited states can be to find ground states of quantum number (or symmetry)\nsectors other than the one containing the absolute ground state. In that\ncontext, the penalty method used below is a way to find higher excited states\nwithin the same quantum number sector.\n**Full Example code:**\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 20\n  sites = siteinds(\"S=1/2\",N)\n  h = 4.0\n  weight = 20*h # use a large weight",
+      "metadata": {
+        "section_id": "h2_10",
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "package": "itensormps",
+        "section_title": "Compute excited states with DMRG"
+      },
+      "score": 0.9189010554145248,
+      "original_score": 0.9131082736584195,
+      "vector_score": 0.9131082736584195,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensor",
+        "hamiltonian",
+        "function"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_1__1",
+      "text": ", \"Sz\") = ITensor ord=2\nDim 1: (dim=2|id=862|\"S=1/2,Site\")'\nDim 2: (dim=2|id=862|\"S=1/2,Site\")\nNDTensors.Dense{Float64,Array{Float64,1}}\n 2×2\n 0.5   0.0\n 0.0  -0.5\n\njulia> @show op(\"Sx\", s);\nop(s, \"Sx\") = ITensor ord=2\nDim 1: (dim=2|id=862|\"S=1/2,Site\")'\nDim 2: (dim=2|id=862|\"S=1/2,Site\")\nNDTensors.Dense{Float64,Array{Float64,1}}\n 2×2\n 0.0  0.5\n 0.5  0.0\n\njulia> @show op(\"Sy\", s);\nop(s, \"Sy\") = ITensor ord=2\nDim 1: (dim=2|id=862|\"S=1/2,Site\")'\nDim 2: (dim=2|id=862|\"S=1/2,Site\")\nNDTensors.Dense{Complex{Float64},Array{Complex{Float64},1}}\n 2×2\n 0.0 + 0.0im  -0.0 - 0.5im\n 0.0 + 0.5im   0.0 + 0.0im\n\njulia> s = siteind(\"Electron\")\n(dim=4|id=734|\"Electron,Site\")\n\njulia> @show op(\"Nup\", s);\nop(s, \"Nup\") = ITensor ord=2\nDim 1: (dim=4|id=734|\"Electron,Site\")'\nDim 2: (dim=4|id=734|\"Electron,Site\")\nNDTensors.Dense{Float64,Array{Float64,1}}\n 4×4\n 0.0  0.0  0.0  0.0\n 0.0  1.0  0.0  0.0\n 0.0  0.0  0.0  0.0\n 0.0  0.0  0.0  1.0\n```\n\nMany operators are available, for example:\n\n- `SiteType\"S=1/2\"`: `\"Sz\"`, `\"Sx\"`, `\"Sy\"`, `\"S+\"`, `\"S-\"`, ...\n- `SiteType\"Electron\"`: `\"Nup\"`, `\"Ndn\"`, `\"Nupdn\"`, `\"Ntot\"`, `\"C",
+      "metadata": {
+        "section_id": "part_1",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "package": "itensors",
+        "section_title": "sitetype.jl"
+      },
+      "score": 0.8624166372812107,
+      "original_score": 0.8560174111082437,
+      "vector_score": 0.7948385311713668,
+      "bm25_score": 0.24471551974750758,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "electron"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 104,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 49
+      }
+    }
+  }
+}

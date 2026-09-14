@@ -1,0 +1,128 @@
+{
+  "query": "How to create variational quantum state object 'vs' for spin0.5-FFNN in netket",
+  "packages": [
+    "netket"
+  ],
+  "results": [
+    {
+      "id": "custom_hilbert_constraints__3478f3f26a02da6418c1b5dc5da24d73__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "source_file": "docs\\advanced\\custom_hilbert_constraints.md",
+        "section_title": "Integration with Variational States",
+        "package": "netket",
+        "section_id": "h2_20"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "variational",
+        "netket"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "custom_hilbert_constraints__6b1a6a577a4f7295fb5d8a8ae5beefc7__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "section_id": "h2_20",
+        "section_title": "Integration with Variational States",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\_sources\\advanced\\custom_hilbert_constraints.md"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "variational",
+        "netket"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_5_5__0",
+      "text": "## 3) Variational Monte Carlo Optimisation#\nWe have now set up our model (Hamiltonian, Graph, Hilbert Space) and can proceed to optimise the variational ansatz we chose, namely the ffnn machine.\nTo setup the variational Monte Carlo optimisation tool, we have to provide a sampler nk.sampler and an optimizer nk.optimizer .\n```code\n# We shall use an exchange Sampler which preserves the global magnetization (as this is a conserved quantity in the model)\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n,\nd_max\n=\n2\n)\n# Construct the variational state\nvs\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nmodel\n,\nn_samples\n=\n1008\n)\n# We choose a basic, albeit important, Optimizer: the Stochastic Gradient Descent\nopt\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.01\n)\n# We can then specify a Variational Monte Carlo object, using the Hamiltonian, sampler and optimizers chosen.\n# Note that we also specify the method to learn the parameters of the wave-function: here we choose the efficient\n# Stochastic reconfiguration (Sr), here in an iterative setup\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nhamiltonian\n=\nop\n,\noptimizer\n=\nopt\n,\nvariational_state\n=\nvs\n,\ndiag_shift\n=\n0.01\n)\n```",
+      "metadata": {
+        "section_title": "3) Variational Monte Carlo Optimisation#",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html",
+        "package": "netket",
+        "section_id": "sec_5"
+      },
+      "score": 0.6930733145394079,
+      "original_score": 0.5278050992913969,
+      "vector_score": 0.32812380021193055,
+      "bm25_score": 0.7987251963178653,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "variational",
+        "state",
+        "object",
+        "ffnn"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "index__d0fafb4c3aae6226a48355272e87ed22__root_0__0",
+      "text": "Repository\nOpen issue\n.md\n.pdf\nTutorials on using symmetries in NetKet.\nEquivariant NQS: GCNN for Spin models\nSymmetries, Representations and Projectors for arbitrary NQS",
+      "metadata": {
+        "section_title": "ROOT",
+        "section_id": "root",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\symmetries\\index.html"
+      },
+      "score": 0.6536823895427112,
+      "original_score": 0.5223205373002913,
+      "vector_score": 0.5223205373002913,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.125,
+      "is_html": true
+    },
+    {
+      "id": "custom_hilbert_constraints__a202136a3fd70552ecbc1a6ad0f2024f__sec_6_6__0",
+      "text": "## Integration with Variational States#\nConstrained Hilbert spaces work seamlessly with all NetKet variational states:\n```code\n# Create constrained system\nhilbert\n=\nnk\n.\nhilbert\n.\nSpin\n(\n0.5\n,\nN\n=\n10\n,\nconstraint\n=\nSumConstraint\n(\n0\n))\n# Zero magnetization\ngraph\n=\nnk\n.\ngraph\n.\nChain\n(\n10\n)\nhamiltonian\n=\nnk\n.\noperator\n.\nIsing\n(\nhilbert\n,\ngraph\n,\nh\n=\n1.0\n)\n# Standard NetKet workflow\nmodel\n=\nnk\n.\nmodels\n.\nRBM\n(\nalpha\n=\n1\n)\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n,\ngraph\n)\n# Respects magnetization\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n)\n# Optimization works as usual\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\n0.01\n)\ndriver\n=\nnk\n.\ndriver\n.\nVMC\n(\nhamiltonian\n,\noptimizer\n)\ndriver\n.\nrun\n(\nvstate\n,\nn_iter\n=\n100\n)\n```",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\advanced\\custom_hilbert_constraints.html",
+        "package": "netket",
+        "section_id": "sec_6",
+        "section_title": "Integration with Variational States#"
+      },
+      "score": 0.6522910513086968,
+      "original_score": 0.48487563156843977,
+      "vector_score": 0.48487563156843977,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "create",
+        "variational",
+        "netket"
+      ],
+      "match_ratio": 0.375,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 30,
+    "total_bm25_results_count": 30,
+    "merged_results_count": 55,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "netket": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "query": "How to return a QuantumCircuit without transpilation, evolution, or measurement.",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "ecr__6f8096765b6a1826186cbc8f6553cbcc__part_2__2",
+      "text": ")\"\"\"\n        # pylint: disable=cyclic-import\n        from qiskit.circuit import QuantumCircuit\n\n        # global phase: 7π/4\n        #      ┌───┐      ┌───┐\n        # q_0: ┤ S ├───■──┤ X ├\n        #      ├───┴┐┌─┴─┐└───┘\n        # q_1: ┤ √X ├┤ X ├─────\n        #      └────┘└───┘\n\n        self.definition = QuantumCircuit._from_circuit_data(\n            StandardGate.ECR._get_definition(self.params), legacy_qubits=True\n        )\n\n    def inverse(self, annotated: bool = False):\n        \"\"\"Return inverse ECR gate (itself).\n\n        Args:\n            annotated: when set to ``True``, this is typically used to return an\n                :class:`.AnnotatedOperation` with an inverse modifier set instead of a concrete\n                :class:`.Gate`. However, for this class this argument is ignored as this gate\n                is self-inverse.\n\n        Returns:\n            ECRGate: inverse gate (self-inverse).\n        \"\"\"\n        return ECRGate()  # self-inverse\n\n    def __eq__(self, other):\n        return isinstance(other, ECRGate)\n",
+      "metadata": {
+        "section_title": "ecr.py",
+        "section_id": "part_2",
+        "package": "qiskit",
+        "source_file": "qiskit\\circuit\\library\\standard_gates\\ecr.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "return",
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "hartree_fock__973a80b2a7462da2917d3311e3e913f7__part_3__3",
+      "text": "_mapper,\n            )\n            self.qregs = [QuantumRegister(len(self._bitstr), name=\"q\")]\n\n    def _build(self) -> None:\n        \"\"\"\n        Construct the Hartree-Fock initial state given its parameters.\n        Returns:\n            QuantumCircuit: a quantum circuit preparing the Hartree-Fock\n            initial state given a number of spatial orbitals, number of particles and\n            a qubit mapper.\n        \"\"\"\n        if self._is_built:\n            return\n\n        super()._build()\n\n        # Construct the circuit for bitstring. Since this is defined as an initial state\n        # circuit its assumed that this is applied first to the qubits that are initialized to\n        # the zero state. Hence we just need to account for all True entries and set those.\n        if self._bitstr is not None:\n            for i, bit in enumerate(self._bitstr):\n                if bit:\n                    self.x(i)\n\n\ndef hartree_fock_bitstring_mapped(\n    num_spatial_orbitals: int,\n    num_particles: tuple[int, int],\n    qubit_mapper: QubitMapper,\n) -> list[bool]:\n    # pylint: disable=unused-argument\n    \"\"\"Compute the bitstring representing the mapped Hartree-Fock state for the specified system.\n\n    Args:\n        num_spatial_orbitals: The number of spatial orbitals, has a min. value of 1.\n        num_particles: The number of particles as a tuple (alpha, beta) containing the number of\n            alpha- and  beta-spin electrons, respectively.\n        qubit_mapper: A QubitMapper.\n\n    Returns:\n        The bitstring representing the mapped state of the Hartree-Fock state as array of bools.\n    \"\"\"\n    # get the bitstring encoding the Hartree Fock state\n    bitstr = hartree_fock_bitstring(num_spatial_orbitals, num_particles)\n\n    # encode the bitstring as a `FermionicOp`\n    bitstr_op = FermionicOp(\n        {\" \".join(f\"+_{idx}\" for idx, bit in enumerate(bitstr) if bit): 1.0},\n        num_spin_orbitals=2 * num_spatial_orbitals,\n    )\n\n    # map the `FermionicOp` to a qubit operator\n    qubit_op: SparsePauliOp\n    if isinstance(qubit_mapper, TaperedQubitMapper):\n        # To avoid checking commutativity, we call the two methods separately.\n        qubit_op = qubit_mapper.map_clifford(bitstr_op)\n        qubit_op = qubit_mapper.taper_clifford(qubit_op, check_commutes=False)\n    else:\n        qubit_op = qubit_mapper.map(bitstr_op)\n\n    # We check the mapped operator `x` part of the paulis because we want to have particles\n    # i.e. True,",
+      "metadata": {
+        "section_id": "part_3",
+        "package": "qiskit-nature",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\hartree_fock.py",
+        "section_title": "hartree_fock.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "return",
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "derive_circuit__aa510859f1519197f42934ac33ebb9e6__part_1__1",
+      "text": ".5j, derivative)]\n    if isinstance(gate, CRXGate):\n        proj1 = QuantumCircuit(gate.num_qubits)\n        proj1.rx(param, 1)\n        proj1.x(1)\n\n        proj2 = QuantumCircuit(gate.num_qubits)\n        proj2.z(0)\n        proj2.rx(param, 1)\n        proj2.x(1)\n\n        return [(-0.25j, proj1), (0.25j, proj2)]\n    if isinstance(gate, CRYGate):\n        proj1 = QuantumCircuit(gate.num_qubits)\n        proj1.ry(param, 1)\n        proj1.y(1)\n\n        proj2 = QuantumCircuit(gate.num_qubits)\n        proj2.z(0)\n        proj2.ry(param, 1)\n        proj2.y(1)\n\n        return [(-0.25j, proj1), (0.25j, proj2)]\n    if isinstance(gate, CRZGate):\n        proj1 = QuantumCircuit(gate.num_qubits)\n        proj1.rz(param, 1)\n        proj1.z(1)\n\n        proj2 = QuantumCircuit(gate.num_qubits)\n        proj2.z(0)\n        proj2.rz(param, 1)\n        proj2.z(1)\n\n        return [(-0.25j, proj1), (0.25j, proj2)]\n    raise NotImplementedError(\"Cannot implement gradient for\", gate)\n\n\ndef derive_circuit(\n    circuit: QuantumCircuit, parameter: Parameter, check: bool = True\n) -> Sequence[tuple[complex, QuantumCircuit]]:\n    \"\"\"Return the analytic gradient expression of the input circuit wrt. a single parameter.\n\n    Returns a list of ``(coeff, gradient_circuit)`` tuples, where the derivative of the circuit is\n    given by the sum of the gradient circuits multiplied by their coefficient.\n\n    For example, the circuit::\n\n           ┌───┐┌───────┐┌─────┐\n        q: ┤ H ├┤ Rx(x) ├┤ Sdg ├\n           └───┘└───────┘└─────┘\n\n    returns the coefficient `-0.5j` and the circuit equivalent to::\n\n           ┌───┐┌───────┐┌───┐┌─────┐\n        q: ┤ H ├┤ Rx(x) ├┤ X ├┤ Sdg ├\n           └───┘└───────┘└───┘└─────┘\n\n    as the derivative of `Rx(x)` is `-0.5j Rx(x) X`.\n\n    Args:\n        circuit: The quantum circuit to derive.\n        parameter: The parameter with respect to which",
+      "metadata": {
+        "section_title": "derive_circuit.py",
+        "source_file": "qiskit_algorithms\\gradients\\reverse\\derive_circuit.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_1"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "return",
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "ref_1q_clifford__c789f1dcb7b84d499f6bb16045764fab__part_1__1",
+      "text": " ClassicalRegister(1)\n        regs = (qr, cr)\n    else:\n        regs = (qr,)\n    # H\n    circuit = QuantumCircuit(*regs)\n    circuit.h(qr)\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n    return circuits\n\n\ndef h_gate_counts_nondeterministic(shots, hex_counts=True):\n    \"\"\"H-gate circuits reference counts.\"\"\"\n    targets = []\n    if hex_counts:\n        # H\n        targets.append({\"0x0\": shots / 2, \"0x1\": shots / 2})\n    else:\n        # H\n        targets.append({\"0\": shots / 2, \"1\": shots / 2})\n    return targets\n\n\ndef h_gate_statevector_nondeterministic():\n    \"\"\"H-gate circuits reference statevectors.\"\"\"\n    targets = []\n    # H\n    targets.append(np.array([1, 1]) / np.sqrt(2))\n    return targets\n\n\ndef h_gate_unitary_nondeterministic():\n    \"\"\"H-gate circuits reference unitaries.\"\"\"\n    targets = []\n    # HH=I\n    targets.append(np.array([[1, 1], [1, -1]]) / np.sqrt(2))\n    return targets\n\n\n# ==========================================================================\n# X-gate\n# ==========================================================================\n\n\ndef x_gate_circuits_deterministic(final_measure=True):\n    \"\"\"X-gate test circuits with deterministic counts.\"\"\"\n    circuits = []\n    qr = QuantumRegister(1)\n    if final_measure:\n        cr = ClassicalRegister(1)\n        regs = (qr, cr)\n    else:\n        regs = (qr,)\n\n    # X\n    circuit = QuantumCircuit(*regs)\n    circuit.x(qr)\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # XX = I\n    circuit = QuantumCircuit(*regs)\n    circuit.x(qr)\n    circuit.barrier(qr)\n    circuit.x(qr)\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # HXH=Z\n    circuit = QuantumCircuit(*regs)\n    circuit.h(qr)\n    circuit.barrier(qr)\n    circuit.x(qr)\n    circuit.barrier(qr)\n    circuit.h(qr)\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    return circuits\n\n\ndef x_gate_counts_deterministic(shots, hex_counts=True):\n    \"\"\"X-gate circuits reference counts.\"\"\"\n    targets = []\n    if hex_counts:\n        # X\n        targets.append({\"0x1\": shots})\n        # XX = I\n        targets.append({\"0x0\": shots})\n        # HXH=Z",
+      "metadata": {
+        "section_title": "ref_1q_clifford.py",
+        "section_id": "part_1",
+        "source_file": "test\\terra\\reference\\ref_1q_clifford.py",
+        "package": "qiskit-aer"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "return",
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_circuit__9bdeee009ef9b4f1bee76da0cabe69e6__part_2__2",
+      "text": "circuit], [{\"0x0\": 500, \"0x7\": 500}], delta=0.05 * shots)\n\n        qubits0 = QuantumRegister(1)\n        clbits1 = ClassicalRegister(1)\n        qubits1 = QuantumRegister(1)\n        clbits2 = ClassicalRegister(1)\n        qubits2 = QuantumRegister(1)\n        clbits3 = ClassicalRegister(1)\n\n        circuit = QuantumCircuit(qubits0, clbits1)\n        circuit.add_bits(qubits1)\n        circuit.add_bits(clbits2)\n        circuit.add_register(qubits2)\n        circuit.add_register(clbits3)\n        circuit.h(qubits0[0])\n        circuit.cx(qubits0[0], qubits1[0])\n        circuit.cx(qubits1[0], qubits2[0])\n\n        for qubits, clbits in zip([qubits0, qubits1, qubits2], [clbits1, clbits2, clbits3]):\n            for q, c in zip(qubits, clbits):\n                circuit.measure(q, c)\n\n        backend = self.backend(method=method, device=device, seed_simulator=1111)\n\n        shots = 1000\n        result = backend.run(circuit, shots=shots).result()\n        self.assertSuccess(result)\n        self.compare_counts(result, [circuit], [{\"0x0\": 500, \"0x7\": 500}], delta=0.05 * shots)\n\n    def test_partial_result_a_single_invalid_circuit(self):\n        \"\"\"Test a partial result is returned with a job with a valid and invalid circuit.\"\"\"\n\n        circuits = []\n        qc = QuantumCircuit(2)\n        qc.h(0)\n        qc.cx(0, 1)\n        qc.measure_all()\n        qc_2 = QuantumCircuit(50)\n        qc_2.h(range(50))\n        qc_2.measure_all()\n        circuits.append(qc_2)\n        circuits.append(qc)\n        backend = self.backend()\n        shots = 100\n        result = backend.run(circuits, shots=shots, method=\"statevector\").result()\n        self.assertEqual(result.status, \"PARTIAL COMPLETED\")\n        self.assertTrue(hasattr(result.results[1].data, \"counts\"))\n        self.assertFalse(hasattr(result.results[0].data, \"counts\"))\n\n    def test_metadata_protected(self):\n        \"\"\"Test metadata is consitently viewed from users\"\"\"\n\n        qc = QuantumCircuit(2)\n        qc.metadata = {\"foo\": \"bar\", \"object\": object}\n\n        circuits = [qc.copy() for _ in range(5)]\n\n        backend = self.backend()\n        job = backend.run(circuits)\n\n        for circuit in circuits:\n            self.assertTrue(\"foo\" in circuit.metadata)\n            self.assertEqual(circuit.metadata[\"foo\"], \"bar\")\n            self.assertEqual(circuit.metadata[\"object\"], object)\n\n        deepcopy(job",
+      "metadata": {
+        "section_title": "test_circuit.py",
+        "package": "qiskit-aer",
+        "source_file": "test\\terra\\backends\\aer_simulator\\test_circuit.py",
+        "section_id": "part_2"
+      },
+      "score": 0.9848689265661748,
+      "original_score": 0.9843471654132843,
+      "vector_score": 0.9843471654132843,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 231,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      }
+    }
+  }
+}

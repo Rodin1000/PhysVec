@@ -1,0 +1,137 @@
+{
+  "query": "ITensor electron observable function input parameters and return types",
+  "packages": [
+    "itensormps",
+    "itensors"
+  ],
+  "results": [
+    {
+      "id": "electron__fa1c6b34144066e0252f965aeea863af__part_6__6",
+      "text": ".0 0.0\n    0.0 0.0 0.5 0.0\n    0.0 0.5 0.0 0.0\n    0.0 0.0 0.0 0.0\n  ]\nend\n\nfunction op(::OpName\"Sˣ\", st::SiteType\"Electron\")\n  return op(OpName(\"Sx\"), st)\nend\n\nfunction op(::OpName\"S+\", ::SiteType\"Electron\")\n  return [\n    0.0 0.0 0.0 0.0\n    0.0 0.0 1.0 0.0\n    0.0 0.0 0.0 0.0\n    0.0 0.0 0.0 0.0\n  ]\nend\n\nfunction op(::OpName\"S⁺\", st::SiteType\"Electron\")\n  return op(OpName(\"S+\"), st)\nend\nfunction op(::OpName\"Sp\", st::SiteType\"Electron\")\n  return op(OpName(\"S+\"), st)\nend\nfunction op(::OpName\"Splus\", st::SiteType\"Electron\")\n  return op(OpName(\"S+\"), st)\nend\n\nfunction op(::OpName\"S-\", ::SiteType\"Electron\")\n  return [\n    0.0 0.0 0.0 0.0\n    0.0 0.0 0.0 0.0\n    0.0 1.0 0.0 0.0\n    0.0 0.0 0.0 0.0\n  ]\nend\n\nfunction op(::OpName\"S⁻\", st::SiteType\"Electron\")\n  return op(OpName(\"S-\"), st)\nend\nfunction op(::OpName\"Sm\", st::SiteType\"Electron\")\n  return op(OpName(\"S-\"), st)\nend\nfunction op(::OpName\"Sminus\", st::SiteType\"Electron\")\n  return op(OpName(\"S-\"), st)\nend\n\nhas_fermion_string(::OpName\"Cup\", ::SiteType\"Electron\") = true\nfunction has_fermion_string(on::OpName\"c↑\", st::SiteType\"Electron\")\n  return has_fermion_string(alias(on), st)\nend\nhas_fermion_string(::OpName\"Cdagup\", ::SiteType\"Electron\") = true\nfunction has_fermion_string(on::OpName\"c†↑\", st::SiteType\"Electron\")\n  return has_fermion_string(alias(on), st)\nend\nhas_fermion_string(::OpName\"Cdn\", ::SiteType\"Electron\") = true\nfunction has_fermion_string(on::",
+      "metadata": {
+        "section_title": "electron.jl",
+        "section_id": "part_6",
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\electron.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.4777981311019705,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "electron",
+        "function",
+        "return"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "opsum_to_mpo__8a4e1576c820b60c5768eac0b6de8485__part_0__0",
+      "text": "using NDTensors: using_auto_fermion\n\n# `ValType::Type{<:Number}` is used instead of `ValType::Type` for efficiency, possibly due to increased method specialization.\n# See https://github.com/ITensor/ITensors.jl/pull/1183.\nfunction svdMPO(\n  ValType::Type{<:Number}, os::OpSum{C}, sites; mindim=1, maxdim=typemax(Int), cutoff=1e-15\n)::MPO where {C}\n  N = length(sites)\n\n  # Specifying the element type with `Matrix{ValType}[...]` improves type inference and therefore efficiency.\n  # See https://github.com/ITensor/ITensors.jl/pull/1183.\n  Vs = Matrix{ValType}[Matrix{ValType}(undef, 1, 1) for n in 1:N]\n  tempMPO = [MatElem{Scaled{C,Prod{Op}}}[] for n in 1:N]\n\n  function crosses_bond(t::Scaled{C,Prod{Op}}, n::Int) where {C}\n    return (only(site(t[1])) <= n <= only(site(t[end])))\n  end\n\n  rightmaps = [Dict{Vector{Op},Int}() for _ in 1:N]\n\n  for n in 1:N\n    leftbond_coefs = MatElem{ValType}[]\n\n    leftmap = Dict{Vector{Op},Int}()\n    for term in os\n      crosses_bond(term, n) || continue\n\n      left = filter(t -> (only(site(t)) < n), terms(term))\n      onsite = filter(t -> (only(site(t)) == n), terms(term))\n      right = filter(t -> (only(site(t)) > n), terms(term))\n\n      bond_row = -1\n      bond_col = -1\n      if !isempty(left)\n        bond_row = posInLink!(leftmap, left)\n        bond_col = posInLink!(rightmaps[n - 1], vcat(onsite, right))\n        bond_coef = convert(ValType, coefficient(term))\n        push!(leftbond_coefs, MatElem(bond_row, bond_col, bond_coef))\n      end\n\n      A_row = bond_col\n      A_col = posInLink!(rightmaps[n], right)\n      site_coef = one(C)\n      if A_row == -1\n        site_coef = coefficient(term)\n      end\n      if isempty(onsite)\n        if !using_auto_fermion() && isfermionic(right, sites)\n          push!(onsite, Op(\"F\", n))\n        else\n          push!(onsite, Op(\"Id\", n))\n        end\n      end\n      el = MatElem(A_row, A_col, site_coef * Prod(onsite))\n      push!(",
+      "metadata": {
+        "section_title": "opsum_to_mpo.jl",
+        "source_file": "src\\opsum_to_mpo\\opsum_to_mpo.jl",
+        "package": "itensormps",
+        "section_id": "part_0"
+      },
+      "score": 0.9012989736630764,
+      "original_score": 0.8932961877438664,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensor",
+        "function",
+        "return"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "electronk__bb5495f9725f795c7137a8113bf787b0__part_5__5",
+      "text": "\", st::SiteType\"ElecK\", s::Index)\n  return op!(Op, OpName(\"S+\"), st, s)\nend\n\nfunction op!(Op::ITensor, ::OpName\"S-\", ::SiteType\"ElecK\", s::Index)\n  return Op[s' => 3, s => 2] = 1.0\nend\n\nfunction ITensors.op!(Op::ITensor, ::OpName\"S⁻\", st::SiteType\"ElecK\", s::Index)\n  return op!(Op, OpName(\"S-\"), st, s)\nend\nfunction ITensors.op!(Op::ITensor, ::OpName\"Sm\", st::SiteType\"ElecK\", s::Index)\n  return op!(Op, OpName(\"S-\"), st, s)\nend\nfunction ITensors.op!(Op::ITensor, ::OpName\"Sminus\", st::SiteType\"ElecK\", s::Index)\n  return op!(Op, OpName(\"S-\"), st, s)\nend\n\nITensors.has_fermion_string(::OpName\"Cup\", ::SiteType\"ElecK\") = true\nITensors.has_fermion_string(::OpName\"Cdagup\", ::SiteType\"ElecK\") = true\nITensors.has_fermion_string(::OpName\"Cdn\", ::SiteType\"ElecK\") = true\nITensors.has_fermion_string(::OpName\"Cdagdn\", ::SiteType\"ElecK\") = true\n",
+      "metadata": {
+        "section_id": "part_5",
+        "section_title": "electronk.jl",
+        "source_file": "examples\\src\\electronk.jl",
+        "package": "itensormps"
+      },
+      "score": 0.850160719592696,
+      "original_score": 0.8380115887488605,
+      "vector_score": 0.9381116814853601,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensor",
+        "function",
+        "return"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "SiteType__b961e6094c8c36d698ed956743838766__Methods_1__1",
+      "text": "0\n 0.0  -0.5\nITensor ord=2 (dim=2|id=575|\"S=1/2,Site\")' (dim=2|id=575|\"S=1/2,Site\")\nNDTensors.Dense{Float64, Vector{Float64}}\n```\n```code\nop(opname::String,sites::Vector{<:Index},n::Int; kwargs...)\n```\nReturn an ITensor corresponding to the operator named opname for the n'th Index in the array sites .\nExample\n```code\ns = siteinds(\"S=1/2\", 4)\nSz2 = op(\"Sz\", s, 2)\n```\n```code\nstate(s::Index, name::String; kwargs...)\n```\nReturn an ITensor corresponding to the state named name for the Index s . The returned ITensor will have s as its only index.\nThe terminology here is based on the idea of a single-site state or wavefunction in physics.\nThe state function is implemented for various Index tags by overloading either the state or state! methods which take a SiteType argument corresponding to one of the tags of the Index s and an StateName\"name\" argument that corresponds to the input state name.\nThe state system is used by the MPS type to construct product-state MPS and for other purposes.\nExample\n```code\ns = Index(2, \"Site,S=1/2\")\nsup = state(s,\"Up\")\nsdn = state(s,\"Dn\")\nsxp = state(s,\"X+\")\nsxm = state(s,\"X-\")\n```\n```code\nval(q::QN,name)\n```\nGet the value within the QN q corresponding to the string name\n```code\nval(s::Index, name::String)\n```\nReturn an integer corresponding to the name of a certain value the Index s can take. In other words, the val function maps strings to specific integer values within the range 1:dim(s) .\nThe val function is implemented for various Index tags by overloading methods named val which take a SiteType argument corresponding to one of the tags of the Index s and an ValName\"name\" argument that corresponds to the input name.\nExample\n```code\ns = Index(2, \"Site,S=1/2\")\nval(s,\"Up\") == 1\nval(s,\"Dn\") == 2\n\ns = Index(2, \"Site,Fermion\")\nval(s,\"Emp\") == 1\nval(s,\"Occ\") == 2\n```\n```code\nspace(::SiteType\"Qubit\";\n      conserve_qns = false,\n      conserve_parity = conserve_qns,\n      conserve_number = false,\n      qnname_parity = \"Parity\",\n      qnname_number = \"Number\")\n```\nCreate the Hilbert space for a site of type \"Qubit\".\nOptionally specify the",
+      "metadata": {
+        "section_title": "Methods",
+        "package": "itensormps",
+        "source_file": "docs\\build\\SiteType.html",
+        "section_id": "Methods"
+      },
+      "score": 0.8001967217271175,
+      "original_score": 0.6926103411186423,
+      "vector_score": 0.7753423227607386,
+      "bm25_score": 0.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensor",
+        "function",
+        "input",
+        "return"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "generic_array_constructors__01524f94b4921b244914ca078497c637__full__0",
+      "text": "using TypeParameterAccessors:\n  default_type_parameters,\n  parenttype,\n  set_eltype,\n  specify_default_type_parameters,\n  specify_type_parameters,\n  type_parameters\n##TODO replace randn in ITensors with generic_randn\n## and replace zeros with generic_zeros\n\n# This is a file to write generic fills for NDTensors.\n#  This includes random fills, zeros, ...\n\nfunction generic_randn(StoreT::Type{<:Dense}, dims::Integer; rng=Random.default_rng())\n  StoreT = specify_default_type_parameters(StoreT)\n  DataT = specify_type_parameters(\n    type_parameters(StoreT, parenttype), eltype, eltype(StoreT)\n  )\n  @assert eltype(StoreT) == eltype(DataT)\n\n  data = generic_randn(DataT, dims; rng=rng)\n  StoreT = set_datatype(StoreT, typeof(data))\n  return StoreT(data)\nend\n\nfunction generic_zeros(StoreT::Type{<:Dense}, dims::Integer)\n  StoreT = specify_default_type_parameters(StoreT)\n  DataT = specify_type_parameters(\n    type_parameters(StoreT, parenttype), eltype, eltype(StoreT)\n  )\n  @assert eltype(StoreT) == eltype(DataT)\n\n  data = generic_zeros(DataT, dims)\n  StoreT = set_datatype(StoreT, typeof(data))\n  return StoreT(data)\nend\n",
+      "metadata": {
+        "section_title": "generic_array_constructors.jl",
+        "package": "itensors",
+        "section_id": "full",
+        "source_file": "NDTensors\\src\\dense\\generic_array_constructors.jl"
+      },
+      "score": 0.7642206613936245,
+      "original_score": 0.7518112225196047,
+      "vector_score": 0.8416147217849433,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "function",
+        "return"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 107,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      }
+    }
+  }
+}

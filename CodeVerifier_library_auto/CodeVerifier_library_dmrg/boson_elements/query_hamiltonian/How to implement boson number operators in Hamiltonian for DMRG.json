@@ -1,0 +1,135 @@
+{
+  "query": "How to implement boson number operators in Hamiltonian for DMRG?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Perform-a-basic-DMRG-calculation_0__0",
+      "text": "## Perform a basic DMRG calculation\nBecause tensor indices in ITensor have unique identities, before we can make a Hamiltonian or a wavefunction we need to construct a \"site set\" which will hold the site indices defining the physical Hilbert space:\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1\",N)\n```\nHere we have chosen to create a Hilbert space of N spin 1 sites. The string \"S=1\" denotes a special Index tag which hooks into a system that knows \"S=1\" indices have a dimension of 3 and how to create common physics operators like \"Sz\" for them.\nNext we'll make our Hamiltonian matrix product operator (MPO). A very convenient way to do this is to use the OpSum helper type which lets us input a Hamiltonian (or any sum of local operators) in similar notation to pencil-and-paper notation:\n```code\nos = OpSum()\nfor j=1:N-1\n  os += 0.5,\"S+\",j,\"S-\",j+1\n  os += 0.5,\"S-\",j,\"S+\",j+1\n  os += \"Sz\",j,\"Sz\",j+1\nend\nH = MPO(os,sites)\n```\nIn the last line above we convert the OpSum helper object to an actual MPO.\nBefore beginning the calculation, we need to specify how many DMRG sweeps to do and what schedule we would like for the parameters controlling the accuracy. These parameters can be specified as follows:\n```code\nnsweeps = 5 # number of sweeps is 5\nmaxdim = [10,20,100,100,200] # gradually increase states kept\ncutoff = [1E-10] # desired truncation error\n```\nThe random starting wavefunction psi0 must be defined in the same Hilbert space as the Hamiltonian, so we construct it using the same collection of site indices:\n```code\npsi0 = random_mps(sites;linkdims=2)\n```\nHere we have made a random MPS of bond dimension 2. We could have used a random product state instead, but choosing a slightly larger bond dimension can help DMRG avoid getting stuck in local minima. We could also set psi to some specific initial state using the MPS constructor, which is actually required if we were conserving QNs.\nFinally, we are ready to call DMRG:\n```code\nenergy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n```\nWhen the algorithm is done, it returns the ground state energy as the variable energy and an MPS approximation to the ground state as the variable psi .\nBelow you can find a complete working code that includes all of these steps:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n  sites = siteinds(\"S=1\",N)\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5,\"S+\",j,\"S-\",j+1\n    os += 0.5,\"S-\",j,\"S+\",j+1\n    os += \"Sz\",j,\"Sz\",j+1\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 5 # number of sweeps is 5\n  maxdim = [10,20,100,100,200] # gradually increase states kept\n  cutoff = [1E-10] # desired truncation error\n\n  psi0 = random_mps(sites;linkdims=2)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "Perform-a-basic-DMRG-calculation",
+        "section_title": "Perform a basic DMRG calculation",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.8911417319155219,
+      "bm25_score": 0.8756291135875501,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "number",
+        "operators",
+        "hamiltonian",
+        "dmrg"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types_2__0",
+      "text": "## DMRG Calculation with Mixed Local Hilbert Space Types\nThe following fully-working example shows how to set up a calculation mixing S=1/2 and S=1 spins on every other site of a 1D system. The Hamiltonian involves Heisenberg spin interactions with adjustable couplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation is that the sites array has Index objects which alternate in dimension and in which physical tag type they carry, whether \"S=1/2\" or \"S=1\" . (Try printing out the sites array to see!) These tags tell the OpSum system which local operators to use for these sites when building the Hamiltonian MPO.\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n\n  # Make an array of N Index objects with alternating\n  # \"S=1/2\" and \"S=1\" tags on odd versus even sites\n  # (The first argument n->isodd(n) ... is an\n  # on-the-fly function mapping integers to strings)\n  sites = siteinds(n->isodd(n) ? \"S=1/2\" : \"S=1\",N)\n\n  # Couplings between spin-half and\n  # spin-one sites:\n  Jho = 1.0 # half-one coupling\n  Jhh = 0.5 # half-half coupling\n  Joo = 0.5 # one-one coupling\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5*Jho,\"S+\",j,\"S-\",j+1\n    os += 0.5*Jho,\"S-\",j,\"S+\",j+1\n    os += Jho,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:2:N-2\n    os += 0.5*Jhh,\"S+\",j,\"S-\",j+2\n    os += 0.5*Jhh,\"S-\",j,\"S+\",j+2\n    os += Jhh,\"Sz\",j,\"Sz\",j+2\n  end\n  for j=2:2:N-2\n    os += 0.5*Joo,\"S+\",j,\"S-\",j+2\n    os += 0.5*Joo,\"S-\",j,\"S+\",j+2\n    os += Joo,\"Sz\",j,\"Sz\",j+2\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 10\n  maxdim = [10,10,20,40,80,100,140,180,200]\n  cutoff = [1E-8]\n\n  psi0 = random_mps(sites;linkdims=4)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "section_id": "DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types",
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 0.9793430223962795,
+      "original_score": 0.9682200344558146,
+      "vector_score": 1.0,
+      "bm25_score": 0.2990867640492957,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "operators",
+        "hamiltonian",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "fermion__22c1fe1832a6a2692603537fcc8f80cd__part_0__0",
+      "text": "\n\"\"\"\n    space(::SiteType\"Fermion\";\n          conserve_qns=false,\n          conserve_nf=conserve_qns,\n          conserve_nfparity=conserve_qns,\n          qnname_nf = \"Nf\",\n          qnname_nfparity = \"NfParity\",\n          qnname_sz = \"Sz\",\n          conserve_sz = false)\n\nCreate the Hilbert space for a site of type \"Fermion\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nfunction space(\n  ::SiteType\"Fermion\";\n  conserve_qns=false,\n  conserve_nf=conserve_qns,\n  conserve_nfparity=conserve_qns,\n  qnname_nf=\"Nf\",\n  qnname_nfparity=\"NfParity\",\n  qnname_sz=\"Sz\",\n  conserve_sz=false,\n  # Deprecated\n  conserve_parity=nothing,\n)\n  if !isnothing(conserve_parity)\n    conserve_nfparity = conserve_parity\n  end\n  if conserve_sz == true\n    conserve_sz = \"Up\"\n  end\n  if conserve_nf && conserve_sz == \"Up\"\n    zer = QN((qnname_nf, 0, -1), (qnname_sz, 0)) => 1\n    one = QN((qnname_nf, 1, -1), (qnname_sz, 1)) => 1\n    return [zer, one]\n  elseif conserve_nf && conserve_sz == \"Dn\"\n    zer = QN((qnname_nf, 0, -1), (qnname_sz, 0)) => 1\n    one = QN((qnname_nf, 1, -1), (qnname_sz, -1)) => 1\n    return [zer, one]\n  elseif conserve_nfparity && conserve_sz == \"Up\"\n    zer = QN((qnname_nfparity, 0, -2), (qnname_sz, 0)) => 1\n    one = QN((qnname_nfparity, 1, -2), (qnname_sz, 1)) => 1\n    return [zer, one]\n  elseif conserve_nfparity && conserve_sz == \"Dn\"\n    zer = QN((qnname_nfparity, 0, -2), (qnname_sz, 0)) => 1\n    one = QN((qnname_nfparity, 1, -2), (qnname_sz, -1)) => 1\n    return [zer, one]\n  elseif conserve_nf\n    zer = QN(qnname_nf, 0, -1) => 1\n    one = QN(qnname_nf, 1, -1) => 1\n    return [zer, one]\n  elseif conserve_nfparity\n    zer = QN(qnname_nfparity, ",
+      "metadata": {
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\fermion.jl",
+        "package": "itensors",
+        "section_title": "fermion.jl",
+        "section_id": "part_0"
+      },
+      "score": 0.9041657539618698,
+      "original_score": 0.9008611247881412,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "number"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "section_id": "h2_2"
+      },
+      "score": 0.8571223394795121,
+      "original_score": 0.8412470438661246,
+      "vector_score": 0.7312258062104324,
+      "bm25_score": 0.810398569045597,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "operators",
+        "hamiltonian",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "boson__68a4a48a32f91533144dbb5ef2f01694__full__0",
+      "text": "\nalias(::SiteType\"Boson\") = SiteType\"Qudit\"()\n\n\"\"\"\n    space(::SiteType\"Boson\";\n          dim = 2,\n          conserve_qns = false,\n          conserve_number = false,\n          qnname_number = \"Number\")\n\nCreate the Hilbert space for a site of type \"Boson\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nspace(st::SiteType\"Boson\"; kwargs...) = space(alias(st); kwargs...)\n\nval(vn::ValName, st::SiteType\"Boson\") = val(vn, alias(st))\n\nfunction state(sn::StateName, st::SiteType\"Boson\", s::Index; kwargs...)\n  return state(sn, alias(st), s; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", ds::Int...; kwargs...)\n  return op(on, alias(st), ds...; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", s1::Index, s_tail::Index...; kwargs...)\n  rs = reverse((s1, s_tail...))\n  ds = dim.(rs)\n  opmat = op(on, st, ds...; kwargs...)\n  return itensor(opmat, prime.(rs)..., dag.(rs)...)\nend\n",
+      "metadata": {
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\boson.jl",
+        "package": "itensors",
+        "section_title": "boson.jl",
+        "section_id": "full"
+      },
+      "score": 0.813958973130066,
+      "original_score": 0.8006703283536422,
+      "vector_score": 0.6833052077882926,
+      "bm25_score": 0.8219123911487186,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "boson",
+        "number"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 104,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 46
+      }
+    }
+  }
+}

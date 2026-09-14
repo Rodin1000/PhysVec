@@ -1,0 +1,128 @@
+{
+  "query": "itensors electron InitState function signature and usage for DMRG",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_ctmrg__d202e1b4009a29577de40ed9d424bafe__full__0",
+      "text": "using ITensors\nusing Test\n\nsrc_dir = joinpath(pkgdir(ITensors), \"examples\", \"src\")\ninclude(joinpath(src_dir, \"ctmrg_isotropic.jl\"))\ninclude(joinpath(src_dir, \"2d_classical_ising.jl\"))\n\n@testset \"ctmrg\" begin\n  # Make Ising model partition function\n  β = 1.1 * βc\n  d = 2\n  s = Index(d, \"Site\")\n  sₕ = addtags(s, \"horiz\")\n  sᵥ = addtags(s, \"vert\")\n\n  T = ising_mpo(sₕ, sᵥ, β)\n\n  χ0 = 1\n  l = Index(χ0, \"Link\")\n  lₕ = addtags(l, \"horiz\")\n  lᵥ = addtags(l, \"vert\")\n\n  # Initial CTM\n  Cₗᵤ = ITensor(lᵥ, lₕ)\n  Cₗᵤ[1, 1] = 1.0\n\n  # Initial HRTM\n  Aₗ = ITensor(lᵥ, lᵥ', sₕ)\n  Aₗ[lᵥ => 1, lᵥ' => 1, sₕ => 1] = 1.0\n  Aₗ[lᵥ => 1, lᵥ' => 1, sₕ => 2] = 0.0\n\n  Cₗᵤ, Aₗ = ctmrg(T, Cₗᵤ, Aₗ; χmax=20, nsteps=100)\n\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = noncommoninds(Cₗᵤ, Aₗ)[1]\n\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n\n  ACₗ = Aₗ * Cₗᵤ * dag(Cₗᵤ')\n\n  ACTₗ = prime(ACₗ * dag(Aᵤ') * T * Aᵤ, -1)\n\n  κ = (ACTₗ * dag(ACₗ))[]\n\n  @test κ ≈ exp(-β * ising_free_energy(β))\n\n  # Calculate magnetization\n  Tsz = ising_mpo(sₕ, sᵥ, β; sz=true)\n  ACTszₗ = prime(ACₗ * dag(Aᵤ') * Tsz * Aᵤ, -1)\n  m = (ACTszₗ * dag(ACₗ))[] / κ\n  @test abs(m) ≈ ising_magnetization(β)\nend\n",
+      "metadata": {
+        "section_title": "test_ctmrg.jl",
+        "source_file": "test\\base\\test_ctmrg.jl",
+        "package": "itensors",
+        "section_id": "full"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "function"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "dmrg__7888fe20fce412585dc62035ae11a5ee__full__0",
+      "text": "using ..ITensorMPS:\n  MPS,\n  alternating_update,\n  compose_observers,\n  default_observer,\n  eigsolve_updater,\n  values_observer\n\nfunction dmrg(\n  operator, init::MPS; updater=eigsolve_updater, (observer!)=default_observer(), kwargs...\n)\n  info_ref! = Ref{Any}()\n  info_observer! = values_observer(; info=(info_ref!))\n  observer! = compose_observers(observer!, info_observer!)\n  state = alternating_update(operator, init; updater, observer!, kwargs...)\n  return info_ref![].eigval, state\nend\n",
+      "metadata": {
+        "section_title": "dmrg.jl",
+        "package": "itensormps",
+        "section_id": "full",
+        "source_file": "src\\lib\\Experimental\\src\\dmrg.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "function",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_3__3",
+      "text": " -1) => 1], \"sn\")\n\n      N1 = ITensor(s', dag(s))\n      N1[s' => 2, s => 2] = 1.0\n\n      N2 = ITensor(dag(s), s')\n      N2[s' => 2, s => 2] = 1.0\n\n      NN = N1 + N2\n      @test NN[s' => 2, s => 2] ≈ 2.0\n\n      NN = N1 + N1\n      @test NN[s' => 2, s => 2] ≈ 2.0\n\n      NN = N2 + N2\n      @test NN[s' => 2, s => 2] ≈ 2.0\n    end\n\n    @testset \"Wavefunction Tests\" begin\n      s = [Index([QN(\"N\", 0, -2) => 2, QN(\"N\", 1, -2) => 2], \"s$n\") for n in 1:4]\n\n      psi0 = ITensor(s...)\n\n      psi0[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] = 1111\n      psi0[s[1] => 3, s[2] => 3, s[3] => 1, s[4] => 1] = 3311\n      psi0[s[1] => 1, s[2] => 3, s[3] => 1, s[4] => 3] = 1313\n\n      psi1 = permute(psi0, s[2], s[1], s[3], s[4])\n      @test norm(psi1 - psi0) ≈ 0.0\n\n      @test psi0[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi1[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi0[s[2] => 1, s[1] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi1[s[2] => 1, s[1] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n\n      @test psi0[s[1] => 3, s[2] => 3, s[3] => 1,",
+      "metadata": {
+        "section_id": "part_3",
+        "package": "itensors",
+        "section_title": "test_fermions.jl",
+        "source_file": "test\\base\\test_fermions.jl"
+      },
+      "score": 0.9949397123625975,
+      "original_score": 0.9949397123625975,
+      "vector_score": 0.9949397123625975,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG",
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "Use a Sum of MPOs in DMRG"
+      },
+      "score": 0.9341394843341104,
+      "original_score": 0.9049435856368604,
+      "vector_score": 0.9049435856368603,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "function",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    },
+    {
+      "id": "test_exports__dca4b52dccc633a8fe82618cfd3164cd__full__0",
+      "text": "@eval module $(gensym())\nusing ITensors: ITensors\nusing Test: @test, @testset\ninclude(\"utils/TestITensorsExportedNames/TestITensorsExportedNames.jl\")\nusing .TestITensorsExportedNames: ITENSORS_EXPORTED_NAMES\n@testset \"Test exports of ITensors\" begin\n  # @show setdiff(names(ITensors), ITENSORS_EXPORTED_NAMES)\n  # @show setdiff(ITENSORS_EXPORTED_NAMES, names(ITensors))\n  @test issetequal(names(ITensors), ITENSORS_EXPORTED_NAMES)\nend\nend\n",
+      "metadata": {
+        "source_file": "test\\base\\test_exports.jl",
+        "section_id": "full",
+        "section_title": "test_exports.jl",
+        "package": "itensors"
+      },
+      "score": 0.8713448674225392,
+      "original_score": 0.8675608929349669,
+      "vector_score": 0.8675608929349669,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 110,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      }
+    }
+  }
+}

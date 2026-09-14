@@ -1,0 +1,140 @@
+{
+  "query": "ITensors dmrg return values energy and MPO/MPS state handling",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__News_2__3",
+      "text": "TDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 9, 2024: A new package ITensorMPS.jl has been released. We plan to move all of the MPS/MPO functionality in ITensors.jl to ITensorMPS.jl . For now, ITensorMPS.jl just re-exports the MPS/MPO functionality of ITensors.jl (as well as of ITensorTDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 2, 2024: ITensors.jl v0.5 has been released. This version removes PackageCompiler.jl as a dependency and moves the package compilation functionality into a package extension. In order to use the ITensors.compile() function going forward, you need to install the PackageCompiler.jl package with using Pkg: Pkg; Pkg.add(\"PackageCompiler\") and put using PackageCompiler together with using ITensors in your code.\nMay 2, 202",
+      "metadata": {
+        "section_title": "News",
+        "section_id": "News",
+        "source_file": "docs\\build\\index.html",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9211999111265906,
+      "bm25_score": 0.7864505207096067,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensors",
+        "dmrg",
+        "mpo",
+        "mps"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG",
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 0.9303217872350527,
+      "original_score": 0.8946043840530209,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "dmrg",
+        "energy",
+        "mpo",
+        "state"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": true
+    },
+    {
+      "id": "2d_classical_ising__d30e54e4e402a00b85ee89ff1e3c79bd__part_1__1",
+      "text": "�′ = itensor(vec(X), s̃ₕ′, sₕ′)\n  Xᵥ = itensor(vec(X), s̃ᵥ, sᵥ)\n  Xᵥ′ = itensor(vec(X), s̃ᵥ′, sᵥ′)\n  return T̃ * Xₕ′ * Xᵥ′ * Xₕ * Xᵥ\nend\n\nfunction ising_mpo(sₕ::Index, sᵥ::Index, args...; kwargs...)\n  return ising_mpo(sₕ => sₕ', sᵥ => sᵥ', args...; kwargs...)\nend\n\nfunction ising_mpo_dual(\n  sh::Tuple{Index,Index}, sv::Tuple{Index,Index}, β::Real, J::Real=1.0\n)\n  d = dim(sh[1])\n  T = ITensor(sh[1], sh[2], sv[1], sv[2])\n  sig(s) = 1.0 - 2.0 * (s - 1)\n  E0 = -4.0\n  for s1 in 1:d, s2 in 1:d, s3 in 1:d, s4 in 1:d\n    E = sig(s1) * sig(s2) + sig(s2) * sig(s3) + sig(s3) * sig(s4) + sig(s4) * sig(s1)\n    val = exp(-β * (E - E0))\n    T[sh[1] => s1, sv[2] => s2, sh[2] => s3, sv[1] => s4] = val\n  end\n  return T\nend\n\nfunction ising_partition(sh, sv, β)\n  ny, nx = size(sh)\n  T = Matrix{ITensor}(undef, ny, nx)\n  for iy in 1:ny, ix in 1:nx\n    ixp = per(ix + 1, nx)\n    iyp = per(iy + 1, ny)\n    T[iy, ix] = ising_mpo(sh[iy, ix] => sh[iy, ixp], sv[iy, ix] => sv[iyp, ix], β)\n  end\n  return T\nend\n\n#\n# Exact results\n#\n\nconst βc = 0.5 * log(√2 + 1)\n\nfunction ising_free_energy(β::Real, J::Real=1.0)\n  k = β * J\n  c = cosh(2 * k)\n  s = sinh(2 * k)\n  xmin = 0.0\n  xmax = π\n  integrand(x) = log(c^2 + √(s^4",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "part_1",
+        "section_title": "2d_classical_ising.jl",
+        "source_file": "examples\\src\\2d_classical_ising.jl"
+      },
+      "score": 0.8969465088518427,
+      "original_score": 0.8946043840530209,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "return"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__root_0__0",
+      "text": "ITensor is a library for rapidly creating correct and efficient tensor network algorithms.\nThe source code for ITensors.jl can be found on Github .\nAdditional documentation can be found on the ITensor website itensor.org .\nAn ITensor is a tensor whose interface is independent of its memory layout. ITensor indices are objects which carry extra information and which 'recognize' each other (compare equal to each other).\nThe ITensorMPS.jl library includes composable and extensible algorithms for optimizing and transforming tensor networks, such as matrix product state and matrix product operators, such as the DMRG algorithm. If you are looking for information on running finite MPS/MPO calculations such as DMRG, take a look at the ITensorMPS.jl documentation .",
+      "metadata": {
+        "section_id": "root",
+        "source_file": "docs\\build\\index.html",
+        "package": "itensors",
+        "section_title": "ROOT"
+      },
+      "score": 0.8572929613264443,
+      "original_score": 0.7766324612066084,
+      "vector_score": 0.6397144040977848,
+      "bm25_score": 0.9136604040909936,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensors",
+        "dmrg",
+        "mpo",
+        "mps",
+        "state"
+      ],
+      "match_ratio": 0.5555555555555556,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_5_5__0",
+      "text": "One version of the ITensor `dmrg` function accepts an array of MPOs\n`[H1,H2,H3]` (or any number of MPOs you want). This version of DMRG\nwill find the ground state of `H1+H2+H3`. Internally it does not\nactually sum these MPOs, but loops over them during each step of\nthe \"eigensolver\" at the core of the DMRG algorithm, so it is usually\nmore efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs `H1`, `H2`, and `H3`.\nThen call DMRG like this:\n```julia\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "package": "itensormps",
+        "section_id": "h2_5",
+        "section_title": "Use a Sum of MPOs in DMRG"
+      },
+      "score": 0.7798557574561904,
+      "original_score": 0.7583782703787455,
+      "vector_score": 0.8477247416817916,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "dmrg",
+        "energy",
+        "mpo",
+        "state"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 102,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      }
+    }
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "query": "How to return calculation results like statevector, energy, eigenvalues in Qiskit?",
+  "packages": [
+    "qiskit",
+    "qiskit-algorithms"
+  ],
+  "results": [
+    {
+      "id": "README__9e52fc636985046c4ee9350fa9244d32__h1_7_7__0",
+      "text": "from qiskit.primitives import StatevectorEstimator\nestimator = StatevectorEstimator()\njob = estimator.run([(qc, operator)], precision=1e-3)\nresult = job.result()\nprint(f\" > Expectation values: {result[0].data.evs}\")\n```\nRunning this will give the outcome `4`. For fun, try to assign a value of +/- 1 to each single-qubit operator X and Y \nand see if you can achieve this outcome. (Spoiler alert: this is not possible!)\nUsing the Qiskit-provided `qiskit.primitives.StatevectorSampler` and `qiskit.primitives.StatevectorEstimator` will not take you very far.\nThe power of quantum computing cannot be simulated on classical computers and you need to use real quantum hardware to scale to larger quantum circuits.\nHowever, running a quantum circuit on hardware requires rewriting to the basis gates and connectivity of the quantum hardware.\nThe tool that does this is the [transpiler](https://quantum.cloud.ibm.com/docs/api/qiskit/transpiler), and Qiskit includes transpiler passes for synthesis, optimization, mapping, and scheduling.\nHowever, it also includes a default compiler, which works very well in most examples.\nThe following code will map the example circuit to the `basis_gates = [\"cz\", \"sx\", \"rz\"]` and a\nbidirectional linear chain of qubits $0 \\leftrightarrow 1 \\leftrightarrow 2$ with the\n`coupling_map = [[0, 1], [1, 0], [1, 2], [2, 1]]`.\n```python\nfrom qiskit import transpile\nfrom qiskit.transpiler import Target, CouplingMap\ntarget = Target.from_configuration(\n    basis_gates=[\"cz\", \"sx\", \"rz\"],\n    coupling_map=CouplingMap.from_line(3),\n)\nqc_transpiled = transpile(qc, target=target)\n```",
+      "metadata": {
+        "source_file": "README.md",
+        "section_id": "h1_7",
+        "package": "qiskit",
+        "section_title": "3. Execute using the Estimator primitive"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qiskit"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "test_vqd__69bbcfe16b14a0e7e3cec7e7a51130fb__part_3__3",
+      "text": "qd.compute_eigenvalues(operator=op)\n        np.testing.assert_array_almost_equal(\n            result.eigenvalues.real, self.h2_energy_excited[:2], decimal=1\n        )\n\n    @data(H2_SPARSE_PAULI)\n    def test_missing_varform_params(self, op):\n        \"\"\"Test specifying a variational form with no parameters raises an error.\"\"\"\n        circuit = QuantumCircuit(op.num_qubits)\n        vqd = VQD(\n            estimator=self.estimator,\n            fidelity=self.fidelity,\n            ansatz=circuit,\n            optimizer=SLSQP(),\n            k=1,\n            betas=self.betas,\n        )\n        with self.assertRaises(AlgorithmError):\n            vqd.compute_eigenvalues(operator=op)\n\n    @data(H2_SPARSE_PAULI)\n    def test_callback(self, op):\n        \"\"\"Test the callback on VQD.\"\"\"\n        history = {\"eval_count\": [], \"parameters\": [], \"mean\": [], \"metadata\": [], \"step\": []}\n\n        def store_intermediate_result(eval_count, parameters, mean, metadata, step):\n            history[\"eval_count\"].append(eval_count)\n            history[\"parameters\"].append(parameters)\n            history[\"mean\"].append(mean)\n            history[\"metadata\"].append(metadata)\n            history[\"step\"].append(step)\n\n        optimizer = COBYLA(maxiter=10)\n        wavefunction = self.ry_wavefunction\n\n        vqd = VQD(\n            estimator=self.estimator,\n            fidelity=self.fidelity,\n            ansatz=wavefunction,\n            optimizer=optimizer,\n            callback=store_intermediate_result,\n            betas=self.betas,\n            initial_point=[1] * 8,\n        )\n\n        vqd.compute_eigenvalues(operator=op)\n\n        self.assertTrue(all(isinstance(count, int) for count in history[\"eval_count\"]))\n        self.assertTrue(all(isinstance(mean, float) for mean in history[\"mean\"]))\n        self.assertTrue(all(isinstance(metadata, dict) for metadata in history[\"metadata\"]))\n        self.assertTrue(all(isinstance(count, int) for count in history[\"step\"]))\n        for params in history[\"parameters\"]:\n            self.assertTrue(all(isinstance(param, float) for param in params))\n\n        ref_eval_count = [\n            1,\n            2,\n            3,\n            4,\n            5,\n            6,\n            7,\n            8,\n            9,\n            10,\n            1,\n            2,\n            3,\n            4,\n            5,\n            6,\n            7,\n            8,\n            9,\n            10,\n        ]\n\n        ref_mean = [\n            -1.08,\n            -1.08,\n            -1.01,\n            -1.14,\n            -1.17,\n            -1.38,\n            -1.01,\n            -1.63,\n            -1.46,\n            -1.56,\n            -0.",
+      "metadata": {
+        "source_file": "test\\eigensolvers\\test_vqd.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_3",
+        "section_title": "test_vqd.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "eigenvalues"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "vqd__1b80be488ef6434c230f83aff592b718__part_1__1",
+      "text": "atively by introducing an overlap term with all\n    the previously computed eigenstates that must be minimised, thus ensuring\n    higher energy eigenstates are found.\n\n    An instance of VQD requires defining three algorithmic subcomponents:\n    an integer k denoting the number of eigenstates to calculate, a trial\n    state (a.k.a. ansatz) which is a :class:`QuantumCircuit`,\n    and one instance (or list of) classical :mod:`~qiskit_algorithms.optimizers`.\n    The optimizer varies the circuit parameters\n    The trial state :math:`|\\psi(\\vec\\theta)\\rangle` is varied by the optimizer,\n    which modifies the set of ansatz parameters :math:`\\vec\\theta`\n    such that the expectation value of the operator on the corresponding\n    state approaches a minimum. The algorithm does this by iteratively refining\n    each excited state to be orthogonal to all the previous excited states.\n\n    An optional array of parameter values, via the *initial_point*, may be provided\n    as the starting point for the search of the minimum eigenvalue. This feature is\n    particularly useful when there are reasons to believe that the solution point\n    is close to a particular point.\n\n    The length of the *initial_point* list value must match the number of the parameters\n    expected by the ansatz. If the *initial_point* is left at the default\n    of ``None``, then VQD will look to the ansatz for a preferred value, based on its\n    given initial state. If the ansatz returns ``None``,\n    then a random point will be generated within the parameter bounds set, as per above.\n    It is also possible to give a list of initial points, one for every kth eigenvalue.\n    If the ansatz provides ``None`` as the lower bound, then VQD\n    will default it to :math:`-2\\pi`; similarly, if the ansatz returns ``None``\n    as the upper bound, the default value will be :math:`2\\pi`.\n\n    The following attributes can be set via the initializer but can also be read and\n    updated once the VQD object has been constructed.\n\n    Attributes:\n            estimator (BaseEstimatorV2): The primitive instance used to perform the expectation\n                estimation as indicated in the VQD paper.\n            fidelity (BaseStateFidelity): The fidelity class instance used to compute the\n                overlap estimation as indicated in the VQD paper.\n            optimizer(Optimizer | Sequence[Optimizer]): A classical optimizer or a list of optimizers,\n                one for every k-th eigenvalue. Can either be a Qiskit optimizer or a callable\n                that takes an array as input and returns a Qiskit or SciPy optimization result.\n            k (int): the number of eigenvalues to return. Returns the lowest k eigenvalues.\n            bet",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "source_file": "qiskit_algorithms\\eigensolvers\\vqd.py",
+        "section_title": "vqd.py",
+        "section_id": "part_1"
+      },
+      "score": 0.8331644205528773,
+      "original_score": 0.8146271339476414,
+      "vector_score": 0.8094202725118702,
+      "bm25_score": 0.020827445743084545,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "return",
+        "energy",
+        "eigenvalues",
+        "qiskit"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "eigensolver__700408177d9470387a2bb8b1b5dc273d__full__0",
+      "text": "# This code is part of a Qiskit project.\n#\n# (C) Copyright IBM 2022, 2023.\n#\n# This code is licensed under the Apache License, Version 2.0. You may\n# obtain a copy of this license in the LICENSE.txt file in the root directory\n# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.\n#\n# Any modifications or derivative works of this code must retain this\n# copyright notice, and modified files need to carry a notice indicating\n# that they have been altered from the originals.\n\n\"\"\"The eigensolver interface and result.\"\"\"\n\nfrom __future__ import annotations\n\nfrom abc import ABC, abstractmethod\nfrom typing import Any\nimport numpy as np\n\nfrom qiskit.quantum_info.operators.base_operator import BaseOperator\n\nfrom ..algorithm_result import AlgorithmResult\nfrom ..list_or_dict import ListOrDict\n\n\nclass Eigensolver(ABC):\n    \"\"\"The eigensolver interface.\n\n    Algorithms that can compute eigenvalues for an operator\n    may implement this interface to allow different algorithms to be\n    used interchangeably.\n    \"\"\"\n\n    @abstractmethod\n    def compute_eigenvalues(\n        self,\n        operator: BaseOperator,\n        aux_operators: ListOrDict[BaseOperator] | None = None,\n    ) -> \"EigensolverResult\":\n        \"\"\"\n        Computes the minimum eigenvalue. The ``operator`` and ``aux_operators`` are supplied here.\n        While an ``operator`` is required by algorithms, ``aux_operators`` are optional.\n\n        Args:\n            operator: Qubit operator of the observable.\n            aux_operators: Optional list of auxiliary operators to be evaluated with the\n                eigenstate of the minimum eigenvalue main result and their expectation values\n                returned. For instance, in chemistry, these can be dipole operators and total particle\n                count operators, so we can get values for these at the ground state.\n\n        Returns:\n             An eigensolver result.\n        \"\"\"\n        return EigensolverResult()\n\n    @classmethod\n    def supports_aux_operators(cls) -> bool:\n        \"\"\"Whether computing the expectation value of auxiliary operators is supported.\n\n        If the eigensolver computes the eigenvalues of the main operator, then it can compute\n        the expectation value of the ``aux_operators`` for that state. Otherwise they will be ignored.\n\n        Returns:\n            ``True`` if ``aux_operator`` expectations can be evaluated, ``False`` otherwise.\n        \"\"\"\n        return False\n\n\nclass EigensolverResult(AlgorithmResult):\n    \"\"\"Eigensolver result.\"\"\"\n\n    def __init__(self) -> None:\n        super().__init__()\n        self._eigenvalues: np.ndarray | None = None\n        self._aux_operators_evaluated: list[ListOrDict[tuple[float, dict[str, Any]]]] | None = None\n\n    @property\n    def eigenvalues(self) -> np.ndarray | None:\n        \"\"\"Return the eigenvalues.\"\"\"\n        return self._eigenvalues\n\n    @eigenvalues.setter\n    def eigenvalues(self, value: np.ndarray) -> None:\n        \"\"\"Set the eigenvalues.\"\"\"\n        self._eigenvalues = value\n\n    @property\n    def aux_operators_evaluated(\n        self,\n    ) -> list[ListOrDict[tuple[float, dict[str, Any]]]] | None:\n        \"\"\"Return the aux operator expectation values.\n\n        These values are in fact tuples formatted as (mean, metadata).\n        \"\"\"\n        return self._aux_operators_evaluated\n\n    @aux_operators_evaluated.setter\n    def aux_operators_evaluated(\n        self, value: list[ListOrDict[tuple[float, dict[str, Any]]]]\n    ) -> None:\n        \"\"\"Set the aux operator eigenvalues.\"\"\"\n        self._aux_operators_evaluated = value\n",
+      "metadata": {
+        "source_file": "qiskit_algorithms\\eigensolvers\\eigensolver.py",
+        "section_id": "full",
+        "package": "qiskit-algorithms",
+        "section_title": "eigensolver.py"
+      },
+      "score": 0.799439631127697,
+      "original_score": 0.7831779795975102,
+      "vector_score": 0.7831779795975101,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "return",
+        "eigenvalues",
+        "qiskit"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "operator__045e51c707e9fbba38fcfcb278bb937a__part_1__1",
+      "text": "0|)` changes it to the\n    one state :math:`|\\psi\\rangle=|1\\rangle (\\rho = |1\\rangle\\langle 1|)`:\n\n    .. plot::\n       :include-source:\n       :nofigs:\n\n        >>> import numpy as np\n        >>> from qiskit.quantum_info import Operator\n        >>> op = Operator(np.array([[0.0, 1.0], [1.0, 0.0]]))  # Represents Pauli X operator\n\n        >>> from qiskit.quantum_info import Statevector\n        >>> sv = Statevector(np.array([1.0, 0.0]))\n        >>> sv.evolve(op)\n        Statevector([0.+0.j, 1.+0.j],\n                    dims=(2,))\n\n        >>> from qiskit.quantum_info import DensityMatrix\n        >>> dm = DensityMatrix(np.array([[1.0, 0.0], [0.0, 0.0]]))\n        >>> dm.evolve(op)\n        DensityMatrix([[0.+0.j, 0.+0.j],\n                    [0.+0.j, 1.+0.j]],\n                    dims=(2,))\n\n    \"\"\"\n\n    def __init__(\n        self,\n        data: QuantumCircuit | Operation | BaseOperator | np.ndarray,\n        input_dims: tuple | None = None,\n        output_dims: tuple | None = None,\n    ):\n        \"\"\"Initialize an operator object.\n\n        Args:\n            data (QuantumCircuit or Operation or BaseOperator or matrix):\n                                data to initialize operator.\n            input_dims (tuple): the input subsystem dimensions.\n                                [Default: None]\n            output_dims (tuple): the output subsystem dimensions.\n                                 [Default: None]\n\n        Raises:\n            QiskitError: if input data cannot be initialized as an operator.\n\n        Additional Information:\n            If the input or output dimensions are None, they will be\n            automatically determined from the input data. If the input data is\n            a Numpy array of shape (2**N, 2**N) qubit systems will be used. If\n            the input operator is not an N-qubit operator, it will assign a\n            single subsystem with dimension specified by the shape of the input.\n            Note that two operators initialized via this method are only considered equivalent if they\n            match up to their canonical qubit order (or: permutation). See :meth:`.Operator.from_circuit`\n            to specify a different qubit permutation.\n        \"\"\"\n        op_shape = None\n        if isinstance(data, (list, np.ndarray)):\n            # Default initialization from list or numpy array matrix\n            self._data = np.asarray(data, dtype=complex)\n        elif isinstance(data, (QuantumCircuit, Operation)):\n            # If the input is a Terra QuantumCircuit or Operation we\n            # perform a simulation to construct the unitary operator.\n",
+      "metadata": {
+        "section_id": "part_1",
+        "package": "qiskit",
+        "section_title": "operator.py",
+        "source_file": "qiskit\\quantum_info\\operators\\operator.py"
+      },
+      "score": 0.7624863792684059,
+      "original_score": 0.7499856623877957,
+      "vector_score": 0.7499856623877958,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "statevector",
+        "qiskit"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 114,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

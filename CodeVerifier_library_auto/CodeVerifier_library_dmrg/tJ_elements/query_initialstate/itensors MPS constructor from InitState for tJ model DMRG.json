@@ -1,0 +1,136 @@
+{
+  "query": "itensors MPS constructor from InitState for tJ model DMRG",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__root_0__0",
+      "text": "ITensor is a library for rapidly creating correct and efficient tensor network algorithms.\nThe source code for ITensors.jl can be found on Github .\nAdditional documentation can be found on the ITensor website itensor.org .\nAn ITensor is a tensor whose interface is independent of its memory layout. ITensor indices are objects which carry extra information and which 'recognize' each other (compare equal to each other).\nThe ITensorMPS.jl library includes composable and extensible algorithms for optimizing and transforming tensor networks, such as matrix product state and matrix product operators, such as the DMRG algorithm. If you are looking for information on running finite MPS/MPO calculations such as DMRG, take a look at the ITensorMPS.jl documentation .",
+      "metadata": {
+        "section_title": "ROOT",
+        "package": "itensors",
+        "section_id": "root",
+        "source_file": "docs\\build\\index.html"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.6516300077730691,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensors",
+        "mps",
+        "dmrg"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "dmrg__7888fe20fce412585dc62035ae11a5ee__full__0",
+      "text": "using ..ITensorMPS:\n  MPS,\n  alternating_update,\n  compose_observers,\n  default_observer,\n  eigsolve_updater,\n  values_observer\n\nfunction dmrg(\n  operator, init::MPS; updater=eigsolve_updater, (observer!)=default_observer(), kwargs...\n)\n  info_ref! = Ref{Any}()\n  info_observer! = values_observer(; info=(info_ref!))\n  observer! = compose_observers(observer!, info_observer!)\n  state = alternating_update(operator, init; updater, observer!, kwargs...)\n  return info_ref![].eigval, state\nend\n",
+      "metadata": {
+        "section_title": "dmrg.jl",
+        "section_id": "full",
+        "source_file": "src\\lib\\Experimental\\src\\dmrg.jl",
+        "package": "itensormps"
+      },
+      "score": 0.8679185562260507,
+      "original_score": 0.8599136202397508,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "mps",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__News_2__3",
+      "text": "TDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 9, 2024: A new package ITensorMPS.jl has been released. We plan to move all of the MPS/MPO functionality in ITensors.jl to ITensorMPS.jl . For now, ITensorMPS.jl just re-exports the MPS/MPO functionality of ITensors.jl (as well as of ITensorTDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 2, 2024: ITensors.jl v0.5 has been released. This version removes PackageCompiler.jl as a dependency and moves the package compilation functionality into a package extension. In order to use the ITensors.compile() function going forward, you need to install the PackageCompiler.jl package with using Pkg: Pkg; Pkg.add(\"PackageCompiler\") and put using PackageCompiler together with using ITensors in your code.\nMay 2, 202",
+      "metadata": {
+        "section_id": "News",
+        "section_title": "News",
+        "package": "itensors",
+        "source_file": "docs\\build\\index.html"
+      },
+      "score": 0.8283760030638689,
+      "original_score": 0.7416412949348564,
+      "vector_score": 0.7080916127934672,
+      "bm25_score": 0.6174744513487868,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensors",
+        "mps",
+        "dmrg"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "UpgradeGuide_0.1_to_0.2__cd8727a7c4be2179bde8bba8a697829f__Miscellaneous-breaking-changes_3__1",
+      "text": ".7071067811865475\n```\nwhich will be used for making more general MPS product states.\nThis should not affect end users in general, besides ones who had customized the previous state function, such as with overloads like:\n```code\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Up\") = 1\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Dn\") = 2\n```\nwhich should be changed now to:\n```code\nITensors.val(::SiteType\"My_S=1/2\", ::StateName\"Up\") = 1\nITensors.val(::SiteType\"My_S=1/2\", ::StateName\"Dn\") = 2\n```\nThe QN convention of the \"Qubit\" site type is changed to track the total number of 1 bits instead of the net number of 1 bits vs 0 bits (i.e. change the QN from +1/-1 to 0/1) ( PR #676 ).\n```code\njulia> s = siteinds(\"Qubit\", 4; conserve_number=true)\n4-element Vector{Index{Vector{Pair{QN, Int64}}}}:\n (dim=2|id=925|\"Qubit,Site,n=1\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=799|\"Qubit,Site,n=2\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=8|\"Qubit,Site,n=3\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=385|\"Qubit,Site,n=4\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n```\nBefore it was +1/-1 like \"S=1/2\" :\n```code\njulia> s = siteinds(\"S=1/2\", 4; conserve_sz=true)\n4-element Vector{Index{Vector{Pair{QN, Int64}}}}:\n (dim=2|id=364|\"S=1/2,Site,n=1\") <Out>\n 1: QN(\"Sz\",1) => 1\n 2: QN(\"Sz\",-1) => 1\n (dim=2|id=823|\"S=1/2,Site,n=2\") <Out>\n 1: QN(\"Sz\",1) => 1\n 2: QN(\"",
+      "metadata": {
+        "section_title": "Miscellaneous breaking changes",
+        "source_file": "docs\\build\\UpgradeGuide_0.1_to_0.2.html",
+        "section_id": "Miscellaneous-breaking-changes",
+        "package": "itensors"
+      },
+      "score": 0.8182785649958243,
+      "original_score": 0.7264408505313483,
+      "vector_score": 0.8447835148009527,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensors",
+        "mps",
+        "from"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "README__25bbe8cd84f3edd0df30ca927d4da6ae__h4_3_3__0",
+      "text": "If you are using any MPS/MPO functionality of ITensors.jl, such as the `MPS` and `MPO` types or constructors thereof (like `random_mps`), `OpSum`, `siteinds`, `dmrg`, `apply`, etc. you should install the ITensorMPS.jl package with `import Pkg; Pkg.add(\"ITensorMPS\")` and add `using ITensorMPS` to your code. Additionally, if you are currently using [ITensorTDVP.jl](https://github.com/ITensor/ITensorTDVP.jl), you should replace `using ITensorTDVP` with `using ITensorMPS` in your code.",
+      "metadata": {
+        "section_id": "h4_3",
+        "source_file": "README.md",
+        "section_title": "Upgrade guide",
+        "package": "itensormps"
+      },
+      "score": 0.8102216216750042,
+      "original_score": 0.7924298987070358,
+      "vector_score": 0.9215226739705553,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensors",
+        "mps",
+        "dmrg"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 110,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

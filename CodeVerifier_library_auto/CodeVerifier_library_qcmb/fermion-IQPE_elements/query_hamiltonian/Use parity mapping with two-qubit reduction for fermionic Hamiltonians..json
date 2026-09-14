@@ -1,0 +1,139 @@
+{
+  "query": "Use parity mapping with two-qubit reduction for fermionic Hamiltonians.",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "0.6_c_qubit_converter__b2ad6fe9af7ffae9b09fd8e83744238a__part_4__4",
+      "text": " -0.22575349 * ZIII\n    +0.16614543 * ZIIZ\n    +0.17464343 * ZIZI\n    +0.12091263 * ZZII\n\nThis is likely what you were doing when you were working with any of the following mappers:\n\n- :class:`~qiskit_nature.second_q.mappers.JordanWignerMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevSuperFastMapper`\n- :class:`~qiskit_nature.second_q.mappers.DirectMapper`\n- :class:`~qiskit_nature.second_q.mappers.LinearMapper`\n- :class:`~qiskit_nature.second_q.mappers.LogarithmicMapper`\n\nThe ParityMapper\n----------------\n\nHowever, when you were using the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, you were\nable to use the ``two_qubit_reduction=True`` option of the\n:class:`~qiskit_nature.second_q.mappers.QubitConverter`. This ability, which has always been unique\nto the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, is now directly built into said\nmapper. So if you were doing something along these lines:\n\n.. code:: ipython3\n\n   from qiskit_nature.second_q.mappers import ParityMapper\n\n   converter = QubitConverter(ParityMapper(), two_qubit_reduction=True)\n\n   reduced_op = converter.convert(hamiltonian, num_particles=problem.num_particles)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nThe equivalent code now looks like the following:\n\n.. code:: ipython3\n\n   mapper = ParityMapper(num_particles=problem.num_particles)\n\n   reduced_op = mapper.map(hamiltonian)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nZ2Symmetries\n------------\n\nFinally, the :class:`~qiskit_nature.second_q.mappers.QubitConverter` class also supported further\nreduction of qubit resources by exploiting",
+      "metadata": {
+        "package": "qiskit-nature",
+        "source_file": "docs\\migration\\0.6_c_qubit_converter.rst",
+        "section_title": "0.6_c_qubit_converter.rst",
+        "section_id": "part_4"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.04403581558658049,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "use",
+        "qubit",
+        "reduction"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "excitation_preserving__d836ed2db9ec2301899ac4499edb746b__part_3__3",
+      "text": " :math:`e^{-i\\phi} = 1` for the mode ``'iswap'``.\n\n    Note that other wave functions, such as UCC-ansatzes, are also excitation preserving.\n    However these can become complex quickly, while this heuristically motivated circuit follows\n    a simpler pattern.\n\n    This trial wave function consists of layers of :math:`Z` rotations with 2-qubit entanglements.\n    The entangling is creating using :math:`XX+YY` rotations and optionally a controlled-phase\n    gate for the mode ``'fsim'``.\n\n    See :class:`~qiskit.circuit.library.RealAmplitudes` for more detail on the possible arguments\n    and options such as skipping unentanglement qubits, which apply here too.\n\n    The rotations of the ExcitationPreserving ansatz can be written as\n\n    Examples:\n\n        >>> ansatz = ExcitationPreserving(3, reps=1, insert_barriers=True, entanglement='linear')\n        >>> print(ansatz.decompose())  # show the circuit\n             ┌──────────┐ ░ ┌────────────┐┌────────────┐                             ░ ┌──────────┐\n        q_0: ┤ RZ(θ[0]) ├─░─┤0           ├┤0           ├─────────────────────────────░─┤ RZ(θ[5]) ├\n             ├──────────┤ ░ │  RXX(θ[3]) ││  RYY(θ[3]) │┌────────────┐┌────────────┐ ░ ├──────────┤\n        q_1: ┤ RZ(θ[1]) ├─░─┤1           ├┤1           ├┤0           ├┤0           ├─░─┤ RZ(θ[6]) ├\n             ├──────────┤ ░ └────────────┘└────────────┘│  RXX(θ[4]) ││  RYY(θ[4]) │ ░ ├──────────┤\n        q_2: ┤ RZ(θ[2]) ├─░─────────────────────────────┤1           ├┤1           ├─░─┤ RZ(θ[7]) ├\n             └──────────┘ ░                             └────────────┘└────────────┘ ░ └──────────┘\n\n        >>> ansatz = ExcitationPreserving(2, reps=1, flatten=True)\n        >>> qc = QuantumCircuit(2)  # create a circuit and append the RY variational form\n        >>> qc.cry(0.2, 0, 1)  # do some previous operation\n        >>> qc.compose(ansatz, inplace=True)  # add the",
+      "metadata": {
+        "package": "qiskit",
+        "section_title": "excitation_preserving.py",
+        "section_id": "part_3",
+        "source_file": "qiskit\\circuit\\library\\n_local\\excitation_preserving.py"
+      },
+      "score": 0.9893831503589964,
+      "original_score": 0.9891109234451245,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qubit"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "vqe_application__0a14c61f464a058fb9d6c3d130273bc1__part_1__1",
+      "text": "_mapping, two_qubit_reduction, z2_symmetries\n        ):\n            initial_state = HartreeFock(\n                num_orbitals,\n                num_particles,\n                qubit_mapping,\n                two_qubit_reduction,\n                z2_symmetries.sq_list,\n            )\n            var_form = UCCSD(\n                num_orbitals=num_orbitals,\n                num_particles=num_particles,\n                initial_state=initial_state,\n                qubit_mapping=qubit_mapping,\n                two_qubit_reduction=two_qubit_reduction,\n                z2_symmetries=z2_symmetries,\n            )\n            vqe = VQE(\n                var_form=var_form,\n                include_custom=True,\n                optimizer=SLSQP(maxiter=5000),\n                max_evals_grouped=256,\n            )\n            vqe.quantum_instance = AerProvider.get_backend(\"qasm_simulator\")\n            vqe.quantum_instance.backend_options[\"backend_options\"] = {\n                \"max_parallel_experiments\": threads,\n                \"method\": method,\n            }\n\n            return vqe\n\n        mgse = MolecularGroundStateEnergy(driver)\n        result = mgse.compute_energy(cb_create_solver)\n\n    def time_statevector(self, mol_name):\n        threads = multiprocessing.cpu_count()\n        mol_string = self.mol_strings[mol_name][0]\n        qubit = self.mol_strings[mol_name][1]\n        self._run_uccsd_vqe(mol_string, \"statevector\", threads)\n\n    def time_statevector_gpu(self, mol_name):\n        threads = 1\n        mol_string = self.mol_strings[mol_name][0]\n        qubit = self.mol_strings[mol_name][1]\n        self._run_uccsd_vqe(mol_string, \"statevector_gpu\", threads)\n",
+      "metadata": {
+        "section_id": "part_1",
+        "package": "qiskit-aer",
+        "section_title": "vqe_application.py",
+        "source_file": "test\\benchmark\\vqe_application.py"
+      },
+      "score": 0.9893831503589964,
+      "original_score": 0.9891109234451245,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qubit"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "hamiltonian_phase_estimation__fe09fa7dc716801664052a1a15ef8c76__part_1__1",
+      "text": " sufficiently large to map positive :math:`\\lambda` to\n    :math:`[0,\\pi)` and negative :math:`\\lambda` to :math:`[\\pi,2\\pi)`. Each time the circuit is\n    run, one measures a phase corresponding to :math:`lambda_j` with probability :math:`|c_j|^2`.\n\n    If :math:`H` is a Pauli sum, the bound :math:`b` is computed from the sum of the absolute\n    values of the coefficients of the terms. There is no way to reliably recover eigenvalues\n    from phases very near the endpoints of these intervals. Because of this you should be aware\n    that for degenerate cases, such as :math:`H=Z`, the eigenvalues :math:`\\pm 1` will be\n    mapped to the same phase, :math:`\\pi`, and so cannot be distinguished. In this case, you need\n    to specify a larger bound as an argument to the method ``estimate``.\n\n    This class uses and works together with :class:`~qiskit_algorithms.PhaseEstimationScale` to\n    manage scaling the Hamiltonian and the phases that are obtained by the QPE algorithm. This\n    includes setting, or computing, a bound on the eigenvalues of the operator, using this\n    bound to obtain a scale factor, scaling the operator, and shifting and scaling the measured\n    phases to recover the eigenvalues.\n\n    Note that, although we speak of \"evolving\" the state according the Hamiltonian, in the\n    present algorithm, we are not actually considering time evolution. Rather, the role of time is\n    played by the scaling factor, which is chosen to best extract the eigenvalues of the\n    Hamiltonian.\n\n    A few of the ideas in the algorithm may be found in Ref. [1].\n\n    **Reference:**\n\n    [1]: Quantum phase estimation of multiple eigenvalues for small-scale (noisy) experiments\n         T.E. O'Brien, B. Tarasinski, B.M. Terhal\n         `arXiv:1809.09697 <https://arxiv.org/abs/1809.09697>`_\n\n    \"\"\"\n\n    def __init__(\n        self,\n        num_evaluation_qubits: int,\n        sampler: BaseSamplerV2 | None = None,\n        *,\n        transpiler: Transpiler | None = None,\n        transpiler_options: dict[str, Any] | None = None,\n    ) -> None:\n        r\"\"\"\n        Args:\n            num_evaluation_qubits: The number of qubits used in estimating the phase. The phase will\n                be estimated as a binary string with this many bits.\n            sampler: The sampler primitive on which the circuit will be sampled.\n            transpiler: An optional object with a `run` method allowing to transpile the circuits\n                that are produced within this",
+      "metadata": {
+        "source_file": "qiskit_algorithms\\phase_estimators\\hamiltonian_phase_estimation.py",
+        "package": "qiskit-algorithms",
+        "section_title": "hamiltonian_phase_estimation.py",
+        "section_id": "part_1"
+      },
+      "score": 0.9891109234451245,
+      "original_score": 0.9891109234451245,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "test_hamiltonian_gate__84146b1e6b5a7a4b9a38c727c62e8ad3__part_1__1",
+      "text": "):\n        \"\"\"test adjoint operation\"\"\"\n        ham = HamiltonianGate([[3, 4j], [-4j, -0.2]], np.pi * 0.143)\n        np.testing.assert_array_almost_equal(\n            ham.adjoint().to_matrix(), np.transpose(np.conj(ham.to_matrix()))\n        )\n\n    def test_repeat(self):\n        \"\"\"test repeat operation\"\"\"\n        ham = HamiltonianGate(np.array([[1, 0.5 + 4j], [0.5 - 4j, -0.2]]), np.pi * 0.143)\n        operator = Operator(ham)\n        self.assertTrue(np.allclose(Operator(ham.repeat(2)), operator @ operator))\n\n\nclass TestHamiltonianCircuit(QiskitTestCase):\n    \"\"\"Hamiltonian gate circuit tests.\"\"\"\n\n    def test_1q_hamiltonian(self):\n        \"\"\"test 1 qubit hamiltonian\"\"\"\n        qr = QuantumRegister(1, \"q0\")\n        cr = ClassicalRegister(1, \"c0\")\n        qc = QuantumCircuit(qr, cr)\n        matrix = np.zeros((2, 2))\n        qc.x(qr[0])\n        theta = Parameter(\"theta\")\n        qc.append(HamiltonianGate(matrix, theta), [qr[0]])\n        qc = qc.assign_parameters({theta: 1})\n\n        # test of text drawer\n        self.log.info(qc)\n        dag = circuit_to_dag(qc)\n        dag_nodes = dag.named_nodes(\"hamiltonian\")\n        self.assertTrue(len(dag_nodes) == 1)\n        dnode = dag_nodes[0]\n        self.assertIsInstance(dnode.op, HamiltonianGate)\n        self.assertEqual(dnode.qargs, tuple(qc.qubits))\n        assert_allclose(dnode.op.to_matrix(), np.eye(2))\n\n    def test_2q_hamiltonian(self):\n        \"\"\"test 2 qubit hamiltonian\"\"\"\n        qr = QuantumRegister(2)\n        cr = ClassicalRegister(2)\n        qc = QuantumCircuit(qr, cr)\n        matrix = Operator.from_label(\"XY\")\n        qc.x(qr[0])\n        theta = Parameter(\"theta\")\n        uni2q = HamiltonianGate(matrix, theta)\n        qc.append(uni2q, [qr[0], qr[1]])\n        qc2 = qc.assign_parameters({theta: -np.pi / 2})\n        dag = circuit_to_dag(qc2)\n        nodes = dag.two_qubit_ops()\n        self.assertEqual(len(nodes), 1)\n        dnode = nodes[0]\n        self.assertIsInstance(dnode.op, HamiltonianGate)\n        self.assertEqual(dnode.qargs, (qr[0], qr[1]))\n        # Equality based on Pauli exponential identity\n        np.testing.assert_array_almost_equal(dnode.op.to_matrix(), 1j * matrix.data)\n        qc3 = dag_to_circuit(dag",
+      "metadata": {
+        "section_title": "test_hamiltonian_gate.py",
+        "section_id": "part_1",
+        "package": "qiskit",
+        "source_file": "test\\python\\circuit\\test_hamiltonian_gate.py"
+      },
+      "score": 0.9869601069895512,
+      "original_score": 0.986625750758514,
+      "vector_score": 0.9974874681618574,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qubit"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 227,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

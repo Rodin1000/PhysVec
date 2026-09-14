@@ -1,0 +1,141 @@
+{
+  "query": "How to use siteinds() function to define spin-1/2 lattice site in ITensor?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "package": "itensormps",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "section_id": "h2_2"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.7446162433868734,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "use",
+        "spin",
+        "site",
+        "itensor"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "test_phys_site_types__060210c943032a0fd9694bbf30890d18__part_0__0",
+      "text": "using ITensors, LinearAlgebra, Test\nusing ITensors.SiteTypes: has_fermion_string, op, siteind, siteinds, state\n\n@testset \"Physics Sites\" begin\n  N = 10\n\n  @testset \"Generic sites\" for eltype in (Float32, Float64, ComplexF32, ComplexF64)\n    d1, d2 = 3, 4\n    i1, i2 = Index(d1), Index(d2)\n\n    o = op(\"I\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"F\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"I\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    U1 = op(\"RandomUnitary\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U1 = op(\"randU\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U12 = op(\"RandomUnitary\", i1, i2)\n    @test hassameinds(U12, (i1', i2', i1, i2))\n    @test apply(transpose(dag(U12)), U12) ≈\n      itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n  end\n\n  @testset \"Qubit sites\" begin\n   ",
+      "metadata": {
+        "section_title": "test_phys_site_types.jl",
+        "section_id": "part_0",
+        "package": "itensors",
+        "source_file": "test\\base\\test_phys_site_types.jl"
+      },
+      "score": 0.8509077668392053,
+      "original_score": 0.8430608071991635,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "siteinds",
+        "itensor"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "1d_heisenberg__10fcc333efa7636f8f5f3944796c9c77__full__0",
+      "text": "using ITensors, ITensorMPS\nusing Printf\nusing Random\n\nRandom.seed!(1234)\n\nlet\n  N = 100\n\n  # Create N spin-one degrees of freedom\n  sites = siteinds(\"S=1\", N)\n  # Alternatively can make spin-half sites instead\n  #sites = siteinds(\"S=1/2\", N)\n\n  # Input operator terms which define a Hamiltonian\n  os = OpSum()\n  for j in 1:(N - 1)\n    os += \"Sz\", j, \"Sz\", j + 1\n    os += 0.5, \"S+\", j, \"S-\", j + 1\n    os += 0.5, \"S-\", j, \"S+\", j + 1\n  end\n  # Convert these terms to an MPO tensor network\n  H = MPO(os, sites)\n\n  # Create an initial random matrix product state\n  psi0 = random_mps(sites; linkdims=10)\n\n  # Plan to do 5 DMRG sweeps:\n  nsweeps = 5\n  # Set maximum MPS bond dimensions for each sweep\n  maxdim = [10, 20, 100, 100, 200]\n  # Set maximum truncation error allowed when adapting bond dimensions\n  cutoff = [1E-11]\n\n  # Run the DMRG algorithm, returning energy and optimized MPS\n  energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff)\n  @printf(\"Final energy = %.12f\\n\", energy)\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "itensormps",
+        "source_file": "examples\\dmrg\\1d_heisenberg.jl",
+        "section_title": "1d_heisenberg.jl"
+      },
+      "score": 0.79507765436436,
+      "original_score": 0.7784623290425513,
+      "vector_score": 0.9207152767733261,
+      "bm25_score": 0.010643904146760851,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "siteinds",
+        "define",
+        "spin"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "Physics__3bf93049cd8ad58331d2a32084e34246__h2_4_4__0",
+      "text": "ITensor provides support for a range of common local Hilbert space types,\nor physical degrees of freedom, such as S=1/2 and S=1 spins; spinless and spinful\nfermions; and more.\nHowever, there can be many cases where you need to make custom\ndegrees of freedom. You might be working with an\nexotic system, such as ``Z_N`` parafermions for example, or need\nto customize other defaults provided by ITensor.\nIn ITensor, such a customization is done by overloading functions\non specially designated Index tags.\nBelow we give an brief introduction by example of how to make\nsuch custom Index site types in ITensor.\nOther code formulas following this one explain how to build on this\nexample to expand the capabilities of your custom site type such as\nadding support for quantum number (QN) conservation and defining\ncustom mappings of strings to states.\nThroughout we will focus on the example of ``S=3/2`` spins. These\nare spins taking the ``S^z`` values of ``+3/2,+1/2,-1/2,-3/2``.\nSo as tensor indices, they are indices of dimension 4.\nThe key operators we will make for this example are ``S^z``, ``S^+``,\nand ``S^-``, which are defined as:\n```math\n\\begin{aligned}\nS^z &=\n\\begin{bmatrix}\n3/2 &  0  &  0  &  0 \\\\\n 0  & 1/2 &  0  &  0 \\\\\n 0  &  0  &-1/2 &  0 \\\\\n 0  &  0  &  0  &-3/2\\\\\n\\end{bmatrix} \\\\\nS^+ & =\n\\begin{bmatrix}\n 0  &  \\sqrt{3}  &  0  &  0 \\\\\n 0  &  0  &  2  &  0 \\\\\n 0  &  0  &  0  &  \\sqrt{3} \\\\\n 0  &  0  &  0  &  0 \\\\\n\\end{bmatrix} \\\\\nS^- & =\n\\begin{bmatrix}\n 0  &  0 &  0  &  0 \\\\\n \\sqrt{3}  &  0  &  0  &  0 \\\\\n 0  &  2  &  0  &  0  \\\\\n 0  &  0  &  \\sqrt{3}  &  0 \\\\\n\\end{bmatrix} \\\\\n\\end{aligned}\n```\n**Code Preview**\nFirst let's see the minimal code needed to define and use this new\n``S",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "Make a Custom Local Hilbert Space / Physical Degree of Freedom",
+        "source_file": "docs\\src\\examples\\Physics.md",
+        "section_id": "h2_4"
+      },
+      "score": 0.7573245846196631,
+      "original_score": 0.7303606495774034,
+      "vector_score": 0.7670154123073462,
+      "bm25_score": 0.3972193522861519,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "use",
+        "define",
+        "site",
+        "itensor"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "Physics__76dd2e2b1a4692ebd1e2d3b3298ad284__custom_op_2__1",
+      "text": " = op(\"Pup\",s)\n```\nto obtain the \"Pup\" operator for our \"S=1/2\" Index s . Or we can do a similar thing for an array of site indices:\n```code\nusing ITensors, ITensorMPS\nN = 40\ns = siteinds(\"S=1/2\",N)\nPup1 = op(\"Pup\",s[1])\nPup3 = op(\"Pup\",s[3])\n```\nNote that for the \"Qudit\" / \"Boson\" site types, you have to define your overload of op with the dimension of the local Hilbert space, for example:\n```code\nusing ITensors, ITensorMPS\nfunction ITensors.op(::OpName\"P1\", ::SiteType\"Boson\", d::Int)\n  o = zeros(d, d)\n  o[1, 1] = 1\n  return o\nend\n```\nAlternatively you could use Julia's array comprehension syntax:\n```code\nusing ITensors, ITensorMPS\nITensors.op(::OpName\"P1\", ::SiteType\"Boson\", d::Int) =\n  [(i == j == 1) ? 1.0 : 0.0 for i in 1:d, j in 1:d]\n```\nUsing Custom Operators in OpSum\nA key use of these op system extensions is allowing additional operator names to be recognized by the OpSum system for constructing matrix product operator (MPO) tensor networks. With the code above defining the \"Pup\" operator, we are now allowed to use this operator name in any OpSum code involving \"S=1/2\" site indices.\nFor example, we could now make an OpSum involving our custom operator such as:\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1/2\",N)\nos = OpSum()\nfor n=1:N\n  os += \"Pup\",n\nend\nP = MPO(os,sites)\n```\nThis code makes an MPO P which is just the sum of a spin-up projection operator acting on every site.",
+      "metadata": {
+        "section_id": "custom_op",
+        "section_title": "Making a Custom op Definition",
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\Physics.html"
+      },
+      "score": 0.6999867940688971,
+      "original_score": 0.49997799011482835,
+      "vector_score": 0.4896501293733828,
+      "bm25_score": 0.413603175741205,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "use",
+        "siteinds",
+        "function",
+        "define",
+        "spin",
+        "site"
+      ],
+      "match_ratio": 0.75,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 106,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      }
+    }
+  }
+}

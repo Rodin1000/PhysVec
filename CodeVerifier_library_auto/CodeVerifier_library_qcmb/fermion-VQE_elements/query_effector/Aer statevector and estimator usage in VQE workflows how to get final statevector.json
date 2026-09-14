@@ -1,0 +1,143 @@
+{
+  "query": "Aer statevector and estimator usage in VQE workflows; how to get final statevector",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "test_statevector_estimator__fa6e14b3a97b706fa932af77efd82343__part_5__5",
+      "text": "II\", 1)])\n\n        est = StatevectorEstimator()\n        with self.assertRaises(ValueError):\n            est.run([(qc, op2)]).result()\n        with self.assertRaises(ValueError):\n            est.run([(qc, op, [[1e4]])]).result()\n        with self.assertRaises(ValueError):\n            est.run([(qc2, op2, [[1, 2]])]).result()\n        with self.assertRaises(ValueError):\n            est.run([(qc, [op, op2], [[1]])]).result()\n        with self.assertRaises(ValueError):\n            est.run([(qc, op)], precision=-1).result()\n        with self.assertRaises(ValueError):\n            est.run([(qc, 1j * op)], precision=0.1).result()\n        with self.subTest(\"missing []\"):\n            with self.assertRaisesRegex(ValueError, \"An invalid Estimator pub-like was given\"):\n                _ = est.run((qc, op)).result()\n\n    def test_run_numpy_params(self):\n        \"\"\"Test for numpy array as parameter values\"\"\"\n        qc = QuantumCircuit(2)\n        qc.append(real_amplitudes(num_qubits=2, reps=2), [0, 1])\n        op = SparsePauliOp.from_list([(\"IZ\", 1), (\"XI\", 2), (\"ZY\", -1)])\n        k = 5\n        rng = np.random.default_rng(12)\n        params_array = rng.random((k, qc.num_parameters))\n        params_list = params_array.tolist()\n        params_list_array = list(params_array)\n        estimator = StatevectorEstimator()\n        target = estimator.run([(qc, op, params_list)]).result()\n\n        with self.subTest(\"ndarrary\"):\n            result = estimator.run([(qc, op, params_array)]).result()\n            self.assertEqual(len(result[0].data.evs), k)\n            np.testing.assert_allclose(result[0].data.evs, target[0].data.evs)\n\n        with self.subTest(\"list of ndarray\"):\n            result = estimator.run([(qc, op, params_list_array)]).result()\n            self.assertEqual(len(result[0].data.evs), k)\n            np.testing.assert_allclose(result[0].data.evs, target[0].data.evs)\n\n    def test_precision_seed(self):\n        \"\"\"Test for precision and seed\"\"\"\n        estimator = StatevectorEstimator(default_precision=1.0, seed=1)\n        psi1 = self.psi[0]\n        hamiltonian1 = self.hamiltonian[0]\n        theta1 = self.theta[0]\n        job = estimator.run([(psi1, hamiltonian1, [theta1])])\n        result = job.result()\n        np.testing.assert_allclose(result[0].data.evs, [1.901141473854881])\n        # The result of the second run is the same\n        job = estimator.run([(psi1, hamiltonian1, [theta1",
+      "metadata": {
+        "source_file": "test\\python\\primitives\\test_statevector_estimator.py",
+        "package": "qiskit",
+        "section_id": "part_5",
+        "section_title": "test_statevector_estimator.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "estimator"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "test_bosonic_esc_calculation__49325515158ce3ecf65bc111126ddae9__part_2__2",
+      "text": ".reference_energies)\n\n    def test_numpy(self):\n        \"\"\"Test with NumPyEigensolver\"\"\"\n        solver = NumPyEigensolver(k=4)\n        solver.filter_criterion = self.vibrational_problem.get_default_filter_criterion()\n        esc = ExcitedStatesEigensolver(self.qubit_mapper, solver)\n        results = esc.solve(self.vibrational_problem)\n        self._assert_energies(results.computed_vibrational_energies, self.reference_energies)\n\n    def test_vqe_uvccsd(self):\n        \"\"\"Test with VQE plus UVCCSD\"\"\"\n        optimizer = COBYLA(maxiter=5000)\n        estimator = Estimator()\n        initial_state = VSCF(self.vibrational_problem.num_modals, self.qubit_mapper)\n        ansatz = UVCCSD(\n            self.vibrational_problem.num_modals, self.qubit_mapper, initial_state=initial_state\n        )\n        solver = VQE(estimator, ansatz, optimizer)\n        solver.initial_point = [0] * ansatz.num_parameters\n        gsc = GroundStateEigensolver(self.qubit_mapper, solver)\n        esc = QEOM(gsc, estimator, \"sd\")\n        results = esc.solve(self.vibrational_problem)\n        self._assert_energies(\n            results.computed_vibrational_energies, self.reference_energies, places=0\n        )\n\n    def test_vqe_uvcc_with_user_initial_point(self):\n        \"\"\"Test when using a user defined initial point.\"\"\"\n        initial_point = np.asarray([-7.35250290e-05, -9.73079292e-02, -5.43346282e-05])\n        estimator = Estimator()\n        optimizer = COBYLA(maxiter=1)\n        initial_state = VSCF(self.vibrational_problem.num_modals, self.qubit_mapper)\n        ansatz = UVCCSD(\n            self.vibrational_problem.num_modals, self.qubit_mapper, initial_state=initial_state\n        )\n        solver = VQE(estimator, ansatz, optimizer, initial_point=initial_point)\n        gsc = GroundStateEigensolver(self.qubit_mapper, solver)\n        esc = QEOM(gsc, estimator, \"sd\")\n        results = esc.solve(self.vibrational_problem)\n        np.testing.assert_array_almost_equal(\n            results.raw_result.ground_state_raw_result.optimal_point, initial_point\n        )\n\n    def test_vqe_uvccsd_with_callback(self):\n        \"\"\"Test VQE UVCCSD with callback.\"\"\"\n\n        def cb_callback(nfev, parameters, energy, stddev):\n            print(f\"iterations {nfev}: energy: {energy}\")\n\n        estimator = Estimator()\n        optimizer = COBYLA(maxiter=5000)\n        initial_state = VSCF(self.vibrational_problem.num_modals, self.qubit_mapper)\n       ",
+      "metadata": {
+        "source_file": "test\\second_q\\algorithms\\excited_state_solvers\\test_bosonic_esc_calculation.py",
+        "section_id": "part_2",
+        "section_title": "test_bosonic_esc_calculation.py",
+        "package": "qiskit-nature"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "estimator",
+        "vqe"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "test_vqe__ffff26a28311a585190d400006adf82a__part_4__4",
+      "text": " = COBYLA(maxiter=3)\n        wavefunction = self.ry_wavefunction\n\n        estimator = StatevectorEstimator(seed=42)\n\n        vqe = VQE(\n            estimator,\n            wavefunction,\n            optimizer,\n            callback=store_intermediate_result,\n        )\n        vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n\n        self.assertTrue(all(isinstance(count, int) for count in history[\"eval_count\"]))\n        self.assertTrue(all(isinstance(mean, float) for mean in history[\"mean\"]))\n        self.assertTrue(all(isinstance(metadata, dict) for metadata in history[\"metadata\"]))\n        for params in history[\"parameters\"]:\n            self.assertTrue(all(isinstance(param, float) for param in params))\n\n    def test_reuse(self):\n        \"\"\"Test re-using a VQE algorithm instance.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n        vqe = VQE(StatevectorEstimator(seed=42), ansatz, SLSQP(maxiter=300))\n        with self.subTest(msg=\"assert VQE works once all info is available\"):\n            result = vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n            self.assertAlmostEqual(result.eigenvalue.real, self.h2_energy, places=5)\n\n        operator = Operator(np.array([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 2, 0], [0, 0, 0, 3]]))\n        operator = SparsePauliOp.from_operator(operator)\n\n        with self.subTest(msg=\"assert vqe works on re-use.\"):\n            result = vqe.compute_minimum_eigenvalue(operator=operator)\n            self.assertAlmostEqual(result.eigenvalue.real, -1.0, places=5)\n\n    def test_vqe_optimizer_reuse(self):\n        \"\"\"Test running same VQE twice to re-use optimizer, then switch optimizer\"\"\"\n        vqe = VQE(\n            StatevectorEstimator(seed=42),\n            self.ryrz_wavefunction,\n            SLSQP(),\n        )\n\n        def run_check():\n            result = vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n            self.assertAlmostEqual(result.eigenvalue.real, self.h2_energy, places=5)\n\n        run_check()\n\n        with self.subTest(\"Optimizer re-use.\"):\n            run_check()\n\n        with self.subTest(\"Optimizer replace.\"):\n            vqe.optimizer = L_BFGS_B()\n            run_check()\n\n    def test_default_batch_evaluation_on_spsa(self):\n        \"\"\"Test the default batching works.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n\n        wrapped_estimator = StatevectorEstimator(seed=42)\n        inner_estimator = StatevectorEstimator(seed=43)\n\n        callcount = {\"estimator\": 0}\n\n        def wrapped_estimator_run(*",
+      "metadata": {
+        "source_file": "test\\minimum_eigensolvers\\test_vqe.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_4",
+        "section_title": "test_vqe.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "estimator",
+        "vqe"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "aer_statevector__1dd08ca16cd833bed244aac476cef63f__part_1__1",
+      "text": "Statevector`` constructor.\n\n        \"\"\"\n        if \"_aer_state\" in configs:\n            self._aer_state = configs.pop(\"_aer_state\")\n        else:\n            if \"method\" not in configs:\n                configs[\"method\"] = \"statevector\"\n            elif configs[\"method\"] not in (\"statevector\", \"matrix_product_state\"):\n                method = configs[\"method\"]\n                raise AerError(f\"Method {method} is not supported\")\n            if isinstance(data, (QuantumCircuit, Instruction)):\n                data, aer_state = AerStatevector._from_instruction(data, None, configs)\n            elif isinstance(data, list):\n                data, aer_state = AerStatevector._from_ndarray(\n                    np.array(data, dtype=complex), configs\n                )\n            elif isinstance(data, np.ndarray):\n                data, aer_state = AerStatevector._from_ndarray(data, configs)\n            elif isinstance(data, AerStatevector):\n                aer_state = data._aer_state\n                if dims is None:\n                    dims = data._op_shape._dims_l\n                data = data._data.copy()\n            elif isinstance(data, Statevector):\n                data, aer_state = AerStatevector._from_ndarray(\n                    np.array(data.data, dtype=complex), configs\n                )\n            else:\n                raise AerError(f\"Input data is not supported: type={data.__class__}, data={data}\")\n\n            self._aer_state = aer_state\n\n        super().__init__(data, dims=dims)\n\n        self._result = None\n        self._configs = configs\n\n    def seed(self, value=None):\n        \"\"\"Set the seed for the quantum state RNG.\"\"\"\n        if value is None or isinstance(value, int):\n            self._aer_state.set_seed(value)\n        else:\n            raise AerError(f\"This seed is not supported: type={value.__class__}, value={value}\")\n\n    def _last_result(self):\n        if self._result is None:\n            self._result = self._aer_state.last_result()\n        return self._result\n\n    def metadata(self):\n        \"\"\"Return result metadata of an operation that executed lastly.\"\"\"\n        if self._last_result() is None:\n            raise AerError(\"AerState was not used and metadata does not exist.\")\n        return self._last_result()[\"metadata\"]\n\n    def __copy__(self):\n        return copy.deepcopy(self)\n\n    def __deepcopy__(self, _memo=None):\n        ret = AerStatevector(self._data.copy(), **self._configs)\n        ret._op_shape = copy.deepcopy(self._op_shape)\n        ret._rng_generator = copy.deepcopy(self._rng_generator)\n        return ret\n\n    def conjugate(self):\n        return AerStatevector(np.conj(self._data), dims=self.dims())\n\n    def sample_memory(self, shots, qargs=None):\n        if qargs is None:\n            qubits = np.arange(self._aer_state.num",
+      "metadata": {
+        "section_title": "aer_statevector.py",
+        "package": "qiskit-aer",
+        "section_id": "part_1",
+        "source_file": "qiskit_aer\\quantum_info\\states\\aer_statevector.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "statevector",
+        "statevector"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "test_aer_state__fed00549cbc25a3f8ee238f21ee42543__part_9__9",
+      "text": "=\"statevector\")\n        result = aer_simulator.run(circuit).result()\n        expected = result.get_statevector(0)\n\n        state = AerState(method=\"statevector\")\n        state.allocate_qubits(5)\n        state.initialize(init_state.data)\n\n        state.apply_mcz([0], 1)\n        state.apply_mcz([1, 2], 3)\n        state.apply_mcz([4, 0, 1], 2)\n        actual = state.move_to_ndarray()\n\n        for i, amp in enumerate(actual):\n            self.assertAlmostEqual(expected[i], amp)\n\n    def test_appply_reset(self):\n        \"\"\"Test applying a rest gate\"\"\"\n        seed = 1234\n        init_state = random_statevector(2**5, seed=111)\n\n        circuit = QuantumCircuit(5)\n        circuit.initialize(init_state, [0, 1, 2, 3, 4])\n        circuit.reset(0)\n        circuit.reset([2, 4])\n        circuit.save_statevector()\n\n        aer_simulator = AerSimulator(method=\"statevector\", seed_simulator=seed)\n        result = aer_simulator.run(circuit).result()\n        expected = result.get_statevector(0)\n\n        state = AerState(method=\"statevector\", seed_simulator=seed)\n        state.allocate_qubits(5)\n        state.initialize(init_state.data)\n\n        state.apply_reset([0])\n        state.apply_reset([2, 4])\n        actual = state.move_to_ndarray()\n\n        for i, amp in enumerate(actual):\n            self.assertAlmostEqual(expected[i], amp)\n\n    def test_appply_measure(self):\n        \"\"\"Test applying a measure\"\"\"\n        seed = 1234\n        init_state = random_statevector(2**5, seed=111)\n\n        circuit = QuantumCircuit(5, 1)\n        circuit.initialize(init_state, [0, 1, 2, 3, 4])\n        circuit.measure(0, 0)\n        circuit.save_statevector()\n\n        aer_simulator = AerSimulator(method=\"statevector\", seed_simulator=seed)\n        result = aer_simulator.run(circuit).result()\n        expected = result.get_statevector(0)\n\n        state = AerState(method=\"statevector\", seed_simulator=seed)\n        state.allocate_qubits(5)\n        state.initialize(init_state.data)\n\n        state.apply_measure([0])\n        actual = state.move_to_ndarray()\n\n        for i, amp in enumerate(actual):\n            self.assertAlmostEqual(expected[i], amp)\n\n    def test_probability(self):\n        \"\"\"Test probability() of outcome\"\"\"\n        init_state = random_statevector(2**5, seed=111)\n\n        state = AerState(method=\"statevector\")\n        state.allocate_qubits(5)\n        state.initialize(init_state.data)\n\n        expected = init_state.probabilities()\n\n        for idx in range(0, 2**5):\n            self.assertAlmostEqual(state.probability(idx",
+      "metadata": {
+        "section_title": "test_aer_state.py",
+        "section_id": "part_9",
+        "package": "qiskit-aer",
+        "source_file": "test\\terra\\states\\test_aer_state.py"
+      },
+      "score": 0.9921037660953548,
+      "original_score": 0.9917364994021155,
+      "vector_score": 0.9917364994021154,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "statevector",
+        "statevector"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 224,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      }
+    }
+  }
+}

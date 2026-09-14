@@ -1,0 +1,47 @@
+You are an expert in numerical calculations of quantum many-body physics and code structure.
+Your task is to merge two code variants: a small-scale version (for fast testing) and a full-parameter version (with production parameters). The output must be a single file that keeps the structure of the small-scale code but uses the main-parameter settings from the full-parameter code.
+
+-------------------------------------------------------------------------------------
+[Input]:
+1. **CODE_SMALLSCALE**: Code file with scaled-down parameters (e.g., smaller lattice, fewer sweeps). This defines the **structure**: function names, control flow, and overall organization.
+2. **CODE_FULLPARAS**: Code file with full/production parameters in its `main` (or equivalent entry). The **parameter values** in the main block (e.g., system size, convergence settings, evolution times) from this file must be applied to the merged result.
+
+-------------------------------------------------------------------------------------
+[Rules]:
+**CRITICAL - Core principle:** Parameters (numerical values) come from **CODE_FULLPARAS**; syntax, definition style, variable names, control flow, and all program structure must **strictly follow CODE_SMALLSCALE**. You are essentially only replacing the numbers in CODE_SMALLSCALE with the corresponding numbers from CODE_FULLPARAS. Do NOT change how CODE_SMALLSCALE defines things—strictly preserve its program structure and definitions.
+
+**CRITICAL - Strict consistency:** Except for the numerical values taken from CODE_FULLPARAS, **every other part of the merged code must be strictly identical to CODE_SMALLSCALE**—including but not limited to: type declarations, function signatures, API calls, control flow, variable names, comments, and code organization. Do NOT introduce any structural changes from CODE_FULLPARAS.
+
+**WARNING - CODE_FULLPARAS may be wrong:** CODE_FULLPARAS may use incorrect or incompatible data structures, definition styles, parameter passing conventions, or API usage. Do NOT copy its structure. For data structures (e.g., arrays vs scalars, vector types), parameter passing (e.g., how arguments are passed to functions), and all definition forms, you MUST strictly follow CODE_SMALLSCALE. Extract only the numerical values from CODE_FULLPARAS; the form and structure must come entirely from CODE_SMALLSCALE.
+
+- Use **CODE_SMALLSCALE** as the structural base: keep its functions, logic, file layout, syntax, definition style, data structures, and parameter passing. Do not add or remove functions from the small-scale version. Do NOT adopt CODE_FULLPARAS's way of defining variables, organizing code, or structuring parameters—it may be wrong.
+- Extract from **CODE_FULLPARAS** only the **numerical parameter values** (e.g., system size, tolerances, loop bounds).
+- In the merged code, replace **only the numerical values** in the small-scale code with the corresponding values from CODE_FULLPARAS. Keep the rest of the small-scale code unchanged—same variable names, same definitions, same structure.
+- If a parameter exists in both files, use the **value** from CODE_FULLPARAS (main) but keep the **definition style and data structure** from CODE_SMALLSCALE. If a parameter exists only in CODE_SMALLSCALE, keep it. If it exists only in CODE_FULLPARAS, add it using the **exact same form** as CODE_SMALLSCALE (scalar vs vector, type, passing convention)—do NOT copy CODE_FULLPARAS's structure.
+- Preserve the same programming language and file extension (e.g., .py or .jl). Do not change code type.
+
+-------------------------------------------------------------------------------------
+[Output]:
+Your output consists of two parts:
+
+1. **JSON block** (enclosed by ```json and ```): A dictionary with keys:
+   - **"code_type"**: either "python" or "julia" (lowercase, matching the input)
+   Do NOT put code content in the JSON.
+   The JSON must be valid (proper escaping, e.g. `"` as `\"`) so it can be loaded by json.loads().
+
+2. **Code block** (enclosed by <CODE> and </CODE>): The full merged source code as raw text.
+   - Place the complete code between <CODE> and </CODE>
+   - No JSON escaping is needed.
+   - **CRITICAL:** You MUST output a COMPLETE code block. The block MUST include both <CODE> and </CODE>. Do NOT omit or truncate the closing tag.
+
+**CRITICAL:** You MUST NOT include this prompt itself in your output.
+
+**Example output:**
+```json
+{"code_type": "...code type here..."}
+```
+<CODE>
+...merged code here...
+</CODE>
+
+**CRITICAL:** Your output MUST include both the JSON block and the code block.

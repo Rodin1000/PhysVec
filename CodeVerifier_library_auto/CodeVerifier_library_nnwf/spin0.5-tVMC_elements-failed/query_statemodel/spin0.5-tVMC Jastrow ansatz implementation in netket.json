@@ -1,0 +1,116 @@
+{
+  "query": "spin0.5-tVMC Jastrow ansatz implementation in netket",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-matrix-models__ef1b32ac39370be9a6422cd5bf62bbb1__sec_7_7__0",
+      "text": "## 5. Jastrow Ansatz#\nWe have seen that the mean field ansatz yields about sub-10% error on the ground-state energy. Let’s now try to do better, using a more correlated ansatz.\nWe will now take a short-range Jastrow ansatz which is already inlcuded in NetKet as nk.models.Jastrow :\nwhere \\(W_{ij}\\) is a symmetric matrix of learnable complex parameters (the kernel of the quadratic form).\n```code\n# change the model: initialize weights with normal distributions\nmodel\n=\nnk\n.\nmodels\n.\nJastrow\n(\nkernel_init\n=\nnn\n.\ninitializers\n.\nnormal\n())\n# we use the same MetropolicLocal sapmler as before. Now we sample for longer to get a more accurate result\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n2\n**\n10\n)\n```\n```code\n# look at the parameters\nprint\n(\nvstate\n.\nparameters\n)\n```\n```code\nFrozenDict({\n    kernel: DeviceArray([[ 0.01049682+0.01166978j,  0.00682185+0.00620781j,\n                   0.00733915+0.01080751j,  0.00185571+0.00749652j,\n                  -0.00214337+0.00025017j, -0.00318804-0.00774995j],\n                 [-0.00512184-0.00538546j,  0.00184588-0.01090576j,\n                   0.00651656-0.00574499j,  0.00724852-0.00697769j,\n                  -0.01310518-0.00781628j,  0.0107602 +0.00490359j],\n                 [-0.00207881-0.00916165j,  0.00700885+0.00145953j,\n                   0.00113884-0.00484843j, -0.00317073-0.01036345j,\n                   0.00207871+0.01423066j,  0.01065844+0.00981316j],\n                 [ 0.00393085+0.01117876j,  0.00657261+0.00599069j,\n                  -0.01086216-0.00661874j,  0.00182235+0.00389626j,\n                  -0.00074458+0.0142108j ,  0.00068885+0.00487905j],\n                 [ 0.003",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-matrix-models.html",
+        "section_title": "5. Jastrow Ansatz#",
+        "section_id": "sec_7"
+      },
+      "score": 0.9563574135549741,
+      "original_score": 0.9328575593153446,
+      "vector_score": 1.0,
+      "bm25_score": 0.664287796576723,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "jastrow",
+        "ansatz",
+        "netket"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_5_5__0",
+      "text": "## 3. The Jastrow ansatz#\nLet’s start with a simple ansatz for the ground-state: the Jastrow Ansatz.\n\\( \\log\\psi(\\sigma) = \\sum_i a_i \\sigma_i + \\sum_{i,j} \\sigma_i J_{i,j} \\sigma_j \\)\nTo show how it’s done, we write this simple ansatz as a flax.nnx module.\nWe import this module and call it nnx , as it is customary in the Flax documentation.\nAn NNX model subclasses nnx.Module and defines its parameters inside __init__ using nnx.Param .\nAs the module should work with batches of inputs (therefore the input will be a 2d matrix with shape (N_inputs, N_sites) , but we are lazy and find it easier to define the function for a single input \\(\\sigma\\) , a 1D vector of shape (N_sites,) .\nTherefore, we write a function called evaluate_single , which will evaluate a single 1D input, and use jax.vmap to make it work with 2D inputs as well.\nTo learn more about jax.vmap, give a look at the jax documentation!\n```code\nfrom\nflax\nimport\nnnx\nimport\njax.numpy\nas\njnp\nimport\njax\nclass\nJastrow\n(\nnnx\n.\nModule\n):\ndef\n__init__\n(\nself\n,\nN\n:\nint\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\nk1\n,\nk2\n=\njax\n.\nrandom\n.\nsplit\n(\nrngs\n.\nparams\n())\nself\n.\nJ\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk1\n,\n(\nN\n,\nN\n),\ndtype\n=\njnp\n.\ncomplex128\n))\nself\n.\nv_bias\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk2\n,\n(\nN\n,\n1\n),\ndtype\n=\njnp\n.\ncomplex128\n)\n)\ndef\n__call__\n(\nself\n,\nx\n):\nx\n=\nx\n.\nastype\n(\njnp\n.\ncomplex128\n)\n# keep the dtypes aligned\nquad\n=\njnp\n.\neinsum\n(\n\"...i,ij,...j->...\"\n,\nx\n,\nself\n.\nJ\n,\nx\n)\nlin\n=\njnp\n.\nsqueeze\n(\nx\n@\nself\n.\nv_bias\n,\n-\n1\n)\n# (...,N) @ (N,1) → (...,1)\nreturn\nquad\n+\nlin\n```\nNow that the model is defined, we can instantiate it\n```code\nma\n=\nJastrow\n(\nN\n=\nhi\n.\nsize\n,\nrngs\n=\nnnx",
+      "metadata": {
+        "package": "netket",
+        "section_title": "3. The Jastrow ansatz#",
+        "section_id": "sec_5",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html"
+      },
+      "score": 0.7455517775700563,
+      "original_score": 0.6276367476634971,
+      "vector_score": 0.6783060041377597,
+      "bm25_score": 0.4249597217664468,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "jastrow",
+        "ansatz"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_7_7__0",
+      "text": "## 5. Jastrow Ansatz#\nWe have seen that the mean field ansatz yields about 2% error on the ground-state energy. Let’s now try to do better, using a more correlated ansatz.\nWe will now take a short-range Jastrow ansatz, entangling nearest and next-to nearest neighbors, of the form\nwhere the parameters \\(J_1\\) and \\(J_2\\) are to be learned.\nAgain we can write the model using flax.\n```code\nclass\nJasShort\n(\nnnx\n.\nModule\n):\ndef\n__init__\n(\nself\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\n# Define two parameters j1, and j2.\n# Initialise them with a random normal distribution of standard deviation\n# 0.01\n# We must get a different key for each parameter, otherwise they will be\n# initialised with the same value.\nself\n.\nj1\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nrngs\n.\nparams\n(),\n(\n1\n,)),\ndtype\n=\nfloat\n)\nself\n.\nj2\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nrngs\n.\nparams\n(),\n(\n1\n,)),\ndtype\n=\nfloat\n)\ndef\n__call__\n(\nself\n,\nx\n:\njax\n.\nArray\n):\n# compute the nearest-neighbor correlations\ncorr1\n=\nx\n*\njnp\n.\nroll\n(\nx\n,\n-\n1\n,\naxis\n=-\n1\n)\ncorr2\n=\nx\n*\njnp\n.\nroll\n(\nx\n,\n-\n2\n,\naxis\n=-\n1\n)\n# sum the output\nreturn\njnp\n.\nsum\n(\nself\n.\nj1\n*\ncorr1\n+\nself\n.\nj2\n*\ncorr2\n,\naxis\n=-\n1\n)\n# Initialise the model wtih seed 1\nmodel\n=\nJasShort\n(\nrngs\n=\nnnx\n.\nRngs\n(\n1\n))\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n1008\n)\n```\nWe then optimize it, however this time we also introduce a stochastic reconfiguration (natural gradient) preconditioner. Also, we now log the intermediate results of the optimization, so that we can visualize them at a later stage.\nLoggers that work together with optimisation drivers are defined in nk.logging . In this example we use RuntimeLog , which keeps the metrics in memory. You could also use JsonLog , which stores data to a json file which can be later read as a dict or TensorBoardLog which connects to TensorBoard .\n```code\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\n",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html",
+        "package": "netket",
+        "section_title": "5. Jastrow Ansatz#",
+        "section_id": "sec_7"
+      },
+      "score": 0.6076161441118707,
+      "original_score": 0.4257797230905425,
+      "vector_score": 0.43155809312152293,
+      "bm25_score": 0.40266624296662085,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "jastrow",
+        "ansatz"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__S_20__3",
+      "text": ")\nsizes (netket.hilbert.constraint.SumOnPartitionConstraint attribute)\nSlater2nd (class in netket.experimental.models)\nsmoothing_window (netket.callbacks.ConvergenceStopping attribute)\nsolve() (in module netket.optimizer.solver)\nsolver (netket.optimizer.SR attribute)\nsolver_restart (netket.optimizer.SR attribute)\nsorted_betas (netket.sampler.ParallelTemperingSampler attribute)\nspace_group (netket.graph.space_group.SpaceGroup attribute)\nspace_group() (netket.graph.Lattice method)\nspace_group_builder() (netket.graph.Lattice method)\nspace_group_irreps() (netket.graph.space_group.SpaceGroup method)\nSpaceGroup (class in netket.graph.space_group)\nSpin (class in netket.hilbert)\nspin (netket.hilbert.SpinOrbitalFermions attribute)\nSpinOrbitalFermions (class in netket.hilbert)\nSquare (class in netket.graph)\nSR (class in netket.optimizer)\nstages (netket.experimental.dynamics.AbstractSolver attribute)\nstart (netket.utils.StaticRange attribute)\nstart_from_step (netket.callbacks.EarlyStopping attribute)\nstate (netket.driver.AbstractVariationalDriver attribute) (netket.driver.SteadyState attribute) (netket.driver.VMC attribute) (netket.driver.VMC_SR attribute) (netket.experimental.driver.Infidelity_SR attribute) (netket.experimental.driver.TDVPSchmitt attribute) (netket.experimental.QSR attribute) (netket.experimental.TDVP attribute)\n(netket.driver.SteadyState attribute)\n(netket.driver.VMC attribute)\n(netket.driver.VMC_SR attribute)\n(netket.experimental.driver.Infidelity_SR attribute)\n(netket.experimental.driver.TDVPSchmitt attribute)\n(netket.experimental.QSR attribute)\n(netket.experimental.TDVP attribute)\nStateLog (class in netket.logging)\nstates() (netket.hilbert.DiscreteHilbert method) (netket.hilbert.DoubledHilbert method) (netket.hilbert.Fock method) (netket.hilbert.HomogeneousHilbert method) (netket.hilbert.Qubit method) (netket.hilbert.Spin method) (netket.hilbert.SpinOrbitalFermions method)\n(netket.hilbert.DoubledHilbert method)\n(netket.hilbert.Fock method)\n(netket.hilbert.HomogeneousHilbert method)\n(netket.hilbert.Qubit method)\n(netket.hilbert.Spin method)\n(netket.hilbert.SpinOrbitalFermions method)\nstates_at_index() (netket.hilbert.DiscreteHilbert method) (netket.hilbert.DoubledHilbert method) (netket.hilbert.Fock method) (netket.hilbert.HomogeneousHilbert method) (netket.h",
+      "metadata": {
+        "package": "netket",
+        "section_title": "S",
+        "section_id": "S",
+        "source_file": "docs\\_build\\html\\genindex.html"
+      },
+      "score": 0.6018875250690237,
+      "original_score": 0.44449422102654457,
+      "vector_score": 0.5556177762831807,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__A_2__1",
+      "text": ") (netket.driver.VMC method) (netket.driver.VMC_SR method) (netket.experimental.driver.Infidelity_SR method) (netket.experimental.driver.TDVPSchmitt method) (netket.experimental.QSR method) (netket.experimental.TDVP method)\n(netket.driver.SteadyState method)\n(netket.driver.VMC method)\n(netket.driver.VMC_SR method)\n(netket.experimental.driver.Infidelity_SR method)\n(netket.experimental.driver.TDVPSchmitt method)\n(netket.experimental.QSR method)\n(netket.experimental.TDVP method)\naffine_matrix (netket.symmetry.group.PGSymmetry attribute)\naffine_matrix() (netket.symmetry.group.PointGroup method) (netket.utils.group.PointGroup method)\n(netket.utils.group.PointGroup method)\nall_states() (netket.hilbert.DiscreteHilbert method) (netket.hilbert.DoubledHilbert method) (netket.hilbert.Fock method) (netket.hilbert.HomogeneousHilbert method) (netket.hilbert.Qubit method) (netket.hilbert.Spin method) (netket.hilbert.SpinOrbitalFermions method) (netket.utils.StaticRange method)\n(netket.hilbert.DoubledHilbert method)\n(netket.hilbert.Fock method)\n(netket.hilbert.HomogeneousHilbert method)\n(netket.hilbert.Qubit method)\n(netket.hilbert.Spin method)\n(netket.hilbert.SpinOrbitalFermions method)\n(netket.utils.StaticRange method)\nalpha (netket.models.NDM attribute) (netket.models.RBM attribute) (netket.models.RBMModPhase attribute) (netket.models.RBMMultiVal attribute) (netket.models.RBMSymm attribute)\n(netket.models.RBM attribute)\n(netket.models.RBMModPhase attribute)\n(netket.models.RBMMultiVal attribute)\n(netket.models.RBMSymm attribute)\nappend() (netket.utils.history.History method)\napply() (netket.experimental.operator.FermiHubbardJax method) (netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd method) (netket.experimental.operator.ParticleNumberConservingFermioperator2nd method) (netket.operator._fermion2nd.FermionOperator2ndBase method) (netket.operator._ising.IsingBase method) (netket.operator._local_operator.LocalOperatorBase method) (netket.operator._pauli_strings.PauliStringsBase method) (netket.operator._prod.ProductDiscreteJaxOperator method) (netket.operator._prod.ProductDiscreteOperator method) (netket.operator._sum.SumDiscreteJaxOperator method) (netket.operator._sum.SumDiscreteOperator method) (netket.operator.AbstractSuperOperator",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\genindex.html",
+        "package": "netket",
+        "section_title": "A",
+        "section_id": "A"
+      },
+      "score": 0.5629195183823261,
+      "original_score": 0.39012025820789686,
+      "vector_score": 0.487650322759871,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 56,
+    "final_results_count": 5
+  }
+}

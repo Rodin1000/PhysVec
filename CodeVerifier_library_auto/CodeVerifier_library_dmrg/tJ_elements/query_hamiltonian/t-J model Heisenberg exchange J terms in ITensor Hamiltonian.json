@@ -1,0 +1,137 @@
+{
+  "query": "t-J model Heisenberg exchange J terms in ITensor Hamiltonian",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_12__12",
+      "text": " s2)\n    C[s2 => 2, i => 3, s1 => 2] = -223\n    @test A ≈ C\n  end\n\n  @testset \"Fermionic SVD\" begin\n    N = 4\n    s = siteinds(\"Fermion\", N; conserve_qns=true)\n\n    A = random_itensor(QN(\"Nf\", 2, -1), s[1], s[2], s[3], s[4])\n    for n1 in 1:4, n2 in 1:4\n      (n1 == n2) && continue\n      U, S, V = svd(A, (s[n1], s[n2]))\n      @test norm(U * S * V - A) < 1E-10\n    end\n    for n1 in 1:4, n2 in 1:4, n3 in 1:4\n      (n1 == n2) && continue\n      (n1 == n3) && continue\n      (n2 == n3) && continue\n      U, S, V = svd(A, (s[n1], s[n2], s[n3]))\n      @test norm(U * S * V - A) < 1E-10\n    end\n\n    B = random_itensor(QN(\"Nf\", 3, -1), s[1], s[2], s[3], s[4])\n    for n1 in 1:4, n2 in 1:4\n      (n1 == n2) && continue\n      U, S, V = svd(B, (s[n1], s[n2]))\n      @test norm(U * S * V - B) < 1E-10\n    end\n    for n1 in 1:4, n2 in 1:4, n3 in 1:4\n      (n1 == n2) && continue\n      (n1 == n3) && continue\n      (n2 == n3) && continue\n      U, S, V = svd(B, (s[n1], s[n2], s[n3]))\n      @test norm(U * S * V - B) < 1E-10\n    end\n  end # Fermionic SVD tests\n\n  @testset \"Fermionic SVD Arrow Cases\" begin\n    s = siteinds(\"Fermion\", 3; conserve_qns=true)\n\n    function id(i)\n      if dir(i) == Out\n        I = ITensor(i, dag(i)')\n      else\n        I = ITensor(dag(i)', i)\n      end\n      for n in 1:dim(i)\n        I[n, n] = 1.0\n      end\n",
+      "metadata": {
+        "source_file": "test\\base\\test_fermions.jl",
+        "section_id": "part_12",
+        "section_title": "test_fermions.jl",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_id": "h2_2",
+        "package": "itensormps",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "heisenberg",
+        "itensor",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types_2__0",
+      "text": "## DMRG Calculation with Mixed Local Hilbert Space Types\nThe following fully-working example shows how to set up a calculation mixing S=1/2 and S=1 spins on every other site of a 1D system. The Hamiltonian involves Heisenberg spin interactions with adjustable couplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation is that the sites array has Index objects which alternate in dimension and in which physical tag type they carry, whether \"S=1/2\" or \"S=1\" . (Try printing out the sites array to see!) These tags tell the OpSum system which local operators to use for these sites when building the Hamiltonian MPO.\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n\n  # Make an array of N Index objects with alternating\n  # \"S=1/2\" and \"S=1\" tags on odd versus even sites\n  # (The first argument n->isodd(n) ... is an\n  # on-the-fly function mapping integers to strings)\n  sites = siteinds(n->isodd(n) ? \"S=1/2\" : \"S=1\",N)\n\n  # Couplings between spin-half and\n  # spin-one sites:\n  Jho = 1.0 # half-one coupling\n  Jhh = 0.5 # half-half coupling\n  Joo = 0.5 # one-one coupling\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5*Jho,\"S+\",j,\"S-\",j+1\n    os += 0.5*Jho,\"S-\",j,\"S+\",j+1\n    os += Jho,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:2:N-2\n    os += 0.5*Jhh,\"S+\",j,\"S-\",j+2\n    os += 0.5*Jhh,\"S-\",j,\"S+\",j+2\n    os += Jhh,\"Sz\",j,\"Sz\",j+2\n  end\n  for j=2:2:N-2\n    os += 0.5*Joo,\"S+\",j,\"S-\",j+2\n    os += 0.5*Joo,\"S-\",j,\"S+\",j+2\n    os += Joo,\"Sz\",j,\"Sz\",j+2\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 10\n  maxdim = [10,10,20,40,80,100,140,180,200]\n  cutoff = [1E-8]\n\n  psi0 = random_mps(sites;linkdims=4)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "section_id": "DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 0.9724161356605037,
+      "original_score": 0.9575632856315441,
+      "vector_score": 0.9339252830828962,
+      "bm25_score": 0.09455201019459132,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "heisenberg",
+        "itensor",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Make-a-2D-Hamiltonian-for-DMRG_4__0",
+      "text": "## Make a 2D Hamiltonian for DMRG\nYou can use the OpSum system to make 2D Hamiltonians much in the same way you make 1D Hamiltonians: by looping over all of the bonds and adding the interactions on these bonds to the OpSum.\nTo help with the logic of 2D lattices, ITensor pre-defines some helper functions which return an array of bonds. Each bond object has an \"s1\" field and an \"s2\" field which are the integers numbering the two sites the bond connects. (You can view the source for these functions at this link .)\nThe two provided functions currently are square_lattice and triangular_lattice . It is not hard to write your own similar lattice functions as all they have to do is define an array of ITensorMPS.LatticeBond structs or even a custom struct type you wish to define. We welcome any user contributions of other lattices that ITensor does not currently offer.\nEach lattice function takes an optional named argument \"yperiodic\" which lets you request that the lattice should have periodic boundary conditions around the y direction, making the geometry a cylinder.\nFull example code:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  Ny = 6\n  Nx = 12\n\n  N = Nx*Ny\n\n  sites = siteinds(\"S=1/2\", N;\n                   conserve_qns = true)\n\n  # Obtain an array of LatticeBond structs\n  # which define nearest-neighbor site pairs\n  # on the 2D square lattice (wrapped on a cylinder)\n  lattice = square_lattice(Nx, Ny; yperiodic = false)\n\n  # Define the Heisenberg spin Hamiltonian on this lattice\n  os = OpSum()\n  for b in lattice\n    os += 0.5, \"S+\", b.s1, \"S-\", b.s2\n    os += 0.5, \"S-\", b.s1, \"S+\", b.s2\n    os +=      \"Sz\", b.s1, \"Sz\", b.s2\n  end\n  H = MPO(os,sites)\n\n  state = [isodd(n) ? \"Up\" : \"Dn\" for n=1:N]\n  # Initialize wavefunction to a random MPS\n  # of bond-dimension 10 with same quantum\n  # numbers as `state`\n  psi0 = random_mps(sites,state;linkdims=20)\n\n  nsweeps = 10\n  maxdim = [20,60,100,100,200,400,800]\n  cutoff = [1E-8]\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "section_id": "Make-a-2D-Hamiltonian-for-DMRG",
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "Make a 2D Hamiltonian for DMRG"
+      },
+      "score": 0.9333360988706627,
+      "original_score": 0.8974401521087119,
+      "vector_score": 0.8974401521087119,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "heisenberg",
+        "itensor",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "MPSTimeEvolution__31534b9ac1f6d0e64244cb9d1f610cfc__root_0__0",
+      "text": "An important application of matrix product state (MPS) tensor networks in physics is computing the time evolution of a quantum state under the dynamics of a Hamiltonian $H$ . An accurate, efficient, and simple way to time evolve a matrix product state (MPS) is by using a Trotter decomposition of the time evolution operator $U(t) = e^{-i H t}$ .\nThe technique we will use is \"time evolving block decimation\" (TEBD). More simply it is just the idea of decomposing the time-evolution operator into a circuit of quantum 'gates' (two-site unitaries) using the Trotter-Suzuki approximation and applying these gates in a controlled way to an MPS.\nLet's see how to set up and run a TEBD calculation using ITensor.\nThe Hamiltonian $H$ we will use is the one-dimensional Heisenberg model which is given by:\n\\[\\begin{aligned}\nH & = \\sum_{j=1}^{N-1} \\mathbf{S}_{j} \\cdot \\mathbf{S}_{j+1}  \\\\\n& = \\sum_{j=1}^{N-1} S^z_{j} S^z_{j+1} + \\frac{1}{2} S^+_{j} S^-_{j+1} + \\frac{1}{2} S^-_{j} S^+_{j+1}\n\\end{aligned}\\]\nThe TEBD Method\nWhen the Hamiltonian, like the one above, is a sum of local terms,\n\\[H = \\sum_j h_{j,j+1}\\]\nwhere $h_{j,j+1}$ acts on sites j and j+1, then a Trotter decomposition that is particularly well suited for use with MPS techniques is\n\\[e^{-i \\tau H} \\approx e^{-i h_{1,2} \\tau/2} e^{-i h_{2,3} \\tau/2} \\cdots e^{-i h_{N-1,N} \\tau/2}\ne^{-i h_{N-1,N} \\tau/2} e^{-i h_{N-2,N-1} \\tau/2} \\cdots e^{-i h_{1,2} \\tau/2} + O(\\tau^3)\\]\nNote the factors of two in each exponential. Each factored exponential is known as a Trotter \"gate\".\nWe can visualize the resulting circuit that will be applied to the MPS as follows:\nThe error in the above decomposition is of order $\\tau^3$ , so that will be the error accumulated per time step . Because of the time-step error, one takes $\\tau$ to be small and then applies the above set of operators to an MPS as a single sweep, then does a number $(t/\\tau)$ of sweeps to evolve for a total",
+      "metadata": {
+        "section_id": "root",
+        "source_file": "docs\\build\\tutorials\\MPSTimeEvolution.html",
+        "package": "itensormps",
+        "section_title": "ROOT"
+      },
+      "score": 0.9005549521405561,
+      "original_score": 0.8295227750980962,
+      "vector_score": 0.5964777451180988,
+      "bm25_score": 0.9321801199199896,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "model",
+        "heisenberg",
+        "terms",
+        "itensor",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.8333333333333334,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 108,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 49
+      }
+    }
+  }
+}

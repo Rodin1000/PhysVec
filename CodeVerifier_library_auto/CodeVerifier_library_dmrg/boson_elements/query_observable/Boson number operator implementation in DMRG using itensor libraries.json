@@ -1,0 +1,136 @@
+{
+  "query": "Boson number operator implementation in DMRG using itensor libraries",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_5__5",
+      "text": "3] => 1, s[4] => 3] ≈ 1313\n      @test psi0[s[4] => 3, s[1] => 1, s[3] => 1, s[2] => 3] ≈ -1313\n      @test psi1[s[4] => 3, s[1] => 1, s[3] => 1, s[2] => 3] ≈ -1313\n      @test psi2[s[4] => 3, s[1] => 1, s[3] => 1, s[2] => 3] ≈ -1313\n    end\n  end\n\n  @testset \"C Cdag operators\" begin\n    s = siteinds(\"Fermion\", 3; conserve_qns=true)\n\n    p110 = ITensor(s[1], s[2], s[3])\n    p110[s[1] => 2, s[2] => 2, s[3] => 1] = 1.0\n\n    p011 = ITensor(s[1], s[2], s[3])\n    p011[s[1] => 1, s[2] => 2, s[3] => 2] = 1.0\n\n    np011 = ITensor(s[1], s[2], s[3])\n    np011[s[1] => 1, s[3] => 2, s[2] => 2] = 1.0\n\n    dag_p011 = ITensor(dag(s[3]), dag(s[2]), dag(s[1]))\n    dag_p011[s[3] => 2, s[2] => 2, s[1] => 1] = 1.0\n\n    @test norm(dag(p011) - dag_p011) ≈ 0\n\n    C1 = op(s, \"C\", 1)\n    Cdag3 = op(s, \"Cdag\", 3)\n\n    # Anti-commutator\n    @test norm(Cdag3 * C1 + C1 * Cdag3) ≈ 0.0\n\n    # Commutator\n    @test norm(Cdag3 * C1 - C1 * Cdag3) ≈ 2.0\n\n    let # <011|Cdag3*C1|110> = -1\n      t1 = noprime(C1 * p110)\n      t2 = noprime(Cdag3 * t1)\n      @test scalar(dag_p011 * t2) ≈ -1.0\n    end\n\n    let # <011|C1*Cdag3|110> = +1\n      t1 = noprime(Cdag3",
+      "metadata": {
+        "package": "itensors",
+        "section_title": "test_fermions.jl",
+        "section_id": "part_5",
+        "source_file": "test\\base\\test_fermions.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "section_id": "h2_2",
+        "package": "itensormps"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "dmrg",
+        "using",
+        "itensor"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "Physics__76dd2e2b1a4692ebd1e2d3b3298ad284__custom_op_2__1",
+      "text": " = op(\"Pup\",s)\n```\nto obtain the \"Pup\" operator for our \"S=1/2\" Index s . Or we can do a similar thing for an array of site indices:\n```code\nusing ITensors, ITensorMPS\nN = 40\ns = siteinds(\"S=1/2\",N)\nPup1 = op(\"Pup\",s[1])\nPup3 = op(\"Pup\",s[3])\n```\nNote that for the \"Qudit\" / \"Boson\" site types, you have to define your overload of op with the dimension of the local Hilbert space, for example:\n```code\nusing ITensors, ITensorMPS\nfunction ITensors.op(::OpName\"P1\", ::SiteType\"Boson\", d::Int)\n  o = zeros(d, d)\n  o[1, 1] = 1\n  return o\nend\n```\nAlternatively you could use Julia's array comprehension syntax:\n```code\nusing ITensors, ITensorMPS\nITensors.op(::OpName\"P1\", ::SiteType\"Boson\", d::Int) =\n  [(i == j == 1) ? 1.0 : 0.0 for i in 1:d, j in 1:d]\n```\nUsing Custom Operators in OpSum\nA key use of these op system extensions is allowing additional operator names to be recognized by the OpSum system for constructing matrix product operator (MPO) tensor networks. With the code above defining the \"Pup\" operator, we are now allowed to use this operator name in any OpSum code involving \"S=1/2\" site indices.\nFor example, we could now make an OpSum involving our custom operator such as:\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1/2\",N)\nos = OpSum()\nfor n=1:N\n  os += \"Pup\",n\nend\nP = MPO(os,sites)\n```\nThis code makes an MPO P which is just the sum of a spin-up projection operator acting on every site.",
+      "metadata": {
+        "source_file": "docs\\build\\examples\\Physics.html",
+        "section_id": "custom_op",
+        "package": "itensormps",
+        "section_title": "Making a Custom op Definition"
+      },
+      "score": 0.9398716972041548,
+      "original_score": 0.910921032895044,
+      "vector_score": 0.6622956506656259,
+      "bm25_score": 0.9945015289176725,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "boson",
+        "operator",
+        "using"
+      ],
+      "match_ratio": 0.375,
+      "is_html": true
+    },
+    {
+      "id": "Physics__76dd2e2b1a4692ebd1e2d3b3298ad284__Obtaining-a-Predefined-Operator_0__0",
+      "text": "## Obtaining a Predefined Operator\nGiven an Index carrying a \"physical\" tag such as \"Qubit\", \"S=1/2\", \"Boson\", etc. there are a set of pre-defined operators for each tag. The entire set of operators can be found in the section SiteTypes Included with ITensor .\nIf you have an Index s carrying a \"S=1/2\" tag, for example, you can obtain the \"Sz\" operator like this:\n```code\nusing ITensors, ITensorMPS\n\nop(\"Sz\",s)\n```\nUsually indices with physical tags come from an array of indices returned from the siteinds function\n```code\nusing ITensors, ITensorMPS\n\nN = 10\nsites = siteinds(\"S=1/2\",N)\n```\nin which case one might want the \"Sz\" operator on site 4\n```code\nusing ITensors, ITensorMPS\nSz4 = op(\"Sz\",sites[4])\n```",
+      "metadata": {
+        "section_id": "Obtaining-a-Predefined-Operator",
+        "package": "itensormps",
+        "section_title": "Obtaining a Predefined Operator",
+        "source_file": "docs\\build\\examples\\Physics.html"
+      },
+      "score": 0.8470193872574598,
+      "original_score": 0.7646452111653229,
+      "vector_score": 0.5565448159229869,
+      "bm25_score": 0.8324015809693441,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "boson",
+        "operator",
+        "using",
+        "itensor"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types_2__0",
+      "text": "## DMRG Calculation with Mixed Local Hilbert Space Types\nThe following fully-working example shows how to set up a calculation mixing S=1/2 and S=1 spins on every other site of a 1D system. The Hamiltonian involves Heisenberg spin interactions with adjustable couplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation is that the sites array has Index objects which alternate in dimension and in which physical tag type they carry, whether \"S=1/2\" or \"S=1\" . (Try printing out the sites array to see!) These tags tell the OpSum system which local operators to use for these sites when building the Hamiltonian MPO.\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n\n  # Make an array of N Index objects with alternating\n  # \"S=1/2\" and \"S=1\" tags on odd versus even sites\n  # (The first argument n->isodd(n) ... is an\n  # on-the-fly function mapping integers to strings)\n  sites = siteinds(n->isodd(n) ? \"S=1/2\" : \"S=1\",N)\n\n  # Couplings between spin-half and\n  # spin-one sites:\n  Jho = 1.0 # half-one coupling\n  Jhh = 0.5 # half-half coupling\n  Joo = 0.5 # one-one coupling\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5*Jho,\"S+\",j,\"S-\",j+1\n    os += 0.5*Jho,\"S-\",j,\"S+\",j+1\n    os += Jho,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:2:N-2\n    os += 0.5*Jhh,\"S+\",j,\"S-\",j+2\n    os += 0.5*Jhh,\"S-\",j,\"S+\",j+2\n    os += Jhh,\"Sz\",j,\"Sz\",j+2\n  end\n  for j=2:2:N-2\n    os += 0.5*Joo,\"S+\",j,\"S-\",j+2\n    os += 0.5*Joo,\"S-\",j,\"S+\",j+2\n    os += Joo,\"Sz\",j,\"Sz\",j+2\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 10\n  maxdim = [10,10,20,40,80,100,140,180,200]\n  cutoff = [1E-8]\n\n  psi0 = random_mps(sites;linkdims=4)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "package": "itensormps",
+        "section_id": "DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 0.8254243528034344,
+      "original_score": 0.7413694115606435,
+      "vector_score": 0.7413694115606435,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "dmrg",
+        "using",
+        "itensor"
+      ],
+      "match_ratio": 0.375,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 110,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

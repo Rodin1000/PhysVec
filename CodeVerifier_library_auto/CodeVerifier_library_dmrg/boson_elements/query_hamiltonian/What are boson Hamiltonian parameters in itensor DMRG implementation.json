@@ -1,0 +1,137 @@
+{
+  "query": "What are boson Hamiltonian parameters in itensor DMRG implementation?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "examples\\src\\trg.jl",
+        "section_title": "trg.jl",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "are",
+        "itensor"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "package": "itensormps",
+        "section_id": "h2_2"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hamiltonian",
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "ctmrg_isotropic__3af4213eb7e13bdc1c45eaa2b10337a1__full__0",
+      "text": "using ITensors\n\nfunction ctmrg(T::ITensor, Cₗᵤ::ITensor, Aₗ::ITensor; χmax::Int, cutoff=0.0, nsteps::Int)\n  sₕ = commonind(T, Aₗ)\n  sᵥ = uniqueind(T, Aₗ, Aₗ'; plev=0)\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = uniqueind(Cₗᵤ, Aₗ)\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  Cₗᵤ = dense(Cₗᵤ)\n  for i in 1:nsteps\n    ## Get the grown corner transfer matrix (CTM)\n    Cₗᵤ⁽¹⁾ = Aₗ * Cₗᵤ * Aᵤ * T\n\n    ## Diagonalize the grown CTM\n    # TODO: replace with\n    # eigen(Cₗᵤ⁽¹⁾, \"horiz\" => \"vert\"; tags = \"horiz\" => \"vert\", kwargs...)\n    Cₗᵤ, Uᵥ = eigen(\n      Cₗᵤ⁽¹⁾,\n      (lₕ', sₕ'),\n      (lᵥ', sᵥ');\n      ishermitian=true,\n      cutoff,\n      maxdim=χmax,\n      lefttags=tags(lₕ),\n      righttags=tags(lᵥ),\n    )\n    Cₗᵤ = dense(Cₗᵤ)\n    lᵥ = commonind(Cₗᵤ, Uᵥ)\n    lₕ = uniqueind(Cₗᵤ, Uᵥ)\n\n    # The renormalized CTM is the diagonal matrix of eigenvalues\n    # Normalize the CTM\n    Cₗ = Cₗᵤ * prime(dag(Cₗᵤ), lₕ)\n    normC = (Cₗ * dag(Cₗ))[]^(1 / 4)\n    Cₗᵤ = Cₗᵤ / normC\n\n    # Calculate the renormalized half row transfer matrix (HRTM)\n    Uᵥ = noprime(Uᵥ)\n    Aₗ = Aₗ * Uᵥ * T * dag(Uᵥ')\n    Aₗ = replaceinds(Aₗ, sₕ' => sₕ)\n\n    # Normalize the HRTM\n    ACₗ = Aₗ * Cₗᵤ * prime(dag(Cₗᵤ))\n    normA = √((ACₗ * dag(ACₗ))[])\n    Aₗ = Aₗ / normA\n    Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  end\n  return Cₗᵤ, Aₗ\nend\n",
+      "metadata": {
+        "source_file": "examples\\src\\ctmrg_isotropic.jl",
+        "package": "itensors",
+        "section_id": "full",
+        "section_title": "ctmrg_isotropic.jl"
+      },
+      "score": 0.9413101491410281,
+      "original_score": 0.9395839770569406,
+      "vector_score": 0.9395839770569406,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__How-to-do-periodic-boundary-condition-DMRG_2__0",
+      "text": "## How to do periodic boundary condition DMRG\nThe short answer to how to do fully periodic boundary condition DMRG in ITensor is that you simply input a periodic Hamiltonian into our OpSum system and make the MPO form of your Hamiltonian in the usual way. For example, for a chain of N sites with nearest-neighbor interactions, you include a term that connects site 1 to site N. For a one-dimensional Ising model chain Hamiltonian this would look like:\n```code\nsites = siteinds(\"S=1/2\",N)\n\nhterms = OpSum()\nfor j=1:(N-1)\n  hterms += \"Sz\",j,\"Sz\",j+1\nend\nhterms += \"Sz\",1,\"Sz\",N  # term 'wrapping' around the ring\n\nH = MPO(hterms,sites)\n```\nFor two-dimensional DMRG calculations, where the most common approach is to use periodic boundary conditions in the y-direction only, and not in the x-direction, you do a similar step in making your OpSum input to ITensor DMRG: you include terms wrapping around the periodic cylinder in the y direction but not in the x direction.\nHowever, fully periodic boundary conditions are only recommended for small systems when absolutely needed, and in general are not recommended. For a longer discussion of alternatives to using fully periodic boundaries, see the next section below.\nThe reason fully periodic boundary conditions (periodic in x in 1D, and periodic in both x and y in 2D) are not recommended in general is that the DMRG algorithm, as we are defining it here, optimizes an open-boundary MPS . So if you input a periodic-boundary Hamiltonian, there is a kind of \"mismatch\" that happens where you can still get the correct answer, but it requires much more resources (a larger bond dimension and more sweeps) to get good accuracy. There has been some research into \"truly\" periodic DMRG, [Pippan] that is DMRG that optimizes an MPS with a ring-like topology, but it is not widely used, is still an open area of algorithm development, and is not currently available in ITensor.",
+      "metadata": {
+        "section_title": "How to do periodic boundary condition DMRG",
+        "section_id": "How-to-do-periodic-boundary-condition-DMRG",
+        "source_file": "docs\\build\\faq\\DMRG.html",
+        "package": "itensormps"
+      },
+      "score": 0.8482160757126305,
+      "original_score": 0.7612387707839131,
+      "vector_score": 0.6651603629079769,
+      "bm25_score": 0.38431363150374476,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "are",
+        "hamiltonian",
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Perform-a-basic-DMRG-calculation_0__0",
+      "text": "## Perform a basic DMRG calculation\nBecause tensor indices in ITensor have unique identities, before we can make a Hamiltonian or a wavefunction we need to construct a \"site set\" which will hold the site indices defining the physical Hilbert space:\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1\",N)\n```\nHere we have chosen to create a Hilbert space of N spin 1 sites. The string \"S=1\" denotes a special Index tag which hooks into a system that knows \"S=1\" indices have a dimension of 3 and how to create common physics operators like \"Sz\" for them.\nNext we'll make our Hamiltonian matrix product operator (MPO). A very convenient way to do this is to use the OpSum helper type which lets us input a Hamiltonian (or any sum of local operators) in similar notation to pencil-and-paper notation:\n```code\nos = OpSum()\nfor j=1:N-1\n  os += 0.5,\"S+\",j,\"S-\",j+1\n  os += 0.5,\"S-\",j,\"S+\",j+1\n  os += \"Sz\",j,\"Sz\",j+1\nend\nH = MPO(os,sites)\n```\nIn the last line above we convert the OpSum helper object to an actual MPO.\nBefore beginning the calculation, we need to specify how many DMRG sweeps to do and what schedule we would like for the parameters controlling the accuracy. These parameters can be specified as follows:\n```code\nnsweeps = 5 # number of sweeps is 5\nmaxdim = [10,20,100,100,200] # gradually increase states kept\ncutoff = [1E-10] # desired truncation error\n```\nThe random starting wavefunction psi0 must be defined in the same Hilbert space as the Hamiltonian, so we construct it using the same collection of site indices:\n```code\npsi0 = random_mps(sites;linkdims=2)\n```\nHere we have made a random MPS of bond dimension 2. We could have used a random product state instead, but choosing a slightly larger bond dimension can help DMRG avoid getting stuck in local minima. We could also set psi to some specific initial state using the MPS constructor, which is actually required if we were conserving QNs.\nFinally, we are ready to call DMRG:\n```code\nenergy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n```\nWhen the algorithm is done, it returns the ground state energy as the variable energy and an MPS approximation to the ground state as the variable psi .\nBelow you can find a complete working code that includes all of these steps:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n  sites = siteinds(\"S=1\",N)\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5,\"S+\",j,\"S-\",j+1\n    os += 0.5,\"S-\",j,\"S+\",j+1\n    os += \"Sz\",j,\"Sz\",j+1\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 5 # number of sweeps is 5\n  maxdim = [10,20,100,100,200] # gradually increase states kept\n  cutoff = [1E-10] # desired truncation error\n\n  psi0 = random_mps(sites;linkdims=2)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "Perform a basic DMRG calculation",
+        "package": "itensormps",
+        "section_id": "Perform-a-basic-DMRG-calculation"
+      },
+      "score": 0.8403359227480683,
+      "original_score": 0.7370238727615244,
+      "vector_score": 0.530042653470013,
+      "bm25_score": 0.8279248771660455,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "are",
+        "hamiltonian",
+        "parameters",
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 106,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 49
+      }
+    }
+  }
+}

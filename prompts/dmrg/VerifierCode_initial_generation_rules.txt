@@ -1,0 +1,94 @@
+**Code Format Requirements for Verifier Functions**
+-----------------------------------------------------------------------------
+[Function Naming:]
+- Format: `{element}_verifier_{type}`
+- Examples: `site_verifier_boson`, `hamiltonian_verifier_boson`, `initialstate_verifier_boson`, `observable_verifier_boson`, `effector_verifier_boson`
+
+[Package usage:]
+- You MUST import('using' command in Julia) ITensors and ITensorMPS packages both explicitly
+
+-----------------------------------------------------------------------------
+[Comment Style:]
+1. **Element separator (before function):**
+   - Use separator comment: `# {element}-----------------------------------------------------------------------------------------`
+
+2. **Function description (first line after function definition):**
+   - Format: `# a verifier {element} for {type} system: <brief description>`
+   - Use lowercase for first word (unless proper noun)
+   - Keep description concise and specific
+
+3. **Parameter documentation:**
+   - One line per parameter: `# param_name: description`
+   - Include all parameters (positional and keyword)
+   - Describe parameter purpose clearly
+
+-----------------------------------------------------------------------------
+[Code Structure:]
+1. **Function signature:**
+   - Use type annotations (e.g., `L::Int=6`)
+   - Default values for common parameters
+   - Keyword arguments after semicolon (e.g., `; conserve_qns::Bool=false`)
+   - **CRITICAL: All prerequisite variables/dependencies needed by this {element} function MUST be input parameters**
+     * Do NOT create prerequisite objects (e.g., sites, hamiltonian, initial state) inside the function
+     * All dependencies should be passed as function parameters
+     * Example: `hamiltonian_verifier_boson(sites, t, U, mu; pbc=true)` - sites is an input parameter, not created inside
+
+2. **Function body:**
+   - Keep implementation concise and practical
+   - Use clear variable names
+   - Add inline comments for complex logic if needed
+
+3. **Return statement:**
+   - Always use explicit `return` statement
+   - Return the main result object
+
+-----------------------------------------------------------------------------
+[Language and Style:]
+- For {topic} (dmrg): Use Julia (`.jl` extension)
+- Follow Julia syntax conventions
+- Keep code simple and readable
+- Focus on practical implementation, not theoretical details
+- All parameters MUST be treated as variable, NOT specific numbers. 
+
+-----------------------------------------------------------------------------
+[File Content:]
+- File should contain ONLY the verifier function code
+- **CRITICAL: `using`/`import` statements MUST be placed OUTSIDE the function definition, at the top of the file**
+- Include necessary `using`/`import` statements at the top of the file (before function definition)
+- No extra explanations, examples, or reference code
+- One function per file
+
+-----------------------------------------------------------------------------
+[Element Scope:]
+- **ELEMENT_NOTE: {element_note}**
+- **CRITICAL: Your verifier function MUST implement ONLY what is described in ELEMENT_NOTE**
+- Do NOT add functionality beyond what ELEMENT_NOTE specifies
+- Keep the function minimal and focused on the specific task described in ELEMENT_NOTE
+- If ELEMENT_NOTE mentions specific operations (e.g., "DMRG for ground state"), implement ONLY those operations
+- **CRITICAL: All prerequisite variables/dependencies MUST be input parameters, NOT created inside the function**
+  * For hamiltonian_verifier: sites must be an input parameter (do NOT create sites inside the function)
+  * For initialstate_verifier: sites must be an input parameter
+  * For observable_verifier: sites must be an input parameter
+  * For effector_verifier: sites, H, psi0, etc. must all be input parameters
+  * Only site_verifier can create sites (as it is the first element in the chain) 
+
+-----------------------------------------------------------------------------
+[Example Structure:]
+```julia
+using ITensors, ITensorMPS
+
+# {element}-----------------------------------------------------------------------------------------
+function {element}_verifier_{type}(param1, param2; keyword1=default)
+    # a verifier {element} for {type} system: <brief description>
+    # param1: <description>
+    # param2: <description>
+    # keyword1: <description> (default value)
+    
+    # implementation code
+    
+    return result
+end
+```
+
+**Follow these rules strictly when generating verifier code.**
+

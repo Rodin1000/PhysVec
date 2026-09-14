@@ -1,0 +1,130 @@
+{
+  "query": "Common pitfalls in spin-1/2 initial state definition for DMRG",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "section_id": "h2_2",
+        "package": "itensormps",
+        "source_file": "docs\\src\\examples\\DMRG.md"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.1765831895306859,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "spin",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "DMRGObserver__77e713791fffb15aca3c48d3446c7a86__h2_1_1__0",
+      "text": "In the following example, we have already made a Hamiltonian MPO `H`\nand initial MPS `psi0` for a system of spins whose sites\nhave an associated \"Sz\" operator defined. We construct a\n`DMRGObserver` which measures \"Sz\" on each site at each\nstep of DMRG, and also stops the calculation early if\nthe energy no longer changes to a relative precision of 1E-7.\n```\nSz_observer = DMRGObserver([\"Sz\"],sites,energy_tol=1E-7)\nenergy, psi = dmrg(H,psi0,sweeps,observer=Sz_observer)\nfor (sw,Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n  println(\"Total Sz after sweep $sw = \", sum(Szs)/N)\nend\n```",
+      "metadata": {
+        "section_id": "h2_1",
+        "section_title": "Sample Usage",
+        "package": "itensormps",
+        "source_file": "docs\\src\\DMRGObserver.md"
+      },
+      "score": 0.9594395364268049,
+      "original_score": 0.9569813265132779,
+      "vector_score": 0.9992280302525333,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "initial",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_12__12",
+      "text": " s2)\n    C[s2 => 2, i => 3, s1 => 2] = -223\n    @test A ≈ C\n  end\n\n  @testset \"Fermionic SVD\" begin\n    N = 4\n    s = siteinds(\"Fermion\", N; conserve_qns=true)\n\n    A = random_itensor(QN(\"Nf\", 2, -1), s[1], s[2], s[3], s[4])\n    for n1 in 1:4, n2 in 1:4\n      (n1 == n2) && continue\n      U, S, V = svd(A, (s[n1], s[n2]))\n      @test norm(U * S * V - A) < 1E-10\n    end\n    for n1 in 1:4, n2 in 1:4, n3 in 1:4\n      (n1 == n2) && continue\n      (n1 == n3) && continue\n      (n2 == n3) && continue\n      U, S, V = svd(A, (s[n1], s[n2], s[n3]))\n      @test norm(U * S * V - A) < 1E-10\n    end\n\n    B = random_itensor(QN(\"Nf\", 3, -1), s[1], s[2], s[3], s[4])\n    for n1 in 1:4, n2 in 1:4\n      (n1 == n2) && continue\n      U, S, V = svd(B, (s[n1], s[n2]))\n      @test norm(U * S * V - B) < 1E-10\n    end\n    for n1 in 1:4, n2 in 1:4, n3 in 1:4\n      (n1 == n2) && continue\n      (n1 == n3) && continue\n      (n2 == n3) && continue\n      U, S, V = svd(B, (s[n1], s[n2], s[n3]))\n      @test norm(U * S * V - B) < 1E-10\n    end\n  end # Fermionic SVD tests\n\n  @testset \"Fermionic SVD Arrow Cases\" begin\n    s = siteinds(\"Fermion\", 3; conserve_qns=true)\n\n    function id(i)\n      if dir(i) == Out\n        I = ITensor(i, dag(i)')\n      else\n        I = ITensor(dag(i)', i)\n      end\n      for n in 1:dim(i)\n        I[n, n] = 1.0\n      end\n",
+      "metadata": {
+        "section_id": "part_12",
+        "section_title": "test_fermions.jl",
+        "source_file": "test\\base\\test_fermions.jl",
+        "package": "itensors"
+      },
+      "score": 0.9577206578876912,
+      "original_score": 0.9577206578876912,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__Preventing-DMRG-from-getting-stuck-in-a-local-minimum_1__2",
+      "text": " state which is not orthogonal to the ground state. After doing some amount of imaginary time evolution, use the resulting MPS as an initial state for DMRG obtain a higher-accuracy solution.\nIn stubborn cases, try other methods for finding the ground state which are slower, but have a better chance of succeeding. A key example is imaginary time evolution, which always reaches the ground state if (a) performed accurately on (b) a state which is not orthogonal to the ground state. After doing some amount of imaginary time evolution, use the resulting MPS as an initial state for DMRG obtain a higher-accuracy solution.",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "Preventing DMRG from getting stuck in a local minimum",
+        "source_file": "docs\\build\\faq\\DMRG.html",
+        "section_id": "Preventing-DMRG-from-getting-stuck-in-a-local-minimum"
+      },
+      "score": 0.9061546651914014,
+      "original_score": 0.8587274529763032,
+      "vector_score": 0.8966366611223324,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "initial",
+        "state",
+        "dmrg"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types_2__0",
+      "text": "## DMRG Calculation with Mixed Local Hilbert Space Types\nThe following fully-working example shows how to set up a calculation mixing S=1/2 and S=1 spins on every other site of a 1D system. The Hamiltonian involves Heisenberg spin interactions with adjustable couplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation is that the sites array has Index objects which alternate in dimension and in which physical tag type they carry, whether \"S=1/2\" or \"S=1\" . (Try printing out the sites array to see!) These tags tell the OpSum system which local operators to use for these sites when building the Hamiltonian MPO.\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n\n  # Make an array of N Index objects with alternating\n  # \"S=1/2\" and \"S=1\" tags on odd versus even sites\n  # (The first argument n->isodd(n) ... is an\n  # on-the-fly function mapping integers to strings)\n  sites = siteinds(n->isodd(n) ? \"S=1/2\" : \"S=1\",N)\n\n  # Couplings between spin-half and\n  # spin-one sites:\n  Jho = 1.0 # half-one coupling\n  Jhh = 0.5 # half-half coupling\n  Joo = 0.5 # one-one coupling\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5*Jho,\"S+\",j,\"S-\",j+1\n    os += 0.5*Jho,\"S-\",j,\"S+\",j+1\n    os += Jho,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:2:N-2\n    os += 0.5*Jhh,\"S+\",j,\"S-\",j+2\n    os += 0.5*Jhh,\"S-\",j,\"S+\",j+2\n    os += Jhh,\"Sz\",j,\"Sz\",j+2\n  end\n  for j=2:2:N-2\n    os += 0.5*Joo,\"S+\",j,\"S-\",j+2\n    os += 0.5*Joo,\"S-\",j,\"S+\",j+2\n    os += Joo,\"Sz\",j,\"Sz\",j+2\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 10\n  maxdim = [10,10,20,40,80,100,140,180,200]\n  cutoff = [1E-8]\n\n  psi0 = random_mps(sites;linkdims=4)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "package": "itensormps",
+        "section_id": "DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types"
+      },
+      "score": 0.8888882581779652,
+      "original_score": 0.8396325375764447,
+      "vector_score": 0.8013898555734511,
+      "bm25_score": 0.30123571953096695,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "spin",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 108,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      }
+    }
+  }
+}

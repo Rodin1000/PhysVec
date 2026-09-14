@@ -1,0 +1,130 @@
+{
+  "query": "itensor siteinds function for tJ site type usage and syntax",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_0__0",
+      "text": "using ChainRulesCore: @ignore_derivatives\nusing ..ITensors:\n  ITensors, Index, ITensor, itensor, dag, onehot, prime, product, swapprime, tags\nusing ..SmallStrings: SmallString\nusing ..TagSets: TagSets, TagSet, addtags, commontags\n\n@eval struct SiteType{T}\n  (f::Type{<:SiteType})() = $(Expr(:new, :f))\nend\n\n# Note that the complicated definition of\n# SiteType above is a workaround for performance\n# issues when creating parameterized types\n# in Julia 1.4 and 1.5-beta. Ideally we\n# can just use the following in the future:\n# struct SiteType{T}\n# end\n\n\"\"\"\nSiteType is a parameterized type which allows\nmaking Index tags into Julia types. Use cases\ninclude overloading functions such as `op`,\n`siteinds`, and `state` which generate custom\noperators, Index arrays, and IndexVals associated\nwith Index objects having a certain tag.\n\nTo make a SiteType type, you can use the string\nmacro notation: `SiteType\"MyTag\"`\n\nTo make a SiteType value or object, you can use\nthe notation: `SiteType(\"MyTag\")`\n\nThere are currently a few built-in site types\nrecognized by `jl`. The system is easily extensible\nby users. To add new operators to an existing site type,\nor to create new site types, you can follow the instructions\n[here](https://docs.itensor.org/ITensorMPS/stable/examples/Physics.html).\n\nThe current built-in site types are:\n\n- `SiteType\"S=1/2\"` (or `SiteType\"S=½\"`)\n- `SiteType\"S=1\"`\n- `SiteType\"Qubit\"`\n- `SiteType\"Qudit\"`\n- `SiteType\"Boson\"`\n- `SiteType\"Fermion\"`\n- `SiteType\"tJ\"`\n- `SiteType\"Electron\"`\n\n# Examples\n\nTags on indices get turned into SiteTypes internally, and then\nwe search for overloads of functions like `op` and `siteind`.\nFor example:\n\n```julia\njulia> s = siteind(\"S=1/2\")\n(dim=2|id=862|\"S=1/2,Site\")\n\njulia> @show op(\"Sz\", s);\nop(s, \"Sz\") = ITensor ord=2\nDim 1: (dim=2|id=862|\"S=1/2,Site\")'\nDim 2: (dim=2|id=862|\"S=1/2,Site\")\nNDTensors.Dense{Float64,Array{Float64,1}}\n 2×2\n 0.5   0.0\n 0.0  -0.5\n\njulia> @show op",
+      "metadata": {
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "section_id": "part_0",
+        "package": "itensors",
+        "section_title": "sitetype.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.827485198929224,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensor",
+        "siteinds",
+        "site",
+        "type"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "ops_itensor__affa3c82ed8d1be94bbe675053e1287f__full__0",
+      "text": "using .SiteTypes: SiteTypes, op\n\nfunction SiteTypes.op(I::UniformScaling, s::Index...)\n  return I.λ * op(\"Id\", s...)\nend\n\nfunction ITensor(o::Op, s::Vector{<:Index})\n  return op(o.which_op, map(n -> s[n], o.sites)...; o.params...)\nend\n\nfunction ITensor(o::Scaled, s::Vector{<:Index})\n  c = coefficient(o)\n  if isreal(c)\n    c = real(c)\n  end\n  return c * ITensor(argument(o), s)\nend\n\nfunction ITensor(o::Prod, s::Vector{<:Index})\n  T = ITensor(true)\n  for a in o.args[1]\n    Tₙ = ITensor(a, s)\n    # TODO: Implement this logic inside `apply`\n    if hascommoninds(T, Tₙ)\n      T = T(Tₙ)\n    else\n      T *= Tₙ\n    end\n  end\n  return T\nend\n\nfunction ITensor(o::Sum, s::Vector{<:Index})\n  T = ITensor()\n  for a in o.args[1]\n    T += ITensor(a, s)\n  end\n  return T\nend\n\nfunction ITensor(o::Exp, s::Vector{<:Index})\n  return exp(ITensor(argument(o), s))\nend\n\nfunction ITensor(o::LazyApply.Adjoint, s::Vector{<:Index})\n  return swapprime(dag(ITensor(o', s)), 0 => 1)\nend\n\nfunction Sum{ITensor}(o::Sum, s::Vector{<:Index})\n  return Applied(sum, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Prod, s::Vector{<:Index})\n  return Applied(prod, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Scaled{C,Prod{Op}}, s::Vector{<:Index}) where {C}\n  t = Prod{ITensor}(argument(o), s)\n  t1 = coefficient(o) * only(t.args)[1]\n  return Applied(prod, (vcat([t1], only(t.args)[2:end]),))\nend\n\nfunction apply(o::Prod{ITensor}, v::ITensor; kwargs...)\n  ov = v\n  for oₙ in reverse(only(o.args))\n    ov = apply(oₙ, ov; kwargs...)\n  end\n  return ov\nend\n\nfunction (o::Prod{ITensor})(v::ITensor; kwargs...)\n  return apply(o, v; kwargs...)\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "source_file": "src\\lib\\Ops\\ops_itensor.jl",
+        "section_id": "full",
+        "section_title": "ops_itensor.jl"
+      },
+      "score": 0.9321963091941049,
+      "original_score": 0.9280869945998083,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "function"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "MPSandMPO__5428c6e009697a0773192d5cb72e02f5__h2_5_5__0",
+      "text": "```@docs\nsiteinds(::typeof(commoninds), ::ITensorMPS.AbstractMPS, ::ITensorMPS.AbstractMPS, ::Int)\nsiteinds(::typeof(uniqueinds), ::ITensorMPS.AbstractMPS, ::ITensorMPS.AbstractMPS, ::Int)\nfindsite\nfindsites\nfirstsiteinds\nlinkind(::ITensorMPS.AbstractMPS,::Int)\nsiteind(::MPS, ::Int)\nsiteind(::typeof(first), ::MPS, ::Int)\nsiteinds(::MPS)\nsiteind(::MPO, ::Int)\nsiteinds(::MPO)\nsiteinds(::ITensorMPS.AbstractMPS, ::Int)\n```",
+      "metadata": {
+        "section_title": "Obtaining and finding indices",
+        "source_file": "docs\\src\\MPSandMPO.md",
+        "section_id": "h2_5",
+        "package": "itensormps"
+      },
+      "score": 0.9301416518969566,
+      "original_score": 0.9280869945998083,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "siteinds"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "SiteType__24c306422b4596c3e0e7d9555ab988ee__h2_0_0__0",
+      "text": "```@docs\nSiteType\n```",
+      "metadata": {
+        "section_title": "Description",
+        "section_id": "h2_0",
+        "package": "itensormps",
+        "source_file": "docs\\src\\SiteType.md"
+      },
+      "score": 0.8277836411374687,
+      "original_score": 0.8277836411374687,
+      "vector_score": 0.8919246212413628,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "ITensorsSiteTypesExt__6e84319b85a875508ec561a249cd43f1__part_0__0",
+      "text": "module ITensorsSiteTypesExt\nusing ..ITensors: ITensors, Index, LastVal, dag, prime, val\nusing NDTensors: NDTensors, dim, sim\nusing ..SiteTypes: SiteTypes\nSiteTypes.val(iv::Pair{<:Index}) = val(iv.first, iv.second)\nSiteTypes.val(i::Index, l::LastVal) = l.f(dim(i))\n# TODO:\n# Implement a macro with a general definition:\n# f(iv::Pair{<:Index}, args...) = (f(ind(iv), args...) => val(iv))\nITensors.prime(iv::Pair{<:Index}, inc::Integer=1) = (prime(ind(iv), inc) => val(iv))\nNDTensors.sim(iv::Pair{<:Index}, args...) = (sim(ind(iv), args...) => val(iv))\nITensors.dag(iv::Pair{<:Index}) = (dag(ind(iv)) => val(iv))\nBase.adjoint(iv::Pair{<:Index}) = (prime(ind(iv)) => val(iv))\n\nusing ..ITensors: ITensors, Indices\nfunction ITensors._vals(is::Indices, I::String...)\n  return val.(is, I)\nend\n\nusing Adapt: Adapt\nusing ..ITensors: ITensors, Index, ITensor, ind, inds\nusing NDTensors: NDTensors, Tensor\nusing ..SiteTypes: val\nBase.@propagate_inbounds @inline function ITensors._getindex(\n  T::Tensor, ivs::Vararg{Any,N}\n) where {N}\n  # Tried ind.(ivs), val.(ivs) but it is slower\n  p = NDTensors.getperm(inds(T), ntuple(n -> ind(@inbounds ivs[n]), Val(N)))\n  fac = NDTensors.permfactor(p, ivs...) #<fermions> possible sign\n  return fac * ITensors._getindex(\n    T, NDTensors.permute(ntuple(n -> val(@inbounds ivs[n]), Val(N)), p)...\n  )\nend\nBase.@propagate_inbounds @inline function ITensors._setindex!!(\n  T::Tensor, x::Number, ivs::Vararg{Any,N}\n) where {N}\n  # Would be nice to split off the functions for extracting the `ind` and `val` as Tuples,\n  # but it was slower.\n  p = NDTensors.getperm(inds(T), ntuple(n -> ind(@inbounds ivs[n]), Val(N)))\n  fac = NDTensors.permfactor(p, ivs...) #<fermions> possible sign\n  return ITensors._setindex!!(\n    T, fac * x, NDTensors.permute(ntuple(n -> val(@inbounds ivs[n]), Val(N)), p)...\n  )\nend\nBase.@propagate_in",
+      "metadata": {
+        "source_file": "src\\lib\\ITensorsSiteTypesExt\\src\\ITensorsSiteTypesExt.jl",
+        "section_title": "ITensorsSiteTypesExt.jl",
+        "package": "itensors",
+        "section_id": "part_0"
+      },
+      "score": 0.7547274241739066,
+      "original_score": 0.7398624195783858,
+      "vector_score": 0.797190806339674,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "function"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 106,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+Your task is to analyze a target function and select the most appropriate library file(s) from the available CodeVerifier library files to use as reference libraries for writing unit tests.
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. TARGET_FUNCTION: The function code that needs to be verified/tested. You will write unit tests for the function(s) in this code.
+2. AVAILABLE_LIBRARY_FILES: A list of available library file names (with extensions) in the CodeVerifier library directory.
+
+-------------------------------------------------------------------------------------------------------
+[Instructions]:
+1. Analyze the TARGET_FUNCTION to understand:
+   - The function type and its purpose
+   - Its parameter types and dependencies
+   - The physical system it represents (e.g., boson, fermion, spin type, etc.)
+
+2. Review the AVAILABLE_LIBRARY_FILES list and select one or more library files that are compatible with the TARGET_FUNCTION:
+   - The reference library functions will be used to set up the unit test environment for the TARGET_FUNCTION.  
+   - You MUST select library files that are compatible with the TARGET_FUNCTION's physical system type
+    - **Example**: If TARGET_FUNCTION contains functions related to boson systems, select library files that contain boson-related verifier functions (e.g., files with "boson" in their names)
+    - **Example**: If TARGET_FUNCTION contains functions related to fermion systems, select library files that contain fermion-related verifier functions (e.g., files with "fermion" in their names)
+   - You may select multiple library files if needed to cover all required function types for the test environment
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). **JSON escaping:** In string values, any double quote (`"`) must be escaped as `\"` so the output can be parsed by json.loads().
+The dictionary must contain keys:
+- "selected_files": A list of selected library file names (with extensions, e.g., ["verifier_XXX_basic.py", "verifier_YYY_basic.jl"]). If multiple files are needed, include all of them. If only one file is sufficient, return a list with a single element.
+
+Example output ("```json" right before the dict and "```" right after the dict MUST be included! Beside from this dict, no other information should be output):
+```json
+{
+"selected_files": ["verifier_boson_basic.py"]
+}
+```
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'. Even you fail to select files, you must KEEP this output format.
+2. The "selected_files" field MUST be a list of strings, where each string is a file name with extension.

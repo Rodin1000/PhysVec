@@ -1,0 +1,129 @@
+{
+  "query": "netket.operator.LocalOperator for spin 1/2 hamiltonian implementation",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_3_3__1",
+      "text": ",  1,  1, -1,  1,  1, -1,  1, -1, -1,\n         1,  1, -1, -1]], dtype=int8)\n```\nWe now need to specify the Hamiltonian. For this purpose, we will use NetKet’s LocalOperator (see details here ) which is the sum of arbitrary k-local operators.\nIn this specific case, we have a 1-local operator, \\( \\sigma^{(x)}_i \\) and a 2-local operator, \\( \\sigma^{(z)}_i \\sigma^{(z)}_j \\) . We then start importing the pauli operators.\n```code\nfrom\nnetket.operator.spin\nimport\nsigmax\n,\nsigmaz\n```\nWe now take \\( \\Gamma=-1 \\) and start defining the 1-local parts of the Hamiltonian\n```code\nGamma\n=\n-\n1\nH\n=\nsum\n([\nGamma\n*\nsigmax\n(\nhi\n,\ni\n)\nfor\ni\nin\nrange\n(\nN\n)])\n```\nHere we have used a list comprehension to (mildly) show off our ability to write one-liners, however you could have just added the terms one by one in an explicit loop instead (though you’d end up with a whopping 3 lines of code).\nWe now also add the interaction terms, using the fact that NetKet automatically recognizes products of local operators as tensor products.\n```code\nV\n=\n-\n1\nH\n+=\nsum\n([\nV\n*\nsigmaz\n(\nhi\n,\ni\n)\n@\nsigmaz\n(\nhi\n,\n(\ni\n+\n1\n)\n%\nN\n)\nfor\ni\nin\nrange\n(\nN\n)])\n```\nIn general, when manipulating NetKet objects, you should always assume that you can safely operate on them like\nyou would in mathematical equations, therefore you can sum and multiply them with ease.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html",
+        "section_title": "1. Defining The Hamiltonian#",
+        "section_id": "sec_3",
+        "package": "netket"
+      },
+      "score": 0.8998191145428355,
+      "original_score": 0.8282613392162894,
+      "vector_score": 1.0,
+      "bm25_score": 0.14130669608144705,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "netket",
+        "operator",
+        "localoperator",
+        "spin",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.8333333333333334,
+      "is_html": true
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_1_1__0",
+      "text": "## Contents\nThe goal of this tutorial series is to guide you through writing a simple VMC code from (almost) scratch to compute the ground-state of a paradigmatic spin model: the transverse-field Ising model in 2 dimensions.\nIn this first tutorial, we will focus on:\nUnderstanding NetKet’s graph and operator system\nUnderstanding NetKet’s graph and operator system\nDefining Hamiltonians using building blocks\nDefining Hamiltonians using building blocks\nWorking with different operator formats\nWorking with different operator formats\nValidating our implementation with exact diagonalization\nValidating our implementation with exact diagonalization\nThe hamiltonian we will study is the transverse-field Ising model in 2 dimensions:\nIn the following we assume periodic boundary conditions with \\(h=1\\) and \\(J=1\\) .\nNote\nIf you are executing this notebook on Colab , you will need to install NetKet.\nYou can do so by uncommenting and running the following cell.\nKeep in mind that this notebook was designed for NetKet version 3.9.1 , which requires Python >=3.8.\n```code\n# %pip install --quiet netket\n```\nPlease verify that you are running on the correct version of NetKet:\n```code\nimport\nplatform\nimport\nnetket\nas\nnk\nprint\n(\n\"Python version (requires >=3.9)\"\n,\nplatform\n.\npython_version\n())\nprint\n(\n\"NetKet version (requires >=3.9.1)\"\n,\nnk\n.\n__version__\n)\n```\n```code\nPython version (requires >=3.9) 3.12.11\nNetKet version (requires >=3.9.1) 3.19.dev26+gd94cf4597.d20250713\n```\nShow code cell content\nHide code cell content\n```code\n# Import necessary libraries\nimport\nnetket\nas\nnk\nimport\nnumpy\nas\nnp\n```",
+      "metadata": {
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "package": "netket"
+      },
+      "score": 0.7239085840087212,
+      "original_score": 0.5267004297292364,
+      "vector_score": 0.6377213694608471,
+      "bm25_score": 0.0826166708027933,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "netket",
+        "operator",
+        "spin",
+        "hamiltonian",
+        "implementation"
+      ],
+      "match_ratio": 0.8333333333333334,
+      "is_html": true
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_5_5__0",
+      "text": "## 4. Building Operators#\nIn NetKet you can build individual operators acting on a site by calling the following functions:\n```code\nsx_1\n=\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\n1\n)\nsy_2\n=\nnk\n.\noperator\n.\nspin\n.\nsigmay\n(\nhi\n,\n2\n)\nsz_2\n=\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\n2\n)\n```\nThe functions in nk.operator.spin and nk.operator.boson are used to create the fundamental operators that can be used to build arbitrary observables and Hamiltonians.\nThose functions return an object of type LocalOperator , which behaves as some sort of sparse matrix optimized for Variational Monte Carlo.\nNote\nA LocalOperator can efficiently represent only operators that have a small domain in the computational basis: this means that an operator acting on 1 or 2 qubits will be efficiently represented, but one that acts on many qubits at once will not be.\nA LocalOperator can be printed and has the following representation:\n```code\nprint\n(\nsx_1\n)\n```\n```code\nLocalOperator(dim=16, acting_on=[(1,)], constant=0.0, dtype=float64)\n```\nThe information tells you that:\ndim : The hilbert space has 16 local degrees of freedom\ndim : The hilbert space has 16 local degrees of freedom\nacting_on : this specific operator is composed by terms that act on the single site 1\nacting_on : this specific operator is composed by terms that act on the single site 1\nconstant : this is a diagonal shift proportional to the identity. In this case it is 0\nconstant : this is a diagonal shift proportional to the identity. In this case it is 0\ndtype : the numpy data-type of the matrix elements\ndtype : the numpy data-type of the matrix elements",
+      "metadata": {
+        "section_title": "4. Building Operators#",
+        "package": "netket",
+        "section_id": "sec_5",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html"
+      },
+      "score": 0.6789901920081215,
+      "original_score": 0.47944355460776467,
+      "vector_score": 0.5227525741720186,
+      "bm25_score": 0.3062074763507488,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "operator",
+        "localoperator",
+        "spin"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "02-variational-states-full-summation__9df6c03baad2cbefd9c913ee6748c0df__sec_2_2__0",
+      "text": "## 1. Setup from Previous Tutorial#\nLet’s quickly recreate the system from Part 1:\n```code\n# Define the system\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\ng\n.\nn_nodes\n)\n# Build the Hamiltonian (solution from Part 1)\nhamiltonian\n=\nnk\n.\noperator\n.\nLocalOperator\n(\nhi\n)\n# Add transverse field terms\nfor\nsite\nin\ng\n.\nnodes\n():\nhamiltonian\n=\nhamiltonian\n-\n1.0\n*\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\nsite\n)\n# Add Ising interaction terms\nfor\ni\n,\nj\nin\ng\n.\nedges\n():\nhamiltonian\n=\nhamiltonian\n+\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\ni\n)\n@\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\nj\n)\n# Convert to JAX format\nhamiltonian_jax\n=\nhamiltonian\n.\nto_pauli_strings\n()\n.\nto_jax_operator\n()\n# Compute exact ground state for comparison\nfrom\nscipy.sparse.linalg\nimport\neigsh\ne_gs\n,\npsi_gs\n=\neigsh\n(\nhamiltonian\n.\nto_sparse\n(),\nk\n=\n1\n)\ne_gs\n=\ne_gs\n[\n0\n]\npsi_gs\n=\npsi_gs\n.\nreshape\n(\n-\n1\n)\nprint\n(\nf\n\"Exact ground state energy:\n{\ne_gs\n:\n.6f\n}\n\"\n)\n```\n```code\nExact ground state energy: -34.010598\n```",
+      "metadata": {
+        "section_title": "1. Setup from Previous Tutorial#",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\02-variational-states-full-summation.html",
+        "package": "netket",
+        "section_id": "sec_2"
+      },
+      "score": 0.6457085366882609,
+      "original_score": 0.42547330273772044,
+      "vector_score": 0.35236191865309774,
+      "bm25_score": 0.7179188390762112,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "operator",
+        "localoperator",
+        "spin",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "03-monte-carlo-sampling__41d6b7963280c521f74cf679f9477a50__sec_2_2__0",
+      "text": "## 1. Setup from Previous Tutorials#\nLet’s recreate the complete system from Parts 1 and 2:\n```code\n# Define the system\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\ng\n.\nn_nodes\n)\n# Build the Hamiltonian\nhamiltonian\n=\nnk\n.\noperator\n.\nLocalOperator\n(\nhi\n)\n# Add transverse field terms\nfor\nsite\nin\ng\n.\nnodes\n():\nhamiltonian\n=\nhamiltonian\n-\n1.0\n*\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\nsite\n)\n# Add Ising interaction terms\nfor\ni\n,\nj\nin\ng\n.\nedges\n():\nhamiltonian\n=\nhamiltonian\n+\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\ni\n)\n@\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\nj\n)\n# Convert to JAX format\nhamiltonian_jax\n=\nhamiltonian\n.\nto_pauli_strings\n()\n.\nto_jax_operator\n()\n# Compute exact ground state for comparison\nfrom\nscipy.sparse.linalg\nimport\neigsh\ne_gs\n,\npsi_gs\n=\neigsh\n(\nhamiltonian\n.\nto_sparse\n(),\nk\n=\n1\n)\ne_gs\n=\ne_gs\n[\n0\n]\npsi_gs\n=\npsi_gs\n.\nreshape\n(\n-\n1\n)\nprint\n(\nf\n\"Exact ground state energy:\n{\ne_gs\n:\n.6f\n}\n\"\n)\n```\n```code\nExact ground state energy: -34.010598\n```",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\03-monte-carlo-sampling.html",
+        "section_title": "1. Setup from Previous Tutorials#",
+        "section_id": "sec_2",
+        "package": "netket"
+      },
+      "score": 0.6435140860114967,
+      "original_score": 0.42191473407269753,
+      "vector_score": 0.33964671547249703,
+      "bm25_score": 0.7509868084734994,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "operator",
+        "localoperator",
+        "spin",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 47,
+    "final_results_count": 5
+  }
+}

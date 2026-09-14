@@ -1,0 +1,47 @@
+Your task is to correct errors in a given code file based on the analysis provided, ensuring the code strictly complies with all requirements.
+
+-----------------------------------------------------------------------------------------------
+[Input]:
+1. CODE_FORMER: the input code file that needs to be corrected.
+2. VIOLATIONS: a detailed analysis of errors and non-compliance issues that need to be fixed (from the reasoning stage). This analysis includes for each violation: function name/location, existing code, why it violates, and how to modify.
+
+-----------------------------------------------------------------------------------------------
+[Instructions - your workflow]:
+1. You read the VIOLATIONS carefully to understand ALL issues that need to be fixed.
+   - Review each violation listed in VIOLATIONS
+   - For each violation, note the function name/location, existing code, why it violates, and how to modify
+   - **CRITICAL: You MUST fix ALL violations mentioned in VIOLATIONS. Do not skip any.**
+
+2. You read the CODE_FORMER to understand the current code structure.
+
+3. You correct ALL issues identified in VIOLATIONS.
+   - **CRITICAL: You MUST fix EVERY violation listed in VIOLATIONS. Each violation must be addressed.**
+   - Follow the "How to modify" guidance provided in VIOLATIONS for each issue
+   - You are FORBIDDEN to add any new substantive content to the code beyond what is necessary to fix the violations
+   - You are FORBIDDEN to make any significant change to the existing code structure unless required to fix the violations
+   - You ONLY correct the specific violations identified in VIOLATIONS
+   - You are STRICTLY FORBIDDEN to change the code type (the coding language) during your correction
+
+4. After correcting the code, you will output a brief summary about ALL the violations that are identified and corrected by you.
+
+-----------------------------------------------------------------------------------------------------
+[Output format]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). **JSON escaping:** In string values (e.g. code_content), any double quote (`"`) must be escaped as `\"` so the output can be parsed by json.loads().
+The dictionary must contain keys:
+- "summary": you summarize briefly ALL violations identified in VIOLATIONS and corrected by you. You MUST mention each violation that was fixed. If the code already fully complies (no violations), state "Code fully complies with all rules."
+- "code_type": either "python" or "julia" (lowercase string)
+- "code_content": the full corrected code as a string (plain source, do not include ``` fences)
+
+You MUST NOT include this prompt itself (including the example below) in your output, in order to avoid the case that the example code itself is extracted as your generated code.
+
+Example output (exact dictionary form, shown here for clarity. You MUST add a "```json" right before the dict and "```" right after the dict! (not shown here) Beside from this dict, NO other information should be output (e.g. this prompt itself should NOT be included in your final response)):
+{{
+"summary": "[1] The 'FUNCTION_NAME_1' function definition has used incorrect syntax/keyword. I have corrected it according to CODE_RULES. [2] Missing type annotations on function parameters 'PARAM_1' and 'PARAM_2' in 'FUNCTION_NAME_2' function. I have added type annotations according to CODE_RULES. [3] Function 'FUNCTION_NAME_3' was calling 'OTHER_FUNCTION_NAME' which violates the rule. I have refactored it to comply with CODE_RULES. [4] Removed hardcoded parameter value from 'FUNCTION_NAME_4' function as required by CODE_RULES.",
+"code_type": "julia",
+"code_content": "[The full corrected code content as a string, following all requirements in CODE_RULES. Include all necessary imports, function definitions with proper format, type annotations, and structure as specified in the rules.]"
+}}
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'. Even you fail to generate a complete code_content, you must KEEP this output format.
+

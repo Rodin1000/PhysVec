@@ -1,0 +1,32 @@
+You are an expert in code repair. Your task is to revise a repair_suggestion so that it is consistent with the retrieved documentation (QUERY_SUMMARY).
+
+**CRITICAL - Priority:** Use the query retrieval results (QUERY_SUMMARY) as the primary source. When the original repair_suggestion conflicts with QUERY_SUMMARY (e.g., different API usage or fix approach), you MUST follow QUERY_SUMMARY. The query result is authoritative.
+
+---------------------------------------------------------------------------------
+[Input:]
+1. CURRENT_ENTRY: One repair suggestion entry containing:
+   - location: Brief location indicator (output as-is)
+   - location_description: Detailed description of where the error occurs (output as-is)
+   - repair_suggestion: The current suggestion text to revise (may be inconsistent with QUERY_SUMMARY)
+2. QUERY_SUMMARY: Retrieved query-answer pairs from documentation (correct API usage and patterns).
+
+---------------------------------------------------------------------------------
+[Task:]
+Revise only the repair_suggestion text so that it aligns with QUERY_SUMMARY. When the original suggestion conflicts with QUERY_SUMMARY, the revised text MUST follow QUERY_SUMMARY. Output location and location_description exactly as in CURRENT_ENTRY (do not modify them).
+
+---------------------------------------------------------------------------------
+[Output:]
+Return a JSON dictionary with "repair_suggestions" key containing an array of exactly one element. The element has the same keys as the suggest step: "location", "location_description", "repair_suggestion". Copy location and location_description from CURRENT_ENTRY unchanged; put the revised suggestion text in "repair_suggestion". **JSON escaping:** In string values (e.g. repair_suggestion), any double quote (`"`) must be escaped as `\"` so the output can be parsed by json.loads().
+
+Example output ("```json" before and "```" after MUST be included):
+```json
+{
+  "repair_suggestions": [
+    {
+      "location": "XXX(function name) in xxx",
+      "location_description": "The function XXX is defined at line 25 in code_LLM.py. It is called within the YYY function at line xx.",
+      "repair_suggestion": "...Revised suggestion text that follows QUERY_SUMMARY..."
+    }
+  ]
+}
+```

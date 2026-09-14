@@ -1,0 +1,135 @@
+{
+  "query": "itensor electron hamiltonian implementation examples and common pitfalls in DMRG",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_id": "h2_2",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "package": "itensormps"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.14153449105195912,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensor",
+        "hamiltonian",
+        "dmrg"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__How-to-do-periodic-boundary-condition-DMRG_2__0",
+      "text": "## How to do periodic boundary condition DMRG\nThe short answer to how to do fully periodic boundary condition DMRG in ITensor is that you simply input a periodic Hamiltonian into our OpSum system and make the MPO form of your Hamiltonian in the usual way. For example, for a chain of N sites with nearest-neighbor interactions, you include a term that connects site 1 to site N. For a one-dimensional Ising model chain Hamiltonian this would look like:\n```code\nsites = siteinds(\"S=1/2\",N)\n\nhterms = OpSum()\nfor j=1:(N-1)\n  hterms += \"Sz\",j,\"Sz\",j+1\nend\nhterms += \"Sz\",1,\"Sz\",N  # term 'wrapping' around the ring\n\nH = MPO(hterms,sites)\n```\nFor two-dimensional DMRG calculations, where the most common approach is to use periodic boundary conditions in the y-direction only, and not in the x-direction, you do a similar step in making your OpSum input to ITensor DMRG: you include terms wrapping around the periodic cylinder in the y direction but not in the x direction.\nHowever, fully periodic boundary conditions are only recommended for small systems when absolutely needed, and in general are not recommended. For a longer discussion of alternatives to using fully periodic boundaries, see the next section below.\nThe reason fully periodic boundary conditions (periodic in x in 1D, and periodic in both x and y in 2D) are not recommended in general is that the DMRG algorithm, as we are defining it here, optimizes an open-boundary MPS . So if you input a periodic-boundary Hamiltonian, there is a kind of \"mismatch\" that happens where you can still get the correct answer, but it requires much more resources (a larger bond dimension and more sweeps) to get good accuracy. There has been some research into \"truly\" periodic DMRG, [Pippan] that is DMRG that optimizes an MPS with a ring-like topology, but it is not widely used, is still an open area of algorithm development, and is not currently available in ITensor.",
+      "metadata": {
+        "section_id": "How-to-do-periodic-boundary-condition-DMRG",
+        "source_file": "docs\\build\\faq\\DMRG.html",
+        "package": "itensormps",
+        "section_title": "How to do periodic boundary condition DMRG"
+      },
+      "score": 0.9731915989247876,
+      "original_score": 0.9587563060381348,
+      "vector_score": 0.7436445954316439,
+      "bm25_score": 0.996143928243928,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensor",
+        "hamiltonian",
+        "common",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "examples\\src\\trg.jl",
+        "section_title": "trg.jl",
+        "package": "itensors"
+      },
+      "score": 0.9666799518212853,
+      "original_score": 0.9658255916115747,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "ctmrg_isotropic__3af4213eb7e13bdc1c45eaa2b10337a1__full__0",
+      "text": "using ITensors\n\nfunction ctmrg(T::ITensor, Cₗᵤ::ITensor, Aₗ::ITensor; χmax::Int, cutoff=0.0, nsteps::Int)\n  sₕ = commonind(T, Aₗ)\n  sᵥ = uniqueind(T, Aₗ, Aₗ'; plev=0)\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = uniqueind(Cₗᵤ, Aₗ)\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  Cₗᵤ = dense(Cₗᵤ)\n  for i in 1:nsteps\n    ## Get the grown corner transfer matrix (CTM)\n    Cₗᵤ⁽¹⁾ = Aₗ * Cₗᵤ * Aᵤ * T\n\n    ## Diagonalize the grown CTM\n    # TODO: replace with\n    # eigen(Cₗᵤ⁽¹⁾, \"horiz\" => \"vert\"; tags = \"horiz\" => \"vert\", kwargs...)\n    Cₗᵤ, Uᵥ = eigen(\n      Cₗᵤ⁽¹⁾,\n      (lₕ', sₕ'),\n      (lᵥ', sᵥ');\n      ishermitian=true,\n      cutoff,\n      maxdim=χmax,\n      lefttags=tags(lₕ),\n      righttags=tags(lᵥ),\n    )\n    Cₗᵤ = dense(Cₗᵤ)\n    lᵥ = commonind(Cₗᵤ, Uᵥ)\n    lₕ = uniqueind(Cₗᵤ, Uᵥ)\n\n    # The renormalized CTM is the diagonal matrix of eigenvalues\n    # Normalize the CTM\n    Cₗ = Cₗᵤ * prime(dag(Cₗᵤ), lₕ)\n    normC = (Cₗ * dag(Cₗ))[]^(1 / 4)\n    Cₗᵤ = Cₗᵤ / normC\n\n    # Calculate the renormalized half row transfer matrix (HRTM)\n    Uᵥ = noprime(Uᵥ)\n    Aₗ = Aₗ * Uᵥ * T * dag(Uᵥ')\n    Aₗ = replaceinds(Aₗ, sₕ' => sₕ)\n\n    # Normalize the HRTM\n    ACₗ = Aₗ * Cₗᵤ * prime(dag(Cₗᵤ))\n    normA = √((ACₗ * dag(ACₗ))[])\n    Aₗ = Aₗ / normA\n    Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  end\n  return Cₗᵤ, Aₗ\nend\n",
+      "metadata": {
+        "section_title": "ctmrg_isotropic.jl",
+        "package": "itensors",
+        "source_file": "examples\\src\\ctmrg_isotropic.jl",
+        "section_id": "full"
+      },
+      "score": 0.9594951505587819,
+      "original_score": 0.9584565646756738,
+      "vector_score": 0.9923702301948688,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__ee249f64f89e6651115ee4527b6ea283__h2_2_2__0",
+      "text": "The short answer to how to do fully periodic boundary condition DMRG in ITensor is that\nyou simply input a **periodic Hamiltonian** into our OpSum system and make the MPO\nform of your Hamiltonian in the usual way. For example, for a chain of N sites with nearest-neighbor\ninteractions, you include a term that connects site 1 to site N. For a one-dimensional Ising model\nchain Hamiltonian this would look like:\n```\nsites = siteinds(\"S=1/2\",N)\nhterms = OpSum()\nfor j=1:(N-1)\n  hterms += \"Sz\",j,\"Sz\",j+1\nend\nhterms += \"Sz\",1,\"Sz\",N  # term 'wrapping' around the ring\nH = MPO(hterms,sites)\n```\nFor two-dimensional DMRG calculations, where the most common approach is to use\nperiodic boundary conditions in the y-direction only, and not in the x-direction,\nyou do a similar step in making your OpSum input to ITensor DMRG: you include\nterms wrapping around the periodic cylinder in the y direction but not in the x direction.\nHowever, fully periodic boundary conditions are only recommended for small systems\nwhen absolutely needed, and in general are not recommended. For a longer discussion\nof alternatives to using fully periodic boundaries, see the next section below.\nThe reason fully periodic boundary conditions (periodic in x in 1D, and periodic in both x\nand y in 2D) are not recommended in general is that the DMRG algorithm, as we are defining it\nhere, optimizes an **open-boundary MPS**. So if you input a periodic-boundary Hamiltonian, there\nis a kind of \"mismatch\" that happens where you can still get the correct answer, but it\nrequires much more resources (a larger bond dimension and more sweeps) to get good\naccuracy. There has been some research into \"truly\" periodic DMRG, [^Pippan] that is DMRG that\noptimizes an MPS with a ring-like topology, but it is not widely used, is still an\nopen area of algorithm development, and is not currently available in ITensor.",
+      "metadata": {
+        "source_file": "docs\\src\\faq\\DMRG.md",
+        "section_id": "h2_2",
+        "package": "itensormps",
+        "section_title": "How to do periodic boundary condition DMRG"
+      },
+      "score": 0.8861791883506152,
+      "original_score": 0.8735324315006835,
+      "vector_score": 0.6544411735281409,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensor",
+        "hamiltonian",
+        "common",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 108,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      }
+    }
+  }
+}

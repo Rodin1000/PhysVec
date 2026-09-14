@@ -1,0 +1,130 @@
+{
+  "query": "How to create Hilbert object 'hi' for fermion-spinless-backflow in netket",
+  "packages": [
+    "netket"
+  ],
+  "results": [
+    {
+      "id": "custom_hilbert_constraints__3478f3f26a02da6418c1b5dc5da24d73__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "section_id": "h2_20",
+        "source_file": "docs\\advanced\\custom_hilbert_constraints.md",
+        "package": "netket",
+        "section_title": "Integration with Variational States"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hilbert",
+        "netket"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "custom_hilbert_constraints__6b1a6a577a4f7295fb5d8a8ae5beefc7__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\_sources\\advanced\\custom_hilbert_constraints.md",
+        "section_title": "Integration with Variational States",
+        "section_id": "h2_20",
+        "package": "netket"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hilbert",
+        "netket"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "hilbert__03c53ec606ed51fb8ee918c5ed0f37ac__sec_1_1__0",
+      "text": "## Contents\nThe Hilbert module defines the abstract Hilbert space API and some concrete implementations, such as Spin , Fock .\nAn Hilbert object represents a Hilbert space together with a particular choice of computational basis.\nThey are needed to construct most other objects in NetKet, but they can also be useful to experiment and validate variational ansätze.\nHilbert space objects are all sub-classes of the abstract class AbstractHilbert , which defines the general API respected by all implementations.\nYou can see a birds-eye view of the inheritance diagram among the various kinds of Hilbert spaces included with NetKet below (you can click on the nodes in the graph to go to their API documentation page).\nClasses whose edge is dashed are abstract classes, while the others are concrete and can be instantiated.\nAbstractHilbert makes very few assumptions on the structure of the resulting space and you will generally very rarely interact with it directly.\nDerived from AbstractHilbert are two less generic, but still abstract, types: DiscreteHilbert , representing Hilbert spaces where the local degrees of freedom are countable, and ContinuousHilbert , representing the Hilbert spaces with continuous bases, such as particles in a box.\nSo far, the majority of NetKet development has focused DiscreteHilbert spaces which therefore have a much more developed API, while ContinuousHilbert is still experimental and does not yet support many operations.\nThe most important class of discrete Hilbert spaces are subclasses of HomogeneousHilbert , which is a tensor product of a finite number of local Hilbert spaces of the same kind, each with the same number of local degrees of freedom. HomogeneousHilbert has the concrete subclasses Fock , Spin , and Qubit .\nTensorHilbert represents tensor products of different homogeneous hilbert spaces, therefore it is not homogeneous. You can use it to represent composite systems such as spin-boson setups.\nDoubledHilbert represents a space doubled through Choi’s Isomorphism .\nThis is the space of density matrices and is used to work with dissipative/open systems.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\user-guides\\hilbert.html",
+        "package": "netket",
+        "section_id": "sec_1",
+        "section_title": "Contents"
+      },
+      "score": 0.9405587476158924,
+      "original_score": 0.9105185447981176,
+      "vector_score": 0.9105185447981176,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hilbert",
+        "object",
+        "netket"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "fermi_hubbard__8bcbfda76004a5566d8a49d0d94ad588__part_0__0",
+      "text": "import netket as nk\nimport netket.experimental as nkx\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport json\n\n\nL = 2  # take a 2x2 lattice\nD = 2\nt = 1  # tunneling/hopping\nU = 0.01  # coulomb\n\n# create the graph our fermions can hop on\ng = nk.graph.Hypercube(length=L, n_dim=D, pbc=True)\nn_sites = g.n_nodes\n\n# create a hilbert space with 2 up and 2 down spins\nhi = nk.hilbert.SpinOrbitalFermions(n_sites, s=1 / 2, n_fermions_per_spin=(2, 2))\n\n# Option 1: create an operator representing fermi hubbard interactions by hand\n\n\n# -t (i^ j + h.c.) + U (i^ i j^ j)\n# we will create a helper function to abbreviate the creation, destruction and number operators\n# each operator has a site and spin projection (sz) in order to find the right position in the hilbert space samples\ndef c(site, sz):\n    return nk.operator.fermion.destroy(hi, site, sz=sz)\n\n\ndef cdag(site, sz):\n    return nk.operator.fermion.create(hi, site, sz=sz)\n\n\ndef nc(site, sz):\n    return nk.operator.fermion.number(hi, site, sz=sz)\n\n\nup = +1\ndown = -1\nham = 0.0\nfor sz in (up, down):\n    for u, v in g.edges():\n        ham += -t * cdag(u, sz) @ c(v, sz) - t * cdag(v, sz) @ c(u, sz)\nfor u in g.nodes():\n    ham += U * nc(u, up) @ nc(u, down)\n\nprint(\"Hamiltonian =\", ham.operator_string())\n\n# The Fermi-hubbard hamiltonian conserves the number of fermions, which the generic operator we just defined does not exploit,\n# and thus it creates more (zero) connected elements than necessary.\n# We could set max_conn_size to remove them inside the operator, or,\n# better, directly use the a more efficient implementation included in netket:\n# Convert to ParticleNumberAndSpinConservingFermioperator2nd\nham_generic = ham\nham = nkx.operator.ParticleNumberAndSpinConservingFermioperator2nd.from_fermionoperator2nd(\n    ham_generic\n)\n# we see that ham.max_conn_size << ham_generic.max_conn_size\n# alternatively we can directly construct it with the provided operator\n# ham = nkx.operator.FermiHubbardJax(hi, t=t, U=U, graph=g)\n\n# metropolis exchange moves fermions around according to",
+      "metadata": {
+        "section_title": "fermi_hubbard.py",
+        "package": "netket",
+        "section_id": "part_0",
+        "source_file": "Examples\\Fermions\\fermi_hubbard.py"
+      },
+      "score": 0.8865789502036323,
+      "original_score": 0.8719439760363591,
+      "vector_score": 0.6811437306634807,
+      "bm25_score": 0.7632009814915136,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "create",
+        "hilbert",
+        "fermion",
+        "netket"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "custom_hilbert_constraints__a202136a3fd70552ecbc1a6ad0f2024f__sec_6_6__0",
+      "text": "## Integration with Variational States#\nConstrained Hilbert spaces work seamlessly with all NetKet variational states:\n```code\n# Create constrained system\nhilbert\n=\nnk\n.\nhilbert\n.\nSpin\n(\n0.5\n,\nN\n=\n10\n,\nconstraint\n=\nSumConstraint\n(\n0\n))\n# Zero magnetization\ngraph\n=\nnk\n.\ngraph\n.\nChain\n(\n10\n)\nhamiltonian\n=\nnk\n.\noperator\n.\nIsing\n(\nhilbert\n,\ngraph\n,\nh\n=\n1.0\n)\n# Standard NetKet workflow\nmodel\n=\nnk\n.\nmodels\n.\nRBM\n(\nalpha\n=\n1\n)\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n,\ngraph\n)\n# Respects magnetization\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n)\n# Optimization works as usual\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\n0.01\n)\ndriver\n=\nnk\n.\ndriver\n.\nVMC\n(\nhamiltonian\n,\noptimizer\n)\ndriver\n.\nrun\n(\nvstate\n,\nn_iter\n=\n100\n)\n```",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\advanced\\custom_hilbert_constraints.html",
+        "section_id": "sec_6",
+        "package": "netket",
+        "section_title": "Integration with Variational States#"
+      },
+      "score": 0.7869978467567565,
+      "original_score": 0.6793515972682357,
+      "vector_score": 0.6793515972682357,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "create",
+        "hilbert",
+        "netket"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 30,
+    "total_bm25_results_count": 30,
+    "merged_results_count": 56,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "netket": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      }
+    }
+  }
+}

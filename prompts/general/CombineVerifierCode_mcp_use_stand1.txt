@@ -1,0 +1,102 @@
+**IMPORTANT: You are in an MCP environment. You have real tool-calling capabilities - tools will ACTUALLY execute when you call them.**
+
+Your task is to combine verifier code by integrating multiple element functions into complete, runnable programs.
+
+**PURPOSE: Combine all element functions from the prepare directory into integrated verifier programs that can be executed as complete workflows. Each program should demonstrate the full chain of operations from initial setup to final computation.**
+
+**TASK COMPLETION CRITERIA (READ THIS FIRST):**
+- ✅ Task is COMPLETE when: You have called `save_file` and saved at least one `integ_verifier_xxx` file
+- ❌ Task is INCOMPLETE if: You only read files without saving
+
+
+--------------------------------------------------------------------------
+[Input:]
+1. TYPE: {type} (e.g., boson, fermion)
+2. TOPIC: {topic} (the package/library topic, e.g., dmrg, netket, dft)
+3. PREPARE_DIR: {prepare_dir} (directory containing element functions - available as reference "libs")
+4. REFINING_DIR: {refining_dir} (working directory where integrated programs will be saved)
+
+Note: The filesystem-mcp working directory is set to {refining_dir}. The prepare directory is available as a reference project named "libs".
+
+
+-----------------------------------------------------------------------------
+[Instruction:]
+1. **List and read all element functions from reference "libs":**
+   - First call filesystem-mcp `get_reference_projects` and confirm reference "libs" exists
+   - Use filesystem-mcp `list_reference_directory` tool with reference_name="libs" to list all files in the prepare directory
+   - Use filesystem-mcp `read_reference_file` tool with reference_name="libs" to read ALL element function files
+     * **CRITICAL: file_path MUST be the exact RELATIVE path returned by list_reference_directory (no `..\\`, no absolute paths)**
+   - Read each file completely to understand function definitions, parameters, and dependencies
+   - IMPORTANT: Do NOT use filesystem-mcp `read_file` to read reference files; reference files must be read via `read_reference_file`.
+
+2. **Group functions by element type:**
+   - Extract the element type from each function name (first word before "_verifier_")
+   - Group functions by element type (e.g., all "site" functions together, all "hamiltonian" functions together)
+   - Identify all unique element types present
+
+3. **Generate integrated verifier programs:**
+   - **CRITICAL: You MUST generate and save at least one integrated program. DO NOT stop after reading files - you MUST complete the code generation and saving steps.**
+   - **CRITICAL: If multiple functions exist for the same element type (e.g., site_verifier_boson_1.jl, site_verifier_boson_2.jl), you MUST generate multiple integrated programs**
+   - For each combination of element functions (one function per element type):
+     a. Create a complete program file named `integ_verifier_xxx.<ext>` where:
+        * `xxx` is a descriptive name you choose (e.g., "basic", "full", "minimal", or based on function variants)
+        * `<ext>` is the file extension matching the programming language (typically `.jl` for Julia)
+     b. **Program structure requirements:**
+        * **Package imports (at top):** Collect ALL `using`/`import` statements from all selected element functions and place them at the very beginning of the file (no duplicates)
+        * **Element function definitions:** Copy ALL selected element function definitions EXACTLY as they appear (including all comments, parameter documentation, and code)
+        * **Main function (entry point):**
+          - Define a `main()` function that serves as the entry point
+          - Call all element functions in the correct order to satisfy dependencies:
+            * Functions that produce outputs needed by other functions must be called first
+            * Use return values from earlier functions as inputs to later functions
+          - Define minimal parameters in main() to reduce computational resources:
+            * Use small system sizes (e.g., N<6 for lattice systems)
+            * Use default values where possible
+            * Keep parameters small enough for quick execution but sufficient for verification
+          - Ensure all function calls are properly chained (outputs → inputs)
+          - **CRITICAL - Error tolerance: If you cannot perfectly chain all element functions due to parameter mismatches or missing dependencies:**
+            * DO NOT modify any element function definitions (they must remain exactly as copied)
+            * Create the best possible main() function that calls all element functions
+            * You may need to create intermediate variables or use default/placeholder values to bridge gaps
+            * Output the best form you can achieve - it's better to have an imperfect but complete program than no program at all
+            * The goal is to demonstrate the integration of all element functions, even if some connections are not perfect
+     c. **CRITICAL - Code integrity:**
+        * Preserve all original comments and documentation from element functions
+        * Maintain exact function signatures and implementations
+        * Do NOT modify element function code - only copy and integrate
+
+4. **Save integrated programs using filesystem-mcp (MANDATORY - THIS IS THE MOST IMPORTANT STEP - DO NOT SKIP):**
+   - **CRITICAL - TASK COMPLETION: Your task is ONLY complete when you have successfully called save_file and saved at least one integ_verifier_xxx file.**
+   - Use filesystem-mcp `save_file` tool to write each integrated program
+   - **CRITICAL: The filesystem-mcp working directory is already set to {refining_dir}**
+   - **IMPORTANT: Use ONLY filename for file_path parameter: `integ_verifier_xxx.<ext>`**
+   - Example: if xxx is "basic" and extension is ".jl", use file_path="integ_verifier_basic.jl"
+   - DO NOT include `{refining_dir}` in file_path - it's already the working directory
+   - DO NOT use `..\\` or absolute paths - this will cause security errors
+   - **CRITICAL - Error handling: If save_file fails with an error, analyze the error message and fix the issue (e.g., correct file_path format, remove path traversal attempts) then retry save_file**
+   - **CRITICAL - REMINDER: After reading files, you MUST proceed to generate code and call save_file. Do NOT stop after reading - that is only the preparation phase.**
+
+5. **CRITICAL - How to call tools:**
+   - You have REAL MCP tools available - when you call them, they EXECUTE and return results
+   - DO NOT write "Action:", "Thought:", "Observation:" - this is NOT ReAct format
+   - DO NOT describe what you will do - DIRECTLY call the tools
+   - DO NOT simulate tool calls - tools will actually run
+
+6. **Workflow sequence (MANDATORY - ALL STEPS MUST BE COMPLETED):**
+   Step 1: Use filesystem-mcp get_reference_projects and confirm "libs" is available
+   Step 2: Use filesystem-mcp list_reference_directory(reference_name="libs") to list all files
+   Step 3: Use filesystem-mcp read_reference_file(reference_name="libs", file_path="...") to read ALL element function files
+   Step 4: Group functions by element type and identify all combinations (if multiple functions per type)
+   Step 5: **MANDATORY - MUST COMPLETE - THIS IS THE CRITICAL STEP:** For each combination:
+     a. Generate integrated program with package imports, all element functions, and main() function
+     b. **CRITICAL - MANDATORY ACTION: You MUST call filesystem-mcp save_file to write integ_verifier_xxx.<ext> - THIS STEP IS REQUIRED, NOT OPTIONAL. DO NOT SKIP THIS.**
+     c. If save_file fails, analyze error and retry until successful
+
+**BEFORE YOU END YOUR RESPONSE:**
+1. Check: Have I called `save_file`?
+2. If NO → Call `save_file` NOW
+3. If YES → Verify the file was saved successfully
+4. Only end after confirming `save_file` was called and succeeded
+
+**Start executing the workflow NOW. 
+

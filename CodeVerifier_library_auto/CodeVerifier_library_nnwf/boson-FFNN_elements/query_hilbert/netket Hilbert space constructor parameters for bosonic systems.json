@@ -1,0 +1,123 @@
+{
+  "query": "netket Hilbert space constructor parameters for bosonic systems",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-continuous-space__7613926d2a700cd8cd4d6139229d8aa7__sec_2_2__0",
+      "text": "## 1. Defining The Hilbert Space and Sampler#\nThe first ingredient in defining our problem in NetKet, consists of defining the Hilbert Space to study.\nFor continuous space systems, the Hilbert space takes information about the number of particles, the size of the system and the type of boundary conditions: open or periodic. The dimensionality of space is inferred from the size of the system.\nThe species of particles (bosonic or fermionic) is not relevant for the Hilbert space but only in defining the variational Ansatz (symmetric or antisymmetric).\nIn the following the Hilbert space for \\(N=10\\) particles in open (infinite) space is defined.\n```code\nimport\njax.numpy\nas\njnp\nN\n=\n10\n# 10 particles in 3D space without periodic boundary conditions.\n# The length of the L-tuple indicates the spatial dimension of space.\ngeo\n=\nnk\n.\nexperimental\n.\ngeometry\n.\nFreeSpace\n(\nd\n=\n3\n)\nhi\n=\nnk\n.\nexperimental\n.\nhilbert\n.\nParticle\n(\nN\n=\nN\n,\ngeometry\n=\ngeo\n)\n```\nWe can now generate random configurations in the Hilbert space, we just defined. For the above specifications the random state will consists of a vector of \\(N*d = 10*3\\) numbers ( \\(d\\) number of spatial dimensions), representing the 10 3D positions of the particles under consideration.\n```code\nimport\njax\nstates\n=\nhi\n.\nrandom_state\n(\njax\n.\nrandom\n.\nkey\n(\n0\n),\n1\n)\n# You can always reshape those configurations to NxD matrix\nstates\n.\nreshape\n(\nN\n,\n3\n)\n```\n```code\nArray([[-0.20584214, -0.78476578,  1.81608667],\n       [ 0.18784401,  0.08086788, -0.37211079],\n       [ 1.19016372,  0.33864229,  0.08482584],\n       [-0.87181784,  1.05451609, -1.5594979 ],\n       [ 0.36753958,  2.51635215,  0.25856516],\n       [-0.28371043, -0.53389115,  0.36794769],\n       [-0.1959642 ,  1.50407679,  0.05904905],\n       [ 0.1415813 ,  0.18851565,  0.04672933],\n       [-1.4134907 , -0.19496338,  1.11302457],\n       [-2.22703843, -0.56259627,  0.301361",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_2",
+        "section_title": "1. Defining The Hilbert Space and Sampler#",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-continuous-space.html"
+      },
+      "score": 0.8826549221451263,
+      "original_score": 0.8067257541213846,
+      "vector_score": 0.8302867098810606,
+      "bm25_score": 0.7124819310826805,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "netket",
+        "hilbert",
+        "space",
+        "bosonic",
+        "systems"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "custom_hilbert_constraints__3478f3f26a02da6418c1b5dc5da24d73__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "section_id": "h2_20",
+        "source_file": "docs\\advanced\\custom_hilbert_constraints.md",
+        "package": "netket",
+        "section_title": "Integration with Variational States"
+      },
+      "score": 0.8114285714285715,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hilbert"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "custom_hilbert_constraints__6b1a6a577a4f7295fb5d8a8ae5beefc7__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "section_id": "h2_20",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\_sources\\advanced\\custom_hilbert_constraints.md",
+        "section_title": "Integration with Variational States"
+      },
+      "score": 0.8114285714285715,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hilbert"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "hilbert__03c53ec606ed51fb8ee918c5ed0f37ac__sec_1_1__0",
+      "text": "## Contents\nThe Hilbert module defines the abstract Hilbert space API and some concrete implementations, such as Spin , Fock .\nAn Hilbert object represents a Hilbert space together with a particular choice of computational basis.\nThey are needed to construct most other objects in NetKet, but they can also be useful to experiment and validate variational ansätze.\nHilbert space objects are all sub-classes of the abstract class AbstractHilbert , which defines the general API respected by all implementations.\nYou can see a birds-eye view of the inheritance diagram among the various kinds of Hilbert spaces included with NetKet below (you can click on the nodes in the graph to go to their API documentation page).\nClasses whose edge is dashed are abstract classes, while the others are concrete and can be instantiated.\nAbstractHilbert makes very few assumptions on the structure of the resulting space and you will generally very rarely interact with it directly.\nDerived from AbstractHilbert are two less generic, but still abstract, types: DiscreteHilbert , representing Hilbert spaces where the local degrees of freedom are countable, and ContinuousHilbert , representing the Hilbert spaces with continuous bases, such as particles in a box.\nSo far, the majority of NetKet development has focused DiscreteHilbert spaces which therefore have a much more developed API, while ContinuousHilbert is still experimental and does not yet support many operations.\nThe most important class of discrete Hilbert spaces are subclasses of HomogeneousHilbert , which is a tensor product of a finite number of local Hilbert spaces of the same kind, each with the same number of local degrees of freedom. HomogeneousHilbert has the concrete subclasses Fock , Spin , and Qubit .\nTensorHilbert represents tensor products of different homogeneous hilbert spaces, therefore it is not homogeneous. You can use it to represent composite systems such as spin-boson setups.\nDoubledHilbert represents a space doubled through Choi’s Isomorphism .\nThis is the space of density matrices and is used to work with dissipative/open systems.",
+      "metadata": {
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\user-guides\\hilbert.html"
+      },
+      "score": 0.7265123725166701,
+      "original_score": 0.5697947432846496,
+      "vector_score": 0.6827869898457459,
+      "bm25_score": 0.11782575704026402,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "hilbert",
+        "space",
+        "systems"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "netket.operator.boson.create__1785aa48fb4c0999c2e1a5c2e36b5d9b__sec_1_1__0",
+      "text": "## Contents\nBuilds the boson creation operator \\(\\hat{a}^\\dagger\\) acting on the site -th\nof the Hilbert space hilbert .\nIf hilbert is a non-Bosonic space of local dimension M, it is considered\nas a bosonic space of local dimension M.\nhilbert ( DiscreteHilbert ) – The hilbert space.\nhilbert ( DiscreteHilbert ) – The hilbert space.\nsite ( int ) – The site on which this operator acts.\nsite ( int ) – The site on which this operator acts.\ndtype ( Union [ None , str , type [ Any ], dtype , _SupportsDType ] ) – The datatype to use for the matrix elements.\ndtype ( Union [ None , str , type [ Any ], dtype , _SupportsDType ] ) – The datatype to use for the matrix elements.\ncls ( type [ _LocalOperatorT ] )\ncls ( type [ _LocalOperatorT ] )\nTypeVar ( _LocalOperatorT , bound= LocalOperatorBase )\nAn instance of {class}`nk.operator.LocalOperator`.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\operator\\netket.operator.boson.create.html",
+        "package": "netket",
+        "section_title": "Contents",
+        "section_id": "sec_1"
+      },
+      "score": 0.6370624464941045,
+      "original_score": 0.4536423925717702,
+      "vector_score": 0.31823911328022253,
+      "bm25_score": 0.9952555097379613,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hilbert",
+        "space",
+        "bosonic"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 49,
+    "final_results_count": 5
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "query": "netket fermion spinless backflow model parameters",
+  "package": "netket",
+  "results": [
+    {
+      "id": "changelog__775627bff97fcf0367c7035d3e792e5f__sec_27_27__2",
+      "text": " .\nThe netket.nn.blocks.SymmExpSum layer is now normalised by the number of elements in the symmetry group in order to maintain a reasonable normalisation #1624 .\nThe labelling of spin sectors in netket.experimental.operator.fermion.create() and similar operators has now changed from the eigenvalue of the spin operator ( \\(\\pm 1/2\\) and so on) to the eigenvalue of the Pauli matrices ( \\(\\pm 1\\) and so on) #1637 .\nThe labelling of spin sectors in netket.experimental.operator.fermion.create() and similar operators has now changed from the eigenvalue of the spin operator ( \\(\\pm 1/2\\) and so on) to the eigenvalue of the Pauli matrices ( \\(\\pm 1\\) and so on) #1637 .\nThe connected elements and expectation values of all non-simmetric fermionic operators is now changed in order to be correct #1640 .\nThe connected elements and expectation values of all non-simmetric fermionic operators is now changed in order to be correct #1640 .\nConsiderably reduced the memory consumption of LocalOperator , especially in the case of large local hilbert spaces. Also leveraged sparsity in the terms to speed up compilation ( _setup ) in the same cases #1558 .\nConsiderably reduced the memory consumption of LocalOperator , especially in the case of large local hilbert spaces. Also leveraged sparsity in the terms to speed up compilation ( _setup ) in the same cases #1558 .\nnetket.nn.blocks.SymmExpSum now works with inputs of arbitrary dimensions, while previously it errored for all inputs that were not 2D #1616\nnetket.nn.blocks.SymmExpSum now works with inputs of arbitrary dimensions, while previously it errored for all inputs that were not 2D #1616\nStop using FrozenDict from flax and instead return standard dictionaries for the variational parameters from the variational state. This makes it much easier to edit parameters #1547 .\nStop using FrozenDict from flax and instead return standard dictionaries for the variational parameters from the variational state. This makes it much easier to edit parameters #1547 .\nVastly improved, finally readable documentation of all Flax modules and neural network architectures #1641 .\nVastly improved, finally readable documentation of all Flax modules and neural network architectures #1641 .\nFixed minor bug where netket.operator.LocalOperator could not be built with np.matrix object obtained by converting scipy sparse matrices to dense #1597 .\nFixed minor bug where netket.operator.LocalOperator could not be built with np.matrix object obtained by converting scipy sparse matrices to dense #1597 .\nRaise correct error instead of unintelligible one when multiplying netket.experimental.operator.FermionOperator2nd with other operators #1599 .\nRaise correct error instead of unintelligible one when multiplying netket.experimental.operator.Fermion",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\changelog.html",
+        "section_id": "sec_27",
+        "section_title": "NetKet 3.10 (🥶 7 november 2023)#"
+      },
+      "score": 0.8826424692533316,
+      "original_score": 0.8194499526974331,
+      "vector_score": 1.0,
+      "bm25_score": 0.09724976348716569,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "netket",
+        "fermion",
+        "parameters"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_1_1__0",
+      "text": "## Contents\nAuthor: Giuseppe Carleo (Computational Quantum Science Lab - EPFL)\nIn this tutorial, we will introduce you to studying fermionic quantum many-body systems using NetKet. We will start by introducing fermionic operators and how to work with them in NetKet. We will then proceed to implement and optimize three different wave functions: a Slater determinant wave function, a Neural Jastrow-Slater state, and a Slater Backflow neural wave function. We will focus on a Hamiltonian of spinless fermions in two dimensions. In the following we will also assume the reader is familiar with the main concepts in second quantization, including creation and destruction operators, as well as the role of anticommutation relations.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "package": "netket"
+      },
+      "score": 0.7747409222335356,
+      "original_score": 0.653447572666978,
+      "vector_score": 0.5735711808775735,
+      "bm25_score": 0.9729531398245956,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "netket",
+        "spinless",
+        "backflow"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_9_9__0",
+      "text": "## Neural-Backflow Wave Function#\nAn alternative approach to go beyond the simple mean field approximation, and also effectively change the nodal structure of the wave functions is given by the Neural Backflow transformation of Reference [4].\nThe idea is to promote the matrix \\(M\\) appearing in the Slater determinant to be a function of all the occupation numbers, through a neural network. Specifically, we take an additive form of the backflow transformation:\nand parameterize \\(F\\) with a multilayer perceptron taking \\(N\\) inputs and having an output of \\(N\\times N_{\\mathrm{f}}\\) numbers.\n```code\nclass\nLogNeuralBackflow\n(\nnnx\n.\nModule\n):\nhilbert\n:\nnk\n.\nhilbert\n.\nSpinOrbitalFermions\ndef\n__init__\n(\nself\n,\nhilbert\n,\nhidden_units\n:\nint\n,\nkernel_init\n=\ndefault_kernel_init\n,\nparam_dtype\n=\nfloat\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n,\n):\nself\n.\nhilbert\n=\nhilbert\n# To generate random numbers we need to extract the key from the `rngs` object.\nkey\n=\nrngs\n.\nparams\n()\n# the N x Nf matrix of the orbitals\nself\n.\nM\n=\nnnx\n.\nParam\n(\nkernel_init\n(\nkey\n,\n(\nself\n.\nhilbert\n.\nn_orbitals\n,\nself\n.\nhilbert\n.\nn_fermions\n,\n),\nparam_dtype\n,\n)\n)\n# Construct the Backflow. Takes as input strings of $N$ occupation numbers, outputs an $N x Nf$ matrix\n# that modifies the bare orbitals.\nself\n.\nbackflow\n=\nnnx\n.\nSequential\n(\n# First layer, input (..., N,) output (..., hidden_units)\nnnx\n.\nLinear\n(\nin_features\n=\nhilbert\n.\nsize\n,\nout_features\n=\nhidden_units\n,\nparam_dtype\n=\nparam_dtype\n,\nrngs\n=\nrngs\n,\n),\nnnx\n.\ntanh\n,\n# Last layer, input (..., hidden_units,) output (..., N x Nf)\nnnx\n.\nLinear\n(\nin_features\n=\nhidden_units\n,\nout_features\n=\nhilbert\n.\nn_orbitals\n*\nhilbert\n.\nn_fermions\n,\nparam_dtype\n=\nparam_dtype\n,\nrngs\n=\nrngs\n,\n),\n# Reshape into the orbital shape, (..., N, Nf)\nlambda\nx\n:\nx\n.\nreshape\n(\nx\n.\nshape\n[:\n-\n1\n]\n+\n(\nhilbert\n.\nn_orbitals\n,\nhilbert\n.\nn_fermions\n)\n),\n)\ndef\n__call__\n(\nself\n,\nn\n:\njax\n.\nArray\n)\n->\njax\n.\nArray\n:\n# For simplicity, we",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "section_id": "sec_9",
+        "section_title": "Neural-Backflow Wave Function#",
+        "package": "netket"
+      },
+      "score": 0.6775049167147116,
+      "original_score": 0.5500068605321556,
+      "vector_score": 0.5822662720461932,
+      "bm25_score": 0.4209692144760052,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "backflow"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_2_2__0",
+      "text": "## Fermionic Operators in NetKet#\nFermionic operators are fundamental to describing quantum systems with fermions (e.g., electrons). NetKet provides these operators directly via the netket.operator.fermion module. Let’s start by setting up the necessary environment and defining our quantum system.\n```code\nimport\nnetket\nas\nnk\nprint\n(\n\"NetKet version:\"\n,\nnk\n.\n__version__\n)\n```\n```code\nNetKet version: 3.19.dev23+gfbd40743f.d20250713\n```\nWe will work with a Hamiltonian of spinless fermions on a two-dimensional lattice:\nHere, \\(\\langle i,j \\rangle \\) denotes nearest-neighbors on a square lattice of \\(N=L\\times L\\) sites, \\(c_i (c^{\\dagger}_i)\\) are destruction (creation) fermionic operators on site \\(i\\) , whereas \\(n_i=c^{\\dagger}_i c_i\\) are density operators.",
+      "metadata": {
+        "section_title": "Fermionic Operators in NetKet#",
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "section_id": "sec_2",
+        "package": "netket"
+      },
+      "score": 0.6610001424100269,
+      "original_score": 0.47846175755388765,
+      "vector_score": 0.42079983225941725,
+      "bm25_score": 0.7091094587317693,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "netket",
+        "fermion",
+        "spinless"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "netket.experimental.models.Slater2nd__10acc8da84e45014d877432289734716__sec_1_1__0",
+      "text": "## Contents\nBases: Module\nA slater determinant ansatz for second-quantised spinless or spin-full\nfermions.\nWhen working with spin-full fermionic hilbert spaces (where the number of degrees of\nfreedom is a multiple of the number of orbitals) Slater2nd may behave in 3 different ways, depending on some flags.  Those modes differ by how\nthe orbitals are represented.\nThe more restrictions we impose, the lower the number of parameters,\nthe higher the number of imposed symmetries, but the expressivity will be worse and it will\nbe less likely to attain accurate ground-state energies.\nThose options are summarised in this table, while the details are discussed below.\nHartree Fock type\nNumber of Parameters\nOptions\nGeneralized\n\\(n_{\\mathrm{M}} \\times n_{\\mathrm{f}}\\)\ngeneralized = True\nUnrestricted\n\\(n_{\\mathrm{S}} \\times n_{\\mathrm{L}} \\times n_{\\textrm{f, s}}\\)\ngeneralized=False, restricted=False\nRestricted\n\\(n_{\\mathrm{L}} \\times n_{\\textrm{f, s}}\\)\ngeneralized=False, restricted=True\nWhere we use \\(n_{\\textrm{M}}\\) to denote the number of fermionic modes, \\(n_{\\textrm{L}}\\) the number of spatial orbitals, and \\(n_{\\textrm{S}}\\) the number of spin states. The number\nof fermions is denoted \\(n_{\\mathrm{f}}\\) , or \\(n_{\\textrm{f}, \\alpha}\\) for the number of\nfermions in a given spin sector \\(\\alpha\\) . We assume the same number of fermions in each spin\nsector for simplicity.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\models\\netket.experimental.models.Slater2nd.html",
+        "section_title": "Contents",
+        "package": "netket",
+        "section_id": "sec_1"
+      },
+      "score": 0.5921438859364037,
+      "original_score": 0.40313739405327376,
+      "vector_score": 0.5039217425665922,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "spinless",
+        "parameters"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 52,
+    "final_results_count": 5
+  }
+}

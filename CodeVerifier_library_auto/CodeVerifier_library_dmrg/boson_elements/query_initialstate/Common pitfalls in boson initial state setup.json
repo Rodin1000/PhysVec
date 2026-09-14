@@ -1,0 +1,130 @@
+{
+  "query": "Common pitfalls in boson initial state setup",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "boson__68a4a48a32f91533144dbb5ef2f01694__full__0",
+      "text": "\nalias(::SiteType\"Boson\") = SiteType\"Qudit\"()\n\n\"\"\"\n    space(::SiteType\"Boson\";\n          dim = 2,\n          conserve_qns = false,\n          conserve_number = false,\n          qnname_number = \"Number\")\n\nCreate the Hilbert space for a site of type \"Boson\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nspace(st::SiteType\"Boson\"; kwargs...) = space(alias(st); kwargs...)\n\nval(vn::ValName, st::SiteType\"Boson\") = val(vn, alias(st))\n\nfunction state(sn::StateName, st::SiteType\"Boson\", s::Index; kwargs...)\n  return state(sn, alias(st), s; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", ds::Int...; kwargs...)\n  return op(on, alias(st), ds...; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", s1::Index, s_tail::Index...; kwargs...)\n  rs = reverse((s1, s_tail...))\n  ds = dim.(rs)\n  opmat = op(on, st, ds...; kwargs...)\n  return itensor(opmat, prime.(rs)..., dag.(rs)...)\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "section_title": "boson.jl",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\boson.jl",
+        "section_id": "full"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "boson",
+        "state"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "IncludedSiteTypes__10c3b7e95897ec39b67299563b29b049__h2_7_7__0",
+      "text": "The \"Boson\" site type is an alias for the \"Qudit\" site type. Please\nsee more information about \"Qudit\" below:",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "h2_7",
+        "source_file": "docs\\src\\IncludedSiteTypes.md",
+        "section_title": "\"Boson\" SiteType"
+      },
+      "score": 0.8368095738591971,
+      "original_score": 0.8311823177853763,
+      "vector_score": 1.0,
+      "bm25_score": 0.1559115889268815,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "boson"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "test_sitetype__4f218ef42b698a8d9918bec72dd1b284__part_6__6",
+      "text": "oson\"\n        # Qudit site types don't see Boson overloads\n        continue\n      end\n      d = 4\n      s = siteinds(st, 2; dim=d)\n      o = op(\"$(ot)_op_1\", s, 1)\n      @test o ≈ itensor([i * j for i in 1:d, j in 1:d], s[1]', dag(s[1]))\n\n      o = op(\"$(ot)_op_1\", s, 1, 2)\n      @test o ≈ itensor(\n        [i * j for i in 1:(d ^ 2), j in 1:(d ^ 2)], s[2]', s[1]', dag(s[2]), dag(s[1])\n      )\n\n      d = 4\n      s = siteinds(st, 2; dim=d)\n      o = op(\"$(ot)_op_2\", s, 1)\n      @test o ≈ itensor([i * j for i in 1:d, j in 1:d], s[1]', dag(s[1]))\n      @test_throws MethodError op(\"$(ot)_op_2\", s, 1, 2)\n    end\n  end\n\n  @testset \"Custom SiteType using op!\" begin\n    # Use \"_Custom_\" tag even though this example\n    # is for S=3/2, because we might define the\n    # \"S=3/2\" TagType inside ITensors.jl later\n    function ITensors.op!(Op::ITensor, ::OpName\"Sz\", ::SiteType\"_Custom_\", s::Index)\n      Op[s' => 1, s => 1] = +3 / 2\n      Op[s' => 2, s => 2] = +1 / 2\n      Op[s' => 3, s => 3] = -1 / 2\n      return Op[s' => 4, s => 4] = -3 / 2\n    end\n\n    function ITensors.op!(\n      Op::ITensor, ::OpName\"α\", ::SiteType\"_Custom_\", s1::Index, s2::Index\n    )\n      Op[s1' => 1, s2' => 2, s1 => 1, s2 => 2] = +3 / 2\n      Op[s1' => 2, s2' => 1, s1 => 2, s2 => 2] = +1 / 2\n      Op[s1' => 3, s2' => 3, s1 => 3, s2 => 4] = -1 / 2\n      return Op[s1' => 4, s2' => 1, s1 => ",
+      "metadata": {
+        "section_id": "part_6",
+        "package": "itensors",
+        "source_file": "test\\base\\test_sitetype.jl",
+        "section_title": "test_sitetype.jl"
+      },
+      "score": 0.7123706551013778,
+      "original_score": 0.7024524018290115,
+      "vector_score": 0.8534413229360571,
+      "bm25_score": 0.09849671740082863,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "boson"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "QN_DMRG__629a0c9d83a6c48625080be07715c0ee__h4_1_1__0",
+      "text": "Setting up a quantum-number conserving DMRG calculation in ITensor requires\nonly very small changes to a DMRG code. The main changes are:\n1. using tensor indices (`Index` objects) which carry quantum number (QN) information to build your Hamiltonian and  initial state\n2. initializing your MPS to have well-defined total quantum numbers\nImportantly, _the total QN of your state throughout the calculation will\nremain the same as the initial state passed to DMRG_.\nThe total QN of your state is not set separately, but determined\nimplicitly from the initial QN of the state when it is first constructed.\nOf course, your Hamiltonian should conserve all of the QN's that you would\nlike to use. If it doesn't, you will get an error when you try to construct\nit out of the QN-enabled tensor indices.",
+      "metadata": {
+        "section_title": "Necessary Changes",
+        "source_file": "docs\\src\\tutorials\\QN_DMRG.md",
+        "package": "itensormps",
+        "section_id": "h4_1"
+      },
+      "score": 0.6551829604752913,
+      "original_score": 0.6305531719378121,
+      "vector_score": 0.5861837721655024,
+      "bm25_score": 0.8080307710270508,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "initial",
+        "state"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "QN_DMRG__bc3c6420aed7848d7641f75f5ed3386c__root_0__2",
+      "text": " state with alternating up and down spins, so it will have a total $S^z$ of zero. We could check this by computing the quantum-number flux of psi0\n```code\n@show flux(psi0)\n# Output: flux(psi0) = QN(\"Sz\",0)\n```\nThe above example shows the case of setting a total \"Sz\" quantum number of zero, since the initial state alternates between \"Up\" and \"Dn\" on every site with an even number of sites.\nTo obtain other total QN values, just set the initial state to be one which has the total QN you want. To be concrete let's take the example of a system with N=10 sites of $S=1$ spins.\nFor example if you want a total \"Sz\" of +20 (= QN(\"Sz\",20) ) in ITensor units, or $S^z=10$ in physical units, for a system with 10 sites, use the initial state:\n```code\nstate = [\"Up\" for n=1:N]\npsi0 = MPS(sites,state)\n```\nOr to initialize this 10-site system to have a total \"Sz\" of +16 in ITensor units ( $S^z=8$ in physical units):\n```code\nstate = [\"Dn\",\"Up\",\"Up\",\"Up\",\"Up\",\"Up\",\"Up\",\"Up\",\"Up\",\"Up\"]\npsi0 = MPS(sites,state)\n```\nwould work (as would any state with one \"Dn\" and nine \"Up\"'s in any order). Or you could initialize to a total \"Sz\" of +18 in ITensor units ( $S^z=9$ in physical units) as\n```code\nstate = [\"Z0\",\"Up\",\"Up\",\"Up\",\"Up\",\"Up\",\"Up\",\"Up\",\"Up\",\"Up\"]\npsi0 = MPS(sites,state)\n```\nwhere \"Z0\" refers to the $S^z=0$ state of a spin-one spin.\nFinally, the same kind of logic as above applies to other physical site types, whether \"S=1/2\", \"Electron\", etc.\nLet's take the DMRG Tutorial code from the previous section and make the changes discussed above, to turn it into a code which conserves the total $S^z$ quantum number throughout the DMRG calculation. The resulting code is:\n```code\nusing ITensors, ITensorMPS\nlet\n  N = 100\n  sites = siteinds(\"S=1\",N;conserve_qns=true)\n\n  os = OpSum()\n  for j=1:N-1\n    os += \"Sz\",j,\"Sz\",j+1\n    os += 1/2,\"S+\",j,\"S-\",j+1\n    os += 1/2,\"S-\",j,\"S+\",j+1\n  end",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "root",
+        "section_title": "ROOT",
+        "source_file": "docs\\build\\tutorials\\QN_DMRG.html"
+      },
+      "score": 0.6330518410201144,
+      "original_score": 0.4630026941757771,
+      "vector_score": 0.3952555973490955,
+      "bm25_score": 0.7339910814825038,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "initial",
+        "state"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 100,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 45
+      }
+    }
+  }
+}

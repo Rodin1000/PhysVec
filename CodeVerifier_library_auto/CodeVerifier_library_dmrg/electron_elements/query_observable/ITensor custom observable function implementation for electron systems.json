@@ -1,0 +1,131 @@
+{
+  "query": "ITensor custom observable function implementation for electron systems",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "Physics__3bf93049cd8ad58331d2a32084e34246__h2_4_4__0",
+      "text": "ITensor provides support for a range of common local Hilbert space types,\nor physical degrees of freedom, such as S=1/2 and S=1 spins; spinless and spinful\nfermions; and more.\nHowever, there can be many cases where you need to make custom\ndegrees of freedom. You might be working with an\nexotic system, such as ``Z_N`` parafermions for example, or need\nto customize other defaults provided by ITensor.\nIn ITensor, such a customization is done by overloading functions\non specially designated Index tags.\nBelow we give an brief introduction by example of how to make\nsuch custom Index site types in ITensor.\nOther code formulas following this one explain how to build on this\nexample to expand the capabilities of your custom site type such as\nadding support for quantum number (QN) conservation and defining\ncustom mappings of strings to states.\nThroughout we will focus on the example of ``S=3/2`` spins. These\nare spins taking the ``S^z`` values of ``+3/2,+1/2,-1/2,-3/2``.\nSo as tensor indices, they are indices of dimension 4.\nThe key operators we will make for this example are ``S^z``, ``S^+``,\nand ``S^-``, which are defined as:\n```math\n\\begin{aligned}\nS^z &=\n\\begin{bmatrix}\n3/2 &  0  &  0  &  0 \\\\\n 0  & 1/2 &  0  &  0 \\\\\n 0  &  0  &-1/2 &  0 \\\\\n 0  &  0  &  0  &-3/2\\\\\n\\end{bmatrix} \\\\\nS^+ & =\n\\begin{bmatrix}\n 0  &  \\sqrt{3}  &  0  &  0 \\\\\n 0  &  0  &  2  &  0 \\\\\n 0  &  0  &  0  &  \\sqrt{3} \\\\\n 0  &  0  &  0  &  0 \\\\\n\\end{bmatrix} \\\\\nS^- & =\n\\begin{bmatrix}\n 0  &  0 &  0  &  0 \\\\\n \\sqrt{3}  &  0  &  0  &  0 \\\\\n 0  &  2  &  0  &  0  \\\\\n 0  &  0  &  \\sqrt{3}  &  0 \\\\\n\\end{bmatrix} \\\\\n\\end{aligned}\n```\n**Code Preview**\nFirst let's see the minimal code needed to define and use this new\n``S",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "h2_4",
+        "section_title": "Make a Custom Local Hilbert Space / Physical Degree of Freedom",
+        "source_file": "docs\\src\\examples\\Physics.md"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9507073951510394,
+      "bm25_score": 0.21456980356235336,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "custom"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "SiteType__b961e6094c8c36d698ed956743838766__Methods_1__1",
+      "text": "0\n 0.0  -0.5\nITensor ord=2 (dim=2|id=575|\"S=1/2,Site\")' (dim=2|id=575|\"S=1/2,Site\")\nNDTensors.Dense{Float64, Vector{Float64}}\n```\n```code\nop(opname::String,sites::Vector{<:Index},n::Int; kwargs...)\n```\nReturn an ITensor corresponding to the operator named opname for the n'th Index in the array sites .\nExample\n```code\ns = siteinds(\"S=1/2\", 4)\nSz2 = op(\"Sz\", s, 2)\n```\n```code\nstate(s::Index, name::String; kwargs...)\n```\nReturn an ITensor corresponding to the state named name for the Index s . The returned ITensor will have s as its only index.\nThe terminology here is based on the idea of a single-site state or wavefunction in physics.\nThe state function is implemented for various Index tags by overloading either the state or state! methods which take a SiteType argument corresponding to one of the tags of the Index s and an StateName\"name\" argument that corresponds to the input state name.\nThe state system is used by the MPS type to construct product-state MPS and for other purposes.\nExample\n```code\ns = Index(2, \"Site,S=1/2\")\nsup = state(s,\"Up\")\nsdn = state(s,\"Dn\")\nsxp = state(s,\"X+\")\nsxm = state(s,\"X-\")\n```\n```code\nval(q::QN,name)\n```\nGet the value within the QN q corresponding to the string name\n```code\nval(s::Index, name::String)\n```\nReturn an integer corresponding to the name of a certain value the Index s can take. In other words, the val function maps strings to specific integer values within the range 1:dim(s) .\nThe val function is implemented for various Index tags by overloading methods named val which take a SiteType argument corresponding to one of the tags of the Index s and an ValName\"name\" argument that corresponds to the input name.\nExample\n```code\ns = Index(2, \"Site,S=1/2\")\nval(s,\"Up\") == 1\nval(s,\"Dn\") == 2\n\ns = Index(2, \"Site,Fermion\")\nval(s,\"Emp\") == 1\nval(s,\"Occ\") == 2\n```\n```code\nspace(::SiteType\"Qubit\";\n      conserve_qns = false,\n      conserve_parity = conserve_qns,\n      conserve_number = false,\n      qnname_parity = \"Parity\",\n      qnname_number = \"Number\")\n```\nCreate the Hilbert space for a site of type \"Qubit\".\nOptionally specify the",
+      "metadata": {
+        "source_file": "docs\\build\\SiteType.html",
+        "section_title": "Methods",
+        "package": "itensormps",
+        "section_id": "Methods"
+      },
+      "score": 0.99699923098296,
+      "original_score": 0.9956689931712824,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "function"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    },
+    {
+      "id": "ITensorsSiteTypesExt__6e84319b85a875508ec561a249cd43f1__part_1__1",
+      "text": " was slower.\n  p = NDTensors.getperm(inds(T), ntuple(n -> ind(@inbounds ivs[n]), Val(N)))\n  fac = NDTensors.permfactor(p, ivs...) #<fermions> possible sign\n  return ITensors._setindex!!(\n    T, fac * x, NDTensors.permute(ntuple(n -> val(@inbounds ivs[n]), Val(N)), p)...\n  )\nend\nBase.@propagate_inbounds @inline function Base.setindex!(\n  T::ITensor, x::Number, I1::Pair{<:Index,String}, I::Pair{<:Index,String}...\n)\n  Iv = map(i -> i.first => val(i.first, i.second), (I1, I...))\n  return setindex!(T, x, Iv...)\nend\n\"\"\"\n    onehot(ivs...)\n    setelt(ivs...)\n    onehot(::Type, ivs...)\n    setelt(::Type, ivs...)\n\nCreate an ITensor with all zeros except the specified value,\nwhich is set to 1.\n\n# Examples\n```julia\ni = Index(2,\"i\")\nA = onehot(i=>2)\n# A[i=>2] == 1, all other elements zero\n\n# Specify the element type\nA = onehot(Float32, i=>2)\n\nj = Index(3,\"j\")\nB = onehot(i=>1,j=>3)\n# B[i=>1,j=>3] == 1, all other element zero\n```\n\"\"\"\nfunction ITensors.onehot(datatype::Type{<:AbstractArray}, ivs::Pair{<:Index}...)\n  A = ITensor(eltype(datatype), ind.(ivs)...)\n  A[val.(ivs)...] = one(eltype(datatype))\n  return Adapt.adapt(datatype, A)\nend\nend\n",
+      "metadata": {
+        "source_file": "src\\lib\\ITensorsSiteTypesExt\\src\\ITensorsSiteTypesExt.jl",
+        "section_id": "part_1",
+        "section_title": "ITensorsSiteTypesExt.jl",
+        "package": "itensors"
+      },
+      "score": 0.9959164792757805,
+      "original_score": 0.9956689931712824,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "function"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "test_tdvp__2dc2fc2cfe3664ed3c488649adcf85fc__part_0__0",
+      "text": "@eval module $(gensym())\nusing ITensorMPS:\n  AbstractObserver, MPO, MPS, OpSum, apply, expect, inner, random_mps, siteinds, tdvp\nusing ITensors: ITensors, ITensor, dag, noprime, op, prime, scalar\nusing KrylovKit: exponentiate\nusing LinearAlgebra: norm\nusing Observers: observer\nusing StableRNGs: StableRNG\nusing Test: @test, @test_throws, @testset\nconst elts = (Float32, Float64, Complex{Float32}, Complex{Float64})\n@testset \"Basic TDVP (eltype=$elt)\" for elt in elts\n  N = 10\n  cutoff = eps(real(elt)) * 10^4\n  s = siteinds(\"S=1/2\", N)\n  os = OpSum()\n  for j in 1:(N - 1)\n    os += 0.5, \"S+\", j, \"S-\", j + 1\n    os += 0.5, \"S-\", j, \"S+\", j + 1\n    os += \"Sz\", j, \"Sz\", j + 1\n  end\n  H = MPO(elt, os, s)\n  rng = StableRNG(1234)\n  ψ0 = random_mps(rng, elt, s; linkdims=10)\n  time_step = elt(0.1) * im\n  # Time evolve forward:\n  ψ1 = tdvp(H, -time_step, ψ0; cutoff, nsite=1)\n  @test ITensors.scalartype(ψ1) == complex(elt)\n  #Different backend updaters, default updater_backend = \"exponentiate\"\n  @test ψ1 ≈ tdvp(H, -time_step, ψ0; cutoff, nsite=1, updater_backend=\"applyexp\")\n  @test norm(ψ1) ≈ 1 rtol = √eps(real(elt)) * 10\n  ## Should lose fidelity:\n  #@test abs(inner(ψ0,ψ1)) < 0.9\n  # Average energy should be conserved:\n  @test real(inner(ψ1', H, ψ1)) ≈ inner(ψ0', H, ψ0) rtol = √eps(real(elt)) * 10\n  # Time evolve backwards:\n  ψ2 = tdvp(H, time_step, ψ1; cutoff)\n  @test ITensors.scalartype(ψ2) == complex(elt)\n  @test norm(ψ2) ≈ 1 rtol = √eps(real(elt)) * 10\n  # Should rotate back to original state:\n  @",
+      "metadata": {
+        "source_file": "test\\base\\test_solvers\\test_tdvp.jl",
+        "package": "itensormps",
+        "section_id": "part_0",
+        "section_title": "test_tdvp.jl"
+      },
+      "score": 0.9733213295461413,
+      "original_score": 0.9725366627680866,
+      "vector_score": 0.9767670475209662,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "ITensor__d6c9e5cc91af8b329b09628d4822990e__h2_13_13__0",
+      "text": "It is often useful to make ITensors with all elements zero\nexcept for a specific element that is equal to 1.0.\nUse cases can include making product-state quantum wavefunctions\nor contracting single-element ITensors with other ITensors to\nset their indices to a fixed value.\nTo make such an ITensor, use the [`onehot`](@ref) function. Borrowing terminology from engineering,\na \"one hot\" vector or tensor has a single element equal to 1.0 and\nthe rest zero. (In previous versions of ITensor this function was called `setelt`.)\nThe ITensor function [`onehot`](@ref) takes one or more\nIndex-value Pairs such as `i=>2` and `j=>1` and returns an ITensor\nwith a 1.0 in the location specified by the Index values:\n```@example onehot_1\nusing ITensors # hide\ni = Index(2)\nO1 = onehot(i=>1)\nprintln(O1)\n```\n```@example onehot_2\nusing ITensors # hide\ni = Index(2) # hide\nO2 = onehot(i=>2)\nprintln(O2)\n```\n```@example onehot_3\nusing ITensors # hide\ni = Index(2) # hide\nj = Index(3)\nT = onehot(i=>2,j=>3)\nprintln(T)\n```",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\ITensor.md",
+        "package": "itensors",
+        "section_id": "h2_13",
+        "section_title": "Making an ITensor with a Single Non-Zero Element"
+      },
+      "score": 0.949470790124671,
+      "original_score": 0.9464084137685904,
+      "vector_score": 0.9505251446609849,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "function"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 109,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

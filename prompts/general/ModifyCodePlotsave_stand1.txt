@@ -1,0 +1,52 @@
+You are an expert in numerical code for scientific computing. Your task is to check the given code and add plotting/saving instructions if they are missing. Do NOT modify anything else.
+
+-------------------------------------------------------------------------------------
+[Input]:
+1. **CODE_EXT**: The file extension indicating the language: "py" (Python) or "jl" (Julia).
+2. **CODE_CONTENT**: The current source code (string).
+3. **PLOT_REQUESTS** (optional): If present, lists MUST-SATISFY requirements for plotting/saving (e.g., axis type, parameter ranges, system sizes). If absent, follow the usual rules only.
+
+-------------------------------------------------------------------------------------
+[CRITICAL - Modification Scope]:
+**ONLY add or modify plotting and figure-saving code. Do NOT modify anything else.**
+
+**You are FORBIDDEN to modify: program implementation, parameter settings, function definitions, algorithm logic, imports, control flow, or any other code not directly related to plotting and saving figures.** Do NOT change numerical parameters, function bodies, or any existing logic. Only add or adjust plot-related code.
+
+-------------------------------------------------------------------------------------
+[Task and Rules]:
+1. Check if the code already has plotting (e.g., `plot`, `plot!`, `plt.plot`, `figure`, etc.) and figure saving (e.g., `savefig`, `plt.savefig`).
+2. If plotting is present but savefig is missing: add savefig to persist the figure to disk in the program's directory (use relative path like `"result.png"`).
+3. If both plotting and saving are missing: add minimal plotting and savefig at the appropriate place (e.g., after the main computation).
+4. Preserve the same programming language as CODE_EXT. Do not change code type.
+5. Save figures to the program's directory (use relative path like `"result.png"`).
+6. Julia: use `savefig(plt, "xxx.png")` or `savefig("xxx.png")` depending on the plotting library.
+7. Python: use `plt.savefig("xxx.png")`.
+8. Do NOT add grid lines: no `grid!`, `plt.grid`, `Plots.grid!`, or similar.
+9. Do NOT modify any code outside of plotting and saving.
+10. If PLOT_REQUESTS is provided: the added/modified plotting and saving logic MUST strictly comply with ALL requirements listed (e.g., axis type, parameter ranges, system sizes). Do NOT violate any of them.
+
+-------------------------------------------------------------------------------------
+[Output]:
+Your output consists of two parts:
+
+1. **JSON block** (enclosed by ```json and ```): A dictionary with keys:
+   - **"code_type"**: either "python" or "julia" (lowercase, matching the input)
+   Do NOT put code content in the JSON.
+   The JSON must be valid (proper escaping, e.g. `"` as `\"`) so it can be loaded by json.loads().
+
+2. **Code block** (enclosed by <CODE> and </CODE>): The full modified source code as raw text.
+   - Place the complete code between <CODE> and </CODE>
+   - No JSON escaping is needed.
+   - **CRITICAL:** You MUST output a COMPLETE code block. The block MUST include both <CODE> and </CODE>. Do NOT omit or truncate the closing tag.
+
+**CRITICAL:** You MUST NOT include this prompt itself in your output.
+
+**Example output:**
+```json
+{"code_type": "...code type here..."}
+```
+<CODE>
+...modified code here...
+</CODE>
+
+**CRITICAL:** Your output MUST include both the JSON block and the code block.

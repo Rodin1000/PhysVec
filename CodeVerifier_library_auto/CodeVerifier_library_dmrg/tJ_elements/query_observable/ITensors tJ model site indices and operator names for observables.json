@@ -1,0 +1,137 @@
+{
+  "query": "ITensors tJ model site indices and operator names for observables",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_4__4",
+      "text": " applying\noperators to MPS.\n\n# Example\n\n```julia\ns = Index(2, \"Site,S=1/2\")\nSz = op(\"Sz\", s)\n```\n\nYou can see all of the operator names defined for the site types included\nwith ITensor [here](https://docs.itensor.org/ITensorMPS/stable/IncludedSiteTypes.html).\nNote that some site types such as \"S=1/2\" and \"Qubit\"\nare aliases for each other and share operator definitions.\n\"\"\"\nfunction op(name::AbstractString, s::Index...; adjoint::Bool=false, kwargs...)\n  name = strip(name)\n  # TODO: filter out only commons tags\n  # if there are multiple indices\n  commontags_s = commontags(s...)\n\n  # first we handle the + and - algebra, which requires a space between ops to avoid clashing\n  name_split = nothing\n  @ignore_derivatives name_split = String.(split(name, \" \"))\n  oplocs = findall(x -> x ∈ (\"+\", \"-\"), name_split)\n\n  if !isempty(oplocs)\n    @ignore_derivatives !isempty(kwargs) &&\n      error(\"Lazy algebra on parametric gates not allowed\")\n\n    # the string representation of algebra ops: ex [\"+\", \"-\", \"+\"]\n    labels = name_split[oplocs]\n    # assign coefficients to each term: ex [+1, -1, +1]\n    coeffs = [1, [(-1)^Int(label == \"-\") for label in labels]...]\n\n    # grad the name of each operator block separated by an algebra op, and do so by\n    # making sure blank spaces between opnames are kept when building the new block.\n    start, opnames = 0, String[]\n    for oploc in oplocs\n      finish = oploc\n      opnames = vcat(\n        opnames, [prod([name_split[k] * \" \" for k in (start + 1):(finish - 1)])]\n      )\n      start = oploc\n    end\n    opnames = vcat(\n      opnames, [prod([name_split[k] * \" \" for k in (start + 1):length(name_split)])]\n    )\n\n    # build the vector of blocks and sum\n    op_list = [\n      coeff * (op(opname, s...; kwargs...)) for (coeff, opname) in zip(coeffs, opnames)\n    ]\n    return sum(op_list)\n  end\n\n  # the the multiplication come after\n  oploc = findfirst(\"*\", name)\n  if !isnothing(oploc)\n    op1, op2 = nothing, nothing\n    @ignore_derivatives begin\n      op1 = name[1:prevind(name, oploc.start)]\n      op2 = name[nextind(name, oploc.start):end]\n      if !(op1[end] == ' ' && op",
+      "metadata": {
+        "package": "itensors",
+        "section_title": "sitetype.jl",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "section_id": "part_4"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.6860152519137002,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "site",
+        "indices",
+        "operator",
+        "names"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "Physics__76dd2e2b1a4692ebd1e2d3b3298ad284__custom_op_2__1",
+      "text": " = op(\"Pup\",s)\n```\nto obtain the \"Pup\" operator for our \"S=1/2\" Index s . Or we can do a similar thing for an array of site indices:\n```code\nusing ITensors, ITensorMPS\nN = 40\ns = siteinds(\"S=1/2\",N)\nPup1 = op(\"Pup\",s[1])\nPup3 = op(\"Pup\",s[3])\n```\nNote that for the \"Qudit\" / \"Boson\" site types, you have to define your overload of op with the dimension of the local Hilbert space, for example:\n```code\nusing ITensors, ITensorMPS\nfunction ITensors.op(::OpName\"P1\", ::SiteType\"Boson\", d::Int)\n  o = zeros(d, d)\n  o[1, 1] = 1\n  return o\nend\n```\nAlternatively you could use Julia's array comprehension syntax:\n```code\nusing ITensors, ITensorMPS\nITensors.op(::OpName\"P1\", ::SiteType\"Boson\", d::Int) =\n  [(i == j == 1) ? 1.0 : 0.0 for i in 1:d, j in 1:d]\n```\nUsing Custom Operators in OpSum\nA key use of these op system extensions is allowing additional operator names to be recognized by the OpSum system for constructing matrix product operator (MPO) tensor networks. With the code above defining the \"Pup\" operator, we are now allowed to use this operator name in any OpSum code involving \"S=1/2\" site indices.\nFor example, we could now make an OpSum involving our custom operator such as:\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1/2\",N)\nos = OpSum()\nfor n=1:N\n  os += \"Pup\",n\nend\nP = MPO(os,sites)\n```\nThis code makes an MPO P which is just the sum of a spin-up projection operator acting on every site.",
+      "metadata": {
+        "source_file": "docs\\build\\examples\\Physics.html",
+        "section_id": "custom_op",
+        "package": "itensormps",
+        "section_title": "Making a Custom op Definition"
+      },
+      "score": 0.95499483435185,
+      "original_score": 0.9258738448148116,
+      "vector_score": 1.0,
+      "bm25_score": 0.33865895815018515,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensors",
+        "site",
+        "indices",
+        "operator",
+        "names"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "SiteTypes__c774f95869a6174e9ce75e61d1a4214f__full__0",
+      "text": "module SiteTypes\n# TODO: This is a bit strange, but required for backwards\n# compatibility since `val` is also used by `QNVal`.\nimport ..ITensors: val\n# TODO: Use explicit overloading with `NDTensors.space`.\nimport ..ITensors: space\ninclude(\"sitetype.jl\")\ninclude(\"SiteTypesChainRulesCoreExt.jl\")\ninclude(\"sitetypes/aliases.jl\")\ninclude(\"sitetypes/generic_sites.jl\")\ninclude(\"sitetypes/qubit.jl\")\ninclude(\"sitetypes/spinhalf.jl\")\ninclude(\"sitetypes/spinone.jl\")\ninclude(\"sitetypes/fermion.jl\")\ninclude(\"sitetypes/electron.jl\")\ninclude(\"sitetypes/tj.jl\")\ninclude(\"sitetypes/qudit.jl\")\ninclude(\"sitetypes/boson.jl\")\nend\n",
+      "metadata": {
+        "section_title": "SiteTypes.jl",
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\SiteTypes.jl",
+        "section_id": "full"
+      },
+      "score": 0.8125228385699643,
+      "original_score": 0.8070088044102574,
+      "vector_score": 0.9410005685846454,
+      "bm25_score": 0.0176532915565237,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_0__0",
+      "text": "using ChainRulesCore: @ignore_derivatives\nusing ..ITensors:\n  ITensors, Index, ITensor, itensor, dag, onehot, prime, product, swapprime, tags\nusing ..SmallStrings: SmallString\nusing ..TagSets: TagSets, TagSet, addtags, commontags\n\n@eval struct SiteType{T}\n  (f::Type{<:SiteType})() = $(Expr(:new, :f))\nend\n\n# Note that the complicated definition of\n# SiteType above is a workaround for performance\n# issues when creating parameterized types\n# in Julia 1.4 and 1.5-beta. Ideally we\n# can just use the following in the future:\n# struct SiteType{T}\n# end\n\n\"\"\"\nSiteType is a parameterized type which allows\nmaking Index tags into Julia types. Use cases\ninclude overloading functions such as `op`,\n`siteinds`, and `state` which generate custom\noperators, Index arrays, and IndexVals associated\nwith Index objects having a certain tag.\n\nTo make a SiteType type, you can use the string\nmacro notation: `SiteType\"MyTag\"`\n\nTo make a SiteType value or object, you can use\nthe notation: `SiteType(\"MyTag\")`\n\nThere are currently a few built-in site types\nrecognized by `jl`. The system is easily extensible\nby users. To add new operators to an existing site type,\nor to create new site types, you can follow the instructions\n[here](https://docs.itensor.org/ITensorMPS/stable/examples/Physics.html).\n\nThe current built-in site types are:\n\n- `SiteType\"S=1/2\"` (or `SiteType\"S=½\"`)\n- `SiteType\"S=1\"`\n- `SiteType\"Qubit\"`\n- `SiteType\"Qudit\"`\n- `SiteType\"Boson\"`\n- `SiteType\"Fermion\"`\n- `SiteType\"tJ\"`\n- `SiteType\"Electron\"`\n\n# Examples\n\nTags on indices get turned into SiteTypes internally, and then\nwe search for overloads of functions like `op` and `siteind`.\nFor example:\n\n```julia\njulia> s = siteind(\"S=1/2\")\n(dim=2|id=862|\"S=1/2,Site\")\n\njulia> @show op(\"Sz\", s);\nop(s, \"Sz\") = ITensor ord=2\nDim 1: (dim=2|id=862|\"S=1/2,Site\")'\nDim 2: (dim=2|id=862|\"S=1/2,Site\")\nNDTensors.Dense{Float64,Array{Float64,1}}\n 2×2\n 0.5   0.0\n 0.0  -0.5\n\njulia> @show op",
+      "metadata": {
+        "section_title": "sitetype.jl",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "package": "itensors",
+        "section_id": "part_0"
+      },
+      "score": 0.7859900868991923,
+      "original_score": 0.7659266575459915,
+      "vector_score": 0.804902931135742,
+      "bm25_score": 0.36953227456482984,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensors",
+        "site",
+        "indices"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "ITensorsChainRulesCoreExt__7437db302f2d2e2bb079d034fa46e600__full__0",
+      "text": "module ITensorsChainRulesCoreExt\nusing ChainRulesCore\nimport ChainRulesCore: rrule\nusing ITensors\nusing ITensors: Indices\nusing ITensors.Adapt\nusing ITensors.NDTensors\nusing ITensors.NDTensors: datatype\nusing ITensors.Ops\ninclude(\"utils.jl\")\ninclude(\"projection.jl\")\ninclude(\"NDTensors/tensor.jl\")\ninclude(\"NDTensors/dense.jl\")\ninclude(\"indexset.jl\")\ninclude(\"itensor.jl\")\ninclude(\"LazyApply/LazyApply.jl\")\ninclude(\"non_differentiable.jl\")\ninclude(\"smallstrings.jl\")\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "full",
+        "source_file": "ext\\ITensorsChainRulesCoreExt\\ITensorsChainRulesCoreExt.jl",
+        "section_title": "ITensorsChainRulesCoreExt.jl"
+      },
+      "score": 0.7534247969502564,
+      "original_score": 0.738480845250272,
+      "vector_score": 0.8651331260222239,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "indices"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 105,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 48
+      }
+    }
+  }
+}

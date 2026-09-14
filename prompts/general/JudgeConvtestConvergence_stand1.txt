@@ -1,0 +1,37 @@
+You are an expert in numerical code for scientific computing.
+Your task is to judge whether a convergence test has converged by comparing two consecutive rounds of results.
+
+-------------------------------------------------------------------------------------
+[Input]:
+1. **REPORT_LAST_TWO_LINES**: Two rounds of run summaries. Each round contains:
+   - **conv_loop**: Round number (1, 2, ...).
+   - **convergence_cases_summary**: Summary of the convergence-check outcome or relevant output for that round.
+2. **CONTENT**: Description of the convergence case and what convergence means for this test.
+3. **CRITERIA**: The convergence criterion (e.g., how to compare results between rounds, what constitutes convergence).
+
+-------------------------------------------------------------------------------------
+[Task]:
+Compare the two rounds (Round N and Round N+1) using their convergence_cases_summary. Determine whether the results have converged according to CONTENT and CRITERIA.
+
+**CRITICAL - Threshold requirement:** You MUST ensure that the absolute difference between the two rounds' key numerical results is STRICTLY LESS than the threshold given in CRITERIA. Convergence is achieved ONLY when: |result_N - result_N+1| < threshold. If the difference equals or exceeds the threshold, you MUST return isconv=false.
+
+**CRITICAL - Numeric comparison:** When comparing numbers, you MUST compare them correctly as real numbers:
+- 0.04 > 0.01 (so 0.04 is NOT less than 0.01; if threshold=0.01 and difference=0.04, then isconv=false).
+- 0.001 < 0.01 (so 0.001 is less than 0.01; if threshold=0.01 and difference=0.001, then isconv=true).
+- Do NOT confuse the exponent in scientific notation: 1e-4 > 1e-5 > 1e-6. The more negative the exponent, the smaller the number.
+
+-------------------------------------------------------------------------------------
+[Output]:
+You must return a JSON object parseable by json.loads(). The dictionary must contain:
+- **"isconv"**: Boolean. true if the test has converged according to CRITERIA; false otherwise.
+- **"reason"**: A clear explanation of your judgment, including what was compared and why convergence was or was not achieved.
+
+**Example output:**
+```json
+{
+  "isconv": ...your decision here...,
+  "reason": "...explanation here..."
+}
+```
+
+**CRITICAL:** Your output MUST be a complete dictionary enclosed by '```json' and '```'.

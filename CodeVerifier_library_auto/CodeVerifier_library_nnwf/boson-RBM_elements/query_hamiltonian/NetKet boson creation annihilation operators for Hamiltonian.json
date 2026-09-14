@@ -1,0 +1,124 @@
+{
+  "query": "NetKet boson creation annihilation operators for Hamiltonian",
+  "package": "netket",
+  "results": [
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_4_4__0",
+      "text": "## Fermionic Operators and Hamiltonian#\nTo describe the Hamiltonian of our quantum system, we need to work with the fermionic operators associated with the Hilbert space defined above. These operators include creation (cdag), annihilation (c), and number (nc) operators. We will use these operators to build our Hamiltonian.\n```code\nfrom\nnetket.operator.fermion\nimport\ndestroy\nas\nc\nfrom\nnetket.operator.fermion\nimport\ncreate\nas\ncdag\nfrom\nnetket.operator.fermion\nimport\nnumber\nas\nnc\n```\nWith these operators, we can now construct the Hamiltonian for our system. In this example, we have a tight-binding hopping term proportional to \\(t\\) and a density-density interaction term proportional to \\(V\\) . We can easily define the Hamiltonian by adding terms one by one looping over the edges of the lattice:\n```code\nt\n=\n1.0\nV\n=\n4.0\nH\n=\n0.0\nfor\ni\n,\nj\nin\ngraph\n.\nedges\n():\nH\n-=\nt\n*\n(\ncdag\n(\nhi\n,\ni\n)\n@\nc\n(\nhi\n,\nj\n)\n+\ncdag\n(\nhi\n,\nj\n)\n@\nc\n(\nhi\n,\ni\n))\nH\n+=\nV\n*\nnc\n(\nhi\n,\ni\n)\n@\nnc\n(\nhi\n,\nj\n)\n```\nThe hamiltonian above commutes with the total fermion number operator.However the operator we just defined does not exploit this property, and simply computes one connected element for every off-diagonal term:\n```code\nH\n.\nmax_conn_size\n```\n```code\n65\n```\nmany of which are zero.\nThis can be reduced by using a more efficient implementation, to which we can easily convert our hamiltonian to:\n```code\nfrom\nnetket.experimental.operator\nimport\nParticleNumberConservingFermioperator2nd\nH_pnc\n=\nParticleNumberConservingFermioperator2nd\n.\nfrom_fermionoperator2nd\n(\nH\n)\n```\nNow the number of connected elements is reduced to\n```code\nH_pnc\n.\nmax_conn_size\n```\n```code\n21\n```\ngreatly reducing the number of wavfunction-evaluations needed to compute the local energies.",
+      "metadata": {
+        "package": "netket",
+        "section_title": "Fermionic Operators and Hamiltonian#",
+        "section_id": "sec_4",
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html"
+      },
+      "score": 0.9600715627711943,
+      "original_score": 0.9315512504649046,
+      "vector_score": 0.9144390630811308,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "netket",
+        "creation",
+        "annihilation",
+        "operators",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.8333333333333334,
+      "is_html": true
+    },
+    {
+      "id": "gs-matrix-models__ef1b32ac39370be9a6422cd5bf62bbb1__sec_3_3__1",
+      "text": "N\n==\nhi\n.\nn_states\n```\nWe have checked that all the dimensions correspond to our expectations. We can think of this as the Hilbert state of a many-body system with \\(N\\) bosonic sites, each with excitations up to level \\(\\Lambda\\) (inclusive, starting from 0 to \\(\\Lambda-1\\) ).\nIn other words, it is a collection of harmonic oscillators in the \\(\\mid n \\rangle\\) basis.\nWe now need to specify the Hamiltonian.\nWe will use some predefined operators for bosons, such as the create and destroy operators for each boson in the Hilber state (see the API documentation here ).\nIn this specifc case, \\(\\hat{a}^\\dagger_I\\) for each boson \\(I\\) (we can regard this index as a site index in NetKet ).\n```code\nfrom\nnetket.operator.boson\nimport\ncreate\n,\ndestroy\n```\nWe now start by defining the free part of the Hamiltonian, which is just a collection of harmonic oscillators (for this part we could also use the number operator which is pre-defined in NetKet )\n```code\n# we loop over all \"sites\" -> loop over N bosons\nH_free\n=\nsum\n([\n0.5\n+\ncreate\n(\nhi\n,\ni\n)\n@\ndestroy\n(\nhi\n,\ni\n)\nfor\ni\nin\nrange\n(\nN\n)])\n```\nNetKet automatically recognizes products of local operators as tensor products and the addition of scalars as if they were multiplied by the identity matrix in the tensor space. In this case, H_free acts on a 4096 dimensional space.\nIn general, when manipulating NetKet objects, you should always assume that you can safely operate on them like\nyou would in mathematical equations, therefore you can sum and multiply them with ease.\nLet us check this free Hamiltonian, whose eigenvectors are analytically known: the ground state has vacuum energy for \\(N\\) independent harmonic oscillators: \\(0.5N = 0.5 \\cdot 6 = 3\\)\nIn NetKet we can  convert our Hamiltonian operator into a sparse matrix of size \\(\\Lambda^N \\times \\Lambda^N \\) .\nOr we can use the fact that NetKet provides a wrapper for eigsh in the form of a Lanczos exact solver which does not require to manipulate the Hamiltonian into a sparse matrix using .to_sparse .\n```code\neig_vals\n=\nnk\n.\nexact\n.\nlanczos_ed\n(\nH_free\n,\nk\n=\n13\n,\ncompute_eigenvectors\n=\nFalse\n)\n# args to scipy.sparse.linalg.eighs like can be passed with scipy_args={'tol':1e-8}\nprint\n(\nf\n\"Eigenvalues with exact lanczos (sparse):\n{\neig_vals\n",
+      "metadata": {
+        "section_id": "sec_3",
+        "section_title": "1. Defining The Hamiltonian#",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-matrix-models.html",
+        "package": "netket"
+      },
+      "score": 0.9526981573431851,
+      "original_score": 0.9232943092051651,
+      "vector_score": 1.0,
+      "bm25_score": 0.6164715460258254,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "boson",
+        "operators",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_1_1__0",
+      "text": "## Contents\nThe goal of this tutorial series is to guide you through writing a simple VMC code from (almost) scratch to compute the ground-state of a paradigmatic spin model: the transverse-field Ising model in 2 dimensions.\nIn this first tutorial, we will focus on:\nUnderstanding NetKet’s graph and operator system\nUnderstanding NetKet’s graph and operator system\nDefining Hamiltonians using building blocks\nDefining Hamiltonians using building blocks\nWorking with different operator formats\nWorking with different operator formats\nValidating our implementation with exact diagonalization\nValidating our implementation with exact diagonalization\nThe hamiltonian we will study is the transverse-field Ising model in 2 dimensions:\nIn the following we assume periodic boundary conditions with \\(h=1\\) and \\(J=1\\) .\nNote\nIf you are executing this notebook on Colab , you will need to install NetKet.\nYou can do so by uncommenting and running the following cell.\nKeep in mind that this notebook was designed for NetKet version 3.9.1 , which requires Python >=3.8.\n```code\n# %pip install --quiet netket\n```\nPlease verify that you are running on the correct version of NetKet:\n```code\nimport\nplatform\nimport\nnetket\nas\nnk\nprint\n(\n\"Python version (requires >=3.9)\"\n,\nplatform\n.\npython_version\n())\nprint\n(\n\"NetKet version (requires >=3.9.1)\"\n,\nnk\n.\n__version__\n)\n```\n```code\nPython version (requires >=3.9) 3.12.11\nNetKet version (requires >=3.9.1) 3.19.dev26+gd94cf4597.d20250713\n```\nShow code cell content\nHide code cell content\n```code\n# Import necessary libraries\nimport\nnetket\nas\nnk\nimport\nnumpy\nas\nnp\n```",
+      "metadata": {
+        "section_id": "sec_1",
+        "section_title": "Contents",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html"
+      },
+      "score": 0.8531842693412294,
+      "original_score": 0.7851477112310674,
+      "vector_score": 0.9814346390388342,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_3_3__0",
+      "text": "## 1. Defining The Hamiltonian#\nThe first step in our journey consists in defining the Hamiltonian we are interested in.\nFor this purpose, we first need to define the kind of degrees of freedom we are dealing with (i.e. if we have spins, bosons, fermions etc).\nThis is done specifying the Hilbert space of the problem. For example, let us concentrate on a problem with 20 spins-1/2.\nWhen building hilbert spaces, in general, the first argument determines the size of the local basis and the latter defines how many modes you have.\n```code\nimport\nnetket\nas\nnk\nN\n=\n20\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\nN\n)\n```\nNetKet’s Hilbert spaces define the computational basis of the calculation, and are used to label and generate elements from it.\nThe standard Spin-basis implicitly selects the z basis and elements of that basis will be elements \\( v\\in\\{\\pm 1\\}^N \\) .\nIt is possible to generate random basis elements through the function random_state(rng, shape, dtype) , where the first argument must be a jax RNG state (usually built with jax.random.key(seed) , second is an integer or a tuple giving the shape of the samples and the last is the dtype of the generated states.\n```code\nimport\njax\nhi\n.\nrandom_state\n(\njax\n.\nrandom\n.\nkey\n(\n0\n),\n3\n)\n```\n```code\nArray([[-1, -1, -1, -1, -1, -1,  1,  1,  1,  1,  1, -1,  1,  1, -1,  1,\n         1, -1, -1,  1],\n       [ 1,  1,  1, -1, -1,  1,  1,  1, -1, -1,  1,  1,  1, -1, -1,  1,\n        -1,  1,  1,  1],\n       [ 1, -1,  1, -1, -1,  1,  1,  1,  1, -1,  1,  1, -1,  1, -1, -1,\n         1,  1, -1, -1]], dtype=int8)\n```\nWe now need to specify the Hamiltonian. For this purpose, we will use NetKet’s LocalOperator (see details here ) which is the sum of arbitrary k-local operators.\nIn this specific case, we have a 1",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html",
+        "section_title": "1. Defining The Hamiltonian#",
+        "package": "netket",
+        "section_id": "sec_3"
+      },
+      "score": 0.7438720130522605,
+      "original_score": 0.6059569431573237,
+      "vector_score": 0.7574461789466547,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "netket",
+        "operators",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "netket.experimental.operator.FermiHubbardJax__870ed44d318db13db78482336e5c28b4__sec_1_1__0",
+      "text": "## Contents\nBases: ParticleNumberAndSpinConservingFermioperator2nd\nFermi-Hubbard Hamiltonian based on the generic ParticleNumberAndSpinConservingFermioperator2nd\nThis implementation is more efficient than a FermionOperator2nd created using create,destroy,number from nk.operator.fermion\nas shown in the examples, as it considers only matrix elements with the correct number of particles.\nConstructs a new FermiHubbardJax operator given a hilbert space, a graph\nspecifying the connectivity and the interaction strength.\nhilbert – Hilbert space the operator acts on.\nhilbert – Hilbert space the operator acts on.\ngraph – Graph\ngraph – Graph\nt – The strength of the hopping term.\nt – The strength of the hopping term.\nU – The strength of the on-site coulomb interaction term.\nU – The strength of the on-site coulomb interaction term.\ndtype – The dtype of the matrix elements.\ndtype – The dtype of the matrix elements.\nExamples\nConstructs a FermiHubbardJax operator for a 2D system at half filling.\n```code\n>>>\nimport\nnetket\nas\nnk\n>>>\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\n4\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\n>>>\nhi\n=\nnk\n.\nhilbert\n.\nSpinOrbitalFermions\n(\nn_orbitals\n=\ng\n.\nn_nodes\n,\ns\n=\n1\n/\n2\n,\nn_fermions_per_spin\n=\n(\n4\n,\n4\n))\n>>>\nop\n=\nnk\n.\nexperimental\n.\noperator\n.\nFermiHubbardJax\n(\nhi\n,\nt\n=\n1.0\n,\nU\n=\n1.0\n,\ngraph\n=\ng\n)\n```\nReturns the Conjugate-Transposed operator\nReturns the transposed operator\nThe hilbert space associated to this observable.\nCall self as a function.\nndarray\nv ( ndarray )\nndarray\nv ( ndarray )\nReturns a guaranteed concrete instance of an operator.\nAs some operations on operators return lazy wrappers (such as transpose,\nhermitian conjugate…), this is used to obtain a guaranteed non-lazy\noperator.\nAbstractOperator\nAbstractOperator\nReturns the complex-conjugate of this operator.\nconcrete – if True returns a concrete operator and not a lazy wrapper\nAbstractOperator\nif concrete is not True, self or a lazy wrapper; the\ncomplex-conjugated operator otherwise\nConvert from FermionOperator2nd\nha ( FermionOperator2ndJax ) – the original FermionOperator2nd/FermionOperator2ndJax operator\nha ( FermionOperator2ndJax ) – the original FermionOperator2nd/FermionOperator2ndJax operator\ncutoff (",
+      "metadata": {
+        "section_id": "sec_1",
+        "section_title": "Contents",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\_generated\\operator\\netket.experimental.operator.FermiHubbardJax.html"
+      },
+      "score": 0.7115314213854054,
+      "original_score": 0.5562021867467776,
+      "vector_score": 0.6952527334334719,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "netket",
+        "operators",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 49,
+    "final_results_count": 5
+  }
+}

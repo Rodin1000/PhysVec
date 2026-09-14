@@ -1,0 +1,131 @@
+{
+  "query": "NetKet FFNN feed-forward neural network MLP model definition Flax",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_4_4__0",
+      "text": "## 2) Defining the Machine#\nFor this tutorial, we shall use the most common type of neural network: fully connected feedforward neural network nk.machine.FFNN . Other types of neural networks available will be discussed in other tutorials.\n```code\nimport\nnetket.nn\nas\nnknn\nimport\nflax.linen\nas\nnn\nimport\njax.numpy\nas\njnp\nclass\nFFNN\n(\nnn\n.\nModule\n):\n@nn\n.\ncompact\ndef\n__call__\n(\nself\n,\nx\n):\nx\n=\nnn\n.\nDense\n(\nfeatures\n=\n2\n*\nx\n.\nshape\n[\n-\n1\n],\nuse_bias\n=\nTrue\n,\nparam_dtype\n=\nnp\n.\ncomplex128\n,\nkernel_init\n=\nnn\n.\ninitializers\n.\nnormal\n(\nstddev\n=\n0.01\n),\nbias_init\n=\nnn\n.\ninitializers\n.\nnormal\n(\nstddev\n=\n0.01\n),\n)(\nx\n)\nx\n=\nnknn\n.\nlog_cosh\n(\nx\n)\nx\n=\njnp\n.\nsum\n(\nx\n,\naxis\n=-\n1\n)\nreturn\nx\nmodel\n=\nFFNN\n()\n```",
+      "metadata": {
+        "section_id": "sec_4",
+        "package": "netket",
+        "section_title": "2) Defining the Machine#",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html"
+      },
+      "score": 0.9547773273718506,
+      "original_score": 0.9282179799553184,
+      "vector_score": 1.0,
+      "bm25_score": 0.6410898997765918,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "netket",
+        "ffnn",
+        "neural",
+        "network",
+        "model",
+        "flax"
+      ],
+      "match_ratio": 0.6,
+      "is_html": true
+    },
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_8_8__0",
+      "text": "## 5. Learning with Feed Forward Neural Networks#\nNow let’s try a more complex network, namely a Feed Forward Neural Network (FFNN). There you will have more freedom to construct your own specific architecture. We’ll try two different FFNN in this tutorial.\nThe first one is a simple structure: the first layer takes as input L-dimensional input, applies a bias and outputs two times more data, just followed by a Lncosh activation layer. The final layer SumOutput is needed to obtain a single number for the wave-function coefficient associated to the input basis state.\n```code\nclass\nModel\n(\nnnx\n.\nModule\n):\ndef\n__init__\n(\nself\n,\nN\n:\nint\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\nself\n.\nlinear\n=\nnnx\n.\nLinear\n(\nin_features\n=\nN\n,\nout_features\n=\n2\n*\nN\n,\ndtype\n=\njnp\n.\ncomplex128\n,\nrngs\n=\nrngs\n)\ndef\n__call__\n(\nself\n,\nx\n:\njax\n.\nArray\n):\nx\n=\nself\n.\nlinear\n(\nx\n)\nx\n=\nnk\n.\nnn\n.\nactivation\n.\nlog_cosh\n(\nx\n)\nreturn\njnp\n.\nsum\n(\nx\n,\naxis\n=-\n1\n)\nffnn\n=\nModel\n(\nN\n=\nhi\n.\nsize\n,\nrngs\n=\nnnx\n.\nRngs\n(\n1\n))\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhi\n,\ngraph\n=\ng\n)\n# The variational state\nvs\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nffnn\n,\nn_samples\n=\n1008\n)\nopt\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.05\n)\n# The ground-state optimization loop\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nhamiltonian\n=\nha\n,\noptimizer\n=\nop\n,\ndiag_shift\n=\n0.1\n,\nvariational_state\n=\nvs\n)\nstart\n=\ntime\n.\ntime\n()\ngs\n.\nrun\n(\nout\n=\n\"FF\"\n,\nn_iter\n=\n300\n)\nend\n=\ntime\n.\ntime\n()\nprint\n(\n\"### Feed Forward calculation\"\n)\nprint\n(\n\"Has\"\n,\nvs\n.\nn_parameters\n,\n\"parameters\"\n)\nprint\n(\n\"The Feed Forward calculation took\"\n,\nend\n-\nstart\n,\n\"seconds\"\n)\n```\n```code\n### Feed Forward calculation\nHas 1012 parameters\nThe Feed Forward calculation took 51.89680004119873 seconds\n```\n```code\n# import the data from log file\ndata\n=\njson\n.\nload\n(\nopen\n(\n\"FF.log\"\n))\n# Extract the relevant information\niters_FF",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "section_title": "5. Learning with Feed Forward Neural Networks#",
+        "section_id": "sec_8"
+      },
+      "score": 0.6352963338901504,
+      "original_score": 0.4211052918891276,
+      "vector_score": 0.2763816148614095,
+      "bm25_score": 1.0,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "ffnn",
+        "feed",
+        "forward",
+        "neural",
+        "network",
+        "model"
+      ],
+      "match_ratio": 0.6,
+      "is_html": true
+    },
+    {
+      "id": "netket.vqs.FullSumState__54ba2b4e5749b5330a7451125d562772__sec_1_1__1",
+      "text": " Union [ None , str , type [ Any ], dtype , _SupportsDType ]], Array ] | None ) – Function of the signature f(model, shape, rng_key, dtype) -> Optional_state, parameters used to\ninitialise the parameters. Defaults to the standard flax initialiser. Only specify if your network has\na non-standard init method.\napply_fun ( Callable | None ) – Function of the signature f(model, variables, σ) that should evaluate the model. Defaults to model.apply(variables, σ) . specify only if your network has a non-standard apply method.\napply_fun ( Callable | None ) – Function of the signature f(model, variables, σ) that should evaluate the model. Defaults to model.apply(variables, σ) . specify only if your network has a non-standard apply method.\ntraining_kwargs ( dict ) – a dict containing the optional keyword arguments to be passed to the apply_fun during training.\nUseful for example when you have a batchnorm layer that constructs the average/mean only during training.\ntraining_kwargs ( dict ) – a dict containing the optional keyword arguments to be passed to the apply_fun during training.\nUseful for example when you have a batchnorm layer that constructs the average/mean only during training.\nchunk_size ( int | None ) – (Defaults to None ) If specified, calculations are split into chunks where the neural network\nis evaluated at most on chunk_size samples at once. This does not change the mathematical results,\nbut will trade a higher computational cost for lower memory cost.\nchunk_size ( int | None ) – (Defaults to None ) If specified, calculations are split into chunks where the neural network\nis evaluated at most on chunk_size samples at once. This does not change the mathematical results,\nbut will trade a higher computational cost for lower memory cost.\nSuggested maximum size of the chunks used in forward and backward evaluations\nof the Neural Network model. If your inputs are smaller than the chunk size\nthis setting is ignored.\nThis can be used to lower the memory required to run a computation with a very\nhigh number of samples or on a very large lattice. Notice that inputs and\noutputs must still fit in memory, but the intermediate computations will now\nrequire less memory.\nThis option comes at an increased computational cost. While this cost should\nbe negligible for large-enough chunk sizes, don’t use it unless you are memory\nbound!\nThis option is an hint: only some operations support chunking. If you perform\nan operation that is not implemented with chunking support, it will fall back\nto no chunking. To check if this happened, set the environment variable NETKET_DEBUG=1 .\nThe descriptor of the Hilbert space\non which this variational state is defined.\nNote\nFull summation states only work over discrete hilbert spaces.\nReturns the model definition of this variational state.\nThis field is optional, and is set to None if the variational",
+      "metadata": {
+        "section_id": "sec_1",
+        "source_file": "docs\\_build\\html\\api\\_generated\\vqs\\netket.vqs.FullSumState.html",
+        "package": "netket",
+        "section_title": "Contents"
+      },
+      "score": 0.6192558786690157,
+      "original_score": 0.39564425185558044,
+      "vector_score": 0.43817994130567706,
+      "bm25_score": 0.22550149405519387,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "forward",
+        "neural",
+        "network",
+        "model",
+        "definition",
+        "flax"
+      ],
+      "match_ratio": 0.6,
+      "is_html": true
+    },
+    {
+      "id": "custom_models__707887de1b8178f64d05d185e87cacc5__sec_1_1__0",
+      "text": "## Contents\nIn this section we give some examples on how to define models for NetKet 3.\nThere are mainly 3 ways to do that, and they all involve using some third party\nframework.\nWhatever you pick, we strongly advise you to read their documentation and whatch\nsome examples.\nThe 3 frameworks that are supported are:\nFlax Linen API , which is an easy-to-use framework to define complex neural networks\nFlax Linen API , which is an easy-to-use framework to define complex neural networks\nHaiku , which is a competitor to Flax, and offers somewhat equivalent expressivity with a rather different syntax.\nHaiku , which is a competitor to Flax, and offers somewhat equivalent expressivity with a rather different syntax.",
+      "metadata": {
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "source_file": "docs\\_build\\html\\advanced\\custom_models.html",
+        "package": "netket"
+      },
+      "score": 0.5810080090240581,
+      "original_score": 0.39276523046964945,
+      "vector_score": 0.4909565380870618,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "netket",
+        "neural",
+        "flax"
+      ],
+      "match_ratio": 0.3,
+      "is_html": true
+    },
+    {
+      "id": "custom_models__e3ecbf081771e6e0402d52dc00bb0897__h1_1_1__0",
+      "text": "In this section we give some examples on how to define models for NetKet 3.\nThere are mainly 3 ways to do that, and they all involve using some third party\nframework.\nWhatever you pick, we strongly advise you to read their documentation and whatch\nsome examples.\nThe 3 frameworks that are supported are:\n- [Flax Linen API](https://flax.readthedocs.io/en/latest/examples.html), which is an easy-to-use framework to define complex neural networks\n- [Haiku](https://github.com/deepmind/dm-haiku), which is a competitor to Flax, and offers somewhat equivalent expressivity with a rather different syntax.",
+      "metadata": {
+        "section_id": "h1_1",
+        "package": "netket",
+        "section_title": "Defining Custom Models",
+        "source_file": "docs\\advanced\\custom_models.md"
+      },
+      "score": 0.47269865734364636,
+      "original_score": 0.43904112483366636,
+      "vector_score": 0.5488014060420829,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "netket",
+        "neural",
+        "flax"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 56,
+    "final_results_count": 5
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "query": "customizing spin1 site properties and operators in itensor siteinds",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "IncludedSiteTypes__7d74debdd1c692a6ddd9c2ac060aba29__\"S1\"-SiteType_2__0",
+      "text": "## \"S=1\" SiteType\nSite indices with the \"S=1\" site type represent $S=1$ spins with the states $|\\!\\uparrow\\rangle$ , $|0\\rangle$ , $|\\!\\downarrow\\rangle$ .\nMaking a single \"S=1\" site or collection of N \"S=1\" sites\n```code\ns = siteind(\"S=1\")\nsites = siteinds(\"S=1\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\nconserve_qns (default: false): conserve total $S^z$\nconserve_sz (default: conserve_qns): conserve total $S^z$\nqnname_sz (default: \"Sz\"): name of total $S^z$ QN\nFor example:\n```code\nsites = siteinds(\"S=1\",N; conserve_sz=true, qnname_sz=\"TotalSz\")\n```\nThe available state names for \"S=1\" sites are:\n\"Up\" (aliases: \"Z+\" , \"↑\" ) spin in the up state\n\"Z0\" (aliases: \"0\" ) spin in the Sz=0 state\n\"Dn\" (aliases: \"Z-\" , \"↓\" ) spin in the down state\nOperators associated with \"S=1\" sites can be made using the op function, for example\n```code\nSz = op(\"Sz\",s)\nSz4 = op(\"Sz\",sites[4])\n```\nSpin operators:\n\"Sz\" (aliases: \"Sᶻ\" )\n\"Sz2\" Square of S^z operator\n\"S+\" (alises: \"S⁺\" , \"Splus\" )\n\"S-\" (aliases: \"S⁻\" , \"Sminus\" )\n\"Sx\" (alises: \"Sˣ\" )\n\"Sx2\" Square of S^x operator\n\"iSy\" (aliases: \"iSʸ\" )\n\"Sy\" (aliases: \"Sʸ\" )\n\"Sy2\" Square of S^y operator\n\"S2\" (aliases: \"S²\"`)",
+      "metadata": {
+        "source_file": "docs\\build\\IncludedSiteTypes.html",
+        "section_id": "\"S1\"-SiteType",
+        "package": "itensormps",
+        "section_title": "\"S=1\" SiteType"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9219748193051993,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "customizing",
+        "site",
+        "operators",
+        "siteinds"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_0__0",
+      "text": "using ChainRulesCore: @ignore_derivatives\nusing ..ITensors:\n  ITensors, Index, ITensor, itensor, dag, onehot, prime, product, swapprime, tags\nusing ..SmallStrings: SmallString\nusing ..TagSets: TagSets, TagSet, addtags, commontags\n\n@eval struct SiteType{T}\n  (f::Type{<:SiteType})() = $(Expr(:new, :f))\nend\n\n# Note that the complicated definition of\n# SiteType above is a workaround for performance\n# issues when creating parameterized types\n# in Julia 1.4 and 1.5-beta. Ideally we\n# can just use the following in the future:\n# struct SiteType{T}\n# end\n\n\"\"\"\nSiteType is a parameterized type which allows\nmaking Index tags into Julia types. Use cases\ninclude overloading functions such as `op`,\n`siteinds`, and `state` which generate custom\noperators, Index arrays, and IndexVals associated\nwith Index objects having a certain tag.\n\nTo make a SiteType type, you can use the string\nmacro notation: `SiteType\"MyTag\"`\n\nTo make a SiteType value or object, you can use\nthe notation: `SiteType(\"MyTag\")`\n\nThere are currently a few built-in site types\nrecognized by `jl`. The system is easily extensible\nby users. To add new operators to an existing site type,\nor to create new site types, you can follow the instructions\n[here](https://docs.itensor.org/ITensorMPS/stable/examples/Physics.html).\n\nThe current built-in site types are:\n\n- `SiteType\"S=1/2\"` (or `SiteType\"S=½\"`)\n- `SiteType\"S=1\"`\n- `SiteType\"Qubit\"`\n- `SiteType\"Qudit\"`\n- `SiteType\"Boson\"`\n- `SiteType\"Fermion\"`\n- `SiteType\"tJ\"`\n- `SiteType\"Electron\"`\n\n# Examples\n\nTags on indices get turned into SiteTypes internally, and then\nwe search for overloads of functions like `op` and `siteind`.\nFor example:\n\n```julia\njulia> s = siteind(\"S=1/2\")\n(dim=2|id=862|\"S=1/2,Site\")\n\njulia> @show op(\"Sz\", s);\nop(s, \"Sz\") = ITensor ord=2\nDim 1: (dim=2|id=862|\"S=1/2,Site\")'\nDim 2: (dim=2|id=862|\"S=1/2,Site\")\nNDTensors.Dense{Float64,Array{Float64,1}}\n 2×2\n 0.5   0.0\n 0.0  -0.5\n\njulia> @show op",
+      "metadata": {
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "section_id": "part_0",
+        "section_title": "sitetype.jl"
+      },
+      "score": 0.9833571007471885,
+      "original_score": 0.981209629875858,
+      "vector_score": 0.8999529786742801,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "site",
+        "operators",
+        "itensor",
+        "siteinds"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "MPSandMPO__85ff8e4a2a3bbd8ef8316257bf7d9a30__h1_15_15__0",
+      "text": "sites = siteinds(psi) # Get site indices from your MPS\nH = MPO(os,sites)",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\MPSandMPO.md",
+        "section_title": "Then put operators into os...",
+        "package": "itensormps",
+        "section_id": "h1_15"
+      },
+      "score": 0.8658383116108019,
+      "original_score": 0.8532606533243147,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "site",
+        "operators",
+        "siteinds"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "ops_itensor__affa3c82ed8d1be94bbe675053e1287f__full__0",
+      "text": "using .SiteTypes: SiteTypes, op\n\nfunction SiteTypes.op(I::UniformScaling, s::Index...)\n  return I.λ * op(\"Id\", s...)\nend\n\nfunction ITensor(o::Op, s::Vector{<:Index})\n  return op(o.which_op, map(n -> s[n], o.sites)...; o.params...)\nend\n\nfunction ITensor(o::Scaled, s::Vector{<:Index})\n  c = coefficient(o)\n  if isreal(c)\n    c = real(c)\n  end\n  return c * ITensor(argument(o), s)\nend\n\nfunction ITensor(o::Prod, s::Vector{<:Index})\n  T = ITensor(true)\n  for a in o.args[1]\n    Tₙ = ITensor(a, s)\n    # TODO: Implement this logic inside `apply`\n    if hascommoninds(T, Tₙ)\n      T = T(Tₙ)\n    else\n      T *= Tₙ\n    end\n  end\n  return T\nend\n\nfunction ITensor(o::Sum, s::Vector{<:Index})\n  T = ITensor()\n  for a in o.args[1]\n    T += ITensor(a, s)\n  end\n  return T\nend\n\nfunction ITensor(o::Exp, s::Vector{<:Index})\n  return exp(ITensor(argument(o), s))\nend\n\nfunction ITensor(o::LazyApply.Adjoint, s::Vector{<:Index})\n  return swapprime(dag(ITensor(o', s)), 0 => 1)\nend\n\nfunction Sum{ITensor}(o::Sum, s::Vector{<:Index})\n  return Applied(sum, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Prod, s::Vector{<:Index})\n  return Applied(prod, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Scaled{C,Prod{Op}}, s::Vector{<:Index}) where {C}\n  t = Prod{ITensor}(argument(o), s)\n  t1 = coefficient(o) * only(t.args)[1]\n  return Applied(prod, (vcat([t1], only(t.args)[2:end]),))\nend\n\nfunction apply(o::Prod{ITensor}, v::ITensor; kwargs...)\n  ov = v\n  for oₙ in reverse(only(o.args))\n    ov = apply(oₙ, ov; kwargs...)\n  end\n  return ov\nend\n\nfunction (o::Prod{ITensor})(v::ITensor; kwargs...)\n  return apply(o, v; kwargs...)\nend\n",
+      "metadata": {
+        "section_title": "ops_itensor.jl",
+        "package": "itensors",
+        "source_file": "src\\lib\\Ops\\ops_itensor.jl",
+        "section_id": "full"
+      },
+      "score": 0.8574532060864771,
+      "original_score": 0.8532606533243147,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "SiteTypes__c774f95869a6174e9ce75e61d1a4214f__full__0",
+      "text": "module SiteTypes\n# TODO: This is a bit strange, but required for backwards\n# compatibility since `val` is also used by `QNVal`.\nimport ..ITensors: val\n# TODO: Use explicit overloading with `NDTensors.space`.\nimport ..ITensors: space\ninclude(\"sitetype.jl\")\ninclude(\"SiteTypesChainRulesCoreExt.jl\")\ninclude(\"sitetypes/aliases.jl\")\ninclude(\"sitetypes/generic_sites.jl\")\ninclude(\"sitetypes/qubit.jl\")\ninclude(\"sitetypes/spinhalf.jl\")\ninclude(\"sitetypes/spinone.jl\")\ninclude(\"sitetypes/fermion.jl\")\ninclude(\"sitetypes/electron.jl\")\ninclude(\"sitetypes/tj.jl\")\ninclude(\"sitetypes/qudit.jl\")\ninclude(\"sitetypes/boson.jl\")\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "full",
+        "source_file": "src\\lib\\SiteTypes\\src\\SiteTypes.jl",
+        "section_title": "SiteTypes.jl"
+      },
+      "score": 0.8457540987449111,
+      "original_score": 0.8457540987449111,
+      "vector_score": 0.9912025070531989,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 102,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      }
+    }
+  }
+}

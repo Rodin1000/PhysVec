@@ -1,0 +1,124 @@
+{
+  "query": "Key implementation details for fermion-spinless-backflow Hamiltonian in netket",
+  "package": "netket",
+  "results": [
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_1_1__0",
+      "text": "## Contents\nAuthor: Giuseppe Carleo (Computational Quantum Science Lab - EPFL)\nIn this tutorial, we will introduce you to studying fermionic quantum many-body systems using NetKet. We will start by introducing fermionic operators and how to work with them in NetKet. We will then proceed to implement and optimize three different wave functions: a Slater determinant wave function, a Neural Jastrow-Slater state, and a Slater Backflow neural wave function. We will focus on a Hamiltonian of spinless fermions in two dimensions. In the following we will also assume the reader is familiar with the main concepts in second quantization, including creation and destruction operators, as well as the role of anticommutation relations.",
+      "metadata": {
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "package": "netket"
+      },
+      "score": 0.9665543292762038,
+      "original_score": 0.9485451219633904,
+      "vector_score": 0.9356814024542379,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "spinless",
+        "backflow",
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_1_1__0",
+      "text": "## Contents\nThe goal of this tutorial series is to guide you through writing a simple VMC code from (almost) scratch to compute the ground-state of a paradigmatic spin model: the transverse-field Ising model in 2 dimensions.\nIn this first tutorial, we will focus on:\nUnderstanding NetKet’s graph and operator system\nUnderstanding NetKet’s graph and operator system\nDefining Hamiltonians using building blocks\nDefining Hamiltonians using building blocks\nWorking with different operator formats\nWorking with different operator formats\nValidating our implementation with exact diagonalization\nValidating our implementation with exact diagonalization\nThe hamiltonian we will study is the transverse-field Ising model in 2 dimensions:\nIn the following we assume periodic boundary conditions with \\(h=1\\) and \\(J=1\\) .\nNote\nIf you are executing this notebook on Colab , you will need to install NetKet.\nYou can do so by uncommenting and running the following cell.\nKeep in mind that this notebook was designed for NetKet version 3.9.1 , which requires Python >=3.8.\n```code\n# %pip install --quiet netket\n```\nPlease verify that you are running on the correct version of NetKet:\n```code\nimport\nplatform\nimport\nnetket\nas\nnk\nprint\n(\n\"Python version (requires >=3.9)\"\n,\nplatform\n.\npython_version\n())\nprint\n(\n\"NetKet version (requires >=3.9.1)\"\n,\nnk\n.\n__version__\n)\n```\n```code\nPython version (requires >=3.9) 3.12.11\nNetKet version (requires >=3.9.1) 3.19.dev26+gd94cf4597.d20250713\n```\nShow code cell content\nHide code cell content\n```code\n# Import necessary libraries\nimport\nnetket\nas\nnk\nimport\nnumpy\nas\nnp\n```",
+      "metadata": {
+        "section_id": "sec_1",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "package": "netket",
+        "section_title": "Contents"
+      },
+      "score": 0.865,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "implementation",
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.375,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_2_2__0",
+      "text": "## Fermionic Operators in NetKet#\nFermionic operators are fundamental to describing quantum systems with fermions (e.g., electrons). NetKet provides these operators directly via the netket.operator.fermion module. Let’s start by setting up the necessary environment and defining our quantum system.\n```code\nimport\nnetket\nas\nnk\nprint\n(\n\"NetKet version:\"\n,\nnk\n.\n__version__\n)\n```\n```code\nNetKet version: 3.19.dev23+gfbd40743f.d20250713\n```\nWe will work with a Hamiltonian of spinless fermions on a two-dimensional lattice:\nHere, \\(\\langle i,j \\rangle \\) denotes nearest-neighbors on a square lattice of \\(N=L\\times L\\) sites, \\(c_i (c^{\\dagger}_i)\\) are destruction (creation) fermionic operators on site \\(i\\) , whereas \\(n_i=c^{\\dagger}_i c_i\\) are density operators.",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "section_title": "Fermionic Operators in NetKet#",
+        "section_id": "sec_2"
+      },
+      "score": 0.7811109693636824,
+      "original_score": 0.6632476451748961,
+      "vector_score": 0.6282059141800886,
+      "bm25_score": 0.8034145691541255,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "fermion",
+        "spinless",
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_4_4__0",
+      "text": "## Fermionic Operators and Hamiltonian#\nTo describe the Hamiltonian of our quantum system, we need to work with the fermionic operators associated with the Hilbert space defined above. These operators include creation (cdag), annihilation (c), and number (nc) operators. We will use these operators to build our Hamiltonian.\n```code\nfrom\nnetket.operator.fermion\nimport\ndestroy\nas\nc\nfrom\nnetket.operator.fermion\nimport\ncreate\nas\ncdag\nfrom\nnetket.operator.fermion\nimport\nnumber\nas\nnc\n```\nWith these operators, we can now construct the Hamiltonian for our system. In this example, we have a tight-binding hopping term proportional to \\(t\\) and a density-density interaction term proportional to \\(V\\) . We can easily define the Hamiltonian by adding terms one by one looping over the edges of the lattice:\n```code\nt\n=\n1.0\nV\n=\n4.0\nH\n=\n0.0\nfor\ni\n,\nj\nin\ngraph\n.\nedges\n():\nH\n-=\nt\n*\n(\ncdag\n(\nhi\n,\ni\n)\n@\nc\n(\nhi\n,\nj\n)\n+\ncdag\n(\nhi\n,\nj\n)\n@\nc\n(\nhi\n,\ni\n))\nH\n+=\nV\n*\nnc\n(\nhi\n,\ni\n)\n@\nnc\n(\nhi\n,\nj\n)\n```\nThe hamiltonian above commutes with the total fermion number operator.However the operator we just defined does not exploit this property, and simply computes one connected element for every off-diagonal term:\n```code\nH\n.\nmax_conn_size\n```\n```code\n65\n```\nmany of which are zero.\nThis can be reduced by using a more efficient implementation, to which we can easily convert our hamiltonian to:\n```code\nfrom\nnetket.experimental.operator\nimport\nParticleNumberConservingFermioperator2nd\nH_pnc\n=\nParticleNumberConservingFermioperator2nd\n.\nfrom_fermionoperator2nd\n(\nH\n)\n```\nNow the number of connected elements is reduced to\n```code\nH_pnc\n.\nmax_conn_size\n```\n```code\n21\n```\ngreatly reducing the number of wavfunction-evaluations needed to compute the local energies.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "package": "netket",
+        "section_title": "Fermionic Operators and Hamiltonian#",
+        "section_id": "sec_4"
+      },
+      "score": 0.686895150448642,
+      "original_score": 0.5183002314594494,
+      "vector_score": 0.45527296160958314,
+      "bm25_score": 0.7704093108589145,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "implementation",
+        "fermion",
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_1_1__0",
+      "text": "## Contents\nIn this tutorial we will use NetKet to obtain the ground state of the J1-J2 model in one-dimension with periodic boundary conditions, using a Neural Network variational wave-function. The Hamiltonian of the model is given by:\nwhere the sum is over sites of the 1-D chain. Here \\(\\vec{\\sigma}=(\\sigma^x,\\sigma^y,\\sigma^z)\\) is the vector of Pauli matrices.\nWe will also explore some useful functionalities provided by the package.",
+      "metadata": {
+        "section_id": "sec_1",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html",
+        "section_title": "Contents",
+        "package": "netket"
+      },
+      "score": 0.6614568027613384,
+      "original_score": 0.5163668610876263,
+      "vector_score": 0.6454585763595329,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.25,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 55,
+    "final_results_count": 5
+  }
+}

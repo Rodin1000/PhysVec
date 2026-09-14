@@ -1,0 +1,137 @@
+{
+  "query": "Common pitfalls when initializing electron site indices with siteinds in ITensor.",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "IncludedSiteTypes__10c3b7e95897ec39b67299563b29b049__h2_13_13__0",
+      "text": "The states of site indices with the \"Electron\" SiteType correspond to\n``|0\\rangle``, ``|\\!\\uparrow\\rangle``, ``|\\!\\downarrow\\rangle``, ``|\\!\\uparrow\\downarrow\\rangle``.\nMaking a single \"Electron\" site or collection of N \"Electron\" sites\n```\ns = siteind(\"Electron\")\nsites = siteinds(\"Electron\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\n- `conserve_qns` (default: false): conserve total number of electrons\n- `conserve_sz` (default: conserve_qns): conserve total ``S^z``\n- `conserve_nf` (default: conserve_qns): conserve total number of electrons\n- `conserve_nfparity` (default: conserve_qns): conserve total electron number parity\n- `qnname_sz` (default: \"Sz\"): name of total ``S^z`` QN\n- `qnname_nf` (default: \"Nf\"): name of total electron number QN\n- `qnname_nfparity` (default: \"NfParity\"): name of total electron number parity QN\nFor example:\n```\nsites = siteinds(\"Electron\",N; conserve_nfparity=true)\n```",
+      "metadata": {
+        "section_id": "h2_13",
+        "section_title": "\"Electron\" SiteType",
+        "source_file": "docs\\src\\IncludedSiteTypes.md",
+        "package": "itensormps"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.29566153395869316,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "electron",
+        "site",
+        "indices",
+        "siteinds"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "SiteTypes__c774f95869a6174e9ce75e61d1a4214f__full__0",
+      "text": "module SiteTypes\n# TODO: This is a bit strange, but required for backwards\n# compatibility since `val` is also used by `QNVal`.\nimport ..ITensors: val\n# TODO: Use explicit overloading with `NDTensors.space`.\nimport ..ITensors: space\ninclude(\"sitetype.jl\")\ninclude(\"SiteTypesChainRulesCoreExt.jl\")\ninclude(\"sitetypes/aliases.jl\")\ninclude(\"sitetypes/generic_sites.jl\")\ninclude(\"sitetypes/qubit.jl\")\ninclude(\"sitetypes/spinhalf.jl\")\ninclude(\"sitetypes/spinone.jl\")\ninclude(\"sitetypes/fermion.jl\")\ninclude(\"sitetypes/electron.jl\")\ninclude(\"sitetypes/tj.jl\")\ninclude(\"sitetypes/qudit.jl\")\ninclude(\"sitetypes/boson.jl\")\nend\n",
+      "metadata": {
+        "source_file": "src\\lib\\SiteTypes\\src\\SiteTypes.jl",
+        "section_id": "full",
+        "package": "itensors",
+        "section_title": "SiteTypes.jl"
+      },
+      "score": 0.93289275858192,
+      "original_score": 0.9311720600840205,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "electron"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_0__0",
+      "text": "@eval module $(gensym())\nusing ITensors, Test\nimport ITensors: Out, In\nusing ITensors.SiteTypes: op, siteind, siteinds\n\n@testset \"Fermions\" begin\n  ITensors.enable_auto_fermion()\n\n  @testset \"parity_sign function\" begin\n\n    # Full permutations\n    p1 = [1, 2, 3]\n    @test ITensors.parity_sign(p1) == +1\n    p2 = [2, 1, 3]\n    @test ITensors.parity_sign(p2) == -1\n    p3 = [2, 3, 1]\n    @test ITensors.parity_sign(p3) == +1\n    p4 = [3, 2, 1]\n    @test ITensors.parity_sign(p4) == -1\n\n    ## Partial permutations\n    p5 = [2, 7]\n    @test ITensors.parity_sign(p5) == +1\n    p6 = [5, 3]\n    @test ITensors.parity_sign(p6) == -1\n    p7 = [1, 9, 3, 10]\n    @test ITensors.parity_sign(p7) == -1\n    p8 = [1, 12, 9, 3, 11]\n    @test ITensors.parity_sign(p8) == +1\n  end\n\n  @testset \"Fermionic QNs\" begin\n    q = QN(\"Nf\", 1, -1)\n    @test isfermionic(q[1])\n    @test fparity(q) == 1\n\n    q = q + q + q\n    @test val(q, \"Nf\") == 3\n\n    p = QN(\"P\", 1, -2)\n    @test fparity(p) == 1\n    @test isodd(p)\n    @test fparity(p + p) == 0\n    @test fparity(p + p + p) == 1\n  end\n\n  @testset \"Fermionic IndexVals\" begin\n    sn = Index([QN(\"Nf\", 0, -1) => 1, QN(\"Nf\", 1, -1) => 1], \"sn\")\n    @test fparity(sn => 1) == 0\n    @test fparity(sn => 2) == 1\n    @test !isodd(sn => 1)\n    @test isodd(sn => 2)\n\n    sp = Index([QN(\"Nfp\", 0, -2) => 1, QN(\"Nfp\", 1, -2) => 1], \"sp\")\n    @test fparity(sp => 1) == 0\n    @test fparity(sp",
+      "metadata": {
+        "source_file": "test\\base\\test_fermions.jl",
+        "section_id": "part_0",
+        "section_title": "test_fermions.jl",
+        "package": "itensors"
+      },
+      "score": 0.7093110685756192,
+      "original_score": 0.7018575062314043,
+      "vector_score": 0.7537355729596042,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "siteinds"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "IncludedSiteTypes__7d74debdd1c692a6ddd9c2ac060aba29__\"Electron\"-SiteType_6__0",
+      "text": "## \"Electron\" SiteType\nThe states of site indices with the \"Electron\" SiteType correspond to $|0\\rangle$ , $|\\!\\uparrow\\rangle$ , $|\\!\\downarrow\\rangle$ , $|\\!\\uparrow\\downarrow\\rangle$ .\nMaking a single \"Electron\" site or collection of N \"Electron\" sites\n```code\ns = siteind(\"Electron\")\nsites = siteinds(\"Electron\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\nconserve_qns (default: false): conserve total number of electrons\nconserve_sz (default: conserve_qns): conserve total $S^z$\nconserve_nf (default: conserve_qns): conserve total number of electrons\nconserve_nfparity (default: conserve_qns): conserve total electron number parity\nqnname_sz (default: \"Sz\"): name of total $S^z$ QN\nqnname_nf (default: \"Nf\"): name of total electron number QN\nqnname_nfparity (default: \"NfParity\"): name of total electron number parity QN\nFor example:\n```code\nsites = siteinds(\"Electron\",N; conserve_nfparity=true)\n```\nThe available state names for \"Electron\" sites are:\n\"Emp\" (aliases: \"0\" ) unoccupied electron site\n\"Up\" (aliases: \"↑\" ) electron site occupied with one up electron\n\"Dn\" (aliases: \"↓\" ) electron site occupied with one down electron\n\"UpDn\" (aliases: \"↑↓\" ) electron site occupied with two electrons (one up, one down)\nOperators associated with \"Electron\" sites can be made using the op function, for example\n```code\nCup = op(\"Cup\",s)\nCup4 = op(\"Cup\",sites[4])\n```\nSingle-fermion operators:\n\"Ntot\" (aliases: \"ntot\" ) Total density operator\n\"Nup\" (aliases: \"n↑\" ) Up density operator\n\"Ndn\" (aliases: \"n↓\" ) Down density operator\n\"Cup\" (aliases: \"c↑\" ) Up-spin annihilation operator\n\"Cdn\" (aliases: \"c↓\" ) Down-spin annihilation operator\n\"Cdagup\" (aliases: \"c†↑\" ) Up-spin creation operator\n\"Cdagdn\" (aliases: \"c†↓\" ) Down-spin creation operator\n\"Sz\" (aliases: \"Sᶻ\" )\n\"Sx\" (aliases: \"Sˣ\" )\n\"S+\" (aliases: \"Sp\" , \"S⁺\" , \"Splus\" )\n\"S-\" (aliases: \"Sm\" , \"S⁻\" , \"Sminus\" )\n\"F\" Jordan-Wigner string operator\n\"Fup\" (aliases: \"F↑\" ) Up-spin Jordan-Wigner string operator\n\"Fdn\" (aliases: \"F↓\" ) Down-spin Jordan-Wigner string operator\nNon-fermionic single particle operators (these do not have Jordan-Wigner string attached, so will commute within systems such as OpSum or the apply function):\n\"Aup\" (aliases: \"a↑\" ) Up-spin annihilation operator\n\"Adn\" (aliases: \"a↓\" ) Down-spin annihilation operator\n\"Adagup\" (aliases: \"a†↑\" ) Up-spin creation operator\n\"Adagdn\" (aliases: \"a†↓\" ) Down-spin creation operator",
+      "metadata": {
+        "section_id": "\"Electron\"-SiteType",
+        "package": "itensormps",
+        "source_file": "docs\\build\\IncludedSiteTypes.html",
+        "section_title": "\"Electron\" SiteType"
+      },
+      "score": 0.6477664072685887,
+      "original_score": 0.4581021650285979,
+      "vector_score": 0.43948309749012077,
+      "bm25_score": 0.20991945897606232,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "electron",
+        "site",
+        "indices",
+        "siteinds"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_0__0",
+      "text": "using ChainRulesCore: @ignore_derivatives\nusing ..ITensors:\n  ITensors, Index, ITensor, itensor, dag, onehot, prime, product, swapprime, tags\nusing ..SmallStrings: SmallString\nusing ..TagSets: TagSets, TagSet, addtags, commontags\n\n@eval struct SiteType{T}\n  (f::Type{<:SiteType})() = $(Expr(:new, :f))\nend\n\n# Note that the complicated definition of\n# SiteType above is a workaround for performance\n# issues when creating parameterized types\n# in Julia 1.4 and 1.5-beta. Ideally we\n# can just use the following in the future:\n# struct SiteType{T}\n# end\n\n\"\"\"\nSiteType is a parameterized type which allows\nmaking Index tags into Julia types. Use cases\ninclude overloading functions such as `op`,\n`siteinds`, and `state` which generate custom\noperators, Index arrays, and IndexVals associated\nwith Index objects having a certain tag.\n\nTo make a SiteType type, you can use the string\nmacro notation: `SiteType\"MyTag\"`\n\nTo make a SiteType value or object, you can use\nthe notation: `SiteType(\"MyTag\")`\n\nThere are currently a few built-in site types\nrecognized by `jl`. The system is easily extensible\nby users. To add new operators to an existing site type,\nor to create new site types, you can follow the instructions\n[here](https://docs.itensor.org/ITensorMPS/stable/examples/Physics.html).\n\nThe current built-in site types are:\n\n- `SiteType\"S=1/2\"` (or `SiteType\"S=½\"`)\n- `SiteType\"S=1\"`\n- `SiteType\"Qubit\"`\n- `SiteType\"Qudit\"`\n- `SiteType\"Boson\"`\n- `SiteType\"Fermion\"`\n- `SiteType\"tJ\"`\n- `SiteType\"Electron\"`\n\n# Examples\n\nTags on indices get turned into SiteTypes internally, and then\nwe search for overloads of functions like `op` and `siteind`.\nFor example:\n\n```julia\njulia> s = siteind(\"S=1/2\")\n(dim=2|id=862|\"S=1/2,Site\")\n\njulia> @show op(\"Sz\", s);\nop(s, \"Sz\") = ITensor ord=2\nDim 1: (dim=2|id=862|\"S=1/2,Site\")'\nDim 2: (dim=2|id=862|\"S=1/2,Site\")\nNDTensors.Dense{Float64,Array{Float64,1}}\n 2×2\n 0.5   0.0\n 0.0  -0.5\n\njulia> @show op",
+      "metadata": {
+        "section_id": "part_0",
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "section_title": "sitetype.jl"
+      },
+      "score": 0.6152714624289954,
+      "original_score": 0.5603102427759948,
+      "vector_score": 0.3517257892439746,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "electron",
+        "site",
+        "indices",
+        "siteinds",
+        "itensor"
+      ],
+      "match_ratio": 0.625,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 114,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

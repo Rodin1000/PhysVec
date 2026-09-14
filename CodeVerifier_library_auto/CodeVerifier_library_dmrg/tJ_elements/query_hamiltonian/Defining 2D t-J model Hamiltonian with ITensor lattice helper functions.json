@@ -1,0 +1,139 @@
+{
+  "query": "Defining 2D t-J model Hamiltonian with ITensor lattice helper functions",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Make-a-2D-Hamiltonian-for-DMRG_4__0",
+      "text": "## Make a 2D Hamiltonian for DMRG\nYou can use the OpSum system to make 2D Hamiltonians much in the same way you make 1D Hamiltonians: by looping over all of the bonds and adding the interactions on these bonds to the OpSum.\nTo help with the logic of 2D lattices, ITensor pre-defines some helper functions which return an array of bonds. Each bond object has an \"s1\" field and an \"s2\" field which are the integers numbering the two sites the bond connects. (You can view the source for these functions at this link .)\nThe two provided functions currently are square_lattice and triangular_lattice . It is not hard to write your own similar lattice functions as all they have to do is define an array of ITensorMPS.LatticeBond structs or even a custom struct type you wish to define. We welcome any user contributions of other lattices that ITensor does not currently offer.\nEach lattice function takes an optional named argument \"yperiodic\" which lets you request that the lattice should have periodic boundary conditions around the y direction, making the geometry a cylinder.\nFull example code:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  Ny = 6\n  Nx = 12\n\n  N = Nx*Ny\n\n  sites = siteinds(\"S=1/2\", N;\n                   conserve_qns = true)\n\n  # Obtain an array of LatticeBond structs\n  # which define nearest-neighbor site pairs\n  # on the 2D square lattice (wrapped on a cylinder)\n  lattice = square_lattice(Nx, Ny; yperiodic = false)\n\n  # Define the Heisenberg spin Hamiltonian on this lattice\n  os = OpSum()\n  for b in lattice\n    os += 0.5, \"S+\", b.s1, \"S-\", b.s2\n    os += 0.5, \"S-\", b.s1, \"S+\", b.s2\n    os +=      \"Sz\", b.s1, \"Sz\", b.s2\n  end\n  H = MPO(os,sites)\n\n  state = [isodd(n) ? \"Up\" : \"Dn\" for n=1:N]\n  # Initialize wavefunction to a random MPS\n  # of bond-dimension 10 with same quantum\n  # numbers as `state`\n  psi0 = random_mps(sites,state;linkdims=20)\n\n  nsweeps = 10\n  maxdim = [20,60,100,100,200,400,800]\n  cutoff = [1E-8]\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "section_id": "Make-a-2D-Hamiltonian-for-DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "Make a 2D Hamiltonian for DMRG",
+        "package": "itensormps"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "hamiltonian",
+        "itensor",
+        "lattice",
+        "helper",
+        "functions"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "README__b97d9cca32fc2a3172c92369ac486bd8__root_0__0",
+      "text": "Here is an initial version of a general CTMRG code for contracting an infinite 2D tensor network.\nFor now, the code only works with a square lattice with a unit cell of 2x2 or larger.\nRun a test example of contracting the 2D classical Ising model partition function with `include(\"main.jl\"); main()`.",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "root",
+        "section_title": "README",
+        "source_file": "examples\\ctmrg\\anisotropic\\README.md"
+      },
+      "score": 0.8625176289923635,
+      "original_score": 0.8541853640828098,
+      "vector_score": 0.8177317051035122,
+      "bm25_score": 1.0,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "model",
+        "lattice"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "full",
+        "source_file": "examples\\src\\trg.jl",
+        "section_title": "trg.jl"
+      },
+      "score": 0.8057142857142857,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_6_6__0",
+      "text": "You can use the OpSum system to make 2D Hamiltonians\nmuch in the same way you make 1D Hamiltonians: by looping over\nall of the bonds and adding the interactions on these bonds to\nthe OpSum.\nTo help with the logic of 2D lattices, ITensor pre-defines\nsome helper functions which\nreturn an array of bonds. Each bond object has an\n\"s1\" field and an \"s2\" field which are the integers numbering\nthe two sites the bond connects.\n(You can view the source for these functions at [this link](https://github.com/ITensor/ITensorMPS.jl/blob/main/src/lattices/lattices.jl).)\nThe two provided functions currently are `square_lattice` and\n`triangular_lattice`. It is not hard to write your own similar lattice\nfunctions as all they have to do is define an array of `ITensorMPS.LatticeBond`\nstructs or even a custom struct type you wish to define. We welcome any\nuser contributions of other lattices that ITensor does not currently offer.\nEach lattice function takes an optional named argument\n\"yperiodic\" which lets you request that the lattice should\nhave periodic boundary conditions around the y direction, making\nthe geometry a cylinder.\n**Full example code:**\n```julia\nusing ITensors, ITensorMPS\nlet\n  Ny = 6\n  Nx = 12\n  N = Nx*Ny\n  sites = siteinds(\"S=1/2\", N;\n                   conserve_qns = true)",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "h2_6",
+        "section_title": "Make a 2D Hamiltonian for DMRG",
+        "source_file": "docs\\src\\examples\\DMRG.md"
+      },
+      "score": 0.7582042573040371,
+      "original_score": 0.71790496685471,
+      "vector_score": 0.6858807023257615,
+      "bm25_score": 0.8460020249705038,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "hamiltonian",
+        "itensor",
+        "lattice",
+        "helper",
+        "functions"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Perform-a-basic-DMRG-calculation_0__0",
+      "text": "## Perform a basic DMRG calculation\nBecause tensor indices in ITensor have unique identities, before we can make a Hamiltonian or a wavefunction we need to construct a \"site set\" which will hold the site indices defining the physical Hilbert space:\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1\",N)\n```\nHere we have chosen to create a Hilbert space of N spin 1 sites. The string \"S=1\" denotes a special Index tag which hooks into a system that knows \"S=1\" indices have a dimension of 3 and how to create common physics operators like \"Sz\" for them.\nNext we'll make our Hamiltonian matrix product operator (MPO). A very convenient way to do this is to use the OpSum helper type which lets us input a Hamiltonian (or any sum of local operators) in similar notation to pencil-and-paper notation:\n```code\nos = OpSum()\nfor j=1:N-1\n  os += 0.5,\"S+\",j,\"S-\",j+1\n  os += 0.5,\"S-\",j,\"S+\",j+1\n  os += \"Sz\",j,\"Sz\",j+1\nend\nH = MPO(os,sites)\n```\nIn the last line above we convert the OpSum helper object to an actual MPO.\nBefore beginning the calculation, we need to specify how many DMRG sweeps to do and what schedule we would like for the parameters controlling the accuracy. These parameters can be specified as follows:\n```code\nnsweeps = 5 # number of sweeps is 5\nmaxdim = [10,20,100,100,200] # gradually increase states kept\ncutoff = [1E-10] # desired truncation error\n```\nThe random starting wavefunction psi0 must be defined in the same Hilbert space as the Hamiltonian, so we construct it using the same collection of site indices:\n```code\npsi0 = random_mps(sites;linkdims=2)\n```\nHere we have made a random MPS of bond dimension 2. We could have used a random product state instead, but choosing a slightly larger bond dimension can help DMRG avoid getting stuck in local minima. We could also set psi to some specific initial state using the MPS constructor, which is actually required if we were conserving QNs.\nFinally, we are ready to call DMRG:\n```code\nenergy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n```\nWhen the algorithm is done, it returns the ground state energy as the variable energy and an MPS approximation to the ground state as the variable psi .\nBelow you can find a complete working code that includes all of these steps:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n  sites = siteinds(\"S=1\",N)\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5,\"S+\",j,\"S-\",j+1\n    os += 0.5,\"S-\",j,\"S+\",j+1\n    os += \"Sz\",j,\"Sz\",j+1\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 5 # number of sweeps is 5\n  maxdim = [10,20,100,100,200] # gradually increase states kept\n  cutoff = [1E-10] # desired truncation error\n\n  psi0 = random_mps(sites;linkdims=2)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "Perform a basic DMRG calculation",
+        "section_id": "Perform-a-basic-DMRG-calculation"
+      },
+      "score": 0.6678025007360872,
+      "original_score": 0.4774421359893506,
+      "vector_score": 0.5367203813680915,
+      "bm25_score": 0.24032915447438682,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "defining",
+        "hamiltonian",
+        "itensor",
+        "helper"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 104,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 47
+      }
+    }
+  }
+}

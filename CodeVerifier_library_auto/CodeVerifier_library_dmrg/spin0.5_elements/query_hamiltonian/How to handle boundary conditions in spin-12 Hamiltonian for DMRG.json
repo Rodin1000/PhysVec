@@ -1,0 +1,136 @@
+{
+  "query": "How to handle boundary conditions in spin-1/2 Hamiltonian for DMRG?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__How-to-do-periodic-boundary-condition-DMRG_2__0",
+      "text": "## How to do periodic boundary condition DMRG\nThe short answer to how to do fully periodic boundary condition DMRG in ITensor is that you simply input a periodic Hamiltonian into our OpSum system and make the MPO form of your Hamiltonian in the usual way. For example, for a chain of N sites with nearest-neighbor interactions, you include a term that connects site 1 to site N. For a one-dimensional Ising model chain Hamiltonian this would look like:\n```code\nsites = siteinds(\"S=1/2\",N)\n\nhterms = OpSum()\nfor j=1:(N-1)\n  hterms += \"Sz\",j,\"Sz\",j+1\nend\nhterms += \"Sz\",1,\"Sz\",N  # term 'wrapping' around the ring\n\nH = MPO(hterms,sites)\n```\nFor two-dimensional DMRG calculations, where the most common approach is to use periodic boundary conditions in the y-direction only, and not in the x-direction, you do a similar step in making your OpSum input to ITensor DMRG: you include terms wrapping around the periodic cylinder in the y direction but not in the x direction.\nHowever, fully periodic boundary conditions are only recommended for small systems when absolutely needed, and in general are not recommended. For a longer discussion of alternatives to using fully periodic boundaries, see the next section below.\nThe reason fully periodic boundary conditions (periodic in x in 1D, and periodic in both x and y in 2D) are not recommended in general is that the DMRG algorithm, as we are defining it here, optimizes an open-boundary MPS . So if you input a periodic-boundary Hamiltonian, there is a kind of \"mismatch\" that happens where you can still get the correct answer, but it requires much more resources (a larger bond dimension and more sweeps) to get good accuracy. There has been some research into \"truly\" periodic DMRG, [Pippan] that is DMRG that optimizes an MPS with a ring-like topology, but it is not widely used, is still an open area of algorithm development, and is not currently available in ITensor.",
+      "metadata": {
+        "section_title": "How to do periodic boundary condition DMRG",
+        "package": "itensormps",
+        "source_file": "docs\\build\\faq\\DMRG.html",
+        "section_id": "How-to-do-periodic-boundary-condition-DMRG"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "boundary",
+        "conditions",
+        "hamiltonian",
+        "dmrg"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__ee249f64f89e6651115ee4527b6ea283__h2_2_2__0",
+      "text": "The short answer to how to do fully periodic boundary condition DMRG in ITensor is that\nyou simply input a **periodic Hamiltonian** into our OpSum system and make the MPO\nform of your Hamiltonian in the usual way. For example, for a chain of N sites with nearest-neighbor\ninteractions, you include a term that connects site 1 to site N. For a one-dimensional Ising model\nchain Hamiltonian this would look like:\n```\nsites = siteinds(\"S=1/2\",N)\nhterms = OpSum()\nfor j=1:(N-1)\n  hterms += \"Sz\",j,\"Sz\",j+1\nend\nhterms += \"Sz\",1,\"Sz\",N  # term 'wrapping' around the ring\nH = MPO(hterms,sites)\n```\nFor two-dimensional DMRG calculations, where the most common approach is to use\nperiodic boundary conditions in the y-direction only, and not in the x-direction,\nyou do a similar step in making your OpSum input to ITensor DMRG: you include\nterms wrapping around the periodic cylinder in the y direction but not in the x direction.\nHowever, fully periodic boundary conditions are only recommended for small systems\nwhen absolutely needed, and in general are not recommended. For a longer discussion\nof alternatives to using fully periodic boundaries, see the next section below.\nThe reason fully periodic boundary conditions (periodic in x in 1D, and periodic in both x\nand y in 2D) are not recommended in general is that the DMRG algorithm, as we are defining it\nhere, optimizes an **open-boundary MPS**. So if you input a periodic-boundary Hamiltonian, there\nis a kind of \"mismatch\" that happens where you can still get the correct answer, but it\nrequires much more resources (a larger bond dimension and more sweeps) to get good\naccuracy. There has been some research into \"truly\" periodic DMRG, [^Pippan] that is DMRG that\noptimizes an MPS with a ring-like topology, but it is not widely used, is still an\nopen area of algorithm development, and is not currently available in ITensor.",
+      "metadata": {
+        "section_id": "h2_2",
+        "source_file": "docs\\src\\faq\\DMRG.md",
+        "package": "itensormps",
+        "section_title": "How to do periodic boundary condition DMRG"
+      },
+      "score": 0.9247955295937058,
+      "original_score": 0.9132256110696605,
+      "vector_score": 0.9131834082559045,
+      "bm25_score": 0.9133944223246845,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "boundary",
+        "conditions",
+        "hamiltonian",
+        "dmrg"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__What-boundary-conditions-should-I-choose:-open,-periodic,-or-infinite?_3__0",
+      "text": "## What boundary conditions should I choose: open, periodic, or infinite?\nOne of the weaknesses of the density matrix renormalization group (DMRG), and its time-dependent or finite-temperature extensions, is that it works poorly with periodic boundary conditions. This stems from the fact that conventional DMRG optimizes over open-boundary matrix product state (MPS) wavefunctions whether or not the Hamiltonian includes periodic interactions.\nBut this begs the question, when are periodic boundary conditions (PBC) really needed? DMRG offers some compelling alternatives to PBC:\nUse open boundary conditions (OBC). Though this introduces edge effects, the number of states needed to reach a given accuracy is significantly lower than with PBC (see next section below). For gapped systems DMRG scales linearly with system size, meaning often one can study systems with many hundreds or even thousands of sites. Last but not least, open boundaries are often more natural. For studying systems which spontaneously break symmetry, adding \"pinning\" fields on the edge is often a very nice way to tip the balance toward a certain symmetry broken state while leaving the bulk unmodified.\nUse open boundary conditions (OBC). Though this introduces edge effects, the number of states needed to reach a given accuracy is significantly lower than with PBC (see next section below). For gapped systems DMRG scales linearly with system size, meaning often one can study systems with many hundreds or even thousands of sites. Last but not least, open boundaries are often more natural. For studying systems which spontaneously break symmetry, adding \"pinning\" fields on the edge is often a very nice way to tip the balance toward a certain symmetry broken state while leaving the bulk unmodified.\nUse smooth boundary conditions. The basic idea is to use OBC but send the Hamiltonian parameters smoothly to zero at the boundary so that the system can not \"feel\" the boundary. For certain systems this can significantly reduce edge effects. [Smooth1] [Smooth2] [Smooth3]\nUse smooth boundary conditions. The basic idea is to use OBC but send the Hamiltonian parameters smoothly to zero at the boundary so that the system can not \"feel\" the boundary. For certain systems this can significantly reduce edge effects. [Smooth1] [Smooth2] [Smooth3]\nUse \"infinite boundary conditions\", that is, use infinite DMRG in the form of an algorithm like iDMRG or VUMPS. This has a cost that can be even less than with OBC yet is completely free of finite-size effects.\nHowever, there are a handful of cases where PBC remains preferable despite the extra overhead. A few such cases are:\nBenchmarking DMRG against another code that uses PBC, such as a Monte Carlo or exact diagonalization code.\nBenchmarking DMRG against another code that uses PBC, such as a Monte Carlo or exact diagonalization code.\nExtracting the central charge of a",
+      "metadata": {
+        "source_file": "docs\\build\\faq\\DMRG.html",
+        "package": "itensormps",
+        "section_title": "What boundary conditions should I choose: open, periodic, or infinite?",
+        "section_id": "What-boundary-conditions-should-I-choose:-open,-periodic,-or-infinite?"
+      },
+      "score": 0.8300893569158645,
+      "original_score": 0.7244692274311316,
+      "vector_score": 0.7913262344238823,
+      "bm25_score": 0.45704119946012856,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "boundary",
+        "conditions",
+        "hamiltonian",
+        "dmrg"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types_2__0",
+      "text": "## DMRG Calculation with Mixed Local Hilbert Space Types\nThe following fully-working example shows how to set up a calculation mixing S=1/2 and S=1 spins on every other site of a 1D system. The Hamiltonian involves Heisenberg spin interactions with adjustable couplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation is that the sites array has Index objects which alternate in dimension and in which physical tag type they carry, whether \"S=1/2\" or \"S=1\" . (Try printing out the sites array to see!) These tags tell the OpSum system which local operators to use for these sites when building the Hamiltonian MPO.\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n\n  # Make an array of N Index objects with alternating\n  # \"S=1/2\" and \"S=1\" tags on odd versus even sites\n  # (The first argument n->isodd(n) ... is an\n  # on-the-fly function mapping integers to strings)\n  sites = siteinds(n->isodd(n) ? \"S=1/2\" : \"S=1\",N)\n\n  # Couplings between spin-half and\n  # spin-one sites:\n  Jho = 1.0 # half-one coupling\n  Jhh = 0.5 # half-half coupling\n  Joo = 0.5 # one-one coupling\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5*Jho,\"S+\",j,\"S-\",j+1\n    os += 0.5*Jho,\"S-\",j,\"S+\",j+1\n    os += Jho,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:2:N-2\n    os += 0.5*Jhh,\"S+\",j,\"S-\",j+2\n    os += 0.5*Jhh,\"S-\",j,\"S+\",j+2\n    os += Jhh,\"Sz\",j,\"Sz\",j+2\n  end\n  for j=2:2:N-2\n    os += 0.5*Joo,\"S+\",j,\"S-\",j+2\n    os += 0.5*Joo,\"S-\",j,\"S+\",j+2\n    os += Joo,\"Sz\",j,\"Sz\",j+2\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 10\n  maxdim = [10,10,20,40,80,100,140,180,200]\n  cutoff = [1E-8]\n\n  psi0 = random_mps(sites;linkdims=4)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "section_id": "DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "package": "itensormps",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types"
+      },
+      "score": 0.8096719309712387,
+      "original_score": 0.707187586109598,
+      "vector_score": 0.7909865099404383,
+      "bm25_score": 0.3719918907862365,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "spin",
+        "hamiltonian",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_12__12",
+      "text": " s2)\n    C[s2 => 2, i => 3, s1 => 2] = -223\n    @test A ≈ C\n  end\n\n  @testset \"Fermionic SVD\" begin\n    N = 4\n    s = siteinds(\"Fermion\", N; conserve_qns=true)\n\n    A = random_itensor(QN(\"Nf\", 2, -1), s[1], s[2], s[3], s[4])\n    for n1 in 1:4, n2 in 1:4\n      (n1 == n2) && continue\n      U, S, V = svd(A, (s[n1], s[n2]))\n      @test norm(U * S * V - A) < 1E-10\n    end\n    for n1 in 1:4, n2 in 1:4, n3 in 1:4\n      (n1 == n2) && continue\n      (n1 == n3) && continue\n      (n2 == n3) && continue\n      U, S, V = svd(A, (s[n1], s[n2], s[n3]))\n      @test norm(U * S * V - A) < 1E-10\n    end\n\n    B = random_itensor(QN(\"Nf\", 3, -1), s[1], s[2], s[3], s[4])\n    for n1 in 1:4, n2 in 1:4\n      (n1 == n2) && continue\n      U, S, V = svd(B, (s[n1], s[n2]))\n      @test norm(U * S * V - B) < 1E-10\n    end\n    for n1 in 1:4, n2 in 1:4, n3 in 1:4\n      (n1 == n2) && continue\n      (n1 == n3) && continue\n      (n2 == n3) && continue\n      U, S, V = svd(B, (s[n1], s[n2], s[n3]))\n      @test norm(U * S * V - B) < 1E-10\n    end\n  end # Fermionic SVD tests\n\n  @testset \"Fermionic SVD Arrow Cases\" begin\n    s = siteinds(\"Fermion\", 3; conserve_qns=true)\n\n    function id(i)\n      if dir(i) == Out\n        I = ITensor(i, dag(i)')\n      else\n        I = ITensor(dag(i)', i)\n      end\n      for n in 1:dim(i)\n        I[n, n] = 1.0\n      end\n",
+      "metadata": {
+        "section_title": "test_fermions.jl",
+        "package": "itensors",
+        "source_file": "test\\base\\test_fermions.jl",
+        "section_id": "part_12"
+      },
+      "score": 0.8,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 100,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 41
+      }
+    }
+  }
+}

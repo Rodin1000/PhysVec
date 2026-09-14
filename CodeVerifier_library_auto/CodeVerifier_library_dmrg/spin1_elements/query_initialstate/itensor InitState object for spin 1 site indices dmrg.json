@@ -1,0 +1,130 @@
+{
+  "query": "itensor InitState object for spin 1 site indices dmrg",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_dmrg__331a78ba2f4acb4c4da3149efdb573bc__part_0__0",
+      "text": "using ITensors, Test, Random\nusing ITensorMPS: dmrg, nsite, set_nsite!, siteinds, site_range\n\n@testset \"Basic DMRG\" begin\n  @testset \"Spin-one Heisenberg\" begin\n    N = 10\n    sites = siteinds(\"S=1\", N)\n\n    os = OpSum()\n    for j in 1:(N - 1)\n      add!(os, \"Sz\", j, \"Sz\", j + 1)\n      add!(os, 0.5, \"S+\", j, \"S-\", j + 1)\n      add!(os, 0.5, \"S-\", j, \"S+\", j + 1)\n    end\n    H = MPO(os, sites)\n\n    psi = random_mps(sites)\n\n    sweeps = Sweeps(3)\n    @test length(sweeps) == 3\n    maxdim!(sweeps, 10, 20, 40)\n    mindim!(sweeps, 1, 10)\n    cutoff!(sweeps, 1E-11)\n    noise!(sweeps, 1E-10)\n    str = split(sprint(show, sweeps), '\\n')\n    @test length(str) > 1\n    energy, psi = dmrg(H, psi, sweeps; outputlevel=0)\n    @test energy < -12.0\n  end\n\n  @testset \"QN-conserving Spin-one Heisenberg\" begin\n    N = 10\n    sites = siteinds(\"S=1\", N; conserve_qns=true)\n\n    os = OpSum()\n    for j in 1:(N - 1)\n      os += \"Sz\", j, \"Sz\", j + 1\n      os += 0.5, \"S+\", j, \"S-\", j + 1\n      os += 0.5, \"S-\", j, \"S+\", j + 1\n    end\n    H = MPO(os, sites)\n\n    state = [isodd(n) ? \"Up\" : \"Dn\" for n in 1:N]\n    psi = random_mps(sites, state; linkdims=4)\n\n    sweeps = Sweeps(3)\n    @test length(sweeps) == 3\n    maxdim!(sweeps, 10, 20, 40)\n    mindim!(sweeps, 1, 10)\n    cutoff!(sweeps, 1E-11)\n    noise!(sweeps, 1E-10)\n    str = split(sprint(show, sweeps), '\\n')\n    @test length(str) > 1\n    energy, psi = dmrg(H, psi, sweeps; outputlevel=0)\n    @test energy < -12.0\n",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "test_dmrg.jl",
+        "section_id": "part_0",
+        "source_file": "test\\base\\test_dmrg.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 9.646957790189378e-05,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "spin",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "test_phys_site_types__060210c943032a0fd9694bbf30890d18__part_0__0",
+      "text": "using ITensors, LinearAlgebra, Test\nusing ITensors.SiteTypes: has_fermion_string, op, siteind, siteinds, state\n\n@testset \"Physics Sites\" begin\n  N = 10\n\n  @testset \"Generic sites\" for eltype in (Float32, Float64, ComplexF32, ComplexF64)\n    d1, d2 = 3, 4\n    i1, i2 = Index(d1), Index(d2)\n\n    o = op(\"I\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"F\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"I\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    U1 = op(\"RandomUnitary\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U1 = op(\"randU\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U12 = op(\"RandomUnitary\", i1, i2)\n    @test hassameinds(U12, (i1', i2', i1, i2))\n    @test apply(transpose(dag(U12)), U12) ≈\n      itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n  end\n\n  @testset \"Qubit sites\" begin\n   ",
+      "metadata": {
+        "source_file": "test\\base\\test_phys_site_types.jl",
+        "section_id": "part_0",
+        "package": "itensors",
+        "section_title": "test_phys_site_types.jl"
+      },
+      "score": 0.9999765722389545,
+      "original_score": 0.9999758831871591,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "IncludedSiteTypes__10c3b7e95897ec39b67299563b29b049__h4_5_5__0",
+      "text": "The available state names for \"S=1\" sites are:\n- `\"Up\"` (aliases: `\"Z+\"`, `\"↑\"`) spin in the up state\n- `\"Z0\"` (aliases: `\"0\"`) spin in the Sz=0 state\n- `\"Dn\"` (aliases: `\"Z-\"`, `\"↓\"`) spin in the down state",
+      "metadata": {
+        "section_id": "h4_5",
+        "source_file": "docs\\src\\IncludedSiteTypes.md",
+        "section_title": "\"S=1\" States",
+        "package": "itensormps"
+      },
+      "score": 0.9615534335592316,
+      "original_score": 0.9604226521933267,
+      "vector_score": 0.9604458150852928,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "spin"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "qubit__04eb5b322e8470823b519f30a361d1bd__part_10__10",
+      "text": " ]\nend\n\n# spin-full operators\nop(::OpName\"Sz\", ::SiteType\"Qubit\") = [\n  0.5 0.0\n  0.0 -0.5\n]\n\nop(on::OpName\"Sᶻ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S+\", ::SiteType\"Qubit\") = [\n  0 1\n  0 0\n]\n\nop(on::OpName\"S⁺\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Splus\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S-\", ::SiteType\"Qubit\") = [\n  0 0\n  1 0\n]\n\nop(on::OpName\"S⁻\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Sminus\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"Sx\", ::SiteType\"Qubit\") = [\n  0.0 0.5\n  0.5 0.0\n]\n\nop(on::OpName\"Sˣ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"iSy\", ::SiteType\"Qubit\") = [\n  0.0 0.5\n  -0.5 0.0\n]\n\nop(on::OpName\"iSʸ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"Sy\", ::SiteType\"Qubit\") = [\n  0.0 -0.5im\n  0.5im 0.0\n]\n\nop(on::OpName\"Sʸ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S2\", ::SiteType\"Qubit\") = [\n  0.75 0.0\n  0.0 0.75\n]\n\nop(on::OpName\"S²\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"ProjUp\", ::SiteType\"Qubit\") = [\n  1 0\n  0 0\n]\n\nop(on::OpName\"projUp\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Proj0\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"ProjDn\", ::SiteType\"Qubit\") = [\n  0 0\n  0 1\n]\n\nop(on::OpName\"projDn\", t::SiteType\"Qubit\") = op(alias(on),",
+      "metadata": {
+        "package": "itensors",
+        "section_title": "qubit.jl",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\qubit.jl",
+        "section_id": "part_10"
+      },
+      "score": 0.8617152829248111,
+      "original_score": 0.8576480853637761,
+      "vector_score": 0.8576687696009719,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "spin"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "IncludedSiteTypes__7d74debdd1c692a6ddd9c2ac060aba29__\"S1\"-SiteType_2__0",
+      "text": "## \"S=1\" SiteType\nSite indices with the \"S=1\" site type represent $S=1$ spins with the states $|\\!\\uparrow\\rangle$ , $|0\\rangle$ , $|\\!\\downarrow\\rangle$ .\nMaking a single \"S=1\" site or collection of N \"S=1\" sites\n```code\ns = siteind(\"S=1\")\nsites = siteinds(\"S=1\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\nconserve_qns (default: false): conserve total $S^z$\nconserve_sz (default: conserve_qns): conserve total $S^z$\nqnname_sz (default: \"Sz\"): name of total $S^z$ QN\nFor example:\n```code\nsites = siteinds(\"S=1\",N; conserve_sz=true, qnname_sz=\"TotalSz\")\n```\nThe available state names for \"S=1\" sites are:\n\"Up\" (aliases: \"Z+\" , \"↑\" ) spin in the up state\n\"Z0\" (aliases: \"0\" ) spin in the Sz=0 state\n\"Dn\" (aliases: \"Z-\" , \"↓\" ) spin in the down state\nOperators associated with \"S=1\" sites can be made using the op function, for example\n```code\nSz = op(\"Sz\",s)\nSz4 = op(\"Sz\",sites[4])\n```\nSpin operators:\n\"Sz\" (aliases: \"Sᶻ\" )\n\"Sz2\" Square of S^z operator\n\"S+\" (alises: \"S⁺\" , \"Splus\" )\n\"S-\" (aliases: \"S⁻\" , \"Sminus\" )\n\"Sx\" (alises: \"Sˣ\" )\n\"Sx2\" Square of S^x operator\n\"iSy\" (aliases: \"iSʸ\" )\n\"Sy\" (aliases: \"Sʸ\" )\n\"Sy2\" Square of S^y operator\n\"S2\" (aliases: \"S²\"`)",
+      "metadata": {
+        "section_id": "\"S1\"-SiteType",
+        "package": "itensormps",
+        "section_title": "\"S=1\" SiteType",
+        "source_file": "docs\\build\\IncludedSiteTypes.html"
+      },
+      "score": 0.8558755456498622,
+      "original_score": 0.7830384558169969,
+      "vector_score": 0.6844487015515679,
+      "bm25_score": 0.3944345564510297,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "spin",
+        "site",
+        "indices"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 107,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      }
+    }
+  }
+}

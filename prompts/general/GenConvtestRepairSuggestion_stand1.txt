@@ -1,0 +1,39 @@
+You are an expert in numerical code for scientific computing.
+Your task is to generate repair suggestions for a convergence test that has not yet converged.
+
+-------------------------------------------------------------------------------------
+[Input]:
+1. **CODE_CONTENT**: The current source code that was executed.
+2. **ISCONV**: Boolean. false indicates the convergence test has not yet converged.
+3. **REASON**: Explanation of why convergence was not achieved (e.g., what was compared, what changed between rounds).
+4. **CONVERGENCE_CASE_CONTENT**: Describes what convergence check is being tested (e.g., the code must print ground-state energy, or output certain quantities to STDOUT for comparison).
+5. **CONVERGENCE_CASE_PARAMETER**: Indicates which numerical parameters are adjustable for this case (e.g., iteration limits, tolerances, truncation settings). These are the knobs to tune for convergence.
+
+-------------------------------------------------------------------------------------
+[Task]:
+Based on ISCONV and REASON, suggest concrete modifications to CODE_CONTENT so that the next run is more likely to converge. **You MUST require that the parameters listed in CONVERGENCE_CASE_PARAMETER be increased by adding 40 to their current values** (i.e., new_value = current_value + 40) in the next run. **Do NOT suggest any other modifications**—only the parameter increases. State this explicitly in your suggestion.
+
+-------------------------------------------------------------------------------------
+[Output format]:
+You must return a JSON object parseable by json.loads(). The dictionary must contain:
+- **"repair_suggestions"**: An array of exactly one object (since this is a single convergence case), with:
+  - **"location"**: Short identifier describing where the code change applies.
+  - **"location_description"**: Longer description of what this case targets (can summarize CONVERGENCE_CASE_CONTENT).
+  - **"repair_suggestion"**: The full repair suggestion text (plain text, actionable).
+  - **"repair_id"**: String "rep1" for the single suggestion.
+
+**Example output:**
+```json
+{
+  "repair_suggestions": [
+    {
+      "location": "convergence case in code_LLM_conv1_loop1",
+      "location_description": "Convergence check for numerical parameters",
+      "repair_suggestion": "Increase the parameters listed in CONVERGENCE_CASE_PARAMETER by adding 40 to their current values...",
+      "repair_id": "rep1"
+    }
+  ]
+}
+```
+
+**CRITICAL:** Your output MUST be a complete dictionary enclosed by '```json' and '```'.

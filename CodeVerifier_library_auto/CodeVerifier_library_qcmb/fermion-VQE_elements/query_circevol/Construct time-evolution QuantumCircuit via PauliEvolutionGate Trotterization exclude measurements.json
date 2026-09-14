@@ -1,0 +1,144 @@
+{
+  "query": "Construct time-evolution QuantumCircuit via PauliEvolutionGate Trotterization; exclude measurements",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "test_evolution_gate__7705ec4cae8e47c6b2d5b77110100385__lines_900_1003__1",
+      "text": "    chain = QuantumCircuit(pauli.num_qubits)\n    control, target = None, None\n\n    # iterate over the Pauli's and add CNOTs\n    for i, pauli_i in enumerate(pauli.to_label()):\n        i = pauli.num_qubits - i - 1\n        if pauli_i != \"I\":\n            if control is None:\n                control = i\n            else:\n                target = i\n\n        if control is not None and target is not None:\n            chain.cx(control, target)\n            control = i\n            target = None\n\n    return chain\n\n\ndef custom_atomic_evolution(circuit, pauli, time):\n    \"\"\"A custom atomic evolution not supporting SparseObservable.\"\"\"\n    if isinstance(pauli, SparsePauliOp):\n        for single_term, coeff in zip(pauli.paulis, pauli.coeffs):\n            custom_atomic_evolution(circuit, single_term, np.real(coeff) * time)\n\n        return circuit\n\n    cliff = diagonalizing_clifford(pauli)\n    chain = cnot_chain(pauli)\n\n    target = None\n    for i, pauli_i in enumerate(reversed(pauli.to_label())):\n        if pauli_i != \"I\":\n            target = i\n            break\n\n    circuit.compose(cliff, inplace=True)\n    circuit.compose(chain, inplace=True)\n    circuit.rz(2 * time, target)\n    circuit.compose(chain.inverse(), inplace=True)\n    circuit.compose(cliff.inverse(), inplace=True)\n\n    return circuit\n\n\ndef observable_supporting_evolution(circuit, pauli, time):\n    \"\"\"A custom atomic evolution supporting SparseObservable.\"\"\"\n    if isinstance(pauli, SparseObservable):\n        pauli = SparsePauliOp.from_sparse_observable(pauli)\n\n    custom_atomic_evolution(circuit, pauli, time)\n\n\n@ddt\nclass TestPauliEvolutionGateLabels(QiskitTestCase):\n    \"\"\"Tests for verifying PauliEvolutionGate label correctness.\"\"\"\n\n    def test_single_term_label(self):\n        \"\"\"Test label generation for a single-term SparseObservable.\"\"\"\n        evo = PauliEvolutionGate(SparseObservable.from_list([(\"XXII\", 1)]), time=1)\n        expected_label = \"exp(-it X2 X3)\"\n        self.assertEqual(expected_label, evo.label)\n\n    def test_multiple_term_label(self):\n        \"\"\"Test label generation for a multi-term SparseObservable.\"\"\"\n        evo = PauliEvolutionGate(\n            SparseObservable.from_list([(\"IIXX\", 1), (\"IYYI\", 2), (\"ZZII\", 3)]), time=1\n        )\n        expected_label = \"exp(-it (X0 X1 + Y1 Y2 + Z2 Z3))\"\n        self.assertEqual(expected_label, evo.label)\n\n    @data(True, False)\n    def test_list_of_observables_label(self, use_sparse_observable):\n        \"\"\"Test label generation for a list of SparseObservable operators.\"\"\"\n        obs_cls = SparseObservable if use_sparse_observable else SparsePauliOp\n        evo = PauliEvolutionGate(\n            [\n                obs_cls.from_list([(\"IIXX\", 1), (\"IYYI\", 2), (\"ZZII\", 3)]),\n                obs_cls.from_list([(\"XXII\", 4)]),\n            ],\n            time=1,\n        )\n\n        if use_sparse_observable:\n            expected_label = \"exp(-it [(X0 X1 + Y1 Y2 + Z2 Z3), X2 X3])\"\n        else:\n            expected_label = \"exp(-it [(IIXX + IYYI + ZZII), XXII])\"\n\n        self.assertEqual(expected_label, evo.label)\n\n    def test_circuit_display_labels(self):\n        \"\"\"Test that the labels are correctly displayed in a circuit context.\"\"\"\n        evo = PauliEvolutionGate(SparseObservable.from_list([(\"XXII\", 1)]), time=1)\n        qc = QuantumCircuit(4)\n        qc.append(evo, [0, 1, 2, 3])\n        text = str(qc.draw(output=\"text\"))\n        self.assertIn(\"X2 X3\", text)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "section_id": "lines_900_1003",
+        "source_file": "test\\python\\circuit\\library\\test_evolution_gate.py",
+        "package": "qiskit",
+        "section_title": "Lines 901-1003"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.5358034277968895,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "time",
+        "evolution",
+        "quantumcircuit",
+        "paulievolutiongate"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    },
+    {
+      "id": "time_evolution_problem__856ae00b1dea4850230a12d5ab56ede0__part_1__1",
+      "text": ": BaseOperator,\n        time: float,\n        initial_state: QuantumCircuit | Statevector | None = None,\n        aux_operators: ListOrDict[BaseOperator] | None = None,\n        truncation_threshold: float = 1e-12,\n        t_param: Parameter | None = None,\n        param_value_map: Mapping[Parameter, complex] | None = None,\n    ):\n        \"\"\"\n        Args:\n            hamiltonian: The Hamiltonian under which to evolve the system.\n            time: Total time of evolution.\n            initial_state: The quantum state to be evolved for methods like Trotterization.\n                For variational time evolutions, where the evolution happens in an ansatz,\n                this argument is not required.\n            aux_operators: Optional list of auxiliary operators to be evaluated with the\n                evolved ``initial_state`` and their expectation values returned.\n            truncation_threshold: Defines a threshold under which values can be assumed to be 0.\n                Used when ``aux_operators`` is provided.\n            t_param: Time parameter in case of a time-dependent Hamiltonian. This\n                free parameter must be within the ``hamiltonian``.\n            param_value_map: Maps free parameters in the problem to values. Depending on the\n                algorithm, it might refer to e.g. a Hamiltonian or an initial state.\n\n        Raises:\n            ValueError: If non-positive time of evolution is provided.\n        \"\"\"\n\n        self.t_param = t_param\n        self.param_value_map = param_value_map\n        self.hamiltonian = hamiltonian\n        self.time = time\n        if isinstance(initial_state, Statevector):\n            circuit = QuantumCircuit(initial_state.num_qubits)\n            circuit.prepare_state(initial_state.data)\n            initial_state = circuit\n        self.initial_state: QuantumCircuit | None = initial_state\n        self.aux_operators = aux_operators\n        self.truncation_threshold = truncation_threshold\n\n    @property\n    def time(self) -> float:\n        \"\"\"Returns time.\"\"\"\n        return self._time\n\n    @time.setter\n    def time(self, time: float) -> None:\n        \"\"\"\n        Sets time and validates it.\n        \"\"\"\n        self._time = time\n",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "section_id": "part_1",
+        "source_file": "qiskit_algorithms\\time_evolvers\\time_evolution_problem.py",
+        "section_title": "time_evolution_problem.py"
+      },
+      "score": 0.9967952178191164,
+      "original_score": 0.9964825561429326,
+      "vector_score": 1.0,
+      "bm25_score": 0.5198489938929195,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "time",
+        "evolution",
+        "quantumcircuit",
+        "trotterization"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    },
+    {
+      "id": "hartree_fock__973a80b2a7462da2917d3311e3e913f7__part_3__3",
+      "text": "_mapper,\n            )\n            self.qregs = [QuantumRegister(len(self._bitstr), name=\"q\")]\n\n    def _build(self) -> None:\n        \"\"\"\n        Construct the Hartree-Fock initial state given its parameters.\n        Returns:\n            QuantumCircuit: a quantum circuit preparing the Hartree-Fock\n            initial state given a number of spatial orbitals, number of particles and\n            a qubit mapper.\n        \"\"\"\n        if self._is_built:\n            return\n\n        super()._build()\n\n        # Construct the circuit for bitstring. Since this is defined as an initial state\n        # circuit its assumed that this is applied first to the qubits that are initialized to\n        # the zero state. Hence we just need to account for all True entries and set those.\n        if self._bitstr is not None:\n            for i, bit in enumerate(self._bitstr):\n                if bit:\n                    self.x(i)\n\n\ndef hartree_fock_bitstring_mapped(\n    num_spatial_orbitals: int,\n    num_particles: tuple[int, int],\n    qubit_mapper: QubitMapper,\n) -> list[bool]:\n    # pylint: disable=unused-argument\n    \"\"\"Compute the bitstring representing the mapped Hartree-Fock state for the specified system.\n\n    Args:\n        num_spatial_orbitals: The number of spatial orbitals, has a min. value of 1.\n        num_particles: The number of particles as a tuple (alpha, beta) containing the number of\n            alpha- and  beta-spin electrons, respectively.\n        qubit_mapper: A QubitMapper.\n\n    Returns:\n        The bitstring representing the mapped state of the Hartree-Fock state as array of bools.\n    \"\"\"\n    # get the bitstring encoding the Hartree Fock state\n    bitstr = hartree_fock_bitstring(num_spatial_orbitals, num_particles)\n\n    # encode the bitstring as a `FermionicOp`\n    bitstr_op = FermionicOp(\n        {\" \".join(f\"+_{idx}\" for idx, bit in enumerate(bitstr) if bit): 1.0},\n        num_spin_orbitals=2 * num_spatial_orbitals,\n    )\n\n    # map the `FermionicOp` to a qubit operator\n    qubit_op: SparsePauliOp\n    if isinstance(qubit_mapper, TaperedQubitMapper):\n        # To avoid checking commutativity, we call the two methods separately.\n        qubit_op = qubit_mapper.map_clifford(bitstr_op)\n        qubit_op = qubit_mapper.taper_clifford(qubit_op, check_commutes=False)\n    else:\n        qubit_op = qubit_mapper.map(bitstr_op)\n\n    # We check the mapped operator `x` part of the paulis because we want to have particles\n    # i.e. True,",
+      "metadata": {
+        "section_title": "hartree_fock.py",
+        "section_id": "part_3",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\hartree_fock.py",
+        "package": "qiskit-nature"
+      },
+      "score": 0.9793012857770675,
+      "original_score": 0.9783385548829776,
+      "vector_score": 0.9039396353952203,
+      "bm25_score": 0.8217928292031842,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "construct",
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "ref_multiplexer__9af4c80f7ccfdfa03a449acc4ddb8020__part_5__5",
+      "text": "), [0])\n    vector_circuit = vector_circuit.inverse()\n    qc.append(vector_circuit, [0])\n\n    sv = Statevector(qc)\n    gate_list = [np.array([[sv[0], -sv[1]], [sv[1], sv[0]]])]\n    qc = QuantumCircuit(1, 1)\n    qc.append(UCGate(gate_list), [0])\n\n    if final_measure:\n        qc.measure(0, 0)\n\n    target = Target.from_configuration(\n        basis_gates=[\"multiplexer\", \"measure\"], custom_name_mapping={\"multiplexer\": None}\n    )\n\n    return [transpile(qc, target=target)]\n",
+      "metadata": {
+        "package": "qiskit-aer",
+        "section_title": "ref_multiplexer.py",
+        "source_file": "test\\terra\\reference\\ref_multiplexer.py",
+        "section_id": "part_5"
+      },
+      "score": 0.8844974890784842,
+      "original_score": 0.8818724320120862,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "bksf_lih__0a998911150915e555501f7956b68a04__part_9__9",
+      "text": "0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.07049784 + 0.0j,\n            0.0616872 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00240961 + 0.0j,\n            0.06754287 + 0.0j,\n            0.06017866 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00240961 + 0.0j,\n        ]\n    )\n\n    return SparsePauliOp(pauli_list, coeffs=coeffs)\n\n\nQUBIT_HAMILTONIAN = _qubit_operator()\n",
+      "metadata": {
+        "source_file": "test\\second_q\\mappers\\resources\\bksf_lih.py",
+        "section_title": "bksf_lih.py",
+        "package": "qiskit-nature",
+        "section_id": "part_9"
+      },
+      "score": 0.8818724320120862,
+      "original_score": 0.8818724320120862,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 223,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

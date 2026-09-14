@@ -1,0 +1,136 @@
+{
+  "query": "How to use EstimatorV2 with VQE in qiskit-algorithms for fermion-VQE qcmb?",
+  "packages": [
+    "qiskit",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "test_vqe__ffff26a28311a585190d400006adf82a__part_4__4",
+      "text": " = COBYLA(maxiter=3)\n        wavefunction = self.ry_wavefunction\n\n        estimator = StatevectorEstimator(seed=42)\n\n        vqe = VQE(\n            estimator,\n            wavefunction,\n            optimizer,\n            callback=store_intermediate_result,\n        )\n        vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n\n        self.assertTrue(all(isinstance(count, int) for count in history[\"eval_count\"]))\n        self.assertTrue(all(isinstance(mean, float) for mean in history[\"mean\"]))\n        self.assertTrue(all(isinstance(metadata, dict) for metadata in history[\"metadata\"]))\n        for params in history[\"parameters\"]:\n            self.assertTrue(all(isinstance(param, float) for param in params))\n\n    def test_reuse(self):\n        \"\"\"Test re-using a VQE algorithm instance.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n        vqe = VQE(StatevectorEstimator(seed=42), ansatz, SLSQP(maxiter=300))\n        with self.subTest(msg=\"assert VQE works once all info is available\"):\n            result = vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n            self.assertAlmostEqual(result.eigenvalue.real, self.h2_energy, places=5)\n\n        operator = Operator(np.array([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 2, 0], [0, 0, 0, 3]]))\n        operator = SparsePauliOp.from_operator(operator)\n\n        with self.subTest(msg=\"assert vqe works on re-use.\"):\n            result = vqe.compute_minimum_eigenvalue(operator=operator)\n            self.assertAlmostEqual(result.eigenvalue.real, -1.0, places=5)\n\n    def test_vqe_optimizer_reuse(self):\n        \"\"\"Test running same VQE twice to re-use optimizer, then switch optimizer\"\"\"\n        vqe = VQE(\n            StatevectorEstimator(seed=42),\n            self.ryrz_wavefunction,\n            SLSQP(),\n        )\n\n        def run_check():\n            result = vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n            self.assertAlmostEqual(result.eigenvalue.real, self.h2_energy, places=5)\n\n        run_check()\n\n        with self.subTest(\"Optimizer re-use.\"):\n            run_check()\n\n        with self.subTest(\"Optimizer replace.\"):\n            vqe.optimizer = L_BFGS_B()\n            run_check()\n\n    def test_default_batch_evaluation_on_spsa(self):\n        \"\"\"Test the default batching works.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n\n        wrapped_estimator = StatevectorEstimator(seed=42)\n        inner_estimator = StatevectorEstimator(seed=43)\n\n        callcount = {\"estimator\": 0}\n\n        def wrapped_estimator_run(*",
+      "metadata": {
+        "section_id": "part_4",
+        "section_title": "test_vqe.py",
+        "package": "qiskit-algorithms",
+        "source_file": "test\\minimum_eigensolvers\\test_vqe.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9737467539849965,
+      "bm25_score": 0.8072479116812546,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "use",
+        "vqe",
+        "vqe"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "test_sampling_vqe__1096557e912fe83ed05b2e64cae3dbd5__part_2__2",
+      "text": "])\n\n        vqe = SamplingVQE(StatevectorSampler(), ansatz, SLSQP(), initial_point=initial_point)\n\n        with self.assertRaises(ValueError):\n            _ = vqe.compute_minimum_eigenvalue(operator=op)\n\n    # TODO: remove this test once BlueprintCircuit support has been removed\n    @data(PAULI_OP)\n    def test_ansatz_resize(self, op):\n        \"\"\"Test the ansatz is properly resized if it's a blueprint circuit.\"\"\"\n        ansatz = RealAmplitudes(1, reps=1)\n        vqe = SamplingVQE(StatevectorSampler(seed=42), ansatz, SPSA())\n        result = vqe.compute_minimum_eigenvalue(operator=op)\n        self.assertAlmostEqual(result.eigenvalue, self.optimal_value, places=5)\n\n    @data(PAULI_OP)\n    def test_invalid_ansatz_size(self, op):\n        \"\"\"Test an error is raised if the ansatz has the wrong number of qubits.\"\"\"\n        ansatz = QuantumCircuit(1)\n        ansatz.compose(real_amplitudes(1, reps=2))\n        vqe = SamplingVQE(StatevectorSampler(), ansatz, SLSQP())\n\n        with self.assertRaises(AlgorithmError):\n            _ = vqe.compute_minimum_eigenvalue(operator=op)\n\n    @data(PAULI_OP)\n    def test_missing_varform_params(self, op):\n        \"\"\"Test specifying a variational form with no parameters raises an error.\"\"\"\n        circuit = QuantumCircuit(op.num_qubits)\n        vqe = SamplingVQE(StatevectorSampler(), circuit, SLSQP())\n        with self.assertRaises(AlgorithmError):\n            vqe.compute_minimum_eigenvalue(operator=op)\n\n    @unittest.skip(\"SLSQP returns wrong results because of shot noise\")\n    @data(PAULI_OP)\n    def test_batch_evaluate_slsqp(self, op):\n        \"\"\"Test batching with SLSQP (as representative of SciPyOptimizer).\"\"\"\n        optimizer = SLSQP(max_evals_grouped=10)\n        vqe = SamplingVQE(\n            StatevectorSampler(default_shots=1_000_000, seed=42), real_amplitudes(2), optimizer\n        )\n        result = vqe.compute_minimum_eigenvalue(operator=op)\n        self.assertAlmostEqual(result.eigenvalue, self.optimal_value, places=5)\n\n    def test_batch_evaluate_with_qnspsa(self):\n        \"\"\"Test batch evaluating with QNSPSA works.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n\n        wrapped_sampler = StatevectorSampler(seed=42)\n        inner_sampler = StatevectorSampler(seed=43)\n\n        callcount = {\"count\": 0}\n\n        def wrapped_run(*args, **kwargs):\n            kwargs[\"callcount\"][\"count\"] += 1\n            return inner_sampler.run(*args)\n\n        wrapped",
+      "metadata": {
+        "section_title": "test_sampling_vqe.py",
+        "source_file": "test\\minimum_eigensolvers\\test_sampling_vqe.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_2"
+      },
+      "score": 0.858126360866946,
+      "original_score": 0.8506593272283642,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "vqe",
+        "vqe"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "__init____9a6998c88f3af4e4c476b1ebe4940c17__part_4__4",
+      "text": " plus optional metadata like confidence intervals for\nthe estimation.\n\n.. math::\n\n    \\langle\\psi_i(\\theta_k)|H_j|\\psi_i(\\theta_k)\\rangle\n\nHere is an example of how an ``EstimatorV1`` implementation would be used.\nNote that there are currently no implementations of the legacy ``EstimatorV1``\ninterface in Qiskit.\n\n.. code-block:: python\n\n    # This is a fictional import path.\n    # There are currently no EstimatorV1 implementations in Qiskit.\n    from estimator_v1_location import EstimatorV1\n    from qiskit.circuit.library import RealAmplitudes\n    from qiskit.quantum_info import SparsePauliOp\n\n    psi1 = RealAmplitudes(num_qubits=2, reps=2)\n    psi2 = RealAmplitudes(num_qubits=2, reps=3)\n\n    H1 = SparsePauliOp.from_list([(\"II\", 1), (\"IZ\", 2), (\"XI\", 3)])\n    H2 = SparsePauliOp.from_list([(\"IZ\", 1)])\n    H3 = SparsePauliOp.from_list([(\"ZI\", 1), (\"ZZ\", 1)])\n\n    theta1 = [0, 1, 1, 2, 3, 5]\n    theta2 = [0, 1, 1, 2, 3, 5, 8, 13]\n    theta3 = [1, 2, 3, 4, 5, 6]\n\n    estimator = EstimatorV1()\n\n    # calculate [ <psi1(theta1)|H1|psi1(theta1)> ]\n    job = estimator.run([psi1], [H1], [theta1])\n    job_result = job.result() # It will block until the job finishes.\n    print(f\"The primitive-job finished with result {job_result}\")\n\n    # calculate [ <psi1(theta1)|H1|psi1(theta1)>,\n    #             <psi2(theta2)|H2|psi2(theta2)>,\n    #             <psi1(theta3)|H3|psi1(theta3)> ]\n    job2 = estimator.run(\n        [psi1, psi2, psi1],\n        [H1, H2, H3],\n        [theta1, theta2, theta3]\n    )\n    job_result = job2.result()\n    print(f\"The primitive-job finished with result {job_result}\")\n\n\nOverview of SamplerV1\n=====================\n\nThere are currently no implementations of the legacy ``SamplerV1`` interface in Qiskit.\nHowever, the abstract interface definition from :class:`~BaseSamplerV1` is still part\nof the package to provide backward compatibility for external implementations.\n\nSampler classes calculate probabilities or quasi-probabilities of bitstrings from quantum circuits.\n\nA ``SamplerV1`` is initialized with an",
+      "metadata": {
+        "source_file": "qiskit\\primitives\\__init__.py",
+        "section_title": "__init__.py",
+        "section_id": "part_4",
+        "package": "qiskit"
+      },
+      "score": 0.8543928440476551,
+      "original_score": 0.8506593272283642,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qiskit"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "README__68a83d855e5a8dc60938b12c4713fb62__h1_4_4__0",
+      "text": "from qiskit_aer.primitives import EstimatorV2\npsi1 = transpile(RealAmplitudes(num_qubits=2, reps=2), sim, optimization_level=0)\npsi2 = transpile(RealAmplitudes(num_qubits=2, reps=3), sim, optimization_level=0)\nH1 = SparsePauliOp.from_list([(\"II\", 1), (\"IZ\", 2), (\"XI\", 3)])\nH2 = SparsePauliOp.from_list([(\"IZ\", 1)])\nH3 = SparsePauliOp.from_list([(\"ZI\", 1), (\"ZZ\", 1)])\ntheta1 = [0, 1, 1, 2, 3, 5]\ntheta2 = [0, 1, 1, 2, 3, 5, 8, 13]\ntheta3 = [1, 2, 3, 4, 5, 6]\nestimator = EstimatorV2()",
+      "metadata": {
+        "package": "qiskit-aer",
+        "section_title": "---------------------------",
+        "source_file": "README.md",
+        "section_id": "h1_4"
+      },
+      "score": 0.8543928440476551,
+      "original_score": 0.8506593272283642,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "estimatorv2"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "test_estimator_v2__9d69df86ff11786b1b78117907871d4b__part_10__10",
+      "text": "pile(qc, backend_2, optimization_level=0)\n        qc_5 = transpile(qc, backend_5, optimization_level=0)\n\n        estimator_2 = EstimatorV2.from_backend(backend_2, options=self._options)\n        estimator_5 = EstimatorV2.from_backend(backend_5, options=self._options)\n\n        H1 = self.observable\n        H1_2 = H1.apply_layout(qc_2.layout)\n        H1_5 = H1.apply_layout(qc_5.layout)\n        theta1 = [0, 1, 1, 2, 3, 5]\n\n        result_2 = estimator_2.run(\n            [\n                (qc_2, [H1_2], [theta1]),\n            ],\n            precision=0.01,\n        ).result()\n        result_5 = estimator_5.run(\n            [\n                (qc_5, [H1_5], [theta1]),\n            ],\n            precision=0.01,\n        ).result()\n        self.assertAlmostEqual(\n            result_5[0].data[\"evs\"][0], result_2[0].data[\"evs\"][0], delta=self._rtol\n        )\n\n    def test_truncate_large_backends(self):\n        \"\"\"Test truncation allows us to run few-qubit circuits on many-qubit backends\"\"\"\n        N = 12\n        qc = QuantumCircuit(N)\n\n        qc.x(range(N))\n        qc.h(range(N))\n\n        for kk in range(N // 2, 0, -1):\n            qc.ch(kk, kk - 1)\n        for kk in range(N // 2, N - 1):\n            qc.ch(kk, kk + 1)\n\n        op = SparsePauliOp(\"Z\" * N)\n        backend_127 = GenericBackendV2(num_qubits=127)\n        pm = generate_preset_pass_manager(backend=backend_127, optimization_level=1)\n        isa_circuit = pm.run(qc)\n        mapped_observable = op.apply_layout(isa_circuit.layout)\n\n        ref_est = StatevectorEstimator()\n        ref_result = ref_est.run(pubs=[(qc, op)]).result()\n\n        est = EstimatorV2()\n        res = est.run(pubs=[(isa_circuit, mapped_observable)]).result()\n\n        self.assertAlmostEqual(ref_result[0].data.evs, res[0].data.evs)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "section_title": "test_estimator_v2.py",
+        "section_id": "part_10",
+        "package": "qiskit-aer",
+        "source_file": "test\\terra\\primitives\\test_estimator_v2.py"
+      },
+      "score": 0.7740252782095983,
+      "original_score": 0.768231054573947,
+      "vector_score": 0.8731863777089783,
+      "bm25_score": 0.1196573864649996,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "estimatorv2"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 90,
+    "total_bm25_results_count": 90,
+    "merged_results_count": 171,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

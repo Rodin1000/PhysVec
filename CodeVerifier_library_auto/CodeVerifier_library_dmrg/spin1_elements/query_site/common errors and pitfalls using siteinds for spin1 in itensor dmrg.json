@@ -1,0 +1,133 @@
+{
+  "query": "common errors and pitfalls using siteinds for spin1 in itensor dmrg",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_chainrules__73b59dfef40987df3650b8abe26b6f48__part_0__0",
+      "text": "using ITensors\nusing ITensors.SiteTypes: siteinds\nusing Random\nusing Test\n\nusing ChainRulesCore: rrule_via_ad\n\ninclude(\"utils/chainrulestestutils.jl\")\n\nusing TensorOperations: TensorOperations\nusing Zygote: ZygoteRuleConfig, gradient\n\nRandom.seed!(1234)\n\n@testset \"ChainRules rrules: basic ITensor operations\" begin\n  i = Index(2, \"i\")\n  j = Index(2, \"j\")\n  A = random_itensor(i', dag(i))\n  V = random_itensor(i)\n  Ac = random_itensor(ComplexF64, i', dag(i))\n  B = random_itensor(i', dag(i))\n  C = ITensor(3.4)\n  D = random_itensor(i', j)\n\n  @testset \"getindex, priming, tagging, ITensor constructors, dag, etc.\" begin\n    test_rrule(getindex, ITensor(3.4); check_inferred=false)\n    test_rrule(getindex, A, 1, 2; check_inferred=false)\n    test_rrule(contract, A', A; check_inferred=false)\n    test_rrule(*, 3.2, A; check_inferred=false)\n    test_rrule(*, A, 4.3; check_inferred=false)\n    test_rrule(+, A, B; check_inferred=false)\n    test_rrule(prime, A; check_inferred=false)\n    test_rrule(prime, A, 2; check_inferred=false)\n    test_rrule(prime, A; fkwargs=(; tags=\"i\"), check_inferred=false)\n    test_rrule(prime, A; fkwargs=(; tags=\"x\"), check_inferred=false)\n    test_rrule(setprime, D, 2; check_inferred=false)\n    test_rrule(noprime, D; check_inferred=false)\n    test_rrule(replaceprime, A, 1 => 2; check_inferred=false)\n    test_rrule(replaceprime, A, 1, 2; check_inferred=false)\n    test_rrule(swapprime, A, 0 => 1; check_inferred=false)\n    test_rrule(swapprime, A, 0, 1; check_inferred=false)\n    test_rrule(addtags, A, \"x\"; check_inferred=false)\n    test_rrule(addtags, A, \"x\"; fkwargs=(; plev=1), check_inferred=false)\n    test_rrule(removetags, A, \"i\"; check_inferred=false)\n    test_rrule(replacetags, A, \"i\" => \"j\"; check_inferred=false)\n    test_rrule(replacetags, A, \"i\", \"j\"; check_inferred=false)\n    test_rrule(set",
+      "metadata": {
+        "section_id": "part_0",
+        "source_file": "test\\ext\\ITensorsChainRulesCoreExt\\test_chainrules.jl",
+        "package": "itensors",
+        "section_title": "test_chainrules.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "using",
+        "siteinds",
+        "itensor"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "test_dmrg__331a78ba2f4acb4c4da3149efdb573bc__part_0__0",
+      "text": "using ITensors, Test, Random\nusing ITensorMPS: dmrg, nsite, set_nsite!, siteinds, site_range\n\n@testset \"Basic DMRG\" begin\n  @testset \"Spin-one Heisenberg\" begin\n    N = 10\n    sites = siteinds(\"S=1\", N)\n\n    os = OpSum()\n    for j in 1:(N - 1)\n      add!(os, \"Sz\", j, \"Sz\", j + 1)\n      add!(os, 0.5, \"S+\", j, \"S-\", j + 1)\n      add!(os, 0.5, \"S-\", j, \"S+\", j + 1)\n    end\n    H = MPO(os, sites)\n\n    psi = random_mps(sites)\n\n    sweeps = Sweeps(3)\n    @test length(sweeps) == 3\n    maxdim!(sweeps, 10, 20, 40)\n    mindim!(sweeps, 1, 10)\n    cutoff!(sweeps, 1E-11)\n    noise!(sweeps, 1E-10)\n    str = split(sprint(show, sweeps), '\\n')\n    @test length(str) > 1\n    energy, psi = dmrg(H, psi, sweeps; outputlevel=0)\n    @test energy < -12.0\n  end\n\n  @testset \"QN-conserving Spin-one Heisenberg\" begin\n    N = 10\n    sites = siteinds(\"S=1\", N; conserve_qns=true)\n\n    os = OpSum()\n    for j in 1:(N - 1)\n      os += \"Sz\", j, \"Sz\", j + 1\n      os += 0.5, \"S+\", j, \"S-\", j + 1\n      os += 0.5, \"S-\", j, \"S+\", j + 1\n    end\n    H = MPO(os, sites)\n\n    state = [isodd(n) ? \"Up\" : \"Dn\" for n in 1:N]\n    psi = random_mps(sites, state; linkdims=4)\n\n    sweeps = Sweeps(3)\n    @test length(sweeps) == 3\n    maxdim!(sweeps, 10, 20, 40)\n    mindim!(sweeps, 1, 10)\n    cutoff!(sweeps, 1E-11)\n    noise!(sweeps, 1E-10)\n    str = split(sprint(show, sweeps), '\\n')\n    @test length(str) > 1\n    energy, psi = dmrg(H, psi, sweeps; outputlevel=0)\n    @test energy < -12.0\n",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "test\\base\\test_dmrg.jl",
+        "section_id": "part_0",
+        "section_title": "test_dmrg.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "using",
+        "siteinds",
+        "dmrg"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "SiteTypes__c774f95869a6174e9ce75e61d1a4214f__full__0",
+      "text": "module SiteTypes\n# TODO: This is a bit strange, but required for backwards\n# compatibility since `val` is also used by `QNVal`.\nimport ..ITensors: val\n# TODO: Use explicit overloading with `NDTensors.space`.\nimport ..ITensors: space\ninclude(\"sitetype.jl\")\ninclude(\"SiteTypesChainRulesCoreExt.jl\")\ninclude(\"sitetypes/aliases.jl\")\ninclude(\"sitetypes/generic_sites.jl\")\ninclude(\"sitetypes/qubit.jl\")\ninclude(\"sitetypes/spinhalf.jl\")\ninclude(\"sitetypes/spinone.jl\")\ninclude(\"sitetypes/fermion.jl\")\ninclude(\"sitetypes/electron.jl\")\ninclude(\"sitetypes/tj.jl\")\ninclude(\"sitetypes/qudit.jl\")\ninclude(\"sitetypes/boson.jl\")\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "full",
+        "section_title": "SiteTypes.jl",
+        "source_file": "src\\lib\\SiteTypes\\src\\SiteTypes.jl"
+      },
+      "score": 0.8807362338435785,
+      "original_score": 0.8807362338435785,
+      "vector_score": 0.8807362338435785,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "test_inference__390a80808ee111f0e281b854c75f14e5__full__0",
+      "text": "using ITensors\nusing ITensors.NDTensors\nusing Test\n\n@testset \"dmrg\" begin\n  N = 10\n  sites = siteinds(\"S=1\", N)\n  opsum = OpSum()\n  for j in 1:(N - 1)\n    opsum += \"Sz\", j, \"Sz\", j + 1\n    opsum += 0.5, \"S+\", j, \"S-\", j + 1\n    opsum += 0.5, \"S-\", j, \"S+\", j + 1\n  end\n  H = MPO(opsum, sites)\n  psi0 = random_mps(sites; linkdims=10)\n  sweeps = Sweeps(5)\n  setmaxdim!(sweeps, 10, 20, 100, 100, 200)\n  setcutoff!(sweeps, 1E-11)\n  @test @inferred(Tuple{Any,MPS}, dmrg(H, psi0, sweeps; outputlevel=0)) isa\n    Tuple{Float64,MPS}\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "test_inference.jl",
+        "package": "itensormps",
+        "source_file": "test\\base\\test_inference.jl"
+      },
+      "score": 0.8089598692641479,
+      "original_score": 0.7934701289342139,
+      "vector_score": 0.7934701289342138,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "using",
+        "siteinds",
+        "dmrg"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "test_phys_site_types__060210c943032a0fd9694bbf30890d18__part_0__0",
+      "text": "using ITensors, LinearAlgebra, Test\nusing ITensors.SiteTypes: has_fermion_string, op, siteind, siteinds, state\n\n@testset \"Physics Sites\" begin\n  N = 10\n\n  @testset \"Generic sites\" for eltype in (Float32, Float64, ComplexF32, ComplexF64)\n    d1, d2 = 3, 4\n    i1, i2 = Index(d1), Index(d2)\n\n    o = op(\"I\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"F\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"I\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    U1 = op(\"RandomUnitary\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U1 = op(\"randU\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U12 = op(\"RandomUnitary\", i1, i2)\n    @test hassameinds(U12, (i1', i2', i1, i2))\n    @test apply(transpose(dag(U12)), U12) ≈\n      itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n  end\n\n  @testset \"Qubit sites\" begin\n   ",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "part_0",
+        "section_title": "test_phys_site_types.jl",
+        "source_file": "test\\base\\test_phys_site_types.jl"
+      },
+      "score": 0.793871223461619,
+      "original_score": 0.7771580794179664,
+      "vector_score": 0.7771580794179664,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "using",
+        "siteinds",
+        "itensor"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 113,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

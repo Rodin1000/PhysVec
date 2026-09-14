@@ -1,0 +1,127 @@
+{
+  "query": "Best practices for creating effector functions in Qiskit quantum circuits",
+  "packages": [
+    "qiskit",
+    "qiskit-nature"
+  ],
+  "results": [
+    {
+      "id": "__init____c21336c1bae2d0fe5fb31594219db6ee__part_8__8",
+      "text": "qp\n   quantum_volume\n   phase_estimation\n   grover_operator\n   unitary_overlap\n   GraphStateGate\n   PauliEvolutionGate\n   HamiltonianGate\n\nBelow we provide the same operations as classes deriving :class:`.QuantumCircuit`. For better\nruntime and compiler performance, however, we suggest using above functions and gates.\n\n.. autosummary::\n   :toctree: ../stubs/\n   :template: autosummary/class_no_inherited_members.rst\n\n   FourierChecking\n   GraphState\n   HiddenLinearFunction\n   IQP\n   QuantumVolume\n   PhaseEstimation\n   GroverOperator\n   UnitaryOverlap\n\n.. _n-local:\n\nN-local circuits\n================\n\nThe following functions return a parameterized :class:`.QuantumCircuit` to use as ansatz in\na broad set of variational quantum algorithms.\n\nFor example, we can build a variational circuit\n\n.. plot::\n   :alt: The efficient SU2 ansatz circuit...\n   :context:\n\n   from qiskit.circuit.library import efficient_su2\n\n   num_qubits = 4\n   ansatz = efficient_su2(num_qubits, entanglement=\"pairwise\")\n   ansatz.draw(\"mpl\")\n\nand combine it with\n\n.. plot::\n   :alt: ... combined with the ZZ feature map.\n   :include-source:\n   :context:\n\n   from qiskit.circuit.library import zz_feature_map\n\n   circuit = zz_feature_map(num_qubits)\n   circuit.barrier()\n   circuit.compose(ansatz, inplace=True)\n\n   circuit.draw(\"mpl\")\n\nto obtain a circuit for variational quantum classification.\n\nThe following functions all construct variational circuits and are optimized for a fast\nconstruction:\n\n.. autosummary::\n   :toctree: ../stubs/\n\n   n_local\n   efficient_su2\n   real_amplitudes\n   pauli_two_design\n   excitation_preserving\n   qaoa_ansatz\n   hamiltonian_variational_ansatz\n   evolved_operator_ansatz\n\nWhile we suggest using the above functions, we also continue supporting the following\n:class:`.BlueprintCircuit`, which wrap the circuits into a block\nand allow for inplace mutations of the circuits:\n\n.. autosummary::\n   :toctree: ../stubs/\n   :template: autosummary/class_no_inherited_members.rst\n\n   NLocal\n   TwoLocal\n   PauliTwoDesign\n   RealAmplitudes\n   EfficientSU2\n   EvolvedOperatorAnsatz\n   ExcitationPreserving\n   QAOAAnsatz\n\n\n.. _data-encoding:\n\nData encoding circuits\n======================\n\nThe following functions return a parameterized :class:`.QuantumCircuit` to use as data\nencoding circuits in a series of variational quantum algorithms:\n\n.. autosummary::\n   :toctree: ../stubs/\n\n   pauli",
+      "metadata": {
+        "package": "qiskit",
+        "source_file": "qiskit\\circuit\\library\\__init__.py",
+        "section_id": "part_8",
+        "section_title": "__init__.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.9319664534331432,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "functions",
+        "qiskit",
+        "quantum",
+        "circuits"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "givens_rotations__e7a92f4886839d82a2c86cd118562fbb__part_0__0",
+      "text": "# This code is part of a Qiskit project.\n#\n# (C) Copyright IBM 2021, 2023.\n#\n# This code is licensed under the Apache License, Version 2.0. You may\n# obtain a copy of this license in the LICENSE.txt file in the root directory\n# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.\n#\n# Any modifications or derivative works of this code must retain this\n# copyright notice, and modified files need to carry a notice indicating\n# that they have been altered from the originals.\n\n\"\"\"Private helper functions for initial states.\"\"\"\n\nfrom __future__ import annotations\n\nfrom typing import Iterable, List, Sequence, Tuple\n\nimport numpy as np\nfrom qiskit import QuantumRegister\nfrom qiskit.circuit import Gate, Qubit\nfrom qiskit.circuit.library import XGate, XXPlusYYGate\nfrom qiskit_nature.utils import apply_matrix_to_slices, givens_matrix\nfrom qiskit_nature.utils.linalg import fermionic_gaussian_decomposition_jw\n\n\ndef _prepare_slater_determinant_jw(\n    register: QuantumRegister, transformation_matrix: np.ndarray\n) -> Iterable[Tuple[Gate, Tuple[Qubit, ...]]]:\n    \"\"\"Prepare a Slater determinant under the Jordan-Wigner Transform.\n\n    Args:\n        register: The register containing the qubits to use\n        transformation_matrix: The transformation matrix describing\n            the Slater determinant.\n\n    Yields:\n        (gate, qubits) pairs describing the operations, where the qubits\n        are provided in a tuple\n    \"\"\"\n    m, n = transformation_matrix.shape\n\n    # set the first n_particles qubits to 1\n    for i in range(m):\n        yield XGate(), (register[i],)\n\n    # if all orbitals are filled, no further operations are needed\n    if m == n:\n        return\n\n    current_matrix = transformation_matrix\n\n    # zero out top right corner by rotating rows; this is a no-op\n    for j in reversed(range(n - m + 1, n)):\n        # Zero out entries in column j\n        for i in range(m - n + j):\n            # Zero out entry in row i if needed\n            if not np.isclose(current_matrix[i, j], 0.0):\n                givens_mat = givens_matrix(current_matrix[i + 1, j], current_matrix[i, j])\n                current_matrix = apply_matrix_to_slices(current_matrix, givens_mat, [i + 1, i])\n\n    # decompose matrix into Givens rotations\n    decomposition: List[Tuple[Gate, Tuple[Qubit, ...]]] = []\n    for i in range(m):\n        # zero out the columns in row i\n        for j in range(n - m + i, i, -1):\n            if not",
+      "metadata": {
+        "section_title": "givens_rotations.py",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\utils\\givens_rotations.py",
+        "section_id": "part_0",
+        "package": "qiskit-nature"
+      },
+      "score": 0.8650463066890385,
+      "original_score": 0.8579434807253037,
+      "vector_score": 0.9935516494214442,
+      "bm25_score": 0.2571418681930849,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "functions",
+        "qiskit"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "ucc__75322347c7796822f4be2c351375ee91__part_4__4",
+      "text": " the default\n                generation method (i.e. not providing a ``Callable`` to ``excitations``), these will\n                always be constructed with respect to a\n                :class:`~qiskit_nature.second_q.circuit.library.HartreeFock` reference state.\n                When setting up a ``VQE`` algorithm using this ansatz and initial state, it is\n                likely you will also want to use a\n                :class:`~qiskit_nature.second_q.algorithms.initial_points.HFInitialPoint` that has\n                been configured using the corresponding ansatz parameters.\n        \"\"\"\n        self._qubit_mapper = qubit_mapper\n        self._num_particles = num_particles\n        self._num_spatial_orbitals = num_spatial_orbitals\n        self._excitations = excitations\n        self._alpha_spin = alpha_spin\n        self._beta_spin = beta_spin\n        self._max_spin_excitation = max_spin_excitation\n        self._generalized = generalized\n        self._preserve_spin = preserve_spin\n        self._include_imaginary = include_imaginary\n\n        super().__init__(reps=reps, initial_state=initial_state)\n\n        # To give read access to the actual excitation list that UCC is using.\n        self._excitation_list: list[tuple[tuple[int, ...], tuple[int, ...]]] | None = None\n\n        # We cache these, because the generation may be quite expensive (depending on the generator)\n        # and the user may want quick access to inspect these. Also, it speeds up testing for the\n        # same reason!\n        self._excitation_ops: list[SparseLabelOp] = None\n\n        # Our parent, EvolvedOperatorAnsatz, sets qregs when it knows the\n        # number of qubits, which it gets from the operators. Getting the\n        # operators here will build them if configuration already allows.\n        # This will allow the circuit to be fully built/valid when it's\n        # possible at this stage.\n        _ = self.operators\n\n    @property\n    def qubit_mapper(self) -> QubitMapper | None:\n        \"\"\"The qubit operator mapper.\"\"\"\n        return self._qubit_mapper\n\n    @qubit_mapper.setter\n    def qubit_mapper(self, mapper: QubitMapper | None) -> None:\n        \"\"\"Sets the qubit operator mapper.\"\"\"\n        self._operators = None\n        self._invalidate()\n        self._qubit_mapper = mapper\n\n    @property\n    def num_spatial_orbitals(self) -> int:\n        \"\"\"The number of spatial orbitals.\"\"\"\n        return self._num_spatial_orbitals\n\n    @num_spatial_orbitals.setter\n    def num_spatial_orbitals(self, n: int) -> None:\n        \"\"\"Sets the number of spatial orbitals.\"\"\"\n        self._operators = None\n",
+      "metadata": {
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\ansatzes\\ucc.py",
+        "section_title": "ucc.py",
+        "package": "qiskit-nature",
+        "section_id": "part_4"
+      },
+      "score": 0.8110355246264093,
+      "original_score": 0.8110355246264093,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "test_bogoliubov_transform__37591ec438f6bde1d2d31019c31e0184__part_2__2",
+      "text": ")\n            @ _expand_transformation_matrix(transformation_matrix2)\n        )[:n_orbitals]\n\n        bog_circuit_1 = BogoliubovTransform(transformation_matrix1)\n        bog_circuit_2 = BogoliubovTransform(transformation_matrix2)\n        bog_circuit_composed = BogoliubovTransform(composed_transformation_matrix)\n\n        register = QuantumRegister(n_orbitals)\n        circuit = QuantumCircuit(register)\n        circuit.append(bog_circuit_1, register)\n        circuit.append(bog_circuit_2, register)\n\n        self.assertTrue(Operator(circuit).equiv(Operator(bog_circuit_composed), atol=1e-8))\n\n    def test_bogoliubov_transform_jw_inverse_general_identity(self):\n        \"\"\"Test Bogoliubov transform for the identity transformation.\"\"\"\n        n_orbitals = 3\n        mat = np.eye(n_orbitals, 2 * n_orbitals, k=n_orbitals)\n        bog = BogoliubovTransform(mat)\n\n        register = QuantumRegister(n_orbitals)\n        circuit = QuantumCircuit(register)\n        circuit.append(bog, register)\n        circuit.append(bog.inverse(), register)\n\n        self.assertTrue(Operator(circuit).equiv(np.eye(2**n_orbitals), atol=1e-8))\n\n    def test_no_side_effects(self):\n        \"\"\"Test that the routines don't mutate the input array.\"\"\"\n        n_orbitals = 5\n        hermitian_part = random_hermitian(n_orbitals).data\n        constant = np.random.uniform(-10, 10)\n\n        quad_ham = QuadraticHamiltonian(hermitian_part, constant=constant)\n        transformation_matrix, _, _ = quad_ham.diagonalizing_bogoliubov_transform()\n        original = transformation_matrix.copy()\n        _ = BogoliubovTransform(transformation_matrix)\n        np.testing.assert_allclose(transformation_matrix, original, atol=1e-8)\n\n    def test_validation(self):\n        \"\"\"Test input validation.\"\"\"\n        with self.assertRaisesRegex(ValueError, \"2-dimensional\"):\n            _ = BogoliubovTransform(np.ones((2, 2, 2)))\n        with self.assertRaisesRegex(ValueError, \"shape\"):\n            _ = BogoliubovTransform(np.ones((3, 2)))\n        with self.assertRaisesRegex(ValueError, \"shape\"):\n            _ = BogoliubovTransform(np.ones((2, 3)))\n\n    def test_circuit_kwargs(self):\n        \"\"\"Test that circuit keyword arguments are actually passed through.\"\"\"\n        circuit = BogoliubovTransform(np.eye(2), name=\"abcd\")\n        assert circuit.name == \"abcd\"\n\n    def test_unsupported_mapper(self):\n        \"\"\"Test passing unsupported mapper fails gracefully.\"\"\"\n        with self.assertRaisesRegex(NotImplementedError, \"supported\"):\n            _ = BogoliubovTransform(np.eye(2), qubit_mapper=BravyiK",
+      "metadata": {
+        "source_file": "test\\second_q\\circuit\\library\\test_bogoliubov_transform.py",
+        "package": "qiskit-nature",
+        "section_title": "test_bogoliubov_transform.py",
+        "section_id": "part_2"
+      },
+      "score": 0.7513455759591107,
+      "original_score": 0.7513455759591107,
+      "vector_score": 0.9264027938914342,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "collect_blocks__e3c51fcfb710d031681a27dfdf65c2fc__part_7__7",
+      "text": ")\n\n            # Add classical registers used in conditions over registers\n            for reg in cur_clregs:\n                qc.add_register(reg)\n\n            # Construct a quantum circuit from the nodes in the block, remapping the qubits.\n            wire_pos_map = {qb: ix for ix, qb in enumerate(sorted_qubits)}\n            wire_pos_map.update({qb: ix for ix, qb in enumerate(sorted_clbits)})\n\n            for node in block:\n                qc.append(CircuitInstruction(node.op, node.qargs, node.cargs))\n\n            # Collapse this quantum circuit into an operation.\n            op = collapse_fn(qc)\n\n            # Replace the block of nodes in the DAG by the constructed operation\n            # (the function replace_block_with_op is implemented both in DAGCircuit and DAGDependency).\n            self.dag.replace_block_with_op(block, op, wire_pos_map, cycle_check=False)\n        return self.dag\n",
+      "metadata": {
+        "section_id": "part_7",
+        "package": "qiskit",
+        "section_title": "collect_blocks.py",
+        "source_file": "qiskit\\dagcircuit\\collect_blocks.py"
+      },
+      "score": 0.6093300945859398,
+      "original_score": 0.5993129175240408,
+      "vector_score": 0.7389478010844283,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "quantum"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 113,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

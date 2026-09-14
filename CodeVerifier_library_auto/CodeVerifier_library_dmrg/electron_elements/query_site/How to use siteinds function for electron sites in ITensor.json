@@ -1,0 +1,136 @@
+{
+  "query": "How to use siteinds function for electron sites in ITensor?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "IncludedSiteTypes__10c3b7e95897ec39b67299563b29b049__h2_13_13__0",
+      "text": "The states of site indices with the \"Electron\" SiteType correspond to\n``|0\\rangle``, ``|\\!\\uparrow\\rangle``, ``|\\!\\downarrow\\rangle``, ``|\\!\\uparrow\\downarrow\\rangle``.\nMaking a single \"Electron\" site or collection of N \"Electron\" sites\n```\ns = siteind(\"Electron\")\nsites = siteinds(\"Electron\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\n- `conserve_qns` (default: false): conserve total number of electrons\n- `conserve_sz` (default: conserve_qns): conserve total ``S^z``\n- `conserve_nf` (default: conserve_qns): conserve total number of electrons\n- `conserve_nfparity` (default: conserve_qns): conserve total electron number parity\n- `qnname_sz` (default: \"Sz\"): name of total ``S^z`` QN\n- `qnname_nf` (default: \"Nf\"): name of total electron number QN\n- `qnname_nfparity` (default: \"NfParity\"): name of total electron number parity QN\nFor example:\n```\nsites = siteinds(\"Electron\",N; conserve_nfparity=true)\n```",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "h2_13",
+        "source_file": "docs\\src\\IncludedSiteTypes.md",
+        "section_title": "\"Electron\" SiteType"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.16417715633289615,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "siteinds",
+        "electron",
+        "sites"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "ops_itensor__affa3c82ed8d1be94bbe675053e1287f__full__0",
+      "text": "using .SiteTypes: SiteTypes, op\n\nfunction SiteTypes.op(I::UniformScaling, s::Index...)\n  return I.λ * op(\"Id\", s...)\nend\n\nfunction ITensor(o::Op, s::Vector{<:Index})\n  return op(o.which_op, map(n -> s[n], o.sites)...; o.params...)\nend\n\nfunction ITensor(o::Scaled, s::Vector{<:Index})\n  c = coefficient(o)\n  if isreal(c)\n    c = real(c)\n  end\n  return c * ITensor(argument(o), s)\nend\n\nfunction ITensor(o::Prod, s::Vector{<:Index})\n  T = ITensor(true)\n  for a in o.args[1]\n    Tₙ = ITensor(a, s)\n    # TODO: Implement this logic inside `apply`\n    if hascommoninds(T, Tₙ)\n      T = T(Tₙ)\n    else\n      T *= Tₙ\n    end\n  end\n  return T\nend\n\nfunction ITensor(o::Sum, s::Vector{<:Index})\n  T = ITensor()\n  for a in o.args[1]\n    T += ITensor(a, s)\n  end\n  return T\nend\n\nfunction ITensor(o::Exp, s::Vector{<:Index})\n  return exp(ITensor(argument(o), s))\nend\n\nfunction ITensor(o::LazyApply.Adjoint, s::Vector{<:Index})\n  return swapprime(dag(ITensor(o', s)), 0 => 1)\nend\n\nfunction Sum{ITensor}(o::Sum, s::Vector{<:Index})\n  return Applied(sum, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Prod, s::Vector{<:Index})\n  return Applied(prod, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Scaled{C,Prod{Op}}, s::Vector{<:Index}) where {C}\n  t = Prod{ITensor}(argument(o), s)\n  t1 = coefficient(o) * only(t.args)[1]\n  return Applied(prod, (vcat([t1], only(t.args)[2:end]),))\nend\n\nfunction apply(o::Prod{ITensor}, v::ITensor; kwargs...)\n  ov = v\n  for oₙ in reverse(only(o.args))\n    ov = apply(oₙ, ov; kwargs...)\n  end\n  return ov\nend\n\nfunction (o::Prod{ITensor})(v::ITensor; kwargs...)\n  return apply(o, v; kwargs...)\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "full",
+        "source_file": "src\\lib\\Ops\\ops_itensor.jl",
+        "section_title": "ops_itensor.jl"
+      },
+      "score": 0.9645165334825169,
+      "original_score": 0.9605739260916855,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "function",
+        "sites",
+        "itensor"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "SiteTypes__c774f95869a6174e9ce75e61d1a4214f__full__0",
+      "text": "module SiteTypes\n# TODO: This is a bit strange, but required for backwards\n# compatibility since `val` is also used by `QNVal`.\nimport ..ITensors: val\n# TODO: Use explicit overloading with `NDTensors.space`.\nimport ..ITensors: space\ninclude(\"sitetype.jl\")\ninclude(\"SiteTypesChainRulesCoreExt.jl\")\ninclude(\"sitetypes/aliases.jl\")\ninclude(\"sitetypes/generic_sites.jl\")\ninclude(\"sitetypes/qubit.jl\")\ninclude(\"sitetypes/spinhalf.jl\")\ninclude(\"sitetypes/spinone.jl\")\ninclude(\"sitetypes/fermion.jl\")\ninclude(\"sitetypes/electron.jl\")\ninclude(\"sitetypes/tj.jl\")\ninclude(\"sitetypes/qudit.jl\")\ninclude(\"sitetypes/boson.jl\")\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "section_title": "SiteTypes.jl",
+        "section_id": "full",
+        "source_file": "src\\lib\\SiteTypes\\src\\SiteTypes.jl"
+      },
+      "score": 0.9607776889149681,
+      "original_score": 0.9579760952660372,
+      "vector_score": 0.9972955430549546,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "use",
+        "electron"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_0__0",
+      "text": "@eval module $(gensym())\nusing ITensors, Test\nimport ITensors: Out, In\nusing ITensors.SiteTypes: op, siteind, siteinds\n\n@testset \"Fermions\" begin\n  ITensors.enable_auto_fermion()\n\n  @testset \"parity_sign function\" begin\n\n    # Full permutations\n    p1 = [1, 2, 3]\n    @test ITensors.parity_sign(p1) == +1\n    p2 = [2, 1, 3]\n    @test ITensors.parity_sign(p2) == -1\n    p3 = [2, 3, 1]\n    @test ITensors.parity_sign(p3) == +1\n    p4 = [3, 2, 1]\n    @test ITensors.parity_sign(p4) == -1\n\n    ## Partial permutations\n    p5 = [2, 7]\n    @test ITensors.parity_sign(p5) == +1\n    p6 = [5, 3]\n    @test ITensors.parity_sign(p6) == -1\n    p7 = [1, 9, 3, 10]\n    @test ITensors.parity_sign(p7) == -1\n    p8 = [1, 12, 9, 3, 11]\n    @test ITensors.parity_sign(p8) == +1\n  end\n\n  @testset \"Fermionic QNs\" begin\n    q = QN(\"Nf\", 1, -1)\n    @test isfermionic(q[1])\n    @test fparity(q) == 1\n\n    q = q + q + q\n    @test val(q, \"Nf\") == 3\n\n    p = QN(\"P\", 1, -2)\n    @test fparity(p) == 1\n    @test isodd(p)\n    @test fparity(p + p) == 0\n    @test fparity(p + p + p) == 1\n  end\n\n  @testset \"Fermionic IndexVals\" begin\n    sn = Index([QN(\"Nf\", 0, -1) => 1, QN(\"Nf\", 1, -1) => 1], \"sn\")\n    @test fparity(sn => 1) == 0\n    @test fparity(sn => 2) == 1\n    @test !isodd(sn => 1)\n    @test isodd(sn => 2)\n\n    sp = Index([QN(\"Nfp\", 0, -2) => 1, QN(\"Nfp\", 1, -2) => 1], \"sp\")\n    @test fparity(sp => 1) == 0\n    @test fparity(sp",
+      "metadata": {
+        "section_title": "test_fermions.jl",
+        "source_file": "test\\base\\test_fermions.jl",
+        "package": "itensors",
+        "section_id": "part_0"
+      },
+      "score": 0.885148962060271,
+      "original_score": 0.8769453164931476,
+      "vector_score": 0.9129389135734716,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "siteinds",
+        "function"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "IncludedSiteTypes__7d74debdd1c692a6ddd9c2ac060aba29__\"Electron\"-SiteType_6__0",
+      "text": "## \"Electron\" SiteType\nThe states of site indices with the \"Electron\" SiteType correspond to $|0\\rangle$ , $|\\!\\uparrow\\rangle$ , $|\\!\\downarrow\\rangle$ , $|\\!\\uparrow\\downarrow\\rangle$ .\nMaking a single \"Electron\" site or collection of N \"Electron\" sites\n```code\ns = siteind(\"Electron\")\nsites = siteinds(\"Electron\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\nconserve_qns (default: false): conserve total number of electrons\nconserve_sz (default: conserve_qns): conserve total $S^z$\nconserve_nf (default: conserve_qns): conserve total number of electrons\nconserve_nfparity (default: conserve_qns): conserve total electron number parity\nqnname_sz (default: \"Sz\"): name of total $S^z$ QN\nqnname_nf (default: \"Nf\"): name of total electron number QN\nqnname_nfparity (default: \"NfParity\"): name of total electron number parity QN\nFor example:\n```code\nsites = siteinds(\"Electron\",N; conserve_nfparity=true)\n```\nThe available state names for \"Electron\" sites are:\n\"Emp\" (aliases: \"0\" ) unoccupied electron site\n\"Up\" (aliases: \"↑\" ) electron site occupied with one up electron\n\"Dn\" (aliases: \"↓\" ) electron site occupied with one down electron\n\"UpDn\" (aliases: \"↑↓\" ) electron site occupied with two electrons (one up, one down)\nOperators associated with \"Electron\" sites can be made using the op function, for example\n```code\nCup = op(\"Cup\",s)\nCup4 = op(\"Cup\",sites[4])\n```\nSingle-fermion operators:\n\"Ntot\" (aliases: \"ntot\" ) Total density operator\n\"Nup\" (aliases: \"n↑\" ) Up density operator\n\"Ndn\" (aliases: \"n↓\" ) Down density operator\n\"Cup\" (aliases: \"c↑\" ) Up-spin annihilation operator\n\"Cdn\" (aliases: \"c↓\" ) Down-spin annihilation operator\n\"Cdagup\" (aliases: \"c†↑\" ) Up-spin creation operator\n\"Cdagdn\" (aliases: \"c†↓\" ) Down-spin creation operator\n\"Sz\" (aliases: \"Sᶻ\" )\n\"Sx\" (aliases: \"Sˣ\" )\n\"S+\" (aliases: \"Sp\" , \"S⁺\" , \"Splus\" )\n\"S-\" (aliases: \"Sm\" , \"S⁻\" , \"Sminus\" )\n\"F\" Jordan-Wigner string operator\n\"Fup\" (aliases: \"F↑\" ) Up-spin Jordan-Wigner string operator\n\"Fdn\" (aliases: \"F↓\" ) Down-spin Jordan-Wigner string operator\nNon-fermionic single particle operators (these do not have Jordan-Wigner string attached, so will commute within systems such as OpSum or the apply function):\n\"Aup\" (aliases: \"a↑\" ) Up-spin annihilation operator\n\"Adn\" (aliases: \"a↓\" ) Down-spin annihilation operator\n\"Adagup\" (aliases: \"a†↑\" ) Up-spin creation operator\n\"Adagdn\" (aliases: \"a†↓\" ) Down-spin creation operator",
+      "metadata": {
+        "section_id": "\"Electron\"-SiteType",
+        "source_file": "docs\\build\\IncludedSiteTypes.html",
+        "section_title": "\"Electron\" SiteType",
+        "package": "itensormps"
+      },
+      "score": 0.8421943922653945,
+      "original_score": 0.7440990144844235,
+      "vector_score": 0.7408112240256596,
+      "bm25_score": 0.1353152220632187,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "siteinds",
+        "function",
+        "electron",
+        "sites"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 109,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

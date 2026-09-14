@@ -1,0 +1,129 @@
+{
+  "query": "Correct VQE compute_minimum_eigenvalue usage with EstimatorV2 and observables for fermion-VQE qcmb",
+  "packages": [
+    "qiskit-algorithms",
+    "qiskit"
+  ],
+  "results": [
+    {
+      "id": "test_vqe__ffff26a28311a585190d400006adf82a__part_4__4",
+      "text": " = COBYLA(maxiter=3)\n        wavefunction = self.ry_wavefunction\n\n        estimator = StatevectorEstimator(seed=42)\n\n        vqe = VQE(\n            estimator,\n            wavefunction,\n            optimizer,\n            callback=store_intermediate_result,\n        )\n        vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n\n        self.assertTrue(all(isinstance(count, int) for count in history[\"eval_count\"]))\n        self.assertTrue(all(isinstance(mean, float) for mean in history[\"mean\"]))\n        self.assertTrue(all(isinstance(metadata, dict) for metadata in history[\"metadata\"]))\n        for params in history[\"parameters\"]:\n            self.assertTrue(all(isinstance(param, float) for param in params))\n\n    def test_reuse(self):\n        \"\"\"Test re-using a VQE algorithm instance.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n        vqe = VQE(StatevectorEstimator(seed=42), ansatz, SLSQP(maxiter=300))\n        with self.subTest(msg=\"assert VQE works once all info is available\"):\n            result = vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n            self.assertAlmostEqual(result.eigenvalue.real, self.h2_energy, places=5)\n\n        operator = Operator(np.array([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 2, 0], [0, 0, 0, 3]]))\n        operator = SparsePauliOp.from_operator(operator)\n\n        with self.subTest(msg=\"assert vqe works on re-use.\"):\n            result = vqe.compute_minimum_eigenvalue(operator=operator)\n            self.assertAlmostEqual(result.eigenvalue.real, -1.0, places=5)\n\n    def test_vqe_optimizer_reuse(self):\n        \"\"\"Test running same VQE twice to re-use optimizer, then switch optimizer\"\"\"\n        vqe = VQE(\n            StatevectorEstimator(seed=42),\n            self.ryrz_wavefunction,\n            SLSQP(),\n        )\n\n        def run_check():\n            result = vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n            self.assertAlmostEqual(result.eigenvalue.real, self.h2_energy, places=5)\n\n        run_check()\n\n        with self.subTest(\"Optimizer re-use.\"):\n            run_check()\n\n        with self.subTest(\"Optimizer replace.\"):\n            vqe.optimizer = L_BFGS_B()\n            run_check()\n\n    def test_default_batch_evaluation_on_spsa(self):\n        \"\"\"Test the default batching works.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n\n        wrapped_estimator = StatevectorEstimator(seed=42)\n        inner_estimator = StatevectorEstimator(seed=43)\n\n        callcount = {\"estimator\": 0}\n\n        def wrapped_estimator_run(*",
+      "metadata": {
+        "source_file": "test\\minimum_eigensolvers\\test_vqe.py",
+        "package": "qiskit-algorithms",
+        "section_title": "test_vqe.py",
+        "section_id": "part_4"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.9657524377394585,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "vqe",
+        "compute_minimum_eigenvalue",
+        "vqe"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_sampling_vqe__1096557e912fe83ed05b2e64cae3dbd5__part_5__5",
+      "text": "        )\n        sampling_vqe.compute_minimum_eigenvalue(operator=op)\n\n        self.assertTrue(all(isinstance(count, int) for count in history[\"eval_count\"]))\n        self.assertTrue(all(isinstance(mean, float) for mean in history[\"mean\"]))\n        self.assertTrue(all(isinstance(metadata, dict) for metadata in history[\"metadata\"]))\n        for params in history[\"parameters\"]:\n            self.assertTrue(all(isinstance(param, float) for param in params))\n\n    def test_aggregation(self):\n        \"\"\"Test the aggregation works.\"\"\"\n\n        # test a custom aggregation that just uses the best measurement\n        def best_measurement(measurements):\n            res = min(measurements, key=lambda meas: meas[1])[1]\n            return res\n\n        # test CVaR with alpha of 0.4 (i.e. 40% of the best measurements)\n        alpha = 0.4\n\n        ansatz = real_amplitudes(1, reps=0)\n        ansatz.h(0)\n\n        for aggregation in [alpha, best_measurement]:\n            with self.subTest(aggregation=aggregation):\n                vqe = SamplingVQE(\n                    StatevectorSampler(), ansatz, _mock_optimizer, aggregation=best_measurement\n                )\n                result = vqe.compute_minimum_eigenvalue(Pauli(\"Z\"))\n\n                # evaluation at x0=0 samples -1 and 1 with 50% probability, and our aggregation\n                # takes the smallest value\n                self.assertAlmostEqual(result.optimal_value, -1)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "source_file": "test\\minimum_eigensolvers\\test_sampling_vqe.py",
+        "section_id": "part_5",
+        "package": "qiskit-algorithms",
+        "section_title": "test_sampling_vqe.py"
+      },
+      "score": 0.869790631831397,
+      "original_score": 0.8604899626764968,
+      "vector_score": 0.8671874443930389,
+      "bm25_score": 0.8042303522389945,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "vqe",
+        "compute_minimum_eigenvalue",
+        "vqe"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_backend_estimator_v2__136b5e4293090ff3dfc098df748dec1f__part_2__2",
+      "text": " psi1, psi2 = pm.run([psi1, psi2])\n        estimator = BackendEstimatorV2(backend=backend, options=self._options)\n        estimator.options.abelian_grouping = abelian_grouping\n        # Specify the circuit and observable by indices.\n        # calculate [ <psi1(theta1)|H1|psi1(theta1)> ]\n        ham1 = hamiltonian1.apply_layout(psi1.layout)\n        job = estimator.run([(psi1, ham1, [theta1])])\n        result = job.result()\n        np.testing.assert_allclose(result[0].data.evs, [1.5555572817900956], rtol=self._rtol)\n\n        # Objects can be passed instead of indices.\n        # Note that passing objects has an overhead\n        # since the corresponding indices need to be searched.\n        # User can append a circuit and observable.\n        # calculate [ <psi2(theta2)|H1|psi2(theta2)> ]\n        ham1 = hamiltonian1.apply_layout(psi2.layout)\n        result2 = estimator.run([(psi2, ham1, theta2)]).result()\n        np.testing.assert_allclose(result2[0].data.evs, [2.97797666], rtol=self._rtol)\n\n        # calculate [ <psi1(theta1)|H2|psi1(theta1)>, <psi1(theta1)|H3|psi1(theta1)> ]\n        ham2 = hamiltonian2.apply_layout(psi1.layout)\n        ham3 = hamiltonian3.apply_layout(psi1.layout)\n        result3 = estimator.run([(psi1, [ham2, ham3], theta1)]).result()\n        np.testing.assert_allclose(result3[0].data.evs, [-0.551653, 0.07535239], rtol=self._rtol)\n\n        # calculate [ [<psi1(theta1)|H1|psi1(theta1)>,\n        #              <psi1(theta3)|H3|psi1(theta3)>],\n        #             [<psi2(theta2)|H2|psi2(theta2)>] ]\n        ham1 = hamiltonian1.apply_layout(psi1.layout)\n        ham3 = hamiltonian3.apply_layout(psi1.layout)\n        ham2 = hamiltonian2.apply_layout(psi2.layout)\n        result4 = estimator.run(\n            [\n                (psi1, [ham1, ham3], [theta1, theta3]),\n                (psi2, ham2, theta2),\n            ]\n        ).result()\n        np.testing.assert_allclose(result4[0].data.evs, [1.55555728, -1.08766318], rtol=self._rtol)\n        np.testing.assert_allclose(result4[1].data.evs, [0.17849238], rtol=self._rtol",
+      "metadata": {
+        "package": "qiskit",
+        "section_title": "test_backend_estimator_v2.py",
+        "section_id": "part_2",
+        "source_file": "test\\python\\primitives\\test_backend_estimator_v2.py"
+      },
+      "score": 0.8055174014717709,
+      "original_score": 0.8055174014717709,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "test_vqd__69bbcfe16b14a0e7e3cec7e7a51130fb__part_2__2",
+      "text": ".optimal_values, self.h2_energy_excited[:2], decimal=3\n            )\n\n    def test_full_spectrum(self):\n        \"\"\"Test obtaining all eigenvalues.\"\"\"\n        vqd = VQD(\n            self.estimator,\n            self.fidelity,\n            self.ryrz_wavefunction,\n            optimizer=COBYLA(),\n            k=4,\n            betas=[3, 3, 3],\n        )\n        result = vqd.compute_eigenvalues(H2_SPARSE_PAULI)\n        np.testing.assert_array_almost_equal(\n            result.eigenvalues.real, self.h2_energy_excited, decimal=2\n        )\n\n    @data(H2_SPARSE_PAULI)\n    def test_beta_autoeval(self, op):\n        \"\"\"Test beta auto-evaluation for different operator types.\"\"\"\n\n        with self.assertLogs(level=\"INFO\") as logs:\n            vqd = VQD(self.estimator, self.fidelity, self.ryrz_wavefunction, optimizer=L_BFGS_B())\n            _ = vqd.compute_eigenvalues(op)\n\n        # the first log message shows the value of beta[0]\n        beta = float(logs.output[0].split()[-1])\n        self.assertAlmostEqual(beta, 20.40459399499687, 4)\n\n    @data(H2_SPARSE_PAULI)\n    def test_mismatching_num_qubits(self, op):\n        \"\"\"Ensuring circuit and operator mismatch is caught\"\"\"\n        wavefunction = QuantumCircuit(1)\n        optimizer = SLSQP(maxiter=50)\n        vqd = VQD(\n            estimator=self.estimator,\n            fidelity=self.fidelity,\n            k=1,\n            ansatz=wavefunction,\n            optimizer=optimizer,\n            betas=self.betas,\n        )\n        with self.assertRaises(AlgorithmError):\n            _ = vqd.compute_eigenvalues(operator=op)\n\n    # TODO: remove this test once BlueprintCircuit support has been removed\n    @data(H2_SPARSE_PAULI)\n    def test_ansatz_resize(self, op):\n        \"\"\"Test the ansatz is properly resized if it's a blueprint circuit.\"\"\"\n        ansatz = RealAmplitudes(1, reps=1)\n        vqd = VQD(\n            estimator=self.estimator,\n            fidelity=self.fidelity,\n            ansatz=ansatz,\n            optimizer=COBYLA(),\n            betas=self.betas,\n        )\n        result = vqd.compute_eigenvalues(operator=op)\n        np.testing.assert_array_almost_equal(\n            result.eigenvalues.real, self.h2_energy_excited[:2], decimal=1\n        )\n\n    @data(H2_SPARSE_PAULI)\n    def test_missing_varform_params(self, op):\n        \"\"\"Test specifying a variational form with no parameters raises an error.\"\"\"\n        circuit = QuantumCircuit(op.num_qubits)\n        vqd = VQD(\n            estimator=self.estimator",
+      "metadata": {
+        "source_file": "test\\eigensolvers\\test_vqd.py",
+        "section_id": "part_2",
+        "package": "qiskit-algorithms",
+        "section_title": "test_vqd.py"
+      },
+      "score": 0.8054810897865912,
+      "original_score": 0.8054810897865912,
+      "vector_score": 0.9999549212902001,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "test_vqe__ffff26a28311a585190d400006adf82a__part_6__6",
+      "text": " [ansatz], left, right)\n            return job.result().fidelities\n\n        qnspsa = QNSPSA(fidelity_callable, maxiter=5)\n        qnspsa.set_max_evals_grouped(100)\n\n        vqe = VQE(\n            wrapped_estimator,\n            ansatz,\n            qnspsa,\n        )\n        _ = vqe.compute_minimum_eigenvalue(Pauli(\"ZZ\"))\n\n        # 5 (fidelity)\n        expected_sampler_runs = 5\n        # 1 calibration + 1 stddev estimation + 1 initial blocking\n        # + 5 (1 loss + 1 blocking) + 1 return loss\n        expected_estimator_runs = 1 + 1 + 1 + 5 * 2 + 1\n\n        self.assertEqual(callcount[\"sampler\"], expected_sampler_runs)\n        self.assertEqual(callcount[\"estimator\"], expected_estimator_runs)\n\n    def test_optimizer_scipy_callable(self):\n        \"\"\"Test passing a SciPy optimizer directly as callable.\"\"\"\n        vqe = VQE(\n            StatevectorEstimator(seed=42),\n            self.ryrz_wavefunction,\n            partial(scipy_minimize, method=\"L-BFGS-B\", options={\"maxiter\": 10}),\n        )\n        result = vqe.compute_minimum_eigenvalue(self.h2_op)\n        self.assertAlmostEqual(result.eigenvalue.real, self.h2_energy, places=2)\n\n    def test_optimizer_callable(self):\n        \"\"\"Test passing a optimizer directly as callable.\"\"\"\n        ansatz = real_amplitudes(1, reps=1)\n        vqe = VQE(StatevectorEstimator(seed=42), ansatz, _mock_optimizer)\n        result = vqe.compute_minimum_eigenvalue(SparsePauliOp(\"Z\"))\n        self.assertTrue(np.all(result.optimal_point == np.zeros(ansatz.num_parameters)))\n\n    # Since we perform actions on the aux_operators when a transpiler is set, we have to check that it\n    # doesn't affect the final result\n    @data(\n        None,\n        generate_preset_pass_manager(\n            backend=THREE_QUBITS_BACKEND, optimization_level=1, seed_transpiler=42\n        ),\n    )\n    def test_aux_operators_list(self, transpiler):\n        \"\"\"Test list-based aux_operators.\"\"\"\n        wavefunction = self.ry_wavefunction\n        vqe = VQE(\n            StatevectorEstimator(seed=42), wavefunction, SLSQP(maxiter=300), transpiler=transpiler\n        )\n\n        with self.subTest(\"Test with an empty list.\"):\n            result = vqe.compute_minimum_eigenvalue(self.h2_op, aux_operators=[])\n            self.assertAlmostEqual(result.eigenvalue.real, self.h2_energy, places=6)\n            self.assertIsInstance(result.aux_operators_evaluated, list)\n            self.assertEqual(len(result.aux_operators_evaluated), 0)\n\n        with",
+      "metadata": {
+        "section_id": "part_6",
+        "package": "qiskit-algorithms",
+        "source_file": "test\\minimum_eigensolvers\\test_vqe.py",
+        "section_title": "test_vqe.py"
+      },
+      "score": 0.7886402300894352,
+      "original_score": 0.773543103667252,
+      "vector_score": 0.7936664412731177,
+      "bm25_score": 0.6665577876397323,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "vqe",
+        "compute_minimum_eigenvalue",
+        "vqe"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 105,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 47
+      },
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "query": "ITensors tJ site type operators and Hilbert space definition for DMRG",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "tj__9d10a3364fe53958827560d0636b49b7__part_0__0",
+      "text": "\n\"\"\"\n    space(::SiteType\"tJ\";\n          conserve_qns = false,\n          conserve_sz = conserve_qns,\n          conserve_nf = conserve_qns,\n          conserve_nfparity = conserve_qns,\n          qnname_sz = \"Sz\",\n          qnname_nf = \"Nf\",\n          qnname_nfparity = \"NfParity\")\n\nCreate the Hilbert space for a site of type \"tJ\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nfunction space(\n  ::SiteType\"tJ\";\n  conserve_qns=false,\n  conserve_sz=conserve_qns,\n  conserve_nf=conserve_qns,\n  conserve_nfparity=conserve_qns,\n  qnname_sz=\"Sz\",\n  qnname_nf=\"Nf\",\n  qnname_nfparity=\"NfParity\",\n  # Deprecated\n  conserve_parity=nothing,\n)\n  if !isnothing(conserve_parity)\n    conserve_nfparity = conserve_parity\n  end\n  if conserve_sz && conserve_nf\n    return [\n      QN((qnname_nf, 0, -1), (qnname_sz, 0)) => 1\n      QN((qnname_nf, 1, -1), (qnname_sz, +1)) => 1\n      QN((qnname_nf, 1, -1), (qnname_sz, -1)) => 1\n    ]\n  elseif conserve_nf\n    return [\n      QN(qnname_nf, 0, -1) => 1\n      QN(qnname_nf, 1, -1) => 2\n    ]\n  elseif conserve_sz\n    return [\n      QN((qnname_sz, 0), (qnname_nfparity, 0, -2)) => 1\n      QN((qnname_sz, +1), (qnname_nfparity, 1, -2)) => 1\n      QN((qnname_sz, -1), (qnname_nfparity, 1, -2)) => 1\n    ]\n  elseif conserve_nfparity\n    return [\n      QN(qnname_nfparity, 0, -2) => 1\n      QN(qnname_nfparity, 1, -2) => 2\n    ]\n  end\n  return 3\nend\n\nval(::ValName\"Emp\", ::SiteType\"tJ\") = 1\nval(::ValName\"Up\", ::SiteType\"tJ\") = 2\nval(::ValName\"Dn\", ::SiteType\"tJ\") = 3\nval(::ValName\"0\", st::SiteType\"tJ\") = val(ValName(\"Emp\"), st)\nval(::ValName\"↑\", st::SiteType\"tJ\") = val(ValName(\"",
+      "metadata": {
+        "section_id": "part_0",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\tj.jl",
+        "section_title": "tj.jl",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.8618748356514204,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "site",
+        "type",
+        "hilbert",
+        "space"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Perform-a-basic-DMRG-calculation_0__0",
+      "text": "## Perform a basic DMRG calculation\nBecause tensor indices in ITensor have unique identities, before we can make a Hamiltonian or a wavefunction we need to construct a \"site set\" which will hold the site indices defining the physical Hilbert space:\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1\",N)\n```\nHere we have chosen to create a Hilbert space of N spin 1 sites. The string \"S=1\" denotes a special Index tag which hooks into a system that knows \"S=1\" indices have a dimension of 3 and how to create common physics operators like \"Sz\" for them.\nNext we'll make our Hamiltonian matrix product operator (MPO). A very convenient way to do this is to use the OpSum helper type which lets us input a Hamiltonian (or any sum of local operators) in similar notation to pencil-and-paper notation:\n```code\nos = OpSum()\nfor j=1:N-1\n  os += 0.5,\"S+\",j,\"S-\",j+1\n  os += 0.5,\"S-\",j,\"S+\",j+1\n  os += \"Sz\",j,\"Sz\",j+1\nend\nH = MPO(os,sites)\n```\nIn the last line above we convert the OpSum helper object to an actual MPO.\nBefore beginning the calculation, we need to specify how many DMRG sweeps to do and what schedule we would like for the parameters controlling the accuracy. These parameters can be specified as follows:\n```code\nnsweeps = 5 # number of sweeps is 5\nmaxdim = [10,20,100,100,200] # gradually increase states kept\ncutoff = [1E-10] # desired truncation error\n```\nThe random starting wavefunction psi0 must be defined in the same Hilbert space as the Hamiltonian, so we construct it using the same collection of site indices:\n```code\npsi0 = random_mps(sites;linkdims=2)\n```\nHere we have made a random MPS of bond dimension 2. We could have used a random product state instead, but choosing a slightly larger bond dimension can help DMRG avoid getting stuck in local minima. We could also set psi to some specific initial state using the MPS constructor, which is actually required if we were conserving QNs.\nFinally, we are ready to call DMRG:\n```code\nenergy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n```\nWhen the algorithm is done, it returns the ground state energy as the variable energy and an MPS approximation to the ground state as the variable psi .\nBelow you can find a complete working code that includes all of these steps:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n  sites = siteinds(\"S=1\",N)\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5,\"S+\",j,\"S-\",j+1\n    os += 0.5,\"S-\",j,\"S+\",j+1\n    os += \"Sz\",j,\"Sz\",j+1\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 5 # number of sweeps is 5\n  maxdim = [10,20,100,100,200] # gradually increase states kept\n  cutoff = [1E-10] # desired truncation error\n\n  psi0 = random_mps(sites;linkdims=2)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "section_id": "Perform-a-basic-DMRG-calculation",
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "Perform a basic DMRG calculation"
+      },
+      "score": 0.9900665961378842,
+      "original_score": 0.9827245150224073,
+      "vector_score": 0.9937230912698514,
+      "bm25_score": 0.3957742694452387,
+      "keyword_matches": 7,
+      "matched_keywords": [
+        "itensors",
+        "site",
+        "type",
+        "operators",
+        "hilbert",
+        "space",
+        "dmrg"
+      ],
+      "match_ratio": 0.875,
+      "is_html": true
+    },
+    {
+      "id": "spinone__6cdfb2ad242e7abe7e1c97294d9e4e9d__part_0__0",
+      "text": "using ..ITensors: complex!, QN\n\nalias(::SiteType\"SpinOne\") = SiteType\"S=1\"()\n\n\"\"\"\n    space(::SiteType\"S=1\";\n          conserve_qns = false,\n          conserve_sz = conserve_qns,\n          qnname_sz = \"Sz\")\n\nCreate the Hilbert space for a site of type \"S=1\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nfunction space(\n  ::SiteType\"S=1\"; conserve_qns=false, conserve_sz=conserve_qns, qnname_sz=\"Sz\"\n)\n  if conserve_sz\n    return [QN(qnname_sz, +2) => 1, QN(qnname_sz, 0) => 1, QN(qnname_sz, -2) => 1]\n  end\n  return 3\nend\n\nval(::ValName\"Up\", ::SiteType\"S=1\") = 1\nval(::ValName\"Z0\", ::SiteType\"S=1\") = 2\nval(::ValName\"Dn\", ::SiteType\"S=1\") = 3\n\nval(::ValName\"↑\", st::SiteType\"S=1\") = 1\nval(::ValName\"0\", st::SiteType\"S=1\") = 2\nval(::ValName\"↓\", st::SiteType\"S=1\") = 3\n\nval(::ValName\"Z+\", ::SiteType\"S=1\") = 1\n# -- Z0 is already defined above --\nval(::ValName\"Z-\", ::SiteType\"S=1\") = 3\n\nstate(::StateName\"Up\", ::SiteType\"S=1\") = [1.0, 0.0, 0.0]\nstate(::StateName\"Z0\", ::SiteType\"S=1\") = [0.0, 1.0, 0.0]\nstate(::StateName\"Dn\", ::SiteType\"S=1\") = [0.0, 0.0, 1.0]\n\nstate(::StateName\"↑\", st::SiteType\"S=1\") = [1.0, 0.0, 0.0]\nstate(::StateName\"0\", st::SiteType\"S=1\") = [0.0, 1.0, 0.0]\nstate(::StateName\"↓\", st::SiteType\"S=1\") = [0.0, 0.0, 1.0]\n\nstate(::StateName\"Z+\", st::SiteType\"S=1\") = [1.0, 0.0, 0.0]\n# -- Z0 is already defined above --\nstate(::StateName\"Z-\", st::SiteType\"S=1\") = [0.0, 0.0, 1.0]\n\nstate(::StateName\"X",
+      "metadata": {
+        "section_id": "part_0",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\spinone.jl",
+        "section_title": "spinone.jl",
+        "package": "itensors"
+      },
+      "score": 0.9681029945020504,
+      "original_score": 0.9635462794309148,
+      "vector_score": 1.0,
+      "bm25_score": 0.28537144433914385,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensors",
+        "site",
+        "type",
+        "hilbert",
+        "space"
+      ],
+      "match_ratio": 0.625,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types_2__0",
+      "text": "## DMRG Calculation with Mixed Local Hilbert Space Types\nThe following fully-working example shows how to set up a calculation mixing S=1/2 and S=1 spins on every other site of a 1D system. The Hamiltonian involves Heisenberg spin interactions with adjustable couplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation is that the sites array has Index objects which alternate in dimension and in which physical tag type they carry, whether \"S=1/2\" or \"S=1\" . (Try printing out the sites array to see!) These tags tell the OpSum system which local operators to use for these sites when building the Hamiltonian MPO.\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n\n  # Make an array of N Index objects with alternating\n  # \"S=1/2\" and \"S=1\" tags on odd versus even sites\n  # (The first argument n->isodd(n) ... is an\n  # on-the-fly function mapping integers to strings)\n  sites = siteinds(n->isodd(n) ? \"S=1/2\" : \"S=1\",N)\n\n  # Couplings between spin-half and\n  # spin-one sites:\n  Jho = 1.0 # half-one coupling\n  Jhh = 0.5 # half-half coupling\n  Joo = 0.5 # one-one coupling\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5*Jho,\"S+\",j,\"S-\",j+1\n    os += 0.5*Jho,\"S-\",j,\"S+\",j+1\n    os += Jho,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:2:N-2\n    os += 0.5*Jhh,\"S+\",j,\"S-\",j+2\n    os += 0.5*Jhh,\"S-\",j,\"S+\",j+2\n    os += Jhh,\"Sz\",j,\"Sz\",j+2\n  end\n  for j=2:2:N-2\n    os += 0.5*Joo,\"S+\",j,\"S-\",j+2\n    os += 0.5*Joo,\"S-\",j,\"S+\",j+2\n    os += Joo,\"Sz\",j,\"Sz\",j+2\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 10\n  maxdim = [10,10,20,40,80,100,140,180,200]\n  cutoff = [1E-8]\n\n  psi0 = random_mps(sites;linkdims=4)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "section_id": "DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types",
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types"
+      },
+      "score": 0.9651911368959973,
+      "original_score": 0.9394628467756475,
+      "vector_score": 1.0,
+      "bm25_score": 0.1782603934371546,
+      "keyword_matches": 7,
+      "matched_keywords": [
+        "itensors",
+        "site",
+        "type",
+        "operators",
+        "hilbert",
+        "space",
+        "dmrg"
+      ],
+      "match_ratio": 0.875,
+      "is_html": true
+    },
+    {
+      "id": "spinhalf__b0e57b9fbab557e97d4122d4bba034d9__full__0",
+      "text": "\n\"\"\"\n    space(::SiteType\"S=1/2\";\n          conserve_qns = false,\n          conserve_sz = conserve_qns,\n          conserve_szparity = false,\n          qnname_sz = \"Sz\",\n          qnname_szparity = \"SzParity\")\n\nCreate the Hilbert space for a site of type \"S=1/2\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nfunction space(\n  ::SiteType\"S=1/2\";\n  conserve_qns=false,\n  conserve_sz=conserve_qns,\n  conserve_szparity=false,\n  qnname_sz=\"Sz\",\n  qnname_szparity=\"SzParity\",\n)\n  if conserve_sz && conserve_szparity\n    return [\n      QN((qnname_sz, +1), (qnname_szparity, 1, 2)) => 1,\n      QN((qnname_sz, -1), (qnname_szparity, 0, 2)) => 1,\n    ]\n  elseif conserve_sz\n    return [QN(qnname_sz, +1) => 1, QN(qnname_sz, -1) => 1]\n  elseif conserve_szparity\n    return [QN(qnname_szparity, 1, 2) => 1, QN(qnname_szparity, 0, 2) => 1]\n  end\n  return 2\nend\n\n# Use Qubit  definition of any operator/state\n# called using S=1/2 SiteType\nfunction val(vn::ValName, ::SiteType\"S=1/2\"; kwargs...)\n  return val(vn, SiteType(\"Qubit\"); kwargs...)\nend\n\nfunction state(sn::StateName, ::SiteType\"S=1/2\"; kwargs...)\n  return state(sn, SiteType(\"Qubit\"); kwargs...)\nend\n\nop(o::OpName, ::SiteType\"S=1/2\"; kwargs...) = op(o, SiteType(\"Qubit\"); kwargs...)\n\n# Support the tag \"SpinHalf\" as equivalent to \"S=1/2\"\nspace(::SiteType\"SpinHalf\"; kwargs...) = space(SiteType(\"S=1/2\"); kwargs...)\n\nval(name::ValName, ::SiteType\"SpinHalf\") = val(name, SiteType(\"S=1/2\"))\n\nstate(name::StateName, ::SiteType\"SpinHalf\") = state(name, SiteType(\"S=1/2\"))\n\nfunction op(o::OpName, ::SiteType\"SpinHalf\"; kwargs...)\n  return op(o, SiteType(\"S=1/2\"); kwargs...)\nend\n\n# Support the tag \"S=½\" as equivalent to \"S=1/2\"\n\nspace(::SiteType\"S=½\"; kwargs...) = space(SiteType(\"S=1/2\"); kwargs...)\n\nval(name::ValName, ::SiteType\"S=½\") = val(name, SiteType(\"S=1/2\"))\n\nstate(name::StateName, ::SiteType\"S=½\") = state(name, SiteType(\"S=1/2\"))\n\nop(o::OpName, ::SiteType\"S=½\"; kwargs...) = op(o, SiteType(\"S=1/2\"); kwargs...)\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\spinhalf.jl",
+        "section_title": "spinhalf.jl"
+      },
+      "score": 0.9559804175977944,
+      "original_score": 0.9496919058260508,
+      "vector_score": 0.9371954587729934,
+      "bm25_score": 0.47497229174732436,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "site",
+        "type",
+        "hilbert",
+        "space",
+        "definition"
+      ],
+      "match_ratio": 0.625,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 99,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 48
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      }
+    }
+  }
+}

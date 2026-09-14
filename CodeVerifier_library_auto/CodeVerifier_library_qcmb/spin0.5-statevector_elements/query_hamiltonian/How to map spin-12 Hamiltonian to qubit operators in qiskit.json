@@ -1,0 +1,127 @@
+{
+  "query": "How to map spin-1/2 Hamiltonian to qubit operators in qiskit?",
+  "packages": [
+    "qiskit",
+    "qiskit-nature"
+  ],
+  "results": [
+    {
+      "id": "test_hamiltonian_gate__84146b1e6b5a7a4b9a38c727c62e8ad3__part_1__1",
+      "text": "):\n        \"\"\"test adjoint operation\"\"\"\n        ham = HamiltonianGate([[3, 4j], [-4j, -0.2]], np.pi * 0.143)\n        np.testing.assert_array_almost_equal(\n            ham.adjoint().to_matrix(), np.transpose(np.conj(ham.to_matrix()))\n        )\n\n    def test_repeat(self):\n        \"\"\"test repeat operation\"\"\"\n        ham = HamiltonianGate(np.array([[1, 0.5 + 4j], [0.5 - 4j, -0.2]]), np.pi * 0.143)\n        operator = Operator(ham)\n        self.assertTrue(np.allclose(Operator(ham.repeat(2)), operator @ operator))\n\n\nclass TestHamiltonianCircuit(QiskitTestCase):\n    \"\"\"Hamiltonian gate circuit tests.\"\"\"\n\n    def test_1q_hamiltonian(self):\n        \"\"\"test 1 qubit hamiltonian\"\"\"\n        qr = QuantumRegister(1, \"q0\")\n        cr = ClassicalRegister(1, \"c0\")\n        qc = QuantumCircuit(qr, cr)\n        matrix = np.zeros((2, 2))\n        qc.x(qr[0])\n        theta = Parameter(\"theta\")\n        qc.append(HamiltonianGate(matrix, theta), [qr[0]])\n        qc = qc.assign_parameters({theta: 1})\n\n        # test of text drawer\n        self.log.info(qc)\n        dag = circuit_to_dag(qc)\n        dag_nodes = dag.named_nodes(\"hamiltonian\")\n        self.assertTrue(len(dag_nodes) == 1)\n        dnode = dag_nodes[0]\n        self.assertIsInstance(dnode.op, HamiltonianGate)\n        self.assertEqual(dnode.qargs, tuple(qc.qubits))\n        assert_allclose(dnode.op.to_matrix(), np.eye(2))\n\n    def test_2q_hamiltonian(self):\n        \"\"\"test 2 qubit hamiltonian\"\"\"\n        qr = QuantumRegister(2)\n        cr = ClassicalRegister(2)\n        qc = QuantumCircuit(qr, cr)\n        matrix = Operator.from_label(\"XY\")\n        qc.x(qr[0])\n        theta = Parameter(\"theta\")\n        uni2q = HamiltonianGate(matrix, theta)\n        qc.append(uni2q, [qr[0], qr[1]])\n        qc2 = qc.assign_parameters({theta: -np.pi / 2})\n        dag = circuit_to_dag(qc2)\n        nodes = dag.two_qubit_ops()\n        self.assertEqual(len(nodes), 1)\n        dnode = nodes[0]\n        self.assertIsInstance(dnode.op, HamiltonianGate)\n        self.assertEqual(dnode.qargs, (qr[0], qr[1]))\n        # Equality based on Pauli exponential identity\n        np.testing.assert_array_almost_equal(dnode.op.to_matrix(), 1j * matrix.data)\n        qc3 = dag_to_circuit(dag",
+      "metadata": {
+        "section_title": "test_hamiltonian_gate.py",
+        "source_file": "test\\python\\circuit\\test_hamiltonian_gate.py",
+        "section_id": "part_1",
+        "package": "qiskit"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "qubit"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "0.6_c_qubit_converter__b2ad6fe9af7ffae9b09fd8e83744238a__part_4__4",
+      "text": " -0.22575349 * ZIII\n    +0.16614543 * ZIIZ\n    +0.17464343 * ZIZI\n    +0.12091263 * ZZII\n\nThis is likely what you were doing when you were working with any of the following mappers:\n\n- :class:`~qiskit_nature.second_q.mappers.JordanWignerMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevSuperFastMapper`\n- :class:`~qiskit_nature.second_q.mappers.DirectMapper`\n- :class:`~qiskit_nature.second_q.mappers.LinearMapper`\n- :class:`~qiskit_nature.second_q.mappers.LogarithmicMapper`\n\nThe ParityMapper\n----------------\n\nHowever, when you were using the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, you were\nable to use the ``two_qubit_reduction=True`` option of the\n:class:`~qiskit_nature.second_q.mappers.QubitConverter`. This ability, which has always been unique\nto the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, is now directly built into said\nmapper. So if you were doing something along these lines:\n\n.. code:: ipython3\n\n   from qiskit_nature.second_q.mappers import ParityMapper\n\n   converter = QubitConverter(ParityMapper(), two_qubit_reduction=True)\n\n   reduced_op = converter.convert(hamiltonian, num_particles=problem.num_particles)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nThe equivalent code now looks like the following:\n\n.. code:: ipython3\n\n   mapper = ParityMapper(num_particles=problem.num_particles)\n\n   reduced_op = mapper.map(hamiltonian)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nZ2Symmetries\n------------\n\nFinally, the :class:`~qiskit_nature.second_q.mappers.QubitConverter` class also supported further\nreduction of qubit resources by exploiting",
+      "metadata": {
+        "source_file": "docs\\migration\\0.6_c_qubit_converter.rst",
+        "section_id": "part_4",
+        "section_title": "0.6_c_qubit_converter.rst",
+        "package": "qiskit-nature"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "map",
+        "hamiltonian",
+        "qubit"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "test_logarithmic_mapper__8b916249cd214ece431a60ef33993888__part_1__1",
+      "text": "j)])\n\n    spin_op5 = SpinOp({\"X_0\": 4 + 0j}, 0.5, 8) + SpinOp({\"\": 8 + 0j}, 0.5, 8)\n    ref_qubit_op5 = SparsePauliOp([\"IIIIIIIX\", \"IIIIIIII\"], coeffs=[(2.0 + 0j), (8.0 + 0j)])\n\n    spin_op6 = SpinOp({\"Z_0\": -0.875 - 0.075j}, 1, 1)\n    ref_qubit_op6 = SparsePauliOp(\n        [\"II\", \"IZ\", \"ZZ\"], coeffs=[(-0.4375 - 0.0375j), (0.4375 + 0.0375j), (-0.875 - 0.075j)]\n    )\n    ref_qubit_op7 = SparsePauliOp(\n        [\"II\", \"IZ\", \"ZI\"], coeffs=[(-0.4375 - 0.0375j), (-0.4375 - 0.0375j), (-0.875 - 0.075j)]\n    )\n\n    @data(\n        (spin_op1, ref_qubit_op1),\n        (spin_op2, ref_qubit_op2),\n        (spin_op3, ref_qubit_op3),\n        (spin_op4, ref_qubit_op4),\n        (spin_op5, ref_qubit_op5),\n        (spin_op6, ref_qubit_op6, 2),\n        (spin_op6, ref_qubit_op7, 2, False),\n    )\n    @unpack\n    def test_mapping(self, spin_op, ref_qubit_op, padding=1, embed_upper=True):\n        \"\"\"Test mapping to qubit operator\"\"\"\n        mapper = LogarithmicMapper(padding=padding, embed_upper=embed_upper)\n        qubit_op = mapper.map(spin_op)\n        self.assertEqualSparsePauliOp(qubit_op, ref_qubit_op)\n\n    def test_mapping_overwrite_reg_len(self):\n        \"\"\"Test overwriting the register length.\"\"\"\n        op = SpinOp({\"Y_0\": -0.432 + 1.32j}, 0.5, 1)\n        expected = SpinOp({\"Y_0\": -0.432 + 1.32j}, 0.5, 3)\n        mapper = LogarithmicMapper()\n        self.assertEqual(mapper.map(op, register_length=3), mapper.map(expected))\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "source_file": "test\\second_q\\mappers\\test_logarithmic_mapper.py",
+        "section_title": "test_logarithmic_mapper.py",
+        "package": "qiskit-nature",
+        "section_id": "part_1"
+      },
+      "score": 0.9001756234632947,
+      "original_score": 0.89304531085353,
+      "vector_score": 0.89304531085353,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "map",
+        "qubit"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_qsd_synthesis__56d53b17fea9dfd1c1d53341605e250d__part_9__9",
+      "text": "))\n        qc = QuantumCircuit(num_qubits)\n        gate = base_gate.control(num_qubits - 2, annotated=False)\n        qc.append(gate, layout)\n\n        hidden_op = Operator(qc)\n        hidden_mat = hidden_op.data\n\n        qc2 = qsd.qs_decomposition(hidden_mat)\n        cqc2 = transpile(qc2, basis_gates=[\"u\", \"cx\"], optimization_level=0)\n        op2 = Operator(qc2)\n        self.assertTrue(matrix_equal(hidden_op.to_matrix(), op2.to_matrix(), atol=1e-8))\n        self.assertLessEqual(\n            cqc2.count_ops().get(\"cx\", 0),\n            2 * self._qsd_l2_cx_count(num_qubits - 1) + self._qsd_ucrz(num_qubits),\n        )\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "source_file": "test\\python\\synthesis\\test_qsd_synthesis.py",
+        "package": "qiskit",
+        "section_id": "part_9",
+        "section_title": "test_qsd_synthesis.py"
+      },
+      "score": 0.7443418939817384,
+      "original_score": 0.7443418939817384,
+      "vector_score": 0.7443418939817384,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "bksf_lih__0a998911150915e555501f7956b68a04__part_9__9",
+      "text": "0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.07049784 + 0.0j,\n            0.0616872 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00240961 + 0.0j,\n            0.06754287 + 0.0j,\n            0.06017866 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00240961 + 0.0j,\n        ]\n    )\n\n    return SparsePauliOp(pauli_list, coeffs=coeffs)\n\n\nQUBIT_HAMILTONIAN = _qubit_operator()\n",
+      "metadata": {
+        "section_title": "bksf_lih.py",
+        "source_file": "test\\second_q\\mappers\\resources\\bksf_lih.py",
+        "package": "qiskit-nature",
+        "section_id": "part_9"
+      },
+      "score": 0.6838504894008608,
+      "original_score": 0.6838504894008608,
+      "vector_score": 0.6838504894008608,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 110,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      }
+    }
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "query": "What are the key parameters for spin0.5 DMRG effector in itensors?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_ctmrg__d202e1b4009a29577de40ed9d424bafe__full__0",
+      "text": "using ITensors\nusing Test\n\nsrc_dir = joinpath(pkgdir(ITensors), \"examples\", \"src\")\ninclude(joinpath(src_dir, \"ctmrg_isotropic.jl\"))\ninclude(joinpath(src_dir, \"2d_classical_ising.jl\"))\n\n@testset \"ctmrg\" begin\n  # Make Ising model partition function\n  β = 1.1 * βc\n  d = 2\n  s = Index(d, \"Site\")\n  sₕ = addtags(s, \"horiz\")\n  sᵥ = addtags(s, \"vert\")\n\n  T = ising_mpo(sₕ, sᵥ, β)\n\n  χ0 = 1\n  l = Index(χ0, \"Link\")\n  lₕ = addtags(l, \"horiz\")\n  lᵥ = addtags(l, \"vert\")\n\n  # Initial CTM\n  Cₗᵤ = ITensor(lᵥ, lₕ)\n  Cₗᵤ[1, 1] = 1.0\n\n  # Initial HRTM\n  Aₗ = ITensor(lᵥ, lᵥ', sₕ)\n  Aₗ[lᵥ => 1, lᵥ' => 1, sₕ => 1] = 1.0\n  Aₗ[lᵥ => 1, lᵥ' => 1, sₕ => 2] = 0.0\n\n  Cₗᵤ, Aₗ = ctmrg(T, Cₗᵤ, Aₗ; χmax=20, nsteps=100)\n\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = noncommoninds(Cₗᵤ, Aₗ)[1]\n\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n\n  ACₗ = Aₗ * Cₗᵤ * dag(Cₗᵤ')\n\n  ACTₗ = prime(ACₗ * dag(Aᵤ') * T * Aᵤ, -1)\n\n  κ = (ACTₗ * dag(ACₗ))[]\n\n  @test κ ≈ exp(-β * ising_free_energy(β))\n\n  # Calculate magnetization\n  Tsz = ising_mpo(sₕ, sᵥ, β; sz=true)\n  ACTszₗ = prime(ACₗ * dag(Aᵤ') * Tsz * Aᵤ, -1)\n  m = (ACTszₗ * dag(ACₗ))[] / κ\n  @test abs(m) ≈ ising_magnetization(β)\nend\n",
+      "metadata": {
+        "source_file": "test\\base\\test_ctmrg.jl",
+        "package": "itensors",
+        "section_id": "full",
+        "section_title": "test_ctmrg.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "test_dmrg__331a78ba2f4acb4c4da3149efdb573bc__part_0__0",
+      "text": "using ITensors, Test, Random\nusing ITensorMPS: dmrg, nsite, set_nsite!, siteinds, site_range\n\n@testset \"Basic DMRG\" begin\n  @testset \"Spin-one Heisenberg\" begin\n    N = 10\n    sites = siteinds(\"S=1\", N)\n\n    os = OpSum()\n    for j in 1:(N - 1)\n      add!(os, \"Sz\", j, \"Sz\", j + 1)\n      add!(os, 0.5, \"S+\", j, \"S-\", j + 1)\n      add!(os, 0.5, \"S-\", j, \"S+\", j + 1)\n    end\n    H = MPO(os, sites)\n\n    psi = random_mps(sites)\n\n    sweeps = Sweeps(3)\n    @test length(sweeps) == 3\n    maxdim!(sweeps, 10, 20, 40)\n    mindim!(sweeps, 1, 10)\n    cutoff!(sweeps, 1E-11)\n    noise!(sweeps, 1E-10)\n    str = split(sprint(show, sweeps), '\\n')\n    @test length(str) > 1\n    energy, psi = dmrg(H, psi, sweeps; outputlevel=0)\n    @test energy < -12.0\n  end\n\n  @testset \"QN-conserving Spin-one Heisenberg\" begin\n    N = 10\n    sites = siteinds(\"S=1\", N; conserve_qns=true)\n\n    os = OpSum()\n    for j in 1:(N - 1)\n      os += \"Sz\", j, \"Sz\", j + 1\n      os += 0.5, \"S+\", j, \"S-\", j + 1\n      os += 0.5, \"S-\", j, \"S+\", j + 1\n    end\n    H = MPO(os, sites)\n\n    state = [isodd(n) ? \"Up\" : \"Dn\" for n in 1:N]\n    psi = random_mps(sites, state; linkdims=4)\n\n    sweeps = Sweeps(3)\n    @test length(sweeps) == 3\n    maxdim!(sweeps, 10, 20, 40)\n    mindim!(sweeps, 1, 10)\n    cutoff!(sweeps, 1E-11)\n    noise!(sweeps, 1E-10)\n    str = split(sprint(show, sweeps), '\\n')\n    @test length(str) > 1\n    energy, psi = dmrg(H, psi, sweeps; outputlevel=0)\n    @test energy < -12.0\n",
+      "metadata": {
+        "section_title": "test_dmrg.jl",
+        "section_id": "part_0",
+        "package": "itensormps",
+        "source_file": "test\\base\\test_dmrg.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "dmrg",
+        "itensors"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__root_0__0",
+      "text": "ITensor is a library for rapidly creating correct and efficient tensor network algorithms.\nThe source code for ITensors.jl can be found on Github .\nAdditional documentation can be found on the ITensor website itensor.org .\nAn ITensor is a tensor whose interface is independent of its memory layout. ITensor indices are objects which carry extra information and which 'recognize' each other (compare equal to each other).\nThe ITensorMPS.jl library includes composable and extensible algorithms for optimizing and transforming tensor networks, such as matrix product state and matrix product operators, such as the DMRG algorithm. If you are looking for information on running finite MPS/MPO calculations such as DMRG, take a look at the ITensorMPS.jl documentation .",
+      "metadata": {
+        "section_title": "ROOT",
+        "package": "itensors",
+        "section_id": "root",
+        "source_file": "docs\\build\\index.html"
+      },
+      "score": 0.8427707836783147,
+      "original_score": 0.7633108571501512,
+      "vector_score": 0.5983586114584997,
+      "bm25_score": 0.6598089827666065,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "are",
+        "dmrg",
+        "itensors"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG"
+      },
+      "score": 0.7983392535268112,
+      "original_score": 0.7204702524134018,
+      "vector_score": 0.7204702524134018,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "dmrg"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "section_id": "h2_2",
+        "package": "itensormps",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "source_file": "docs\\src\\examples\\DMRG.md"
+      },
+      "score": 0.7342089658993584,
+      "original_score": 0.7181004183781073,
+      "vector_score": 0.7181004183781075,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "dmrg",
+        "itensors"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 117,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

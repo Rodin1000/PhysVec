@@ -1,0 +1,127 @@
+{
+  "query": "NetKet boson number operator and local operators for observables",
+  "package": "netket",
+  "results": [
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_5_5__0",
+      "text": "## 4. Building Operators#\nIn NetKet you can build individual operators acting on a site by calling the following functions:\n```code\nsx_1\n=\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\n1\n)\nsy_2\n=\nnk\n.\noperator\n.\nspin\n.\nsigmay\n(\nhi\n,\n2\n)\nsz_2\n=\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\n2\n)\n```\nThe functions in nk.operator.spin and nk.operator.boson are used to create the fundamental operators that can be used to build arbitrary observables and Hamiltonians.\nThose functions return an object of type LocalOperator , which behaves as some sort of sparse matrix optimized for Variational Monte Carlo.\nNote\nA LocalOperator can efficiently represent only operators that have a small domain in the computational basis: this means that an operator acting on 1 or 2 qubits will be efficiently represented, but one that acts on many qubits at once will not be.\nA LocalOperator can be printed and has the following representation:\n```code\nprint\n(\nsx_1\n)\n```\n```code\nLocalOperator(dim=16, acting_on=[(1,)], constant=0.0, dtype=float64)\n```\nThe information tells you that:\ndim : The hilbert space has 16 local degrees of freedom\ndim : The hilbert space has 16 local degrees of freedom\nacting_on : this specific operator is composed by terms that act on the single site 1\nacting_on : this specific operator is composed by terms that act on the single site 1\nconstant : this is a diagonal shift proportional to the identity. In this case it is 0\nconstant : this is a diagonal shift proportional to the identity. In this case it is 0\ndtype : the numpy data-type of the matrix elements\ndtype : the numpy data-type of the matrix elements",
+      "metadata": {
+        "section_title": "4. Building Operators#",
+        "section_id": "sec_5",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "package": "netket"
+      },
+      "score": 0.9012110013153141,
+      "original_score": 0.829253582520296,
+      "vector_score": 0.8004064072995669,
+      "bm25_score": 0.9446422834032121,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "netket",
+        "boson",
+        "operator",
+        "local",
+        "operators",
+        "observables"
+      ],
+      "match_ratio": 0.8571428571428571,
+      "is_html": true
+    },
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_3_3__1",
+      "text": ",  1,  1, -1,  1,  1, -1,  1, -1, -1,\n         1,  1, -1, -1]], dtype=int8)\n```\nWe now need to specify the Hamiltonian. For this purpose, we will use NetKet’s LocalOperator (see details here ) which is the sum of arbitrary k-local operators.\nIn this specific case, we have a 1-local operator, \\( \\sigma^{(x)}_i \\) and a 2-local operator, \\( \\sigma^{(z)}_i \\sigma^{(z)}_j \\) . We then start importing the pauli operators.\n```code\nfrom\nnetket.operator.spin\nimport\nsigmax\n,\nsigmaz\n```\nWe now take \\( \\Gamma=-1 \\) and start defining the 1-local parts of the Hamiltonian\n```code\nGamma\n=\n-\n1\nH\n=\nsum\n([\nGamma\n*\nsigmax\n(\nhi\n,\ni\n)\nfor\ni\nin\nrange\n(\nN\n)])\n```\nHere we have used a list comprehension to (mildly) show off our ability to write one-liners, however you could have just added the terms one by one in an explicit loop instead (though you’d end up with a whopping 3 lines of code).\nWe now also add the interaction terms, using the fact that NetKet automatically recognizes products of local operators as tensor products.\n```code\nV\n=\n-\n1\nH\n+=\nsum\n([\nV\n*\nsigmaz\n(\nhi\n,\ni\n)\n@\nsigmaz\n(\nhi\n,\n(\ni\n+\n1\n)\n%\nN\n)\nfor\ni\nin\nrange\n(\nN\n)])\n```\nIn general, when manipulating NetKet objects, you should always assume that you can safely operate on them like\nyou would in mathematical equations, therefore you can sum and multiply them with ease.",
+      "metadata": {
+        "section_title": "1. Defining The Hamiltonian#",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html",
+        "section_id": "sec_3",
+        "package": "netket"
+      },
+      "score": 0.8900808117516068,
+      "original_score": 0.8270934117441007,
+      "vector_score": 1.0,
+      "bm25_score": 0.13546705872050332,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "operator",
+        "local",
+        "operators"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "operator__fc21a85c49525650881240f92b1f78cc__sec_4_4__0",
+      "text": "## Pre-defined operators#\nThose are easy-to-use constructors for a LocalOperator .\nboson.create\nBuilds the boson creation operator \\(\\hat{a}^\\dagger\\) acting on the site -th of the Hilbert space hilbert .\nboson.destroy\nBuilds the boson destruction operator \\(\\hat{a}\\) acting on the site -th of the Hilbert space hilbert .\nboson.identity\nBuilds the \\(\\mathbb{I}\\) identity operator.\nboson.number\nBuilds the number operator \\(\\hat{a}^\\dagger\\hat{a}\\) acting on the site -th of the Hilbert space hilbert .\nboson.proj\nBuilds the projector operator \\(|n\\rangle\\langle n |\\) acting on the site -th of the Hilbert space hilbert and collapsing on the state with n bosons.\nspin.identity\nBuilds the \\(\\mathbb{I}\\) identity operator.\nspin.sigmax\nBuilds the \\(\\sigma^x\\) operator acting on the site -th of the Hilbert space hilbert .\nspin.sigmay\nBuilds the \\(\\sigma^y\\) operator acting on the site -th of the Hilbert space hilbert .\nspin.sigmaz\nBuilds the \\(\\sigma^z\\) operator acting on the site -th of the Hilbert space hilbert .\nspin.sigmap\nBuilds the \\(\\sigma^{+} = \\frac{1}{2}(\\sigma^x + i \\sigma^y)\\) operator acting on the site -th of the Hilbert space hilbert .\nspin.sigmam\nBuilds the \\(\\sigma^{-} = \\frac{1}{2}(\\sigma^x - i \\sigma^y)\\) operator acting on the site -th of the Hilbert space hilbert .\nfermion.create\nBuilds the fermion creation operator \\(\\hat{a}^\\dagger\\) acting on the site -th of the Hilbert space hilbert .\nfermion.destroy\nBuilds the fermion destruction operator \\(\\hat{a}\\) acting on the site -th of the Hilbert space hilbert .\nfermion.number\nBuilds the number operator \\(\\hat{a}^\\dagger\\hat{a}\\) acting on the site -th of the Hilbert space hilbert .",
+      "metadata": {
+        "section_title": "Pre-defined operators#",
+        "section_id": "sec_4",
+        "source_file": "docs\\_build\\html\\api\\operator.html",
+        "package": "netket"
+      },
+      "score": 0.6657924793938406,
+      "original_score": 0.47428030466446824,
+      "vector_score": 0.3737953996207075,
+      "bm25_score": 0.8762199248395114,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "boson",
+        "number",
+        "operator",
+        "operators"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "changelog__775627bff97fcf0367c7035d3e792e5f__sec_15_15__0",
+      "text": "## NetKet 3.13 (11 July 2024)#\nAdded the observable netket.experimental.observable.VarianceObservable() to compute the value and the gradient of the variance of an arbitrary quantum operator #1687 .\nAdded the observable netket.experimental.observable.VarianceObservable() to compute the value and the gradient of the variance of an arbitrary quantum operator #1687 .\nAdded the function netket.jax.tree_norm() to compute the L-p norm of a PyTree, interpreted as a vector of values, without concatenating or ravelling the leaves #1819 .\nAdded the function netket.jax.tree_norm() to compute the L-p norm of a PyTree, interpreted as a vector of values, without concatenating or ravelling the leaves #1819 .\nThe default value of n_discard_per_chain has been changed to 5, which is a more reasonable number in most cases. It might be low for some applications.\nThe default value of n_discard_per_chain has been changed to 5, which is a more reasonable number in most cases. It might be low for some applications.\nThe sampler netket.sampler.MetropolisSampler and all its derivatives now support chunking for the evaluation of the wavefunction at every Metropolis step #1828 .\nThe sampler netket.sampler.MetropolisSampler and all its derivatives now support chunking for the evaluation of the wavefunction at every Metropolis step #1828 .\nAdd a new function netket.hilbert.DiscreteHilbert.local_indices_to_states() to convert integer indices to local configurations #1833 .\nAdd a new function netket.hilbert.DiscreteHilbert.local_indices_to_states() to convert integer indices to local configurations #1833 .\nSupport NetKet’s own linear solvers in netket.experimental.driver.VMC_SRt #1830 .\nSupport NetKet’s own linear solvers in netket.experimental.driver.VMC_SRt #1830 .\nFollowing the discovery and fix of the Parallel Tempering bugs, netket.experimental.sampler.MetropolisPt and related samplers have been stabilised, so they should be constructed with netket.sampler.ParallelTemperingSampler #1803 .\nFollowing the discovery and fix of the Parallel Tempering bugs, netket.experimental.sampler.MetropolisPt and related samplers have been stabilised, so they should be constructed with netket.sampler.ParallelTemperingSampler #1803 .\nDrivers now always log Monte Carlo acceptance if you are using a Monte Carlo sampler #1816 .\nDrivers now always log Monte Carlo acceptance if you are using a Monte Carlo sampler #1816 .\nnetket.sampler.rules.ExchangeRule now only proposes exchanges where the local degrees of freedom changes #1815 .\nnetket.sampler.rules.ExchangeRule now only proposes exchanges where the local degrees of freedom changes #1815 .\nAll solvers within netket.optimizer.solver now automatically return a partial capturing keyword arguments such as rtol and rcond",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\changelog.html",
+        "section_id": "sec_15",
+        "section_title": "NetKet 3.13 (11 July 2024)#"
+      },
+      "score": 0.6314765471279102,
+      "original_score": 0.4203001864933419,
+      "vector_score": 0.5253752331166773,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "number",
+        "operator",
+        "local"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__T_21__9",
+      "text": ".ParticleNumberAndSpinConservingFermioperator2nd method) (netket.experimental.operator.ParticleNumberConservingFermioperator2nd method) (netket.operator._fermion2nd.FermionOperator2ndBase method) (netket.operator._ising.IsingBase method) (netket.operator._local_operator.LocalOperatorBase method) (netket.operator._pauli_strings.PauliStringsBase method) (netket.operator._prod.ProductDiscreteJaxOperator method) (netket.operator._prod.ProductDiscreteOperator method) (netket.operator._sum.SumDiscreteJaxOperator method) (netket.operator._sum.SumDiscreteOperator method) (netket.operator.AbstractSuperOperator method) (netket.operator.BoseHubbardJax method) (netket.operator.BoseHubbardNumba method) (netket.operator.DiscreteJaxOperator method) (netket.operator.DiscreteOperator method) (netket.operator.FermionOperator2ndJax method) (netket.operator.FermionOperator2ndNumba method) (netket.operator.IsingJax method) (netket.operator.IsingNumba method) (netket.operator.LocalLiouvillian method) (netket.operator.LocalOperatorJax method) (netket.operator.LocalOperatorNumba method) (netket.operator.PauliStringsJax method) (netket.operator.PauliStringsNumba method) (netket.operator.permutation.PermutationOperator method) (netket.operator.permutation.PermutationOperatorFermion method)\n(netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd method)\n(netket.experimental.operator.ParticleNumberConservingFermioperator2nd method)\n(netket.operator._fermion2nd.FermionOperator2ndBase method)\n(netket.operator._ising.IsingBase method)\n(netket.operator._local_operator.LocalOperatorBase method)\n(netket.operator._pauli_strings.PauliStringsBase method)\n(netket.operator._prod.ProductDiscreteJaxOperator method)\n(netket.operator._prod.ProductDiscreteOperator method)\n(netket.operator._sum.SumDiscreteJaxOperator method)\n(netket.operator._sum.SumDiscreteOperator method)\n(netket.operator.AbstractSuperOperator method)\n(netket.operator.BoseHubbardJax method)\n(netket.operator.BoseHubbardNumba method)\n(netket.operator.DiscreteJaxOperator method)\n(netket.operator.DiscreteOperator method)\n(netket.operator.FermionOperator2ndJax method)\n(netket.operator.FermionOperator2ndNumba method)\n(netket.operator.IsingJax method)\n(netket.operator.IsingNumba method)\n(netket.operator.LocalLiouvillian method)\n(netket.operator.LocalOperatorJax method)\n(netket.operator.LocalOperatorNumba method)\n(netket.operator.PauliStringsJax method)\n(netket.operator.PauliStrings",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\genindex.html",
+        "section_id": "T",
+        "section_title": "T"
+      },
+      "score": 0.6028343136939172,
+      "original_score": 0.4267711744035918,
+      "vector_score": 0.5334639680044897,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "operator"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 53,
+    "final_results_count": 5
+  }
+}

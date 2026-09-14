@@ -1,0 +1,136 @@
+{
+  "query": "Construct PauliSumOp Hamiltonian for IQPE input and ensure Hermiticity.",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "hamiltonian_phase_estimation__fe09fa7dc716801664052a1a15ef8c76__part_3__3",
+      "text": " Hermitian operator. The allowed types are ``Pauli`` and ``SparsePauliOp``.\n            state_preparation: The state to be prepared, whose eigenphase will be\n                measured. If this parameter is omitted, no preparation circuit will be run and\n                input state will be the all-zero state in the computational basis.\n            evolution: An evolution synthesis class.\n            bound: An upper bound on the absolute value of the eigenvalues of\n                ``hamiltonian``. If omitted, then ``hamiltonian`` must be a SparsePauliOp,\n                in which case a bound will be computed. The tighter the bound,\n                the higher the resolution of computed phases.\n\n        Returns:\n            ``HamiltonianPhaseEstimationResult`` instance containing the result of the estimation\n            and diagnostic information.\n\n        Raises:\n            TypeError: If ``evolution`` is not of type ``EvolutionSynthesis``.\n            TypeError: If ``hamiltonian`` type is not ``Pauli`` or ``SparsePauliOp``.\n            ValueError: If ``bound`` is ``None`` and ``hamiltonian`` is not a Pauli sum.\n        \"\"\"\n        if evolution is not None and not isinstance(evolution, EvolutionSynthesis):\n            raise TypeError(f\"Expecting type EvolutionSynthesis, got {type(evolution)}\")\n\n        if not isinstance(hamiltonian, (Pauli, SparsePauliOp)):\n            raise TypeError(\n                f\"Expecting Hamiltonian type Pauli, SparsePauliOp, \" f\"got {type(hamiltonian)}.\"\n            )\n\n        if isinstance(state_preparation, Statevector):\n            circuit = QuantumCircuit(state_preparation.num_qubits)\n            circuit.prepare_state(state_preparation.data)\n            state_preparation = circuit\n\n        if isinstance(hamiltonian, SparsePauliOp):\n            id_coefficient, hamiltonian_no_id = _remove_identity(hamiltonian)\n        else:\n            id_coefficient = 0.0\n            hamiltonian_no_id = hamiltonian\n\n        pe_scale = self._get_scale(hamiltonian_no_id, bound)\n        unitary = self._get_unitary(hamiltonian_no_id, pe_scale, evolution)\n\n        # run phase estimation\n        phase_estimation_result = self._phase_estimation.estimate(\n            unitary=unitary, state_preparation=state_preparation\n        )\n        return HamiltonianPhaseEstimationResult(\n            phase_estimation_result=phase_estimation_result,\n            id_coefficient=id_coefficient,\n            phase_estimation_scale=pe_scale,\n        )\n\n\ndef _remove_identity(pauli_sum: SparsePauliOp):\n    \"\"\"Remove any identity operators from ``pauli_sum``. Return\n    the sum of the coefficients of the identities and the new operator.\n    \"\"\"\n\n    def _get_identity(size):\n        identity = SparsePauliOp(\"I\")\n        for _",
+      "metadata": {
+        "section_title": "hamiltonian_phase_estimation.py",
+        "source_file": "qiskit_algorithms\\phase_estimators\\hamiltonian_phase_estimation.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_3"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.6355351597935825,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "input"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "save_expectation_value__505a2fbfaf4535f642f642cbc73291b5__part_1__1",
+      "text": "        if isinstance(operator, Pauli):\n            operator = SparsePauliOp(operator)\n        elif not isinstance(operator, SparsePauliOp):\n            operator = SparsePauliOp.from_operator(Operator(operator))\n        if not allclose(operator.coeffs.imag, 0):\n            raise ValueError(\"Input operator is not Hermitian.\")\n        params = _expval_params(operator, variance=False)\n        super().__init__(\n            \"save_expval\",\n            operator.num_qubits,\n            label,\n            unnormalized=unnormalized,\n            pershot=pershot,\n            conditional=conditional,\n            params=params,\n        )\n\n\nclass SaveExpectationValueVariance(SaveAverageData):\n    \"\"\"Save expectation value and variance of an operator.\"\"\"\n\n    def __init__(\n        self,\n        operator,\n        label=\"expectation_value_variance\",\n        unnormalized=False,\n        pershot=False,\n        conditional=False,\n    ):\n        r\"\"\"Instruction to save the expectation value and variance of a Hermitian operator.\n\n        The expectation value of a Hermitian operator :math:`H` for a\n        simulator in quantum state :math`\\rho`is given by\n        :math:`\\langle H\\rangle = \\mbox{Tr}[H.\\rho]`. The variance is given by\n        :math:`\\sigma^2 = \\langle H^2 \\rangle - \\langle H \\rangle>^2`.\n\n        Args:\n            operator (Pauli or SparsePauliOp or Operator): a Hermitian operator.\n            label (str): the key for retrieving saved data from results.\n            unnormalized (bool): If True return save the unnormalized accumulated\n                                 or conditional accumulated expectation value\n                                 over all shot [Default: False].\n            pershot (bool): if True save a list of expectation values for each shot\n                            of the simulation rather than the average over\n                            all shots [Default: False].\n            conditional (bool): if True save the average or pershot data\n                                conditional on the current classical register\n                                values [Default: False].\n\n        Raises:\n            ValueError: if the input operator is not Hermitian.\n            TypeError: if the input operator is of invalid type.\n\n        .. note::\n\n            This instruction can be directly appended to a circuit using\n            the :func:`save_expectation_value` circuit method.\n        \"\"\"\n        # Convert O to SparsePauliOp representation\n        if isinstance(operator, Pauli):\n            operator = SparsePauliOp(operator)\n        elif not isinstance(operator, SparsePauliOp):\n            operator = SparsePauliOp.from_operator(Operator(operator))\n        if not allclose(operator.coeffs.imag, 0):\n            raise ValueError(\"Input operator is not Hermitian.\")\n        params = _expval_params(operator, variance=True)\n        super().__init__(\n            \"save_expval_var\",\n            operator.num_qubits,\n            label,\n            unnormalized=unnormalized,\n            pershot=pershot,\n",
+      "metadata": {
+        "section_id": "part_1",
+        "source_file": "qiskit_aer\\library\\save_instructions\\save_expectation_value.py",
+        "package": "qiskit-aer",
+        "section_title": "save_expectation_value.py"
+      },
+      "score": 0.8968857180129635,
+      "original_score": 0.8938529450133448,
+      "vector_score": 0.9974288177581823,
+      "bm25_score": 0.15377148326167012,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "input"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "pauli_feature_map__6f7e92c3780acb5d121d84f7e80c067c__part_3__3",
+      "text": "�───┘└─────────────┘└───┘└───┘└────────────────────────────────┘└───┘└───┘\n\n        >>> prep = pauli_feature_map(2, reps=1, paulis=[\"ZY\"])\n        >>> print(prep)\n             ┌───┐┌──────────┐                                            ┌───────────┐\n        q_0: ┤ H ├┤ RX(pi/2) ├──■──────────────────────────────────────■──┤ RX(-pi/2) ├\n             ├───┤└──────────┘┌─┴─┐┌────────────────────────────────┐┌─┴─┐└───────────┘\n        q_1: ┤ H ├────────────┤ X ├┤ P(2.0*(pi - x[0])*(pi - x[1])) ├┤ X ├─────────────\n             └───┘            └───┘└────────────────────────────────┘└───┘\n\n        >>> from qiskit.circuit.library import efficient_su2\n        >>> prep = pauli_feature_map(3, reps=3, paulis=[\"Z\", \"YY\", \"ZXZ\"])\n        >>> wavefunction = efficient_su2(3)\n        >>> classifier = prep.compose(wavefunction)\n        >>> classifier.num_parameters\n        27\n        >>> classifier.count_ops()\n        OrderedDict([('cx', 39), ('rx', 36), ('u1', 21), ('h', 15), ('ry', 12), ('rz', 12)])\n\n    References:\n\n    [1] Havlicek et al. Supervised learning with quantum enhanced feature spaces,\n    `Nature 567, 209-212 (2019) <https://www.nature.com/articles/s41586-019-0980-2>`__.\n    \"\"\"\n    # create parameter vector used in the Pauli feature map\n    parameters = ParameterVector(parameter_prefix, feature_dimension)\n\n    # the Rust implementation expects the entanglement to be a str or list[tuple[int]] (or the\n    # callable to return these types), therefore we normalize the entanglement here\n    if callable(entanglement):\n        normalized = lambda offset: _normalize_entanglement(entanglement(offset))\n    else:\n        normalized = _normalize_entanglement(entanglement)\n\n    # construct from Rust\n    circuit = QuantumCircuit._from_circuit_data(\n        _fast_map(\n            feature_dimension,\n            paulis=paulis,\n            entanglement=normalized,\n            reps=reps,\n            parameters=parameters,\n            data_map_func=data_map_func,\n            alpha=alpha,\n            insert_barriers=insert_barriers,\n        ),\n",
+      "metadata": {
+        "section_title": "pauli_feature_map.py",
+        "source_file": "qiskit\\circuit\\library\\data_preparation\\pauli_feature_map.py",
+        "section_id": "part_3",
+        "package": "qiskit"
+      },
+      "score": 0.8668164535293051,
+      "original_score": 0.8628992903978141,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "construct"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "bksf_lih__0a998911150915e555501f7956b68a04__part_9__9",
+      "text": "0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00292783 + 0.0j,\n            0.07049784 + 0.0j,\n            0.0616872 + 0.0j,\n            0.00240961 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00515959 + 0.0j,\n            0.00240961 + 0.0j,\n            0.06754287 + 0.0j,\n            0.06017866 + 0.0j,\n            0.00292783 + 0.0j,\n            0.00240961 + 0.0j,\n        ]\n    )\n\n    return SparsePauliOp(pauli_list, coeffs=coeffs)\n\n\nQUBIT_HAMILTONIAN = _qubit_operator()\n",
+      "metadata": {
+        "source_file": "test\\second_q\\mappers\\resources\\bksf_lih.py",
+        "package": "qiskit-nature",
+        "section_id": "part_9",
+        "section_title": "bksf_lih.py"
+      },
+      "score": 0.8628992903978141,
+      "original_score": 0.8628992903978141,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "ref_pauli_lindblad_noise__c38f425f3569fd3486bd7143ac9dd397__part_3__3",
+      "text": "():\n    \"\"\"Local Pauli reset error noise models\"\"\"\n    noise_models = []\n\n    # 25% all-qubit Pauli error on reset\n    error = PauliLindbladError([\"X\"], [_pauli_rate(0.25)])\n    noise_model = NoiseModel()\n    noise_model.add_all_qubit_quantum_error(error, \"reset\")\n    noise_models.append(noise_model)\n\n    # 25% local Pauli error on reset of qubit 1\n    error = PauliLindbladError([\"X\"], [_pauli_rate(0.25)])\n    noise_model = NoiseModel()\n    noise_model.add_quantum_error(error, \"reset\", [1])\n    noise_models.append(noise_model)\n\n    return noise_models\n\n\ndef pauli_lindblad_reset_error_counts(shots, hex_counts=True):\n    \"\"\"Local Pauli reset error circuits reference counts\"\"\"\n    counts_lists = []\n\n    # 25% all-qubit Pauli error on reset\n    counts = [9 * shots / 16, 3 * shots / 16, 3 * shots / 16, shots / 16]\n    counts_lists.append(counts)\n\n    # 25% local Pauli error on reset of qubit 1\n    counts = [3 * shots / 4, 0, shots / 4, 0]\n    counts_lists.append(counts)\n\n    # Convert to counts dict\n    return [list2dict(i, hex_counts) for i in counts_lists]\n",
+      "metadata": {
+        "package": "qiskit-aer",
+        "section_id": "part_3",
+        "section_title": "ref_pauli_lindblad_noise.py",
+        "source_file": "test\\terra\\reference\\ref_pauli_lindblad_noise.py"
+      },
+      "score": 0.8628992903978141,
+      "original_score": 0.8628992903978141,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 222,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

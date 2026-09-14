@@ -1,0 +1,138 @@
+{
+  "query": "ITensors tJ model Hamiltonian MPO construction efficiency for DMRG",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "ContractionSequenceOptimization__05483b41a4520c7282852510770443ad__h1_0_0__0",
+      "text": "When contracting a tensor network, the sequence of contraction makes a big difference in the computational cost. However, the complexity of determining the optimal sequence grows exponentially with the number of tensors, but there are many heuristic algorithms available for computing optimal sequences for small networks[^1][^2][^3][^4][^5][^6]. ITensors.jl imports functionality from [TensorOperations.jl](https://github.com/Jutho/TensorOperations.jl) for helping you find the optimal contraction sequence for small tensor network, as we will show below.\n[^1]: [Faster identification of optimal contraction sequences for tensor networks](https://arxiv.org/abs/1304.6112)\n[^2]: [Improving the efficiency of variational tensor network algorithms](https://arxiv.org/abs/1310.8023)\n[^3]: [Simulating quantum computation by contracting tensor networks](https://arxiv.org/abs/quant-ph/0511069)\n[^4]: [Towards a polynomial algorithm for optimal contraction sequence of tensor networks from trees](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.100.043309)\n[^5]: [Algorithms for Tensor Network Contraction Ordering](https://arxiv.org/abs/2001.08063)\n[^6]: [Hyper-optimized tensor network contraction](https://arxiv.org/abs/2002.01935)",
+      "metadata": {
+        "section_id": "h1_0",
+        "section_title": "Contraction sequence optimization",
+        "source_file": "docs\\src\\ContractionSequenceOptimization.md",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.07509040251681204,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "efficiency"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_5_5__0",
+      "text": "One version of the ITensor `dmrg` function accepts an array of MPOs\n`[H1,H2,H3]` (or any number of MPOs you want). This version of DMRG\nwill find the ground state of `H1+H2+H3`. Internally it does not\nactually sum these MPOs, but loops over them during each step of\nthe \"eigensolver\" at the core of the DMRG algorithm, so it is usually\nmore efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs `H1`, `H2`, and `H3`.\nThen call DMRG like this:\n```julia\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "section_id": "h2_5",
+        "package": "itensormps"
+      },
+      "score": 0.9826262695106671,
+      "original_score": 0.9815733161476773,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "mpo",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "index__1de0221505bf56b6e61f33e29f10859a__Example-DMRG-Calculation_3__0",
+      "text": "## Example DMRG Calculation\nDMRG is an iterative algorithm for finding the dominant eigenvector of an exponentially large, Hermitian matrix. It originates in physics with the purpose of finding eigenvectors of Hamiltonian (energy) matrices which model the behavior of quantum systems.\n```code\nusing ITensors, ITensorMPS\nlet\n  # Create 100 spin-one indices\n  N = 100\n  sites = siteinds(\"S=1\", N)\n\n  # Input operator terms which define\n  # a Hamiltonian matrix, and convert\n  # these terms to an MPO tensor network\n  # (here we make the 1D Heisenberg model)\n  os = OpSum()\n  for j in 1:(N - 1)\n    os += \"Sz\", j, \"Sz\", j + 1\n    os += 0.5, \"S+\", j, \"S-\", j + 1\n    os += 0.5, \"S-\", j, \"S+\", j + 1\n  end\n  H = MPO(os, sites)\n\n  # Create an initial random matrix product state\n  psi0 = random_mps(sites)\n\n  # Plan to do 5 passes or 'sweeps' of DMRG,\n  # setting maximum MPS internal dimensions\n  # for each sweep and maximum truncation cutoff\n  # used when adapting internal dimensions:\n  nsweeps = 5\n  maxdim = [10, 20, 100, 100, 200]\n  cutoff = 1E-10\n\n  # Run the DMRG algorithm, returning energy\n  # (dominant eigenvalue) and optimized MPS\n  energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff)\n  println(\"Final energy = $energy\")\n\n  nothing\nend\n\n# output\n\n# After sweep 1 energy=-137.954199761732 maxlinkdim=9 maxerr=2.43E-16 time=9.356\n# After sweep 2 energy=-138.935058943878 maxlinkdim=20 maxerr=4.97E-06 time=0.671\n# After sweep 3 energy=-138.940080155429 maxlinkdim=92 maxerr=1.00E-10 time=4.522\n# After sweep 4 energy=-138.940086009318 maxlinkdim=100 maxerr=1.05E-10 time=11.644\n# After sweep 5 energy=-138.940086058840 maxlinkdim=96 maxerr=1.00E-10 time=12.771\n# Final energy = -138.94008605883985\n```\n```code\nAfter sweep 1 energy=-137.05349579858472  maxlinkdim=9 maxerr=3",
+      "metadata": {
+        "source_file": "docs\\build\\index.html",
+        "section_title": "Example DMRG Calculation",
+        "section_id": "Example-DMRG-Calculation",
+        "package": "itensormps"
+      },
+      "score": 0.9663501430388727,
+      "original_score": 0.9445767061816727,
+      "vector_score": 0.761601412449598,
+      "bm25_score": 0.802829820003485,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensors",
+        "model",
+        "hamiltonian",
+        "mpo",
+        "dmrg"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "package": "itensormps"
+      },
+      "score": 0.9636484642598185,
+      "original_score": 0.9475338659420061,
+      "vector_score": 0.9653215407899801,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "mpo",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    },
+    {
+      "id": "1d_ising_with_observer__82f90a8d4a7ed5b00346b555230baebb__part_0__0",
+      "text": "# In this example we show how to pass a DMRGObserver to\n# the dmrg function which allows tracking energy convergence and\n# convergence of local operators.\nusing ITensors, ITensorMPS\n\n\"\"\"\n  Get MPO of transverse field Ising model Hamiltonian with field strength h\n\"\"\"\nfunction tfimMPO(sites, h::Float64)\n  # Input operator terms which define a Hamiltonian\n  N = length(sites)\n  os = OpSum()\n  for j in 1:(N - 1)\n    os -= 1, \"Z\", j, \"Z\", j + 1\n  end\n  for j in 1:N\n    os += h, \"X\", j\n  end\n  # Convert these terms to an MPO tensor network\n  return MPO(os, sites)\nend\n\nlet\n  N = 100\n  sites = siteinds(\"S=1/2\", N)\n  psi0 = random_mps(sites; linkdims=10)\n\n  # define parameters for DMRG sweeps\n  nsweeps = 15\n  maxdim = [10, 20, 100, 100, 200]\n  cutoff = [1E-10]\n\n  #=\n  create observer which will measure Sᶻ at each\n  site during the dmrg sweeps and track energies after each sweep.\n  in addition it will stop the computation if energy converges within\n  1E-7 tolerance\n  =#\n  let\n    Sz_observer = DMRGObserver([\"Sz\"], sites; energy_tol=1E-7)\n\n    # we will now run DMRG calculation for different values\n    # of the transverse field and check how local observables\n    # converge to their ground state values\n\n    println(\"Running DMRG for TFIM with h=0.1\")\n    println(\"================================\")\n    H = tfimMPO(sites, 0.1)\n    energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, observer=Sz_observer)\n\n    for (i, Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n      println(\"<Σ Sz> after sweep $i = \", sum(Szs) / N)\n    end\n  end\n\n  let\n    println(\"\\nRunning DMRG for TFIM with h=1.0 (critical point)\")\n    println(\"================================\")\n    Sz_observer = DMRGObserver([\"Sz\"], sites; energy_tol=1E-7)\n    H = tfimMPO(sites, 1.0)\n    energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, observer=Sz_observer)\n\n    for (i, Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n      println(\"<Σ Sz",
+      "metadata": {
+        "source_file": "examples\\dmrg\\1d_ising_with_observer.jl",
+        "package": "itensormps",
+        "section_title": "1d_ising_with_observer.jl",
+        "section_id": "part_0"
+      },
+      "score": 0.92170837568116,
+      "original_score": 0.90865977162802,
+      "vector_score": 0.7482943447036771,
+      "bm25_score": 0.7096933356997551,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensors",
+        "model",
+        "hamiltonian",
+        "mpo",
+        "dmrg"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 102,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 48
+      }
+    }
+  }
+}

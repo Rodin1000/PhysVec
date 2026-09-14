@@ -1,0 +1,128 @@
+{
+  "query": "ITensors dmrg common pitfalls and noise parameter for avoiding local minima",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "matrix_decomposition__5f0366d3a6152a6c1945194a6acb1704__part_14__14",
+      "text": " it has a lower\n       precision). When no truncation is requested `qr` is used for dense\n       ITensors and `svd` for block-sparse ITensors (in the future `qr`\n       will be used also for block-sparse ITensors in this case).\n    + `\"svd\"`: `L = U` and `R = S * V` for `ortho = \"left\"`, `L = U * S`\n       and `R = V` for `ortho = \"right\"`, and `L = U * sqrt.(S)` and\n       `R = sqrt.(S) * V` for `ortho = \"none\"`. To control which `svd`\n       algorithm is choose, use the `svd_alg` keyword argument. See the\n       documentation for `svd` for the supported algorithms, which are the\n       same as those accepted by the `alg` keyword argument.\n    + `\"eigen\"`: `L = U` and ``R = U^{\\\\dagger} A`` where `U` is determined\n       from the eigendecompositon ``A A^{\\\\dagger} = U D U^{\\\\dagger}`` for\n       `ortho = \"left\"` (and vice versa for `ortho = \"right\"`). `\"eigen\"` is\n       not supported for `ortho = \"none\"`.\n    + `\"qr\"`: `L=Q` and `R` an upper-triangular matrix when\n       `ortho = \"left\"`, and `R = Q` and `L` a lower-triangular matrix\n       when `ortho = \"right\"` (currently supported for dense ITensors only).\n      In the future, other decompositions like QR (for block-sparse ITensors),\n      polar, cholesky, LU, etc. are expected to be supported.\n\nFor truncation arguments, see: [`svd`](@ref)\n\"\"\"\nfunction factorize(\n  A::ITensor,\n  Linds...;\n  mindim=nothing,\n  maxdim=nothing,\n  cutoff=nothing,\n  ortho=nothing,\n  tags=nothing,\n  plev=nothing,\n  which_decomp=nothing,\n  # eigen\n  eigen_perturbation=nothing,\n  # svd\n  svd_alg=nothing,\n  use_absolute_cutoff=nothing,\n  use_relative_cutoff=nothing,\n  min_blockdim=nothing,\n  (singular_values!)=nothing,\n  dir=nothing,\n)\n  @debug_check checkflux(A)\n  if !isnothing(eigen_perturbation)\n    if !(isnothing(which_decomp) || which_decomp == \"eigen\")\n      error(\"\"\"when passing a non-trivial eigen_perturbation to `factorize`,\n               the which_decomp keyword argument must be either \"automatic\" or\n               \"eigen\" \"\"\")\n    end\n    which",
+      "metadata": {
+        "section_title": "matrix_decomposition.jl",
+        "source_file": "src\\tensor_operations\\matrix_decomposition.jl",
+        "section_id": "part_14",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_5_5__0",
+      "text": "One version of the ITensor `dmrg` function accepts an array of MPOs\n`[H1,H2,H3]` (or any number of MPOs you want). This version of DMRG\nwill find the ground state of `H1+H2+H3`. Internally it does not\nactually sum these MPOs, but loops over them during each step of\nthe \"eigensolver\" at the core of the DMRG algorithm, so it is usually\nmore efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs `H1`, `H2`, and `H3`.\nThen call DMRG like this:\n```julia\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_id": "h2_5",
+        "package": "itensormps"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "dmrg"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG"
+      },
+      "score": 0.8462138381048475,
+      "original_score": 0.7886907699150577,
+      "vector_score": 0.7886907699150577,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "dmrg"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": true
+    },
+    {
+      "id": "ctmrg_isotropic__3af4213eb7e13bdc1c45eaa2b10337a1__full__0",
+      "text": "using ITensors\n\nfunction ctmrg(T::ITensor, Cₗᵤ::ITensor, Aₗ::ITensor; χmax::Int, cutoff=0.0, nsteps::Int)\n  sₕ = commonind(T, Aₗ)\n  sᵥ = uniqueind(T, Aₗ, Aₗ'; plev=0)\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = uniqueind(Cₗᵤ, Aₗ)\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  Cₗᵤ = dense(Cₗᵤ)\n  for i in 1:nsteps\n    ## Get the grown corner transfer matrix (CTM)\n    Cₗᵤ⁽¹⁾ = Aₗ * Cₗᵤ * Aᵤ * T\n\n    ## Diagonalize the grown CTM\n    # TODO: replace with\n    # eigen(Cₗᵤ⁽¹⁾, \"horiz\" => \"vert\"; tags = \"horiz\" => \"vert\", kwargs...)\n    Cₗᵤ, Uᵥ = eigen(\n      Cₗᵤ⁽¹⁾,\n      (lₕ', sₕ'),\n      (lᵥ', sᵥ');\n      ishermitian=true,\n      cutoff,\n      maxdim=χmax,\n      lefttags=tags(lₕ),\n      righttags=tags(lᵥ),\n    )\n    Cₗᵤ = dense(Cₗᵤ)\n    lᵥ = commonind(Cₗᵤ, Uᵥ)\n    lₕ = uniqueind(Cₗᵤ, Uᵥ)\n\n    # The renormalized CTM is the diagonal matrix of eigenvalues\n    # Normalize the CTM\n    Cₗ = Cₗᵤ * prime(dag(Cₗᵤ), lₕ)\n    normC = (Cₗ * dag(Cₗ))[]^(1 / 4)\n    Cₗᵤ = Cₗᵤ / normC\n\n    # Calculate the renormalized half row transfer matrix (HRTM)\n    Uᵥ = noprime(Uᵥ)\n    Aₗ = Aₗ * Uᵥ * T * dag(Uᵥ')\n    Aₗ = replaceinds(Aₗ, sₕ' => sₕ)\n\n    # Normalize the HRTM\n    ACₗ = Aₗ * Cₗᵤ * prime(dag(Cₗᵤ))\n    normA = √((ACₗ * dag(ACₗ))[])\n    Aₗ = Aₗ / normA\n    Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  end\n  return Cₗᵤ, Aₗ\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "source_file": "examples\\src\\ctmrg_isotropic.jl",
+        "section_id": "full",
+        "section_title": "ctmrg_isotropic.jl"
+      },
+      "score": 0.8271852147016749,
+      "original_score": 0.8232576059448948,
+      "vector_score": 0.8232576059448947,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "test_inference__390a80808ee111f0e281b854c75f14e5__full__0",
+      "text": "using ITensors\nusing ITensors.NDTensors\nusing Test\n\n@testset \"dmrg\" begin\n  N = 10\n  sites = siteinds(\"S=1\", N)\n  opsum = OpSum()\n  for j in 1:(N - 1)\n    opsum += \"Sz\", j, \"Sz\", j + 1\n    opsum += 0.5, \"S+\", j, \"S-\", j + 1\n    opsum += 0.5, \"S-\", j, \"S+\", j + 1\n  end\n  H = MPO(opsum, sites)\n  psi0 = random_mps(sites; linkdims=10)\n  sweeps = Sweeps(5)\n  setmaxdim!(sweeps, 10, 20, 100, 100, 200)\n  setcutoff!(sweeps, 1E-11)\n  @test @inferred(Tuple{Any,MPS}, dmrg(H, psi0, sweeps; outputlevel=0)) isa\n    Tuple{Float64,MPS}\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "test_inference.jl",
+        "package": "itensormps",
+        "source_file": "test\\base\\test_inference.jl"
+      },
+      "score": 0.7335103770990149,
+      "original_score": 0.7211155109175738,
+      "vector_score": 0.7211155109175738,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "dmrg"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 110,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

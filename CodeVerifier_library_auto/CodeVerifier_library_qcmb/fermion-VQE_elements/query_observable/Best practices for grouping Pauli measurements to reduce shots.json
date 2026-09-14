@@ -1,0 +1,139 @@
+{
+  "query": "Best practices for grouping Pauli measurements to reduce shots",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "test_pauli__ca4a3566b31e32c25d92fe8caa71b3ec__part_3__3",
+      "text": ") and np.all(pauli1.x == pauli2.x)\n        self.assertEqual(pauli1.equiv(pauli2), target)\n\n    @data(*pauli_group_labels(1))\n    def test_phase(self, label):\n        \"\"\"Test phase attribute\"\"\"\n        pauli = Pauli(label)\n        _, coeff = _split_pauli_label(str(pauli))\n        target = _phase_from_label(coeff)\n        self.assertEqual(pauli.phase, target)\n\n    @data(*((p, q) for p in [\"I\", \"X\", \"Y\", \"Z\"] for q in range(4)))\n    @unpack\n    def test_phase_setter(self, pauli, phase):\n        \"\"\"Test phase setter\"\"\"\n        pauli = Pauli(pauli)\n        pauli.phase = phase\n        _, coeff = _split_pauli_label(str(pauli))\n        value = _phase_from_label(coeff)\n        self.assertEqual(value, phase)\n\n    def test_x_setter(self):\n        \"\"\"Test phase attribute\"\"\"\n        pauli = Pauli(\"II\")\n        pauli.x = True\n        self.assertEqual(pauli, Pauli(\"XX\"))\n\n    def test_z_setter(self):\n        \"\"\"Test phase attribute\"\"\"\n        pauli = Pauli(\"II\")\n        pauli.z = True\n        self.assertEqual(pauli, Pauli(\"ZZ\"))\n\n    @data(\n        *(\n            (\"IXYZ\", i)\n            for i in [0, 1, 2, 3, slice(None, None, None), slice(None, 2, None), [0, 3], [2, 1, 3]]\n        )\n    )\n    @unpack\n    def test_getitem(self, label, qubits):\n        \"\"\"Test __getitem__\"\"\"\n        pauli = Pauli(label)\n        value = str(pauli[qubits])\n        val_array = np.array(list(reversed(label)))[qubits]\n        target = \"\".join(reversed(val_array.tolist()))\n        self.assertEqual(value, target, msg=f\"indices = {qubits}\")\n\n    @data(\n        (0, \"iY\", \"iIIY\"),\n        ([1, 0], \"XZ\", \"IZX\"),\n        (slice(None, None, None), \"XYZ\", \"XYZ\"),\n        (slice(None, None, -1), \"XYZ\", \"ZYX\"),\n    )\n    @unpack\n    def test_setitem(self, qubits, value, target):\n        \"\"\"Test __setitem__\"\"\"\n        pauli = Pauli(\"III\")\n        pauli[qubits] = value\n        self.assertEqual(str(pauli), target)\n\n    def test_insert(self):\n        \"\"\"Test insert method\"\"\"\n        pauli = Pauli(\"III\")\n        pauli = pauli.insert([2, 0, 4], \"XYZ\")\n        self.assertEqual(str(pauli), \"",
+      "metadata": {
+        "section_title": "test_pauli.py",
+        "source_file": "test\\python\\quantum_info\\operators\\symplectic\\test_pauli.py",
+        "section_id": "part_3",
+        "package": "qiskit"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "pauli"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "test_hartree_fock__7493bd888fe26a8e4edc13631204319e__part_2__2",
+      "text": "I\"), Pauli(\"IIIIIXII\")],\n            sq_list=[2, 3],\n            tapering_values=[1, 1],\n        )\n        mapper = TaperedQubitMapper(\n            ParityMapper(num_particles=num_particles), z2symmetries=z2symmetries\n        )\n        state = HartreeFock(5, num_particles, mapper)\n        ref = QuantumCircuit(6)\n        ref.x([0, 1])\n        self.assertEqual(state, ref)\n\n    def test_hf_bitstring_mapped(self):\n        \"\"\"Mapped bitstring test for water\"\"\"\n\n        num_spatial_orbitals = 7\n        num_particles = (5, 5)\n        z2symmetries = Z2Symmetries(\n            symmetries=[Pauli(\"IZZIIIIZZIII\"), Pauli(\"ZZIZIIZZIZII\")],\n            sq_paulis=[Pauli(\"IIIIIIIIXIII\"), Pauli(\"IIIIIIIIIXII\")],\n            sq_list=[3, 2],\n            tapering_values=[1, -1],\n        )\n        mapper = TaperedQubitMapper(\n            ParityMapper(num_particles=num_particles), z2symmetries=z2symmetries\n        )\n\n        bitstr = hartree_fock_bitstring_mapped(\n            num_spatial_orbitals=num_spatial_orbitals,\n            num_particles=num_particles,\n            qubit_mapper=mapper,\n        )\n\n        ref_matched = [True, False, True, True, False, True, False, True, False, False]\n        self.assertListEqual(bitstr, ref_matched)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "package": "qiskit-nature",
+        "section_title": "test_hartree_fock.py",
+        "section_id": "part_2",
+        "source_file": "test\\second_q\\circuit\\library\\initial_states\\test_hartree_fock.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "pauli"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "test_phase_estimator__871226f3a53461a1bdfaad1b84c58532__part_2__2",
+      "text": "value\"):\n            self.assertAlmostEqual(eigv, -0.98, delta=0.01)\n\n    def test_single_pauli_op_sampler_with_transpiler(self):\n        \"\"\"Check that the transpilation does happen\"\"\"\n        pass_manager = generate_preset_pass_manager(optimization_level=1, seed_transpiler=42)\n        counts = [0]\n\n        def callback(**kwargs):\n            counts[0] = kwargs[\"count\"]\n\n        phase_est = HamiltonianPhaseEstimation(\n            1,\n            StatevectorSampler(),\n            transpiler=pass_manager,\n            transpiler_options={\"callback\": callback},\n        )\n        phase_est.estimate(hamiltonian=SparsePauliOp(Pauli(\"Z\")))\n\n        self.assertGreater(counts[0], 0)\n\n    @data(\n        (Statevector(QuantumCircuit(2).compose(IGate()).compose(HGate()))),\n        (QuantumCircuit(2).compose(IGate()).compose(HGate())),\n    )\n    def test_H2_hamiltonian_sampler(self, state_preparation):\n        \"\"\"Test H2 hamiltonian\"\"\"\n\n        hamiltonian = SparsePauliOp.from_list(\n            [\n                (\"II\", -1.0523732457728587),\n                (\"IZ\", 0.3979374248431802),\n                (\"ZI\", -0.3979374248431802),\n                (\"ZZ\", -0.011280104256235324),\n                (\"XX\", 0.18093119978423147),\n            ]\n        )\n\n        evo = SuzukiTrotter(reps=4)\n        result = self.hamiltonian_pe_sampler(hamiltonian, state_preparation, evolution=evo)\n        with self.subTest(\"Most likely eigenvalues\"):\n            self.assertAlmostEqual(result.most_likely_eigenvalue, -1.855, delta=0.001)\n        with self.subTest(\"Most likely phase\"):\n            self.assertAlmostEqual(result.phase, 0.5937, delta=0.001)\n        with self.subTest(\"All eigenvalues\"):\n            phase_dict = result.filter_phases(0.1)\n            phases = sorted(phase_dict.keys())\n            self.assertAlmostEqual(phases[0], -1.8551, delta=0.001)\n            self.assertAlmostEqual(phases[1], -1.2376, delta=0.001)\n            self.assertAlmostEqual(phases[2], -0.8979, delta=0.001)\n\n    def test_matrix_evolution_sampler(self):\n        \"\"\"1Q Hamiltonian with MatrixEvolution\"\"\"\n        # hamiltonian = PauliSumOp(SparsePauliOp.from_list([(\"X\", 0.5), (\"Y\", 0.6), (\"I\", 0.7)]))\n\n        hamiltonian = SparsePauliOp.from_list([(\"X\", 0.5), (\"Y\", 0.6), (\"I",
+      "metadata": {
+        "section_title": "test_phase_estimator.py",
+        "source_file": "test\\test_phase_estimator.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_2"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "pauli"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "ref_save_expval__fdf852941f93215107ae23372436c15e__part_1__1",
+      "text": "\")\n        ZZ_wpo = Pauli(\"ZZ\")\n    else:\n        X_wpo = np.array([[0, 1], [1, 0]], dtype=complex)\n        Y_wpo = np.array([[0, -1j], [1j, 0]], dtype=complex)\n        Z_wpo = np.array([[1, 0], [0, -1]], dtype=complex)\n        H_wpo = np.array([[1, 1], [1, -1]], dtype=complex) / np.sqrt(2)\n        IX_wpo = np.kron(np.eye(2), X_wpo)\n        IY_wpo = np.kron(np.eye(2), Y_wpo)\n        IZ_wpo = np.kron(np.eye(2), Z_wpo)\n        IH_wpo = np.kron(np.eye(2), H_wpo)\n        XX_wpo = np.kron(X_wpo, X_wpo)\n        YY_wpo = np.kron(Y_wpo, Y_wpo)\n        ZZ_wpo = np.kron(Z_wpo, Z_wpo)\n    return {\n        \"<H[0]>\": (H_wpo, [0]),\n        \"<H[1]>\": (H_wpo, [1]),\n        \"<X[0]>\": (X_wpo, [0]),\n        \"<X[1]>\": (X_wpo, [1]),\n        \"<Y[1]>\": (Y_wpo, [0]),\n        \"<Y[1]>\": (Y_wpo, [1]),\n        \"<Z[0]>\": (Z_wpo, [0]),\n        \"<Z[1]>\": (Z_wpo, [1]),\n        \"<H[0], I[1]>\": (IH_wpo, [0, 1]),\n        \"<I[0], H[1]>\": (IH_wpo, [1, 0]),\n        \"<X[0], I[1]>\": (IX_wpo, [0, 1]),\n        \"<I[0], X[1]>\": (IX_wpo, [1, 0]),\n        \"<Y[0], I[1]>\": (IY_wpo, [0, 1]),\n        \"<I[0], Y[1]>\": (IY_wpo, [1, 0]),\n        \"<Z[0], I[1]>\": (IZ_wpo, [0, 1]),\n        \"<I[0], Z[1]>\": (IZ_wpo, [1, 0]),\n        \"<X[0], X[1]>\": (XX_wpo, [0, 1]),\n        \"<Y[0], Y[1]>\": (YY_wpo, [0, 1]),\n        \"<Z[0], Z[1]>\": (ZZ_wpo, [0, 1]),\n   ",
+      "metadata": {
+        "source_file": "test\\terra\\reference\\ref_save_expval.py",
+        "package": "qiskit-aer",
+        "section_id": "part_1",
+        "section_title": "ref_save_expval.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "pauli"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "test_sampling_vqe__1096557e912fe83ed05b2e64cae3dbd5__part_4__4",
+      "text": " @data(PAULI_OP)\n    def test_auxops(self, op):\n        \"\"\"Test passing auxiliary operators.\"\"\"\n        ansatz = real_amplitudes(2, reps=1)\n        vqe = SamplingVQE(StatevectorSampler(seed=42), ansatz, SPSA())\n\n        as_list = [Pauli(\"ZZ\"), Pauli(\"II\")]\n        with self.subTest(auxops=as_list):\n            result = vqe.compute_minimum_eigenvalue(op, aux_operators=as_list)\n            self.assertIsInstance(result.aux_operators_evaluated, list)\n            self.assertEqual(len(result.aux_operators_evaluated), 2)\n            self.assertAlmostEqual(result.aux_operators_evaluated[0][0], -1 + 0j, places=5)\n            self.assertAlmostEqual(result.aux_operators_evaluated[1][0], 1 + 0j, places=5)\n\n        as_dict = {\"magnetization\": SparsePauliOp([\"ZI\", \"IZ\"])}\n        with self.subTest(auxops=as_dict):\n            result = vqe.compute_minimum_eigenvalue(op, aux_operators=as_dict)\n            self.assertIsInstance(result.aux_operators_evaluated, dict)\n            self.assertEqual(len(result.aux_operators_evaluated.keys()), 1)\n            self.assertAlmostEqual(result.aux_operators_evaluated[\"magnetization\"][0], 0j, places=5)\n\n    def test_nondiag_observable_raises(self):\n        \"\"\"Test passing a non-diagonal observable raises an error.\"\"\"\n        vqe = SamplingVQE(StatevectorSampler(), real_amplitudes(1), SLSQP())\n\n        with self.assertRaises(ValueError):\n            _ = vqe.compute_minimum_eigenvalue(Pauli(\"X\"))\n\n    @data(PAULI_OP)\n    def test_callback(self, op):\n        \"\"\"Test the callback on VQE.\"\"\"\n        history = {\n            \"eval_count\": [],\n            \"parameters\": [],\n            \"mean\": [],\n            \"metadata\": [],\n        }\n\n        def store_intermediate_result(eval_count, parameters, mean, metadata):\n            history[\"eval_count\"].append(eval_count)\n            history[\"parameters\"].append(parameters)\n            history[\"mean\"].append(mean)\n            history[\"metadata\"].append(metadata)\n\n        sampling_vqe = SamplingVQE(\n            StatevectorSampler(),\n            real_amplitudes(2, reps=1),\n            SLSQP(),\n            callback=store_intermediate_result,\n        )\n        sampling_vqe.compute_minimum_eigenvalue(operator=op)\n\n        self.assertTrue(all(isinstance(count, int) for count in history[\"eval_count\"]))\n        self.assertTrue(all(isinstance(mean, float) for mean in history[\"mean\"]))\n        self.assertTrue(all(isinstance(metadata, dict) for metadata in history[\"metadata\"]))\n        for params in history[\"parameters\"]:\n            self.assertTrue(all(isinstance(param, float) for param in params))\n\n    def test_aggregation(self):\n        \"\"\"Test the aggregation works.\"\"\"\n\n",
+      "metadata": {
+        "source_file": "test\\minimum_eigensolvers\\test_sampling_vqe.py",
+        "section_id": "part_4",
+        "package": "qiskit-algorithms",
+        "section_title": "test_sampling_vqe.py"
+      },
+      "score": 0.9921296897791505,
+      "original_score": 0.9918982100667726,
+      "vector_score": 0.9918982100667726,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "pauli"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 219,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

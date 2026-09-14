@@ -1,0 +1,124 @@
+{
+  "query": "How to define optimizer object 'op' for RBM wave function training",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_5_5__0",
+      "text": "## 3) Variational Monte Carlo Optimisation#\nWe have now set up our model (Hamiltonian, Graph, Hilbert Space) and can proceed to optimise the variational ansatz we chose, namely the ffnn machine.\nTo setup the variational Monte Carlo optimisation tool, we have to provide a sampler nk.sampler and an optimizer nk.optimizer .\n```code\n# We shall use an exchange Sampler which preserves the global magnetization (as this is a conserved quantity in the model)\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n,\nd_max\n=\n2\n)\n# Construct the variational state\nvs\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nmodel\n,\nn_samples\n=\n1008\n)\n# We choose a basic, albeit important, Optimizer: the Stochastic Gradient Descent\nopt\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.01\n)\n# We can then specify a Variational Monte Carlo object, using the Hamiltonian, sampler and optimizers chosen.\n# Note that we also specify the method to learn the parameters of the wave-function: here we choose the efficient\n# Stochastic reconfiguration (Sr), here in an iterative setup\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nhamiltonian\n=\nop\n,\noptimizer\n=\nopt\n,\nvariational_state\n=\nvs\n,\ndiag_shift\n=\n0.01\n)\n```",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html",
+        "section_title": "3) Variational Monte Carlo Optimisation#",
+        "section_id": "sec_5"
+      },
+      "score": 0.9485191978234896,
+      "original_score": 0.9190189628684107,
+      "vector_score": 1.0,
+      "bm25_score": 0.5950948143420532,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "optimizer",
+        "object",
+        "wave",
+        "function"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "netket.models.RBMModPhase__5a506c0b40e6447ee93d24e7164b9cee__sec_1_1__0",
+      "text": "## Contents\nBases: Module\nA fully connected Restricted Boltzmann Machine (RBM) with real-valued parameters.\nIn this case, two RBMs are taken to parametrize, respectively, the real\nand imaginary part of the log-wave-function, as introduced in Torlai et al.,\nNature Physics 14, 447–450(2018).\nThis type of RBM has spin 1/2 hidden units and is defined by:\nfor arbitrary local quantum numbers \\(s_i\\) .\nfeature density. Number of features equal to alpha * input.shape[-1]\nNumerical precision of the computation see jax.lax.Precision for details.\nif True uses a bias in the dense layer (hidden layer bias).\nThe nonlinear activation function.\nInitializer for the Dense layer matrix.\nInitializer for the hidden bias.\nCall self as a function.",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\_generated\\models\\netket.models.RBMModPhase.html",
+        "section_title": "Contents",
+        "section_id": "sec_1"
+      },
+      "score": 0.7928412375197058,
+      "original_score": 0.6881480994920302,
+      "vector_score": 0.8601851243650377,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "rbm",
+        "wave",
+        "function"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "netket.driver.AbstractVariationalDriver__7a79d9bdc0fc91ae5b3afb2dff23c136__sec_1_1__1",
+      "text": " .\noptimizer ( Any ) – an optax optimizer.\nIf you do not want\nto use an optimizer, just pass a sgd optimizer with\nlearning rate -1 .\nminimized_quantity_name ( str ) – the name of the loss function in\nthe logged data set.\nminimized_quantity_name ( str ) – the name of the loss function in\nthe logged data set.\nThe optimizer used to update the parameters at every iteration.\nReturns the machine that is optimized by this driver.\nReturns a monotonic integer labelling all the steps performed by this driver.\nThis can be used, for example, to identify the line in a log file.\nPerforms steps optimization steps.\nsteps ( int ) – (Default=1) number of steps.\nReturn MCMC statistics for the expectation value of observables in the\ncurrent state of the driver.\nobservables – A pytree of operators for which statistics should be computed.\nA pytree of the same structure as the input, containing MCMC statistics\nfor the corresponding operators as leaves.\nReturns a generator which advances the VMC optimization, yielding\nafter every step_size steps.\nn_steps ( int ) – The total number of steps to perform (this is\nequivalent to the length of the iterator)\nn_steps ( int ) – The total number of steps to perform (this is\nequivalent to the length of the iterator)\nstep ( int ) – The number of internal steps the simulation\nis advanced between yielding from the iterator\nstep ( int ) – The number of internal steps the simulation\nis advanced between yielding from the iterator\nint – The current step.\nResets the driver.\nSubclasses should make sure to call super().reset() to ensure\nthat the step count is set to 0.\nRuns this variational driver, updating the weights of the network stored in\nthis driver for n_iter steps and dumping values of the observables obs in the output logger .\nIt is possible to control more specifically what quantities are logged, when to\nstop the optimisation, or to execute arbitrary code at every step by specifying\none or more callbacks, which are passed as a list of functions to the keyword\nargument callback .\nCallbacks are functions that follow this signature:\n```code\ndef\ncallback\n(\nstep\n,\nlog_data\n,\ndriver\n)\n->\nbool\n:\n...\nreturn\nTrue\n/\nFalse\n```\nIf a callback returns True, the optimisation continues, otherwise it is stopped.\nThe log_data is a dictionary that can be modified in-place to change what is\nlogged at every step. For example, this can be used to log additional quantities\nsuch as the acceptance rate of a sampler.\nLoggers are specified as an iterable passed to the keyword argument out . If only\na string is specified, this will create by default a nk.logging.JsonLog .\nTo know about the output format check its documentation. The logger object is\nalso returned at the end of this function so that you",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\driver\\netket.driver.AbstractVariationalDriver.html",
+        "section_id": "sec_1",
+        "section_title": "Contents",
+        "package": "netket"
+      },
+      "score": 0.7758632047143609,
+      "original_score": 0.6625897705377475,
+      "vector_score": 0.8282372131721842,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "optimizer",
+        "object",
+        "function"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_7_7__1",
+      "text": " Natural Gradient (or Stochastic Reconfiguration):\n```code\n# Define the optimizer\nop\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.05\n)\n# Create the VMC (Variational Monte Carlo) driver with SR\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nH\n,\nop\n,\nvariational_state\n=\nvstate\n,\ndiag_shift\n=\n0.05\n)\n```\nA more detailed explanation of SR and the regularization parameter ( diag_shift ) can be found in the Documentation.\nWe can now finally optimize the wave function for 300 steps of VMC:\n```code\n# Construct the logger to visualize the data later on\nslater_log\n=\nnk\n.\nlogging\n.\nRuntimeLog\n()\n# Run the optimization for 300 iterations\ngs\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nslater_log\n)\n```\n```code\n(RuntimeLog():\n  keys = ['acceptance', 'Energy'],)\n```\nAfter optimizating the wave function, we can evaluate the energy on the final set of paramaters and compare to the exact value:\n```code\nsd_energy\n=\nvstate\n.\nexpect\n(\nH\n)\nerror\n=\nabs\n((\nsd_energy\n.\nmean\n-\nE_gs\n)\n/\nE_gs\n)\nprint\n(\nf\n\"Optimized energy :\n{\nsd_energy\n}\n\"\n)\nprint\n(\nf\n\"Relative error   :\n{\nerror\n}\n\"\n)\n```\n```code\nOptimized energy : -5.118-0.000j ± 0.073 [σ²=5.148, R̂=1.0190]\nRelative error   : 0.2538024650300583\n```\nAs you can see, the mean field energy of the Slater Determinant is about 25% off in this case where interactions are strong, thus far from the single-particle regime in which the Slater Determinant is accurate.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "section_id": "sec_7",
+        "section_title": "Optimizing the Slater Determinant Wave Function#",
+        "package": "netket"
+      },
+      "score": 0.7509772092357752,
+      "original_score": 0.6082787561012193,
+      "vector_score": 0.5360067437379576,
+      "bm25_score": 0.8973668055542663,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "define",
+        "optimizer",
+        "wave",
+        "function"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "symmetry_tutorial__b193a05ba167aa16fb4ac01ff2376452__sec_5_5__0",
+      "text": "## VMC#\nWithin the VMC scheme, wavefunction amplitudes may be made symmetric with respect to a particular group \\(G\\) and irrep \\(\\mu\\) using the following projection formula:\nwhere \\(x\\) is the encoding of a basis state, \\(d_\\mu\\) is the dimension of the irrep, \\(|G|\\) is the number of elements in the group, \\(\\chi_\\mu(g)\\) is the character of the representation evaluated on element \\(g\\) and \\(\\hat U_g\\) is the representation of \\(g\\) on the Hilbert space. Here \\(\\psi(g^{-1}x)\\) is the left action of element \\(g\\) on the state \\(x\\) .\nIn the context of permutations and spin systems, we can view \\(g\\) as a function from \\(\\{0,\\ldots, n-1\\} \\to \\{0, \\ldots, n-1\\}\\) and \\(x\\) as a function from \\(\\{0,\\ldots, n-1\\} \\to \\{0,1\\}\\) such that the left action is the composition:\nFor more mathematical details on permutations and their representations, see the symmetry documentation .\nIn the following, we will compare the performance of an unsymmetrized ansatz versus a symmetrized one.\n```code\nimport\njax.numpy\nas\njnp\nfrom\nnetket.experimental.driver\nimport\nVMC_SR\nmodel\n=\nnk\n.\nmodels\n.\nRBM\n(\nparam_dtype\n=\nnp\n.\ncomplex128\n,\nalpha\n=\n2\n)\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisLocal\n(\nhilbert\n=\nhilbert\n)\n#Metropolis-Hastings local sampler\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n5e-3\n)\nsolver\n=\nnk\n.\noptimizer\n.\nsolver\n.\ncholesky\n#linear solver for the SR equations\ndiag_shift\n=\n1e-6\n```\n```code\n#train the unsymmetrized model\nunsymmetrized_log\n=\nnk\n.\nlogging\n.\nRuntimeLog\n()\nunsymmetrized_vstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n512\n,\nseed\n=\nseed\n)\ndriver\n=\nVMC_SR\n(\nhamiltonian\n=\nH\n,\noptimizer\n=\noptimizer\n,\nlinear_solver\n=\nsolver\n,\nvariational_state\n=\nunsymmetrized_vstate\n,\ndiag_shift\n=\ndiag_shift\n,\nuse_ntk\n=\nFalse\n)\ndriver\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nunsymmetrized_log\n);\n```\nTo construct a symmetry projected wavefunction in netket, we use project method of the Representation class.\nThis",
+      "metadata": {
+        "section_id": "sec_5",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\symmetry_tutorial.html",
+        "section_title": "VMC#"
+      },
+      "score": 0.739278911117784,
+      "original_score": 0.607516640392363,
+      "vector_score": 0.7593958004904536,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "optimizer",
+        "rbm",
+        "function"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 49,
+    "final_results_count": 5
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "query": "Defining statemodel with Jastrow ansatz in netket",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_5_5__0",
+      "text": "## 3. The Jastrow ansatz#\nLet’s start with a simple ansatz for the ground-state: the Jastrow Ansatz.\n\\( \\log\\psi(\\sigma) = \\sum_i a_i \\sigma_i + \\sum_{i,j} \\sigma_i J_{i,j} \\sigma_j \\)\nTo show how it’s done, we write this simple ansatz as a flax.nnx module.\nWe import this module and call it nnx , as it is customary in the Flax documentation.\nAn NNX model subclasses nnx.Module and defines its parameters inside __init__ using nnx.Param .\nAs the module should work with batches of inputs (therefore the input will be a 2d matrix with shape (N_inputs, N_sites) , but we are lazy and find it easier to define the function for a single input \\(\\sigma\\) , a 1D vector of shape (N_sites,) .\nTherefore, we write a function called evaluate_single , which will evaluate a single 1D input, and use jax.vmap to make it work with 2D inputs as well.\nTo learn more about jax.vmap, give a look at the jax documentation!\n```code\nfrom\nflax\nimport\nnnx\nimport\njax.numpy\nas\njnp\nimport\njax\nclass\nJastrow\n(\nnnx\n.\nModule\n):\ndef\n__init__\n(\nself\n,\nN\n:\nint\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\nk1\n,\nk2\n=\njax\n.\nrandom\n.\nsplit\n(\nrngs\n.\nparams\n())\nself\n.\nJ\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk1\n,\n(\nN\n,\nN\n),\ndtype\n=\njnp\n.\ncomplex128\n))\nself\n.\nv_bias\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk2\n,\n(\nN\n,\n1\n),\ndtype\n=\njnp\n.\ncomplex128\n)\n)\ndef\n__call__\n(\nself\n,\nx\n):\nx\n=\nx\n.\nastype\n(\njnp\n.\ncomplex128\n)\n# keep the dtypes aligned\nquad\n=\njnp\n.\neinsum\n(\n\"...i,ij,...j->...\"\n,\nx\n,\nself\n.\nJ\n,\nx\n)\nlin\n=\njnp\n.\nsqueeze\n(\nx\n@\nself\n.\nv_bias\n,\n-\n1\n)\n# (...,N) @ (N,1) → (...,1)\nreturn\nquad\n+\nlin\n```\nNow that the model is defined, we can instantiate it\n```code\nma\n=\nJastrow\n(\nN\n=\nhi\n.\nsize\n,\nrngs\n=\nnnx",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "section_id": "sec_5",
+        "section_title": "3. The Jastrow ansatz#"
+      },
+      "score": 0.9494097297854791,
+      "original_score": 0.9244921340081778,
+      "vector_score": 1.0,
+      "bm25_score": 0.6224606700408886,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "jastrow",
+        "ansatz"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "gs-matrix-models__ef1b32ac39370be9a6422cd5bf62bbb1__sec_7_7__0",
+      "text": "## 5. Jastrow Ansatz#\nWe have seen that the mean field ansatz yields about sub-10% error on the ground-state energy. Let’s now try to do better, using a more correlated ansatz.\nWe will now take a short-range Jastrow ansatz which is already inlcuded in NetKet as nk.models.Jastrow :\nwhere \\(W_{ij}\\) is a symmetric matrix of learnable complex parameters (the kernel of the quadratic form).\n```code\n# change the model: initialize weights with normal distributions\nmodel\n=\nnk\n.\nmodels\n.\nJastrow\n(\nkernel_init\n=\nnn\n.\ninitializers\n.\nnormal\n())\n# we use the same MetropolicLocal sapmler as before. Now we sample for longer to get a more accurate result\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n2\n**\n10\n)\n```\n```code\n# look at the parameters\nprint\n(\nvstate\n.\nparameters\n)\n```\n```code\nFrozenDict({\n    kernel: DeviceArray([[ 0.01049682+0.01166978j,  0.00682185+0.00620781j,\n                   0.00733915+0.01080751j,  0.00185571+0.00749652j,\n                  -0.00214337+0.00025017j, -0.00318804-0.00774995j],\n                 [-0.00512184-0.00538546j,  0.00184588-0.01090576j,\n                   0.00651656-0.00574499j,  0.00724852-0.00697769j,\n                  -0.01310518-0.00781628j,  0.0107602 +0.00490359j],\n                 [-0.00207881-0.00916165j,  0.00700885+0.00145953j,\n                   0.00113884-0.00484843j, -0.00317073-0.01036345j,\n                   0.00207871+0.01423066j,  0.01065844+0.00981316j],\n                 [ 0.00393085+0.01117876j,  0.00657261+0.00599069j,\n                  -0.01086216-0.00661874j,  0.00182235+0.00389626j,\n                  -0.00074458+0.0142108j ,  0.00068885+0.00487905j],\n                 [ 0.003",
+      "metadata": {
+        "package": "netket",
+        "section_title": "5. Jastrow Ansatz#",
+        "section_id": "sec_7",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-matrix-models.html"
+      },
+      "score": 0.9029696784529048,
+      "original_score": 0.8459836165919123,
+      "vector_score": 0.8826389665246549,
+      "bm25_score": 0.6993622168609424,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "jastrow",
+        "ansatz",
+        "netket"
+      ],
+      "match_ratio": 0.6,
+      "is_html": true
+    },
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_7_7__0",
+      "text": "## 5. Jastrow Ansatz#\nWe have seen that the mean field ansatz yields about 2% error on the ground-state energy. Let’s now try to do better, using a more correlated ansatz.\nWe will now take a short-range Jastrow ansatz, entangling nearest and next-to nearest neighbors, of the form\nwhere the parameters \\(J_1\\) and \\(J_2\\) are to be learned.\nAgain we can write the model using flax.\n```code\nclass\nJasShort\n(\nnnx\n.\nModule\n):\ndef\n__init__\n(\nself\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\n# Define two parameters j1, and j2.\n# Initialise them with a random normal distribution of standard deviation\n# 0.01\n# We must get a different key for each parameter, otherwise they will be\n# initialised with the same value.\nself\n.\nj1\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nrngs\n.\nparams\n(),\n(\n1\n,)),\ndtype\n=\nfloat\n)\nself\n.\nj2\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nrngs\n.\nparams\n(),\n(\n1\n,)),\ndtype\n=\nfloat\n)\ndef\n__call__\n(\nself\n,\nx\n:\njax\n.\nArray\n):\n# compute the nearest-neighbor correlations\ncorr1\n=\nx\n*\njnp\n.\nroll\n(\nx\n,\n-\n1\n,\naxis\n=-\n1\n)\ncorr2\n=\nx\n*\njnp\n.\nroll\n(\nx\n,\n-\n2\n,\naxis\n=-\n1\n)\n# sum the output\nreturn\njnp\n.\nsum\n(\nself\n.\nj1\n*\ncorr1\n+\nself\n.\nj2\n*\ncorr2\n,\naxis\n=-\n1\n)\n# Initialise the model wtih seed 1\nmodel\n=\nJasShort\n(\nrngs\n=\nnnx\n.\nRngs\n(\n1\n))\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n1008\n)\n```\nWe then optimize it, however this time we also introduce a stochastic reconfiguration (natural gradient) preconditioner. Also, we now log the intermediate results of the optimization, so that we can visualize them at a later stage.\nLoggers that work together with optimisation drivers are defined in nk.logging . In this example we use RuntimeLog , which keeps the metrics in memory. You could also use JsonLog , which stores data to a json file which can be later read as a dict or TensorBoardLog which connects to TensorBoard .\n```code\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\n",
+      "metadata": {
+        "section_id": "sec_7",
+        "section_title": "5. Jastrow Ansatz#",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html"
+      },
+      "score": 0.707155955862196,
+      "original_score": 0.5629193371077553,
+      "vector_score": 0.5998380985605318,
+      "bm25_score": 0.4152442912966494,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "jastrow",
+        "ansatz"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97____1__6",
+      "text": "ket.utils.HashableArray method) (netket.utils.history.History method) (netket.utils.history.HistoryDict method) (netket.utils.StaticRange method) (netket.utils.struct.Pytree method) (netket.utils.timing.Timer method) (netket.vqs.FullSumState method) (netket.vqs.MCMixedState method) (netket.vqs.MCState method) (netket.vqs.VariationalState method)\n(netket.callbacks.EarlyStopping method)\n(netket.callbacks.InvalidLossStopping method)\n(netket.callbacks.Timeout method)\n(netket.driver.AbstractVariationalDriver method)\n(netket.driver.SteadyState method)\n(netket.driver.VMC method)\n(netket.driver.VMC_SR method)\n(netket.experimental.driver.Infidelity_SR method)\n(netket.experimental.driver.TDVPSchmitt method)\n(netket.experimental.dynamics.AbstractSolver method)\n(netket.experimental.dynamics.AbstractSolverState method)\n(netket.experimental.hilbert.ContinuousHilbert method)\n(netket.experimental.hilbert.Particle method)\n(netket.experimental.logging.HDF5Log method)\n(netket.experimental.observable.InfidelityOperator method)\n(netket.experimental.observable.Renyi2EntanglementEntropy method)\n(netket.experimental.observable.VarianceObservable method)\n(netket.experimental.operator.FermiHubbardJax method)\n(netket.experimental.QSR method)\n(netket.experimental.TDVP method)\n(netket.graph.AbstractGraph method)\n(netket.graph.Graph method)\n(netket.graph.Lattice method)\n(netket.graph.space_group.SpaceGroup method)\n(netket.hilbert.constraint.DiscreteHilbertConstraint method)\n(netket.hilbert.DiscreteHilbert method)\n(netket.hilbert.DoubledHilbert method)\n(netket.hilbert.Fock method)\n(netket.hilbert.HomogeneousHilbert method)\n(netket.hilbert.Qubit method)\n(netket.hilbert.Spin method)\n(netket.hilbert.SpinOrbitalFermions method)\n(netket.hilbert.TensorHilbert method)\n(netket.logging.AbstractLog method)\n(netket.logging.JsonLog method)\n(netket.logging.RuntimeLog method)\n(netket.logging.StateLog method)\n(netket.operator._fermion2nd.FermionOperator2ndBase method)\n(netket.operator._ising.IsingBase method)\n(netket.operator._local_operator.LocalOperatorBase method)\n(netket.operator._pauli_strings.PauliStringsBase method)\n(netket.operator._sum.SumContinuousOperator method)\n(netket.operator.AbstractSuperOperator method)\n(netket.operator.BoseHubbardJax method)\n(netket.operator.BoseHubbardNumba method)\n(netket.operator.ContinuousOperator method)\n(netket.operator.FermionOperator2ndJax method)\n(netket.operator.FermionOperator2ndNumba method)\n(netket.operator.IsingJax method)\n(netket.operator.IsingNumba method)\n(netket.operator.KineticEnergy method",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\genindex.html",
+        "package": "netket",
+        "section_title": "_",
+        "section_id": "_"
+      },
+      "score": 0.5309842098953836,
+      "original_score": 0.3394143801343432,
+      "vector_score": 0.42426797516792897,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.2,
+      "is_html": true
+    },
+    {
+      "id": "index__d3aa048ce469f7bb413357ba8294422c__root_0__0",
+      "text": "Repository\nOpen issue\n.md\n.pdf\nDefining Custom Models Commonalities Using Flax Linen Using Jax/Stax Using Haiku\nCommonalities\nUsing Flax Linen\nUsing Jax/Stax\nUsing Haiku\nOverriding defaults in NetKet NetKet Architecture: Multiple Dispatch\nNetKet Architecture: Multiple Dispatch\nDefining Custom Preconditioners The preconditioner interface\nThe preconditioner interface\nDefining Custom Observables and Operators Defining a custom zero operator Defining an operator from scratch Defining an operator the easy way Comparison of the two approaches\nDefining a custom zero operator\nDefining an operator from scratch\nDefining an operator the easy way\nComparison of the two approaches\nCustom Hilbert Space Constraints Built-in Constraints Overview Interface Requirements Advanced Patterns Integration with Variational States See Also\nBuilt-in Constraints\nOverview\nInterface Requirements\nAdvanced Patterns\nIntegration with Variational States\nSee Also",
+      "metadata": {
+        "section_title": "ROOT",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\advanced\\index.html",
+        "section_id": "root"
+      },
+      "score": 0.5141004169156965,
+      "original_score": 0.27477674166521865,
+      "vector_score": 0.2709976873147124,
+      "bm25_score": 0.28989295906724377,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "defining",
+        "netket"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 55,
+    "final_results_count": 5
+  }
+}

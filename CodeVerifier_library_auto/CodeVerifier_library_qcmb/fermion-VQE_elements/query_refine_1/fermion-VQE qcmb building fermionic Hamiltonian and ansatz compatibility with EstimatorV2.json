@@ -1,0 +1,135 @@
+{
+  "query": "fermion-VQE qcmb: building fermionic Hamiltonian and ansatz compatibility with EstimatorV2",
+  "packages": [
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit"
+  ],
+  "results": [
+    {
+      "id": "adapt_vqe__98a67a87faad3bda962a903c96d2e83c__part_1__1",
+      "text": "ations. Thus, a common choice of ansatz to be\n    used with this algorithm is the Unitary Coupled Cluster ansatz implemented in Qiskit Nature.\n    This results in a wavefunction ansatz which is uniquely adapted to the operator whose minimum\n    eigenvalue is being determined. This class relies on a supplied instance of :class:`~.VQE` to\n    find the minimum eigenvalue. The performance of AdaptVQE significantly depends on the\n    minimization routine.\n\n    .. code-block:: python\n\n      from qiskit_algorithms.minimum_eigensolvers import AdaptVQE, VQE\n      from qiskit_algorithms.optimizers import SLSQP\n      from qiskit.primitives import StatevectorEstimator\n      from qiskit.circuit.library import EvolvedOperatorAnsatz\n      from qiskit import QuantumCircuit\n\n      # get your Hamiltonian\n      hamiltonian = ...\n\n      # construct your ansatz\n      ansatz = EvolvedOperatorAnsatz(...)\n\n      vqe = VQE(StatevectorEstimator(), ansatz, SLSQP())\n\n      adapt_vqe = AdaptVQE(vqe)\n\n      # or you can do it without EvolvedOperatorAnsatz\n      vqe = VQE(StatevectorEstimator(), QuantumCircuit(1), SLSQP())\n\n      adapt_vqe = AdaptVQE(vqe, operators=...)\n\n      eigenvalue, _ = adapt_vqe.compute_minimum_eigenvalue(hamiltonian)\n\n    The following attributes can be set via the initializer but can also be read and updated once\n    the AdaptVQE object has been constructed.\n\n    Attributes:\n        solver: a :class:`~.VQE` instance used internally to compute the minimum eigenvalues.\n            It is a requirement that the :attr:`~.VQE.ansatz` of this solver is of type\n            :class:`~qiskit.circuit.library.EvolvedOperatorAnsatz` if the `operators` arguments is\n            not set.\n        gradient_threshold: once all gradients have an absolute value smaller than this threshold,\n            the algorithm has converged and terminates.\n        eigenvalue_threshold: once the eigenvalue has changed by less than this threshold from one\n            iteration to the next, the algorithm has converged and terminates. When this case\n            occurs, the excitation included in the final iteration did not result in a significant\n            improvement of the eigenvalue and, thus, the results from this iteration are not\n            considered.\n        max_iterations: the maximum number of iterations for the adaptive loop. If ``None``, the\n            algorithm is not bound in its number of iterations.\n    \"\"\"\n\n    def __init__(\n        self,\n        solver: VQE,\n        *,\n        gradient_threshold: float = 1e-5,\n        eigenvalue_threshold: float = 1e-5,\n        max_iterations: int | None = None,\n        operators: Base",
+      "metadata": {
+        "section_title": "adapt_vqe.py",
+        "section_id": "part_1",
+        "package": "qiskit-algorithms",
+        "source_file": "qiskit_algorithms\\minimum_eigensolvers\\adapt_vqe.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.987188190737865,
+      "bm25_score": 1.0,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "vqe",
+        "hamiltonian",
+        "ansatz"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_backend_estimator_v2__136b5e4293090ff3dfc098df748dec1f__part_1__1",
+      "text": "ircuit(2)\n        self.ansatz.append(real_amplitudes(num_qubits=2, reps=2), [0, 1])\n        self.observable = SparsePauliOp.from_list(\n            [\n                (\"II\", -1.052373245772859),\n                (\"IZ\", 0.39793742484318045),\n                (\"ZI\", -0.39793742484318045),\n                (\"ZZ\", -0.01128010425623538),\n                (\"XX\", 0.18093119978423156),\n            ]\n        )\n        self.expvals = -1.0284380963435145, -1.284366511861733\n\n        ra_2_reps = QuantumCircuit(2)\n        ra_2_reps.append(real_amplitudes(num_qubits=2, reps=2), [0, 1])\n        ra_3_reps = QuantumCircuit(2)\n        ra_3_reps.append(real_amplitudes(num_qubits=2, reps=3), [0, 1])\n        self.psi = (ra_2_reps, ra_3_reps)\n        self.params = tuple(psi.parameters for psi in self.psi)\n        self.hamiltonian = (\n            SparsePauliOp.from_list([(\"II\", 1), (\"IZ\", 2), (\"XI\", 3)]),\n            SparsePauliOp.from_list([(\"IZ\", 1)]),\n            SparsePauliOp.from_list([(\"ZI\", 1), (\"ZZ\", 1)]),\n        )\n        self.theta = (\n            [0, 1, 1, 2, 3, 5],\n            [0, 1, 1, 2, 3, 5, 8, 13],\n            [1, 2, 3, 4, 5, 6],\n        )\n\n    @combine(backend=BACKENDS, abelian_grouping=[True, False])\n    def test_estimator_run(self, backend, abelian_grouping):\n        \"\"\"Test Estimator.run()\"\"\"\n        psi1, psi2 = self.psi\n        hamiltonian1, hamiltonian2, hamiltonian3 = self.hamiltonian\n        theta1, theta2, theta3 = self.theta\n        pm = generate_preset_pass_manager(optimization_level=0, backend=backend)\n        psi1, psi2 = pm.run([psi1, psi2])\n        estimator = BackendEstimatorV2(backend=backend, options=self._options)\n        estimator.options.abelian_grouping = abelian_grouping\n        # Specify the circuit and observable by indices.\n        # calculate [ <psi1(theta1)|H1|psi1(theta1)> ]\n        ham1 = hamiltonian1.apply_layout(psi1.layout)\n        job = estimator.run([(psi1,",
+      "metadata": {
+        "section_title": "test_backend_estimator_v2.py",
+        "section_id": "part_1",
+        "source_file": "test\\python\\primitives\\test_backend_estimator_v2.py",
+        "package": "qiskit"
+      },
+      "score": 0.9020509833317286,
+      "original_score": 0.8974952151145997,
+      "vector_score": 1.0,
+      "bm25_score": 0.44148192553409016,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "ansatz"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "test_pvqd__5c3f037a4563696e54ecfad7246ef5cc__part_4__4",
+      "text": " aux_operators=[self.hamiltonian, self.observable]\n        )\n\n        sampler = StatevectorSampler()\n        fidelity_primitive = ComputeUncompute(sampler)\n\n        pvqd = PVQD(\n            fidelity_primitive,\n            self.ansatz,\n            self.initial_parameters,\n            optimizer=SPSA(maxiter=0, learning_rate=0.1, perturbation=0.01),\n        )\n\n        with self.assertRaises(ValueError):\n            _ = pvqd.evolve(problem)\n\n    def test_transpiler(self):\n        \"\"\"Test that the transpiler is called.\"\"\"\n        time = 0.02\n        hamiltonian = Pauli(\"XX\")\n        optimizer = L_BFGS_B(maxiter=1)\n\n        sampler = StatevectorSampler()\n        estimator = StatevectorEstimator()\n        fidelity_primitive = ComputeUncompute(sampler)\n\n        pass_manager = generate_preset_pass_manager(\n            backend=GenericBackendV2(num_qubits=3, coupling_map=[[0, 1], [1, 2]], seed=54),\n            optimization_level=1,\n            seed_transpiler=42,\n        )\n        counts = [0]\n\n        def callback(**kwargs):\n            counts[0] = kwargs[\"count\"]\n\n        # run pVQD keeping track of the energy and the magnetization\n        pvqd = PVQD(\n            fidelity_primitive,\n            self.ansatz,\n            self.initial_parameters,\n            estimator,\n            optimizer=optimizer,\n            num_timesteps=None,\n            transpiler=pass_manager,\n            transpiler_options={\"callback\": callback},\n        )\n        problem = TimeEvolutionProblem(\n            hamiltonian, time, aux_operators=[hamiltonian, self.observable]\n        )\n        pvqd.evolve(problem)\n\n        self.assertGreater(counts[0], 0)\n\n\nclass TestPVQDUtils(QiskitAlgorithmsTestCase):\n    \"\"\"Test some utility functions for PVQD.\"\"\"\n\n    def setUp(self):\n        super().setUp()\n        self.hamiltonian = 0.1 * SparsePauliOp([Pauli(\"ZZ\"), Pauli(\"IX\"), Pauli(\"XI\")])\n        self.ansatz = efficient_su2(2, reps=1)\n\n    def test_gradient_supported(self):\n        \"\"\"Test the gradient support is correctly determined.\"\"\"\n        # gradient supported here\n        wrapped = QuantumCircuit(2)  # a circuit wrapped into a big instruction\n        wrapped.append(efficient_su2(2).to_gate(), [0, 1])\n        plain = wrapped.decompose()  # a plain circuit with already supported instructions\n\n        # gradients not supported on the following circuits\n        x = Parameter(\"x\")\n        duplicated = QuantumCircuit(2)\n        duplicated.rx(x, 0)\n        duplicated.rx(x, 1)\n\n        needs_chainrule = QuantumCircuit(2)\n        needs_chainrule.rx(2 * x, 0)\n\n        custom_gate = WhatAmI(x",
+      "metadata": {
+        "section_title": "test_pvqd.py",
+        "source_file": "test\\time_evolvers\\test_pvqd.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_4"
+      },
+      "score": 0.8272877373163434,
+      "original_score": 0.8192546088194291,
+      "vector_score": 1.0,
+      "bm25_score": 0.05428850895586705,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "ansatz"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "test_quadratic_hamiltonian__d0aa9df31e9e71f6b89b9dddcaa3d319__part_4__4",
+      "text": ".0\n        quad_ham = QuadraticHamiltonian(hermitian_part, antisymmetric_part, constant)\n        fermionic_op = quad_ham.second_q_op()\n        expected_terms = {\n            \"\": 5.0,\n            \"+_0 -_0\": 1.0,\n            \"+_0 -_1\": 2j,\n            \"+_1 -_0\": -2j,\n            \"+_1 -_1\": 3.0,\n            \"+_0 +_1\": 2j,\n            \"+_1 +_0\": -2j,\n            \"-_0 -_1\": 2j,\n            \"-_1 -_0\": -2j,\n        }\n        expected_op = FermionicOp(expected_terms, num_spin_orbitals=2)\n        self.assertTrue(expected_op.equiv(fermionic_op))\n\n    def test_validate(self):\n        \"\"\"Test input validation.\"\"\"\n        mat = np.array([[1, 2], [3, 4]])\n        _ = QuadraticHamiltonian(hermitian_part=mat, antisymmetric_part=None, validate=False)\n        with self.assertRaisesRegex(ValueError, \"Hermitian\"):\n            _ = QuadraticHamiltonian(hermitian_part=mat, antisymmetric_part=None)\n        with self.assertRaisesRegex(ValueError, \"Antisymmetric\"):\n            _ = QuadraticHamiltonian(hermitian_part=None, antisymmetric_part=mat)\n\n        hermitian_part = np.array([[1, 2j], [-2j, 3]])\n        antisymmetric_part = np.array([[0, 4, 0], [-4, 0, 4], [0, -4, 0]])\n        with self.assertRaisesRegex(ValueError, \"same shape\"):\n            _ = QuadraticHamiltonian(hermitian_part, antisymmetric_part)\n        with self.assertRaisesRegex(ValueError, \"num_modes\"):\n            _ = QuadraticHamiltonian(hermitian_part, num_modes=5)\n        with self.assertRaisesRegex(ValueError, \"num_modes\"):\n            _ = QuadraticHamiltonian(antisymmetric_part=antisymmetric_part, num_modes=5)\n\n    def test_addition(self):\n        \"\"\"Test addition.\"\"\"\n        quad_ham_1 = QuadraticHamiltonian(\n            np.array([[1, 2j], [-2j, 3]]), np.array([[0, 4], [-4, 0]]), 5.0\n        )\n        quad_ham_2 = QuadraticHamiltonian(\n            np.array([[6, 7j], [-7j, 8]]), np.array([[0, 9j], [-9j, 0]]), 10.0\n        )\n\n        quad_ham_sum = quad_ham_1 + quad_ham_2\n        expected = QuadraticHamiltonian(\n            np.array([[7, 9j], [-9j, ",
+      "metadata": {
+        "section_id": "part_4",
+        "package": "qiskit-nature",
+        "section_title": "test_quadratic_hamiltonian.py",
+        "source_file": "test\\second_q\\hamiltonians\\test_quadratic_hamiltonian.py"
+      },
+      "score": 0.8082844691587262,
+      "original_score": 0.8082844691587262,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "test_vqd__69bbcfe16b14a0e7e3cec7e7a51130fb__part_1__1",
+      "text": " -1.85727503\n        self.h2_energy_excited = [-1.85727503, -1.24458455, -0.88272215, -0.22491125]\n\n        self.ryrz_wavefunction = n_local(\n            2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\", reps=1\n        )\n        self.ry_wavefunction = n_local(2, rotation_blocks=\"ry\", entanglement_blocks=\"cz\")\n\n        self.estimator = StatevectorEstimator(seed=self.seed)\n        self.fidelity = ComputeUncompute(StatevectorSampler(seed=self.seed, default_shots=10_000))\n        self.betas = [3]\n\n    @data(H2_SPARSE_PAULI)\n    def test_basic_operator(self, op):\n        \"\"\"Test the VQD without aux_operators.\"\"\"\n        wavefunction = self.ryrz_wavefunction\n        vqd = VQD(\n            estimator=self.estimator,\n            fidelity=self.fidelity,\n            ansatz=wavefunction,\n            optimizer=COBYLA(),\n            betas=self.betas,\n        )\n\n        result = vqd.compute_eigenvalues(operator=op)\n\n        with self.subTest(msg=\"test eigenvalue\"):\n            np.testing.assert_array_almost_equal(\n                result.eigenvalues.real, self.h2_energy_excited[:2], decimal=1\n            )\n\n        with self.subTest(msg=\"test dimension of optimal point\"):\n            self.assertEqual(len(result.optimal_points[-1]), 8)\n\n        with self.subTest(msg=\"assert cost_function_evals is set\"):\n            self.assertIsNotNone(result.cost_function_evals)\n\n        with self.subTest(msg=\"assert optimizer_times is set\"):\n            self.assertIsNotNone(result.optimizer_times)\n\n        with self.subTest(msg=\"assert return ansatz is set\"):\n            job = self.estimator.run(\n                [\n                    (circuits, op, optimal_points)\n                    for (circuits, optimal_points) in zip(\n                        result.optimal_circuits, result.optimal_points\n                    )\n                ]\n            )\n            job_result = job.result()\n            eigenvalues = np.array([job_result[i].data.evs for i in range(len(result.eigenvalues))])\n            np.testing.assert_array_almost_equal(eigenvalues, result.eigenvalues, 6)\n\n        with self.subTest(msg=\"assert returned values are eigenvalues\"):\n            np.testing.assert_array_almost_equal(\n                result.optimal_values, self.h2_energy_excited[:2], decimal=3\n            )\n\n    def test_full_spectrum(self):\n        \"\"\"Test obtaining all eigenvalues.\"\"\"\n        vqd = VQD(\n            self.estimator,\n            self.fidelity,\n            self.ryrz_wavefunction,\n            optimizer=COBYLA(),\n            k=4,\n            betas=[3, 3, 3],\n        )\n        result = vqd.compute_eigenvalues(H2_SPARSE_PA",
+      "metadata": {
+        "section_id": "part_1",
+        "section_title": "test_vqd.py",
+        "source_file": "test\\eigensolvers\\test_vqd.py",
+        "package": "qiskit-algorithms"
+      },
+      "score": 0.739055736093911,
+      "original_score": 0.7331251846414999,
+      "vector_score": 0.9070138207709804,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "ansatz"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 90,
+    "total_bm25_results_count": 90,
+    "merged_results_count": 158,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 49
+      },
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      }
+    }
+  }
+}

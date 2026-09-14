@@ -1,0 +1,143 @@
+{
+  "query": "itensors tJ model initial state function signature and return type MPS",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "UpgradeGuide_0.1_to_0.2__cd8727a7c4be2179bde8bba8a697829f__Miscellaneous-breaking-changes_3__1",
+      "text": ".7071067811865475\n```\nwhich will be used for making more general MPS product states.\nThis should not affect end users in general, besides ones who had customized the previous state function, such as with overloads like:\n```code\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Up\") = 1\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Dn\") = 2\n```\nwhich should be changed now to:\n```code\nITensors.val(::SiteType\"My_S=1/2\", ::StateName\"Up\") = 1\nITensors.val(::SiteType\"My_S=1/2\", ::StateName\"Dn\") = 2\n```\nThe QN convention of the \"Qubit\" site type is changed to track the total number of 1 bits instead of the net number of 1 bits vs 0 bits (i.e. change the QN from +1/-1 to 0/1) ( PR #676 ).\n```code\njulia> s = siteinds(\"Qubit\", 4; conserve_number=true)\n4-element Vector{Index{Vector{Pair{QN, Int64}}}}:\n (dim=2|id=925|\"Qubit,Site,n=1\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=799|\"Qubit,Site,n=2\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=8|\"Qubit,Site,n=3\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=385|\"Qubit,Site,n=4\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n```\nBefore it was +1/-1 like \"S=1/2\" :\n```code\njulia> s = siteinds(\"S=1/2\", 4; conserve_sz=true)\n4-element Vector{Index{Vector{Pair{QN, Int64}}}}:\n (dim=2|id=364|\"S=1/2,Site,n=1\") <Out>\n 1: QN(\"Sz\",1) => 1\n 2: QN(\"Sz\",-1) => 1\n (dim=2|id=823|\"S=1/2,Site,n=2\") <Out>\n 1: QN(\"Sz\",1) => 1\n 2: QN(\"",
+      "metadata": {
+        "source_file": "docs\\build\\UpgradeGuide_0.1_to_0.2.html",
+        "section_id": "Miscellaneous-breaking-changes",
+        "section_title": "Miscellaneous breaking changes",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.12886026392907374,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensors",
+        "state",
+        "function",
+        "type",
+        "mps"
+      ],
+      "match_ratio": 0.5555555555555556,
+      "is_html": true
+    },
+    {
+      "id": "reducedconstantterm__8c08c0de5313088c4d1b873a65f65553__part_0__0",
+      "text": "using ITensors: ITensors, ITensor, dag, dim, prime\n\n\"\"\"\nHolds the following data where basis\nis the MPS being optimized and state is the \nMPS held constant by the ProjMPS.\n```\n     o--o--o--o--o--o--o--o--o--o--o <state|\n     |  |  |  |  |  |  |  |  |  |  |\n     *--*--*-      -*--*--*--*--*--* |reduced_basis>\n```\n\"\"\"\nmutable struct ReducedConstantTerm <: AbstractProjMPO\n  lpos::Int\n  rpos::Int\n  nsite::Int\n  state::MPS\n  environments::Vector{ITensor}\nend\n\nfunction ReducedConstantTerm(state::MPS)\n  lpos = 0\n  rpos = length(state) + 1\n  nsite = 2\n  environments = Vector{ITensor}(undef, length(state))\n  return ReducedConstantTerm(lpos, rpos, nsite, state, environments)\nend\n\nfunction Base.getproperty(reduced_state::ReducedConstantTerm, sym::Symbol)\n  # This is for compatibility with `AbstractProjMPO`.\n  # TODO: Don't use `reduced_state.H`, `reduced_state.LR`, etc.\n  # in `AbstractProjMPO`.\n  if sym == :LR\n    return getfield(reduced_state, :environments)\n  end\n  return getfield(reduced_state, sym)\nend\n\nBase.length(reduced_state::ReducedConstantTerm) = length(reduced_state.state)\n\nfunction Base.copy(reduced_state::ReducedConstantTerm)\n  return ReducedConstantTerm(\n    reduced_state.lpos,\n    reduced_state.rpos,\n    reduced_state.nsite,\n    copy(reduced_state.state),\n    copy(reduced_state.environments),\n  )\nend\n\nfunction ITensorMPS.set_nsite!(reduced_state::ReducedConstantTerm, nsite)\n  reduced_state.nsite = nsite\n  return reduced_state\nend\n\nfunction ITensorMPS.makeL!(reduced_state::ReducedConstantTerm, basis::MPS, position::Int)\n  # Save the last `L` that is made to help with caching\n  # for DiskProjMPO\n  ll = reduced_state.lpos\n  if ll ≥ position\n    # Special case when nothing has to be done.\n    # Still need to change the position if lproj is\n    # being moved backward.\n    reduced_state.lpos = position\n    return nothing\n  end\n  # Make sure ll is at least 0 for the generic logic below\n  ll = max(ll, 0)\n  L = lproj(reduced_state)\n  while ll < position\n    L = L * basis[ll + 1] * dag(pr",
+      "metadata": {
+        "section_title": "reducedconstantterm.jl",
+        "section_id": "part_0",
+        "source_file": "src\\solvers\\reducedconstantterm.jl",
+        "package": "itensormps"
+      },
+      "score": 0.9722580931530865,
+      "original_score": 0.9687903547972223,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensors",
+        "state",
+        "function",
+        "return",
+        "mps"
+      ],
+      "match_ratio": 0.5555555555555556,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__4afa60a84ae9e39b6c9236cb2ad115d6__part_0__0",
+      "text": "@eval module $(gensym())\nusing ITensorMPS\nusing ITensors\nusing Test\n\n@testset \"AutoFermion MPS, MPO, and OpSum\" begin\n  ITensors.enable_auto_fermion()\n\n  @testset \"MPS Tests\" begin\n    @testset \"Product MPS consistency checks\" begin\n      s = siteinds(\"Fermion\", 3; conserve_qns=true)\n\n      pA = MPS(s, [2, 1, 2])\n      TA = ITensor(s[1], s[2], s[3])\n      TA[s[1] => 2, s[2] => 1, s[3] => 2] = 1.0\n      A = pA[1] * pA[2] * pA[3]\n      @test norm(A - TA) < 1E-8\n\n      pB = MPS(s, [1, 2, 2])\n      TB = ITensor(s[1], s[2], s[3])\n      TB[s[1] => 1, s[2] => 2, s[3] => 2] = 1.0\n      B = pB[1] * pB[2] * pB[3]\n      @test norm(B - TB) < 1E-8\n    end\n    @testset \"MPS inner regression test\" begin\n      sites = siteinds(\"Fermion\", 3; conserve_qns=true)\n      psi = MPS(sites, [2, 2, 1])\n      @test inner(psi, psi) ≈ 1.0\n    end\n    @testset \"Orthogonalize of Product MPS\" begin\n      N = 3\n\n      sites = siteinds(\"Fermion\", N; conserve_qns=true)\n\n      state = [1 for n in 1:N]\n      state[1] = 2\n      state[2] = 2\n      psi = MPS(sites, state)\n      psi_fluxes = [flux(psi[n]) for n in 1:N]\n\n      psi_orig = copy(psi)\n      orthogonalize!(psi, 1)\n      @test inner(psi_orig, psi) ≈ 1.0\n      @test inner(psi, psi_orig) ≈ 1.0\n    end\n  end\n\n  @testset \"Fermionic OpSum Tests\" begin\n    @testset \"Spinless Fermion Hamiltonian\" begin\n      N = 2\n      sites = siteinds(\"Fermion\", N; conserve_qns=true)\n      t1 = 1.0\n      os = OpSum()\n      for b in 1:(N - 1)\n        os -= t1, \"Cdag\", b, \"C",
+      "metadata": {
+        "section_id": "part_0",
+        "package": "itensormps",
+        "section_title": "test_fermions.jl",
+        "source_file": "test\\base\\test_fermions.jl"
+      },
+      "score": 0.7806145423276545,
+      "original_score": 0.7649441524939156,
+      "vector_score": 0.7895868788392575,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensors",
+        "state",
+        "mps"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "index__1de0221505bf56b6e61f33e29f10859a__root_0__0",
+      "text": "Finite MPS and MPO methods based on the Julia version of ITensor ( ITensors.jl ). See the ITensorMPS.jl documentation for more details.",
+      "metadata": {
+        "source_file": "docs\\build\\index.html",
+        "section_id": "root",
+        "section_title": "ROOT",
+        "package": "itensormps"
+      },
+      "score": 0.7449919783143002,
+      "original_score": 0.6385713078470396,
+      "vector_score": 0.6591429246637155,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "mps"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": true
+    },
+    {
+      "id": "reducedcontractproblem__a81dd6d736bc7bb5e3922fca5eabd618__part_0__0",
+      "text": "using ITensors: ITensor\n\n\"\"\"\nA ReducedContractProblem represents the application of an\nMPO `operator` onto an MPS `input_state` but \"projected\" by\nthe basis of a different MPS `state` (which\ncould be an approximation to operator|state>).\n\nAs an implementation of the AbstractProjMPO\ntype, it supports multiple `nsite` values for\none- and two-site algorithms.\n\n```\n     *--*--*-      -*--*--*--*--*--* <state|\n     |  |  |  |  |  |  |  |  |  |  |\n     h--h--h--h--h--h--h--h--h--h--h operator  \n     |  |  |  |  |  |  |  |  |  |  |\n     o--o--o-      -o--o--o--o--o--o |input_state>\n```\n\"\"\"\nmutable struct ReducedContractProblem <: AbstractProjMPO\n  lpos::Int\n  rpos::Int\n  nsite::Int\n  input_state::MPS\n  operator::MPO\n  environments::Vector{ITensor}\nend\n\nfunction ReducedContractProblem(input_state::MPS, operator::MPO)\n  lpos = 0\n  rpos = length(operator) + 1\n  nsite = 2\n  environments = Vector{ITensor}(undef, length(operator))\n  return ReducedContractProblem(lpos, rpos, nsite, input_state, operator, environments)\nend\n\nfunction Base.getproperty(reduced_operator::ReducedContractProblem, sym::Symbol)\n  # This is for compatibility with `AbstractProjMPO`.\n  # TODO: Don't use `reduced_operator.H`, `reduced_operator.LR`, etc.\n  # in `AbstractProjMPO`.\n  if sym === :H\n    return getfield(reduced_operator, :operator)\n  elseif sym == :LR\n    return getfield(reduced_operator, :environments)\n  end\n  return getfield(reduced_operator, sym)\nend\n\nfunction Base.copy(reduced_operator::ReducedContractProblem)\n  return ReducedContractProblem(\n    reduced_operator.lpos,\n    reduced_operator.rpos,\n    reduced_operator.nsite,\n    copy(reduced_operator.input_state),\n    copy(reduced_operator.operator),\n    copy(reduced_operator.environments),\n  )\nend\n\nBase.length(reduced_operator::ReducedContractProblem) = length(reduced_operator.operator)\n\nfunction ITensorMPS.set_nsite!(reduced_operator::ReducedContractProblem, nsite)\n  reduced_operator.nsite = nsite\n  return reduced_operator\nend\n\nfunction ITensorMPS.makeL!(reduced_operator::ReducedContractProblem, state::MPS, k::Int)\n  # Save the last `L` that is",
+      "metadata": {
+        "section_id": "part_0",
+        "package": "itensormps",
+        "source_file": "src\\solvers\\reducedcontractproblem.jl",
+        "section_title": "reducedcontractproblem.jl"
+      },
+      "score": 0.7298617973139965,
+      "original_score": 0.6883020738238421,
+      "vector_score": 0.7104757705478094,
+      "bm25_score": null,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "itensors",
+        "state",
+        "function",
+        "return",
+        "type",
+        "mps"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 115,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      }
+    }
+  }
+}

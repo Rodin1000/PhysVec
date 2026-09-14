@@ -1,0 +1,149 @@
+{
+  "query": "Create SparsePauliOp for fermionic observable measurement after effector in Qiskit",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "bksf__85a46d24e91e3b50acfc604933e7a2f6__part_1__1",
+      "text": "_pauli = SparsePauliOp(table, coeffs)\n\n        return sorted_sparse_pauli\n\n\nclass TermType(Enum):\n    \"\"\"Denotes the type of interaction of a Fermionic operator.\"\"\"\n\n    NUMBER = 1\n    EXCITATION = 2\n    DOUBLE_EXCITATION = 3\n    NUMBER_EXCITATION = 4\n    COULOMB_EXCHANGE = 5\n\n\ndef _convert_operator(ferm_op: FermionicOp, edge_list: np.ndarray) -> SparsePauliOp:\n    \"\"\"Convert a fermionic operator together with qubit-connectivity graph to a Pauli operator.\n\n    This is the heart of the implementation of BKSF mapping. The connectivity graph must be\n    computed before this method is called. The returned Pauli operator must be sorted and simplified.\n\n    Args:\n      ferm_op: The fermionic operator to convert.\n      edge_list: The qubit-connectivity graph expressed as an edge list.\n\n    Returns:\n      An un-simplified Pauli operator representing `ferm_op`.\n\n    Raises:\n      ValueError: if the type of interaction of any term is unknown.\n    \"\"\"\n    encountered_terms = set()\n    sparse_pauli = None\n    for term in ferm_op.terms():\n        if _operator_coefficient(term) == 0:\n            continue\n        term_type, facs = _analyze_term(_operator_string(term))\n\n        # construct h.c. pair\n        hc_facs = frozenset((i, \"-\" if c == \"+\" else \"+\") for i, c in facs)\n        if hc_facs in encountered_terms:\n            continue\n        encountered_terms.add(frozenset(facs))\n\n        if term_type == TermType.NUMBER:  # a^\\dagger_p a_p\n            p = facs[0][0]  # pylint: disable=invalid-name\n            h1_pq = _operator_coefficient(term)\n            sparse_pauli = _add_sparse_pauli(sparse_pauli, _number_operator(edge_list, p, h1_pq))\n            continue\n\n        if term_type == TermType.EXCITATION:\n            (p, q) = [facs[i][0] for i in range(2)]  # p < q always   # pylint: disable=invalid-name\n            h1_pq = _operator_coefficient(term)\n            sparse_pauli = _add_sparse_pauli(\n                sparse_pauli, _excitation_operator(edge_list, p, q, h1_pq)\n            )\n\n        else:\n            facs_reordered, phase = _to_physicist_index_order(facs)\n            h2_pqrs = phase * _operator_coefficient(term)\n            (p, q, r, s) = [facs_reordered[i][0] for i in range(4)]  # pylint: disable=invalid-name\n            if term_type",
+      "metadata": {
+        "section_title": "bksf.py",
+        "package": "qiskit-nature",
+        "source_file": "qiskit_nature\\second_q\\mappers\\bksf.py",
+        "section_id": "part_1"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.864043691937841,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "sparsepauliop",
+        "fermionic"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "lin_comb_estimator_gradient__14d70b916953fc4d6a431ed220b25071__part_3__3",
+      "text": "uits[param])\n\n            n = len(gradient_circuits)\n            # Make the observable as :class:`~qiskit.quantum_info.SparsePauliOp` and\n            # add an ancillary operator to compute the gradient.\n            observable = SparsePauliOp(observable)\n            observable_1, observable_2 = _make_lin_comb_observables(\n                observable, self._derivative_type\n            )\n            # If its derivative type is `DerivativeType.COMPLEX`, calculate the gradient\n            # of the real and imaginary parts separately.\n            meta[\"derivative_type\"] = self.derivative_type\n            metadata.append(meta)\n            # Combine inputs into a single job to reduce overhead.\n            if self._derivative_type == DerivativeType.COMPLEX:\n                all_n.append(2 * n)\n                pubs.extend(\n                    [\n                        (gradient_circuit, observable_1, parameter_values_, precision_)\n                        for gradient_circuit in gradient_circuits\n                    ]\n                )\n                pubs.extend(\n                    [\n                        (gradient_circuit, observable_2, parameter_values_, precision_)\n                        for gradient_circuit in gradient_circuits\n                    ]\n                )\n            else:\n                all_n.append(n)\n                pubs.extend(\n                    [\n                        (gradient_circuit, observable_1, parameter_values_, precision_)\n                        for gradient_circuit in gradient_circuits\n                    ]\n                )\n\n        if self._transpiler is not None:\n            for index, pub in enumerate(pubs):\n                new_circuit = self._transpiler.run(pub[0], **self._transpiler_options)\n                new_observable = pub[1].apply_layout(new_circuit.layout)\n                pubs[index] = (new_circuit, new_observable) + pub[2:]\n\n        # Run the single job with all circuits.\n        results = run_estimator_job(self._estimator, pubs)\n\n        # Compute the gradients.\n        gradients = []\n        partial_sum_n = 0\n\n        for n in all_n:\n            # this disable is needed as Pylint does not understand derivative_type is a property if\n            # it is only defined in the base class and the getter is in the child\n            # pylint: disable=comparison-with-callable\n            if self.derivative_type == DerivativeType.COMPLEX:\n                gradient = np.zeros(n // 2, dtype=\"complex\")\n                gradient.real = np.array(\n                    [result.data.evs for result in results[partial_sum_n : partial_sum_n + n // 2]]\n                )\n                gradient.imag = np.array(\n                    [\n                        result.data.evs\n                        for result in results[partial_sum_n + n // 2 : partial_sum_n + n]\n                    ]\n                )\n\n            else:\n                gradient = np.real(\n                    [result.data.evs for result in results[partial_sum_n : partial_sum_n + n]]\n                )\n\n            partial_sum_n += n\n            gradients.append(",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "section_title": "lin_comb_estimator_gradient.py",
+        "section_id": "part_3",
+        "source_file": "qiskit_algorithms\\gradients\\lin_comb\\lin_comb_estimator_gradient.py"
+      },
+      "score": 0.9126747894287782,
+      "original_score": 0.9055943669500305,
+      "vector_score": 0.9068661827146967,
+      "bm25_score": 0.7773858371589513,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "sparsepauliop",
+        "observable",
+        "qiskit"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "sparse_pauli_op__5dac2011eae3b32c61fcec03ebfcfd78__lines_900_1251__1",
+      "text": "            SparsePauliOp: The SparsePauliOp representation of the Pauli terms.\n\n        Raises:\n            QiskitError: If the number of qubits is incompatible with the indices of the Pauli terms.\n            QiskitError: If the designated qubit is already assigned.\n        \"\"\"\n        obj = list(obj)  # To convert zip or other iterable\n        size = len(obj)\n\n        if size == 0:\n            obj = [(\"I\" * num_qubits, range(num_qubits), 0)]\n            size = len(obj)\n\n        coeffs = np.zeros(size, dtype=dtype)\n        labels = np.zeros(size, dtype=f\"<U{num_qubits}\")\n\n        for i, (paulis, indices, coeff) in enumerate(obj):\n            if do_checks and len(indices) != len(set(indices)):\n                raise QiskitError(\"Input indices are duplicated.\")\n            # construct the full label based off the non-trivial Paulis and indices\n            label = [\"I\"] * num_qubits\n            for pauli, index in zip(paulis, indices):\n                if index >= num_qubits:\n                    raise QiskitError(\n                        f\"The number of qubits ({num_qubits}) is smaller than a required index {index}.\"\n                    )\n                label[~index] = pauli\n\n            labels[i] = \"\".join(label)\n            coeffs[i] = coeff\n\n        paulis = PauliList(labels)\n        return SparsePauliOp(paulis, coeffs, copy=False)\n\n    @staticmethod\n    def from_sparse_observable(obs: SparseObservable) -> SparsePauliOp:\n        r\"\"\"Initialize from a :class:`.SparseObservable`.\n\n        .. warning::\n\n            A :class:`.SparseObservable` can efficiently represent eigenstate projectors\n            (such as :math:`|0\\langle\\rangle 0|`), but a :class:`.SparsePauliOp` **cannot**.\n            If the input ``obs`` has :math:`n` single-qubit projectors, the resulting\n            :class:`.SparsePauliOp` will use :math:`2^n` terms, which is an exponentially\n            expensive representation that can quickly run out of memory.\n\n        Args:\n            obs: The :class:`.SparseObservable` to convert.\n\n        Returns:\n            A :class:`.SparsePauliOp` version of the observable.\n        \"\"\"\n        as_sparse_list = obs.as_paulis().to_sparse_list()\n        return SparsePauliOp.from_sparse_list(as_sparse_list, obs.num_qubits)\n\n    def to_list(self, array: bool = False):\n        \"\"\"Convert to a list Pauli string labels and coefficients.\n\n        For operators with a lot of terms converting using the ``array=True``\n        kwarg will be more efficient since it allocates memory for\n        the full Numpy array of labels in advance.\n\n        Args:\n            array (bool): return a Numpy array if True, otherwise\n                          return a list (Default: False).\n\n        Returns:\n            list or array: List of pairs (label, coeff) for rows of the PauliList.\n        \"\"\"\n        # Dtype for a structured array with string labels and complex coeffs\n        pauli_labels = self.paulis.to_labels(array=True)\n        labels = np.zeros(\n            self.size, dtype=[(\"labels\", pauli_labels.dtype), (\"coeffs\", self.coeffs.dtype)]\n        )\n        labels[\"labels\"] = pauli_labels\n        labels[\"coeffs\"] = self.coeffs\n        if array:\n            return labels\n        return labels.tolist()\n\n    def to_sparse_list(self):\n        \"\"\"Convert to a sparse Pauli list format with elements (pauli, qubits, coefficient).\"\"\"\n        pauli_labels = self.paulis.to_labels()\n        sparse_list = [\n            (*sparsify_label(label), coeff) for label, coeff in zip(pauli_labels, self.coeffs)\n        ]\n        return sparse_list\n\n    def to_matrix(self, sparse: bool = False, force_serial: bool = False) -> np.ndarray:\n        \"\"\"Convert to a dense or sparse matrix.\n\n        Args:\n            sparse: if ``True`` return a sparse CSR matrix, otherwise return dense Numpy\n                array (the default).\n            force_serial: if ``True``, use an unthreaded implementation, regardless of the state of\n                the `Qiskit threading-control environment variables\n                <https://quantum.cloud.ibm.com/docs/guides/configure-qiskit-local#environment-variables>`__.\n                By default, this will use threaded parallelism over the available CPUs.\n\n        Returns:\n            array: A dense matrix if `sparse=False`.\n            csr_matrix: A sparse matrix in CSR format if `sparse=True`.\n        \"\"\"\n        if self.coeffs.dtype == object:\n            # Fallback to slow Python-space method.\n            return sum(self.matrix_iter(sparse=sparse))\n\n        pauli_list = self.paulis\n        zx = ZXPaulis(\n            pauli_list.x.astype(np.bool_),\n            pauli_list.z.astype(np.bool_),\n            pauli_list.phase.astype(np.uint8),\n            self.coeffs.astype(np.complex128),\n        )\n        if sparse:\n            from scipy.sparse import csr_matrix\n\n            data, indices, indptr = to_matrix_sparse(zx, force_serial=force_serial)\n            side = 1 << self.num_qubits\n            return csr_matrix((data, indices, indptr), shape=(side, side))\n        return to_matrix_dense(zx, force_serial=force_serial)\n\n    def to_operator(self) -> Operator:\n        \"\"\"Convert to a matrix Operator object\"\"\"\n        return Operator(self.to_matrix())\n\n    # ---------------------------------------------------------------------\n    # Custom Iterators\n    # ---------------------------------------------------------------------\n\n    def label_iter(self):\n        \"\"\"Return a label representation iterator.\n\n        This is a lazy iterator that converts each term in the SparsePauliOp\n        into a tuple (label, coeff). To convert the entire table to labels\n        use the :meth:`to_labels` method.\n\n        Returns:\n            LabelIterator: label iterator object for the SparsePauliOp.\n        \"\"\"\n\n        class LabelIterator(CustomIterator):\n            \"\"\"Label representation iteration and item access.\"\"\"\n\n            def __repr__(self):\n                return f\"<SparsePauliOp_label_iterator at {hex(id(self))}>\"\n\n            def __getitem__(self, key):\n                coeff = self.obj.coeffs[key]\n                pauli = self.obj.paulis.label_iter()[key]\n                return (pauli, coeff)\n\n        return LabelIterator(self)\n\n    def matrix_iter(self, sparse: bool = False):\n        \"\"\"Return a matrix representation iterator.\n\n        This is a lazy iterator that converts each term in the SparsePauliOp\n        into a matrix as it is used. To convert to a single matrix use the\n        :meth:`to_matrix` method.\n\n        Args:\n            sparse (bool): optionally return sparse CSR matrices if True,\n                           otherwise return Numpy array matrices\n                           (Default: False)\n\n        Returns:\n            MatrixIterator: matrix iterator object for the PauliList.\n        \"\"\"\n\n        class MatrixIterator(CustomIterator):\n            \"\"\"Matrix representation iteration and item access.\"\"\"\n\n            def __repr__(self):\n                return f\"<SparsePauliOp_matrix_iterator at {hex(id(self))}>\"\n\n            def __getitem__(self, key):\n                coeff = self.obj.coeffs[key]\n                mat = self.obj.paulis[key].to_matrix(sparse)\n                return coeff * mat\n\n        return MatrixIterator(self)\n\n    def noncommutation_graph(self, qubit_wise: bool) -> rx.PyGraph:\n        \"\"\"Create the non-commutation graph of this SparsePauliOp.\n\n        This transforms the measurement operator grouping problem into graph coloring problem. The\n        constructed graph contains one node for each Pauli. The nodes will be connecting for any two\n        Pauli terms that do _not_ commute.\n\n        Args:\n            qubit_wise (bool): whether the commutation rule is applied to the whole operator,\n                or on a per-qubit basis.\n\n        Returns:\n            rustworkx.PyGraph: the non-commutation graph with nodes for each Pauli and edges\n                indicating a non-commutation relation. Each node will hold the index of the Pauli\n                term it corresponds to in its data. The edges of the graph hold no data.\n        \"\"\"\n        return self.paulis.noncommutation_graph(qubit_wise)\n\n    def group_commuting(self, qubit_wise: bool = False) -> list[SparsePauliOp]:\n        \"\"\"Partition a SparsePauliOp into sets of commuting Pauli strings.\n\n        Args:\n            qubit_wise (bool): whether the commutation rule is applied to the whole operator,\n                or on a per-qubit basis.  For example:\n\n                .. plot::\n                   :include-source:\n                   :nofigs:\n\n                    >>> from qiskit.quantum_info import SparsePauliOp\n                    >>> op = SparsePauliOp.from_list([(\"XX\", 2), (\"YY\", 1), (\"IZ\",2j), (\"ZZ\",1j)])\n                    >>> op.group_commuting()\n                    [SparsePauliOp([\"IZ\", \"ZZ\"], coeffs=[0.+2.j, 0.+1j]),\n                     SparsePauliOp([\"XX\", \"YY\"], coeffs=[2.+0.j, 1.+0.j])]\n                    >>> op.group_commuting(qubit_wise=True)\n                    [SparsePauliOp(['XX'], coeffs=[2.+0.j]),\n                     SparsePauliOp(['YY'], coeffs=[1.+0.j]),\n                     SparsePauliOp(['IZ', 'ZZ'], coeffs=[0.+2.j, 0.+1.j])]\n\n        Returns:\n            list[SparsePauliOp]: List of SparsePauliOp where each SparsePauliOp contains\n                commuting Pauli operators.\n        \"\"\"\n        groups = self.paulis._commuting_groups(qubit_wise)\n        return [self[group] for group in groups.values()]\n\n    @property\n    def parameters(self) -> ParameterView:\n        r\"\"\"Return the free ``Parameter``\\s in the coefficients.\"\"\"\n        ret = set()\n        for coeff in self.coeffs:\n            if isinstance(coeff, ParameterExpression):\n                ret |= coeff.parameters\n        return ParameterView(ret)\n\n    def assign_parameters(\n        self,\n        parameters: (\n            Mapping[Parameter, complex | ParameterExpression]\n            | Sequence[complex | ParameterExpression]\n        ),\n        inplace: bool = False,\n    ) -> SparsePauliOp | None:\n        r\"\"\"Bind the free ``Parameter``\\s in the coefficients to provided values.\n\n        .. note::\n            If all the parameters in the circuit are bound to numeric values, the coefficients array\n            will be returned with a :class:`complex` dtype.\n\n        Args:\n            parameters: The values to bind the parameters to.\n            inplace: If ``False``, a copy of the operator with the bound parameters is returned.\n                If ``True`` the operator itself is modified.\n\n        Returns:\n            A copy of the operator with bound parameters, if ``inplace`` is ``False``, otherwise\n            ``None``.\n        \"\"\"\n        if inplace:\n            bound = self\n        else:\n            bound = deepcopy(self)\n\n        # turn the parameters to a dictionary\n        if isinstance(parameters, Sequence):\n            free_parameters = bound.parameters\n            if len(parameters) != len(free_parameters):\n                raise ValueError(\n                    f\"Mismatching number of values ({len(parameters)}) and parameters \"\n                    f\"({len(free_parameters)}). For partial binding please pass a dictionary of \"\n                    \"{parameter: value} pairs.\"\n                )\n            parameters = dict(zip(free_parameters, parameters))\n\n        for i, coeff in enumerate(bound.coeffs):\n            if isinstance(coeff, ParameterExpression):\n                for key in coeff.parameters & parameters.keys():\n                    coeff = coeff.assign(key, parameters[key])\n                if len(coeff.parameters) == 0:\n                    coeff = complex(coeff)\n                bound.coeffs[i] = coeff\n\n        if bound.coeffs.dtype == object and not any(\n            isinstance(c, ParameterExpression) for c in bound.coeffs\n        ):\n            bound._coeffs = bound.coeffs.astype(complex)\n\n        return None if inplace else bound\n\n    def apply_layout(\n        self, layout: TranspileLayout | List[int] | None, num_qubits: int | None = None\n    ) -> SparsePauliOp:\n        \"\"\"Apply a transpiler layout to this :class:`~.SparsePauliOp`\n\n        Args:\n            layout: Either a :class:`~.TranspileLayout`, a list of integers or None.\n                    If both layout and num_qubits are none, a copy of the operator is\n                    returned.\n            num_qubits: The number of qubits to expand the operator to. If not\n                provided then if ``layout`` is a :class:`~.TranspileLayout` the\n                number of the transpiler output circuit qubits will be used by\n                default. If ``layout`` is a list of integers the permutation\n                specified will be applied without any expansion. If layout is\n                None, the operator will be expanded to the given number of qubits.\n\n        Returns:\n            A new :class:`.SparsePauliOp` with the provided layout applied\n        \"\"\"\n        from qiskit.transpiler.layout import TranspileLayout\n\n        if layout is None and num_qubits is None:\n            return self.copy()\n\n        n_qubits = self.num_qubits\n        if isinstance(layout, TranspileLayout):\n            n_qubits = len(layout._output_qubit_list)\n            layout = layout.final_index_layout()\n        if num_qubits is not None:\n            if num_qubits < n_qubits:\n                raise QiskitError(\n                    f\"The input num_qubits is too small, a {num_qubits} qubit layout cannot be \"\n                    f\"applied to a {n_qubits} qubit operator\"\n                )\n            n_qubits = num_qubits\n        if layout is None:\n            layout = list(range(self.num_qubits))\n        else:\n            if any(x < 0 or x >= n_qubits for x in layout):\n                raise QiskitError(\"Provided layout contains indices outside the number of qubits.\")\n            if len(set(layout)) != len(layout):\n                raise QiskitError(\"Provided layout contains duplicate indices.\")\n        if self.num_qubits == 0:\n            return type(self)([\"I\" * n_qubits] * self.size, self.coeffs)\n        new_op = type(self)(\"I\" * n_qubits)\n        return new_op.compose(self, qargs=layout)\n\n\ndef sparsify_label(pauli_string):\n    \"\"\"Return a sparse format of a Pauli string, e.g. \"XIIIZ\" -> (\"XZ\", [0, 4]).\"\"\"\n    qubits = [i for i, label in enumerate(reversed(pauli_string)) if label != \"I\"]\n    sparse_label = \"\".join(pauli_string[~i] for i in qubits)\n\n    return sparse_label, qubits\n\n\n# Update docstrings for API docs\ngenerate_apidocs(SparsePauliOp)\n",
+      "metadata": {
+        "source_file": "qiskit\\quantum_info\\operators\\symplectic\\sparse_pauli_op.py",
+        "section_title": "Lines 901-1251",
+        "package": "qiskit",
+        "section_id": "lines_900_1251"
+      },
+      "score": 0.8553235812657011,
+      "original_score": 0.8346555214465156,
+      "vector_score": 0.9500967005887896,
+      "bm25_score": 0.259414121677855,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "create",
+        "sparsepauliop",
+        "observable",
+        "measurement",
+        "qiskit"
+      ],
+      "match_ratio": 0.625,
+      "is_html": false
+    },
+    {
+      "id": "README__9e52fc636985046c4ee9350fa9244d32__h1_6_6__0",
+      "text": "from qiskit.quantum_info import SparsePauliOp\noperator = SparsePauliOp.from_list([(\"XXY\", 1), (\"XYX\", 1), (\"YXX\", 1), (\"YYY\", -1)])",
+      "metadata": {
+        "section_id": "h1_6",
+        "source_file": "README.md",
+        "section_title": "2. Define the observable to be measured",
+        "package": "qiskit"
+      },
+      "score": 0.8356839564646089,
+      "original_score": 0.8223610340157934,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "sparsepauliop",
+        "observable",
+        "qiskit"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "test_estimator__af207aef842da7ca864f3c735bdde459__part_5__5",
+      "text": "\n        qc = QuantumCircuit(n)\n        op = SparsePauliOp.from_list([(\"I\" * n, 1)])\n        with self.assertWarns(DeprecationWarning):\n            estimator = Estimator(abelian_grouping=abelian_grouping)\n        with self.subTest(\"one circuit\"):\n            result = estimator.run(qc, op, shots=1000).result()\n            np.testing.assert_allclose(result.values, [1])\n            self.assertEqual(len(result.metadata), 1)\n\n        with self.subTest(\"two circuits\"):\n            result = estimator.run([qc] * 2, [op] * 2, shots=1000).result()\n            np.testing.assert_allclose(result.values, [1, 1])\n            self.assertEqual(len(result.metadata), 2)\n\n    @data(True, False)\n    def test_numpy_params(self, abelian_grouping):\n        \"\"\"Test for numpy array as parameter values\"\"\"\n        qc = RealAmplitudes(num_qubits=2, reps=2)\n        op = SparsePauliOp.from_list([(\"IZ\", 1), (\"XI\", 2), (\"ZY\", -1)])\n        k = 5\n        params_array = np.random.rand(k, qc.num_parameters)\n        params_list = params_array.tolist()\n        params_list_array = list(params_array)\n        with self.assertWarns(DeprecationWarning):\n            estimator = Estimator(abelian_grouping=abelian_grouping)\n        target = estimator.run([qc] * k, [op] * k, params_list, seed=15).result()\n\n        with self.subTest(\"ndarrary\"):\n            result = estimator.run([qc] * k, [op] * k, params_array, seed=15).result()\n            self.assertEqual(len(result.metadata), k)\n            np.testing.assert_allclose(result.values, target.values)\n\n        with self.subTest(\"list of ndarray\"):\n            result = estimator.run([qc] * k, [op] * k, params_list_array, seed=15).result()\n            self.assertEqual(len(result.metadata), k)\n            np.testing.assert_allclose(result.values, target.values)\n\n    @data(True, False)\n    def test_with_shots_option_with_approximation(self, abelian_grouping):\n        \"\"\"test with shots option.\"\"\"\n        # Note: abelian_gropuing is ignored when approximation is True as documented.\n        # The purpose of this test is to make sure the results remain the same.\n        est = Estimator(approximation=True, abelian_grouping=abelian_grouping)\n        result = est.run(\n            self.ansatz, self.observable, parameter_values=[[0, 1, 1, 2, 3, 5]], shots=1024, seed=15\n        ).result()\n        self.assertIsInstance(result, EstimatorResult)\n        np.testing.assert_allclose(result.values, [-1.308899",
+      "metadata": {
+        "section_title": "test_estimator.py",
+        "package": "qiskit-aer",
+        "section_id": "part_5",
+        "source_file": "test\\terra\\primitives\\test_estimator.py"
+      },
+      "score": 0.8278858495585307,
+      "original_score": 0.8188272100616113,
+      "vector_score": 0.9957028314718105,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "sparsepauliop",
+        "observable"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 214,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      }
+    }
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "query": "itensor spin 1 site tags and state strings for initial state",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_10__10",
+      "text": "# Syntax `state(\"Up\", Index(2, \"S=1/2\"))`\nstate(sn::String, i::Index; kwargs...) = state(i, sn; kwargs...)\n\n\"\"\"\n    state(s::Index, name::String; kwargs...)\n\nReturn an ITensor corresponding to the state\nnamed `name` for the Index `s`. The returned\nITensor will have `s` as its only index.\n\nThe terminology here is based on the idea of a\nsingle-site state or wavefunction in physics.\n\nThe `state` function is implemented for various\nIndex tags by overloading either the\n`state` or `state!` methods which take a `SiteType`\nargument corresponding to one of the tags of\nthe Index `s` and an `StateName\"name\"` argument\nthat corresponds to the input state name.\n\nThe `state` system is used by the MPS type\nto construct product-state MPS and for other purposes.\n\n# Example\n\n```julia\ns = Index(2, \"Site,S=1/2\")\nsup = state(s,\"Up\")\nsdn = state(s,\"Dn\")\nsxp = state(s,\"X+\")\nsxm = state(s,\"X-\")\n```\n\"\"\"\nfunction state(s::Index, name::AbstractString; kwargs...)::ITensor\n  stypes = _sitetypes(s)\n  sname = StateName(name)\n\n  # Try calling state(::StateName\"Name\",::SiteType\"Tag\",s::Index; kwargs...)\n  for st in stypes\n    v = state(sname, st, s; kwargs...)\n    if !isnothing(v)\n      if v isa ITensor\n        return v\n      else\n        # TODO: deprecate, only for backwards compatibility.\n        return itensor(v, s)\n      end\n    end\n  end\n\n  # Try calling state!(::ITensor,::StateName\"Name\",::SiteType\"Tag\",s::Index;kwargs...)\n  T = ITensor(s)\n  for st in stypes\n    state!(T, sname, st, s; kwargs...)\n    !isempty(T) && return T\n  end\n\n  #\n  # otherwise try calling a function of the form:\n  #    state(::StateName\"Name\", ::SiteType\"Tag\"; kwargs...)\n  # which returns a Julia vector\n  #\n  for st in stypes\n    v = state(sname, st; kwargs...)\n    !isnothing(v) && return itensor(v, s)\n  end\n\n  return throw(\n    ArgumentError(\n      \"Overload of \\\"state\\\" or \\\"state!\\\" functions not found for state name \\\"$name\\\" and Index tags $(tags(s))\",\n    ),\n  )\nend\n\nstate(s::Index, n::Integer) = onehot(s => n)\n\nstate(sset::Vector{<:Index}, j::Integer, st; kwargs...)",
+      "metadata": {
+        "section_title": "sitetype.jl",
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "section_id": "part_10"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9618925825266154,
+      "bm25_score": 0.9020325475480212,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensor",
+        "site",
+        "tags",
+        "state",
+        "state"
+      ],
+      "match_ratio": 0.625,
+      "is_html": false
+    },
+    {
+      "id": "UpgradeGuide_0.1_to_0.2__cd8727a7c4be2179bde8bba8a697829f__Miscellaneous-breaking-changes_3__0",
+      "text": "## Miscellaneous breaking changes\nRename the state functions currently defined for various site types to val for mapping a string name for an index to an index value (used in ITensor indexing and MPS construction). state functions now return single-index ITensors representing various single-site states ( PR #664 ). So now to get an Index value from a string, you use:\n```code\nN = 10\ns = siteinds(\"S=1/2\", N)\nval(s[1], \"Up\") == 1\nval(s[1], \"Dn\") == 2\n```\nstate now returns an ITensor corresponding to the state with that value as the only nonzero element:\n```code\njulia> @show state(s[1], \"Up\");\nstate(s[1], \"Up\") = ITensor ord=1\nDim 1: (dim=2|id=597|\"S=1/2,Site,n=1\")\nITensors.NDTensors.Dense{Float64, Vector{Float64}}\n 2-element\n 1.0\n 0.0\n\njulia> @show state(s[1], \"Dn\");\nstate(s[1], \"Dn\") = ITensor ord=1\nDim 1: (dim=2|id=597|\"S=1/2,Site,n=1\")\nITensors.NDTensors.Dense{Float64, Vector{Float64}}\n 2-element\n 0.0\n 1.0\n```\nwhich allows for more general states to be defined, such as:\n```code\njulia> @show state(s[1], \"X+\");\nstate(s[1], \"X+\") = ITensor ord=1\nDim 1: (dim=2|id=597|\"S=1/2,Site,n=1\")\nITensors.NDTensors.Dense{Float64, Vector{Float64}}\n 2-element\n 0.7071067811865475\n 0.7071067811865475\n\njulia> @show state(s[1], \"X-\");\nstate(s[1], \"X-\") = ITensor ord=1\nDim 1: (dim=2|id=597|\"S=1/2,Site,n=1\")\nITensors.NDTensors.Dense{Float64, Vector{Float64}}\n 2-element\n  0.7071067811865475\n -0.7071067811865475\n```\nwhich will be used for making more general MPS product states.\nThis should not affect end users in general, besides ones who had customized the previous state function, such as with overloads like:\n```code\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Up\") = 1\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Dn\") = 2\n```\nwhich",
+      "metadata": {
+        "section_id": "Miscellaneous-breaking-changes",
+        "package": "itensors",
+        "section_title": "Miscellaneous breaking changes",
+        "source_file": "docs\\build\\UpgradeGuide_0.1_to_0.2.html"
+      },
+      "score": 0.9600661465164255,
+      "original_score": 0.9385633023329623,
+      "vector_score": 0.9186396540879773,
+      "bm25_score": 0.7832443452696224,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensor",
+        "site",
+        "state",
+        "state"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_0__0",
+      "text": "using ChainRulesCore: @ignore_derivatives\nusing ..ITensors:\n  ITensors, Index, ITensor, itensor, dag, onehot, prime, product, swapprime, tags\nusing ..SmallStrings: SmallString\nusing ..TagSets: TagSets, TagSet, addtags, commontags\n\n@eval struct SiteType{T}\n  (f::Type{<:SiteType})() = $(Expr(:new, :f))\nend\n\n# Note that the complicated definition of\n# SiteType above is a workaround for performance\n# issues when creating parameterized types\n# in Julia 1.4 and 1.5-beta. Ideally we\n# can just use the following in the future:\n# struct SiteType{T}\n# end\n\n\"\"\"\nSiteType is a parameterized type which allows\nmaking Index tags into Julia types. Use cases\ninclude overloading functions such as `op`,\n`siteinds`, and `state` which generate custom\noperators, Index arrays, and IndexVals associated\nwith Index objects having a certain tag.\n\nTo make a SiteType type, you can use the string\nmacro notation: `SiteType\"MyTag\"`\n\nTo make a SiteType value or object, you can use\nthe notation: `SiteType(\"MyTag\")`\n\nThere are currently a few built-in site types\nrecognized by `jl`. The system is easily extensible\nby users. To add new operators to an existing site type,\nor to create new site types, you can follow the instructions\n[here](https://docs.itensor.org/ITensorMPS/stable/examples/Physics.html).\n\nThe current built-in site types are:\n\n- `SiteType\"S=1/2\"` (or `SiteType\"S=½\"`)\n- `SiteType\"S=1\"`\n- `SiteType\"Qubit\"`\n- `SiteType\"Qudit\"`\n- `SiteType\"Boson\"`\n- `SiteType\"Fermion\"`\n- `SiteType\"tJ\"`\n- `SiteType\"Electron\"`\n\n# Examples\n\nTags on indices get turned into SiteTypes internally, and then\nwe search for overloads of functions like `op` and `siteind`.\nFor example:\n\n```julia\njulia> s = siteind(\"S=1/2\")\n(dim=2|id=862|\"S=1/2,Site\")\n\njulia> @show op(\"Sz\", s);\nop(s, \"Sz\") = ITensor ord=2\nDim 1: (dim=2|id=862|\"S=1/2,Site\")'\nDim 2: (dim=2|id=862|\"S=1/2,Site\")\nNDTensors.Dense{Float64,Array{Float64,1}}\n 2×2\n 0.5   0.0\n 0.0  -0.5\n\njulia> @show op",
+      "metadata": {
+        "section_id": "part_0",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "package": "itensors",
+        "section_title": "sitetype.jl"
+      },
+      "score": 0.9242997295866404,
+      "original_score": 0.9134854052418747,
+      "vector_score": 1.0,
+      "bm25_score": 0.33869290943217945,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensor",
+        "site",
+        "tags",
+        "state",
+        "state"
+      ],
+      "match_ratio": 0.625,
+      "is_html": false
+    },
+    {
+      "id": "UpgradeGuide_0.1_to_0.2__cd8727a7c4be2179bde8bba8a697829f__Miscellaneous-breaking-changes_3__1",
+      "text": ".7071067811865475\n```\nwhich will be used for making more general MPS product states.\nThis should not affect end users in general, besides ones who had customized the previous state function, such as with overloads like:\n```code\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Up\") = 1\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Dn\") = 2\n```\nwhich should be changed now to:\n```code\nITensors.val(::SiteType\"My_S=1/2\", ::StateName\"Up\") = 1\nITensors.val(::SiteType\"My_S=1/2\", ::StateName\"Dn\") = 2\n```\nThe QN convention of the \"Qubit\" site type is changed to track the total number of 1 bits instead of the net number of 1 bits vs 0 bits (i.e. change the QN from +1/-1 to 0/1) ( PR #676 ).\n```code\njulia> s = siteinds(\"Qubit\", 4; conserve_number=true)\n4-element Vector{Index{Vector{Pair{QN, Int64}}}}:\n (dim=2|id=925|\"Qubit,Site,n=1\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=799|\"Qubit,Site,n=2\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=8|\"Qubit,Site,n=3\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=385|\"Qubit,Site,n=4\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n```\nBefore it was +1/-1 like \"S=1/2\" :\n```code\njulia> s = siteinds(\"S=1/2\", 4; conserve_sz=true)\n4-element Vector{Index{Vector{Pair{QN, Int64}}}}:\n (dim=2|id=364|\"S=1/2,Site,n=1\") <Out>\n 1: QN(\"Sz\",1) => 1\n 2: QN(\"Sz\",-1) => 1\n (dim=2|id=823|\"S=1/2,Site,n=2\") <Out>\n 1: QN(\"Sz\",1) => 1\n 2: QN(\"",
+      "metadata": {
+        "section_title": "Miscellaneous breaking changes",
+        "source_file": "docs\\build\\UpgradeGuide_0.1_to_0.2.html",
+        "section_id": "Miscellaneous-breaking-changes",
+        "package": "itensors"
+      },
+      "score": 0.8922005916160003,
+      "original_score": 0.8402971727644448,
+      "vector_score": 0.9298242356583678,
+      "bm25_score": 0.2717809272134622,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "site",
+        "state",
+        "state"
+      ],
+      "match_ratio": 0.375,
+      "is_html": true
+    },
+    {
+      "id": "IncludedSiteTypes__10c3b7e95897ec39b67299563b29b049__h4_5_5__0",
+      "text": "The available state names for \"S=1\" sites are:\n- `\"Up\"` (aliases: `\"Z+\"`, `\"↑\"`) spin in the up state\n- `\"Z0\"` (aliases: `\"0\"`) spin in the Sz=0 state\n- `\"Dn\"` (aliases: `\"Z-\"`, `\"↓\"`) spin in the down state",
+      "metadata": {
+        "section_id": "h4_5",
+        "section_title": "\"S=1\" States",
+        "source_file": "docs\\src\\IncludedSiteTypes.md",
+        "package": "itensormps"
+      },
+      "score": 0.8797982143703594,
+      "original_score": 0.8700521236436318,
+      "vector_score": 1.0,
+      "bm25_score": 0.1324020701671873,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "spin",
+        "state",
+        "state"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 104,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "query": "ITensors DMRG memory management and multithreading for large tJ systems",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "Multithreading__7599ba505c5c26a9b00c7cb714a27832__h1_0_0__0",
+      "text": "Most modern computers, including laptops, have multiple cores (processing units) which can be used\nto perform multiple tasks at the same time and therefore speed up computations.\nMultithreading is a form of shared memory parallelism that makes use of these multiple cores that\nyou may have available.\nThere are three primary sources of parallelization available to ITensors.jl. These are:\n - BLAS/LAPACK multithreading (through whatever flavor you are using, i.e. OpenBLAS or MKL).\n - The Strided.jl package, which implements efficient multithreaded dense array permutations.\n - Block sparse multithreading (currently only for block sparse contractions) implemented in the NDTensors.jl package.\nFirst, you can obtain the number of threads that are available to you with:\n```julia\njulia> Sys.CPU_THREADS\n6\n```\nIf your computations are dominated by large dense tensors, you likely want to make use of BLAS multithreading\nin order to multithread dense matrix multiplications and other linear algebra methods like SVD\nand QR decompositions. This will be on by default. The BLAS/LAPACK multithreading can be controlled\nin the usual way with environment variables such as by starting Julia with:\n```\n$ MKL_NUM_THREADS=4 julia # Set the number of MKL threads to 4\n$ OPENBLAS_NUM_THREADS=4 julia # Set the number of OpenBLAS threads to 4\n$ OMP_NUM_THREADS=4 julia # Set the number of OpenMP threads to 4, which will be used by MKL or OpenBLAS if they are not specifically set\n```\nor at runtime from within Julia:\n```julia\njulia> using LinearAlgebra\njulia> BLAS.vendor()  # Check which BLAS you are using\n:mkl\njulia> BLAS.get_num_threads()\n6\njulia> BLAS.set_num_threads(4)\njulia> BLAS.get_num_threads()\n4\n```\nNote that in Julia v1.6, you will be able to use the command `using LinearAlgebra; BLAS.get_num_threads()`.\nWe would highly recommend using MKL (see the installation instructions for how to do that), especially if you\nare using an Intel chip. How well BLAS multithreading will work depends on how much your\ncalculations are dominated by large dense matrix operations (which is not always the case,\nespecially if you are using QN conservation).\nCurrently, ITensors.jl makes use of the package [Strided.jl](https://github.com/Jutho/Strided.jl)\nfor performant dense array permutations. It also provides multithreaded array permutations.\nIf you start Julia with multiple threads, Strided multithreading is on by default:\n```julia\n$ julia -t 4\njulia>",
+      "metadata": {
+        "section_id": "h1_0",
+        "source_file": "docs\\src\\Multithreading.md",
+        "package": "itensors",
+        "section_title": "Multithreading"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9219527613355555,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensors",
+        "memory",
+        "multithreading",
+        "large"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__root_0__0",
+      "text": "ITensor is a library for rapidly creating correct and efficient tensor network algorithms.\nThe source code for ITensors.jl can be found on Github .\nAdditional documentation can be found on the ITensor website itensor.org .\nAn ITensor is a tensor whose interface is independent of its memory layout. ITensor indices are objects which carry extra information and which 'recognize' each other (compare equal to each other).\nThe ITensorMPS.jl library includes composable and extensible algorithms for optimizing and transforming tensor networks, such as matrix product state and matrix product operators, such as the DMRG algorithm. If you are looking for information on running finite MPS/MPO calculations such as DMRG, take a look at the ITensorMPS.jl documentation .",
+      "metadata": {
+        "section_id": "root",
+        "source_file": "docs\\build\\index.html",
+        "package": "itensors",
+        "section_title": "ROOT"
+      },
+      "score": 0.9761230966623307,
+      "original_score": 0.964056274545444,
+      "vector_score": 0.9487687489224758,
+      "bm25_score": 0.7242386564557023,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensors",
+        "dmrg",
+        "memory"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "Multithreading__91304536d05c5a5a381948f6d916b637__root_0__0",
+      "text": "Most modern computers, including laptops, have multiple cores (processing units) which can be used to perform multiple tasks at the same time and therefore speed up computations. Multithreading is a form of shared memory parallelism that makes use of these multiple cores that you may have available.\nThere are three primary sources of parallelization available to ITensors.jl. These are:\nBLAS/LAPACK multithreading (through whatever flavor you are using, i.e. OpenBLAS or MKL).\nThe Strided.jl package, which implements efficient multithreaded dense array permutations.\nBlock sparse multithreading (currently only for block sparse contractions) implemented in the NDTensors.jl package.\nFirst, you can obtain the number of threads that are available to you with:\n```code\njulia> Sys.CPU_THREADS\n6\n```\nIf your computations are dominated by large dense tensors, you likely want to make use of BLAS multithreading in order to multithread dense matrix multiplications and other linear algebra methods like SVD and QR decompositions. This will be on by default. The BLAS/LAPACK multithreading can be controlled in the usual way with environment variables such as by starting Julia with:\n```code\n$ MKL_NUM_THREADS=4 julia # Set the number of MKL threads to 4\n\n$ OPENBLAS_NUM_THREADS=4 julia # Set the number of OpenBLAS threads to 4\n\n$ OMP_NUM_THREADS=4 julia # Set the number of OpenMP threads to 4, which will be used by MKL or OpenBLAS if they are not specifically set\n```\nor at runtime from within Julia:\n```code\njulia> using LinearAlgebra\n\njulia> BLAS.vendor()  # Check which BLAS you are using\n:mkl\n\njulia> BLAS.get_num_threads()\n6\n\njulia> BLAS.set_num_threads(4)\n\njulia> BLAS.get_num_threads()\n4\n```\nNote that in Julia v1.6, you will be able to use the command using LinearAlgebra; BLAS.get_num_threads() .\nWe would highly recommend using MKL (see the installation instructions for how to do that), especially if you are using an Intel chip. How well BLAS multithreading will work depends on how much your calculations are dominated by large dense matrix operations (which is not always the case, especially if you are using QN conservation).\nCurrently, ITensors.jl makes use of the package Strided.jl for performant dense array permutations. It also provides multithreaded array permutations. If you start Julia with multiple threads, Strided multithreading is on by default:\n```code\n$ julia -t 4\n\njulia> Threads.nthreads()\n4\n\njulia> using Strided\n\njulia> Strided.get_num_threads()\n4\n```\nWe find that",
+      "metadata": {
+        "section_title": "ROOT",
+        "package": "itensors",
+        "source_file": "docs\\build\\Multithreading.html",
+        "section_id": "root"
+      },
+      "score": 0.8993963302556952,
+      "original_score": 0.8417470363572734,
+      "vector_score": 0.7399431067180047,
+      "bm25_score": 0.9861786275476884,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensors",
+        "memory",
+        "multithreading",
+        "large"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_5_5__0",
+      "text": "One version of the ITensor `dmrg` function accepts an array of MPOs\n`[H1,H2,H3]` (or any number of MPOs you want). This version of DMRG\nwill find the ground state of `H1+H2+H3`. Internally it does not\nactually sum these MPOs, but loops over them during each step of\nthe \"eigensolver\" at the core of the DMRG algorithm, so it is usually\nmore efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs `H1`, `H2`, and `H3`.\nThen call DMRG like this:\n```julia\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "section_id": "h2_5",
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "package": "itensormps",
+        "source_file": "docs\\src\\examples\\DMRG.md"
+      },
+      "score": 0.8574688069278165,
+      "original_score": 0.8532767130139287,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "dmrg"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "Multithreading__7599ba505c5c26a9b00c7cb714a27832__h49_1_1__0",
+      "text": "Threads.nthreads() = 5\nSys.CPU_THREADS = 6\nBLAS.get_num_threads() = 1\nStrided.get_num_threads() = 1\nSerial contract:\n  21.558 ms (131 allocations: 7.34 MiB)\nThreaded contract:\n  5.934 ms (446 allocations: 7.37 MiB)\nC_contract ≈ C_threaded_contract = true\n```\nIn addition, we plan to add more threading to other parts of the\ncode beyond contraction (such as SVD) and improve composibility with\nother forms of threading like BLAS and Strided, so stay tuned!",
+      "metadata": {
+        "source_file": "docs\\src\\Multithreading.md",
+        "package": "itensors",
+        "section_title": "UNTITLED",
+        "section_id": "h49_1"
+      },
+      "score": 0.8532767130139287,
+      "original_score": 0.8532767130139287,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 110,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

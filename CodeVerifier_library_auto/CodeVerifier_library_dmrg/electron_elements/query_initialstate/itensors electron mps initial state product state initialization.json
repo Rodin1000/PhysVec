@@ -1,0 +1,133 @@
+{
+  "query": "itensors electron mps initial state product state initialization",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_3__3",
+      "text": " -1) => 1], \"sn\")\n\n      N1 = ITensor(s', dag(s))\n      N1[s' => 2, s => 2] = 1.0\n\n      N2 = ITensor(dag(s), s')\n      N2[s' => 2, s => 2] = 1.0\n\n      NN = N1 + N2\n      @test NN[s' => 2, s => 2] ≈ 2.0\n\n      NN = N1 + N1\n      @test NN[s' => 2, s => 2] ≈ 2.0\n\n      NN = N2 + N2\n      @test NN[s' => 2, s => 2] ≈ 2.0\n    end\n\n    @testset \"Wavefunction Tests\" begin\n      s = [Index([QN(\"N\", 0, -2) => 2, QN(\"N\", 1, -2) => 2], \"s$n\") for n in 1:4]\n\n      psi0 = ITensor(s...)\n\n      psi0[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] = 1111\n      psi0[s[1] => 3, s[2] => 3, s[3] => 1, s[4] => 1] = 3311\n      psi0[s[1] => 1, s[2] => 3, s[3] => 1, s[4] => 3] = 1313\n\n      psi1 = permute(psi0, s[2], s[1], s[3], s[4])\n      @test norm(psi1 - psi0) ≈ 0.0\n\n      @test psi0[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi1[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi0[s[2] => 1, s[1] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi1[s[2] => 1, s[1] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n\n      @test psi0[s[1] => 3, s[2] => 3, s[3] => 1,",
+      "metadata": {
+        "source_file": "test\\base\\test_fermions.jl",
+        "package": "itensors",
+        "section_id": "part_3",
+        "section_title": "test_fermions.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__4afa60a84ae9e39b6c9236cb2ad115d6__part_0__0",
+      "text": "@eval module $(gensym())\nusing ITensorMPS\nusing ITensors\nusing Test\n\n@testset \"AutoFermion MPS, MPO, and OpSum\" begin\n  ITensors.enable_auto_fermion()\n\n  @testset \"MPS Tests\" begin\n    @testset \"Product MPS consistency checks\" begin\n      s = siteinds(\"Fermion\", 3; conserve_qns=true)\n\n      pA = MPS(s, [2, 1, 2])\n      TA = ITensor(s[1], s[2], s[3])\n      TA[s[1] => 2, s[2] => 1, s[3] => 2] = 1.0\n      A = pA[1] * pA[2] * pA[3]\n      @test norm(A - TA) < 1E-8\n\n      pB = MPS(s, [1, 2, 2])\n      TB = ITensor(s[1], s[2], s[3])\n      TB[s[1] => 1, s[2] => 2, s[3] => 2] = 1.0\n      B = pB[1] * pB[2] * pB[3]\n      @test norm(B - TB) < 1E-8\n    end\n    @testset \"MPS inner regression test\" begin\n      sites = siteinds(\"Fermion\", 3; conserve_qns=true)\n      psi = MPS(sites, [2, 2, 1])\n      @test inner(psi, psi) ≈ 1.0\n    end\n    @testset \"Orthogonalize of Product MPS\" begin\n      N = 3\n\n      sites = siteinds(\"Fermion\", N; conserve_qns=true)\n\n      state = [1 for n in 1:N]\n      state[1] = 2\n      state[2] = 2\n      psi = MPS(sites, state)\n      psi_fluxes = [flux(psi[n]) for n in 1:N]\n\n      psi_orig = copy(psi)\n      orthogonalize!(psi, 1)\n      @test inner(psi_orig, psi) ≈ 1.0\n      @test inner(psi, psi_orig) ≈ 1.0\n    end\n  end\n\n  @testset \"Fermionic OpSum Tests\" begin\n    @testset \"Spinless Fermion Hamiltonian\" begin\n      N = 2\n      sites = siteinds(\"Fermion\", N; conserve_qns=true)\n      t1 = 1.0\n      os = OpSum()\n      for b in 1:(N - 1)\n        os -= t1, \"Cdag\", b, \"C",
+      "metadata": {
+        "section_id": "part_0",
+        "section_title": "test_fermions.jl",
+        "package": "itensormps",
+        "source_file": "test\\base\\test_fermions.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensors",
+        "mps",
+        "state",
+        "product",
+        "state"
+      ],
+      "match_ratio": 0.625,
+      "is_html": false
+    },
+    {
+      "id": "2d_classical_ising__d30e54e4e402a00b85ee89ff1e3c79bd__part_1__1",
+      "text": "�′ = itensor(vec(X), s̃ₕ′, sₕ′)\n  Xᵥ = itensor(vec(X), s̃ᵥ, sᵥ)\n  Xᵥ′ = itensor(vec(X), s̃ᵥ′, sᵥ′)\n  return T̃ * Xₕ′ * Xᵥ′ * Xₕ * Xᵥ\nend\n\nfunction ising_mpo(sₕ::Index, sᵥ::Index, args...; kwargs...)\n  return ising_mpo(sₕ => sₕ', sᵥ => sᵥ', args...; kwargs...)\nend\n\nfunction ising_mpo_dual(\n  sh::Tuple{Index,Index}, sv::Tuple{Index,Index}, β::Real, J::Real=1.0\n)\n  d = dim(sh[1])\n  T = ITensor(sh[1], sh[2], sv[1], sv[2])\n  sig(s) = 1.0 - 2.0 * (s - 1)\n  E0 = -4.0\n  for s1 in 1:d, s2 in 1:d, s3 in 1:d, s4 in 1:d\n    E = sig(s1) * sig(s2) + sig(s2) * sig(s3) + sig(s3) * sig(s4) + sig(s4) * sig(s1)\n    val = exp(-β * (E - E0))\n    T[sh[1] => s1, sv[2] => s2, sh[2] => s3, sv[1] => s4] = val\n  end\n  return T\nend\n\nfunction ising_partition(sh, sv, β)\n  ny, nx = size(sh)\n  T = Matrix{ITensor}(undef, ny, nx)\n  for iy in 1:ny, ix in 1:nx\n    ixp = per(ix + 1, nx)\n    iyp = per(iy + 1, ny)\n    T[iy, ix] = ising_mpo(sh[iy, ix] => sh[iy, ixp], sv[iy, ix] => sv[iyp, ix], β)\n  end\n  return T\nend\n\n#\n# Exact results\n#\n\nconst βc = 0.5 * log(√2 + 1)\n\nfunction ising_free_energy(β::Real, J::Real=1.0)\n  k = β * J\n  c = cosh(2 * k)\n  s = sinh(2 * k)\n  xmin = 0.0\n  xmax = π\n  integrand(x) = log(c^2 + √(s^4",
+      "metadata": {
+        "package": "itensors",
+        "section_title": "2d_classical_ising.jl",
+        "source_file": "examples\\src\\2d_classical_ising.jl",
+        "section_id": "part_1"
+      },
+      "score": 0.8430083416667185,
+      "original_score": 0.8430083416667185,
+      "vector_score": 0.8430083416667185,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "UpgradeGuide_0.1_to_0.2__cd8727a7c4be2179bde8bba8a697829f__Miscellaneous-breaking-changes_3__1",
+      "text": ".7071067811865475\n```\nwhich will be used for making more general MPS product states.\nThis should not affect end users in general, besides ones who had customized the previous state function, such as with overloads like:\n```code\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Up\") = 1\nITensors.state(::SiteType\"My_S=1/2\", ::StateName\"Dn\") = 2\n```\nwhich should be changed now to:\n```code\nITensors.val(::SiteType\"My_S=1/2\", ::StateName\"Up\") = 1\nITensors.val(::SiteType\"My_S=1/2\", ::StateName\"Dn\") = 2\n```\nThe QN convention of the \"Qubit\" site type is changed to track the total number of 1 bits instead of the net number of 1 bits vs 0 bits (i.e. change the QN from +1/-1 to 0/1) ( PR #676 ).\n```code\njulia> s = siteinds(\"Qubit\", 4; conserve_number=true)\n4-element Vector{Index{Vector{Pair{QN, Int64}}}}:\n (dim=2|id=925|\"Qubit,Site,n=1\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=799|\"Qubit,Site,n=2\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=8|\"Qubit,Site,n=3\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n (dim=2|id=385|\"Qubit,Site,n=4\") <Out>\n 1: QN(\"Number\",0) => 1\n 2: QN(\"Number\",1) => 1\n```\nBefore it was +1/-1 like \"S=1/2\" :\n```code\njulia> s = siteinds(\"S=1/2\", 4; conserve_sz=true)\n4-element Vector{Index{Vector{Pair{QN, Int64}}}}:\n (dim=2|id=364|\"S=1/2,Site,n=1\") <Out>\n 1: QN(\"Sz\",1) => 1\n 2: QN(\"Sz\",-1) => 1\n (dim=2|id=823|\"S=1/2,Site,n=2\") <Out>\n 1: QN(\"Sz\",1) => 1\n 2: QN(\"",
+      "metadata": {
+        "source_file": "docs\\build\\UpgradeGuide_0.1_to_0.2.html",
+        "package": "itensors",
+        "section_id": "Miscellaneous-breaking-changes",
+        "section_title": "Miscellaneous breaking changes"
+      },
+      "score": 0.7412783187176331,
+      "original_score": 0.5860453099482129,
+      "vector_score": 0.48068776824700776,
+      "bm25_score": 0.42143016680482065,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensors",
+        "mps",
+        "state",
+        "product",
+        "state"
+      ],
+      "match_ratio": 0.625,
+      "is_html": true
+    },
+    {
+      "id": "test_phys_site_types__060210c943032a0fd9694bbf30890d18__part_20__20",
+      "text": "\", 0, -1), (\"Sz\", 0))\n    @test qn(s, 2) == QN((\"Nf\", 1, -1), (\"Sz\", 1))\n    s = siteind(\"Fermion\"; conserve_nfparity=true, conserve_sz=\"Up\")\n    @test qn(s, 1) == QN((\"NfParity\", 0, -2), (\"Sz\", 0))\n    @test qn(s, 2) == QN((\"NfParity\", 1, -2), (\"Sz\", 1))\n    s = siteind(\"Fermion\"; conserve_nf=true, conserve_sz=\"Dn\")\n    @test qn(s, 1) == QN((\"Nf\", 0, -1), (\"Sz\", 0))\n    @test qn(s, 2) == QN((\"Nf\", 1, -1), (\"Sz\", -1))\n    s = siteind(\"Fermion\"; conserve_nfparity=true, conserve_sz=\"Dn\")\n    @test qn(s, 1) == QN((\"NfParity\", 0, -2), (\"Sz\", 0))\n    @test qn(s, 2) == QN((\"NfParity\", 1, -2), (\"Sz\", -1))\n  end\n\n  @testset \"Electron sites\" begin\n    s = siteind(\"Electron\")\n\n    @test val(s, \"Emp\") == 1\n    @test val(s, \"0\") == 1\n    @test val(s, \"Up\") == 2\n    @test val(s, \"↑\") == 2\n    @test val(s, \"Dn\") == 3\n    @test val(s, \"↓\") == 3\n    @test val(s, \"UpDn\") == 4\n    @test val(s, \"↑↓\") == 4\n    @test_throws ArgumentError val(s, \"Fake\")\n\n    @test Vector(state(\"Emp\", s)) ≈ [1, 0, 0, 0]\n    @test Vector(state(\"Up\", s)) ≈ [0, 1, 0, 0]\n    @test Vector(state(\"Dn\", s)) ≈ [0, 0, 1, 0]\n    @test Vector(state(\"UpDn\", s)) ≈ [0, 0, 0, 1]\n    @test Vector(state(\"0\", s)) ≈ [1, 0, 0, 0]\n    @test Vector(state(\"↑\", s)) ≈ [0, 1, 0, 0]\n    @test Vector(state(\"↓\", s)) ≈ [0, 0, 1, 0]\n   ",
+      "metadata": {
+        "section_title": "test_phys_site_types.jl",
+        "section_id": "part_20",
+        "package": "itensors",
+        "source_file": "test\\base\\test_phys_site_types.jl"
+      },
+      "score": 0.6708087472018955,
+      "original_score": 0.6441175645425897,
+      "vector_score": 0.49550463046354326,
+      "bm25_score": 0.5944517363161861,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "electron",
+        "state",
+        "state"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 109,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      }
+    }
+  }
+}

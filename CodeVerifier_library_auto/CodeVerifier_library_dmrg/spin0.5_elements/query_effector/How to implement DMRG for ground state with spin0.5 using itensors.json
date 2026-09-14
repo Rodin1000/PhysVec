@@ -1,0 +1,137 @@
+{
+  "query": "How to implement DMRG for ground state with spin0.5 using itensors?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__f094f5e8791cdf634eeca852150d8932__root_0__0",
+      "text": "The density matrix renormalization group (DMRG) is an algorithm for computing eigenstates of Hamiltonians (or extremal eigenvectors of large, Hermitian matrices). It computes these eigenstates in the matrix product state (MPS) format.\nLet's see how to set up and run a DMRG calculation using the ITensor library. We will be interested in finding the ground state of the quantum Hamiltonian $H$ given by:\n\\[H = \\sum_{j=1}^{N-1} \\mathbf{S}_{j} \\cdot \\mathbf{S}_{j+1} = \\sum_{j=1}^{N-1} S^z_{j} S^z_{j+1} + \\frac{1}{2} S^+_{j} S^-_{j+1} + \\frac{1}{2} S^-_{j} S^+_{j+1}\\]\nThis Hamiltonian is known as the one-dimensional Heisenberg model and we will take the spins to be $S=1$ spins (spin-one spins). We will consider the case of $N=100$ and plan to do five sweeps of DMRG (five passes over the system).\nITensor DMRG Code\nLet's look at an entire, working ITensor code that will do this calculation then discuss the main steps. If you need help running the code below, see the getting started page on Running ITensor and Julia Codes .\n```code\nusing ITensors, ITensorMPS\nlet\n  N = 100\n  sites = siteinds(\"S=1\",N)\n\n  os = OpSum()\n  for j=1:N-1\n    os += \"Sz\",j,\"Sz\",j+1\n    os += 1/2,\"S+\",j,\"S-\",j+1\n    os += 1/2,\"S-\",j,\"S+\",j+1\n  end\n  H = MPO(os,sites)\n\n  psi0 = random_mps(sites;linkdims=10)\n\n  nsweeps = 5\n  maxdim = [10,20,100,100,200]\n  cutoff = [1E-10]\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```\nSteps of The Code\nThe first two lines\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1\",N)\n```\ntells the function siteinds to make an array of ITensor Index objects which have the properties of $S=1$ spins. This means their dimension will be 3 and they will carry the \"S=1\" tag, which will enable the next part of the code to know how to make appropriate operators for them.\nTry printing out",
+      "metadata": {
+        "source_file": "docs\\build\\tutorials\\DMRG.html",
+        "section_title": "ROOT",
+        "section_id": "root",
+        "package": "itensormps"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.828582826062775,
+      "bm25_score": 0.7130129101975324,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "dmrg",
+        "ground",
+        "state",
+        "using",
+        "itensors"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "package": "itensormps",
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 0.9954897396250799,
+      "original_score": 0.9932103607259267,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "dmrg",
+        "ground",
+        "state"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "test_ctmrg__d202e1b4009a29577de40ed9d424bafe__full__0",
+      "text": "using ITensors\nusing Test\n\nsrc_dir = joinpath(pkgdir(ITensors), \"examples\", \"src\")\ninclude(joinpath(src_dir, \"ctmrg_isotropic.jl\"))\ninclude(joinpath(src_dir, \"2d_classical_ising.jl\"))\n\n@testset \"ctmrg\" begin\n  # Make Ising model partition function\n  β = 1.1 * βc\n  d = 2\n  s = Index(d, \"Site\")\n  sₕ = addtags(s, \"horiz\")\n  sᵥ = addtags(s, \"vert\")\n\n  T = ising_mpo(sₕ, sᵥ, β)\n\n  χ0 = 1\n  l = Index(χ0, \"Link\")\n  lₕ = addtags(l, \"horiz\")\n  lᵥ = addtags(l, \"vert\")\n\n  # Initial CTM\n  Cₗᵤ = ITensor(lᵥ, lₕ)\n  Cₗᵤ[1, 1] = 1.0\n\n  # Initial HRTM\n  Aₗ = ITensor(lᵥ, lᵥ', sₕ)\n  Aₗ[lᵥ => 1, lᵥ' => 1, sₕ => 1] = 1.0\n  Aₗ[lᵥ => 1, lᵥ' => 1, sₕ => 2] = 0.0\n\n  Cₗᵤ, Aₗ = ctmrg(T, Cₗᵤ, Aₗ; χmax=20, nsteps=100)\n\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = noncommoninds(Cₗᵤ, Aₗ)[1]\n\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n\n  ACₗ = Aₗ * Cₗᵤ * dag(Cₗᵤ')\n\n  ACTₗ = prime(ACₗ * dag(Aᵤ') * T * Aᵤ, -1)\n\n  κ = (ACTₗ * dag(ACₗ))[]\n\n  @test κ ≈ exp(-β * ising_free_energy(β))\n\n  # Calculate magnetization\n  Tsz = ising_mpo(sₕ, sᵥ, β; sz=true)\n  ACTszₗ = prime(ACₗ * dag(Aᵤ') * Tsz * Aᵤ, -1)\n  m = (ACTszₗ * dag(ACₗ))[] / κ\n  @test abs(m) ≈ ising_magnetization(β)\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "test_ctmrg.jl",
+        "source_file": "test\\base\\test_ctmrg.jl",
+        "package": "itensors"
+      },
+      "score": 0.9935983401130166,
+      "original_score": 0.9932103607259267,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "using",
+        "itensors"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_id": "h2_2",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types"
+      },
+      "score": 0.9921993876418049,
+      "original_score": 0.9914680802332242,
+      "vector_score": 0.998245809184442,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "dmrg",
+        "using",
+        "itensors"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "ctmrg_isotropic__3af4213eb7e13bdc1c45eaa2b10337a1__full__0",
+      "text": "using ITensors\n\nfunction ctmrg(T::ITensor, Cₗᵤ::ITensor, Aₗ::ITensor; χmax::Int, cutoff=0.0, nsteps::Int)\n  sₕ = commonind(T, Aₗ)\n  sᵥ = uniqueind(T, Aₗ, Aₗ'; plev=0)\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = uniqueind(Cₗᵤ, Aₗ)\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  Cₗᵤ = dense(Cₗᵤ)\n  for i in 1:nsteps\n    ## Get the grown corner transfer matrix (CTM)\n    Cₗᵤ⁽¹⁾ = Aₗ * Cₗᵤ * Aᵤ * T\n\n    ## Diagonalize the grown CTM\n    # TODO: replace with\n    # eigen(Cₗᵤ⁽¹⁾, \"horiz\" => \"vert\"; tags = \"horiz\" => \"vert\", kwargs...)\n    Cₗᵤ, Uᵥ = eigen(\n      Cₗᵤ⁽¹⁾,\n      (lₕ', sₕ'),\n      (lᵥ', sᵥ');\n      ishermitian=true,\n      cutoff,\n      maxdim=χmax,\n      lefttags=tags(lₕ),\n      righttags=tags(lᵥ),\n    )\n    Cₗᵤ = dense(Cₗᵤ)\n    lᵥ = commonind(Cₗᵤ, Uᵥ)\n    lₕ = uniqueind(Cₗᵤ, Uᵥ)\n\n    # The renormalized CTM is the diagonal matrix of eigenvalues\n    # Normalize the CTM\n    Cₗ = Cₗᵤ * prime(dag(Cₗᵤ), lₕ)\n    normC = (Cₗ * dag(Cₗ))[]^(1 / 4)\n    Cₗᵤ = Cₗᵤ / normC\n\n    # Calculate the renormalized half row transfer matrix (HRTM)\n    Uᵥ = noprime(Uᵥ)\n    Aₗ = Aₗ * Uᵥ * T * dag(Uᵥ')\n    Aₗ = replaceinds(Aₗ, sₕ' => sₕ)\n\n    # Normalize the HRTM\n    ACₗ = Aₗ * Cₗᵤ * prime(dag(Cₗᵤ))\n    normA = √((ACₗ * dag(ACₗ))[])\n    Aₗ = Aₗ / normA\n    Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  end\n  return Cₗᵤ, Aₗ\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "ctmrg_isotropic.jl",
+        "package": "itensors",
+        "source_file": "examples\\src\\ctmrg_isotropic.jl"
+      },
+      "score": 0.9673689904686331,
+      "original_score": 0.9653913535273382,
+      "vector_score": 0.9719908205767649,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "using",
+        "itensors"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 104,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 46
+      }
+    }
+  }
+}

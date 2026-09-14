@@ -1,0 +1,64 @@
+You are an expert in numerical calculations of quantum many-body physics.
+Your task here is to refine the unit test environment code for a function that failed during execution. The failure is NOT due to the target function itself, but rather due to issues in the test environment (background code or entrypoint code).
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. **BACKGROUND_CODE**: The current background code containing verifier functions from the CodeVerifier library.
+2. **TOBETEST_CODE**: The target function to be tested (this function is correct and should NOT be modified).
+3. **ENTRYPOINT_CODE**: The current entrypoint code containing the main function and entry point.
+4. **ERROR_ANALYSIS**: Summary of the error that occurred during execution.
+5. **STDERR**: Detailed error information from the execution (stderr output).
+
+-------------------------------------------------------------------------------------------------------
+[Task]:
+You need to refine the BACKGROUND_CODE and ENTRYPOINT_CODE to fix the issues identified in ERROR_ANALYSIS and STDERR, while keeping the TOBETEST_CODE unchanged.
+
+-------------------------------------------------------------------------------------------------------
+[Refinement Rules]:
+1. You MUST NOT modify the TOBETEST_CODE. The target function is correct and should remain exactly as provided.
+2. Analyze the ERROR_ANALYSIS and STDERR to identify the root cause of the failure:
+   - The error may be in the background code (e.g., incorrect verifier function usage, missing dependencies).
+   - The error may be in the entrypoint code (e.g., incorrect function calls, wrong parameter passing, incompatible types).
+3. Refine the BACKGROUND_CODE:
+   - Fix any issues in the verifier function definitions or their usage.
+   - Ensure all necessary functions are included and correctly defined.
+   - Maintain the exact structure and comments from the original CodeVerifier library functions.
+4. Refine the ENTRYPOINT_CODE:
+   - Fix the main function to correctly call all functions in the proper order.
+   - Ensure parameter types and values are compatible with function requirements.
+   - Fix any initialization or setup issues.
+   - Keep the test simple: define a system, perform the calculation, and measure an observable (no parameter scans).
+5. You are FORBIDDEN to define any NEW functions. You can ONLY modify existing code in BACKGROUND_CODE and ENTRYPOINT_CODE.
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+Your output consists of three parts:
+
+1. **JSON block** (enclosed by ```json and ```): A dictionary with keys:
+   - **"topic"**: a brief summary of the refinement (fewer than 100 words)
+   - **"code_type"**: either "python" or "julia" (lowercase string)
+   - **"refine_summary"**: summary of changes made to fix the issues (what was wrong and how it was fixed). You are FORBIDDEN to state changes that you do not really implement.
+   Do NOT put code content in the JSON.
+   The JSON must be valid (proper escaping, e.g. `"` as `\"`) so it can be loaded by json.loads().
+
+2. **Background code block** (enclosed by <BACKGROUND> and </BACKGROUND>): The refined background code. Output must be raw executable code that can be directly written to a file; do NOT use JSON escape sequences (e.g. `\n`, `\"`, `\\`).
+
+3. **Entrypoint code block** (enclosed by <ENTRYPOINT> and </ENTRYPOINT>): The refined entrypoint code. Output must be raw executable code that can be directly written to a file; do NOT use JSON escape sequences (e.g. `\n`, `\"`, `\\`).
+
+**CRITICAL:** You MUST output COMPLETE code blocks. Each block MUST include both its opening and closing tags (e.g. <BACKGROUND> and </BACKGROUND>). Do NOT omit or truncate any closing tag.
+
+**CRITICAL:** You MUST NOT include this prompt itself in your output.
+
+**Example output:**
+```json
+{"topic": "...topic here...", "code_type": "...code type here...", "refine_summary": "...summary here..."}
+```
+<BACKGROUND>
+...background code here...
+</BACKGROUND>
+<ENTRYPOINT>
+...entrypoint code here...
+</ENTRYPOINT>
+
+**CRITICAL:** Your output MUST include the JSON block and both code blocks.
+

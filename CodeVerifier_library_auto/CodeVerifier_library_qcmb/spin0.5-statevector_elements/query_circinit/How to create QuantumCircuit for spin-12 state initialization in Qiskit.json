@@ -1,0 +1,145 @@
+{
+  "query": "How to create QuantumCircuit for spin-1/2 state initialization in Qiskit",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "hartree_fock__973a80b2a7462da2917d3311e3e913f7__part_3__3",
+      "text": "_mapper,\n            )\n            self.qregs = [QuantumRegister(len(self._bitstr), name=\"q\")]\n\n    def _build(self) -> None:\n        \"\"\"\n        Construct the Hartree-Fock initial state given its parameters.\n        Returns:\n            QuantumCircuit: a quantum circuit preparing the Hartree-Fock\n            initial state given a number of spatial orbitals, number of particles and\n            a qubit mapper.\n        \"\"\"\n        if self._is_built:\n            return\n\n        super()._build()\n\n        # Construct the circuit for bitstring. Since this is defined as an initial state\n        # circuit its assumed that this is applied first to the qubits that are initialized to\n        # the zero state. Hence we just need to account for all True entries and set those.\n        if self._bitstr is not None:\n            for i, bit in enumerate(self._bitstr):\n                if bit:\n                    self.x(i)\n\n\ndef hartree_fock_bitstring_mapped(\n    num_spatial_orbitals: int,\n    num_particles: tuple[int, int],\n    qubit_mapper: QubitMapper,\n) -> list[bool]:\n    # pylint: disable=unused-argument\n    \"\"\"Compute the bitstring representing the mapped Hartree-Fock state for the specified system.\n\n    Args:\n        num_spatial_orbitals: The number of spatial orbitals, has a min. value of 1.\n        num_particles: The number of particles as a tuple (alpha, beta) containing the number of\n            alpha- and  beta-spin electrons, respectively.\n        qubit_mapper: A QubitMapper.\n\n    Returns:\n        The bitstring representing the mapped state of the Hartree-Fock state as array of bools.\n    \"\"\"\n    # get the bitstring encoding the Hartree Fock state\n    bitstr = hartree_fock_bitstring(num_spatial_orbitals, num_particles)\n\n    # encode the bitstring as a `FermionicOp`\n    bitstr_op = FermionicOp(\n        {\" \".join(f\"+_{idx}\" for idx, bit in enumerate(bitstr) if bit): 1.0},\n        num_spin_orbitals=2 * num_spatial_orbitals,\n    )\n\n    # map the `FermionicOp` to a qubit operator\n    qubit_op: SparsePauliOp\n    if isinstance(qubit_mapper, TaperedQubitMapper):\n        # To avoid checking commutativity, we call the two methods separately.\n        qubit_op = qubit_mapper.map_clifford(bitstr_op)\n        qubit_op = qubit_mapper.taper_clifford(qubit_op, check_commutes=False)\n    else:\n        qubit_op = qubit_mapper.map(bitstr_op)\n\n    # We check the mapped operator `x` part of the paulis because we want to have particles\n    # i.e. True,",
+      "metadata": {
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\hartree_fock.py",
+        "package": "qiskit-nature",
+        "section_id": "part_3",
+        "section_title": "hartree_fock.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.37140956609900605,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "quantumcircuit",
+        "spin",
+        "state"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "test_initializer__e4eb8be2fbbe1c4012d78950a5f400ef__part_8__8",
+      "text": " \"\"\"Initialize from labels.\"\"\"\n        desired_sv = Statevector.from_label(\"01+-lr\")\n        qc = QuantumCircuit(6)\n        qc.initialize(\"01+-lr\", range(6))\n        actual_sv = Statevector.from_instruction(qc)\n        self.assertTrue(desired_sv == actual_sv)\n\n    def test_from_int(self):\n        \"\"\"Initialize from int.\"\"\"\n        desired_sv = Statevector.from_label(\"110101\")\n        qc = QuantumCircuit(6)\n        qc.initialize(53, range(6))\n        actual_sv = Statevector.from_instruction(qc)\n        self.assertTrue(desired_sv == actual_sv)\n\n    def _remove_resets(self, circ):\n        circ.data = [instr for instr in circ.data if instr.operation.name != \"reset\"]\n\n    def test_global_phase_random(self):\n        \"\"\"Test global phase preservation with random state vectors\"\"\"\n        from qiskit.quantum_info.random import random_statevector\n\n        repeats = 5\n        for n_qubits in [1, 2, 4]:\n            for irep in range(repeats):\n                with self.subTest(i=f\"{n_qubits}_{irep}\"):\n                    dim = 2**n_qubits\n                    qr = QuantumRegister(n_qubits)\n                    initializer = QuantumCircuit(qr)\n                    target = random_statevector(dim)\n                    initializer.initialize(target, qr)\n                    uninit = initializer.data[0].operation.definition\n                    self._remove_resets(uninit)\n                    evolve = Statevector(uninit)\n                    self.assertEqual(target, evolve)\n\n    def test_global_phase_1q(self):\n        \"\"\"Test global phase preservation with some simple 1q statevectors\"\"\"\n        target_list = [\n            Statevector([1j, 0]),\n            Statevector([0, 1j]),\n            Statevector([1j / np.sqrt(2), 1j / np.sqrt(2)]),\n        ]\n        n_qubits = 1\n        dim = 2**n_qubits\n        qr = QuantumRegister(n_qubits)\n        for target in target_list:\n            with self.subTest(i=target):\n                initializer = QuantumCircuit(qr)\n                initializer.initialize(target, qr)\n                # need to get rid of the resets in order to use the Operator class\n                disentangler = Operator(initializer.data[0].operation.definition.data[1].operation)\n                zero = Statevector.from_int(0, dim)\n                actual = zero & disentangler\n                self.assertEqual(target, actual)\n\n    @data(2, \"11\", [1 / math.sqrt(2), 0, 0, 1 / math.sqrt(2)])\n    def test_decompose_contains_stateprep(self, state):\n        \"\"\"Test initialize decomposes to a StatePreparation and reset\"\"\"\n        qc = QuantumCircuit(2)\n        qc.initialize(state)\n        decom_circ = qc.decompose()\n\n        self.assertEqual(decom_circ.data[0",
+      "metadata": {
+        "package": "qiskit",
+        "section_title": "test_initializer.py",
+        "source_file": "test\\python\\circuit\\test_initializer.py",
+        "section_id": "part_8"
+      },
+      "score": 0.9235329921768455,
+      "original_score": 0.9150366579742728,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "quantumcircuit",
+        "state",
+        "qiskit"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "base_state_fidelity__4af80df8c9120cca15c3cbd952a6f649__part_3__3",
+      "text": " )\n\n        circuits = []\n        for circuit_1, circuit_2 in zip(circuits_1, circuits_2):\n\n            # Use the same key for circuits as qiskit.primitives use.\n            circuit = self._circuit_cache.get((_circuit_key(circuit_1), _circuit_key(circuit_2)))\n\n            if circuit is not None:\n                circuits.append(circuit)\n            else:\n                self._check_qubits_match(circuit_1, circuit_2)\n\n                # re-parametrize input circuits\n                # TODO: make smarter checks to avoid unnecessary re-parametrizations\n                parameters_1 = ParameterVector(\"x\", circuit_1.num_parameters)\n                parametrized_circuit_1 = circuit_1.assign_parameters(parameters_1)\n                parameters_2 = ParameterVector(\"y\", circuit_2.num_parameters)\n                parametrized_circuit_2 = circuit_2.assign_parameters(parameters_2)\n\n                circuit = self.create_fidelity_circuit(\n                    parametrized_circuit_1, parametrized_circuit_2\n                )\n                circuits.append(circuit)\n                # update cache\n                self._circuit_cache[_circuit_key(circuit_1), _circuit_key(circuit_2)] = circuit\n\n        if self._transpiler is not None:\n            return self._transpiler.run(circuits, **self._transpiler_options)\n\n        return circuits\n\n    def _construct_value_list(\n        self,\n        circuits_1: Sequence[QuantumCircuit],\n        circuits_2: Sequence[QuantumCircuit],\n        values_1: Sequence[float] | Sequence[Sequence[float]] | None = None,\n        values_2: Sequence[float] | Sequence[Sequence[float]] | None = None,\n    ) -> list[list[float]]:\n        \"\"\"\n        Preprocesses input parameter values to match the fidelity\n        circuit parametrization, and return in list format.\n\n        Args:\n           circuits_1: (Parametrized) quantum circuits preparing the\n                        first list of quantum states.\n           circuits_2: (Parametrized) quantum circuits preparing the\n                        second list of quantum states.\n           values_1: Numerical parameters to be bound to the first circuits.\n           values_2: Numerical parameters to be bound to the second circuits.\n\n        Returns:\n             List of lists of parameter values for fidelity circuit.\n\n        \"\"\"\n        values_1 = self._preprocess_values(circuits_1, values_1)\n        values_2 = self._preprocess_values(circuits_2, values_2)\n        # now, values_1 and values_2 are explicitly made 2d lists\n\n        values = []\n        if len(values_2[0]) == 0:\n            values = list(values_1)\n        elif len(values_1[0]) == 0:\n            values = list(values_2)\n        else:\n           ",
+      "metadata": {
+        "source_file": "qiskit_algorithms\\state_fidelities\\base_state_fidelity.py",
+        "section_title": "base_state_fidelity.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_3"
+      },
+      "score": 0.920700880775988,
+      "original_score": 0.9150366579742728,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "quantumcircuit",
+        "qiskit"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "ref_initialize__3c79c72e7d767a01d227dae5d0b67d73__part_10__10",
+      "text": "x2\": shots / 2}]\n    else:\n        return [{\"0x00\": shots / 2, \"0x10\": shots / 2}]\n\n\ndef initialize_entangled_qubits(final_measure=True):\n    \"\"\"Initialize test circuits with entangled qubits\"\"\"\n\n    circuits = []\n    qr = QuantumRegister(3)\n    if final_measure:\n        cr = ClassicalRegister(3)\n        regs = (qr, cr)\n    else:\n        regs = (qr,)\n\n    # Initialize |000+111> -> |000+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [0])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |010+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 1], [1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+011>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0, 0, 0], [0, 1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |100+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 0, 0, 1], [0, 2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100+010+110+100+101+011+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(",
+      "metadata": {
+        "package": "qiskit-aer",
+        "section_id": "part_10",
+        "source_file": "test\\terra\\reference\\ref_initialize.py",
+        "section_title": "ref_initialize.py"
+      },
+      "score": 0.9178687693751304,
+      "original_score": 0.9150366579742728,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "test_aer_state__fed00549cbc25a3f8ee238f21ee42543__part_7__7",
+      "text": " -1, 1, -1]\n\n        init_state = random_statevector(2**5, seed=111)\n\n        circuit = QuantumCircuit(5)\n        circuit.initialize(init_state, [0, 1, 2, 3, 4])\n        circuit.append(DiagonalGate(diag_1), [0])\n        circuit.append(DiagonalGate(diag_2), [1, 2])\n        circuit.append(DiagonalGate(diag_3), [3, 4, 0])\n        circuit.save_statevector()\n\n        aer_simulator = AerSimulator(method=\"statevector\")\n        result = aer_simulator.run(circuit).result()\n        expected = result.get_statevector(0)\n\n        state = AerState(method=\"statevector\")\n        state.allocate_qubits(5)\n        state.initialize(init_state.data)\n\n        state.apply_diagonal([0], diag_1)\n        state.apply_diagonal([1, 2], diag_2)\n        state.apply_diagonal([3, 4, 0], diag_3)\n        actual = state.move_to_ndarray()\n\n        for i, amp in enumerate(actual):\n            self.assertAlmostEqual(expected[i], amp)\n\n    def test_appply_mcx(self):\n        \"\"\"Test applying a mcx gate\"\"\"\n\n        class MCX(Gate):\n            def validate_parameter(self, param):\n                return param\n\n        def mcx(num_control):\n            return MCX(\"mcx\", num_control + 1, [])\n\n        init_state = random_statevector(2**5, seed=111)\n\n        circuit = QuantumCircuit(5)\n        circuit.initialize(init_state, [0, 1, 2, 3, 4])\n        circuit.append(mcx(1), [0, 1])\n        circuit.append(mcx(2), [1, 2, 3])\n        circuit.append(mcx(3), [4, 0, 1, 2])\n        circuit.save_statevector()\n\n        aer_simulator = AerSimulator(method=\"statevector\")\n        result = aer_simulator.run(circuit).result()\n        expected = result.get_statevector(0)\n\n        state = AerState(method=\"statevector\")\n        state.allocate_qubits(5)\n        state.initialize(init_state.data)\n\n        state.apply_mcx([0], 1)\n        state.apply_mcx([1, 2], 3)\n        state.apply_mcx([4, 0, 1], 2)\n        actual = state.move_to_ndarray()\n\n        for i, amp in enumerate(actual):\n            self.assertAlmostEqual(expected[i], amp)\n\n    def test_appply_mcy(self):\n        \"\"\"Test applying a mcy gate\"\"\"\n\n        class MCY(Gate):\n            def validate_parameter(self, param):\n                return param\n\n        def mcy(num_control):\n            return MCY(\"mcy\", num_control + 1, [])\n\n        init_state",
+      "metadata": {
+        "section_title": "test_aer_state.py",
+        "package": "qiskit-aer",
+        "section_id": "part_7",
+        "source_file": "test\\terra\\states\\test_aer_state.py"
+      },
+      "score": 0.8430787236321615,
+      "original_score": 0.8318700610344588,
+      "vector_score": 0.9091111856393492,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "quantumcircuit",
+        "state"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 228,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

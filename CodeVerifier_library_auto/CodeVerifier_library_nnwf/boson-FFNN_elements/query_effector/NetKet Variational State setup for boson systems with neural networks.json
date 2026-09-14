@@ -1,0 +1,120 @@
+{
+  "query": "NetKet Variational State setup for boson systems with neural networks",
+  "package": "netket",
+  "results": [
+    {
+      "id": "custom_hilbert_constraints__3478f3f26a02da6418c1b5dc5da24d73__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "section_title": "Integration with Variational States",
+        "package": "netket",
+        "section_id": "h2_20",
+        "source_file": "docs\\advanced\\custom_hilbert_constraints.md"
+      },
+      "score": 0.81,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "variational"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "custom_hilbert_constraints__6b1a6a577a4f7295fb5d8a8ae5beefc7__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "section_title": "Integration with Variational States",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\_sources\\advanced\\custom_hilbert_constraints.md",
+        "section_id": "h2_20"
+      },
+      "score": 0.81,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "variational"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "gs-continuous-space__7613926d2a700cd8cd4d6139229d8aa7__sec_6_6__0",
+      "text": "## 5. Neural-Network Quantum State#\nRarely do we know the functional form of the ground state wave-function. We therefore have to resort to highly flexible variational Ansaetze, capable of representing many different many-body states. We can for example use neural networks as universal function approximators.\nIn the following, we use a neural network architecture called “DeepSets” to solve the more interesting case of bosons interacting via a repulsive Gaussian interaction:\nWe study the bulk of the system by confining it into a box of length \\(L\\) with periodic boundary conditions. In this extended system we define the particle density as \\( D = N/L^d \\) and we study the case \\( D=1 \\) for \\( N=20 \\) particles in \\( d=1 \\) dimensions with \\( \\epsilon = 2 \\) . To account for the periodicity we use the minimum image convention when evaluating the potential energy of the system. For more information see:\nThe DeepSets architecture we use is defined as:\nwhere the functions \\( \\phi \\) and \\( \\rho \\) are parameterized by simple feed-forward neural network with a GeLu activation function with one hidden layer.\nTo account for periodicity we choose as input \\( \\mathbf{y}_{ij} = (\\sin(\\frac{2\\pi}{L} \\mathbf{r}_{ij}),  \\cos(\\frac{2\\pi}{L} \\mathbf{r}_{ij})) \\) .\nSee PRR 4 , 023138 (2022) for more information.\nFirst we define the Hilbert space, sampler and hamiltonian:\n```code\ndef\nminimum_distance\n(\nx\n,\nN\n,\nsdim\n):\n\"\"\"Computes distances between particles using minimum image convention\"\"\"\nx\n=\nx\n.\nreshape\n(\n-\n1\n,\nN\n,\nsdim\n)\nidx\n=\njnp\n.\ntriu_indices\n(\nN\n,\n1\n)\ndistances\n=\n(\n-\nx\n[\n...\n,\nNone\n,\n:,\n:]\n+\nx\n[\n...\n,\n:,\nNone\n,\n:])[\n...\n,\nidx\n[\n0\n],\nidx\n[\n1\n],\n:]\n# minimum image convention\ndistances\n=\njnp\n.\nremainder\n(\ndistances\n+\nL\n/\n2.0\n,\nL\n)\n-\nL\n/\n2.0\nreturn\njnp\n.\nlinalg\n.\nnorm\n(\ndistances\n,\naxis\n=-\n1\n)\ndef\npotential\n(\nx\n,\nN\n,\nepsilon\n,\nsdim\n):\ndis\n=\nminimum_distance\n(\nx\n,\nN\n,\nsdim\n)\nreturn\nepsilon\n*\njnp\n.\nsum\n(\njnp\n.\nexp\n(\n-\n((\ndis\n)\n**\n2\n)))\nN\n=\n20\nD\n=\n1.0\ndim\n=\n1\nepsilon\n=\n2.0\nL",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-continuous-space.html",
+        "section_id": "sec_6",
+        "section_title": "5. Neural-Network Quantum State#"
+      },
+      "score": 0.7250842212847515,
+      "original_score": 0.5770526481303868,
+      "vector_score": 0.705580365488391,
+      "bm25_score": 0.0629417786983701,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "variational",
+        "state",
+        "neural",
+        "networks"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "custom_hilbert_constraints__a202136a3fd70552ecbc1a6ad0f2024f__sec_6_6__0",
+      "text": "## Integration with Variational States#\nConstrained Hilbert spaces work seamlessly with all NetKet variational states:\n```code\n# Create constrained system\nhilbert\n=\nnk\n.\nhilbert\n.\nSpin\n(\n0.5\n,\nN\n=\n10\n,\nconstraint\n=\nSumConstraint\n(\n0\n))\n# Zero magnetization\ngraph\n=\nnk\n.\ngraph\n.\nChain\n(\n10\n)\nhamiltonian\n=\nnk\n.\noperator\n.\nIsing\n(\nhilbert\n,\ngraph\n,\nh\n=\n1.0\n)\n# Standard NetKet workflow\nmodel\n=\nnk\n.\nmodels\n.\nRBM\n(\nalpha\n=\n1\n)\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n,\ngraph\n)\n# Respects magnetization\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n)\n# Optimization works as usual\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\n0.01\n)\ndriver\n=\nnk\n.\ndriver\n.\nVMC\n(\nhamiltonian\n,\noptimizer\n)\ndriver\n.\nrun\n(\nvstate\n,\nn_iter\n=\n100\n)\n```",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_6",
+        "section_title": "Integration with Variational States#",
+        "source_file": "docs\\_build\\html\\advanced\\custom_hilbert_constraints.html"
+      },
+      "score": 0.6109092344185544,
+      "original_score": 0.44415604916936346,
+      "vector_score": 0.5551950614617043,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "variational"
+      ],
+      "match_ratio": 0.25,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_11_11__0",
+      "text": "## References#\n[1] Becca, F. & Sorella, S. Quantum Monte Carlo Approaches for Correlated Systems. (Cambridge University Press, 2017).\n[2] Nomura, Y., Darmawan, A. S., Yamaji, Y. & Imada, M. Restricted Boltzmann machine learning for solving strongly correlated quantum systems. Phys. Rev. B 96, 205152 (2017).\n[3] Stokes, J., Moreno, J. R., Pnevmatikakis, E. A. & Carleo, G. Phases of two-dimensional spinless lattice fermions with first-quantized deep neural-network quantum states. Phys. Rev. B 102, 205122 (2020).\n[4] Luo, D. & Clark, B. K. Backflow Transformations via Neural Networks for Quantum Many-Body Wave Functions. Phys. Rev. Lett. 122, 226401 (2019).",
+      "metadata": {
+        "section_title": "References#",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "section_id": "sec_11"
+      },
+      "score": 0.5912966132098957,
+      "original_score": 0.39451350105169725,
+      "vector_score": 0.3108994304562581,
+      "bm25_score": 0.7289697834334539,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "systems",
+        "neural",
+        "networks"
+      ],
+      "match_ratio": 0.375,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 52,
+    "final_results_count": 5
+  }
+}

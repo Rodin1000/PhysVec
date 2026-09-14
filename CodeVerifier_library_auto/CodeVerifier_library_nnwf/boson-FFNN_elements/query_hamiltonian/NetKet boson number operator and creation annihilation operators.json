@@ -1,0 +1,128 @@
+{
+  "query": "NetKet boson number operator and creation annihilation operators",
+  "package": "netket",
+  "results": [
+    {
+      "id": "operator__fc21a85c49525650881240f92b1f78cc__sec_4_4__0",
+      "text": "## Pre-defined operators#\nThose are easy-to-use constructors for a LocalOperator .\nboson.create\nBuilds the boson creation operator \\(\\hat{a}^\\dagger\\) acting on the site -th of the Hilbert space hilbert .\nboson.destroy\nBuilds the boson destruction operator \\(\\hat{a}\\) acting on the site -th of the Hilbert space hilbert .\nboson.identity\nBuilds the \\(\\mathbb{I}\\) identity operator.\nboson.number\nBuilds the number operator \\(\\hat{a}^\\dagger\\hat{a}\\) acting on the site -th of the Hilbert space hilbert .\nboson.proj\nBuilds the projector operator \\(|n\\rangle\\langle n |\\) acting on the site -th of the Hilbert space hilbert and collapsing on the state with n bosons.\nspin.identity\nBuilds the \\(\\mathbb{I}\\) identity operator.\nspin.sigmax\nBuilds the \\(\\sigma^x\\) operator acting on the site -th of the Hilbert space hilbert .\nspin.sigmay\nBuilds the \\(\\sigma^y\\) operator acting on the site -th of the Hilbert space hilbert .\nspin.sigmaz\nBuilds the \\(\\sigma^z\\) operator acting on the site -th of the Hilbert space hilbert .\nspin.sigmap\nBuilds the \\(\\sigma^{+} = \\frac{1}{2}(\\sigma^x + i \\sigma^y)\\) operator acting on the site -th of the Hilbert space hilbert .\nspin.sigmam\nBuilds the \\(\\sigma^{-} = \\frac{1}{2}(\\sigma^x - i \\sigma^y)\\) operator acting on the site -th of the Hilbert space hilbert .\nfermion.create\nBuilds the fermion creation operator \\(\\hat{a}^\\dagger\\) acting on the site -th of the Hilbert space hilbert .\nfermion.destroy\nBuilds the fermion destruction operator \\(\\hat{a}\\) acting on the site -th of the Hilbert space hilbert .\nfermion.number\nBuilds the number operator \\(\\hat{a}^\\dagger\\hat{a}\\) acting on the site -th of the Hilbert space hilbert .",
+      "metadata": {
+        "section_title": "Pre-defined operators#",
+        "section_id": "sec_4",
+        "source_file": "docs\\_build\\html\\api\\operator.html",
+        "package": "netket"
+      },
+      "score": 0.962903857134883,
+      "original_score": 0.9389004705751015,
+      "vector_score": 0.9236255882188769,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "boson",
+        "number",
+        "operator",
+        "creation",
+        "operators"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_5_5__0",
+      "text": "## 4. Building Operators#\nIn NetKet you can build individual operators acting on a site by calling the following functions:\n```code\nsx_1\n=\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\n1\n)\nsy_2\n=\nnk\n.\noperator\n.\nspin\n.\nsigmay\n(\nhi\n,\n2\n)\nsz_2\n=\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\n2\n)\n```\nThe functions in nk.operator.spin and nk.operator.boson are used to create the fundamental operators that can be used to build arbitrary observables and Hamiltonians.\nThose functions return an object of type LocalOperator , which behaves as some sort of sparse matrix optimized for Variational Monte Carlo.\nNote\nA LocalOperator can efficiently represent only operators that have a small domain in the computational basis: this means that an operator acting on 1 or 2 qubits will be efficiently represented, but one that acts on many qubits at once will not be.\nA LocalOperator can be printed and has the following representation:\n```code\nprint\n(\nsx_1\n)\n```\n```code\nLocalOperator(dim=16, acting_on=[(1,)], constant=0.0, dtype=float64)\n```\nThe information tells you that:\ndim : The hilbert space has 16 local degrees of freedom\ndim : The hilbert space has 16 local degrees of freedom\nacting_on : this specific operator is composed by terms that act on the single site 1\nacting_on : this specific operator is composed by terms that act on the single site 1\nconstant : this is a diagonal shift proportional to the identity. In this case it is 0\nconstant : this is a diagonal shift proportional to the identity. In this case it is 0\ndtype : the numpy data-type of the matrix elements\ndtype : the numpy data-type of the matrix elements",
+      "metadata": {
+        "package": "netket",
+        "section_title": "4. Building Operators#",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "section_id": "sec_5"
+      },
+      "score": 0.8831849043747333,
+      "original_score": 0.8162459169939625,
+      "vector_score": 1.0,
+      "bm25_score": 0.08122958496981249,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "boson",
+        "operator",
+        "operators"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_3_3__1",
+      "text": ",  1,  1, -1,  1,  1, -1,  1, -1, -1,\n         1,  1, -1, -1]], dtype=int8)\n```\nWe now need to specify the Hamiltonian. For this purpose, we will use NetKet’s LocalOperator (see details here ) which is the sum of arbitrary k-local operators.\nIn this specific case, we have a 1-local operator, \\( \\sigma^{(x)}_i \\) and a 2-local operator, \\( \\sigma^{(z)}_i \\sigma^{(z)}_j \\) . We then start importing the pauli operators.\n```code\nfrom\nnetket.operator.spin\nimport\nsigmax\n,\nsigmaz\n```\nWe now take \\( \\Gamma=-1 \\) and start defining the 1-local parts of the Hamiltonian\n```code\nGamma\n=\n-\n1\nH\n=\nsum\n([\nGamma\n*\nsigmax\n(\nhi\n,\ni\n)\nfor\ni\nin\nrange\n(\nN\n)])\n```\nHere we have used a list comprehension to (mildly) show off our ability to write one-liners, however you could have just added the terms one by one in an explicit loop instead (though you’d end up with a whopping 3 lines of code).\nWe now also add the interaction terms, using the fact that NetKet automatically recognizes products of local operators as tensor products.\n```code\nV\n=\n-\n1\nH\n+=\nsum\n([\nV\n*\nsigmaz\n(\nhi\n,\ni\n)\n@\nsigmaz\n(\nhi\n,\n(\ni\n+\n1\n)\n%\nN\n)\nfor\ni\nin\nrange\n(\nN\n)])\n```\nIn general, when manipulating NetKet objects, you should always assume that you can safely operate on them like\nyou would in mathematical equations, therefore you can sum and multiply them with ease.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html",
+        "section_id": "sec_3",
+        "package": "netket",
+        "section_title": "1. Defining The Hamiltonian#"
+      },
+      "score": 0.7451209894246281,
+      "original_score": 0.6163111668757842,
+      "vector_score": 0.7703889585947302,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "netket",
+        "operator",
+        "operators"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "gs-matrix-models__ef1b32ac39370be9a6422cd5bf62bbb1__sec_3_3__1",
+      "text": "N\n==\nhi\n.\nn_states\n```\nWe have checked that all the dimensions correspond to our expectations. We can think of this as the Hilbert state of a many-body system with \\(N\\) bosonic sites, each with excitations up to level \\(\\Lambda\\) (inclusive, starting from 0 to \\(\\Lambda-1\\) ).\nIn other words, it is a collection of harmonic oscillators in the \\(\\mid n \\rangle\\) basis.\nWe now need to specify the Hamiltonian.\nWe will use some predefined operators for bosons, such as the create and destroy operators for each boson in the Hilber state (see the API documentation here ).\nIn this specifc case, \\(\\hat{a}^\\dagger_I\\) for each boson \\(I\\) (we can regard this index as a site index in NetKet ).\n```code\nfrom\nnetket.operator.boson\nimport\ncreate\n,\ndestroy\n```\nWe now start by defining the free part of the Hamiltonian, which is just a collection of harmonic oscillators (for this part we could also use the number operator which is pre-defined in NetKet )\n```code\n# we loop over all \"sites\" -> loop over N bosons\nH_free\n=\nsum\n([\n0.5\n+\ncreate\n(\nhi\n,\ni\n)\n@\ndestroy\n(\nhi\n,\ni\n)\nfor\ni\nin\nrange\n(\nN\n)])\n```\nNetKet automatically recognizes products of local operators as tensor products and the addition of scalars as if they were multiplied by the identity matrix in the tensor space. In this case, H_free acts on a 4096 dimensional space.\nIn general, when manipulating NetKet objects, you should always assume that you can safely operate on them like\nyou would in mathematical equations, therefore you can sum and multiply them with ease.\nLet us check this free Hamiltonian, whose eigenvectors are analytically known: the ground state has vacuum energy for \\(N\\) independent harmonic oscillators: \\(0.5N = 0.5 \\cdot 6 = 3\\)\nIn NetKet we can  convert our Hamiltonian operator into a sparse matrix of size \\(\\Lambda^N \\times \\Lambda^N \\) .\nOr we can use the fact that NetKet provides a wrapper for eigsh in the form of a Lanczos exact solver which does not require to manipulate the Hamiltonian into a sparse matrix using .to_sparse .\n```code\neig_vals\n=\nnk\n.\nexact\n.\nlanczos_ed\n(\nH_free\n,\nk\n=\n13\n,\ncompute_eigenvectors\n=\nFalse\n)\n# args to scipy.sparse.linalg.eighs like can be passed with scipy_args={'tol':1e-8}\nprint\n(\nf\n\"Eigenvalues with exact lanczos (sparse):\n{\neig_vals\n",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-matrix-models.html",
+        "section_title": "1. Defining The Hamiltonian#",
+        "package": "netket",
+        "section_id": "sec_3"
+      },
+      "score": 0.7399201958649984,
+      "original_score": 0.5716332637776443,
+      "vector_score": 0.6588342648568496,
+      "bm25_score": 0.22282925946082352,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "netket",
+        "boson",
+        "number",
+        "operator",
+        "operators"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "changelog__775627bff97fcf0367c7035d3e792e5f__sec_27_27__2",
+      "text": " .\nThe netket.nn.blocks.SymmExpSum layer is now normalised by the number of elements in the symmetry group in order to maintain a reasonable normalisation #1624 .\nThe labelling of spin sectors in netket.experimental.operator.fermion.create() and similar operators has now changed from the eigenvalue of the spin operator ( \\(\\pm 1/2\\) and so on) to the eigenvalue of the Pauli matrices ( \\(\\pm 1\\) and so on) #1637 .\nThe labelling of spin sectors in netket.experimental.operator.fermion.create() and similar operators has now changed from the eigenvalue of the spin operator ( \\(\\pm 1/2\\) and so on) to the eigenvalue of the Pauli matrices ( \\(\\pm 1\\) and so on) #1637 .\nThe connected elements and expectation values of all non-simmetric fermionic operators is now changed in order to be correct #1640 .\nThe connected elements and expectation values of all non-simmetric fermionic operators is now changed in order to be correct #1640 .\nConsiderably reduced the memory consumption of LocalOperator , especially in the case of large local hilbert spaces. Also leveraged sparsity in the terms to speed up compilation ( _setup ) in the same cases #1558 .\nConsiderably reduced the memory consumption of LocalOperator , especially in the case of large local hilbert spaces. Also leveraged sparsity in the terms to speed up compilation ( _setup ) in the same cases #1558 .\nnetket.nn.blocks.SymmExpSum now works with inputs of arbitrary dimensions, while previously it errored for all inputs that were not 2D #1616\nnetket.nn.blocks.SymmExpSum now works with inputs of arbitrary dimensions, while previously it errored for all inputs that were not 2D #1616\nStop using FrozenDict from flax and instead return standard dictionaries for the variational parameters from the variational state. This makes it much easier to edit parameters #1547 .\nStop using FrozenDict from flax and instead return standard dictionaries for the variational parameters from the variational state. This makes it much easier to edit parameters #1547 .\nVastly improved, finally readable documentation of all Flax modules and neural network architectures #1641 .\nVastly improved, finally readable documentation of all Flax modules and neural network architectures #1641 .\nFixed minor bug where netket.operator.LocalOperator could not be built with np.matrix object obtained by converting scipy sparse matrices to dense #1597 .\nFixed minor bug where netket.operator.LocalOperator could not be built with np.matrix object obtained by converting scipy sparse matrices to dense #1597 .\nRaise correct error instead of unintelligible one when multiplying netket.experimental.operator.FermionOperator2nd with other operators #1599 .\nRaise correct error instead of unintelligible one when multiplying netket.experimental.operator.Fermion",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\changelog.html",
+        "package": "netket",
+        "section_id": "sec_27",
+        "section_title": "NetKet 3.10 (🥶 7 november 2023)#"
+      },
+      "score": 0.7244484688540858,
+      "original_score": 0.566548153253618,
+      "vector_score": 0.7081851915670224,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "number",
+        "operator",
+        "operators"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 53,
+    "final_results_count": 5
+  }
+}

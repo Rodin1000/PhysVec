@@ -1,0 +1,130 @@
+{
+  "query": "t-J model hopping terms implementation in ITensor OpSum",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "ITensor__d6c9e5cc91af8b329b09628d4822990e__h2_6_6__0",
+      "text": "[*Note: currently elementwise operations are only defined for dense ITensors, not for block-sparse QN ITensors.*]\nITensors support Julia broadcasting operations, making it quite easy to carry out element-wise operations on them in a very similar way as for regular Julia arrays. As a concrete example, consider the following ITensor initialized with random elements\n```julia\ni = Index(2,\"i\")\nj = Index(3,\"j\")\nA = random_itensor(i,j)\n```\nHere are some examples of basic element-wise operations we can do using Julia's dotted operator broadcasting syntax.\n```julia",
+      "metadata": {
+        "section_title": "Elementwise Operations on ITensors",
+        "package": "itensors",
+        "section_id": "h2_6",
+        "source_file": "docs\\src\\examples\\ITensor.md"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "test_inference__390a80808ee111f0e281b854c75f14e5__full__0",
+      "text": "using ITensors\nusing ITensors.NDTensors\nusing Test\n\n@testset \"dmrg\" begin\n  N = 10\n  sites = siteinds(\"S=1\", N)\n  opsum = OpSum()\n  for j in 1:(N - 1)\n    opsum += \"Sz\", j, \"Sz\", j + 1\n    opsum += 0.5, \"S+\", j, \"S-\", j + 1\n    opsum += 0.5, \"S-\", j, \"S+\", j + 1\n  end\n  H = MPO(opsum, sites)\n  psi0 = random_mps(sites; linkdims=10)\n  sweeps = Sweeps(5)\n  setmaxdim!(sweeps, 10, 20, 100, 100, 200)\n  setcutoff!(sweeps, 1E-11)\n  @test @inferred(Tuple{Any,MPS}, dmrg(H, psi0, sweeps; outputlevel=0)) isa\n    Tuple{Float64,MPS}\nend\n",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "test_inference.jl",
+        "section_id": "full",
+        "source_file": "test\\base\\test_inference.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "opsum"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "opsum_to_mpo_qn__528878000ccc4be77adde9d646b02e25__part_5__5",
+      "text": ")\n  end # for n in 1:N\n\n  L = ITensor(llinks[1])\n  L[llinks[1] => end] = 1.0\n  H[1] *= L\n\n  R = ITensor(dag(llinks[N + 1]))\n  R[dag(llinks[N + 1]) => 1] = 1.0\n  H[N] *= R\n\n  return H\nend #qn_svdMPO\n\nfunction qn_svdMPO(os::OpSum{C}, sites; kwargs...)::MPO where {C}\n  # Function barrier to improve type stability\n  ValType = determineValType(terms(os))\n  return qn_svdMPO(ValType, os, sites; kwargs...)\nend\n",
+      "metadata": {
+        "section_id": "part_5",
+        "section_title": "opsum_to_mpo_qn.jl",
+        "source_file": "src\\opsum_to_mpo\\opsum_to_mpo_qn.jl",
+        "package": "itensormps"
+      },
+      "score": 0.753888409416614,
+      "original_score": 0.7265426771295711,
+      "vector_score": 0.7265426771295711,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "terms",
+        "itensor",
+        "opsum"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__News_2__3",
+      "text": "TDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 9, 2024: A new package ITensorMPS.jl has been released. We plan to move all of the MPS/MPO functionality in ITensors.jl to ITensorMPS.jl . For now, ITensorMPS.jl just re-exports the MPS/MPO functionality of ITensors.jl (as well as of ITensorTDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 2, 2024: ITensors.jl v0.5 has been released. This version removes PackageCompiler.jl as a dependency and moves the package compilation functionality into a package extension. In order to use the ITensors.compile() function going forward, you need to install the PackageCompiler.jl package with using Pkg: Pkg; Pkg.add(\"PackageCompiler\") and put using PackageCompiler together with using ITensors in your code.\nMay 2, 202",
+      "metadata": {
+        "package": "itensors",
+        "source_file": "docs\\build\\index.html",
+        "section_title": "News",
+        "section_id": "News"
+      },
+      "score": 0.73940767670438,
+      "original_score": 0.6186453805429951,
+      "vector_score": 0.5915674409525669,
+      "bm25_score": 0.10831175836171321,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "implementation",
+        "itensor"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h0_11_11__0",
+      "text": "os = OpSum()\n  for j=1:N-1\n    os -= 4,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:N\n    os -= 2*h,\"Sx\",j;\n  end\n  H = MPO(os,sites)",
+      "metadata": {
+        "section_title": "UNTITLED",
+        "package": "itensormps",
+        "section_id": "h0_11",
+        "source_file": "docs\\src\\examples\\DMRG.md"
+      },
+      "score": 0.728675387525438,
+      "original_score": 0.7193193664056255,
+      "vector_score": 0.7193193664056255,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "opsum"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 116,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

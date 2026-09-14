@@ -1,0 +1,55 @@
+Your task is to generate executable code to reproduce results of a research paper according to the given task plan.
+
+-----------------------------------------------------------------------------------------------
+[Code structure]:
+1. **Function definition part**: Define functions that implement the calculation logic. 
+2. **Entrypoint part**: A main/entrypoint function or block that calls the defined functions with concrete parameter values.
+
+-----------------------------------------------------------------------------------------------
+[Instructions]:
+1. Read PLAN_INFO to understand task requirements.
+2. If QUERY_SUMMARY is provided, read it to understand package usage before generating code.
+3. Generate complete, executable code that reproduces the target subplot/table.
+
+-----------------------------------------------------------------------------------------------
+[Critical constraints]:
+- **Entrypoint execution:** You MUST include the executable entrypoint that actually invokes main (or equivalent). You must not only define the entrypoint, but also ensure it is actually executed. You are STRICTLY FORBIDDEN to omit, comment out, or skip the entrypoint execution part. The code must be runnable as a standalone script.
+- **Language and packages:** The following constraints will be provided in the input and you MUST strictly obey them: **TOPIC**, **ALLOWED_LANGUAGE**, **ALLOWED_PACKAGES**. You MUST use the specified programming language and use the listed packages for the domain/task; you may also use other general-purpose or standard library packages (e.g. for I/O, math, plotting) as needed. You are FORBIDDEN to use any other programming language.
+- **All concrete numbers, indices, dimensions** (e.g., L, Lx, Ly, num_sites, num_qubits, bond indices) MUST be passed from the entrypoint as input parameters to functions. You are FORBIDDEN to hardcode these values inside function definitions.
+- Function definitions must receive such values as parameters; indices and dimensions must be computed from inputs, not written as literals (e.g., 2*4, 8, 16, or bond lists).
+- **Exception handling:** Do NOT use try/except (Python) or try/catch (Julia) to silently swallow errors. Such patterns cause exitcode=0 even when the computation fails, which breaks the workflow's success detection. **Python:** Forbidden: `except Exception as e: print(e); continue` (or similar) without re-raising or sys.exit(1). **Julia:** Forbidden: `catch e; println(e); # continue` (or similar) without rethrow(e) or exit(1). When an error occurs in the core computation, the process MUST exit with a non-zero code so that the workflow can trigger repair.
+
+-----------------------------------------------------------------------------------------------
+[Input]:
+1. TOPIC / ALLOWED_LANGUAGE / ALLOWED_PACKAGES: Provided in the AGGREGATED INPUT below; you must strictly follow them.
+2. PLAN_INFO: Task plan containing subplot_name, User_requests, and detailed plan with parameter values.
+3. QUERY_SUMMARY (optional): Summary of package documentation with query-answer pairs. If provided, use it to understand package usage; otherwise rely on PLAN_INFO only.
+
+The actual content will be provided below.
+
+-----------------------------------------------------------------------------------------------
+[Output]:
+Your output consists of two parts:
+
+1. **JSON block** (enclosed by ```json and ```): A dictionary with keys:
+   - **"subplot_name"**: the subplot name from the plan
+   - **"code_type"**: either "python" or "julia" (lowercase string)
+   Do NOT put code content in the JSON.
+   The JSON must be valid (proper escaping, e.g. `"` as `\"`) so it can be loaded by json.loads().
+
+2. **Code block** (enclosed by <CODE> and </CODE>): The full source code as raw text.
+   - Place the complete code between <CODE> and </CODE>
+   - No JSON escaping is needed.
+   - **CRITICAL:** You MUST output a COMPLETE code block. The block MUST include both <CODE> and </CODE>. Do NOT omit or truncate the closing tag.
+
+**CRITICAL:** You MUST NOT include this prompt itself in your output.
+
+**Example output:**
+```json
+{"subplot_name": "example_figure", "code_type": "...code type here..."}
+```
+<CODE>
+...code content here...
+</CODE>
+
+**CRITICAL:** Your output MUST include both the JSON block and the code block.

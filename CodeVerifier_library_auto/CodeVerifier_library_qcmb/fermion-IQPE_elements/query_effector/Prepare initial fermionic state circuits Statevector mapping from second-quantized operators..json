@@ -1,0 +1,148 @@
+{
+  "query": "Prepare initial fermionic state: circuits, Statevector, mapping from second-quantized operators.",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "fermionic_gaussian_state__80f84e9eb39382ac27685324204d154b__part_1__1",
+      "text": " and \"\n            \"W1 @ W2.T + W2 @ W1.T = 0.\"\n        )\n\n\nclass FermionicGaussianState(QuantumCircuit):\n    r\"\"\"A circuit that prepares a fermionic Gaussian state.\n\n    A fermionic Gaussian state is a state of the form\n\n    .. math::\n        b^\\dagger_1 \\cdots b^\\dagger_{N_p} \\lvert \\overline{\\text{vac}} \\rangle,\n\n    where\n\n    .. math::\n        \\begin{pmatrix}\n            b^\\dagger_1 \\\\\n            \\vdots \\\\\n            b^\\dagger_N \\\\\n        \\end{pmatrix}\n        = W\n        \\begin{pmatrix}\n            a^\\dagger_1 \\\\\n            \\vdots \\\\\n            a^\\dagger_N \\\\\n            a_1 \\\\\n            \\vdots \\\\\n            a_N\n        \\end{pmatrix}.\n\n    - :math:`a^\\dagger_1, \\ldots, a^\\dagger_{N}` are the fermionic creation operators.\n    - :math:`W` is an :math:`N \\times 2N` matrix such that\n      :math:`b^\\dagger_1, \\ldots, b^\\dagger_{N}` also satisfy the\n      fermionic anticommutation relations.\n    - :math:`\\lvert \\overline{\\text{vac}} \\rangle` is the mutual 0-eigenvector of\n      the operators :math:`\\{b_j^\\dagger b_j\\}`.\n\n    The matrix :math:`W` has the block form\n\n    .. math::\n        \\begin{pmatrix}\n            W_1 & W_2\n        \\end{pmatrix},\n\n    where :math:`W_1` and :math:`W_2` must satisfy\n\n    .. math::\n        W_1 W_1^\\dagger + W_2 W_2^\\dagger = I \\\\\n        W_1 W_2^T + W_2 W_1^T = 0.\n\n    The matrix :math:`W` is commonly obtained by calling the\n    :meth:`~.QuadraticHamiltonian.diagonalizing_bogoliubov_transform`\n    method of the :class:`~.QuadraticHamiltonian` class.\n    This matrix is used to create circuits that prepare eigenstates of the\n    quadratic Hamiltonian.\n\n    Currently, only the Jordan-Wigner transformation is supported.\n\n    Reference: `arXiv:1711.05395`_\n\n    .. _arXiv:1711.05395: https://arxiv.org/abs/1711.05395\n    \"\"\"\n\n    def __init__(\n        self,\n        transformation_matrix: np.ndarray,\n        occupied_orbitals: Sequence[int] | None = None,\n        qubit_mapper: QubitMapper | None =",
+      "metadata": {
+        "package": "qiskit-nature",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\fermionic_gaussian_state.py",
+        "section_title": "fermionic_gaussian_state.py",
+        "section_id": "part_1"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "prepare",
+        "fermionic",
+        "state",
+        "circuits",
+        "operators"
+      ],
+      "match_ratio": 0.45454545454545453,
+      "is_html": false
+    },
+    {
+      "id": "slater_determinant__ab346cc5a25d8f6b57e5231d90e42d86__part_1__1",
+      "text": " :math:`N_f \\times N` matrix with orthonormal rows.\n    - :math:`a^\\dagger_1, \\ldots, a^\\dagger_{N}` are the fermionic creation operators.\n    - :math:`\\lvert \\text{vac} \\rangle` is the vacuum state.\n      (mutual 0-eigenvector of the fermionic number operators :math:`\\{a^\\dagger_j a_j\\}`)\n\n    The matrix :math:`Q` can be obtained by calling the\n    :meth:`~.QuadraticHamiltonian.diagonalizing_bogoliubov_transform`\n    method of the :class:`~.QuadraticHamiltonian` class when the\n    quadratic Hamiltonian conserves particle number.\n    This matrix is used to create circuits that prepare eigenstates of the\n    quadratic Hamiltonian.\n\n    Currently, only the Jordan-Wigner transformation is supported.\n\n    Reference: `arXiv:1711.05395`_\n\n    .. _arXiv:1711.05395: https://arxiv.org/abs/1711.05395\n    \"\"\"\n\n    def __init__(\n        self,\n        transformation_matrix: np.ndarray,\n        qubit_mapper: QubitMapper | None = None,\n        *,\n        validate: bool = True,\n        rtol: float = 1e-5,\n        atol: float = 1e-8,\n        **circuit_kwargs,\n    ) -> None:\n        # pylint: disable=unused-argument\n        r\"\"\"\n        Args:\n            transformation_matrix: The matrix :math:`Q` that specifies the coefficients of the\n                new creation operators in terms of the original creation operators.\n                The rows of the matrix must be orthonormal.\n            qubit_mapper: The ``QubitMapper``. The default behavior is to create one using the call\n                ``JordanWignerMapper()``.\n            validate: Whether to validate the inputs.\n            rtol: Relative numerical tolerance for input validation.\n            atol: Absolute numerical tolerance for input validation.\n            circuit_kwargs: Keyword arguments to pass to the ``QuantumCircuit`` initializer.\n\n        Raises:\n            ValueError: transformation_matrix must be a 2-dimensional array.\n            ValueError: transformation_matrix must have orthonormal rows.\n            NotImplementedError: Currently, only the Jordan-Wigner Transform is supported.\n                Please use the :class:`qiskit_nature.second_q.mappers.JordanWignerMapper`.\n        \"\"\"\n        if validate:\n            _validate_transformation_matrix(transformation_matrix, rtol=rtol, atol=atol)\n\n        if qubit_mapper is None:\n            qubit_mapper = JordanWignerMapper()\n\n        _, n = transformation_matrix.shape\n        register = QuantumRegister(n)\n        super().__init__(register, **circuit_kwargs)\n\n        if isinstance(qubit_mapper, JordanWignerMapper):\n            operations = _prepare_slater_determin",
+      "metadata": {
+        "package": "qiskit-nature",
+        "section_title": "slater_determinant.py",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\slater_determinant.py",
+        "section_id": "part_1"
+      },
+      "score": 0.8332916258520745,
+      "original_score": 0.8166207884372819,
+      "vector_score": 0.8631049582247475,
+      "bm25_score": 0.6306841092874197,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "prepare",
+        "fermionic",
+        "state",
+        "circuits",
+        "operators"
+      ],
+      "match_ratio": 0.45454545454545453,
+      "is_html": false
+    },
+    {
+      "id": "vqd__1b80be488ef6434c230f83aff592b718__part_1__1",
+      "text": "atively by introducing an overlap term with all\n    the previously computed eigenstates that must be minimised, thus ensuring\n    higher energy eigenstates are found.\n\n    An instance of VQD requires defining three algorithmic subcomponents:\n    an integer k denoting the number of eigenstates to calculate, a trial\n    state (a.k.a. ansatz) which is a :class:`QuantumCircuit`,\n    and one instance (or list of) classical :mod:`~qiskit_algorithms.optimizers`.\n    The optimizer varies the circuit parameters\n    The trial state :math:`|\\psi(\\vec\\theta)\\rangle` is varied by the optimizer,\n    which modifies the set of ansatz parameters :math:`\\vec\\theta`\n    such that the expectation value of the operator on the corresponding\n    state approaches a minimum. The algorithm does this by iteratively refining\n    each excited state to be orthogonal to all the previous excited states.\n\n    An optional array of parameter values, via the *initial_point*, may be provided\n    as the starting point for the search of the minimum eigenvalue. This feature is\n    particularly useful when there are reasons to believe that the solution point\n    is close to a particular point.\n\n    The length of the *initial_point* list value must match the number of the parameters\n    expected by the ansatz. If the *initial_point* is left at the default\n    of ``None``, then VQD will look to the ansatz for a preferred value, based on its\n    given initial state. If the ansatz returns ``None``,\n    then a random point will be generated within the parameter bounds set, as per above.\n    It is also possible to give a list of initial points, one for every kth eigenvalue.\n    If the ansatz provides ``None`` as the lower bound, then VQD\n    will default it to :math:`-2\\pi`; similarly, if the ansatz returns ``None``\n    as the upper bound, the default value will be :math:`2\\pi`.\n\n    The following attributes can be set via the initializer but can also be read and\n    updated once the VQD object has been constructed.\n\n    Attributes:\n            estimator (BaseEstimatorV2): The primitive instance used to perform the expectation\n                estimation as indicated in the VQD paper.\n            fidelity (BaseStateFidelity): The fidelity class instance used to compute the\n                overlap estimation as indicated in the VQD paper.\n            optimizer(Optimizer | Sequence[Optimizer]): A classical optimizer or a list of optimizers,\n                one for every k-th eigenvalue. Can either be a Qiskit optimizer or a callable\n                that takes an array as input and returns a Qiskit or SciPy optimization result.\n            k (int): the number of eigenvalues to return. Returns the lowest k eigenvalues.\n            bet",
+      "metadata": {
+        "section_id": "part_1",
+        "source_file": "qiskit_algorithms\\eigensolvers\\vqd.py",
+        "package": "qiskit-algorithms",
+        "section_title": "vqd.py"
+      },
+      "score": 0.8072727272727274,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "initial",
+        "state"
+      ],
+      "match_ratio": 0.18181818181818182,
+      "is_html": false
+    },
+    {
+      "id": "initializer__b7a2e57b4d98270c23298f876535fd8e__part_1__1",
+      "text": "                * Labels of basis states of the Pauli eigenstates Z, X, Y. See\n                  :meth:`.Statevector.from_label`. Notice the order of the labels is reversed with\n                  respect to the qubit index to be applied to. Example label '01' initializes the\n                  qubit zero to :math:`|1\\rangle` and the qubit one to :math:`|0\\rangle`.\n                * An integer that is used as a bitmap indicating which qubits to initialize to\n                  :math:`|1\\rangle`. Example: setting params to 5 would initialize qubit 0 and qubit\n                  2 to :math:`|1\\rangle` and qubit 1 to :math:`|0\\rangle`.\n\n            num_qubits: This parameter is only used if params is an int. Indicates the total\n                number of qubits in the `initialize` call. Example: `initialize` covers 5 qubits\n                and params is 3. This allows qubits 0 and 1 to be initialized to :math:`|1\\rangle`\n                and the remaining 3 qubits to be initialized to :math:`|0\\rangle`.\n            normalize: Whether to normalize an input array to a unit vector.\n        \"\"\"\n        self._stateprep = StatePreparation(params, num_qubits, normalize=normalize)\n\n        super().__init__(\"initialize\", self._stateprep.num_qubits, 0, self._stateprep.params)\n\n    def _define(self):\n        q = QuantumRegister(self.num_qubits, \"q\")\n        initialize_circuit = QuantumCircuit(q, name=\"init_def\")\n        initialize_circuit.reset(q)\n        initialize_circuit.append(self._stateprep, q)\n        self.definition = initialize_circuit\n\n    def gates_to_uncompute(self) -> QuantumCircuit:\n        \"\"\"Call to create a circuit with gates that take the desired vector to zero.\n\n        Returns:\n            QuantumCircuit: circuit to take ``self.params`` vector to :math:`|{00\\\\ldots0}\\\\rangle`\n        \"\"\"\n\n        isom = Isometry(self.params, 0, 0)\n        return isom._gates_to_uncompute()\n\n    @property\n    def params(self):\n        \"\"\"Return initialize params.\"\"\"\n        return self._stateprep.params\n\n    @params.setter\n    def params(self, parameters: Statevector | Sequence[complex] | str | int) -> None:\n        \"\"\"Set initialize params.\"\"\"\n        self._stateprep.params = parameters\n\n    def broadcast_arguments(self, qargs, cargs):\n        return self._stateprep.broadcast_arguments(qargs, cargs)\n",
+      "metadata": {
+        "section_title": "initializer.py",
+        "source_file": "qiskit\\circuit\\library\\data_preparation\\initializer.py",
+        "section_id": "part_1",
+        "package": "qiskit"
+      },
+      "score": 0.8036363636363637,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "statevector"
+      ],
+      "match_ratio": 0.09090909090909091,
+      "is_html": false
+    },
+    {
+      "id": "ref_initialize__3c79c72e7d767a01d227dae5d0b67d73__part_10__10",
+      "text": "x2\": shots / 2}]\n    else:\n        return [{\"0x00\": shots / 2, \"0x10\": shots / 2}]\n\n\ndef initialize_entangled_qubits(final_measure=True):\n    \"\"\"Initialize test circuits with entangled qubits\"\"\"\n\n    circuits = []\n    qr = QuantumRegister(3)\n    if final_measure:\n        cr = ClassicalRegister(3)\n        regs = (qr, cr)\n    else:\n        regs = (qr,)\n\n    # Initialize |000+111> -> |000+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [0])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |010+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 1], [1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+011>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0, 0, 0], [0, 1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |100+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 0, 0, 1], [0, 2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100+010+110+100+101+011+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(",
+      "metadata": {
+        "section_title": "ref_initialize.py",
+        "source_file": "test\\terra\\reference\\ref_initialize.py",
+        "section_id": "part_10",
+        "package": "qiskit-aer"
+      },
+      "score": 0.8036363636363637,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "circuits"
+      ],
+      "match_ratio": 0.09090909090909091,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 224,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

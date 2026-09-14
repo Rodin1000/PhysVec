@@ -1,0 +1,135 @@
+{
+  "query": "NetKet graph lattice for Hamiltonian with periodic boundary conditions",
+  "package": "netket",
+  "results": [
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_3_3__0",
+      "text": "## 2. Defining Graphs and Lattices#\nNetKet covers quite a few standard lattices, so let’s use this to quickly define a 2D square lattice with periodic boundary conditions.\nFor the moment we assume \\(L=4\\) ( \\(N=16\\) sites total).\n```code\n# Define a 2D square lattice\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\n```\nThe graph object is handy to quickly write the hamiltonian because it gives you easy access to the vertices (called nodes) and edges of the graph:\n```code\n# The number of sites (called nodes):\nprint\n(\n\"g.n_nodes:\"\n,\ng\n.\nn_nodes\n)\n# You can iterate through the nodes:\nprint\n(\n\"g.nodes:\"\n,\n[\nnode\nfor\nnode\nin\ng\n.\nnodes\n()])\n# You can check the number of edges:\nprint\n(\n\"g.n_edges:\"\n,\ng\n.\nn_edges\n)\n# You can iterate through the edges, which are stored as a 2-tuple with the start and end node:\nprint\n(\n\"g.edges:\"\n,\nlist\n(\ng\n.\nedges\n()))\n```\n```code\ng.n_nodes: 16\ng.nodes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]\ng.n_edges: 32\ng.edges: [(3, 7), (12, 13), (8, 9), (8, 12), (2, 14), (13, 14), (4, 5), (5, 6), (4, 8), (12, 15), (5, 9), (14, 15), (3, 15), (8, 11), (0, 1), (9, 10), (1, 2), (0, 4), (9, 13), (10, 11), (1, 5), (10, 14), (6, 7), (6, 10), (4, 7), (0, 3), (0, 12), (2, 3), (1, 13), (2, 6), (11, 15), (7, 11)]\n```\nYou can also visualize the lattice:\n```code\ng\n.\ndraw\n()\n```\n```code\n<Axes: title={'center': '2D Lattice (Distance Order: 1)'}, xlabel='X', ylabel='Y'>\n```",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_3",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "section_title": "2. Defining Graphs and Lattices#"
+      },
+      "score": 0.9134189749747896,
+      "original_score": 0.8425799544996175,
+      "vector_score": 1.0,
+      "bm25_score": 0.21289977249808756,
+      "keyword_matches": 7,
+      "matched_keywords": [
+        "netket",
+        "graph",
+        "lattice",
+        "hamiltonian",
+        "periodic",
+        "boundary",
+        "conditions"
+      ],
+      "match_ratio": 1.0,
+      "is_html": true
+    },
+    {
+      "id": "netket.errors.InitializePeriodicLatticeOnSmallLatticeWarning__fe281873ae1ea0c061455348464c8a62__sec_1_1__0",
+      "text": "## Contents\nWarning thrown when attempting to create a periodic lattice on a lattice with less than two sites in one direction.\nIn a periodic lattice with two sites (a, b) in one direction,\nthe expected behavior is to have an edge connecting both a->b and b->a\nHowever, as the lattice uses an undirected graph to represent the lattice, it does not support this behavior.\nHence, only one edge a->b is created, which makes the behavior equivalent to an open boundary condition in this direction.\nThis may cause unexpected behavior if you intend to loop over the edges to create a Hamiltonian, for example.\nTo avoid this warning, consider either using a lattice with more than two sites in the direction you want to be periodic,\nor define the graph using Graph by adding the edges manually.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\errors\\netket.errors.InitializePeriodicLatticeOnSmallLatticeWarning.html",
+        "section_title": "Contents",
+        "package": "netket",
+        "section_id": "sec_1"
+      },
+      "score": 0.8998563207160672,
+      "original_score": 0.8350574694146989,
+      "vector_score": 0.9186351030110935,
+      "bm25_score": 0.5007469350291206,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "graph",
+        "lattice",
+        "hamiltonian",
+        "periodic",
+        "boundary"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_3_3__0",
+      "text": "## 1) Defining a Custom Hamiltonian#\nThe first thing to do is to define the graph (lattice) on which to specify the Hamiltonian. Here we would like to build a one-dimensional graph with both nearest and next nearest neighbour bonds. The graph is created in the nk.graph.CustomGraph class. To initialise the class we simply provide a list of edges in the [[site_i, site_j, edge_color], ...]\n```code\n# Couplings J1 and J2\nJ\n=\n[\n1\n,\n0.2\n]\nL\n=\n14\n```\n```code\n# Define custom graph\nedge_colors\n=\n[]\nfor\ni\nin\nrange\n(\nL\n):\nedge_colors\n.\nappend\n([\ni\n,\n(\ni\n+\n1\n)\n%\nL\n,\n1\n])\nedge_colors\n.\nappend\n([\ni\n,\n(\ni\n+\n2\n)\n%\nL\n,\n2\n])\n# Define the netket graph object\ng\n=\nnk\n.\ngraph\n.\nGraph\n(\nedges\n=\nedge_colors\n)\n```\nWe specify a different color for each type of bond so as to define a different operator for each of them.\nNext, we define the relevant bond operators.\n```code\n# Sigma^z*Sigma^z interactions\nsigmaz\n=\n[[\n1\n,\n0\n],\n[\n0\n,\n-\n1\n]]\nmszsz\n=\nnp\n.\nkron\n(\nsigmaz\n,\nsigmaz\n)\n# Exchange interactions\nexchange\n=\nnp\n.\nasarray\n([[\n0\n,\n0\n,\n0\n,\n0\n],\n[\n0\n,\n0\n,\n2\n,\n0\n],\n[\n0\n,\n2\n,\n0\n,\n0\n],\n[\n0\n,\n0\n,\n0\n,\n0\n]])\nbond_operator\n=\n[\n(\nJ\n[\n0\n]\n*\nmszsz\n)\n.\ntolist\n(),\n(\nJ\n[\n1\n]\n*\nmszsz\n)\n.\ntolist\n(),\n(\n-\nJ\n[\n0\n]\n*\nexchange\n)\n.\ntolist\n(),\n(\nJ\n[\n1\n]\n*\nexchange\n)\n.\ntolist\n(),\n]\nbond_color\n=\n[\n1\n,\n2\n,\n1\n,\n2\n]\n```\nSide Remark : Notice the minus sign in front of the exchange. This is simply a basis rotation corresponding to the Marshall sign rule (as an exercise, change the sign of this exchange and observe that the exact diagonalization results in Section 6 do not change). The goal of this basis rotation is to speed up the convergence of the Monte Carlo simulations of the wave-function (by providing a good variational sign structure to start with), but in principle the converged results should be identical in both bases. Note further that this sign change is useful at low frustration (such as here \\(J_2=0.2\\) ), but may actually be not optimal at stronger frustration. As",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html",
+        "section_title": "1) Defining a Custom Hamiltonian#",
+        "package": "netket",
+        "section_id": "sec_3"
+      },
+      "score": 0.8569446400271679,
+      "original_score": 0.7749690966719494,
+      "vector_score": 0.9687113708399366,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "graph",
+        "lattice",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_3_3__0",
+      "text": "## 1. Defining the Hamiltonian#\nNetKet covers quite a few standard Hamiltonians and lattices, so let’s use this to quickly define the antiferromagnetic Heisenberg chain.\nFor the moment we assume \\(L=22\\) and simply define a chain lattice in this way (using periodic boundary conditions for now).\n```code\n# Define a 1d chain\nL\n=\n22\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n1\n,\npbc\n=\nTrue\n)\n```\nNext, we need to define the Hilbert space on this graph.\nWe have here spin-half degrees of freedom, and as we know that the ground-state sits in the zero magnetization sector, we can already impose this as a constraint in the Hilbert space.\nThis is not mandatory, but will nicely speeds things up in the following.\n```code\n# Define the Hilbert space based on this graph\n# We impose to have a fixed total magnetization of zero\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n0.5\n,\ntotal_sz\n=\n0\n,\nN\n=\ng\n.\nn_nodes\n)\n```\nThe final element of the triptych is of course the Hamiltonian acting in this Hilbert space, which in our case in already defined in NetKet.\nNote that the NetKet Hamiltonian uses Pauli Matrices (if you prefer to work with spin- \\(1/2\\) operators, it’s pretty trivial to define your own custom Hamiltonian, as covered in another tutorial)\n```code\n# calling the Heisenberg Hamiltonian\nha\n=\nnk\n.\noperator\n.\nHeisenberg\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n)\n```",
+      "metadata": {
+        "section_title": "1. Defining the Hamiltonian#",
+        "section_id": "sec_3",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "package": "netket"
+      },
+      "score": 0.7826004227342305,
+      "original_score": 0.6047280413349646,
+      "vector_score": 0.6713559825673534,
+      "bm25_score": 0.3382162764054093,
+      "keyword_matches": 7,
+      "matched_keywords": [
+        "netket",
+        "graph",
+        "lattice",
+        "hamiltonian",
+        "periodic",
+        "boundary",
+        "conditions"
+      ],
+      "match_ratio": 1.0,
+      "is_html": true
+    },
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_1_1__0",
+      "text": "## Contents\nIn this tutorial we will use NetKet to obtain the ground state of the J1-J2 model in one-dimension with periodic boundary conditions, using a Neural Network variational wave-function. The Hamiltonian of the model is given by:\nwhere the sum is over sites of the 1-D chain. Here \\(\\vec{\\sigma}=(\\sigma^x,\\sigma^y,\\sigma^z)\\) is the vector of Pauli matrices.\nWe will also explore some useful functionalities provided by the package.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html",
+        "section_id": "sec_1",
+        "package": "netket",
+        "section_title": "Contents"
+      },
+      "score": 0.7758776128797976,
+      "original_score": 0.630857244743196,
+      "vector_score": 0.7325237717908082,
+      "bm25_score": 0.22419113655274725,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "netket",
+        "hamiltonian",
+        "periodic",
+        "boundary",
+        "conditions"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 48,
+    "final_results_count": 5
+  }
+}

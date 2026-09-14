@@ -1,0 +1,65 @@
+Your task is to repair code according to the given repair suggestion and retrieved documentation.
+
+**When QUERY_SUMMARY and REPAIR_SUGGESTION conflict on API usage or how to fix, follow QUERY_SUMMARY.**
+
+-----------------------------------------------------------------------------------------------
+[Input:]
+1. TOPIC / ALLOWED_LANGUAGE / ALLOWED_PACKAGES (optional): When provided in the AGGREGATED INPUT below, you must obey them; the repaired code must keep the same language and use the listed packages for the domain; you may use other general-purpose packages as needed.
+2. ORIGINAL_CODE: The original code file content that needs to be repaired.
+3. QUERY_SUMMARY: Summary of retrieved package documentation with query-answer pairs providing function names, parameters, and usage patterns.
+4. REPAIR_SUGGESTION: A repair suggestion containing:
+   - location: Brief location indicator (function name and file)
+   - location_description: Detailed description of where the error occurs
+   - repair_suggestion: Specific suggestion on how to fix the error
+   - repair_id: Unique identifier for this repair suggestion
+
+-----------------------------------------------------------------------------------------------
+[Instructions:]
+1. Read ORIGINAL_CODE carefully to understand the current code structure.
+2. Read REPAIR_SUGGESTION to understand:
+   - Where the problem is located (location and location_description)
+   - How to fix it (repair_suggestion)
+3. Read QUERY_SUMMARY to understand relevant package API usage and best practices.
+4. Apply the repair suggestion to fix the identified problem in the code.
+5. Ensure the repaired code:
+   - Fixes the specific issue mentioned in the repair suggestion
+   - Maintains the overall code structure and functionality
+   - Uses correct API calls based on the retrieved documentation (if provided)
+   - Remains executable and follows the same coding style
+
+**CRITICAL - Language and packages:** When ALLOWED_LANGUAGE and ALLOWED_PACKAGES are provided in the input, the repaired code MUST keep the same language and use the listed packages for the domain; you may use other general-purpose packages as needed. Do NOT switch to another programming language.
+
+**CRITICAL - Scope of modification:** You MUST ONLY modify the parts of the code explicitly pointed out in REPAIR_SUGGESTION (location, location_description). Do NOT make divergent modifications to places not included in the suggest. Do NOT "improve" or refactor code outside the suggested fix scope.
+
+**CRITICAL - Conflict resolution:** When QUERY_SUMMARY and REPAIR_SUGGESTION give contradictory guidance on how to fix (e.g. different API usage, different repair approach), you MUST follow QUERY_SUMMARY as the authority. The retrieved documentation in QUERY_SUMMARY takes precedence over the repair_suggestion text.
+
+**CRITICAL - Entrypoint execution:** You MUST preserve the executable entrypoint that invokes main (or equivalent). You must not only define the entrypoint, but also ensure it is actually executed. You are STRICTLY FORBIDDEN to omit, comment out, or skip the entrypoint execution part. If REPAIR_SUGGESTION asks to remove or comment the entrypoint, ignore that part of the suggestion.
+
+**CRITICAL - Exception handling:** Do NOT use try/except (Python) or try/catch (Julia) to silently swallow errors. Such patterns cause exitcode=0 even when the computation fails, which breaks the workflow's success detection. **Python:** Forbidden: `except Exception as e: print(e); continue` (or similar) without re-raising or sys.exit(1). **Julia:** Forbidden: `catch e; println(e); # continue` (or similar) without rethrow(e) or exit(1). When an error occurs in the core computation, the process MUST exit with a non-zero code so that the workflow can trigger repair. If REPAIR_SUGGESTION proposes adding such patterns, ignore that part and fix the root cause instead.
+
+-----------------------------------------------------------------------------------------------
+[Output]:
+Your output consists of two parts:
+
+1. **JSON block** (enclosed by ```json and ```): A dictionary with keys:
+   - **"code_type"**: either "python" or "julia" (lowercase string, must match the original code type)
+   Do NOT put code content in the JSON.
+   The JSON must be valid (proper escaping, e.g. `"` as `\"`) so it can be loaded by json.loads().
+
+2. **Code block** (enclosed by <CODE> and </CODE>): The full repaired source code as raw text.
+   - Place the complete code between <CODE> and </CODE>
+   - No JSON escaping is needed.
+   - **CRITICAL:** You MUST output a COMPLETE code block. The block MUST include both <CODE> and </CODE>. Do NOT omit or truncate the closing tag.
+
+**CRITICAL:** You MUST NOT include this prompt itself in your output.
+
+**Example output:**
+```json
+{"code_type": "...code type here..."}
+```
+<CODE>
+...code content here...
+</CODE>
+
+**CRITICAL:** Your output MUST include both the JSON block and the code block.
+

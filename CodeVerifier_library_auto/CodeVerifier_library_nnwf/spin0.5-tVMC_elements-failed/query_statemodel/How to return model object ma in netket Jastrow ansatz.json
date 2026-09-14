@@ -1,0 +1,116 @@
+{
+  "query": "How to return model object 'ma' in netket Jastrow ansatz",
+  "package": "netket",
+  "results": [
+    {
+      "id": "models__12b95c8a73db5e6711fe975ef876c861__root_0__0",
+      "text": "(netket_models_api)=",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\api\\models.md",
+        "section_id": "root",
+        "section_title": "models"
+      },
+      "score": 0.8,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "models__09041a73079b0c73875a7031ae8e8795__root_0__0",
+      "text": "(netket_models_api)=",
+      "metadata": {
+        "section_title": "models",
+        "section_id": "root",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\_sources\\api\\models.md"
+      },
+      "score": 0.8,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_5_5__0",
+      "text": "## 3. The Jastrow ansatz#\nLet’s start with a simple ansatz for the ground-state: the Jastrow Ansatz.\n\\( \\log\\psi(\\sigma) = \\sum_i a_i \\sigma_i + \\sum_{i,j} \\sigma_i J_{i,j} \\sigma_j \\)\nTo show how it’s done, we write this simple ansatz as a flax.nnx module.\nWe import this module and call it nnx , as it is customary in the Flax documentation.\nAn NNX model subclasses nnx.Module and defines its parameters inside __init__ using nnx.Param .\nAs the module should work with batches of inputs (therefore the input will be a 2d matrix with shape (N_inputs, N_sites) , but we are lazy and find it easier to define the function for a single input \\(\\sigma\\) , a 1D vector of shape (N_sites,) .\nTherefore, we write a function called evaluate_single , which will evaluate a single 1D input, and use jax.vmap to make it work with 2D inputs as well.\nTo learn more about jax.vmap, give a look at the jax documentation!\n```code\nfrom\nflax\nimport\nnnx\nimport\njax.numpy\nas\njnp\nimport\njax\nclass\nJastrow\n(\nnnx\n.\nModule\n):\ndef\n__init__\n(\nself\n,\nN\n:\nint\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\nk1\n,\nk2\n=\njax\n.\nrandom\n.\nsplit\n(\nrngs\n.\nparams\n())\nself\n.\nJ\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk1\n,\n(\nN\n,\nN\n),\ndtype\n=\njnp\n.\ncomplex128\n))\nself\n.\nv_bias\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk2\n,\n(\nN\n,\n1\n),\ndtype\n=\njnp\n.\ncomplex128\n)\n)\ndef\n__call__\n(\nself\n,\nx\n):\nx\n=\nx\n.\nastype\n(\njnp\n.\ncomplex128\n)\n# keep the dtypes aligned\nquad\n=\njnp\n.\neinsum\n(\n\"...i,ij,...j->...\"\n,\nx\n,\nself\n.\nJ\n,\nx\n)\nlin\n=\njnp\n.\nsqueeze\n(\nx\n@\nself\n.\nv_bias\n,\n-\n1\n)\n# (...,N) @ (N,1) → (...,1)\nreturn\nquad\n+\nlin\n```\nNow that the model is defined, we can instantiate it\n```code\nma\n=\nJastrow\n(\nN\n=\nhi\n.\nsize\n,\nrngs\n=\nnnx",
+      "metadata": {
+        "package": "netket",
+        "section_title": "3. The Jastrow ansatz#",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "section_id": "sec_5"
+      },
+      "score": 0.7251056798171479,
+      "original_score": 0.5542254267305101,
+      "vector_score": 0.4427817834131377,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "return",
+        "model",
+        "jastrow",
+        "ansatz"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "gs-matrix-models__ef1b32ac39370be9a6422cd5bf62bbb1__sec_7_7__0",
+      "text": "## 5. Jastrow Ansatz#\nWe have seen that the mean field ansatz yields about sub-10% error on the ground-state energy. Let’s now try to do better, using a more correlated ansatz.\nWe will now take a short-range Jastrow ansatz which is already inlcuded in NetKet as nk.models.Jastrow :\nwhere \\(W_{ij}\\) is a symmetric matrix of learnable complex parameters (the kernel of the quadratic form).\n```code\n# change the model: initialize weights with normal distributions\nmodel\n=\nnk\n.\nmodels\n.\nJastrow\n(\nkernel_init\n=\nnn\n.\ninitializers\n.\nnormal\n())\n# we use the same MetropolicLocal sapmler as before. Now we sample for longer to get a more accurate result\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n2\n**\n10\n)\n```\n```code\n# look at the parameters\nprint\n(\nvstate\n.\nparameters\n)\n```\n```code\nFrozenDict({\n    kernel: DeviceArray([[ 0.01049682+0.01166978j,  0.00682185+0.00620781j,\n                   0.00733915+0.01080751j,  0.00185571+0.00749652j,\n                  -0.00214337+0.00025017j, -0.00318804-0.00774995j],\n                 [-0.00512184-0.00538546j,  0.00184588-0.01090576j,\n                   0.00651656-0.00574499j,  0.00724852-0.00697769j,\n                  -0.01310518-0.00781628j,  0.0107602 +0.00490359j],\n                 [-0.00207881-0.00916165j,  0.00700885+0.00145953j,\n                   0.00113884-0.00484843j, -0.00317073-0.01036345j,\n                   0.00207871+0.01423066j,  0.01065844+0.00981316j],\n                 [ 0.00393085+0.01117876j,  0.00657261+0.00599069j,\n                  -0.01086216-0.00661874j,  0.00182235+0.00389626j,\n                  -0.00074458+0.0142108j ,  0.00068885+0.00487905j],\n                 [ 0.003",
+      "metadata": {
+        "package": "netket",
+        "section_title": "5. Jastrow Ansatz#",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-matrix-models.html",
+        "section_id": "sec_7"
+      },
+      "score": 0.5885593171246167,
+      "original_score": 0.3327988926345136,
+      "vector_score": 0.2755243626162377,
+      "bm25_score": 0.5618970127076175,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "model",
+        "netket",
+        "jastrow",
+        "ansatz"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "03-monte-carlo-sampling__41d6b7963280c521f74cf679f9477a50__sec_3_3__0",
+      "text": "## 2. Variational Models from Part 2#\nLet’s redefine our variational ansätze:\n```code\n# Mean Field Ansatz\nclass\nMF\n(\nnn\n.\nModule\n):\n@nn\n.\ncompact\ndef\n__call__\n(\nself\n,\nx\n):\nlam\n=\nself\n.\nparam\n(\n\"lambda\"\n,\nnn\n.\ninitializers\n.\nnormal\n(),\n(\n1\n,),\nfloat\n)\np\n=\nnn\n.\nlog_sigmoid\n(\nlam\n*\nx\n)\nreturn\n0.5\n*\njnp\n.\nsum\n(\np\n,\naxis\n=-\n1\n)\n# Jastrow Ansatz\nclass\nJastrow\n(\nnn\n.\nModule\n):\n@nn\n.\ncompact\ndef\n__call__\n(\nself\n,\nx\n):\nn_sites\n=\nx\n.\nshape\n[\n-\n1\n]\nJ\n=\nself\n.\nparam\n(\n\"J\"\n,\nnn\n.\ninitializers\n.\nnormal\n(),\n(\nn_sites\n,\nn_sites\n),\nfloat\n)\ndtype\n=\njax\n.\nnumpy\n.\npromote_types\n(\nJ\n.\ndtype\n,\nx\n.\ndtype\n)\nJ\n=\nJ\n.\nastype\n(\ndtype\n)\nx\n=\nx\n.\nastype\n(\ndtype\n)\nJ_symm\n=\nJ\n.\nT\n+\nJ\nreturn\njnp\n.\neinsum\n(\n\"...i,ij,...j\"\n,\nx\n,\nJ_symm\n,\nx\n)\n```",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_3",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\03-monte-carlo-sampling.html",
+        "section_title": "2. Variational Models from Part 2#"
+      },
+      "score": 0.5685014324848743,
+      "original_score": 0.3361560499767297,
+      "vector_score": 0.3464539615425368,
+      "bm25_score": 0.29496440371350124,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "return",
+        "jastrow",
+        "ansatz"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 55,
+    "final_results_count": 5
+  }
+}

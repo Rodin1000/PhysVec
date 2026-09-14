@@ -1,0 +1,141 @@
+{
+  "query": "ITensor spin 1 site indices and operator names syntax",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "Physics__76dd2e2b1a4692ebd1e2d3b3298ad284__custom_op_2__1",
+      "text": " = op(\"Pup\",s)\n```\nto obtain the \"Pup\" operator for our \"S=1/2\" Index s . Or we can do a similar thing for an array of site indices:\n```code\nusing ITensors, ITensorMPS\nN = 40\ns = siteinds(\"S=1/2\",N)\nPup1 = op(\"Pup\",s[1])\nPup3 = op(\"Pup\",s[3])\n```\nNote that for the \"Qudit\" / \"Boson\" site types, you have to define your overload of op with the dimension of the local Hilbert space, for example:\n```code\nusing ITensors, ITensorMPS\nfunction ITensors.op(::OpName\"P1\", ::SiteType\"Boson\", d::Int)\n  o = zeros(d, d)\n  o[1, 1] = 1\n  return o\nend\n```\nAlternatively you could use Julia's array comprehension syntax:\n```code\nusing ITensors, ITensorMPS\nITensors.op(::OpName\"P1\", ::SiteType\"Boson\", d::Int) =\n  [(i == j == 1) ? 1.0 : 0.0 for i in 1:d, j in 1:d]\n```\nUsing Custom Operators in OpSum\nA key use of these op system extensions is allowing additional operator names to be recognized by the OpSum system for constructing matrix product operator (MPO) tensor networks. With the code above defining the \"Pup\" operator, we are now allowed to use this operator name in any OpSum code involving \"S=1/2\" site indices.\nFor example, we could now make an OpSum involving our custom operator such as:\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1/2\",N)\nos = OpSum()\nfor n=1:N\n  os += \"Pup\",n\nend\nP = MPO(os,sites)\n```\nThis code makes an MPO P which is just the sum of a spin-up projection operator acting on every site.",
+      "metadata": {
+        "section_title": "Making a Custom op Definition",
+        "source_file": "docs\\build\\examples\\Physics.html",
+        "package": "itensormps",
+        "section_id": "custom_op"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "spin",
+        "site",
+        "indices",
+        "operator",
+        "names",
+        "syntax"
+      ],
+      "match_ratio": 0.8571428571428571,
+      "is_html": true
+    },
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_4__4",
+      "text": " applying\noperators to MPS.\n\n# Example\n\n```julia\ns = Index(2, \"Site,S=1/2\")\nSz = op(\"Sz\", s)\n```\n\nYou can see all of the operator names defined for the site types included\nwith ITensor [here](https://docs.itensor.org/ITensorMPS/stable/IncludedSiteTypes.html).\nNote that some site types such as \"S=1/2\" and \"Qubit\"\nare aliases for each other and share operator definitions.\n\"\"\"\nfunction op(name::AbstractString, s::Index...; adjoint::Bool=false, kwargs...)\n  name = strip(name)\n  # TODO: filter out only commons tags\n  # if there are multiple indices\n  commontags_s = commontags(s...)\n\n  # first we handle the + and - algebra, which requires a space between ops to avoid clashing\n  name_split = nothing\n  @ignore_derivatives name_split = String.(split(name, \" \"))\n  oplocs = findall(x -> x ∈ (\"+\", \"-\"), name_split)\n\n  if !isempty(oplocs)\n    @ignore_derivatives !isempty(kwargs) &&\n      error(\"Lazy algebra on parametric gates not allowed\")\n\n    # the string representation of algebra ops: ex [\"+\", \"-\", \"+\"]\n    labels = name_split[oplocs]\n    # assign coefficients to each term: ex [+1, -1, +1]\n    coeffs = [1, [(-1)^Int(label == \"-\") for label in labels]...]\n\n    # grad the name of each operator block separated by an algebra op, and do so by\n    # making sure blank spaces between opnames are kept when building the new block.\n    start, opnames = 0, String[]\n    for oploc in oplocs\n      finish = oploc\n      opnames = vcat(\n        opnames, [prod([name_split[k] * \" \" for k in (start + 1):(finish - 1)])]\n      )\n      start = oploc\n    end\n    opnames = vcat(\n      opnames, [prod([name_split[k] * \" \" for k in (start + 1):length(name_split)])]\n    )\n\n    # build the vector of blocks and sum\n    op_list = [\n      coeff * (op(opname, s...; kwargs...)) for (coeff, opname) in zip(coeffs, opnames)\n    ]\n    return sum(op_list)\n  end\n\n  # the the multiplication come after\n  oploc = findfirst(\"*\", name)\n  if !isnothing(oploc)\n    op1, op2 = nothing, nothing\n    @ignore_derivatives begin\n      op1 = name[1:prevind(name, oploc.start)]\n      op2 = name[nextind(name, oploc.start):end]\n      if !(op1[end] == ' ' && op",
+      "metadata": {
+        "section_id": "part_4",
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "section_title": "sitetype.jl"
+      },
+      "score": 0.9669359813382142,
+      "original_score": 0.9614253115612499,
+      "vector_score": 1.0,
+      "bm25_score": 0.8071265578062496,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensor",
+        "site",
+        "indices",
+        "operator",
+        "names"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": false
+    },
+    {
+      "id": "IncludedSiteTypes__7d74debdd1c692a6ddd9c2ac060aba29__\"S1\"-SiteType_2__0",
+      "text": "## \"S=1\" SiteType\nSite indices with the \"S=1\" site type represent $S=1$ spins with the states $|\\!\\uparrow\\rangle$ , $|0\\rangle$ , $|\\!\\downarrow\\rangle$ .\nMaking a single \"S=1\" site or collection of N \"S=1\" sites\n```code\ns = siteind(\"S=1\")\nsites = siteinds(\"S=1\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\nconserve_qns (default: false): conserve total $S^z$\nconserve_sz (default: conserve_qns): conserve total $S^z$\nqnname_sz (default: \"Sz\"): name of total $S^z$ QN\nFor example:\n```code\nsites = siteinds(\"S=1\",N; conserve_sz=true, qnname_sz=\"TotalSz\")\n```\nThe available state names for \"S=1\" sites are:\n\"Up\" (aliases: \"Z+\" , \"↑\" ) spin in the up state\n\"Z0\" (aliases: \"0\" ) spin in the Sz=0 state\n\"Dn\" (aliases: \"Z-\" , \"↓\" ) spin in the down state\nOperators associated with \"S=1\" sites can be made using the op function, for example\n```code\nSz = op(\"Sz\",s)\nSz4 = op(\"Sz\",sites[4])\n```\nSpin operators:\n\"Sz\" (aliases: \"Sᶻ\" )\n\"Sz2\" Square of S^z operator\n\"S+\" (alises: \"S⁺\" , \"Splus\" )\n\"S-\" (aliases: \"S⁻\" , \"Sminus\" )\n\"Sx\" (alises: \"Sˣ\" )\n\"Sx2\" Square of S^x operator\n\"iSy\" (aliases: \"iSʸ\" )\n\"Sy\" (aliases: \"Sʸ\" )\n\"Sy2\" Square of S^y operator\n\"S2\" (aliases: \"S²\"`)",
+      "metadata": {
+        "source_file": "docs\\build\\IncludedSiteTypes.html",
+        "section_title": "\"S=1\" SiteType",
+        "package": "itensormps",
+        "section_id": "\"S1\"-SiteType"
+      },
+      "score": 0.806311904415983,
+      "original_score": 0.6809843131557367,
+      "vector_score": 0.6675876935642707,
+      "bm25_score": 0.7345707915216008,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "spin",
+        "site",
+        "indices",
+        "operator",
+        "names"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "qubit__04eb5b322e8470823b519f30a361d1bd__part_10__10",
+      "text": " ]\nend\n\n# spin-full operators\nop(::OpName\"Sz\", ::SiteType\"Qubit\") = [\n  0.5 0.0\n  0.0 -0.5\n]\n\nop(on::OpName\"Sᶻ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S+\", ::SiteType\"Qubit\") = [\n  0 1\n  0 0\n]\n\nop(on::OpName\"S⁺\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Splus\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S-\", ::SiteType\"Qubit\") = [\n  0 0\n  1 0\n]\n\nop(on::OpName\"S⁻\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Sminus\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"Sx\", ::SiteType\"Qubit\") = [\n  0.0 0.5\n  0.5 0.0\n]\n\nop(on::OpName\"Sˣ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"iSy\", ::SiteType\"Qubit\") = [\n  0.0 0.5\n  -0.5 0.0\n]\n\nop(on::OpName\"iSʸ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"Sy\", ::SiteType\"Qubit\") = [\n  0.0 -0.5im\n  0.5im 0.0\n]\n\nop(on::OpName\"Sʸ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S2\", ::SiteType\"Qubit\") = [\n  0.75 0.0\n  0.0 0.75\n]\n\nop(on::OpName\"S²\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"ProjUp\", ::SiteType\"Qubit\") = [\n  1 0\n  0 0\n]\n\nop(on::OpName\"projUp\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Proj0\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"ProjDn\", ::SiteType\"Qubit\") = [\n  0 0\n  0 1\n]\n\nop(on::OpName\"projDn\", t::SiteType\"Qubit\") = op(alias(on),",
+      "metadata": {
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\qubit.jl",
+        "section_title": "qubit.jl",
+        "section_id": "part_10"
+      },
+      "score": 0.7594445752799048,
+      "original_score": 0.7523694157293138,
+      "vector_score": 0.9404617696616422,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "spin"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "test_sitetype__4f218ef42b698a8d9918bec72dd1b284__part_0__0",
+      "text": "using ITensors, Test\nusing ITensors.SiteTypes:\n  @OpName_str,\n  @SiteType_str,\n  @StateName_str,\n  OpName,\n  StateName,\n  op,\n  ops,\n  siteind,\n  siteinds,\n  state\n\nfunction is_unitary(U::ITensor; kwargs...)\n  s = noprime(filterinds(U; plev=1))\n  return isapprox(transpose(dag(U))(U), op(\"I\", s...))\nend\n\n@testset \"SiteType\" begin\n  N = 10\n\n  @testset \"Star in operator strings\" begin\n    @test_throws ErrorException op(\"S=1/2\")\n\n    sites = siteinds(\"S=1/2\", N)\n    #@test_throws ArgumentError op(sites, \"Sp\", 1)\n    @test sites[1] isa Index\n    Sz = op(sites, \"Sz\", 2)\n    SzSz = op(sites, \"Sz * Sz\", 2)\n    @test SzSz ≈ product(Sz, Sz)\n    Sy = op(sites, \"Sy\", 2)\n    SySy = op(sites, \"Sy * Sy\", 2)\n    @test SySy ≈ product(Sy, Sy)\n\n    Sz1 = op(\"Sz\", sites, 1)\n    @test op(\"Sz\", [sites[1]]) ≈ Sz1\n    @test op([sites[1]], \"Sz\") ≈ Sz1\n    @test op([1 0; 0 -1] / 2, [sites[1]]) ≈ Sz1\n    @test op([sites[1]], [1 0; 0 -1] / 2) ≈ Sz1\n\n    @test op([sites[1]], \"Ry\"; θ=π / 2) ≈\n      itensor([1 -1; 1 1] / √2, sites[1]', dag(sites[1]))\n\n    sites = siteinds(\"S=1\", N)\n    #@test_throws ArgumentError op(sites, \"Sp\", 1)\n    Sz = op(sites, \"Sz\", 2)\n    SzSz = op(sites, \"Sz * Sz\", 2)\n    @test SzSz ≈ product(Sz, Sz)\n    Sy = op(sites, \"Sy\", 2)\n    SySy = op(sites, \"Sy * Sy\", 2)\n    @test SySy ≈ product(Sy, Sy)\n    SzSySz = op(sites, \"Sz * Sy * Sz\", 2)\n    @test SzSySz ≈ product(Sz, product(Sy, Sz))\n  end\n\n  @testset \"+/- in operator strings\" begin\n    q = siteind(\"Qudit\"; dim=5)\n   ",
+      "metadata": {
+        "section_title": "test_sitetype.jl",
+        "section_id": "part_0",
+        "package": "itensors",
+        "source_file": "test\\base\\test_sitetype.jl"
+      },
+      "score": 0.7274283684528959,
+      "original_score": 0.7109088756318593,
+      "vector_score": 0.8886360945398242,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "operator"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 103,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      }
+    }
+  }
+}

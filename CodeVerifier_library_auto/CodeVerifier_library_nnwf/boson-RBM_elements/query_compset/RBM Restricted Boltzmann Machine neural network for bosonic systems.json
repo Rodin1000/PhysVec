@@ -1,0 +1,127 @@
+{
+  "query": "RBM Restricted Boltzmann Machine neural network for bosonic systems",
+  "package": "netket",
+  "results": [
+    {
+      "id": "models__d0c41dbca36594765ce48f14a0845f4e__sec_2_2__0",
+      "text": "## Generic models#\nThis section lists some simple variational architectures.\nLogStateVector\n_Exact_ ansatz storing the logarithm of the full, exponentially large wavefunction coefficients.\nRBM\nA restricted boltzman Machine, equivalent to a 2-layer FFNN with a nonlinear activation function in between.\nRBMModPhase\nA fully connected Restricted Boltzmann Machine (RBM) with real-valued parameters.\nRBMMultiVal\nA fully connected Restricted Boltzmann Machine (see netket.models.RBM ) suitable for large local hilbert spaces.\nRBMSymm\nA symmetrized RBM using the netket.nn.DenseSymm() layer internally.\nJastrow\nJastrow wave function \\(\\Psi(s) = \\exp(\\sum_{i \\neq j} s_i W_{ij} s_j)\\) , where W is a symmetric matrix.\nNDM\nEncodes a Positive-Definite Neural Density Matrix using the ansatz from Torlai and Melko, PRL 120, 240503 (2018).\nGCNN\nImplements a Group Convolutional Neural Network (G-CNN) that outputs a wavefunction that is invariant over a specified symmetry group.\nDeepSetMLP\nImplements the DeepSets architecture, which is permutation invariant.\nMLP\nA Multi-Layer Perceptron with hidden layers.",
+      "metadata": {
+        "section_id": "sec_2",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\models.html",
+        "section_title": "Generic models#"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "rbm",
+        "restricted",
+        "boltzmann",
+        "machine",
+        "neural",
+        "network"
+      ],
+      "match_ratio": 0.75,
+      "is_html": true
+    },
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_6_6__0",
+      "text": "## 3. Learning with a Restricted Boltzmann Machine (RBM)#\nWe will now consider another celebrated ansatz, the Restricted Boltzmann Machine (RBM). It simply consists of two layers: a visible one representing the \\(L\\) spin 1/2 degrees of freedom, and an hidden one which contains a different number \\(M\\) of hidden units. There are connections between all visible and hidden nodes. The ansatz is the following\n\\(\\Psi_{\\rm RBM} (\\sigma_1^z,\\sigma_2^z, ..., \\sigma_L^z)  = \\exp ( \\sum_{i=1}^L a_i \\sigma_i^z ) \\prod_{i=1}^M \\cosh (b_i + \\sum_j W_{ij} \\sigma^z_j)\\)\n\\(a_i\\) (resp. \\(b_i\\) ) are the visible (resp. hidden) bias. Together with the weights \\(W_{ij}\\) , they are variational parameters that we (or rather NetKet) will optimize to minimize the energy. Netket gives you the control on the important parameters in this ansatz, such as \\(M\\) and the fact that you want to use or not the biases. The full explanation is here .\nMore conveniently (especially if you want to try another \\(L\\) in this tutorial), let’s define the hidden unit density \\(\\alpha = M / L\\) , and invoke the RBM ansatz in NetKet with as many hidden as visible units.\n```code\n# RBM ansatz with alpha=1\nma\n=\nnk\n.\nmodels\n.\nRBM\n(\nalpha\n=\n1\n)\n```\nAnd let us use the same sampler (Metropolis exchange) with some different random initial parameters, optimizer (stochastic gradient), and variational method (stochastic reconfiguration) as for the Jastrow ansatz, and let’s run things!\n```code\n# Build the sampler\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n)\n# Optimizer\nop\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.05\n)\n# The variational state\nvs\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nma\n,\nn_samples\n=\n1008\n)\n# The ground-state optimization loop\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nhamiltonian\n=\nha\n,\noptimizer\n=\nop\n,\ndiag_shift\n=\n0.1\n,\nvariational_state\n=\nvs\n)\nstart\n=\ntime\n.\ntime\n()\ngs\n.\nrun\n(\nout\n=\n\"RBM\"\n,\nn_iter\n=\n600\n)\nend\n=\ntime\n.\ntime\n()\nprint\n(\n\"### RBM calculation\"\n)\n",
+      "metadata": {
+        "section_title": "3. Learning with a Restricted Boltzmann Machine (RBM)#",
+        "package": "netket",
+        "section_id": "sec_6",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html"
+      },
+      "score": 0.8359002755947768,
+      "original_score": 0.7475388855304258,
+      "vector_score": 0.8204440007456927,
+      "bm25_score": 0.4559184246693585,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "rbm",
+        "restricted",
+        "boltzmann",
+        "machine"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "netket.models.RBMModPhase__5a506c0b40e6447ee93d24e7164b9cee__sec_1_1__0",
+      "text": "## Contents\nBases: Module\nA fully connected Restricted Boltzmann Machine (RBM) with real-valued parameters.\nIn this case, two RBMs are taken to parametrize, respectively, the real\nand imaginary part of the log-wave-function, as introduced in Torlai et al.,\nNature Physics 14, 447–450(2018).\nThis type of RBM has spin 1/2 hidden units and is defined by:\nfor arbitrary local quantum numbers \\(s_i\\) .\nfeature density. Number of features equal to alpha * input.shape[-1]\nNumerical precision of the computation see jax.lax.Precision for details.\nif True uses a bias in the dense layer (hidden layer bias).\nThe nonlinear activation function.\nInitializer for the Dense layer matrix.\nInitializer for the hidden bias.\nCall self as a function.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\models\\netket.models.RBMModPhase.html",
+        "section_id": "sec_1",
+        "section_title": "Contents",
+        "package": "netket"
+      },
+      "score": 0.8357171687124115,
+      "original_score": 0.7472571826344793,
+      "vector_score": 0.8260314689274396,
+      "bm25_score": 0.4321600374626379,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "rbm",
+        "restricted",
+        "boltzmann",
+        "machine"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "models__d0c41dbca36594765ce48f14a0845f4e__sec_6_6__0",
+      "text": "## Experimental models#\nThe following models are experimental, meaning that we could change them at some point, and we actively seeking for feedback and opinions on their usage and APIs.\nThe following models are for 2nd-quantisation fermionic hilbert spaces ( SpinOrbitalFermions ).\nSlater2nd\nA slater determinant ansatz for second-quantised spinless or spin-full fermions.\nMultiSlater2nd\nA slater determinant ansatz for second-quantised spinless or spin-full fermions with a sum of determinants.\nThe following are abstract models for Recurrent neural networks (and their fast versions).\nRNN\nBase class for recurrent neural networks.\nFastRNN\nBase class for recurrent neural networks with fast sampling.\nThe following are concrete, ready to use versions of Recurrent Neural Networks\nLSTMNet\nLong short-term memory network.\nFastLSTMNet\nLong short-term memory network with fast sampling.\nGRUNet1D\nGated recurrent unit network.\nFastGRUNet1D\nGated recurrent unit network with fast sampling.",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\models.html",
+        "section_title": "Experimental models#",
+        "section_id": "sec_6"
+      },
+      "score": 0.8178796063826833,
+      "original_score": 0.739828009118119,
+      "vector_score": 0.9081508738368153,
+      "bm25_score": 0.0665365502433335,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "neural",
+        "network"
+      ],
+      "match_ratio": 0.25,
+      "is_html": true
+    },
+    {
+      "id": "fidelity__0bb023b462bdf06ce58932707b8c0851__sec_3_3__0",
+      "text": "## System, model definition and target state#\nWe set up the physical problem:\n\\(L\\times L\\) square lattice of spins- \\(\\tfrac{1}{2}\\) .\n\\(L\\times L\\) square lattice of spins- \\(\\tfrac{1}{2}\\) .\nVariational ansatz: Restricted Boltzmann Machine with real parameters.\nVariational ansatz: Restricted Boltzmann Machine with real parameters.\nTransverse-field Ising Hamiltonian \\(H\\) .\nTransverse-field Ising Hamiltonian \\(H\\) .\n```code\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nSquare\n(\nlength\n=\nL\n,\n)\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\n0.5\n,\nN\n=\ng\n.\nn_nodes\n)\nma\n=\nnk\n.\nmodels\n.\nRBM\n(\nalpha\n=\n3\n,\nparam_dtype\n=\njnp\n.\nfloat64\n)\nn_samples\n=\n2\n**\n13\nH\n=\nnk\n.\noperator\n.\nIsing\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n,\nJ\n=-\n1.0\n,\nh\n=\n3.04438\n)\n```",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\fidelity.html",
+        "section_id": "sec_3",
+        "section_title": "System, model definition and target state#",
+        "package": "netket"
+      },
+      "score": 0.7832546339965162,
+      "original_score": 0.666545590763871,
+      "vector_score": 0.6723325371147617,
+      "bm25_score": 0.6433978053603082,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "rbm",
+        "restricted",
+        "boltzmann",
+        "machine"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 50,
+    "final_results_count": 5
+  }
+}

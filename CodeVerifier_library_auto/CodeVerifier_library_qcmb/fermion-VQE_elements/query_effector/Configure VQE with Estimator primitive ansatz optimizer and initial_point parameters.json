@@ -1,0 +1,150 @@
+{
+  "query": "Configure VQE with Estimator primitive, ansatz, optimizer, and initial_point parameters",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "test_bosonic_esc_calculation__49325515158ce3ecf65bc111126ddae9__part_3__3",
+      "text": "imal_point, initial_point\n        )\n\n    def test_vqe_uvccsd_with_callback(self):\n        \"\"\"Test VQE UVCCSD with callback.\"\"\"\n\n        def cb_callback(nfev, parameters, energy, stddev):\n            print(f\"iterations {nfev}: energy: {energy}\")\n\n        estimator = Estimator()\n        optimizer = COBYLA(maxiter=5000)\n        initial_state = VSCF(self.vibrational_problem.num_modals, self.qubit_mapper)\n        ansatz = UVCCSD(\n            self.vibrational_problem.num_modals, self.qubit_mapper, initial_state=initial_state\n        )\n        solver = VQE(estimator, ansatz, optimizer, callback=cb_callback)\n        solver.initial_point = [0] * ansatz.num_parameters\n        gsc = GroundStateEigensolver(self.qubit_mapper, solver)\n        esc = QEOM(gsc, estimator, \"sd\")\n        with contextlib.redirect_stdout(io.StringIO()) as out:\n            results = esc.solve(self.vibrational_problem)\n        self._assert_energies(\n            results.computed_vibrational_energies, self.reference_energies, places=0\n        )\n        for idx, line in enumerate(out.getvalue().split(\"\\n\")):\n            if line.strip():\n                self.assertTrue(line.startswith(f\"iterations {idx+1}: energy: \"))\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "package": "qiskit-nature",
+        "source_file": "test\\second_q\\algorithms\\excited_state_solvers\\test_bosonic_esc_calculation.py",
+        "section_id": "part_3",
+        "section_title": "test_bosonic_esc_calculation.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9789820603424844,
+      "bm25_score": 0.8790634470365213,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "vqe",
+        "estimator",
+        "ansatz",
+        "optimizer",
+        "initial_point",
+        "parameters"
+      ],
+      "match_ratio": 0.75,
+      "is_html": false
+    },
+    {
+      "id": "vqe_ucc__c77f66659fb5d4f2352da450ee7fef48__part_1__1",
+      "text": " before, in order to ensure we start from that, we need to initialize our\n   ``initial_point`` with all-zero parameters. One way to do that is like so:\n\n.. testcode::\n\n    vqe.initial_point = np.zeros(ansatz.num_parameters)\n\nAlternatively, one can also use\n:class:`~qiskit_nature.second_q.algorithms.initial_points.HFInitialPoint` like so:\n\n.. testcode::\n\n    from qiskit_nature.second_q.algorithms.initial_points import HFInitialPoint\n    initial_point = HFInitialPoint()\n    initial_point.ansatz = ansatz\n    initial_point.problem = problem\n    vqe.initial_point = initial_point.to_numpy_array()\n\nThis may seem like it is not adding a lot of benefit, but the key aspect here is that you can build\nyour code on top of the :class:`~qiskit_nature.second_q.algorithms.initial_points.InitialPoint`\ninterface based on which we also have the\n:class:`~qiskit_nature.second_q.algorithms.initial_points.MP2InitialPoint` which allows you to start\nfrom an MP2 starting point like so:\n\n.. testcode::\n\n    from qiskit_nature.second_q.algorithms.initial_points import MP2InitialPoint\n    initial_point = MP2InitialPoint()\n    initial_point.ansatz = ansatz\n    initial_point.problem = problem\n    vqe.initial_point = initial_point.to_numpy_array()\n\n6. Finally, we can now actually solve our problem:\n\n.. testcode::\n\n    from qiskit_nature.second_q.algorithms import GroundStateEigensolver\n    solver = GroundStateEigensolver(mapper, vqe)\n    result = solver.solve(problem)\n\n    print(f\"Total ground state energy = {result.total_energies[0]:.4f}\")\n\n.. testoutput::\n\n    Total ground state energy = -1.1373\n",
+      "metadata": {
+        "package": "qiskit-nature",
+        "source_file": "docs\\howtos\\vqe_ucc.rst",
+        "section_id": "part_1",
+        "section_title": "vqe_ucc.rst"
+      },
+      "score": 0.9063918665784105,
+      "original_score": 0.8959909628649007,
+      "vector_score": 1.0,
+      "bm25_score": 0.2962692198244981,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "vqe",
+        "ansatz",
+        "initial_point",
+        "parameters"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "vqe__6755a09a2e23c45ff18820806dff7938__part_7__7",
+      "text": "atz.num_parameters == 0:\n            raise AlgorithmError(\"The ansatz must be parameterized, but has no free parameters.\")\n\n    def _build_vqe_result(\n        self,\n        ansatz: QuantumCircuit,\n        optimizer_result: OptimizerResult,\n        aux_operators_evaluated: ListOrDict[tuple[complex, tuple[complex, int]]],\n        optimizer_time: float,\n    ) -> VQEResult:\n        result = VQEResult()\n        result.optimal_circuit = ansatz.copy()\n        result.eigenvalue = optimizer_result.fun\n        result.cost_function_evals = optimizer_result.nfev\n        result.optimal_point = optimizer_result.x  # type: ignore[assignment]\n        result.optimal_parameters = dict(\n            zip(self.ansatz.parameters, optimizer_result.x)  # type: ignore[arg-type]\n        )\n        result.optimal_value = optimizer_result.fun\n        result.optimizer_time = optimizer_time\n        result.aux_operators_evaluated = aux_operators_evaluated  # type: ignore[assignment]\n        result.optimizer_result = optimizer_result\n        return result\n\n\nclass VQEResult(VariationalResult, MinimumEigensolverResult):\n    \"\"\"The Variational Quantum Eigensolver (VQE) result.\"\"\"\n\n    def __init__(self) -> None:\n        super().__init__()\n        self._cost_function_evals: int | None = None\n\n    @property\n    def cost_function_evals(self) -> int | None:\n        \"\"\"The number of cost optimizer evaluations.\"\"\"\n        return self._cost_function_evals\n\n    @cost_function_evals.setter\n    def cost_function_evals(self, value: int) -> None:\n        self._cost_function_evals = value\n",
+      "metadata": {
+        "section_id": "part_7",
+        "source_file": "qiskit_algorithms\\minimum_eigensolvers\\vqe.py",
+        "package": "qiskit-algorithms",
+        "section_title": "vqe.py"
+      },
+      "score": 0.8507833660492548,
+      "original_score": 0.8342037400547275,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "vqe",
+        "ansatz",
+        "optimizer",
+        "parameters"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "test_statevector_estimator__fa6e14b3a97b706fa932af77efd82343__part_5__5",
+      "text": "II\", 1)])\n\n        est = StatevectorEstimator()\n        with self.assertRaises(ValueError):\n            est.run([(qc, op2)]).result()\n        with self.assertRaises(ValueError):\n            est.run([(qc, op, [[1e4]])]).result()\n        with self.assertRaises(ValueError):\n            est.run([(qc2, op2, [[1, 2]])]).result()\n        with self.assertRaises(ValueError):\n            est.run([(qc, [op, op2], [[1]])]).result()\n        with self.assertRaises(ValueError):\n            est.run([(qc, op)], precision=-1).result()\n        with self.assertRaises(ValueError):\n            est.run([(qc, 1j * op)], precision=0.1).result()\n        with self.subTest(\"missing []\"):\n            with self.assertRaisesRegex(ValueError, \"An invalid Estimator pub-like was given\"):\n                _ = est.run((qc, op)).result()\n\n    def test_run_numpy_params(self):\n        \"\"\"Test for numpy array as parameter values\"\"\"\n        qc = QuantumCircuit(2)\n        qc.append(real_amplitudes(num_qubits=2, reps=2), [0, 1])\n        op = SparsePauliOp.from_list([(\"IZ\", 1), (\"XI\", 2), (\"ZY\", -1)])\n        k = 5\n        rng = np.random.default_rng(12)\n        params_array = rng.random((k, qc.num_parameters))\n        params_list = params_array.tolist()\n        params_list_array = list(params_array)\n        estimator = StatevectorEstimator()\n        target = estimator.run([(qc, op, params_list)]).result()\n\n        with self.subTest(\"ndarrary\"):\n            result = estimator.run([(qc, op, params_array)]).result()\n            self.assertEqual(len(result[0].data.evs), k)\n            np.testing.assert_allclose(result[0].data.evs, target[0].data.evs)\n\n        with self.subTest(\"list of ndarray\"):\n            result = estimator.run([(qc, op, params_list_array)]).result()\n            self.assertEqual(len(result[0].data.evs), k)\n            np.testing.assert_allclose(result[0].data.evs, target[0].data.evs)\n\n    def test_precision_seed(self):\n        \"\"\"Test for precision and seed\"\"\"\n        estimator = StatevectorEstimator(default_precision=1.0, seed=1)\n        psi1 = self.psi[0]\n        hamiltonian1 = self.hamiltonian[0]\n        theta1 = self.theta[0]\n        job = estimator.run([(psi1, hamiltonian1, [theta1])])\n        result = job.result()\n        np.testing.assert_allclose(result[0].data.evs, [1.901141473854881])\n        # The result of the second run is the same\n        job = estimator.run([(psi1, hamiltonian1, [theta1",
+      "metadata": {
+        "section_id": "part_5",
+        "package": "qiskit",
+        "section_title": "test_statevector_estimator.py",
+        "source_file": "test\\python\\primitives\\test_statevector_estimator.py"
+      },
+      "score": 0.8383486465533594,
+      "original_score": 0.8342037400547275,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "estimator"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "README__68a83d855e5a8dc60938b12c4713fb62__h1_4_4__0",
+      "text": "from qiskit_aer.primitives import EstimatorV2\npsi1 = transpile(RealAmplitudes(num_qubits=2, reps=2), sim, optimization_level=0)\npsi2 = transpile(RealAmplitudes(num_qubits=2, reps=3), sim, optimization_level=0)\nH1 = SparsePauliOp.from_list([(\"II\", 1), (\"IZ\", 2), (\"XI\", 3)])\nH2 = SparsePauliOp.from_list([(\"IZ\", 1)])\nH3 = SparsePauliOp.from_list([(\"ZI\", 1), (\"ZZ\", 1)])\ntheta1 = [0, 1, 1, 2, 3, 5]\ntheta2 = [0, 1, 1, 2, 3, 5, 8, 13]\ntheta3 = [1, 2, 3, 4, 5, 6]\nestimator = EstimatorV2()",
+      "metadata": {
+        "source_file": "README.md",
+        "package": "qiskit-aer",
+        "section_id": "h1_4",
+        "section_title": "---------------------------"
+      },
+      "score": 0.8383486465533594,
+      "original_score": 0.8342037400547275,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "estimator"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 193,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 44
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 46
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 48
+      }
+    }
+  }
+}

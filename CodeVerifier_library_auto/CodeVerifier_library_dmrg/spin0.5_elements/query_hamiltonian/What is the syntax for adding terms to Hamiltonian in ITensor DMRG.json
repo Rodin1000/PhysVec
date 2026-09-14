@@ -1,0 +1,140 @@
+{
+  "query": "What is the syntax for adding terms to Hamiltonian in ITensor DMRG?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__How-to-do-periodic-boundary-condition-DMRG_2__0",
+      "text": "## How to do periodic boundary condition DMRG\nThe short answer to how to do fully periodic boundary condition DMRG in ITensor is that you simply input a periodic Hamiltonian into our OpSum system and make the MPO form of your Hamiltonian in the usual way. For example, for a chain of N sites with nearest-neighbor interactions, you include a term that connects site 1 to site N. For a one-dimensional Ising model chain Hamiltonian this would look like:\n```code\nsites = siteinds(\"S=1/2\",N)\n\nhterms = OpSum()\nfor j=1:(N-1)\n  hterms += \"Sz\",j,\"Sz\",j+1\nend\nhterms += \"Sz\",1,\"Sz\",N  # term 'wrapping' around the ring\n\nH = MPO(hterms,sites)\n```\nFor two-dimensional DMRG calculations, where the most common approach is to use periodic boundary conditions in the y-direction only, and not in the x-direction, you do a similar step in making your OpSum input to ITensor DMRG: you include terms wrapping around the periodic cylinder in the y direction but not in the x direction.\nHowever, fully periodic boundary conditions are only recommended for small systems when absolutely needed, and in general are not recommended. For a longer discussion of alternatives to using fully periodic boundaries, see the next section below.\nThe reason fully periodic boundary conditions (periodic in x in 1D, and periodic in both x and y in 2D) are not recommended in general is that the DMRG algorithm, as we are defining it here, optimizes an open-boundary MPS . So if you input a periodic-boundary Hamiltonian, there is a kind of \"mismatch\" that happens where you can still get the correct answer, but it requires much more resources (a larger bond dimension and more sweeps) to get good accuracy. There has been some research into \"truly\" periodic DMRG, [Pippan] that is DMRG that optimizes an MPS with a ring-like topology, but it is not widely used, is still an open area of algorithm development, and is not currently available in ITensor.",
+      "metadata": {
+        "package": "itensormps",
+        "section_title": "How to do periodic boundary condition DMRG",
+        "source_file": "docs\\build\\faq\\DMRG.html",
+        "section_id": "How-to-do-periodic-boundary-condition-DMRG"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.8469477041436668,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "terms",
+        "hamiltonian",
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Make-a-2D-Hamiltonian-for-DMRG_4__0",
+      "text": "## Make a 2D Hamiltonian for DMRG\nYou can use the OpSum system to make 2D Hamiltonians much in the same way you make 1D Hamiltonians: by looping over all of the bonds and adding the interactions on these bonds to the OpSum.\nTo help with the logic of 2D lattices, ITensor pre-defines some helper functions which return an array of bonds. Each bond object has an \"s1\" field and an \"s2\" field which are the integers numbering the two sites the bond connects. (You can view the source for these functions at this link .)\nThe two provided functions currently are square_lattice and triangular_lattice . It is not hard to write your own similar lattice functions as all they have to do is define an array of ITensorMPS.LatticeBond structs or even a custom struct type you wish to define. We welcome any user contributions of other lattices that ITensor does not currently offer.\nEach lattice function takes an optional named argument \"yperiodic\" which lets you request that the lattice should have periodic boundary conditions around the y direction, making the geometry a cylinder.\nFull example code:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  Ny = 6\n  Nx = 12\n\n  N = Nx*Ny\n\n  sites = siteinds(\"S=1/2\", N;\n                   conserve_qns = true)\n\n  # Obtain an array of LatticeBond structs\n  # which define nearest-neighbor site pairs\n  # on the 2D square lattice (wrapped on a cylinder)\n  lattice = square_lattice(Nx, Ny; yperiodic = false)\n\n  # Define the Heisenberg spin Hamiltonian on this lattice\n  os = OpSum()\n  for b in lattice\n    os += 0.5, \"S+\", b.s1, \"S-\", b.s2\n    os += 0.5, \"S-\", b.s1, \"S+\", b.s2\n    os +=      \"Sz\", b.s1, \"Sz\", b.s2\n  end\n  H = MPO(os,sites)\n\n  state = [isodd(n) ? \"Up\" : \"Dn\" for n=1:N]\n  # Initialize wavefunction to a random MPS\n  # of bond-dimension 10 with same quantum\n  # numbers as `state`\n  psi0 = random_mps(sites,state;linkdims=20)\n\n  nsweeps = 10\n  maxdim = [20,60,100,100,200,400,800]\n  cutoff = [1E-8]\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "Make-a-2D-Hamiltonian-for-DMRG",
+        "section_title": "Make a 2D Hamiltonian for DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 0.9449430374529636,
+      "original_score": 0.910718439112914,
+      "vector_score": 0.9978829784362173,
+      "bm25_score": 0.4226727338347726,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "adding",
+        "hamiltonian",
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__ee249f64f89e6651115ee4527b6ea283__h2_2_2__0",
+      "text": "The short answer to how to do fully periodic boundary condition DMRG in ITensor is that\nyou simply input a **periodic Hamiltonian** into our OpSum system and make the MPO\nform of your Hamiltonian in the usual way. For example, for a chain of N sites with nearest-neighbor\ninteractions, you include a term that connects site 1 to site N. For a one-dimensional Ising model\nchain Hamiltonian this would look like:\n```\nsites = siteinds(\"S=1/2\",N)\nhterms = OpSum()\nfor j=1:(N-1)\n  hterms += \"Sz\",j,\"Sz\",j+1\nend\nhterms += \"Sz\",1,\"Sz\",N  # term 'wrapping' around the ring\nH = MPO(hterms,sites)\n```\nFor two-dimensional DMRG calculations, where the most common approach is to use\nperiodic boundary conditions in the y-direction only, and not in the x-direction,\nyou do a similar step in making your OpSum input to ITensor DMRG: you include\nterms wrapping around the periodic cylinder in the y direction but not in the x direction.\nHowever, fully periodic boundary conditions are only recommended for small systems\nwhen absolutely needed, and in general are not recommended. For a longer discussion\nof alternatives to using fully periodic boundaries, see the next section below.\nThe reason fully periodic boundary conditions (periodic in x in 1D, and periodic in both x\nand y in 2D) are not recommended in general is that the DMRG algorithm, as we are defining it\nhere, optimizes an **open-boundary MPS**. So if you input a periodic-boundary Hamiltonian, there\nis a kind of \"mismatch\" that happens where you can still get the correct answer, but it\nrequires much more resources (a larger bond dimension and more sweeps) to get good\naccuracy. There has been some research into \"truly\" periodic DMRG, [^Pippan] that is DMRG that\noptimizes an MPS with a ring-like topology, but it is not widely used, is still an\nopen area of algorithm development, and is not currently available in ITensor.",
+      "metadata": {
+        "source_file": "docs\\src\\faq\\DMRG.md",
+        "package": "itensormps",
+        "section_title": "How to do periodic boundary condition DMRG",
+        "section_id": "h2_2"
+      },
+      "score": 0.9170606056788463,
+      "original_score": 0.9043006988602073,
+      "vector_score": 0.8827511050426317,
+      "bm25_score": 0.8520937760254685,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "terms",
+        "hamiltonian",
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Perform-a-basic-DMRG-calculation_0__0",
+      "text": "## Perform a basic DMRG calculation\nBecause tensor indices in ITensor have unique identities, before we can make a Hamiltonian or a wavefunction we need to construct a \"site set\" which will hold the site indices defining the physical Hilbert space:\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1\",N)\n```\nHere we have chosen to create a Hilbert space of N spin 1 sites. The string \"S=1\" denotes a special Index tag which hooks into a system that knows \"S=1\" indices have a dimension of 3 and how to create common physics operators like \"Sz\" for them.\nNext we'll make our Hamiltonian matrix product operator (MPO). A very convenient way to do this is to use the OpSum helper type which lets us input a Hamiltonian (or any sum of local operators) in similar notation to pencil-and-paper notation:\n```code\nos = OpSum()\nfor j=1:N-1\n  os += 0.5,\"S+\",j,\"S-\",j+1\n  os += 0.5,\"S-\",j,\"S+\",j+1\n  os += \"Sz\",j,\"Sz\",j+1\nend\nH = MPO(os,sites)\n```\nIn the last line above we convert the OpSum helper object to an actual MPO.\nBefore beginning the calculation, we need to specify how many DMRG sweeps to do and what schedule we would like for the parameters controlling the accuracy. These parameters can be specified as follows:\n```code\nnsweeps = 5 # number of sweeps is 5\nmaxdim = [10,20,100,100,200] # gradually increase states kept\ncutoff = [1E-10] # desired truncation error\n```\nThe random starting wavefunction psi0 must be defined in the same Hilbert space as the Hamiltonian, so we construct it using the same collection of site indices:\n```code\npsi0 = random_mps(sites;linkdims=2)\n```\nHere we have made a random MPS of bond dimension 2. We could have used a random product state instead, but choosing a slightly larger bond dimension can help DMRG avoid getting stuck in local minima. We could also set psi to some specific initial state using the MPS constructor, which is actually required if we were conserving QNs.\nFinally, we are ready to call DMRG:\n```code\nenergy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n```\nWhen the algorithm is done, it returns the ground state energy as the variable energy and an MPS approximation to the ground state as the variable psi .\nBelow you can find a complete working code that includes all of these steps:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n  sites = siteinds(\"S=1\",N)\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5,\"S+\",j,\"S-\",j+1\n    os += 0.5,\"S-\",j,\"S+\",j+1\n    os += \"Sz\",j,\"Sz\",j+1\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 5 # number of sweeps is 5\n  maxdim = [10,20,100,100,200] # gradually increase states kept\n  cutoff = [1E-10] # desired truncation error\n\n  psi0 = random_mps(sites;linkdims=2)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "section_title": "Perform a basic DMRG calculation",
+        "section_id": "Perform-a-basic-DMRG-calculation",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "package": "itensormps"
+      },
+      "score": 0.8810488074016191,
+      "original_score": 0.8169981652332601,
+      "vector_score": 0.8740386377747688,
+      "bm25_score": 0.4637928301678631,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hamiltonian",
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types_2__0",
+      "text": "## DMRG Calculation with Mixed Local Hilbert Space Types\nThe following fully-working example shows how to set up a calculation mixing S=1/2 and S=1 spins on every other site of a 1D system. The Hamiltonian involves Heisenberg spin interactions with adjustable couplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation is that the sites array has Index objects which alternate in dimension and in which physical tag type they carry, whether \"S=1/2\" or \"S=1\" . (Try printing out the sites array to see!) These tags tell the OpSum system which local operators to use for these sites when building the Hamiltonian MPO.\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 100\n\n  # Make an array of N Index objects with alternating\n  # \"S=1/2\" and \"S=1\" tags on odd versus even sites\n  # (The first argument n->isodd(n) ... is an\n  # on-the-fly function mapping integers to strings)\n  sites = siteinds(n->isodd(n) ? \"S=1/2\" : \"S=1\",N)\n\n  # Couplings between spin-half and\n  # spin-one sites:\n  Jho = 1.0 # half-one coupling\n  Jhh = 0.5 # half-half coupling\n  Joo = 0.5 # one-one coupling\n\n  os = OpSum()\n  for j=1:N-1\n    os += 0.5*Jho,\"S+\",j,\"S-\",j+1\n    os += 0.5*Jho,\"S-\",j,\"S+\",j+1\n    os += Jho,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:2:N-2\n    os += 0.5*Jhh,\"S+\",j,\"S-\",j+2\n    os += 0.5*Jhh,\"S-\",j,\"S+\",j+2\n    os += Jhh,\"Sz\",j,\"Sz\",j+2\n  end\n  for j=2:2:N-2\n    os += 0.5*Joo,\"S+\",j,\"S-\",j+2\n    os += 0.5*Joo,\"S-\",j,\"S+\",j+2\n    os += Joo,\"Sz\",j,\"Sz\",j+2\n  end\n  H = MPO(os,sites)\n\n  nsweeps = 10\n  maxdim = [10,10,20,40,80,100,140,180,200]\n  cutoff = [1E-8]\n\n  psi0 = random_mps(sites;linkdims=4)\n\n  energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)\n\n  return\nend\n```",
+      "metadata": {
+        "section_id": "DMRG-Calculation-with-Mixed-Local-Hilbert-Space-Types",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "package": "itensormps"
+      },
+      "score": 0.8391717107758362,
+      "original_score": 0.7525718627320557,
+      "vector_score": 0.911919115568065,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hamiltonian",
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 109,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 49
+      }
+    }
+  }
+}

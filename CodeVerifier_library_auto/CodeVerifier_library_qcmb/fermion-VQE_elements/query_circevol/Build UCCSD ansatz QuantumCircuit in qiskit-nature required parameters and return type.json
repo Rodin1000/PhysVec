@@ -1,0 +1,148 @@
+{
+  "query": "Build UCCSD ansatz QuantumCircuit in qiskit-nature; required parameters and return type",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "adapt_vqe__98a67a87faad3bda962a903c96d2e83c__part_1__1",
+      "text": "ations. Thus, a common choice of ansatz to be\n    used with this algorithm is the Unitary Coupled Cluster ansatz implemented in Qiskit Nature.\n    This results in a wavefunction ansatz which is uniquely adapted to the operator whose minimum\n    eigenvalue is being determined. This class relies on a supplied instance of :class:`~.VQE` to\n    find the minimum eigenvalue. The performance of AdaptVQE significantly depends on the\n    minimization routine.\n\n    .. code-block:: python\n\n      from qiskit_algorithms.minimum_eigensolvers import AdaptVQE, VQE\n      from qiskit_algorithms.optimizers import SLSQP\n      from qiskit.primitives import StatevectorEstimator\n      from qiskit.circuit.library import EvolvedOperatorAnsatz\n      from qiskit import QuantumCircuit\n\n      # get your Hamiltonian\n      hamiltonian = ...\n\n      # construct your ansatz\n      ansatz = EvolvedOperatorAnsatz(...)\n\n      vqe = VQE(StatevectorEstimator(), ansatz, SLSQP())\n\n      adapt_vqe = AdaptVQE(vqe)\n\n      # or you can do it without EvolvedOperatorAnsatz\n      vqe = VQE(StatevectorEstimator(), QuantumCircuit(1), SLSQP())\n\n      adapt_vqe = AdaptVQE(vqe, operators=...)\n\n      eigenvalue, _ = adapt_vqe.compute_minimum_eigenvalue(hamiltonian)\n\n    The following attributes can be set via the initializer but can also be read and updated once\n    the AdaptVQE object has been constructed.\n\n    Attributes:\n        solver: a :class:`~.VQE` instance used internally to compute the minimum eigenvalues.\n            It is a requirement that the :attr:`~.VQE.ansatz` of this solver is of type\n            :class:`~qiskit.circuit.library.EvolvedOperatorAnsatz` if the `operators` arguments is\n            not set.\n        gradient_threshold: once all gradients have an absolute value smaller than this threshold,\n            the algorithm has converged and terminates.\n        eigenvalue_threshold: once the eigenvalue has changed by less than this threshold from one\n            iteration to the next, the algorithm has converged and terminates. When this case\n            occurs, the excitation included in the final iteration did not result in a significant\n            improvement of the eigenvalue and, thus, the results from this iteration are not\n            considered.\n        max_iterations: the maximum number of iterations for the adaptive loop. If ``None``, the\n            algorithm is not bound in its number of iterations.\n    \"\"\"\n\n    def __init__(\n        self,\n        solver: VQE,\n        *,\n        gradient_threshold: float = 1e-5,\n        eigenvalue_threshold: float = 1e-5,\n        max_iterations: int | None = None,\n        operators: Base",
+      "metadata": {
+        "source_file": "qiskit_algorithms\\minimum_eigensolvers\\adapt_vqe.py",
+        "section_id": "part_1",
+        "section_title": "adapt_vqe.py",
+        "package": "qiskit-algorithms"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.5498387694795095,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "ansatz",
+        "quantumcircuit",
+        "qiskit",
+        "nature",
+        "type"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "vqe_ucc__c77f66659fb5d4f2352da450ee7fef48__part_0__0",
+      "text": ".. _how-to-vqe-ucc:\n\nUse a UCC-like ansatz with a VQE\n================================\n\nWhen using a :class:`~qiskit_nature.second_q.circuit.library.UCC`-style ansatz with a\n:class:`~qiskit_algorithms.VQE` one needs to pay particular attention to the\n:attr:`~qiskit_algorithms.VQE.initial_point` attribute which indicates from\nwhich set of initial parameters the optimization routine should start.\nBy default, VQE will start from a *random* initial point. In this how to we show how one\ncan set a custom initial point instead (for example to guarantee that one starts from the\nHartree-Fock state).\n\n1. We obtain an :class:`~qiskit_nature.second_q.problems.ElectronicStructureProblem`\n   which we want to solve:\n\n.. testcode::\n\n    from qiskit_nature.second_q.drivers import PySCFDriver\n    driver = PySCFDriver(atom=\"H 0 0 0; H 0 0 0.735\", basis=\"sto-3g\")\n    problem = driver.run()\n\n2. We setup our :class:`~qiskit_nature.second_q.mappers.QubitMapper`:\n\n.. testcode::\n\n    from qiskit_nature.second_q.mappers import JordanWignerMapper\n    mapper = JordanWignerMapper()\n\n3. We setup our ansatz:\n\n.. testcode::\n\n    from qiskit_nature.second_q.circuit.library import UCCSD, HartreeFock\n    ansatz = UCCSD(\n        problem.num_spatial_orbitals,\n        problem.num_particles,\n        mapper,\n        initial_state=HartreeFock(\n            problem.num_spatial_orbitals,\n            problem.num_particles,\n            mapper,\n        ),\n    )\n\n4. We setup a :class:`~qiskit_algorithms.VQE`:\n\n.. testcode::\n\n    import numpy as np\n    from qiskit_algorithms import VQE\n    from qiskit_algorithms.optimizers import SLSQP\n    from qiskit.primitives import Estimator\n    vqe = VQE(Estimator(), ansatz, SLSQP())\n\n5. Now comes the key step: choosing the initial point. Since we picked the\n   :class:`~qiskit_nature.second_q.circuit.library.HartreeFock` initial\n   state before, in order to ensure we start from that, we need to initialize our\n   ``initial_point`` with all-zero parameters. One way to do that is like so:\n\n.. testcode::\n\n    vqe.initial_point = np.zeros(ansatz.num_parameters)\n\nAlternatively, one can also use\n:class:`~qiskit_nature.second_q.algorithms.initial_points.HFInitialPoint` like so:\n\n.. testcode::\n\n    from qiskit_nature.second_q.algorithms.initial_points import HF",
+      "metadata": {
+        "section_title": "vqe_ucc.rst",
+        "package": "qiskit-nature",
+        "section_id": "part_0",
+        "source_file": "docs\\howtos\\vqe_ucc.rst"
+      },
+      "score": 0.9370764902147916,
+      "original_score": 0.9316048806682516,
+      "vector_score": 1.0,
+      "bm25_score": 0.2386520039007433,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "uccsd",
+        "ansatz",
+        "qiskit",
+        "parameters"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "test_initializer__e4eb8be2fbbe1c4012d78950a5f400ef__part_5__5",
+      "text": " to the qubit parameter length.\n        See https://github.com/Qiskit/qiskit-terra/issues/2372\"\"\"\n        qr = QuantumRegister(2)\n\n        random_state = [\n            1 / math.sqrt(4) * complex(0, 1),\n            1 / math.sqrt(8) * complex(1, 0),\n            0,\n            1 / math.sqrt(8) * complex(1, 0),\n            1 / math.sqrt(8) * complex(0, 1),\n            0,\n            1 / math.sqrt(4) * complex(1, 0),\n            1 / math.sqrt(8) * complex(1, 0),\n        ]\n\n        qc = QuantumCircuit(qr)\n\n        self.assertRaises(QiskitError, qc.initialize, random_state, qr[0:2])\n\n    def test_initialize_middle_circuit(self):\n        \"\"\"Reset + initialize gives the correct statevector.\"\"\"\n        desired_vector = [0.5, 0.5, 0.5, 0.5]\n        qr = QuantumRegister(2, \"qr\")\n        cr = ClassicalRegister(2, \"cr\")\n        qc = QuantumCircuit(qr, cr)\n        qc.h(qr[0])\n        qc.cx(qr[0], qr[1])\n        qc.reset(qr[0])\n        qc.reset(qr[1])\n        qc.initialize(desired_vector, [qr[0], qr[1]])\n        qc.measure(qr, cr)\n        # statevector simulator does not support reset\n        shots = 2000\n        threshold = 0.05 * shots\n        backend = BasicSimulator()\n        job = backend.run(transpile(qc, backend), shots=shots, seed_simulator=42)\n        result = job.result()\n        counts = result.get_counts()\n        target = {\"00\": shots / 4, \"01\": shots / 4, \"10\": shots / 4, \"11\": shots / 4}\n        self.assertDictAlmostEqual(counts, target, threshold)\n\n    def test_math_amplitudes(self):\n        \"\"\"Initialize to amplitudes given by math expressions\"\"\"\n        desired_vector = [\n            0,\n            math.cos(math.pi / 3) * complex(0, 1) / math.sqrt(4),\n            math.sin(math.pi / 3) / math.sqrt(4),\n            0,\n            0,\n            0,\n            0,\n            0,\n            1 / math.sqrt(8) * complex(1, 0),\n            1 / math.sqrt(8) * complex(0, 1),\n            0,\n            0,\n            0,\n            0,\n            1 / math.sqrt(4),\n            1 / math.sqrt(4) * complex(0, 1),\n        ]\n       ",
+      "metadata": {
+        "section_title": "test_initializer.py",
+        "section_id": "part_5",
+        "package": "qiskit",
+        "source_file": "test\\python\\circuit\\test_initializer.py"
+      },
+      "score": 0.883985950833877,
+      "original_score": 0.8791520321186218,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "quantumcircuit",
+        "qiskit"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "README__68a83d855e5a8dc60938b12c4713fb62__h1_6_6__0",
+      "text": "from qiskit_aer.primitives import SamplerV2\nfrom qiskit import QuantumCircuit",
+      "metadata": {
+        "section_title": "--------------------------",
+        "source_file": "README.md",
+        "package": "qiskit-aer",
+        "section_id": "h1_6"
+      },
+      "score": 0.883985950833877,
+      "original_score": 0.8791520321186218,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "quantumcircuit",
+        "qiskit"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "test_qsd_synthesis__56d53b17fea9dfd1c1d53341605e250d__part_9__9",
+      "text": "))\n        qc = QuantumCircuit(num_qubits)\n        gate = base_gate.control(num_qubits - 2, annotated=False)\n        qc.append(gate, layout)\n\n        hidden_op = Operator(qc)\n        hidden_mat = hidden_op.data\n\n        qc2 = qsd.qs_decomposition(hidden_mat)\n        cqc2 = transpile(qc2, basis_gates=[\"u\", \"cx\"], optimization_level=0)\n        op2 = Operator(qc2)\n        self.assertTrue(matrix_equal(hidden_op.to_matrix(), op2.to_matrix(), atol=1e-8))\n        self.assertLessEqual(\n            cqc2.count_ops().get(\"cx\", 0),\n            2 * self._qsd_l2_cx_count(num_qubits - 1) + self._qsd_ucrz(num_qubits),\n        )\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "source_file": "test\\python\\synthesis\\test_qsd_synthesis.py",
+        "package": "qiskit",
+        "section_title": "test_qsd_synthesis.py",
+        "section_id": "part_9"
+      },
+      "score": 0.8708207231617187,
+      "original_score": 0.8681844113895089,
+      "vector_score": 0.9875247734994338,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 219,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 47
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

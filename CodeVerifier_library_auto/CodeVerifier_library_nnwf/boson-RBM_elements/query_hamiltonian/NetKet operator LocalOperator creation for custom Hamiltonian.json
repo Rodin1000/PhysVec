@@ -1,0 +1,125 @@
+{
+  "query": "NetKet operator LocalOperator creation for custom Hamiltonian",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_3_3__1",
+      "text": ",  1,  1, -1,  1,  1, -1,  1, -1, -1,\n         1,  1, -1, -1]], dtype=int8)\n```\nWe now need to specify the Hamiltonian. For this purpose, we will use NetKet’s LocalOperator (see details here ) which is the sum of arbitrary k-local operators.\nIn this specific case, we have a 1-local operator, \\( \\sigma^{(x)}_i \\) and a 2-local operator, \\( \\sigma^{(z)}_i \\sigma^{(z)}_j \\) . We then start importing the pauli operators.\n```code\nfrom\nnetket.operator.spin\nimport\nsigmax\n,\nsigmaz\n```\nWe now take \\( \\Gamma=-1 \\) and start defining the 1-local parts of the Hamiltonian\n```code\nGamma\n=\n-\n1\nH\n=\nsum\n([\nGamma\n*\nsigmax\n(\nhi\n,\ni\n)\nfor\ni\nin\nrange\n(\nN\n)])\n```\nHere we have used a list comprehension to (mildly) show off our ability to write one-liners, however you could have just added the terms one by one in an explicit loop instead (though you’d end up with a whopping 3 lines of code).\nWe now also add the interaction terms, using the fact that NetKet automatically recognizes products of local operators as tensor products.\n```code\nV\n=\n-\n1\nH\n+=\nsum\n([\nV\n*\nsigmaz\n(\nhi\n,\ni\n)\n@\nsigmaz\n(\nhi\n,\n(\ni\n+\n1\n)\n%\nN\n)\nfor\ni\nin\nrange\n(\nN\n)])\n```\nIn general, when manipulating NetKet objects, you should always assume that you can safely operate on them like\nyou would in mathematical equations, therefore you can sum and multiply them with ease.",
+      "metadata": {
+        "section_id": "sec_3",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html",
+        "package": "netket",
+        "section_title": "1. Defining The Hamiltonian#"
+      },
+      "score": 0.8898601222396237,
+      "original_score": 0.8213947928210115,
+      "vector_score": 1.0,
+      "bm25_score": 0.10697396410505718,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "operator",
+        "localoperator",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_3_3__0",
+      "text": "## 1) Defining a Custom Hamiltonian#\nThe first thing to do is to define the graph (lattice) on which to specify the Hamiltonian. Here we would like to build a one-dimensional graph with both nearest and next nearest neighbour bonds. The graph is created in the nk.graph.CustomGraph class. To initialise the class we simply provide a list of edges in the [[site_i, site_j, edge_color], ...]\n```code\n# Couplings J1 and J2\nJ\n=\n[\n1\n,\n0.2\n]\nL\n=\n14\n```\n```code\n# Define custom graph\nedge_colors\n=\n[]\nfor\ni\nin\nrange\n(\nL\n):\nedge_colors\n.\nappend\n([\ni\n,\n(\ni\n+\n1\n)\n%\nL\n,\n1\n])\nedge_colors\n.\nappend\n([\ni\n,\n(\ni\n+\n2\n)\n%\nL\n,\n2\n])\n# Define the netket graph object\ng\n=\nnk\n.\ngraph\n.\nGraph\n(\nedges\n=\nedge_colors\n)\n```\nWe specify a different color for each type of bond so as to define a different operator for each of them.\nNext, we define the relevant bond operators.\n```code\n# Sigma^z*Sigma^z interactions\nsigmaz\n=\n[[\n1\n,\n0\n],\n[\n0\n,\n-\n1\n]]\nmszsz\n=\nnp\n.\nkron\n(\nsigmaz\n,\nsigmaz\n)\n# Exchange interactions\nexchange\n=\nnp\n.\nasarray\n([[\n0\n,\n0\n,\n0\n,\n0\n],\n[\n0\n,\n0\n,\n2\n,\n0\n],\n[\n0\n,\n2\n,\n0\n,\n0\n],\n[\n0\n,\n0\n,\n0\n,\n0\n]])\nbond_operator\n=\n[\n(\nJ\n[\n0\n]\n*\nmszsz\n)\n.\ntolist\n(),\n(\nJ\n[\n1\n]\n*\nmszsz\n)\n.\ntolist\n(),\n(\n-\nJ\n[\n0\n]\n*\nexchange\n)\n.\ntolist\n(),\n(\nJ\n[\n1\n]\n*\nexchange\n)\n.\ntolist\n(),\n]\nbond_color\n=\n[\n1\n,\n2\n,\n1\n,\n2\n]\n```\nSide Remark : Notice the minus sign in front of the exchange. This is simply a basis rotation corresponding to the Marshall sign rule (as an exercise, change the sign of this exchange and observe that the exact diagonalization results in Section 6 do not change). The goal of this basis rotation is to speed up the convergence of the Monte Carlo simulations of the wave-function (by providing a good variational sign structure to start with), but in principle the converged results should be identical in both bases. Note further that this sign change is useful at low frustration (such as here \\(J_2=0.2\\) ), but may actually be not optimal at stronger frustration. As",
+      "metadata": {
+        "section_title": "1) Defining a Custom Hamiltonian#",
+        "section_id": "sec_3",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html"
+      },
+      "score": 0.6026198867848047,
+      "original_score": 0.35559981640779154,
+      "vector_score": 0.4444997705097394,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "operator",
+        "custom",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "03-monte-carlo-sampling__41d6b7963280c521f74cf679f9477a50__sec_2_2__0",
+      "text": "## 1. Setup from Previous Tutorials#\nLet’s recreate the complete system from Parts 1 and 2:\n```code\n# Define the system\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\ng\n.\nn_nodes\n)\n# Build the Hamiltonian\nhamiltonian\n=\nnk\n.\noperator\n.\nLocalOperator\n(\nhi\n)\n# Add transverse field terms\nfor\nsite\nin\ng\n.\nnodes\n():\nhamiltonian\n=\nhamiltonian\n-\n1.0\n*\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\nsite\n)\n# Add Ising interaction terms\nfor\ni\n,\nj\nin\ng\n.\nedges\n():\nhamiltonian\n=\nhamiltonian\n+\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\ni\n)\n@\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\nj\n)\n# Convert to JAX format\nhamiltonian_jax\n=\nhamiltonian\n.\nto_pauli_strings\n()\n.\nto_jax_operator\n()\n# Compute exact ground state for comparison\nfrom\nscipy.sparse.linalg\nimport\neigsh\ne_gs\n,\npsi_gs\n=\neigsh\n(\nhamiltonian\n.\nto_sparse\n(),\nk\n=\n1\n)\ne_gs\n=\ne_gs\n[\n0\n]\npsi_gs\n=\npsi_gs\n.\nreshape\n(\n-\n1\n)\nprint\n(\nf\n\"Exact ground state energy:\n{\ne_gs\n:\n.6f\n}\n\"\n)\n```\n```code\nExact ground state energy: -34.010598\n```",
+      "metadata": {
+        "section_title": "1. Setup from Previous Tutorials#",
+        "package": "netket",
+        "section_id": "sec_2",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\03-monte-carlo-sampling.html"
+      },
+      "score": 0.5824167995439677,
+      "original_score": 0.3575643069907197,
+      "vector_score": 0.2146233565194711,
+      "bm25_score": 0.9293281088757146,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "operator",
+        "localoperator",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "02-variational-states-full-summation__9df6c03baad2cbefd9c913ee6748c0df__sec_2_2__0",
+      "text": "## 1. Setup from Previous Tutorial#\nLet’s quickly recreate the system from Part 1:\n```code\n# Define the system\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\ng\n.\nn_nodes\n)\n# Build the Hamiltonian (solution from Part 1)\nhamiltonian\n=\nnk\n.\noperator\n.\nLocalOperator\n(\nhi\n)\n# Add transverse field terms\nfor\nsite\nin\ng\n.\nnodes\n():\nhamiltonian\n=\nhamiltonian\n-\n1.0\n*\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\nsite\n)\n# Add Ising interaction terms\nfor\ni\n,\nj\nin\ng\n.\nedges\n():\nhamiltonian\n=\nhamiltonian\n+\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\ni\n)\n@\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\nj\n)\n# Convert to JAX format\nhamiltonian_jax\n=\nhamiltonian\n.\nto_pauli_strings\n()\n.\nto_jax_operator\n()\n# Compute exact ground state for comparison\nfrom\nscipy.sparse.linalg\nimport\neigsh\ne_gs\n,\npsi_gs\n=\neigsh\n(\nhamiltonian\n.\nto_sparse\n(),\nk\n=\n1\n)\ne_gs\n=\ne_gs\n[\n0\n]\npsi_gs\n=\npsi_gs\n.\nreshape\n(\n-\n1\n)\nprint\n(\nf\n\"Exact ground state energy:\n{\ne_gs\n:\n.6f\n}\n\"\n)\n```\n```code\nExact ground state energy: -34.010598\n```",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\02-variational-states-full-summation.html",
+        "section_title": "1. Setup from Previous Tutorial#",
+        "package": "netket",
+        "section_id": "sec_2"
+      },
+      "score": 0.5749432118528021,
+      "original_score": 0.3460664797735416,
+      "vector_score": 0.20282027440599282,
+      "bm25_score": 0.9190513012437369,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "operator",
+        "localoperator",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "netket.operator._pauli_strings.PauliStringsBase__36de2bf28f178fe441e12b3f4863f694__sec_1_1__0",
+      "text": "## Contents\nBases: DiscreteOperator\nA Hamiltonian consisting of the sum of products of\nPauli operators, acting on any number of sites.\nNote\nCompared to netket.operator.LocalOperator this\noperator can easily handle operators containg terms acting\non an arbitrary number of sites, as long as the number\nof connected entries is ‘reasonable’.\nConstructs a new PauliStrings operator given a set of Pauli operators.\nThis class has two possible forms for initialization: PauliStrings(hilbert, operators, ...) or PauliStrings(operators, ...) .\nWhen no hilbert argument is passed, the hilbert defaults to Qubit, where the number of qubits is automatically deduced from the operators.\nhilbert ( AbstractHilbert ) – A hilbert space, optional (is no AbstractHilbert is passed, default is Qubit)\nhilbert ( AbstractHilbert ) – A hilbert space, optional (is no AbstractHilbert is passed, default is Qubit)\noperators ( list(string) ) – A list of Pauli operators in string format, e.g. [‘IXX’, ‘XZI’].\noperators ( list(string) ) – A list of Pauli operators in string format, e.g. [‘IXX’, ‘XZI’].\nweights ( None | float | complex | list [ float | complex ] ) – A list of amplitudes of the corresponding Pauli operator.\nweights ( None | float | complex | list [ float | complex ] ) – A list of amplitudes of the corresponding Pauli operator.\ncutoff ( float ) – a cutoff to remove small matrix elements (default = 1e-10)\ncutoff ( float ) – a cutoff to remove small matrix elements (default = 1e-10)\ndtype ( Union [ None , str , type [ Any ], dtype , _SupportsDType ] ) – The datatype to use for the matrix elements. Defaults to double precision if\navailable.\ndtype ( Union [ None , str , type [ Any ], dtype , _SupportsDType ] ) – The datatype to use for the matrix elements. Defaults to double precision if\navailable.\nExamples\nConstructs a new PauliStrings operator X_0*X_1 + 3.*Z_0*Z_1 with both construction schemes.\n```code\n>>>\nimport\nnetket\nas\nnk\n>>>\noperators\n,\nweights\n=\n[\n'XX'\n,\n'ZZ'\n],\n[\n1\n,\n3\n]\n>>>\nop\n=\nnk\n.\noperator\n.\nPauliStrings\n(\noperators\n,\nweights\n)\n>>>\nop\n.\nhilbert\nQubit(N=2)\n>>>\nop\n.\nhilbert\n.\nsize\n2\n>>>\nhilbert\n=\nnk\n.\nhilbert\n.\nSpin\n(\n1\n/\n2\n,\n2\n)\n>>>\nop\n=\n",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\_generated\\operator\\netket.operator._pauli_strings.PauliStringsBase.html",
+        "section_id": "sec_1",
+        "section_title": "Contents"
+      },
+      "score": 0.574479017589737,
+      "original_score": 0.30996597446984364,
+      "vector_score": 0.3874574680873045,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "operator",
+        "localoperator",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 53,
+    "final_results_count": 5
+  }
+}

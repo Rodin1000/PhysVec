@@ -1,0 +1,128 @@
+{
+  "query": "How to return Hilbert object 'hi' in netket Jastrow",
+  "packages": [
+    "netket"
+  ],
+  "results": [
+    {
+      "id": "hilbert__5d205cee7e6b4db681ac96539814e6e2__root_0__0",
+      "text": "(netket_hilbert_api)=",
+      "metadata": {
+        "source_file": "docs\\api\\hilbert.md",
+        "section_id": "root",
+        "section_title": "hilbert",
+        "package": "netket"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "hilbert"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "hilbert__ff82b2cd4e25ef78d639252beb2379d4__root_0__0",
+      "text": "(netket_hilbert_api)=",
+      "metadata": {
+        "section_title": "hilbert",
+        "package": "netket",
+        "section_id": "root",
+        "source_file": "docs\\_build\\html\\_sources\\api\\hilbert.md"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "hilbert"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "hilbert__03c53ec606ed51fb8ee918c5ed0f37ac__sec_4_4__0",
+      "text": "## Using Hilbert spaces withjax.jit()ted functions#\nHilbert spaces are immutable, hashable objects.\nTheir hash is computed by hashing their inner fields, determined by the internal _attrs() method.\nYou can freely use AbstractHilbert objects inside of jax.jit() ted functions as long as you specify that they are static .\nAll attributes and methods of Hilbert spaces can be freely used inside of a jax.jit() block.\nIn particular the random_state() method can be used inside of jitted blocks, as it is written in jax, as long as you pass a valid jax jax.random.PRNGKey() object as the first argument.\nIf you want to write a custom hilbert space for which states_to_numbers and numbers_to_states are not easily implementable in pure jax code, you can use a jax.pure_callback() as outlined in the following example:\n```code\nfrom\nfunctools\nimport\npartial\nimport\nnumpy\nas\nnp\nimport\njax\nimport\njax.numpy\nas\njnp\nfrom\nnetket.hilbert\nimport\nDiscreteHilbert\ndef\nnumbers_to_states_py\n(\nhi\n,\nnumbers\n):\nnumbers\n=\nnp\n.\nasarray\n(\nnumbers\n)\nstates\n=\nnp\n.\nzeros\n((\n*\nnumbers\n.\nshape\n,\nhi\n.\nsize\n),\ndtype\n=\nhi\n.\ndtype\n)\nb\n=\n1\nfor\ni\n,\ns\nin\nenumerate\n(\nhi\n.\nshape\n):\nb\n=\nb\n*\ns\nnumbers\n,\nstates\n[\n...\n,\ni\n]\n=\nnp\n.\ndivmod\n(\nnumbers\n,\nb\n)\nreturn\nstates\ndef\nstates_to_numbers_py\n(\nhi\n,\nstates\n):\nnumbers\n=\nnp\n.\nzeros\n(\nstates\n.\nshape\n[:\n-\n1\n],\ndtype\n=\nnp\n.\nint32\n)\nb\n=\n1\nfor\ni\n,\ns\nin\nenumerate\n(\nhi\n.\nshape\n):\nnumbers\n=\nnumbers\n+\nstates\n[\n...\n,\ni\n]\n*\nb\nb\n=\nb\n*\ns\nreturn\nnumbers\nclass\nExamplePythonHilbertSpace\n(\nDiscreteHilbert\n):\ndef\n__init__\n(\nself\n,\nshape\n,\ndtype\n):\nself\n.\n_dtype\n=\ndtype\nsuper\n()\n.\n__init__\n(\nshape\n=\nshape\n)\n@property\ndef\nsize\n(\nself\n):\nreturn\nlen\n(\nself\n.\nshape\n)\n@property\ndef\ndtype\n(\nself\n):\nreturn\nself\n.\n_dtype\n@property\ndef\n_attrs\n(\nself\n):\nreturn\n(\nself\n.\nshape\n,)\n@property\ndef\nn_states\n(\nself\n):\nreturn\nnp\n.\nprod\n(\nself\n.\nshape\n)\n@property\ndef\nis_finite\n(\nself\n):\nreturn",
+      "metadata": {
+        "section_title": "Using Hilbert spaces withjax.jit()ted functions#",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\user-guides\\hilbert.html",
+        "section_id": "sec_4"
+      },
+      "score": 0.6763616522015596,
+      "original_score": 0.45146042746027054,
+      "vector_score": 0.37922601298374187,
+      "bm25_score": 0.288937657906115,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "return",
+        "hilbert",
+        "object",
+        "netket"
+      ],
+      "match_ratio": 0.8,
+      "is_html": true
+    },
+    {
+      "id": "netket.hilbert.AbstractHilbert__25a07fdf1bbfc39fad4f1ab464389ede__sec_1_1__0",
+      "text": "## Contents\nBases: ABC\nAbstract class for NetKet hilbert objects.\nThis class defines the common interface used to interact with Hilbert spaces.\nAn AbstractHilbert object identifies an Hilbert space and a computational basis on\nsuch hilbert space, such as the z-basis for spins on a lattice, or the\nposition-basis for particles in a box.\nHilbert Spaces are generally immutable python objects that must be hashable in order\nto be used as static arguments to jax.jit functions.\nWhether the space can be indexed with an integer\nThe number number of degrees of freedom in the basis of this\nHilbert space.\nReturns the hilbert space without the selected sites.\nNot all hilbert spaces support this operation.\nsites ( int | Sequence [ int ] ) – a site or list of sites to trace away\nOptional [ Self ]\nThe partially-traced hilbert space. The type of the resulting hilbert space\nmight be different from the starting one.\nGenerates either a single or a batch of uniformly distributed random states.\nRuns as random_state(self, key, size=None, dtype=np.float32) by default.\nkey ( Any ) – rng state from a jax-style functional generator.\nkey ( Any ) – rng state from a jax-style functional generator.\nsize ( int | None ) – If provided, returns a batch of configurations of the form (size, N) if size is an integer or (*size, N) if it is\na tuple and where \\(N\\) is the Hilbert space size.\nBy default, a single random configuration with shape (#,) is returned.\nsize ( int | None ) – If provided, returns a batch of configurations of the form (size, N) if size is an integer or (*size, N) if it is\na tuple and where \\(N\\) is the Hilbert space size.\nBy default, a single random configuration with shape (#,) is returned.\ndtype – DType of the resulting vector.\ndtype – DType of the resulting vector.\nArray\nA state or batch of states sampled from the uniform distribution on the\nhilbert space.\nExample\n```code\n>>>\nimport\nnetket\n,\njax\n>>>\nhi\n=\nnetket\n.\nhilbert\n.\nQubit\n(\nN\n=\n2\n)\n>>>\nk1\n,\nk2\n=\njax\n.\nrandom\n.\nsplit\n(\njax\n.\nrandom\n.\nPRNGKey\n(\n1\n))\n>>>\nprint\n(\nhi\n.\nrandom_state\n(\nkey\n=\nk1\n))\n[0 0]\n>>>\nprint\n(\nhi\n.\nrandom_state\n(\nkey\n=\nk2\n,\nsize\n=\n2\n))\n[[0 0]\n[0 0]]\n```",
+      "metadata": {
+        "section_id": "sec_1",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\_generated\\hilbert\\netket.hilbert.AbstractHilbert.html",
+        "section_title": "Contents"
+      },
+      "score": 0.6561976648764595,
+      "original_score": 0.45428200774041183,
+      "vector_score": 0.45428200774041183,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hilbert",
+        "object",
+        "netket"
+      ],
+      "match_ratio": 0.6,
+      "is_html": true
+    },
+    {
+      "id": "hilbert__76b15abe45e0ce5c1605c309fd2a562b__h1_1_1__0",
+      "text": "```{eval-rst}\n.. currentmodule:: netket.hilbert\n```\nThe [Hilbert](netket_hilbert_api) module defines the abstract Hilbert space API and some concrete implementations, such as {class}`Spin`, {class}`Fock`.\nAn `Hilbert` object represents a Hilbert space together with a particular choice of computational basis.\nThey are needed to construct most other objects in NetKet, but they can also be useful to experiment and validate variational ansätze.\nHilbert space objects are all sub-classes of the abstract class {class}`AbstractHilbert`, which defines the general API respected by all implementations. \nYou can see a birds-eye view of the inheritance diagram among the various kinds of Hilbert spaces included with NetKet below (you can click on the nodes in the graph to go to their API documentation page). \nClasses whose edge is dashed are abstract classes, while the others are concrete and can be instantiated.\n```{eval-rst}\n.. inheritance-diagram:: netket.hilbert\n    :top-classes: netket.hilbert.AbstractHilbert\n    :parts: 1\n```\n{class}`AbstractHilbert` makes very few assumptions on the structure of the resulting space and you will generally very rarely interact with it directly.\nDerived from {class}`AbstractHilbert` are two less generic, but still abstract, types: {class}`DiscreteHilbert`, representing Hilbert spaces where the local degrees of freedom are countable, and {class}`~netket.experimental.hilbert.ContinuousHilbert`, representing the Hilbert spaces with continuous bases, such as particles in a box.\nSo far, the majority of NetKet development has focused {class}`DiscreteHilbert` spaces which therefore have a much more developed API, while {class}`~netket.experimental.hilbert.ContinuousHilbert` is still experimental and does not yet support many operations.\nThe most important class of discrete Hilbert spaces are subclasses of {class}`HomogeneousHilbert`, which is a tensor product of a finite number of local Hilbert spaces of the same kind, each with the same number of local degrees of freedom.\n{class}`HomogeneousHilbert` has the concrete subclasses {class}`Fock`, {class}`Spin`, and {class}`Qubit`.\n{class}`TensorHilbert` represents tensor products of different homogeneous hilbert spaces, therefore it is not homogeneous. You can use it to represent composite systems such as spin-boson setups.\n{class}`DoubledHilbert` represents a space doubled through [Choi's Isomorphism](https://en.wikipedia.org/wiki/Choi%E2%80%93Jamio%C5%82kowski_isomorphism).\nThis is the space of density matrices and is used to work with dissipative/open systems.",
+      "metadata": {
+        "section_id": "h1_1",
+        "source_file": "docs\\user-guides\\hilbert.md",
+        "package": "netket",
+        "section_title": "The Hilbert module"
+      },
+      "score": 0.6495918273384412,
+      "original_score": 0.6018088947027741,
+      "vector_score": 0.6018088947027741,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hilbert",
+        "object",
+        "netket"
+      ],
+      "match_ratio": 0.6,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 30,
+    "total_bm25_results_count": 30,
+    "merged_results_count": 57,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "netket": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

@@ -1,0 +1,103 @@
+**Code Format Requirements for Verifier Functions**
+-----------------------------------------------------------------------------
+[Notation:]
+- `g`: graph / lattice object (e.g., `nk.graph.Lattice`, such as `nk.graph.Square(...)`)
+- `hi`: Hilbert space object (e.g., `nk.hilbert.Spin`)
+- `ha`: Hamiltonian operator (e.g., `nk.operator.LocalOperatorJax` or `nk.operator.LocalOperator`)
+- `ma`: variational model / ansatz (e.g., `nk.models.RBM`)
+- `sa`: sampler (e.g., `nk.sampler.MetropolisLocal`)
+- `op`: optimizer (e.g., `nk.optimizer.Adam`)
+- `vs`: variational state (e.g., `nk.vqs.MCState`)
+- `driv`: driver / run object (e.g., `nk.driver.VMC`)
+- `obs`: observable operator (typically a NetKet operator, e.g., `nk.operator.LocalOperatorJax`)
+
+-----------------------------------------------------------------------------
+[Function Naming:]
+- Format: `{element}_verifier_{type}`
+- Examples: `hilbert_verifier_{type}`, `hamiltonian_verifier_{type}`, `statemodel_verifier_{type}`, `compset_verifier_{type}`, `effector_verifier_{type}`, `observable_verifier_{type}`
+
+-----------------------------------------------------------------------------
+[Comment Style:]
+1. **Element separator (before function):**
+   - Use separator comment: `# {element}-----------------------------------------------------------------------------------------`
+
+2. **Function description (first line after function definition):**
+   - Format: `# a verifier {element} for {type} system: <brief description>`
+   - Use lowercase for first word (unless proper noun)
+   - Keep description concise and specific
+
+3. **Parameter documentation:**
+   - One line per parameter: `# param_name: description`
+   - Include all parameters (positional and keyword)
+   - Describe parameter purpose clearly
+
+-----------------------------------------------------------------------------
+[Code Structure:]
+1. **Function signature:**
+   - Use Python type hints (e.g., `Lx: int`)
+   - Default values for common parameters
+   - Use keyword arguments normally (e.g., `def f(x: int, *, pbc: bool = True): ...` when appropriate)
+   - **CRITICAL: All prerequisite variables/dependencies needed by this {element} function MUST be input parameters**
+     * Do NOT create prerequisite objects inside the function
+     * All dependencies should be passed as function parameters
+     * Example: `hamiltonian_verifier_{type}(hi, g, J, D, A, Bz)` - hi/g are input parameters, not created inside
+
+2. **Function body:**
+   - Keep implementation concise and practical
+   - Use clear variable names
+   - Add inline comments for complex logic if needed
+
+3. **Return statement:**
+   - Always use explicit `return` statement
+   - Return the main result object
+
+-----------------------------------------------------------------------------
+[Language and Style:]
+- For {topic} (nnwf): Use Python (`.py` extension) and NetKet
+- Follow Python syntax conventions and NetKet API usage
+- Keep code simple and readable
+- Focus on practical implementation, not theoretical details
+- All parameters MUST be treated as variable, NOT specific numbers. 
+
+-----------------------------------------------------------------------------
+[File Content:]
+- File should contain ONLY the verifier function code
+- **CRITICAL: `import` statements MUST be placed OUTSIDE the function definition, at the top of the file**
+- Include necessary `import` statements at the top of the file (before function definition), e.g. `import netket as nk`, `import numpy as np`
+- No extra explanations, examples, or reference code
+- One function per file
+
+-----------------------------------------------------------------------------
+[Element Scope:]
+- **ELEMENT_NOTE: {element_note}**
+- **CRITICAL: Your verifier function MUST implement ONLY what is described in ELEMENT_NOTE**
+- Do NOT add functionality beyond what ELEMENT_NOTE specifies
+- Keep the function minimal and focused on the specific task described in ELEMENT_NOTE
+- If ELEMENT_NOTE mentions specific operations (e.g., "DMRG for ground state"), implement ONLY those operations
+- **CRITICAL: All prerequisite variables/dependencies MUST be input parameters, NOT created inside the function**
+  * For hamiltonian_verifier: hi (and graph g if needed) must be input parameters (do NOT create them inside the function)
+  * For statemodel_verifier: hyperparameters are input parameters (do NOT build other prerequisites inside unless ELEMENT_NOTE says so)
+  * For compset_verifier: hi/g/ma (or required prerequisites) must be input parameters
+  * For effector_verifier: ha/op/vs (and required prerequisites) must be input parameters
+  * For observable_verifier: hi (and indices/labels needed to define the observable) must be input parameters
+  * Only hilbert_verifier can create the base Hilbert space objects (e.g., graph g and hilbert hi) as the first element in the chain
+
+-----------------------------------------------------------------------------
+[Example Structure:]
+```python
+import netket as nk
+
+# {element}-----------------------------------------------------------------------------------------
+def {element}_verifier_{type}(param1, param2, *, keyword1=default):
+    # a verifier {element} for {type} system: <brief description>
+    # param1: <description>
+    # param2: <description>
+    # keyword1: <description> (default value)
+    #
+    # implementation code
+    #
+    return result
+```
+
+**Follow these rules strictly when generating verifier code.**
+

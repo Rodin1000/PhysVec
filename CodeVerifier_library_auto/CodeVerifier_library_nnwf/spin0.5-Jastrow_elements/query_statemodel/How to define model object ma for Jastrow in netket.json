@@ -1,0 +1,111 @@
+{
+  "query": "How to define model object 'ma' for Jastrow in netket",
+  "package": "netket",
+  "results": [
+    {
+      "id": "models__12b95c8a73db5e6711fe975ef876c861__root_0__0",
+      "text": "(netket_models_api)=",
+      "metadata": {
+        "section_title": "models",
+        "source_file": "docs\\api\\models.md",
+        "section_id": "root",
+        "package": "netket"
+      },
+      "score": 0.8,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "models__09041a73079b0c73875a7031ae8e8795__root_0__0",
+      "text": "(netket_models_api)=",
+      "metadata": {
+        "section_id": "root",
+        "package": "netket",
+        "section_title": "models",
+        "source_file": "docs\\_build\\html\\_sources\\api\\models.md"
+      },
+      "score": 0.8,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_5_5__0",
+      "text": "## 3. The Jastrow ansatz#\nLet’s start with a simple ansatz for the ground-state: the Jastrow Ansatz.\n\\( \\log\\psi(\\sigma) = \\sum_i a_i \\sigma_i + \\sum_{i,j} \\sigma_i J_{i,j} \\sigma_j \\)\nTo show how it’s done, we write this simple ansatz as a flax.nnx module.\nWe import this module and call it nnx , as it is customary in the Flax documentation.\nAn NNX model subclasses nnx.Module and defines its parameters inside __init__ using nnx.Param .\nAs the module should work with batches of inputs (therefore the input will be a 2d matrix with shape (N_inputs, N_sites) , but we are lazy and find it easier to define the function for a single input \\(\\sigma\\) , a 1D vector of shape (N_sites,) .\nTherefore, we write a function called evaluate_single , which will evaluate a single 1D input, and use jax.vmap to make it work with 2D inputs as well.\nTo learn more about jax.vmap, give a look at the jax documentation!\n```code\nfrom\nflax\nimport\nnnx\nimport\njax.numpy\nas\njnp\nimport\njax\nclass\nJastrow\n(\nnnx\n.\nModule\n):\ndef\n__init__\n(\nself\n,\nN\n:\nint\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\nk1\n,\nk2\n=\njax\n.\nrandom\n.\nsplit\n(\nrngs\n.\nparams\n())\nself\n.\nJ\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk1\n,\n(\nN\n,\nN\n),\ndtype\n=\njnp\n.\ncomplex128\n))\nself\n.\nv_bias\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk2\n,\n(\nN\n,\n1\n),\ndtype\n=\njnp\n.\ncomplex128\n)\n)\ndef\n__call__\n(\nself\n,\nx\n):\nx\n=\nx\n.\nastype\n(\njnp\n.\ncomplex128\n)\n# keep the dtypes aligned\nquad\n=\njnp\n.\neinsum\n(\n\"...i,ij,...j->...\"\n,\nx\n,\nself\n.\nJ\n,\nx\n)\nlin\n=\njnp\n.\nsqueeze\n(\nx\n@\nself\n.\nv_bias\n,\n-\n1\n)\n# (...,N) @ (N,1) → (...,1)\nreturn\nquad\n+\nlin\n```\nNow that the model is defined, we can instantiate it\n```code\nma\n=\nJastrow\n(\nN\n=\nhi\n.\nsize\n,\nrngs\n=\nnnx",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "package": "netket",
+        "section_title": "3. The Jastrow ansatz#",
+        "section_id": "sec_5"
+      },
+      "score": 0.6420337582613671,
+      "original_score": 0.4317996162878842,
+      "vector_score": 0.28974952035985535,
+      "bm25_score": 1.0,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "define",
+        "model",
+        "jastrow"
+      ],
+      "match_ratio": 0.6,
+      "is_html": true
+    },
+    {
+      "id": "02-variational-states-full-summation__9df6c03baad2cbefd9c913ee6748c0df__sec_8_8__0",
+      "text": "## 7. Exercise: Jastrow Ansatz#\nNow implement a more sophisticated Jastrow ansatz:\nShow code cell source\nHide code cell source\n```code\nclass\nJastrow\n(\nnn\n.\nModule\n):\n@nn\n.\ncompact\ndef\n__call__\n(\nself\n,\ninput_x\n):\nn_sites\n=\ninput_x\n.\nshape\n[\n-\n1\n]\n# Define the J matrix parameter\nJ\n=\nself\n.\nparam\n(\n\"J\"\n,\nnn\n.\ninitializers\n.\nnormal\n(),\n(\nn_sites\n,\nn_sites\n),\nfloat\n)\n# Ensure same data types\ndtype\n=\njax\n.\nnumpy\n.\npromote_types\n(\nJ\n.\ndtype\n,\ninput_x\n.\ndtype\n)\nJ\n=\nJ\n.\nastype\n(\ndtype\n)\ninput_x\n=\ninput_x\n.\nastype\n(\ndtype\n)\n# Symmetrize J matrix\nJ_symm\n=\nJ\n.\nT\n+\nJ\n# TODO: Compute the result using vectorized operations\n# Hint: use jnp.einsum(\"...i,ij,...j\", input_x, J_symm, input_x)\nres\n=\nNone\n# TODO: implement this\nreturn\nres\n```\n```code\nclass\nJastrow\n(\nnn\n.\nModule\n):\n@nn\n.\ncompact\ndef\n__call__\n(\nself\n,\nx\n):\nn_sites\n=\nx\n.\nshape\n[\n-\n1\n]\nJ\n=\nself\n.\nparam\n(\n\"J\"\n,\nnn\n.\ninitializers\n.\nnormal\n(),\n(\nn_sites\n,\nn_sites\n),\nfloat\n)\nJ_symm\n=\nJ\n.\nT\n+\nJ\nreturn\njnp\n.\neinsum\n(\n\"...i,ij,...j\"\n,\nx\n,\nJ_symm\n,\nx\n)\n```\nTest the Jastrow implementation:\n```code\n# Uncomment after implementing Jastrow\n# model_jastrow = Jastrow()\n# one_sample = hi.random_state(jax.random.key(0))\n# batch_samples = hi.random_state(jax.random.key(0), (5,))\n# multibatch_samples = hi.random_state(jax.random.key(0), (5,4,))\n# parameters_jastrow = model_jastrow.init(jax.random.key(0), one_sample)\n# assert parameters_jastrow['params']['J'].shape == (hi.size, hi.size)\n# assert model_jastrow.apply(parameters_jastrow, one_sample).shape == ()\n# assert model_jastrow.apply(parameters_jastrow, batch_samples).shape == batch_samples.shape[:-1]\n# assert model_jastrow.apply(parameters_jastrow, multibatch_samples).shape == multibatch_samples.shape[:-1]\n# print(\"Jastrow implementation is correct!\")\n```",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\02-variational-states-full-summation.html",
+        "package": "netket",
+        "section_id": "sec_8",
+        "section_title": "7. Exercise: Jastrow Ansatz#"
+      },
+      "score": 0.5600632979522963,
+      "original_score": 0.34337805664521825,
+      "vector_score": 0.42922257080652276,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "define",
+        "jastrow"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "parallel-mpi__a1a46e9ec9c805461a6ed44072224f82__h1_5_5__0",
+      "text": "import mpibackend4jax as _mpi4jax  # noqa: F401\nimport jax\nimport netket as nk",
+      "metadata": {
+        "package": "netket",
+        "section_id": "h1_5",
+        "source_file": "docs\\parallel-mpi.md",
+        "section_title": "Import mpibackend4jax BEFORE importing JAX"
+      },
+      "score": 0.4653777560114629,
+      "original_score": 0.4431018291786072,
+      "vector_score": 0.553877286473259,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 59,
+    "final_results_count": 5
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "query": "FermionicOp construction for electronic Hamiltonian: operator string syntax and register length",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "hamiltonian_gate__caced190507f46142e7b675ab642ce97__part_2__2",
+      "text": ".adjoint()\n\n    def conjugate(self):\n        \"\"\"Return the conjugate of the Hamiltonian.\"\"\"\n        return HamiltonianGate(np.conj(self.params[0]), -self.params[1])\n\n    def adjoint(self):\n        \"\"\"Return the adjoint of the unitary.\"\"\"\n        return HamiltonianGate(self.params[0], -self.params[1])\n\n    def transpose(self):\n        \"\"\"Return the transpose of the Hamiltonian.\"\"\"\n        return HamiltonianGate(np.transpose(self.params[0]), self.params[1])\n\n    def _define(self):\n        \"\"\"Calculate a subcircuit that implements this unitary.\"\"\"\n        q = QuantumRegister(self.num_qubits, \"q\")\n        qc = QuantumCircuit(q)\n        qc._append(UnitaryGate(self.to_matrix()), q[:], [])\n        self.definition = qc\n\n    def validate_parameter(self, parameter):\n        \"\"\"Hamiltonian parameter has to be an ndarray, operator or float.\"\"\"\n        if isinstance(parameter, (float, int, np.ndarray)):\n            return parameter\n        elif isinstance(parameter, ParameterExpression) and len(parameter.parameters) == 0:\n            return float(parameter)\n        else:\n            raise CircuitError(f\"invalid param type {type(parameter)} for gate {self.name}\")\n",
+      "metadata": {
+        "section_title": "hamiltonian_gate.py",
+        "source_file": "qiskit\\circuit\\library\\hamiltonian_gate.py",
+        "section_id": "part_2",
+        "package": "qiskit"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.22794350260182591,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "operator"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "test_fermionic_op__57b088b12d2633a475f69549350891a7__part_4__4",
+      "text": ") ** 0\n            fer_op = fer_op.simplify()\n            targ = FermionicOp.one()\n            self.assertEqual(fer_op, targ)\n\n        with self.subTest(\"square nontrivial with parameters\"):\n            fer_op = FermionicOp({\"+_0 +_1 -_1\": self.a, \"+_0 -_0 -_1\": 1}) ** 2\n            fer_op = fer_op.simplify()\n            targ = FermionicOp({\"+_0 -_1\": -self.a})\n            self.assertEqual(fer_op, targ)\n\n    def test_adjoint(self):\n        \"\"\"Test adjoint method\"\"\"\n        fer_op = FermionicOp(\n            {\"\": 1j, \"+_0 +_1 -_1\": 3, \"+_0 -_0 -_1\": 1, \"-_0 -_1\": 2 + 4j}, num_spin_orbitals=3\n        ).adjoint()\n        targ = FermionicOp(\n            {\"\": -1j, \"+_1 -_1 -_0\": 3, \"+_1 +_0 -_0\": 1, \"+_1 +_0\": 2 - 4j}, num_spin_orbitals=3\n        )\n        self.assertEqual(fer_op, targ)\n\n        fer_op = FermionicOp(\n            {\"\": 1j, \"+_0 +_1 -_1\": 3, \"+_0 -_0 -_1\": self.a, \"-_0 -_1\": 2 + 4j}\n        ).adjoint()\n        targ = FermionicOp(\n            {\"\": -1j, \"+_1 -_1 -_0\": 3, \"+_1 +_0 -_0\": self.a.conjugate(), \"+_1 +_0\": 2 - 4j}\n        )\n        self.assertEqual(fer_op, targ)\n\n    def test_simplify(self):\n        \"\"\"Test simplify\"\"\"\n        with self.subTest(\"simplify integer\"):\n            fer_op = FermionicOp({\"+_0 -_0\": 1, \"+_0 -_0 +_0 -_0\": 1}, num_spin_orbitals=1)\n            simplified_op = fer_op.simplify()\n            targ = FermionicOp({\"+_0 -_0\": 2}, num_spin_orbitals=1)\n            self.assertEqual(simplified_op, targ)\n\n        with self.subTest(\"simplify complex\"):\n            fer_op = FermionicOp({\"+_0 -_0\": 1, \"+_0 -_0 +_0 -_0\": 1j}, num_spin_orbitals=1)\n            simplified_op = fer_op.simplify()\n            targ = FermionicOp({\"+_0 -_0\": 1 + 1j}, num_spin_orbitals=1)\n           ",
+      "metadata": {
+        "package": "qiskit-nature",
+        "section_title": "test_fermionic_op.py",
+        "source_file": "test\\second_q\\operators\\test_fermionic_op.py",
+        "section_id": "part_4"
+      },
+      "score": 0.9472845152032567,
+      "original_score": 0.9460864360033308,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "fermionicop"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "test_pvqd__5c3f037a4563696e54ecfad7246ef5cc__part_4__4",
+      "text": " aux_operators=[self.hamiltonian, self.observable]\n        )\n\n        sampler = StatevectorSampler()\n        fidelity_primitive = ComputeUncompute(sampler)\n\n        pvqd = PVQD(\n            fidelity_primitive,\n            self.ansatz,\n            self.initial_parameters,\n            optimizer=SPSA(maxiter=0, learning_rate=0.1, perturbation=0.01),\n        )\n\n        with self.assertRaises(ValueError):\n            _ = pvqd.evolve(problem)\n\n    def test_transpiler(self):\n        \"\"\"Test that the transpiler is called.\"\"\"\n        time = 0.02\n        hamiltonian = Pauli(\"XX\")\n        optimizer = L_BFGS_B(maxiter=1)\n\n        sampler = StatevectorSampler()\n        estimator = StatevectorEstimator()\n        fidelity_primitive = ComputeUncompute(sampler)\n\n        pass_manager = generate_preset_pass_manager(\n            backend=GenericBackendV2(num_qubits=3, coupling_map=[[0, 1], [1, 2]], seed=54),\n            optimization_level=1,\n            seed_transpiler=42,\n        )\n        counts = [0]\n\n        def callback(**kwargs):\n            counts[0] = kwargs[\"count\"]\n\n        # run pVQD keeping track of the energy and the magnetization\n        pvqd = PVQD(\n            fidelity_primitive,\n            self.ansatz,\n            self.initial_parameters,\n            estimator,\n            optimizer=optimizer,\n            num_timesteps=None,\n            transpiler=pass_manager,\n            transpiler_options={\"callback\": callback},\n        )\n        problem = TimeEvolutionProblem(\n            hamiltonian, time, aux_operators=[hamiltonian, self.observable]\n        )\n        pvqd.evolve(problem)\n\n        self.assertGreater(counts[0], 0)\n\n\nclass TestPVQDUtils(QiskitAlgorithmsTestCase):\n    \"\"\"Test some utility functions for PVQD.\"\"\"\n\n    def setUp(self):\n        super().setUp()\n        self.hamiltonian = 0.1 * SparsePauliOp([Pauli(\"ZZ\"), Pauli(\"IX\"), Pauli(\"XI\")])\n        self.ansatz = efficient_su2(2, reps=1)\n\n    def test_gradient_supported(self):\n        \"\"\"Test the gradient support is correctly determined.\"\"\"\n        # gradient supported here\n        wrapped = QuantumCircuit(2)  # a circuit wrapped into a big instruction\n        wrapped.append(efficient_su2(2).to_gate(), [0, 1])\n        plain = wrapped.decompose()  # a plain circuit with already supported instructions\n\n        # gradients not supported on the following circuits\n        x = Parameter(\"x\")\n        duplicated = QuantumCircuit(2)\n        duplicated.rx(x, 0)\n        duplicated.rx(x, 1)\n\n        needs_chainrule = QuantumCircuit(2)\n        needs_chainrule.rx(2 * x, 0)\n\n        custom_gate = WhatAmI(x",
+      "metadata": {
+        "source_file": "test\\time_evolvers\\test_pvqd.py",
+        "section_id": "part_4",
+        "package": "qiskit-algorithms",
+        "section_title": "test_pvqd.py"
+      },
+      "score": 0.9472845152032567,
+      "original_score": 0.9460864360033308,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "hamiltonian"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "vqe_application__0a14c61f464a058fb9d6c3d130273bc1__part_1__1",
+      "text": "_mapping, two_qubit_reduction, z2_symmetries\n        ):\n            initial_state = HartreeFock(\n                num_orbitals,\n                num_particles,\n                qubit_mapping,\n                two_qubit_reduction,\n                z2_symmetries.sq_list,\n            )\n            var_form = UCCSD(\n                num_orbitals=num_orbitals,\n                num_particles=num_particles,\n                initial_state=initial_state,\n                qubit_mapping=qubit_mapping,\n                two_qubit_reduction=two_qubit_reduction,\n                z2_symmetries=z2_symmetries,\n            )\n            vqe = VQE(\n                var_form=var_form,\n                include_custom=True,\n                optimizer=SLSQP(maxiter=5000),\n                max_evals_grouped=256,\n            )\n            vqe.quantum_instance = AerProvider.get_backend(\"qasm_simulator\")\n            vqe.quantum_instance.backend_options[\"backend_options\"] = {\n                \"max_parallel_experiments\": threads,\n                \"method\": method,\n            }\n\n            return vqe\n\n        mgse = MolecularGroundStateEnergy(driver)\n        result = mgse.compute_energy(cb_create_solver)\n\n    def time_statevector(self, mol_name):\n        threads = multiprocessing.cpu_count()\n        mol_string = self.mol_strings[mol_name][0]\n        qubit = self.mol_strings[mol_name][1]\n        self._run_uccsd_vqe(mol_string, \"statevector\", threads)\n\n    def time_statevector_gpu(self, mol_name):\n        threads = 1\n        mol_string = self.mol_strings[mol_name][0]\n        qubit = self.mol_strings[mol_name][1]\n        self._run_uccsd_vqe(mol_string, \"statevector_gpu\", threads)\n",
+      "metadata": {
+        "source_file": "test\\benchmark\\vqe_application.py",
+        "package": "qiskit-aer",
+        "section_title": "vqe_application.py",
+        "section_id": "part_1"
+      },
+      "score": 0.9460864360033308,
+      "original_score": 0.9460864360033308,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "hamiltonian_phase_estimation__fe09fa7dc716801664052a1a15ef8c76__part_0__0",
+      "text": "# This code is part of a Qiskit project.\n#\n# (C) Copyright IBM 2020, 2025.\n#\n# This code is licensed under the Apache License, Version 2.0. You may\n# obtain a copy of this license in the LICENSE.txt file in the root directory\n# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.\n#\n# Any modifications or derivative works of this code must retain this\n# copyright notice, and modified files need to carry a notice indicating\n# that they have been altered from the originals.\n\n\"\"\"Phase estimation for the spectrum of a Hamiltonian\"\"\"\n\nfrom __future__ import annotations\n\nfrom typing import Any\n\nfrom qiskit import QuantumCircuit\nfrom qiskit.circuit.library import PauliEvolutionGate\nfrom qiskit.primitives import BaseSamplerV2\nfrom qiskit.quantum_info import SparsePauliOp, Statevector, Pauli\nfrom qiskit.synthesis import EvolutionSynthesis\n\nfrom .hamiltonian_phase_estimation_result import HamiltonianPhaseEstimationResult\nfrom .phase_estimation import PhaseEstimation\nfrom .phase_estimation_scale import PhaseEstimationScale\nfrom ..custom_types import Transpiler\n\n\nclass HamiltonianPhaseEstimation:\n    r\"\"\"Run the Quantum Phase Estimation algorithm to find the eigenvalues of a Hermitian operator.\n\n    This class is nearly the same as :class:`~qiskit_algorithms.PhaseEstimation`, differing only\n    in that the input in that class is a unitary operator, whereas here the input is a Hermitian\n    operator from which a unitary will be obtained by scaling and exponentiating. The scaling is\n    performed in order to prevent the phases from wrapping around :math:`2\\pi`.\n    The problem of estimating eigenvalues :math:`\\lambda_j` of the Hermitian operator\n    :math:`H` is solved by running a circuit representing\n\n    .. math::\n\n        \\exp(i b H) |\\psi\\rangle = \\sum_j \\exp(i b \\lambda_j) c_j |\\lambda_j\\rangle,\n\n    where the input state is\n\n    .. math::\n\n        |\\psi\\rangle = \\sum_j c_j |\\lambda_j\\rangle,\n\n    and :math:`\\lambda_j` are the eigenvalues of :math:`H`.\n\n    Here, :math:`b` is a scaling factor sufficiently large to map positive :math:`\\lambda` to\n    :math:`[0,\\pi)` and negative :math:`\\lambda` to :math:`[\\pi,2\\pi)`. Each time the circuit is\n    run, one measures a phase corresponding to :math:`lambda_j` with probability :math:`|c_j|^2`.\n\n    If :math:`H` is a Pauli sum, the bound :math:`b` is computed from the sum of",
+      "metadata": {
+        "section_title": "hamiltonian_phase_estimation.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_0",
+        "source_file": "qiskit_algorithms\\phase_estimators\\hamiltonian_phase_estimation.py"
+      },
+      "score": 0.8588441117753225,
+      "original_score": 0.8522787216253375,
+      "vector_score": 0.9008465708754089,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "operator"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 221,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      }
+    }
+  }
+}

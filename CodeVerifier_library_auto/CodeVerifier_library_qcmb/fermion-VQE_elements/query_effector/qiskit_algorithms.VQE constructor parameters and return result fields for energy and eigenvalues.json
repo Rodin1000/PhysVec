@@ -1,0 +1,148 @@
+{
+  "query": "qiskit_algorithms.VQE constructor parameters and return result fields for energy and eigenvalues",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "vqe_application__0a14c61f464a058fb9d6c3d130273bc1__part_1__1",
+      "text": "_mapping, two_qubit_reduction, z2_symmetries\n        ):\n            initial_state = HartreeFock(\n                num_orbitals,\n                num_particles,\n                qubit_mapping,\n                two_qubit_reduction,\n                z2_symmetries.sq_list,\n            )\n            var_form = UCCSD(\n                num_orbitals=num_orbitals,\n                num_particles=num_particles,\n                initial_state=initial_state,\n                qubit_mapping=qubit_mapping,\n                two_qubit_reduction=two_qubit_reduction,\n                z2_symmetries=z2_symmetries,\n            )\n            vqe = VQE(\n                var_form=var_form,\n                include_custom=True,\n                optimizer=SLSQP(maxiter=5000),\n                max_evals_grouped=256,\n            )\n            vqe.quantum_instance = AerProvider.get_backend(\"qasm_simulator\")\n            vqe.quantum_instance.backend_options[\"backend_options\"] = {\n                \"max_parallel_experiments\": threads,\n                \"method\": method,\n            }\n\n            return vqe\n\n        mgse = MolecularGroundStateEnergy(driver)\n        result = mgse.compute_energy(cb_create_solver)\n\n    def time_statevector(self, mol_name):\n        threads = multiprocessing.cpu_count()\n        mol_string = self.mol_strings[mol_name][0]\n        qubit = self.mol_strings[mol_name][1]\n        self._run_uccsd_vqe(mol_string, \"statevector\", threads)\n\n    def time_statevector_gpu(self, mol_name):\n        threads = 1\n        mol_string = self.mol_strings[mol_name][0]\n        qubit = self.mol_strings[mol_name][1]\n        self._run_uccsd_vqe(mol_string, \"statevector_gpu\", threads)\n",
+      "metadata": {
+        "source_file": "test\\benchmark\\vqe_application.py",
+        "package": "qiskit-aer",
+        "section_title": "vqe_application.py",
+        "section_id": "part_1"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.7717354615747896,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "vqe",
+        "return",
+        "result"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "getting_started__6bb0bafdf3942365acdf5be5cb90eb6f__part_3__3",
+      "text": "] * ansatz.num_parameters\n\n   # prepare the ground-state solver and run it\n   from qiskit_nature.second_q.algorithms import GroundStateEigensolver\n\n   algorithm = GroundStateEigensolver(mapper, vqe)\n\n   electronic_structure_result = algorithm.solve(problem)\n   electronic_structure_result.formatting_precision = 6\n   print(electronic_structure_result)\n\n.. testoutput::\n   :options: +NORMALIZE_WHITESPACE\n\n    === GROUND STATE ENERGY ===\n\n    * Electronic ground state energy (Hartree): -1.857275\n      - computed part:      -1.857275\n    ~ Nuclear repulsion energy (Hartree): 0.719969\n    > Total ground state energy (Hartree): -1.137306\n\n    === MEASURED OBSERVABLES ===\n\n      0:  # Particles: 2.000 S: 0.000 S^2: 0.000 M: 0.000\n\n    === DIPOLE MOMENTS ===\n\n    ~ Nuclear dipole moment (a.u.): [0.0  0.0  1.388949]\n\n      0:\n      * Electronic dipole moment (a.u.): [0.0  0.0  1.388949]\n        - computed part:      [0.0  0.0  1.388949]\n      > Dipole moment (a.u.): [0.0  0.0  0.0]  Total: 0.0\n                     (debye): [0.0  0.0  0.0]  Total: 0.0\n\nThe program above computes the ground state energy of molecular Hydrogen,\nH<sub>2</sub>, where the two atoms are configured to be at a distance of 0.735\nangstroms. The molecular input specification is processed by the PySCF driver.\nThis driver produces an\n:class:`~qiskit_nature.second_q.problems.ElectronicStructureProblem` which\ngathers all the problem information required by Qiskit Nature.\nThe second-quantized operators contained in that problem can be mapped to qubit\noperators with a :class:`~qiskit_nature.second_q.mappers.QubitMapper`. Here, we\nchose the :class:`~qiskit_nature.second_q.mappers.ParityMapper` which\nautomatically removes 2 qubits due to inherit symmetries when the `num_particles`\nare provided to it; a reduction in complexity that is particularly advantageous\nfor NISQ computers.\n\nFor actually finding the ground state solution, the Variational Quantum\nEigensolver (:class:`~qiskit_algorithms.VQE`) algorithm is\nused. Its main three components are the estimator primitive\n(:class:`~qiskit",
+      "metadata": {
+        "source_file": "docs\\getting_started.rst",
+        "package": "qiskit-nature",
+        "section_title": "getting_started.rst",
+        "section_id": "part_3"
+      },
+      "score": 0.8830781810696887,
+      "original_score": 0.8747266225746665,
+      "vector_score": 1.0,
+      "bm25_score": 0.17396404412308258,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "qiskit_algorithms",
+        "vqe",
+        "energy"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "estimator_v2__f294000163ca535be6be933799ac7728__part_2__2",
+      "text": "ircuit.parameters)\n        parameter_binds = {p: param_array[..., i].ravel() for i, p in enumerate(circuit.parameters)}\n\n        # save expval\n        paulis = {pauli for obs_dict in observables.ravel() for pauli in obs_dict.keys()}\n        for pauli in paulis:\n            circuit.save_expectation_value(\n                Pauli(pauli), qubits=range(circuit.num_qubits), label=pauli\n            )\n        result = self._backend.run(\n            circuit, parameter_binds=[parameter_binds], **self.options.run_options\n        ).result()\n\n        # calculate expectation values (evs) and standard errors (stds)\n        flat_indices = list(param_indices.ravel())\n        evs = np.zeros_like(bc_param_ind, dtype=float)\n        stds = np.full(bc_param_ind.shape, precision)\n        for index in np.ndindex(*bc_param_ind.shape):\n            param_index = bc_param_ind[index]\n            flat_index = flat_indices.index(param_index)\n            for pauli, coeff in bc_obs[index].items():\n                expval = result.data(flat_index)[pauli]\n                evs[index] += expval * coeff\n        if precision > 0:\n            rng = np.random.default_rng(self.options.run_options.get(\"seed_simulator\"))\n            if not np.all(np.isreal(evs)):\n                raise ValueError(\"Given operator is not Hermitian and noise cannot be added.\")\n            evs = rng.normal(evs, precision, evs.shape)\n        return PubResult(\n            DataBin(evs=evs, stds=stds, shape=evs.shape),\n            metadata={\n                \"target_precision\": precision,\n                \"circuit_metadata\": pub.circuit.metadata,\n                \"simulator_metadata\": result.metadata,\n            },\n        )\n",
+      "metadata": {
+        "section_title": "estimator_v2.py",
+        "package": "qiskit-aer",
+        "source_file": "qiskit_aer\\primitives\\estimator_v2.py",
+        "section_id": "part_2"
+      },
+      "score": 0.8767818027205991,
+      "original_score": 0.8679805029149277,
+      "vector_score": 0.8854119470356836,
+      "bm25_score": 0.6001255575719461,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "parameters",
+        "return",
+        "result"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_vqd__69bbcfe16b14a0e7e3cec7e7a51130fb__part_3__3",
+      "text": "qd.compute_eigenvalues(operator=op)\n        np.testing.assert_array_almost_equal(\n            result.eigenvalues.real, self.h2_energy_excited[:2], decimal=1\n        )\n\n    @data(H2_SPARSE_PAULI)\n    def test_missing_varform_params(self, op):\n        \"\"\"Test specifying a variational form with no parameters raises an error.\"\"\"\n        circuit = QuantumCircuit(op.num_qubits)\n        vqd = VQD(\n            estimator=self.estimator,\n            fidelity=self.fidelity,\n            ansatz=circuit,\n            optimizer=SLSQP(),\n            k=1,\n            betas=self.betas,\n        )\n        with self.assertRaises(AlgorithmError):\n            vqd.compute_eigenvalues(operator=op)\n\n    @data(H2_SPARSE_PAULI)\n    def test_callback(self, op):\n        \"\"\"Test the callback on VQD.\"\"\"\n        history = {\"eval_count\": [], \"parameters\": [], \"mean\": [], \"metadata\": [], \"step\": []}\n\n        def store_intermediate_result(eval_count, parameters, mean, metadata, step):\n            history[\"eval_count\"].append(eval_count)\n            history[\"parameters\"].append(parameters)\n            history[\"mean\"].append(mean)\n            history[\"metadata\"].append(metadata)\n            history[\"step\"].append(step)\n\n        optimizer = COBYLA(maxiter=10)\n        wavefunction = self.ry_wavefunction\n\n        vqd = VQD(\n            estimator=self.estimator,\n            fidelity=self.fidelity,\n            ansatz=wavefunction,\n            optimizer=optimizer,\n            callback=store_intermediate_result,\n            betas=self.betas,\n            initial_point=[1] * 8,\n        )\n\n        vqd.compute_eigenvalues(operator=op)\n\n        self.assertTrue(all(isinstance(count, int) for count in history[\"eval_count\"]))\n        self.assertTrue(all(isinstance(mean, float) for mean in history[\"mean\"]))\n        self.assertTrue(all(isinstance(metadata, dict) for metadata in history[\"metadata\"]))\n        self.assertTrue(all(isinstance(count, int) for count in history[\"step\"]))\n        for params in history[\"parameters\"]:\n            self.assertTrue(all(isinstance(param, float) for param in params))\n\n        ref_eval_count = [\n            1,\n            2,\n            3,\n            4,\n            5,\n            6,\n            7,\n            8,\n            9,\n            10,\n            1,\n            2,\n            3,\n            4,\n            5,\n            6,\n            7,\n            8,\n            9,\n            10,\n        ]\n\n        ref_mean = [\n            -1.08,\n            -1.08,\n            -1.01,\n            -1.14,\n            -1.17,\n            -1.38,\n            -1.01,\n            -1.63,\n            -1.46,\n            -1.56,\n            -0.",
+      "metadata": {
+        "section_title": "test_vqd.py",
+        "section_id": "part_3",
+        "source_file": "test\\eigensolvers\\test_vqd.py",
+        "package": "qiskit-algorithms"
+      },
+      "score": 0.8490514747509862,
+      "original_score": 0.8382694372331995,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "parameters",
+        "result",
+        "eigenvalues"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "blueprintcircuit__aa51247a0c7115167926a60722163616__part_3__3",
+      "text": "            .. code-block:: python\n\n                >>> from qiskit.circuit import QuantumCircuit, Parameter, ParameterVector\n                >>> x = ParameterVector(\"x\", 12)\n                >>> circuit = QuantumCircuit(1)\n                >>> for x_i in x:\n                ...     circuit.rx(x_i, 0)\n                >>> circuit.parameters\n                ParameterView([\n                    ParameterVectorElement(x[0]), ParameterVectorElement(x[1]),\n                    ParameterVectorElement(x[2]), ParameterVectorElement(x[3]),\n                    ..., ParameterVectorElement(x[11])\n                ])\n\n\n        Returns:\n            The sorted :class:`.Parameter` objects in the circuit.\n        \"\"\"\n        if not self._is_built:\n            self._build()\n        return super().parameters\n\n    def _append(self, instruction, _qargs=None, _cargs=None, *, _standard_gate=False):\n        if not self._is_built:\n            self._build()\n        return super()._append(instruction, _qargs, _cargs, _standard_gate=_standard_gate)\n\n    def compose(\n        self,\n        other,\n        qubits=None,\n        clbits=None,\n        front=False,\n        inplace=False,\n        wrap=False,\n        *,\n        copy=True,\n        var_remap=None,\n        inline_captures=False,\n    ):\n        if not self._is_built:\n            self._build()\n        return super().compose(\n            other,\n            qubits,\n            clbits,\n            front,\n            inplace,\n            wrap,\n            copy=copy,\n            var_remap=var_remap,\n            inline_captures=False,\n        )\n\n    def inverse(self, annotated: bool = False):\n        if not self._is_built:\n            self._build()\n        return super().inverse(annotated=annotated)\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, item):\n        return self.data[item]\n\n    def size(self, *args, **kwargs):\n        if not self._is_built:\n            self._build()\n        return super().size(*args, **kwargs)\n\n    def to_instruction(self, parameter_map=None, label=None):\n        if not self._is_built:\n            self._build()\n        return super().to_instruction(parameter_map, label=label)\n\n    def to_gate(self, parameter_map=None, label=None):\n        if not self._is_built:\n            self._build()\n        return super().to_gate(parameter_map, label=label)\n\n    def depth(self, *args, **kwargs):\n        if not self._is_built:\n            self._build()\n        return super().depth(*args, **kwargs)\n\n    def count_ops(self):\n        if not self._is_built:\n            self._build()\n        return super().count_ops()\n\n    def num_nonlocal_gates(self):\n        if not self._is_built:\n            self._build()\n        return super",
+      "metadata": {
+        "source_file": "qiskit\\circuit\\library\\blueprintcircuit.py",
+        "section_title": "blueprintcircuit.py",
+        "package": "qiskit",
+        "section_id": "part_3"
+      },
+      "score": 0.8454574622450572,
+      "original_score": 0.8382694372331995,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "parameters",
+        "return"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 215,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 46
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

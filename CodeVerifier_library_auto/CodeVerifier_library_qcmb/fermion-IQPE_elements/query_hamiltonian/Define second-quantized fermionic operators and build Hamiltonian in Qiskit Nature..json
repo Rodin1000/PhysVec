@@ -1,0 +1,140 @@
+{
+  "query": "Define second-quantized fermionic operators and build Hamiltonian in Qiskit Nature.",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "adapt_vqe__98a67a87faad3bda962a903c96d2e83c__part_1__1",
+      "text": "ations. Thus, a common choice of ansatz to be\n    used with this algorithm is the Unitary Coupled Cluster ansatz implemented in Qiskit Nature.\n    This results in a wavefunction ansatz which is uniquely adapted to the operator whose minimum\n    eigenvalue is being determined. This class relies on a supplied instance of :class:`~.VQE` to\n    find the minimum eigenvalue. The performance of AdaptVQE significantly depends on the\n    minimization routine.\n\n    .. code-block:: python\n\n      from qiskit_algorithms.minimum_eigensolvers import AdaptVQE, VQE\n      from qiskit_algorithms.optimizers import SLSQP\n      from qiskit.primitives import StatevectorEstimator\n      from qiskit.circuit.library import EvolvedOperatorAnsatz\n      from qiskit import QuantumCircuit\n\n      # get your Hamiltonian\n      hamiltonian = ...\n\n      # construct your ansatz\n      ansatz = EvolvedOperatorAnsatz(...)\n\n      vqe = VQE(StatevectorEstimator(), ansatz, SLSQP())\n\n      adapt_vqe = AdaptVQE(vqe)\n\n      # or you can do it without EvolvedOperatorAnsatz\n      vqe = VQE(StatevectorEstimator(), QuantumCircuit(1), SLSQP())\n\n      adapt_vqe = AdaptVQE(vqe, operators=...)\n\n      eigenvalue, _ = adapt_vqe.compute_minimum_eigenvalue(hamiltonian)\n\n    The following attributes can be set via the initializer but can also be read and updated once\n    the AdaptVQE object has been constructed.\n\n    Attributes:\n        solver: a :class:`~.VQE` instance used internally to compute the minimum eigenvalues.\n            It is a requirement that the :attr:`~.VQE.ansatz` of this solver is of type\n            :class:`~qiskit.circuit.library.EvolvedOperatorAnsatz` if the `operators` arguments is\n            not set.\n        gradient_threshold: once all gradients have an absolute value smaller than this threshold,\n            the algorithm has converged and terminates.\n        eigenvalue_threshold: once the eigenvalue has changed by less than this threshold from one\n            iteration to the next, the algorithm has converged and terminates. When this case\n            occurs, the excitation included in the final iteration did not result in a significant\n            improvement of the eigenvalue and, thus, the results from this iteration are not\n            considered.\n        max_iterations: the maximum number of iterations for the adaptive loop. If ``None``, the\n            algorithm is not bound in its number of iterations.\n    \"\"\"\n\n    def __init__(\n        self,\n        solver: VQE,\n        *,\n        gradient_threshold: float = 1e-5,\n        eigenvalue_threshold: float = 1e-5,\n        max_iterations: int | None = None,\n        operators: Base",
+      "metadata": {
+        "section_id": "part_1",
+        "package": "qiskit-algorithms",
+        "section_title": "adapt_vqe.py",
+        "source_file": "qiskit_algorithms\\minimum_eigensolvers\\adapt_vqe.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.8836799596659143,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "operators",
+        "hamiltonian",
+        "qiskit",
+        "nature"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    },
+    {
+      "id": "0.5_e_lattice_models__e15869aa6fb770ae28394e95bf12c61a__part_1__1",
+      "text": "_nature.problems.second_quantization.lattice.models import FermiHubbardModel\n\n    line = LineLattice(2)\n    fermi = FermiHubbardModel.uniform_parameters(line, 2.0, 4.0, 3.0)\n    print(fermi.second_q_ops())  # Note: the trailing `s`\n\n\n.. parsed-literal::\n\n    Fermionic Operator\n    register length=4, number terms=10\n      (2+0j) * ( +_0 -_2 )\n    + (-2+0j) * ( -_0 +_2 )\n    + (4+0j) * ( +_0 -_0 )\n    + (4+0j) * ( +_2 -_2 )\n    + (2+0j) * ( +_1 -_3 )\n    + (-2+0j) * ( -_1 +_3 )\n    + (4+0j) * ( +_1 -_1 )\n    + (4+0j) * ( +_3 -_3 )\n    + (3+0j) * ...\n\n\nNew\n~~~\n\n.. code:: ipython3\n\n    from qiskit_nature.second_q.hamiltonians.lattices import LineLattice\n    from qiskit_nature.second_q.hamiltonians import FermiHubbardModel\n\n    line = LineLattice(2)\n    fermi = FermiHubbardModel(line.uniform_parameters(2.0, 4.0), 3.0)\n    print(fermi.second_q_op())  # Note: NO trailing `s`\n\n\n.. parsed-literal::\n\n    Fermionic Operator\n    number spin orbitals=4, number terms=10\n      2.0 * ( +_0 -_2 )\n    + -2.0 * ( -_0 +_2 )\n    + 4.0 * ( +_0 -_0 )\n    + 4.0 * ( +_2 -_2 )\n    + 2.0 * ( +_1 -_3 )\n    + -2.0 * ( -_1 +_3 )\n    + 4.0 * ( +_1 -_1 )\n    + 4.0 * ( +_3 -_3 )\n    + 3.0 * ( +_0 -_0 +_1 -_1 )\n    + 3.0 * ( +_2 -_2 +_3 -_3 )\n\n\n``FermiHubbardModel.from_parameters``\n-------------------------------------\n\nPreviously\n~~~~~~~~~~\n\n.. code:: ipython3\n\n    import numpy as np\n    from qiskit_nature.problems.second_quantization.lattice.models import FermiHubbardModel\n\n    interaction = np.array([[4.0, 2.0], [2.0",
+      "metadata": {
+        "source_file": "docs\\migration\\0.5_e_lattice_models.rst",
+        "section_id": "part_1",
+        "package": "qiskit-nature",
+        "section_title": "0.5_e_lattice_models.rst"
+      },
+      "score": 0.8230755015961362,
+      "original_score": 0.8190544902687756,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "fermionic"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "save_expectation_value__505a2fbfaf4535f642f642cbc73291b5__part_0__0",
+      "text": "# This code is part of Qiskit.\n#\n# (C) Copyright IBM 2018, 2021.\n#\n# This code is licensed under the Apache License, Version 2.0. You may\n# obtain a copy of this license in the LICENSE.txt file in the root directory\n# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.\n#\n# Any modifications or derivative works of this code must retain this\n# copyright notice, and modified files need to carry a notice indicating\n# that they have been altered from the originals.\n\"\"\"\nSimulator instruction to save exact operator expectation value.\n\"\"\"\n\nfrom numpy import allclose\nfrom qiskit.quantum_info import Pauli, SparsePauliOp, Operator\nfrom qiskit.circuit import QuantumCircuit\nfrom .save_data import SaveAverageData\n\n\nclass SaveExpectationValue(SaveAverageData):\n    \"\"\"Save expectation value of an operator.\"\"\"\n\n    def __init__(\n        self,\n        operator,\n        label=\"expectation_value\",\n        unnormalized=False,\n        pershot=False,\n        conditional=False,\n    ):\n        r\"\"\"Instruction to save the expectation value of a Hermitian operator.\n\n        The expectation value of a Hermitian operator :math:`H` for a simulator\n        in quantum state :math`\\rho`is given by\n        :math:`\\langle H\\rangle = \\mbox{Tr}[H.\\rho]`.\n\n        Args:\n            operator (Pauli or SparsePauliOp or Operator): a Hermitian operator.\n            label (str): the key for retrieving saved data from results.\n            unnormalized (bool): If True return save the unnormalized accumulated\n                                 or conditional accumulated expectation value\n                                 over all shot [Default: False].\n            pershot (bool): if True save a list of expectation values for each shot\n                            of the simulation rather than the average over\n                            all shots [Default: False].\n            conditional (bool): if True save the average or pershot data\n                                conditional on the current classical register\n                                values [Default: False].\n\n        Raises:\n            ValueError: if the input operator is not Hermitian.\n            TypeError: if the input operator is of invalid type.\n\n        .. note::\n\n            This instruction can be directly appended to a circuit using the\n            :func:`save_expectation_value` circuit method.\n        \"\"\"\n        # Convert O to SparsePauliOp representation\n        if isinstance(operator, Pauli):\n            operator = SparsePauliOp(operator)\n        elif not isinstance(operator, SparsePauliOp):\n            operator = SparsePauliOp.from_operator(Operator(operator))\n        if not allclose(operator.coeffs.imag, 0):\n            raise ValueError(\"Input operator is not Hermitian.\")\n        params = _expval_params(operator, variance=False)\n        super().__init__(\n            \"save_expval\",\n            operator.num_qubits,\n            label,\n            un",
+      "metadata": {
+        "source_file": "qiskit_aer\\library\\save_instructions\\save_expectation_value.py",
+        "section_title": "save_expectation_value.py",
+        "section_id": "part_0",
+        "package": "qiskit-aer"
+      },
+      "score": 0.8230755015961362,
+      "original_score": 0.8190544902687756,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qiskit"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "excitation_preserving__d836ed2db9ec2301899ac4499edb746b__part_4__4",
+      "text": " └────────────┘└────────────┘ ░ └──────────┘\n\n        >>> ansatz = ExcitationPreserving(2, reps=1, flatten=True)\n        >>> qc = QuantumCircuit(2)  # create a circuit and append the RY variational form\n        >>> qc.cry(0.2, 0, 1)  # do some previous operation\n        >>> qc.compose(ansatz, inplace=True)  # add the excitation-preserving\n        >>> qc.draw()\n                        ┌──────────┐┌────────────┐┌────────────┐┌──────────┐\n        q_0: ─────■─────┤ RZ(θ[0]) ├┤0           ├┤0           ├┤ RZ(θ[3]) ├\n             ┌────┴────┐├──────────┤│  RXX(θ[2]) ││  RYY(θ[2]) │├──────────┤\n        q_1: ┤ RY(0.2) ├┤ RZ(θ[1]) ├┤1           ├┤1           ├┤ RZ(θ[4]) ├\n             └─────────┘└──────────┘└────────────┘└────────────┘└──────────┘\n\n        >>> ansatz = ExcitationPreserving(3, reps=1, mode='fsim', entanglement=[[0,2]],\n        ... insert_barriers=True, flatten=True)\n        >>> print(ansatz.decompose())\n             ┌──────────┐ ░ ┌────────────┐┌────────────┐        ░ ┌──────────┐\n        q_0: ┤ RZ(θ[0]) ├─░─┤0           ├┤0           ├─■──────░─┤ RZ(θ[5]) ├\n             ├──────────┤ ░ │            ││            │ │      ░ ├──────────┤\n        q_1: ┤ RZ(θ[1]) ├─░─┤  RXX(θ[3]) ├┤  RYY(θ[3]) ├─┼──────░─┤ RZ(θ[6]) ├\n             ├──────────┤ ░ │            ││            │ │θ[4]  ░ ├──────────┤\n        q_2: ┤ RZ(θ[2]) ├─░─┤1           ├┤1           ├─■──────░─┤ RZ(θ[7]) ├\n             └──────────┘ ░ └────────────┘└────────────┘        ░ └──────────┘\n\n   ",
+      "metadata": {
+        "package": "qiskit",
+        "source_file": "qiskit\\circuit\\library\\n_local\\excitation_preserving.py",
+        "section_title": "excitation_preserving.py",
+        "section_id": "part_4"
+      },
+      "score": 0.8190544902687756,
+      "original_score": 0.8190544902687756,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "hamiltonian_gate__caced190507f46142e7b675ab642ce97__part_2__2",
+      "text": ".adjoint()\n\n    def conjugate(self):\n        \"\"\"Return the conjugate of the Hamiltonian.\"\"\"\n        return HamiltonianGate(np.conj(self.params[0]), -self.params[1])\n\n    def adjoint(self):\n        \"\"\"Return the adjoint of the unitary.\"\"\"\n        return HamiltonianGate(self.params[0], -self.params[1])\n\n    def transpose(self):\n        \"\"\"Return the transpose of the Hamiltonian.\"\"\"\n        return HamiltonianGate(np.transpose(self.params[0]), self.params[1])\n\n    def _define(self):\n        \"\"\"Calculate a subcircuit that implements this unitary.\"\"\"\n        q = QuantumRegister(self.num_qubits, \"q\")\n        qc = QuantumCircuit(q)\n        qc._append(UnitaryGate(self.to_matrix()), q[:], [])\n        self.definition = qc\n\n    def validate_parameter(self, parameter):\n        \"\"\"Hamiltonian parameter has to be an ndarray, operator or float.\"\"\"\n        if isinstance(parameter, (float, int, np.ndarray)):\n            return parameter\n        elif isinstance(parameter, ParameterExpression) and len(parameter.parameters) == 0:\n            return float(parameter)\n        else:\n            raise CircuitError(f\"invalid param type {type(parameter)} for gate {self.name}\")\n",
+      "metadata": {
+        "section_title": "hamiltonian_gate.py",
+        "package": "qiskit",
+        "section_id": "part_2",
+        "source_file": "qiskit\\circuit\\library\\hamiltonian_gate.py"
+      },
+      "score": 0.8131432045026307,
+      "original_score": 0.8088964591504177,
+      "vector_score": 0.9875978567494033,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "hamiltonian"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 217,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

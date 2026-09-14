@@ -1,0 +1,114 @@
+{
+  "query": "How to return model object 'ma' in netket statemodel",
+  "package": "netket",
+  "results": [
+    {
+      "id": "models__12b95c8a73db5e6711fe975ef876c861__root_0__0",
+      "text": "(netket_models_api)=",
+      "metadata": {
+        "source_file": "docs\\api\\models.md",
+        "package": "netket",
+        "section_title": "models",
+        "section_id": "root"
+      },
+      "score": 0.8,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "models__09041a73079b0c73875a7031ae8e8795__root_0__0",
+      "text": "(netket_models_api)=",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\_sources\\api\\models.md",
+        "section_title": "models",
+        "package": "netket",
+        "section_id": "root"
+      },
+      "score": 0.8,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_5_5__1",
+      "text": "Module\n):\n\"\"\"\nA class implementing a uniform mean-field model.\n\"\"\"\n# The __init__ function is used to define the parameters of the model\n# The RNG argument is used to initialize the parameters of the model.\ndef\n__init__\n(\nself\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\n# To generate random numbers we need to extract the key from the\n# `rngs` object.\nkey\n=\nrngs\n.\nparams\n()\n# We store the log-wavefunction on a single site, and we call it\n# `log_phi_local`. This is a variational parameter, and it will be\n# optimized during training.\n#\n# We store a single real parameter, as we assume the wavefunction\n# is normalised, and initialise it according to a normal distibution.\nself\n.\nlog_phi_local\n=\nnnx\n.\nParam\n(\njax\n.\nrandom\n.\nnormal\n(\nkey\n,\n(\n1\n,)))\n# The __call__(self, x) function should take as\n# input a batch of states x.shape = (n_samples, L)\n# and should return a vector of n_samples log-amplitudes\ndef\n__call__\n(\nself\n,\nx\n:\njax\n.\nArray\n):\n# compute the probabilities\np\n=\nnnx\n.\nlog_sigmoid\n(\nself\n.\nlog_phi_local\n*\nx\n)\n# sum the output\nreturn\n0.5\n*\njnp\n.\nsum\n(\np\n,\naxis\n=-\n1\n)\n```\nHere we use flax.nnx to construct the model, which is a more modern and simpler neural-network library when compared to flax.linen , which is what was used in NetKet for many years. In fact, you can use both those libraries with NetKet! Just be careful that the two are quite different.\nTo actually create a variational state the easiest way is to construct a Monte-Carlo-sampled Variational State.\nTo do this, we first need to define a sampler.\nIn netket.sampler several samplers are defined, each with its own peculiarities.\nIn the following example, we will be using a simple sampler that flips the spins in the configurations one by one.\nYou can read more about how the sampler works by checking the documentation with ?nk.sampler.MetropolisLocal\n```code\n# Create an instance of the model, using the seed 0\nmf_model\n=\nMF\n(\nrngs\n=\nnnx\n.\nRngs\n(\n0\n))\n# If you want to learn more about how to use this model, check the nnx tutorial\n# https://flax.readthedocs.io/en/latest/nnx_basics.html\n# Create the local sampler on the hilbert space\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisLocal\n(\nhi\n)\n# Construct the",
+      "metadata": {
+        "section_title": "3. Mean-Field Ansatz#",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html",
+        "section_id": "sec_5"
+      },
+      "score": 0.49171153228916686,
+      "original_score": 0.1384941225240116,
+      "vector_score": null,
+      "bm25_score": 0.6924706126200582,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "return",
+        "model",
+        "object",
+        "netket"
+      ],
+      "match_ratio": 0.8,
+      "is_html": true
+    },
+    {
+      "id": "netket.errors.HolomorphicUndeclaredWarning__30fbdbfd665d818de51f858dccc80ae3__sec_1_1__0",
+      "text": "## Contents\nComplex-to-Complex model detected. Defaulting to holomorphic = False for the calculation of its jacobian.\nHowever, holomorphic = False might lead to slightly increased\ncomputational cost, some disabled features and/or worse quality of\nsolutions found with iterative solvers.\nIf your model is actually holomorphic, you should specify holomorphic = True to unblock some extra, possibly more performant algorithms.\nIf you are unsure whether your variational function is holomorphic or not,\nyou should check if it satisfies the Cauchy-Riemann equations .\nTo check numerically those conditions on a random set of samples you can use the\nfunction netket.utils.is_probably_holomorphic() . If this function returns\nFalse then your ansatz is surely not holomorphic, while if it returns True your\nansatz is likely but not guaranteed to be holomorphic.\nTo check those conditions numerically, you can check by following this\nexample:\n```code\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\n0.5\n,\n2\n)\nsa\n=\nnk\n.\nsampler\n.\nMetropolisLocal\n(\nhi\n)\nma\n=\nnk\n.\nmodels\n.\nRBM\n(\nparam_dtype\n=\ncomplex\n)\n# construct the variational state\nvs\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nma\n)\nnk\n.\nutils\n.\nis_probably_holomorphic\n(\nvs\n.\n_apply_fun\n,\nvs\n.\nparameters\n,\nvs\n.\nsamples\n,\nmodel_state\n=\nvs\n.\nmodel_state\n)\n```\nTo suppress this warning correctly specify the keyword argument holomorphic .\nNote\na  detailed discussion, explaining how to easily check those conditions\nanalitically is found in the documentation of netket.utils.is_probably_holomorphic() ).",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\_generated\\errors\\netket.errors.HolomorphicUndeclaredWarning.html",
+        "section_title": "Contents",
+        "section_id": "sec_1"
+      },
+      "score": 0.44438367039285875,
+      "original_score": 0.1707218961087444,
+      "vector_score": null,
+      "bm25_score": 0.8536094805437221,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "model",
+        "netket"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "gs-matrix-models__ef1b32ac39370be9a6422cd5bf62bbb1__sec_5_5__1",
+      "text": "self\n,\nx\n):\n# A tensor of variational parameters is defined by calling\n# the method `self.param` where the arguments will be:\n# - arbitrary name used to refer to this set of parameters\n# - an initializer used to provide the initial values.\n# - The shape of the tensor\n# - The dtype of the tensor.\ngam\n=\nself\n.\nparam\n(\n\"gamma\"\n,\nnn\n.\ninitializers\n.\nnormal\n(),\n(\n1\n,),\nfloat\n)\n# compute the probabilities\np\n=\nnn\n.\nlog_sigmoid\n(\ngam\n*\nx\n)\n# sum the output to return a single number (on a batch of input configurations)\nreturn\n0.5\n*\njnp\n.\nsum\n(\np\n,\naxis\n=-\n1\n)\n```\nThe model itself is only a set of instructions on how to initialise the parameters and how to compute the result.\nTo actually create a variational state with its parameters, the easiest way is to construct a Monte-Carlo-sampled Variational State.\nTo do this, we first need to define a sampler.\nIn netket.sampler several samplers are defined, each with its own peculiarities.\nIn the following example, we will be using a simple sampler that chooses the occupation number of each boson at random (uniform between 0 and \\(\\Lambda-1\\) ) one by one.\nYou can read more about how the sampler works by checking the documentation with ?nk.sampler.MetropolisLocal\n```code\n# Create an instance of the model.\n# Notice that this does not create the parameters.\nmf_model\n=\nMF\n()\n# Create the local sampler on the hilbert space\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisLocal\n(\nhi\n,\nn_chains\n=\n4\n)\n# Construct the variational state using the model and the sampler above.\n# n_samples specifies how many samples should be used to compute expectation\n# values.\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmf_model\n,\nn_samples\n=\n2\n**\n9\n)\n```\nYou can play around with the variational state: for example, you can compute expectation values yourself or inspect it’s parameters\n```code\n# you can inspect the parameters which contain the single\n# variational parameter `gamma`\nvstate\n.\nparameters\n```\n```code\nFrozenDict({\n    gamma: DeviceArray([0.00979636], dtype=float64),\n})\n```\n```code\n# Expectation value: notice that it also provides an error estimate. and the monte carlo chain properties, such as the Gelman-Rubin statistics across chains\nvstate\n.\nexpect\n(\nH\n)\n```\n```code\n12.95 ± 0.15 [σ²=8.93, R̂=1.0034]\n```\nThe",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-matrix-models.html",
+        "section_title": "3. Mean-Field Ansatz#",
+        "package": "netket",
+        "section_id": "sec_5"
+      },
+      "score": 0.4222260408455914,
+      "original_score": 0.08289847753268474,
+      "vector_score": null,
+      "bm25_score": 0.4144923876634238,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "return",
+        "model",
+        "netket"
+      ],
+      "match_ratio": 0.6,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 60,
+    "final_results_count": 5
+  }
+}

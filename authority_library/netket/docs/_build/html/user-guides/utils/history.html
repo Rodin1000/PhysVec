@@ -1,0 +1,1656 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Time-series data with History and HistoryDict &#8212; NetKet</title>
+    
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=3422b952" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/navbar.css?v=bf041fde" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+
+<!-- Extra fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"> 
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+<link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+    <script src="../../_static/documentation_options.js?v=cafb4dd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guides/utils/history';</script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Advanced guides" href="../../advanced/index.html" />
+    <link rel="prev" title="Timing and Profiling in NetKet" href="timing.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none"><nav class="navbar navbar-custom navbar-top navbar-expand-md fixed-top bd-navbar flex-md navbar-dark bg-light">
+    <div class="container container-navbar">
+        <a class="navbar-brand navbar-custom-brand" href="https://www.netket.org">
+          <img class="navbar-brand-logo d-inline-block align-center" src="../../_static/logonav.png" loading="lazy">
+          <div class="navbar-brand-text d-inline-block align-center">
+        NetKet</div>
+        </a>
+
+        <!-- Button showing on small screens to show the navbar content -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- /Button showing on small screens to show the navbar content -->
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              
+                  <li class="nav-item mx-auto">
+                    <a class="nav-link nav-link-custom" href="https://www.netket.org/posts/">Posts</a>
+                  </li>
+                  <li class="nav-item mx-auto">
+                    <a class="nav-link nav-link-custom" href="https://www.netket.org/papers/">Papers</a>
+                  </li>
+                  <li class="nav-item mx-auto">
+                    <a class="nav-link nav-link-custom" href="https://www.netket.org/get_involved/">Get Involved</a>
+                  </li>
+                  <li class="nav-item mx-auto">
+                    <a class="nav-link nav-link-custom" href="../../cite.html">Citing</a>
+                  </li>
+                  <li class="nav-item mx-auto">
+                    <a class="nav-link nav-link-custom" href="../../index.html">Documentation</a>
+                  </li>
+              
+            </ul>
+            <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+              
+                  <li class="nav-item">
+                    <a class="nav-link nav-link-custom" aria-current="page" href="https://github.com/netket/netket"><i class="fab fa-github" aria-hidden="true"></i></a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link nav-link-custom" aria-current="page" href="https://twitter.com/NetKetOrg"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link nav-link-custom" aria-current="page" href="https://join.slack.com/t/mlquantum/shared_invite/zt-19wibmfdv-LLRI6i43wrLev6oQX0OfOw"><i class="fab fa-slack" aria-hidden="true"></i></a>
+                  </li>
+              
+              
+
+            </ul>
+        </div>
+    </div>
+</nav>
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/logo_transparent.png" class="logo__image only-light" alt="NetKet - Home"/>
+    <script>document.write(`<img src="../../_static/logo_transparent.png" class="logo__image only-dark" alt="NetKet - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/gs-ising.html">First Tutorial</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../parallel.html">Parallel Computing</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../parallel-multigpu.html">Multiple GPUs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../parallel-multinode.html">Multiple nodes (GPUs)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../parallel-mpi.html">Multiple CPUs (MPI)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cite.html">Citing NetKet</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">User guides</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../philosophy.html">Architecture &amp; Philosophy</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/gs-ising.html">Ground-State: Ising model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/gs-continuous-space.html">Ground-State: Bosons in a 3D Harmonic trap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/gs-heisenberg.html">Ground-State: Heisenberg model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/gs-j1j2.html">Ground-State: J1-J2 model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/ViT-wave-function.html">Vision Transformer wave function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/gs-matrix-models.html">Ground-State: Bosonic Matrix Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/lattice-fermions.html">Lattice Fermions, from Slater Determinants to Neural Backflow Transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/fidelity.html">Infidelity Minimization with Stochastic Reconfiguration in NetKet</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../tutorials/symmetries/index.html">Symmetries</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorials/gs-gcnn-honeycomb.html">Equivariant NQS: GCNN for Spin models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../tutorials/symmetry_tutorial.html">Symmetries, Representations and Projectors for arbitrary NQS</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index-modules.html">In-depth guides</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../hilbert.html">The Hilbert module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../operator.html">The Operator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sampler.html">The Sampler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pytree.html">NetKet Pytrees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../varstate.html">The Variational State Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../drivers.html">The Drivers API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sr.html">Quantum Geometric Tensor and Stochastic Reconfiguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../superop.html">The Lindblad Master Equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/symmetry.html">Representation theory in NetKet</a></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="index.html">Utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="timing.html">Timing and Profiling in NetKet</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">Time-series data with History and HistoryDict</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../advanced/index.html">Advanced guides</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/custom_models.html">Defining Custom Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/custom_expect.html">Overriding defaults in NetKet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/custom_preconditioners.html">Defining Custom Preconditioners</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/custom_operators.html">Defining Custom Observables and Operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/custom_hilbert_constraints.html">Custom Hilbert Space Constraints</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../vmc-from-scratch/index.html">VMC DIY</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../vmc-from-scratch/01-hamiltonian-and-operators.html">Part 1: Hamiltonians and Operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../vmc-from-scratch/02-variational-states-full-summation.html">Part 2: Variational States with Full Summation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../vmc-from-scratch/03-monte-carlo-sampling.html">Part 3: Monte Carlo Sampling</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../developer-guides/index.html">Developer guides</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../developer-guides/contributing.html">Contributing to NetKet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../developer-guides/documentation.html">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../developer-guides/writing-tests.html">Writing Tests</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../configurations.html">Configuration Options</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../sharp-bits.html">🔪 The Sharp Bits 🔪</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../api/api-stability.html">API Stability</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../api/api.html">Public API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/callbacks.html">netket.callbacks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/callbacks/netket.callbacks.EarlyStopping.html">netket.callbacks.EarlyStopping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/callbacks/netket.callbacks.ConvergenceStopping.html">netket.callbacks.ConvergenceStopping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/callbacks/netket.callbacks.InvalidLossStopping.html">netket.callbacks.InvalidLossStopping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/callbacks/netket.callbacks.Timeout.html">netket.callbacks.Timeout</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/drivers.html">netket.drivers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/driver/netket.driver.AbstractVariationalDriver.html">netket.driver.AbstractVariationalDriver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/driver/netket.driver.VMC.html">netket.driver.VMC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/driver/netket.driver.VMC_SR.html">netket.driver.VMC_SR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/driver/netket.driver.SteadyState.html">netket.driver.SteadyState</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/experimental/driver/netket.experimental.driver.Infidelity_SR.html">netket.experimental.driver.Infidelity_SR</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/errors.html">netket.errors</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.HilbertIndexingDuringTracingError.html">netket.errors.HilbertIndexingDuringTracingError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.HolomorphicUndeclaredWarning.html">netket.errors.HolomorphicUndeclaredWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.InsufficientSamplesForSRWarning.html">netket.errors.InsufficientSamplesForSRWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.JaxOperatorSetupDuringTracingError.html">netket.errors.JaxOperatorSetupDuringTracingError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.JaxOperatorNotConvertibleToNumba.html">netket.errors.JaxOperatorNotConvertibleToNumba</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.JaxOperatorGetConnInJitError.html">netket.errors.JaxOperatorGetConnInJitError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.NonHolomorphicQGTOnTheFlyDenseRepresentationError.html">netket.errors.NonHolomorphicQGTOnTheFlyDenseRepresentationError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.NumbaOperatorGetConnDuringTracingError.html">netket.errors.NumbaOperatorGetConnDuringTracingError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.OperatorMultiplicationDeprecationWarning.html">netket.errors.OperatorMultiplicationDeprecationWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.RealQGTComplexDomainError.html">netket.errors.RealQGTComplexDomainError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.UnoptimalSRtWarning.html">netket.errors.UnoptimalSRtWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.SymmModuleInvalidInputShape.html">netket.errors.SymmModuleInvalidInputShape</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.ParameterMismatchError.html">netket.errors.ParameterMismatchError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.InitializePeriodicLatticeOnSmallLatticeWarning.html">netket.errors.InitializePeriodicLatticeOnSmallLatticeWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.NNXModuleToSamplerInput.html">netket.errors.NNXModuleToSamplerInput</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.UnoptimisedCustomConstraintRandomStateMethodWarning.html">netket.errors.UnoptimisedCustomConstraintRandomStateMethodWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.UnhashableConstraintError.html">netket.errors.UnhashableConstraintError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.InvalidConstraintInterface.html">netket.errors.InvalidConstraintInterface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/errors/netket.errors.NetKetPyTreeUndeclaredAttributeAssignmentError.html">netket.errors.NetKetPyTreeUndeclaredAttributeAssignmentError</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/exact.html">netket.exact</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/exact/netket.exact.full_ed.html">netket.exact.full_ed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/exact/netket.exact.lanczos_ed.html">netket.exact.lanczos_ed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/exact/netket.exact.steady_state.html">netket.exact.steady_state</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/graph.html">netket.graph</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.AbstractGraph.html">netket.graph.AbstractGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Graph.html">netket.graph.Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Lattice.html">netket.graph.Lattice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Edgeless.html">netket.graph.Edgeless</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.lattice.LatticeSite.html">netket.graph.lattice.LatticeSite</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Grid.html">netket.graph.Grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Hypercube.html">netket.graph.Hypercube</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Square.html">netket.graph.Square</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Cube.html">netket.graph.Cube</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Chain.html">netket.graph.Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Triangular.html">netket.graph.Triangular</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Honeycomb.html">netket.graph.Honeycomb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.KitaevHoneycomb.html">netket.graph.KitaevHoneycomb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Kagome.html">netket.graph.Kagome</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.BCC.html">netket.graph.BCC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.FCC.html">netket.graph.FCC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Diamond.html">netket.graph.Diamond</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.Pyrochlore.html">netket.graph.Pyrochlore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.space_group.SpaceGroup.html">netket.graph.space_group.SpaceGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.space_group.TranslationGroup.html">netket.graph.space_group.TranslationGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.DoubledGraph.html">netket.graph.DoubledGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/graph/netket.graph.disjoint_union.html">netket.graph.disjoint_union</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/geometry.html">netket.experimental.geometry</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/geometry/netket.experimental.geometry.Cell.html">netket.experimental.geometry.Cell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/geometry/netket.experimental.geometry.FreeSpace.html">netket.experimental.geometry.FreeSpace</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/hilbert.html">netket.hilbert</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.TensorHilbert.html">netket.hilbert.TensorHilbert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.DoubledHilbert.html">netket.hilbert.DoubledHilbert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.Spin.html">netket.hilbert.Spin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.Qubit.html">netket.hilbert.Qubit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.Fock.html">netket.hilbert.Fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.SpinOrbitalFermions.html">netket.hilbert.SpinOrbitalFermions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.AbstractHilbert.html">netket.hilbert.AbstractHilbert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.DiscreteHilbert.html">netket.hilbert.DiscreteHilbert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.HomogeneousHilbert.html">netket.hilbert.HomogeneousHilbert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.experimental.hilbert.ContinuousHilbert.html">netket.experimental.hilbert.ContinuousHilbert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.experimental.hilbert.Particle.html">netket.experimental.hilbert.Particle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.constraint.DiscreteHilbertConstraint.html">netket.hilbert.constraint.DiscreteHilbertConstraint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.constraint.SumConstraint.html">netket.hilbert.constraint.SumConstraint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.constraint.SumOnPartitionConstraint.html">netket.hilbert.constraint.SumOnPartitionConstraint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.constraint.ExtraConstraint.html">netket.hilbert.constraint.ExtraConstraint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.random.flip_state.html">netket.hilbert.random.flip_state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.random.random_state.html">netket.hilbert.random.random_state</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/hilbert/netket.hilbert.index.optimalConstrainedHilbertindex.html">netket.hilbert.index.optimalConstrainedHilbertindex</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/jax.html">netket.jax</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.HashablePartial.html">netket.jax.HashablePartial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.PRNGKey.html">netket.jax.PRNGKey</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.PRNGSeq.html">netket.jax.PRNGSeq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.tree_dot.html">netket.jax.tree_dot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.tree_norm.html">netket.jax.tree_norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.tree_ax.html">netket.jax.tree_ax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.tree_axpy.html">netket.jax.tree_axpy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.tree_cast.html">netket.jax.tree_cast</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.tree_conj.html">netket.jax.tree_conj</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.tree_size.html">netket.jax.tree_size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.tree_leaf_iscomplex.html">netket.jax.tree_leaf_iscomplex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.tree_ishomogeneous.html">netket.jax.tree_ishomogeneous</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.tree_to_real.html">netket.jax.tree_to_real</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.dtype_complex.html">netket.jax.dtype_complex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.is_complex_dtype.html">netket.jax.is_complex_dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.maybe_promote_to_complex.html">netket.jax.maybe_promote_to_complex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.expect.html">netket.jax.expect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.vjp.html">netket.jax.vjp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.jacobian.html">netket.jax.jacobian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.jacobian_default_mode.html">netket.jax.jacobian_default_mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.chunk.html">netket.jax.chunk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.unchunk.html">netket.jax.unchunk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.apply_chunked.html">netket.jax.apply_chunked</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.vmap_chunked.html">netket.jax.vmap_chunked</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.vjp_chunked.html">netket.jax.vjp_chunked</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.logsumexp_cplx.html">netket.jax.logsumexp_cplx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/jax/netket.jax.logdet_cmplx.html">netket.jax.logdet_cmplx</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/logging.html">netket.logging</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/driver/netket.logging.AbstractLog.html">netket.logging.AbstractLog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/driver/netket.logging.RuntimeLog.html">netket.logging.RuntimeLog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/driver/netket.logging.JsonLog.html">netket.logging.JsonLog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/driver/netket.logging.StateLog.html">netket.logging.StateLog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/driver/netket.logging.TensorBoardLog.html">netket.logging.TensorBoardLog</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/models.html">netket.models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.LogStateVector.html">netket.models.LogStateVector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.RBM.html">netket.models.RBM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.RBMModPhase.html">netket.models.RBMModPhase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.RBMMultiVal.html">netket.models.RBMMultiVal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.RBMSymm.html">netket.models.RBMSymm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.Jastrow.html">netket.models.Jastrow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.NDM.html">netket.models.NDM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.GCNN.html">netket.models.GCNN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.DeepSetMLP.html">netket.models.DeepSetMLP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.MLP.html">netket.models.MLP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.AbstractARNN.html">netket.models.AbstractARNN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.ARNNSequential.html">netket.models.ARNNSequential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.FastARNNSequential.html">netket.models.FastARNNSequential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.ARNNDense.html">netket.models.ARNNDense</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.ARNNConv1D.html">netket.models.ARNNConv1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.ARNNConv2D.html">netket.models.ARNNConv2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.FastARNNConv1D.html">netket.models.FastARNNConv1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.FastARNNConv2D.html">netket.models.FastARNNConv2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.Gaussian.html">netket.models.Gaussian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.DeepSetRelDistance.html">netket.models.DeepSetRelDistance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.tensor_networks.MPSOpen.html">netket.models.tensor_networks.MPSOpen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.tensor_networks.MPSPeriodic.html">netket.models.tensor_networks.MPSPeriodic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.tensor_networks.MPDOOpen.html">netket.models.tensor_networks.MPDOOpen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.models.tensor_networks.MPDOPeriodic.html">netket.models.tensor_networks.MPDOPeriodic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.experimental.models.Slater2nd.html">netket.experimental.models.Slater2nd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.experimental.models.MultiSlater2nd.html">netket.experimental.models.MultiSlater2nd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.experimental.models.RNN.html">netket.experimental.models.RNN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.experimental.models.FastRNN.html">netket.experimental.models.FastRNN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.experimental.models.LSTMNet.html">netket.experimental.models.LSTMNet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.experimental.models.FastLSTMNet.html">netket.experimental.models.FastLSTMNet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.experimental.models.GRUNet1D.html">netket.experimental.models.GRUNet1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/models/netket.experimental.models.FastGRUNet1D.html">netket.experimental.models.FastGRUNet1D</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/nn.html">netket.nn</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.DenseSymm.html">netket.nn.DenseSymm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.DenseEquivariant.html">netket.nn.DenseEquivariant</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.MaskedDense1D.html">netket.nn.MaskedDense1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.MaskedConv1D.html">netket.nn.MaskedConv1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.MaskedConv2D.html">netket.nn.MaskedConv2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.FastMaskedDense1D.html">netket.nn.FastMaskedDense1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.FastMaskedConv1D.html">netket.nn.FastMaskedConv1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.FastMaskedConv2D.html">netket.nn.FastMaskedConv2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.activation.reim.html">netket.nn.activation.reim</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.activation.reim_relu.html">netket.nn.activation.reim_relu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.activation.reim_selu.html">netket.nn.activation.reim_selu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.activation.log_cosh.html">netket.nn.activation.log_cosh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.activation.log_sinh.html">netket.nn.activation.log_sinh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.activation.log_tanh.html">netket.nn.activation.log_tanh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.binary_encoding.html">netket.nn.binary_encoding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.to_array.html">netket.nn.to_array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.to_matrix.html">netket.nn.to_matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.make_logpsi_op_afun.html">netket.nn.make_logpsi_op_afun</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.blocks.MLP.html">netket.nn.blocks.MLP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.blocks.DeepSetMLP.html">netket.nn.blocks.DeepSetMLP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/netket.nn.blocks.SymmExpSum.html">netket.nn.blocks.SymmExpSum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/rnn/netket.experimental.nn.rnn.RNNLayer.html">netket.experimental.nn.rnn.RNNLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/rnn/netket.experimental.nn.rnn.FastRNNLayer.html">netket.experimental.nn.rnn.FastRNNLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/rnn/netket.experimental.nn.rnn.RNNCell.html">netket.experimental.nn.rnn.RNNCell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/rnn/netket.experimental.nn.rnn.LSTMCell.html">netket.experimental.nn.rnn.LSTMCell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/rnn/netket.experimental.nn.rnn.GRU1DCell.html">netket.experimental.nn.rnn.GRU1DCell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/rnn/netket.experimental.nn.rnn.check_reorder_idx.html">netket.experimental.nn.rnn.check_reorder_idx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/rnn/netket.experimental.nn.rnn.ensure_prev_neighbors.html">netket.experimental.nn.rnn.ensure_prev_neighbors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/nn/rnn/netket.experimental.nn.rnn.get_snake_inv_reorder_idx.html">netket.experimental.nn.rnn.get_snake_inv_reorder_idx</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/operator.html">netket.operator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.AbstractOperator.html">netket.operator.AbstractOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.AbstractSuperOperator.html">netket.operator.AbstractSuperOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.DiscreteOperator.html">netket.operator.DiscreteOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.DiscreteJaxOperator.html">netket.operator.DiscreteJaxOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.ContinuousOperator.html">netket.operator.ContinuousOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.BoseHubbardJax.html">netket.operator.BoseHubbardJax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.BoseHubbardNumba.html">netket.operator.BoseHubbardNumba</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.GraphOperator.html">netket.operator.GraphOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.LocalOperatorJax.html">netket.operator.LocalOperatorJax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.LocalOperatorNumba.html">netket.operator.LocalOperatorNumba</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.IsingJax.html">netket.operator.IsingJax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.IsingNumba.html">netket.operator.IsingNumba</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.Heisenberg.html">netket.operator.Heisenberg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.PauliStringsJax.html">netket.operator.PauliStringsJax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.PauliStringsNumba.html">netket.operator.PauliStringsNumba</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.LocalLiouvillian.html">netket.operator.LocalLiouvillian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.FermionOperator2ndJax.html">netket.operator.FermionOperator2ndJax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.FermionOperator2ndNumba.html">netket.operator.FermionOperator2ndNumba</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.experimental.operator.ParticleNumberConservingFermioperator2nd.html">netket.experimental.operator.ParticleNumberConservingFermioperator2nd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd.html">netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.experimental.operator.FermiHubbardJax.html">netket.experimental.operator.FermiHubbardJax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.KineticEnergy.html">netket.operator.KineticEnergy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.PotentialEnergy.html">netket.operator.PotentialEnergy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.permutation.PermutationOperator.html">netket.operator.permutation.PermutationOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.permutation.PermutationOperatorFermion.html">netket.operator.permutation.PermutationOperatorFermion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.permutation.construct_permutation_operator.html">netket.operator.permutation.construct_permutation_operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.SumOperator.html">netket.operator.SumOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.ProductOperator.html">netket.operator.ProductOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.boson.create.html">netket.operator.boson.create</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.boson.destroy.html">netket.operator.boson.destroy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.boson.identity.html">netket.operator.boson.identity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.boson.number.html">netket.operator.boson.number</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.boson.proj.html">netket.operator.boson.proj</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.spin.identity.html">netket.operator.spin.identity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.spin.sigmax.html">netket.operator.spin.sigmax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.spin.sigmay.html">netket.operator.spin.sigmay</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.spin.sigmaz.html">netket.operator.spin.sigmaz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.spin.sigmap.html">netket.operator.spin.sigmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.spin.sigmam.html">netket.operator.spin.sigmam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.fermion.create.html">netket.operator.fermion.create</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.fermion.destroy.html">netket.operator.fermion.destroy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.fermion.number.html">netket.operator.fermion.number</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator.to_sparse_cached.html">netket.operator.to_sparse_cached</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._local_operator.LocalOperator.html">netket.operator._local_operator.LocalOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._local_operator.LocalOperatorBase.html">netket.operator._local_operator.LocalOperatorBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._ising.Ising.html">netket.operator._ising.Ising</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._ising.IsingBase.html">netket.operator._ising.IsingBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._pauli_strings.PauliStrings.html">netket.operator._pauli_strings.PauliStrings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._pauli_strings.PauliStringsBase.html">netket.operator._pauli_strings.PauliStringsBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._fermion2nd.FermionOperator2nd.html">netket.operator._fermion2nd.FermionOperator2nd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._fermion2nd.FermionOperator2ndBase.html">netket.operator._fermion2nd.FermionOperator2ndBase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._sum.SumContinuousOperator.html">netket.operator._sum.SumContinuousOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._sum.SumGenericOperator.html">netket.operator._sum.SumGenericOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._sum.SumDiscreteJaxOperator.html">netket.operator._sum.SumDiscreteJaxOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._sum.SumDiscreteOperator.html">netket.operator._sum.SumDiscreteOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._prod.ProductGenericOperator.html">netket.operator._prod.ProductGenericOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._prod.ProductDiscreteOperator.html">netket.operator._prod.ProductDiscreteOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/operator/netket.operator._prod.ProductDiscreteJaxOperator.html">netket.operator._prod.ProductDiscreteJaxOperator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/optimizer.html">netket.optimizer</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.Adam.html">netket.optimizer.Adam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.AdaGrad.html">netket.optimizer.AdaGrad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.Sgd.html">netket.optimizer.Sgd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.Momentum.html">netket.optimizer.Momentum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.RmsProp.html">netket.optimizer.RmsProp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.SR.html">netket.optimizer.SR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.qgt.QGTAuto.html">netket.optimizer.qgt.QGTAuto</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.qgt.QGTOnTheFly.html">netket.optimizer.qgt.QGTOnTheFly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.qgt.QGTJacobianPyTree.html">netket.optimizer.qgt.QGTJacobianPyTree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.qgt.QGTJacobianDense.html">netket.optimizer.qgt.QGTJacobianDense</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.solver.cholesky.html">netket.optimizer.solver.cholesky</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.solver.LU.html">netket.optimizer.solver.LU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.solver.pinv.html">netket.optimizer.solver.pinv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.solver.pinv_smooth.html">netket.optimizer.solver.pinv_smooth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.solver.solve.html">netket.optimizer.solver.solve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/optim/netket.optimizer.solver.svd.html">netket.optimizer.solver.svd</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/sampler.html">netket.sampler</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.Sampler.html">netket.sampler.Sampler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.SamplerState.html">netket.sampler.SamplerState</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.MetropolisSamplerState.html">netket.sampler.MetropolisSamplerState</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.ExactSampler.html">netket.sampler.ExactSampler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.MetropolisSampler.html">netket.sampler.MetropolisSampler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.MetropolisSamplerNumpy.html">netket.sampler.MetropolisSamplerNumpy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.ParallelTemperingSampler.html">netket.sampler.ParallelTemperingSampler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.ARDirectSampler.html">netket.sampler.ARDirectSampler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.MetropolisLocal.html">netket.sampler.MetropolisLocal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.MetropolisExchange.html">netket.sampler.MetropolisExchange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.MetropolisHamiltonian.html">netket.sampler.MetropolisHamiltonian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.MetropolisGaussian.html">netket.sampler.MetropolisGaussian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.MetropolisAdjustedLangevin.html">netket.sampler.MetropolisAdjustedLangevin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.ParallelTemperingLocal.html">netket.sampler.ParallelTemperingLocal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.ParallelTemperingExchange.html">netket.sampler.ParallelTemperingExchange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.ParallelTemperingHamiltonian.html">netket.sampler.ParallelTemperingHamiltonian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.MetropolisFermionHop.html">netket.sampler.MetropolisFermionHop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.MetropolisRule.html">netket.sampler.rules.MetropolisRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.LocalRule.html">netket.sampler.rules.LocalRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.GlobalSpinFlipRule.html">netket.sampler.rules.GlobalSpinFlipRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.CustomRuleNumpy.html">netket.sampler.rules.CustomRuleNumpy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.ExchangeRule.html">netket.sampler.rules.ExchangeRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.FixedRule.html">netket.sampler.rules.FixedRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.HamiltonianRule.html">netket.sampler.rules.HamiltonianRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.HamiltonianRuleNumpy.html">netket.sampler.rules.HamiltonianRuleNumpy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.GaussianRule.html">netket.sampler.rules.GaussianRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.LangevinRule.html">netket.sampler.rules.LangevinRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.FermionHopRule.html">netket.sampler.rules.FermionHopRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.TensorRule.html">netket.sampler.rules.TensorRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.MultipleRules.html">netket.sampler.rules.MultipleRules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.SamplerState.html">netket.sampler.SamplerState</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.MetropolisSamplerState.html">netket.sampler.MetropolisSamplerState</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.MetropolisFermionHop.html">netket.sampler.MetropolisFermionHop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/samplers/netket.sampler.rules.FermionHopRule.html">netket.sampler.rules.FermionHopRule</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/symmetry.html">netket.symmetry</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/symmetry/netket.symmetry.Representation.html">netket.symmetry.Representation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/symmetry/netket.symmetry.canonical_representation.html">netket.symmetry.canonical_representation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/symmetry/netket.symmetry.group.FiniteGroup.html">netket.symmetry.group.FiniteGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/symmetry/netket.symmetry.group.Permutation.html">netket.symmetry.group.Permutation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/symmetry/netket.symmetry.group.PermutationGroup.html">netket.symmetry.group.PermutationGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/symmetry/netket.symmetry.group.PGSymmetry.html">netket.symmetry.group.PGSymmetry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/symmetry/netket.symmetry.group.PointGroup.html">netket.symmetry.group.PointGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/symmetry/netket.symmetry.group.axial.html">netket.symmetry.group.axial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/symmetry/netket.symmetry.group.planar.html">netket.symmetry.group.planar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/symmetry/netket.symmetry.group.cubic.html">netket.symmetry.group.cubic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/symmetry/netket.symmetry.group.icosa.html">netket.symmetry.group.icosa</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/stats.html">netket.stats</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/stats/netket.stats.statistics.html">netket.stats.statistics</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/utils.html">netket.utils</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.is_probably_holomorphic.html">netket.utils.is_probably_holomorphic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/struct/netket.utils.struct.Pytree.html">netket.utils.struct.Pytree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/struct/netket.utils.struct.field.html">netket.utils.struct.field</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/struct/netket.utils.struct.ShardedFieldSpec.html">netket.utils.struct.ShardedFieldSpec</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.HashableArray.html">netket.utils.HashableArray</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.StaticRange.html">netket.utils.StaticRange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.numbers.StaticZero.html">netket.utils.numbers.StaticZero</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.group.Permutation.html">netket.utils.group.Permutation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.group.PermutationGroup.html">netket.utils.group.PermutationGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.group.FiniteGroup.html">netket.utils.group.FiniteGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.group.PointGroup.html">netket.utils.group.PointGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.history.History.html">netket.utils.history.History</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.history.HistoryDict.html">netket.utils.history.HistoryDict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.history.accum_histories_in_tree.html">netket.utils.history.accum_histories_in_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.timing.Timer.html">netket.utils.timing.Timer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.timing.timed_scope.html">netket.utils.timing.timed_scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/utils/netket.utils.timing.timed.html">netket.utils.timing.timed</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../api/vqs.html">netket.vqs</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/vqs/netket.vqs.VariationalState.html">netket.vqs.VariationalState</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/vqs/netket.vqs.VariationalMixedState.html">netket.vqs.VariationalMixedState</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/vqs/netket.vqs.FullSumState.html">netket.vqs.FullSumState</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/vqs/netket.vqs.MCState.html">netket.vqs.MCState</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/vqs/netket.vqs.MCMixedState.html">netket.vqs.MCMixedState</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/vqs/netket.vqs.get_local_kernel.html">netket.vqs.get_local_kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/_generated/vqs/netket.vqs.get_local_kernel_arguments.html">netket.vqs.get_local_kernel_arguments</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/driver/netket.driver.VMC.html">netket.driver.VMC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/driver/netket.driver.SteadyState.html">netket.driver.SteadyState</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../api/api-experimental.html">Experimental API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/driver/netket.experimental.driver.Infidelity_SR.html">netket.experimental.driver.Infidelity_SR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/qsr/netket.experimental.QSR.html">netket.experimental.QSR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/operator/netket.experimental.operator.ParticleNumberConservingFermioperator2nd.html">netket.experimental.operator.ParticleNumberConservingFermioperator2nd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/operator/netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd.html">netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/operator/netket.experimental.operator.FermiHubbardJax.html">netket.experimental.operator.FermiHubbardJax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/operator/netket.experimental.operator.from_pyscf_molecule.html">netket.experimental.operator.from_pyscf_molecule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/operator/netket.experimental.operator.pyscf.TV_from_pyscf_molecule.html">netket.experimental.operator.pyscf.TV_from_pyscf_molecule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/logging/netket.experimental.logging.HDF5Log.html">netket.experimental.logging.HDF5Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/variational/netket.experimental.vqs.variables_from_file.html">netket.experimental.vqs.variables_from_file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/variational/netket.experimental.vqs.variables_from_tar.html">netket.experimental.vqs.variables_from_tar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/dynamics/netket.experimental.TDVP.html">netket.experimental.TDVP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/dynamics/netket.experimental.driver.TDVPSchmitt.html">netket.experimental.driver.TDVPSchmitt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/dynamics/netket.experimental.dynamics.Euler.html">netket.experimental.dynamics.Euler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/dynamics/netket.experimental.dynamics.Heun.html">netket.experimental.dynamics.Heun</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/dynamics/netket.experimental.dynamics.Midpoint.html">netket.experimental.dynamics.Midpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/dynamics/netket.experimental.dynamics.RK12.html">netket.experimental.dynamics.RK12</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/dynamics/netket.experimental.dynamics.RK23.html">netket.experimental.dynamics.RK23</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/dynamics/netket.experimental.dynamics.RK4.html">netket.experimental.dynamics.RK4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/dynamics/netket.experimental.dynamics.RK45.html">netket.experimental.dynamics.RK45</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/dynamics/netket.experimental.dynamics.AbstractSolver.html">netket.experimental.dynamics.AbstractSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/dynamics/netket.experimental.dynamics.AbstractSolverState.html">netket.experimental.dynamics.AbstractSolverState</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/observable/netket.experimental.observable.Renyi2EntanglementEntropy.html">netket.experimental.observable.Renyi2EntanglementEntropy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/observable/netket.experimental.observable.VarianceObservable.html">netket.experimental.observable.VarianceObservable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/_generated/experimental/observable/netket.experimental.observable.InfidelityOperator.html">netket.experimental.observable.InfidelityOperator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Change Log</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index-modules.html" class="nav-link">In-depth guides</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Utilities</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Time-series...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/netket/netket/blob/master/docs/user-guides/utils/history.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Colab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Colab logo" src="../../_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/netket/netket" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/netket/netket/issues/new?title=Issue%20on%20page%20%2Fuser-guides/utils/history.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/user-guides/utils/history.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Time-series data with History and HistoryDict</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-history-objects">Working with History Objects</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#building-history-objects-in-a-loop">Building History Objects in a Loop</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-history-data">Plotting History Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-history-with-multiple-keys">Creating History with Multiple Keys</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#concatenating-history-objects">Concatenating History Objects</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-historydict">Working with HistoryDict</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-accum-histories-in-tree-for-historydict-construction">Using accum_histories_in_tree for HistoryDict Construction</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-data-in-historydict">Accessing Data in HistoryDict</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-data-from-historydict">Plotting Data from HistoryDict</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#saving-and-loading-historydict">Saving and Loading HistoryDict</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-runtimelog-for-easy-data-collection">Using RuntimeLog for Easy Data Collection</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-runtimelog-usage">Basic RuntimeLog Usage</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-runtimelog-data">Accessing RuntimeLog Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-runtimelog-data">Plotting RuntimeLog Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#saving-and-loading-runtimelog-data">Saving and Loading RuntimeLog Data</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="time-series-data-with-history-and-historydict">
+<h1>Time-series data with History and HistoryDict<a class="headerlink" href="#time-series-data-with-history-and-historydict" title="Link to this heading">#</a></h1>
+<p>NetKet provides powerful classes for storing and managing time-series data through the <a class="reference internal" href="../../api/_generated/utils/netket.utils.history.History.html#netket.utils.history.History" title="netket.utils.history.History"><code class="xref py py-class docutils literal notranslate"><span class="pre">netket.utils.history.History</span></code></a> and <a class="reference internal" href="../../api/_generated/utils/netket.utils.history.HistoryDict.html#netket.utils.history.HistoryDict" title="netket.utils.history.HistoryDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">netket.utils.history.HistoryDict</span></code></a> classes. These are particularly useful for tracking optimization progress, storing simulation results, and managing logging data.</p>
+<p>This tutorial will show you how to:</p>
+<ol class="arabic simple">
+<li><p>Create and manipulate <a class="reference internal" href="../../api/_generated/utils/netket.utils.history.History.html#netket.utils.history.History" title="netket.utils.history.History"><code class="xref py py-class docutils literal notranslate"><span class="pre">History</span></code></a> objects</p></li>
+<li><p>Use <a class="reference internal" href="../../api/_generated/utils/netket.utils.history.HistoryDict.html#netket.utils.history.HistoryDict" title="netket.utils.history.HistoryDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistoryDict</span></code></a> for managing multiple time-series</p></li>
+<li><p>Save and load history data</p></li>
+<li><p>Use logging utilities like <a class="reference internal" href="../../api/_generated/driver/netket.logging.RuntimeLog.html#netket.logging.RuntimeLog" title="netket.logging.RuntimeLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeLog</span></code></a> for easy data collection</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">netket</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nk</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">netket.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">history</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">netket.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">RuntimeLog</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="working-with-history-objects">
+<h2>Working with History Objects<a class="headerlink" href="#working-with-history-objects" title="Link to this heading">#</a></h2>
+<p>The <a class="reference internal" href="../../api/_generated/utils/netket.utils.history.History.html#netket.utils.history.History" title="netket.utils.history.History"><code class="xref py py-class docutils literal notranslate"><span class="pre">History</span></code></a> class is designed to store time-series data with associated iteration numbers. Let’s start with basic usage:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create an empty history object</span>
+<span class="n">hist</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">History</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Empty history: </span><span class="si">{</span><span class="n">hist</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Empty history: History(keys=[&#39;value&#39;], n_iters=0)
+Length: 0
+</pre></div>
+</div>
+</div>
+</div>
+<section id="building-history-objects-in-a-loop">
+<h3>Building History Objects in a Loop<a class="headerlink" href="#building-history-objects-in-a-loop" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="../../api/_generated/utils/netket.utils.history.History.html#netket.utils.history.History" title="netket.utils.history.History"><code class="xref py py-class docutils literal notranslate"><span class="pre">History</span></code></a> objects are designed to be built incrementally, which is perfect for optimization loops:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simulate an optimization loop with data</span>
+<span class="n">steps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">energies</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">step</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">]</span>
+
+<span class="c1"># Create History object with initial data</span>
+<span class="n">energy_history</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">History</span><span class="p">({</span><span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="n">energies</span><span class="p">},</span> <span class="n">iters</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;History after creation: </span><span class="si">{</span><span class="n">energy_history</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Iterations: </span><span class="si">{</span><span class="n">energy_history</span><span class="o">.</span><span class="n">iters</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Energy values: </span><span class="si">{</span><span class="n">energy_history</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>History after creation: History(keys=[&#39;energy&#39;], n_iters=10)
+Iterations: [0 1 2 3 4 5 6 7 8 9]
+Energy values: [1.05901467 1.07698539 0.64250923 0.59448121 0.62322185 0.33553292
+ 0.31330107 0.14264381 0.31478527 0.11293369]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="plotting-history-data">
+<h3>Plotting History Data<a class="headerlink" href="#plotting-history-data" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="../../api/_generated/utils/netket.utils.history.History.html#netket.utils.history.History" title="netket.utils.history.History"><code class="xref py py-class docutils literal notranslate"><span class="pre">History</span></code></a> objects have built-in plotting capabilities:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot the energy history manually</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy_history</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">energy_history</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span> <span class="s1">&#39;b-o&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Energy&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Energy vs Iteration&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/d955608aac3c2fe3450221c92cdf01988cc2f1fdace254718dc7e3e1c177e1d3.png" src="../../_images/d955608aac3c2fe3450221c92cdf01988cc2f1fdace254718dc7e3e1c177e1d3.png" />
+</div>
+</div>
+</section>
+<section id="creating-history-with-multiple-keys">
+<h3>Creating History with Multiple Keys<a class="headerlink" href="#creating-history-with-multiple-keys" title="Link to this heading">#</a></h3>
+<p>A single <a class="reference internal" href="../../api/_generated/utils/netket.utils.history.History.html#netket.utils.history.History" title="netket.utils.history.History"><code class="xref py py-class docutils literal notranslate"><span class="pre">History</span></code></a> object can store multiple time-series with the same time axis:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a history with multiple metrics</span>
+<span class="n">steps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">15</span><span class="p">))</span>
+<span class="n">energies</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">step</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">]</span>
+<span class="n">variances</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">step</span> <span class="o">*</span> <span class="mf">0.05</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.02</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">]</span>
+<span class="n">grad_norms</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">step</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">]</span>
+
+<span class="n">multi_history</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">History</span><span class="p">({</span>
+    <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="n">energies</span><span class="p">,</span>
+    <span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="n">variances</span><span class="p">,</span>
+    <span class="s1">&#39;gradient_norm&#39;</span><span class="p">:</span> <span class="n">grad_norms</span>
+<span class="p">},</span> <span class="n">iters</span><span class="o">=</span><span class="n">steps</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Multi-metric history: </span><span class="si">{</span><span class="n">multi_history</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Keys: </span><span class="si">{</span><span class="n">multi_history</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Multi-metric history: History(keys=[&#39;energy&#39;, &#39;variance&#39;, &#39;gradient_norm&#39;], n_iters=15)
+Keys: [&#39;energy&#39;, &#39;variance&#39;, &#39;gradient_norm&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot all metrics manually</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="c1"># Plot each metric</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">multi_history</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">multi_history</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span> <span class="s1">&#39;b-o&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Energy&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Energy&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Energy over Time&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">multi_history</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">multi_history</span><span class="p">[</span><span class="s1">&#39;variance&#39;</span><span class="p">],</span> <span class="s1">&#39;r-s&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Variance&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Variance&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Variance over Time&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">multi_history</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">multi_history</span><span class="p">[</span><span class="s1">&#39;gradient_norm&#39;</span><span class="p">],</span> <span class="s1">&#39;g-^&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Gradient Norm&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Gradient Norm&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Gradient Norm over Time&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/b1e89c702bc201b51fd7ef802406bbfe84e5aa6d3060a8025faf207d187edbc8.png" src="../../_images/b1e89c702bc201b51fd7ef802406bbfe84e5aa6d3060a8025faf207d187edbc8.png" />
+</div>
+</div>
+</section>
+<section id="concatenating-history-objects">
+<h3>Concatenating History Objects<a class="headerlink" href="#concatenating-history-objects" title="Link to this heading">#</a></h3>
+<p>You can concatenate <a class="reference internal" href="../../api/_generated/utils/netket.utils.history.History.html#netket.utils.history.History" title="netket.utils.history.History"><code class="xref py py-class docutils literal notranslate"><span class="pre">History</span></code></a> objects together:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create two separate history segments with working data</span>
+<span class="n">steps1</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">loss1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.0</span> <span class="o">-</span> <span class="n">step</span> <span class="o">*</span> <span class="mf">0.2</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps1</span><span class="p">]</span>
+<span class="n">hist1</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">History</span><span class="p">({</span><span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss1</span><span class="p">},</span> <span class="n">iters</span><span class="o">=</span><span class="n">steps1</span><span class="p">)</span>
+
+<span class="n">steps2</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">loss2</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.0</span> <span class="o">-</span> <span class="n">step</span> <span class="o">*</span> <span class="mf">0.2</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps2</span><span class="p">]</span>
+<span class="n">hist2</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">History</span><span class="p">({</span><span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss2</span><span class="p">},</span> <span class="n">iters</span><span class="o">=</span><span class="n">steps2</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;First segment: </span><span class="si">{</span><span class="n">hist1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Second segment: </span><span class="si">{</span><span class="n">hist2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Concatenate</span>
+<span class="n">hist1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hist2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Concatenated: </span><span class="si">{</span><span class="n">hist1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>First segment: History(keys=[&#39;loss&#39;], n_iters=5)
+Second segment: History(keys=[&#39;loss&#39;], n_iters=5)
+Concatenated: History(keys=[&#39;loss&#39;], n_iters=10)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="working-with-historydict">
+<h2>Working with HistoryDict<a class="headerlink" href="#working-with-historydict" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="../../api/_generated/utils/netket.utils.history.HistoryDict.html#netket.utils.history.HistoryDict" title="netket.utils.history.HistoryDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistoryDict</span></code></a> is a powerful container that can store multiple <a class="reference internal" href="../../api/_generated/utils/netket.utils.history.History.html#netket.utils.history.History" title="netket.utils.history.History"><code class="xref py py-class docutils literal notranslate"><span class="pre">History</span></code></a> objects or nested dictionaries. Each value can be logged at independent iterations, making it perfect for complex simulations where different metrics are computed at different frequencies.</p>
+<section id="using-accum-histories-in-tree-for-historydict-construction">
+<h3>Using accum_histories_in_tree for HistoryDict Construction<a class="headerlink" href="#using-accum-histories-in-tree-for-historydict-construction" title="Link to this heading">#</a></h3>
+<p>The <a class="reference internal" href="../../api/_generated/utils/netket.utils.history.accum_histories_in_tree.html#netket.utils.history.accum_histories_in_tree" title="netket.utils.history.accum_histories_in_tree"><code class="xref py py-func docutils literal notranslate"><span class="pre">accum_histories_in_tree()</span></code></a> function is the recommended way to build complex nested history structures:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start with an empty HistoryDict</span>
+<span class="n">history_dict</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">HistoryDict</span><span class="p">()</span>
+
+<span class="c1"># Simulate a complex optimization with nested metrics</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+    <span class="c1"># Core metrics computed every step</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.0</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(),</span>
+        <span class="s1">&#39;variance&#39;</span><span class="p">:</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Expensive metrics computed every 5 steps</span>
+    <span class="k">if</span> <span class="n">step</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;expensive_metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;correlation_length&#39;</span><span class="p">:</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(),</span>
+            <span class="s1">&#39;entanglement_entropy&#39;</span><span class="p">:</span> <span class="mf">1.5</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span>
+        <span class="p">}</span>
+    
+    <span class="c1"># Diagnostic metrics computed every 3 steps</span>
+    <span class="k">if</span> <span class="n">step</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;diagnostics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;acceptance_rate&#39;</span><span class="p">:</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(),</span>
+            <span class="s1">&#39;step_size&#39;</span><span class="p">:</span> <span class="mf">0.01</span> <span class="o">+</span> <span class="mf">0.001</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span>
+        <span class="p">}</span>
+    
+    <span class="c1"># Use accum_histories_in_tree to accumulate the data</span>
+    <span class="n">history_dict</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">accum_histories_in_tree</span><span class="p">(</span><span class="n">history_dict</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Complex HistoryDict: </span><span class="si">{</span><span class="n">history_dict</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Complex HistoryDict: HistoryDict with 6 elements:
+	&#39;diagnostics/acceptance_rate&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=7)
+	&#39;diagnostics/step_size&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=7)
+	&#39;energy&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=20)
+	&#39;expensive_metrics/correlation_length&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=4)
+	&#39;expensive_metrics/entanglement_entropy&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=4)
+	&#39;variance&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=20)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="accessing-data-in-historydict">
+<h3>Accessing Data in HistoryDict<a class="headerlink" href="#accessing-data-in-historydict" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="../../api/_generated/utils/netket.utils.history.HistoryDict.html#netket.utils.history.HistoryDict" title="netket.utils.history.HistoryDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistoryDict</span></code></a> supports various ways to access nested data:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Access top-level keys</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Top-level keys: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">history_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Access nested data using dictionary syntax</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Energy history: </span><span class="si">{</span><span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expensive metrics: </span><span class="si">{</span><span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;expensive_metrics&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Access deeply nested data using path syntax</span>
+<span class="n">correlation_history</span> <span class="o">=</span> <span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;expensive_metrics/correlation_length&#39;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Correlation length history: </span><span class="si">{</span><span class="n">correlation_history</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Show that different metrics were logged at different frequencies</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Energy logged at steps: </span><span class="si">{</span><span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iters</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Correlation length logged at steps: </span><span class="si">{</span><span class="n">correlation_history</span><span class="o">.</span><span class="n">iters</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Acceptance rate logged at steps: </span><span class="si">{</span><span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;diagnostics/acceptance_rate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iters</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Top-level keys: [&#39;energy&#39;, &#39;variance&#39;, &#39;expensive_metrics&#39;, &#39;diagnostics&#39;]
+Energy history: History(keys=[&#39;value&#39;], n_iters=20)
+Expensive metrics: HistoryDict with 2 elements:
+	&#39;correlation_length&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=4)
+	&#39;entanglement_entropy&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=4)
+Correlation length history: History(keys=[&#39;value&#39;], n_iters=4)
+Energy logged at steps: [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19]
+Correlation length logged at steps: [ 0  5 10 15]
+Acceptance rate logged at steps: [ 0  3  6  9 12 15 18]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="plotting-data-from-historydict">
+<h3>Plotting Data from HistoryDict<a class="headerlink" href="#plotting-data-from-historydict" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot different metrics with different sampling frequencies</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+
+<span class="c1"># Energy (every step)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;b-o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Energy (every step)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+
+<span class="c1"># Correlation length (every 5 steps)</span>
+<span class="n">corr_hist</span> <span class="o">=</span> <span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;expensive_metrics/correlation_length&#39;</span><span class="p">]</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">corr_hist</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">corr_hist</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;r-s&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Correlation Length (every 5 steps)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+
+<span class="c1"># Acceptance rate (every 3 steps)</span>
+<span class="n">acc_hist</span> <span class="o">=</span> <span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;diagnostics/acceptance_rate&#39;</span><span class="p">]</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">acc_hist</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">acc_hist</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;g-^&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Acceptance Rate (every 3 steps)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+
+<span class="c1"># Combined plot</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;b-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Energy&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">corr_hist</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">corr_hist</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;r-s&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Correlation Length&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Combined View&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/4ce18876fcdb51bc43cfc7930b9c61aa87ed8a4d3b086c335fb27e94c73566aa.png" src="../../_images/4ce18876fcdb51bc43cfc7930b9c61aa87ed8a4d3b086c335fb27e94c73566aa.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="saving-and-loading-historydict">
+<h2>Saving and Loading HistoryDict<a class="headerlink" href="#saving-and-loading-historydict" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="../../api/_generated/utils/netket.utils.history.HistoryDict.html#netket.utils.history.HistoryDict" title="netket.utils.history.HistoryDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistoryDict</span></code></a> provides convenient methods for saving and loading data:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a temporary file for demonstration</span>
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp_file</span><span class="p">:</span>
+    <span class="n">tmp_filename</span> <span class="o">=</span> <span class="n">tmp_file</span><span class="o">.</span><span class="n">name</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving to temporary file: </span><span class="si">{</span><span class="n">tmp_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Save the HistoryDict - we&#39;ll use RuntimeLog for this</span>
+<span class="c1"># (HistoryDict itself doesn&#39;t have a direct save method, but RuntimeLog does)</span>
+<span class="n">runtime_log</span> <span class="o">=</span> <span class="n">RuntimeLog</span><span class="p">()</span>
+<span class="n">runtime_log</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">history_dict</span>
+<span class="n">runtime_log</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">tmp_filename</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data saved successfully!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Saving to temporary file: /var/folders/b_/dvph1c6569155bspz2m2sml40000gp/T/tmpnfskv9xu.json
+Data saved successfully!
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the data back</span>
+<span class="n">loaded_history_dict</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">HistoryDict</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">tmp_filename</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded HistoryDict: </span><span class="si">{</span><span class="n">loaded_history_dict</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Verify the data is the same</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original energy values: </span><span class="si">{</span><span class="n">history_dict</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded energy values: </span><span class="si">{</span><span class="n">loaded_history_dict</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Clean up</span>
+<span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">tmp_filename</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Loaded HistoryDict: HistoryDict with 6 elements:
+	&#39;diagnostics/acceptance_rate&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=7)
+	&#39;diagnostics/step_size&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=7)
+	&#39;energy&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=20)
+	&#39;expensive_metrics/correlation_length&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=4)
+	&#39;expensive_metrics/entanglement_entropy&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=4)
+	&#39;variance&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=20)
+Original energy values: [-1.96226202 -1.9480204  -2.05242489 -1.98877341 -1.96826794]
+Loaded energy values: [-1.96226202 -1.9480204  -2.05242489 -1.98877341 -1.96826794]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="using-runtimelog-for-easy-data-collection">
+<h2>Using RuntimeLog for Easy Data Collection<a class="headerlink" href="#using-runtimelog-for-easy-data-collection" title="Link to this heading">#</a></h2>
+<p>The <a class="reference internal" href="../../api/_generated/driver/netket.logging.RuntimeLog.html#netket.logging.RuntimeLog" title="netket.logging.RuntimeLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeLog</span></code></a> class provides an even easier way to work with history data. It automatically uses <a class="reference internal" href="../../api/_generated/utils/netket.utils.history.HistoryDict.html#netket.utils.history.HistoryDict" title="netket.utils.history.HistoryDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistoryDict</span></code></a> internally and provides a simple interface for logging data in loops.</p>
+<section id="basic-runtimelog-usage">
+<h3>Basic RuntimeLog Usage<a class="headerlink" href="#basic-runtimelog-usage" title="Link to this heading">#</a></h3>
+<p>By passing <code class="docutils literal notranslate"><span class="pre">driver=None</span></code> to log in a loop, <a class="reference internal" href="../../api/_generated/driver/netket.logging.RuntimeLog.html#netket.logging.RuntimeLog" title="netket.logging.RuntimeLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeLog</span></code></a> becomes a simple and powerful logging tool:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a RuntimeLog instance</span>
+<span class="n">log</span> <span class="o">=</span> <span class="n">RuntimeLog</span><span class="p">()</span>
+
+<span class="c1"># Simulate a training loop with irregular logging</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">25</span><span class="p">):</span>
+    <span class="c1"># Basic metrics every epoch</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;train_loss&#39;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">epoch</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(),</span>
+        <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">epoch</span> <span class="o">*</span> <span class="mf">0.05</span><span class="p">)</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Validation metrics every 5 epochs</span>
+    <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;validation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;val_loss&#39;</span><span class="p">:</span> <span class="mf">1.2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">epoch</span> <span class="o">*</span> <span class="mf">0.08</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(),</span>
+            <span class="s1">&#39;val_accuracy&#39;</span><span class="p">:</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">epoch</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">))</span>
+        <span class="p">}</span>
+    
+    <span class="c1"># Model checkpointing info every 10 epochs</span>
+    <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;checkpoint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;model_size_mb&#39;</span><span class="p">:</span> <span class="mi">150</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(),</span>
+            <span class="s1">&#39;save_time_seconds&#39;</span><span class="p">:</span> <span class="mf">2.5</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span>
+        <span class="p">}</span>
+    
+    <span class="c1"># Log the metrics (note: driver=None is implicit)</span>
+    <span class="n">log</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span> <span class="n">variational_state</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RuntimeLog contents: </span><span class="si">{</span><span class="n">log</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available keys: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>RuntimeLog contents: RuntimeLog():
+ keys = [&#39;train_loss&#39;, &#39;learning_rate&#39;, &#39;validation&#39;, &#39;checkpoint&#39;]
+Available keys: [&#39;train_loss&#39;, &#39;learning_rate&#39;, &#39;validation&#39;, &#39;checkpoint&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="accessing-runtimelog-data">
+<h3>Accessing RuntimeLog Data<a class="headerlink" href="#accessing-runtimelog-data" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="../../api/_generated/driver/netket.logging.RuntimeLog.html#netket.logging.RuntimeLog" title="netket.logging.RuntimeLog"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeLog</span></code></a>’s data attribute is a <a class="reference internal" href="../../api/_generated/utils/netket.utils.history.HistoryDict.html#netket.utils.history.HistoryDict" title="netket.utils.history.HistoryDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistoryDict</span></code></a>, so you can use all the same access patterns:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Access the underlying HistoryDict</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">data</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type of log.data: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Access different metrics</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Train loss history: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train_loss&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation loss history: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;validation/val_loss&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checkpoint info: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;checkpoint&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Show different logging frequencies</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Logging frequencies:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Train loss logged at: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train_loss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iters</span><span class="p">)</span><span class="si">}</span><span class="s2"> steps&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation logged at: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;validation/val_loss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iters</span><span class="p">)</span><span class="si">}</span><span class="s2"> steps&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checkpoints at: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;checkpoint/model_size_mb&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iters</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Type of log.data: &lt;class &#39;netket.utils.history.history_dict.HistoryDict&#39;&gt;
+Train loss history: History(keys=[&#39;value&#39;], n_iters=25)
+Validation loss history: History(keys=[&#39;value&#39;], n_iters=5)
+Checkpoint info: HistoryDict with 2 elements:
+	&#39;model_size_mb&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=3)
+	&#39;save_time_seconds&#39; -&gt; History(keys=[&#39;value&#39;], n_iters=3)
+
+Logging frequencies:
+Train loss logged at: 25 steps
+Validation logged at: 5 steps
+Checkpoints at: [ 0 10 20]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="plotting-runtimelog-data">
+<h3>Plotting RuntimeLog Data<a class="headerlink" href="#plotting-runtimelog-data" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a comprehensive plot of the logged data</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="c1"># Training and validation loss</span>
+<span class="n">train_loss</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;train_loss&#39;</span><span class="p">]</span>
+<span class="n">val_loss</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;validation/val_loss&#39;</span><span class="p">]</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">train_loss</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">train_loss</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;b-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Train Loss&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">val_loss</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">val_loss</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;r-o&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Val Loss&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Training Progress&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Epoch&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Loss&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="c1"># Learning rate</span>
+<span class="n">lr_hist</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;learning_rate&#39;</span><span class="p">]</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lr_hist</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">lr_hist</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Learning Rate Schedule&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Epoch&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Learning Rate&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="c1"># Validation accuracy</span>
+<span class="n">val_acc</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;validation/val_accuracy&#39;</span><span class="p">]</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">val_acc</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">val_acc</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;m-s&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Validation Accuracy&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Epoch&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Accuracy&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="c1"># Model size at checkpoints</span>
+<span class="n">model_size</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;checkpoint/model_size_mb&#39;</span><span class="p">]</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">model_size</span><span class="o">.</span><span class="n">iters</span><span class="p">,</span> <span class="n">model_size</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Model Size at Checkpoints&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Epoch&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Size (MB)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/30d49248ffa3d9cb536471e8a97f49a7c056de2577dfbfc2fad95774ff797380.png" src="../../_images/30d49248ffa3d9cb536471e8a97f49a7c056de2577dfbfc2fad95774ff797380.png" />
+</div>
+</div>
+</section>
+<section id="saving-and-loading-runtimelog-data">
+<h3>Saving and Loading RuntimeLog Data<a class="headerlink" href="#saving-and-loading-runtimelog-data" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save the RuntimeLog data</span>
+<span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp_file</span><span class="p">:</span>
+    <span class="n">tmp_filename</span> <span class="o">=</span> <span class="n">tmp_file</span><span class="o">.</span><span class="n">name</span>
+
+<span class="n">log</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">tmp_filename</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RuntimeLog data saved to: </span><span class="si">{</span><span class="n">tmp_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Load it back as a HistoryDict</span>
+<span class="n">loaded_data</span> <span class="o">=</span> <span class="n">history</span><span class="o">.</span><span class="n">HistoryDict</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">tmp_filename</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded data type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">loaded_data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded keys: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">loaded_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Verify data integrity</span>
+<span class="n">original_train_loss</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;train_loss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">loaded_train_loss</span> <span class="o">=</span> <span class="n">loaded_data</span><span class="p">[</span><span class="s1">&#39;train_loss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data integrity check: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">original_train_loss</span><span class="p">,</span><span class="w"> </span><span class="n">loaded_train_loss</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Clean up</span>
+<span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">tmp_filename</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>RuntimeLog data saved to: /var/folders/b_/dvph1c6569155bspz2m2sml40000gp/T/tmp7ewmq_q8.json
+Loaded data type: &lt;class &#39;netket.utils.history.history_dict.HistoryDict&#39;&gt;
+Loaded keys: [&#39;checkpoint&#39;, &#39;learning_rate&#39;, &#39;train_loss&#39;, &#39;validation&#39;]
+Data integrity check: True
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="timing.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Timing and Profiling in NetKet</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../../advanced/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Advanced guides</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-history-objects">Working with History Objects</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#building-history-objects-in-a-loop">Building History Objects in a Loop</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-history-data">Plotting History Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-history-with-multiple-keys">Creating History with Multiple Keys</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#concatenating-history-objects">Concatenating History Objects</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-historydict">Working with HistoryDict</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-accum-histories-in-tree-for-historydict-construction">Using accum_histories_in_tree for HistoryDict Construction</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-data-in-historydict">Accessing Data in HistoryDict</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-data-from-historydict">Plotting Data from HistoryDict</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#saving-and-loading-historydict">Saving and Loading HistoryDict</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-runtimelog-for-easy-data-collection">Using RuntimeLog for Easy Data Collection</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-runtimelog-usage">Basic RuntimeLog Usage</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-runtimelog-data">Accessing RuntimeLog Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-runtimelog-data">Plotting RuntimeLog Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#saving-and-loading-runtimelog-data">Saving and Loading RuntimeLog Data</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The Netket authors
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2019-2026, The Netket authors - All rights reserved.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,135 @@
+{
+  "query": "itensor MPS constructor for spin 1 initial state product state",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_fermions__4afa60a84ae9e39b6c9236cb2ad115d6__part_0__0",
+      "text": "@eval module $(gensym())\nusing ITensorMPS\nusing ITensors\nusing Test\n\n@testset \"AutoFermion MPS, MPO, and OpSum\" begin\n  ITensors.enable_auto_fermion()\n\n  @testset \"MPS Tests\" begin\n    @testset \"Product MPS consistency checks\" begin\n      s = siteinds(\"Fermion\", 3; conserve_qns=true)\n\n      pA = MPS(s, [2, 1, 2])\n      TA = ITensor(s[1], s[2], s[3])\n      TA[s[1] => 2, s[2] => 1, s[3] => 2] = 1.0\n      A = pA[1] * pA[2] * pA[3]\n      @test norm(A - TA) < 1E-8\n\n      pB = MPS(s, [1, 2, 2])\n      TB = ITensor(s[1], s[2], s[3])\n      TB[s[1] => 1, s[2] => 2, s[3] => 2] = 1.0\n      B = pB[1] * pB[2] * pB[3]\n      @test norm(B - TB) < 1E-8\n    end\n    @testset \"MPS inner regression test\" begin\n      sites = siteinds(\"Fermion\", 3; conserve_qns=true)\n      psi = MPS(sites, [2, 2, 1])\n      @test inner(psi, psi) ≈ 1.0\n    end\n    @testset \"Orthogonalize of Product MPS\" begin\n      N = 3\n\n      sites = siteinds(\"Fermion\", N; conserve_qns=true)\n\n      state = [1 for n in 1:N]\n      state[1] = 2\n      state[2] = 2\n      psi = MPS(sites, state)\n      psi_fluxes = [flux(psi[n]) for n in 1:N]\n\n      psi_orig = copy(psi)\n      orthogonalize!(psi, 1)\n      @test inner(psi_orig, psi) ≈ 1.0\n      @test inner(psi, psi_orig) ≈ 1.0\n    end\n  end\n\n  @testset \"Fermionic OpSum Tests\" begin\n    @testset \"Spinless Fermion Hamiltonian\" begin\n      N = 2\n      sites = siteinds(\"Fermion\", N; conserve_qns=true)\n      t1 = 1.0\n      os = OpSum()\n      for b in 1:(N - 1)\n        os -= t1, \"Cdag\", b, \"C",
+      "metadata": {
+        "section_title": "test_fermions.jl",
+        "section_id": "part_0",
+        "package": "itensormps",
+        "source_file": "test\\base\\test_fermions.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9869978871793754,
+      "bm25_score": 0.09920567111838967,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensor",
+        "mps",
+        "state",
+        "product",
+        "state"
+      ],
+      "match_ratio": 0.625,
+      "is_html": false
+    },
+    {
+      "id": "MPSandMPO__4f952b2b5288acd3875bfc705c1cbf3d__Applying-a-Single-site-Operator-to-an-MPS_6__0",
+      "text": "## Applying a Single-site Operator to an MPS\nIn many applications one needs to modify a matrix product state (MPS) by multiplying it with an operator that acts only on a single site. This is actually a very straightforward operation and this formula shows you how to do it in ITensor.\nSay we have an operator $G^{s'_3}_{s_3}$ which acts non-trivially on site 3 of our MPS psi as in the following diagram:\nTo carry out this operation, contract the operator G with the MPS tensor for site 3, removing the prime from the $s'_3$ index afterward:\n```code\nnewA = G * psi[3]\nnewA = noprime(newA)\n```\nFinally, put the new tensor back into MPS psi to update its third MPS tensor:\n```code\npsi[3] = newA\n```\nAfterward, we can visualize the modified MPS as:\nAs a technical note, if you are working in a context where gauge or orthogonality properties of the MPS are important, such as in time evolution using two-site gates, then you may want to call psi = orthogonalize(psi, 3) before modifying the tensor at site 3, which will ensure that the MPS remains in a well-defined orthogonal gauge centered on site 3. Modifying a tensor which is left- or right-orthogonal (i.e. not the \"center\" tensor of the gauge) will destroy the gauge condition and require extra operations to restore it. (Calling orthogonalize method will automatically fix this but will have to do extra work to do so.)",
+      "metadata": {
+        "section_id": "Applying-a-Single-site-Operator-to-an-MPS",
+        "section_title": "Applying a Single-site Operator to an MPS",
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\MPSandMPO.html"
+      },
+      "score": 0.9927114344087663,
+      "original_score": 0.9883382950540262,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "itensor",
+        "mps",
+        "state",
+        "product",
+        "state"
+      ],
+      "match_ratio": 0.625,
+      "is_html": true
+    },
+    {
+      "id": "2d_classical_ising__d30e54e4e402a00b85ee89ff1e3c79bd__part_1__1",
+      "text": "�′ = itensor(vec(X), s̃ₕ′, sₕ′)\n  Xᵥ = itensor(vec(X), s̃ᵥ, sᵥ)\n  Xᵥ′ = itensor(vec(X), s̃ᵥ′, sᵥ′)\n  return T̃ * Xₕ′ * Xᵥ′ * Xₕ * Xᵥ\nend\n\nfunction ising_mpo(sₕ::Index, sᵥ::Index, args...; kwargs...)\n  return ising_mpo(sₕ => sₕ', sᵥ => sᵥ', args...; kwargs...)\nend\n\nfunction ising_mpo_dual(\n  sh::Tuple{Index,Index}, sv::Tuple{Index,Index}, β::Real, J::Real=1.0\n)\n  d = dim(sh[1])\n  T = ITensor(sh[1], sh[2], sv[1], sv[2])\n  sig(s) = 1.0 - 2.0 * (s - 1)\n  E0 = -4.0\n  for s1 in 1:d, s2 in 1:d, s3 in 1:d, s4 in 1:d\n    E = sig(s1) * sig(s2) + sig(s2) * sig(s3) + sig(s3) * sig(s4) + sig(s4) * sig(s1)\n    val = exp(-β * (E - E0))\n    T[sh[1] => s1, sv[2] => s2, sh[2] => s3, sv[1] => s4] = val\n  end\n  return T\nend\n\nfunction ising_partition(sh, sv, β)\n  ny, nx = size(sh)\n  T = Matrix{ITensor}(undef, ny, nx)\n  for iy in 1:ny, ix in 1:nx\n    ixp = per(ix + 1, nx)\n    iyp = per(iy + 1, ny)\n    T[iy, ix] = ising_mpo(sh[iy, ix] => sh[iy, ixp], sv[iy, ix] => sv[iyp, ix], β)\n  end\n  return T\nend\n\n#\n# Exact results\n#\n\nconst βc = 0.5 * log(√2 + 1)\n\nfunction ising_free_energy(β::Real, J::Real=1.0)\n  k = β * J\n  c = cosh(2 * k)\n  s = sinh(2 * k)\n  xmin = 0.0\n  xmax = π\n  integrand(x) = log(c^2 + √(s^4",
+      "metadata": {
+        "section_id": "part_1",
+        "package": "itensors",
+        "section_title": "2d_classical_ising.jl",
+        "source_file": "examples\\src\\2d_classical_ising.jl"
+      },
+      "score": 0.9886298376776755,
+      "original_score": 0.9883382950540262,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "qubit__04eb5b322e8470823b519f30a361d1bd__part_10__10",
+      "text": " ]\nend\n\n# spin-full operators\nop(::OpName\"Sz\", ::SiteType\"Qubit\") = [\n  0.5 0.0\n  0.0 -0.5\n]\n\nop(on::OpName\"Sᶻ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S+\", ::SiteType\"Qubit\") = [\n  0 1\n  0 0\n]\n\nop(on::OpName\"S⁺\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Splus\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S-\", ::SiteType\"Qubit\") = [\n  0 0\n  1 0\n]\n\nop(on::OpName\"S⁻\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Sminus\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"Sx\", ::SiteType\"Qubit\") = [\n  0.0 0.5\n  0.5 0.0\n]\n\nop(on::OpName\"Sˣ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"iSy\", ::SiteType\"Qubit\") = [\n  0.0 0.5\n  -0.5 0.0\n]\n\nop(on::OpName\"iSʸ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"Sy\", ::SiteType\"Qubit\") = [\n  0.0 -0.5im\n  0.5im 0.0\n]\n\nop(on::OpName\"Sʸ\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"S2\", ::SiteType\"Qubit\") = [\n  0.75 0.0\n  0.0 0.75\n]\n\nop(on::OpName\"S²\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"ProjUp\", ::SiteType\"Qubit\") = [\n  1 0\n  0 0\n]\n\nop(on::OpName\"projUp\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(on::OpName\"Proj0\", t::SiteType\"Qubit\") = op(alias(on), t)\n\nop(::OpName\"ProjDn\", ::SiteType\"Qubit\") = [\n  0 0\n  0 1\n]\n\nop(on::OpName\"projDn\", t::SiteType\"Qubit\") = op(alias(on),",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "part_10",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\qubit.jl",
+        "section_title": "qubit.jl"
+      },
+      "score": 0.8553543466002093,
+      "original_score": 0.8516454836925224,
+      "vector_score": 0.8616943084715424,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "spin"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "Physics__76dd2e2b1a4692ebd1e2d3b3298ad284__Make-a-Custom-Local-Hilbert-Space-/-Physical-Degree-of-Freedom_4__0",
+      "text": "## Make a Custom Local Hilbert Space / Physical Degree of Freedom\nITensor provides support for a range of common local Hilbert space types, or physical degrees of freedom, such as S=1/2 and S=1 spins; spinless and spinful fermions; and more.\nHowever, there can be many cases where you need to make custom degrees of freedom. You might be working with an exotic system, such as $Z_N$ parafermions for example, or need to customize other defaults provided by ITensor.\nIn ITensor, such a customization is done by overloading functions on specially designated Index tags. Below we give an brief introduction by example of how to make such custom Index site types in ITensor. Other code formulas following this one explain how to build on this example to expand the capabilities of your custom site type such as adding support for quantum number (QN) conservation and defining custom mappings of strings to states.\nThroughout we will focus on the example of $S=3/2$ spins. These are spins taking the $S^z$ values of $+3/2,+1/2,-1/2,-3/2$ . So as tensor indices, they are indices of dimension 4.\nThe key operators we will make for this example are $S^z$ , $S^+$ , and $S^-$ , which are defined as:\n\\[\\begin{aligned}\nS^z &=\n\\begin{bmatrix}\n3/2 &  0  &  0  &  0 \\\\\n 0  & 1/2 &  0  &  0 \\\\\n 0  &  0  &-1/2 &  0 \\\\\n 0  &  0  &  0  &-3/2\\\\\n\\end{bmatrix} \\\\\n\nS^+ & =\n\\begin{bmatrix}\n 0  &  \\sqrt{3}  &  0  &  0 \\\\\n 0  &  0  &  2  &  0 \\\\\n 0  &  0  &  0  &  \\sqrt{3} \\\\\n 0  &  0  &  0  &  0 \\\\\n\\end{bmatrix} \\\\\n\nS^- & =\n\\begin{bmatrix}\n 0  &  0 &  0  &  0 \\\\\n \\sqrt{3}  &  0  &  0  &  0 \\\\\n 0  &  2  &  0  &  0  \\\\\n 0  &  0  &  \\sqrt{3}  &  0 \\\\\n\\end{bmatrix} \\\\\n\\end{aligned}\\]\nCode Preview\nFirst let's see the minimal code needed to define and use this new $S",
+      "metadata": {
+        "source_file": "docs\\build\\examples\\Physics.html",
+        "section_id": "Make-a-Custom-Local-Hilbert-Space-/-Physical-Degree-of-Freedom",
+        "package": "itensormps",
+        "section_title": "Make a Custom Local Hilbert Space / Physical Degree of Freedom"
+      },
+      "score": 0.8474913515712094,
+      "original_score": 0.7896432435464956,
+      "vector_score": 0.7989604849858933,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.125,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 107,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      }
+    }
+  }
+}

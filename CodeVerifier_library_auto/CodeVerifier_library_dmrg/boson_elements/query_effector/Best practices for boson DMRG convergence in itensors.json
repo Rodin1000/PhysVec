@@ -1,0 +1,130 @@
+{
+  "query": "Best practices for boson DMRG convergence in itensors",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "ctmrg_isotropic__3af4213eb7e13bdc1c45eaa2b10337a1__full__0",
+      "text": "using ITensors\n\nfunction ctmrg(T::ITensor, Cₗᵤ::ITensor, Aₗ::ITensor; χmax::Int, cutoff=0.0, nsteps::Int)\n  sₕ = commonind(T, Aₗ)\n  sᵥ = uniqueind(T, Aₗ, Aₗ'; plev=0)\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = uniqueind(Cₗᵤ, Aₗ)\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  Cₗᵤ = dense(Cₗᵤ)\n  for i in 1:nsteps\n    ## Get the grown corner transfer matrix (CTM)\n    Cₗᵤ⁽¹⁾ = Aₗ * Cₗᵤ * Aᵤ * T\n\n    ## Diagonalize the grown CTM\n    # TODO: replace with\n    # eigen(Cₗᵤ⁽¹⁾, \"horiz\" => \"vert\"; tags = \"horiz\" => \"vert\", kwargs...)\n    Cₗᵤ, Uᵥ = eigen(\n      Cₗᵤ⁽¹⁾,\n      (lₕ', sₕ'),\n      (lᵥ', sᵥ');\n      ishermitian=true,\n      cutoff,\n      maxdim=χmax,\n      lefttags=tags(lₕ),\n      righttags=tags(lᵥ),\n    )\n    Cₗᵤ = dense(Cₗᵤ)\n    lᵥ = commonind(Cₗᵤ, Uᵥ)\n    lₕ = uniqueind(Cₗᵤ, Uᵥ)\n\n    # The renormalized CTM is the diagonal matrix of eigenvalues\n    # Normalize the CTM\n    Cₗ = Cₗᵤ * prime(dag(Cₗᵤ), lₕ)\n    normC = (Cₗ * dag(Cₗ))[]^(1 / 4)\n    Cₗᵤ = Cₗᵤ / normC\n\n    # Calculate the renormalized half row transfer matrix (HRTM)\n    Uᵥ = noprime(Uᵥ)\n    Aₗ = Aₗ * Uᵥ * T * dag(Uᵥ')\n    Aₗ = replaceinds(Aₗ, sₕ' => sₕ)\n\n    # Normalize the HRTM\n    ACₗ = Aₗ * Cₗᵤ * prime(dag(Cₗᵤ))\n    normA = √((ACₗ * dag(ACₗ))[])\n    Aₗ = Aₗ / normA\n    Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  end\n  return Cₗᵤ, Aₗ\nend\n",
+      "metadata": {
+        "section_title": "ctmrg_isotropic.jl",
+        "section_id": "full",
+        "package": "itensors",
+        "source_file": "examples\\src\\ctmrg_isotropic.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "section_id": "h2_2",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "package": "itensormps"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "dmrg",
+        "itensors"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "section_title": "trg.jl",
+        "package": "itensors",
+        "source_file": "examples\\src\\trg.jl",
+        "section_id": "full"
+      },
+      "score": 0.8942340685812754,
+      "original_score": 0.8905869674978711,
+      "vector_score": 0.8905869674978711,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__root_0__0",
+      "text": "ITensor is a library for rapidly creating correct and efficient tensor network algorithms.\nThe source code for ITensors.jl can be found on Github .\nAdditional documentation can be found on the ITensor website itensor.org .\nAn ITensor is a tensor whose interface is independent of its memory layout. ITensor indices are objects which carry extra information and which 'recognize' each other (compare equal to each other).\nThe ITensorMPS.jl library includes composable and extensible algorithms for optimizing and transforming tensor networks, such as matrix product state and matrix product operators, such as the DMRG algorithm. If you are looking for information on running finite MPS/MPO calculations such as DMRG, take a look at the ITensorMPS.jl documentation .",
+      "metadata": {
+        "section_id": "root",
+        "source_file": "docs\\build\\index.html",
+        "section_title": "ROOT",
+        "package": "itensors"
+      },
+      "score": 0.7924713607545416,
+      "original_score": 0.6962995523237194,
+      "vector_score": 0.6276098538798333,
+      "bm25_score": 0.27475879377554485,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "dmrg",
+        "itensors"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "ITensors__829a5cf9db8b1983a9f0b261ee9af85d__part_0__0",
+      "text": "\"\"\"\nITensor is a library for rapidly creating correct and efficient tensor network algorithms.\n\nAn ITensor is a tensor whose interface is independent of its memory layout.\nITensor indices are 'intelligent' meaning they carry extra information and\n'recognize' each other automatically when contracting or adding ITensors.\n\nThe ITensor library includes composable and extensible algorithms for optimizing\nand transforming tensor networks, such as matrix product state and matrix product operators.\n\n# Example Usage\n\nDefine tensor indices i and j\n\n    i = Index(2, \"i\")\n    j = Index(3, \"j\")\n\nMake an ITensor with these indices\n\n    A = ITensor(i,j)\n\nSet the i==2,j==1 element to -2.6\n\n    A[j=>1,i=>2] = -2.6\n    A[i=>2,j=>1] = -2.6 #this has the same effect\n\nMake an ITensor with random elements\n\n    B = random_itensor(j,i)\n\nAdd ITensors A and B together (ok that indices in different order)\n\n    C = A + B\n\n# Other Features of ITensor\n\n  - Tools for **tensor networks**, such as matrix product states (MPS) / tensor trains (TT)\n  - **Algorithms** for solving linear equations in MPS form (such as DMRG) or\n    for integrating differential equations (\"time evolving MPS\")\n  - ITensors can have **sparse data** internally, such as block sparsity or diagonal\n    sparsity, while having the same interface as dense ITensors\n  - ITensors can have **symmetry properties** (invariance or equivariance) under\n    group transformations of the indices. In physics terminology such ITensors conserve quantum numbers.\n\n# Documentation and Resources\n\nITensor website: https://itensor.org/\n\nDocumentation: https://itensor.github.io/ITensors.jl/stable/\n\"\"\"\nmodule ITensors\ninclude(\"usings.jl\")\ninclude(\"utils.jl\")\ninclude(\"lib/LazyApply/src/LazyApply.jl\")\n# TODO: `using .LazyApply: LazyApply, ...`.\nusing .LazyApply\nusing .LazyApply: Prod, Scaled, Sum, coefficient\ninclude(\"lib/Ops/src/Ops.jl\")\n# TODO: `using .Ops: Ops, ...`.\nusing .Ops\nusing .Ops: Ops, Op, Trotter\nimport .Ops: sites, name\ninclude(\"exports.jl\")\ninclude(\"imports.jl\")\ninclude(\"global_variables.jl\")\n# TODO: Move to `lib/LastVals/src/LastVals.jl`.\ninclude(\"lastval.jl\")\ninclude(\"lib/SmallStrings/src/SmallStrings.jl\")\nusing .SmallStrings: SmallStrings, IntChar, SmallString, Tag, isint, isnull\ninclude(\"readwrite.jl\")\nexport readcpp\n# TODO: Move to `lib/Nots",
+      "metadata": {
+        "source_file": "src\\ITensors.jl",
+        "section_title": "ITensors.jl",
+        "section_id": "part_0",
+        "package": "itensors"
+      },
+      "score": 0.7769004120885419,
+      "original_score": 0.7609647272377235,
+      "vector_score": 0.72472136187914,
+      "bm25_score": 0.14497346143433348,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "dmrg",
+        "itensors"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 111,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

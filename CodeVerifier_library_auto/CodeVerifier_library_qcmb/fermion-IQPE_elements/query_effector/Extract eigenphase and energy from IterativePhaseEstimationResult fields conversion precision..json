@@ -1,0 +1,138 @@
+{
+  "query": "Extract eigenphase and energy from IterativePhaseEstimationResult: fields, conversion, precision.",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "ipe__d624dd05dbe1dc7a1bb72116a44fa3c1__part_3__3",
+      "text": ": The circuit that prepares the state whose eigenphase will be\n                     measured.  If this parameter is omitted, no preparation circuit\n                     will be run and input state will be the all-zero state in the\n                     computational basis.\n\n        Returns:\n            Estimated phase in an IterativePhaseEstimationResult object.\n\n        Raises:\n            AlgorithmError: If a sampler is not provided.\n        \"\"\"\n        phase = self._estimate_phase_iteratively(unitary, state_preparation)\n\n        return IterativePhaseEstimationResult(self._num_iterations, phase)\n\n\nclass IterativePhaseEstimationResult(PhaseEstimatorResult):\n    \"\"\"Phase Estimation Result.\"\"\"\n\n    def __init__(self, num_iterations: int, phase: float) -> None:\n        \"\"\"\n        Args:\n            num_iterations: number of iterations used in the phase estimation.\n            phase: the estimated phase.\n        \"\"\"\n\n        self._num_iterations = num_iterations\n        self._phase = phase\n\n    @property\n    def phase(self) -> float:\n        r\"\"\"Return the estimated phase as a number in :math:`[0.0, 1.0)`.\n\n        1.0 corresponds to a phase of :math:`2\\pi`. It is assumed that the input vector is an\n        eigenvector of the unitary so that the peak of the probability density occurs at the bit\n        string that most closely approximates the true phase.\n        \"\"\"\n        return self._phase\n\n    @property\n    def num_iterations(self) -> int:\n        r\"\"\"Return the number of iterations used in the estimation algorithm.\"\"\"\n        return self._num_iterations\n",
+      "metadata": {
+        "source_file": "qiskit_algorithms\\phase_estimators\\ipe.py",
+        "package": "qiskit-algorithms",
+        "section_title": "ipe.py",
+        "section_id": "part_3"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "eigenphase",
+        "iterativephaseestimationresult"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "statevector_estimator__488263125ed47fe267798d6c614feda2__part_3__3",
+      "text": " coeffs = zip(*observable.items())\n            obs = SparsePauliOp(paulis, coeffs)  # TODO: support non Pauli operators\n            expectation_value = np.real_if_close(final_state.expectation_value(obs))\n            if precision != 0:\n                if not np.isreal(expectation_value):\n                    raise ValueError(\"Given operator is not Hermitian and noise cannot be added.\")\n                expectation_value = rng.normal(expectation_value, precision)\n            evs[index] = expectation_value\n\n        data = DataBin(evs=evs, stds=stds, shape=evs.shape)\n        return PubResult(\n            data, metadata={\"target_precision\": precision, \"circuit_metadata\": pub.circuit.metadata}\n        )\n",
+      "metadata": {
+        "section_id": "part_3",
+        "source_file": "qiskit\\primitives\\statevector_estimator.py",
+        "package": "qiskit",
+        "section_title": "statevector_estimator.py"
+      },
+      "score": 0.9373491847443722,
+      "original_score": 0.9357427535839715,
+      "vector_score": 1.0,
+      "bm25_score": 0.6787137679198577,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "precision"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "eigenstate_result__f04fc69c4a1e81a072e5a694249bacb2__part_1__1",
+      "text": " 12\n\n    @property\n    def groundenergy(self) -> float | None:\n        \"\"\"Returns the lowest eigenvalue.\"\"\"\n        energies = self.eigenvalues\n        if isinstance(energies, np.ndarray) and energies.size:\n            return energies[0].real\n        return None\n\n    @property\n    def groundstate(self) -> tuple[QuantumCircuit, Sequence[float] | None] | None:\n        \"\"\"Returns the lowest eigenstate.\"\"\"\n        states = self.eigenstates\n        if states:\n            return states[0]\n        return None\n\n    @classmethod\n    def from_result(\n        cls, raw_result: EigenstateResult | EigensolverResult | MinimumEigensolverResult\n    ) -> EigenstateResult:\n        \"\"\"Constructs an `EigenstateResult` from another result type.\n\n        Args:\n            raw_result: the raw result from which to build the new one.\n\n        Raises:\n            TypeError: when an unsupported result type is provided as input.\n\n        Returns:\n            The constructed `EigenstateResult`.\n        \"\"\"\n        # NOTE: the following inspection of class names is a work-around to handle backwards\n        # compatibility for the deprecated qiskit.algorithms module without delving into complex\n        # type unions. This logic can be removed once the qiskit.algorithms module no longer wants\n        # to be supported.\n        cls_names = {cls.__name__ for cls in raw_result.__class__.mro()}\n\n        if isinstance(raw_result, EigenstateResult) or \"EigenstateResult\" in cls_names:\n            return raw_result\n        if isinstance(raw_result, EigensolverResult) or \"EigensolverResult\" in cls_names:\n            return EigenstateResult.from_eigensolver_result(raw_result)\n        if (\n            isinstance(raw_result, MinimumEigensolverResult)\n            or \"MinimumEigensolverResult\" in cls_names\n        ):\n            return EigenstateResult.from_minimum_eigensolver_result(raw_result)\n        raise TypeError(\n            f\"Cannot construct an EigenstateResult from a result of type, {type(raw_result)}.\"\n        )\n\n    @classmethod\n    def from_eigensolver_result(cls, raw_result: EigensolverResult) -> EigenstateResult:\n        \"\"\"Constructs an `EigenstateResult` from an\n        :class:`~qiskit_algorithms.EigensolverResult`.\n\n        Args:\n            raw_result: the raw result from which to build the `EigenstateResult`.\n\n        Returns:\n            The constructed `EigenstateResult`.\n        \"\"\"\n        result = EigenstateResult()\n        result.raw_result = raw_result\n        result.eigenvalues = np.asarray(raw_result.eigenvalues)\n\n        if hasattr(raw_result, \"eigenstates\"):\n            result.eigenstates = [\n                (_statevector_to_circuit(Statevector(state)), None)\n                for state in raw_result.eigenstates\n            ]\n        elif hasattr",
+      "metadata": {
+        "section_title": "eigenstate_result.py",
+        "section_id": "part_1",
+        "package": "qiskit-nature",
+        "source_file": "qiskit_nature\\second_q\\problems\\eigenstate_result.py"
+      },
+      "score": 0.805,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "from"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "estimator__9f03b6fbe6fa1cc29ca5c44c6d58f645__part_8__8",
+      "text": " result_indices.append(result_index)\n                    paulis.append(PauliList(pauli))\n                    coeffs.append([coeff])\n            post_processings.append(_PostProcessing(result_indices, paulis, coeffs))\n        return post_processings\n\n    def _compute_with_approximation(\n        self, circuits, observables, parameter_values, run_options, seed\n    ):\n        # Key for cache\n        key = (tuple(circuits), tuple(observables), self._approximation)\n        shots = run_options.pop(\"shots\", None)\n\n        # Create expectation value experiments.\n        if key in self._cache:  # Use a cache\n            parameter_binds = defaultdict(dict)\n            for i, j, value in zip(circuits, observables, parameter_values):\n                self._validate_parameter_length(value, i)\n                for k, v in zip(self._parameters[i], value):\n                    if k in parameter_binds[(i, j)]:\n                        parameter_binds[(i, j)][k].append(v)\n                    else:\n                        parameter_binds[(i, j)][k] = [v]\n            experiment_manager = self._cache[key]\n            experiment_manager.parameter_binds = list(parameter_binds.values())\n        else:\n            self._transpile_circuits(circuits)\n            experiment_manager = _ExperimentManager()\n            for i, j, value in zip(circuits, observables, parameter_values):\n                self._validate_parameter_length(value, i)\n                if (i, j) in experiment_manager.keys:\n                    key_index = experiment_manager.keys.index((i, j))\n                    circuit = experiment_manager.experiment_circuits[key_index]\n                else:\n                    circuit = (\n                        self._circuits[i].copy()\n                        if self._skip_transpilation\n                        else self._transpiled_circuits[i].copy()\n                    )\n                    observable = self._observables[j]\n                    if shots is None:\n                        circuit.save_expectation_value(observable, self._layouts[i])\n                    else:\n                        for term_ind, pauli in enumerate(observable.paulis):\n                            circuit.save_expectation_value(\n                                pauli, self._layouts[i], label=str(term_ind)\n                            )\n                experiment_manager.append(\n                    key=(i, j),\n                    parameter_bind=dict(zip(self._parameters[i], value)),\n                    experiment_circuit=circuit,\n                )\n\n            self._cache[key] = experiment_manager\n        result = self._backend.run(\n            experiment_manager.experiment_circuits,\n            parameter_binds=experiment_manager.parameter_binds,\n            **run_options,\n        ).result()\n\n        # Post processing (calculate expectation values)\n        if shots is None:\n            expectation_values = [\n                result.data(i)[\"expectation_value\"] for i in experiment_manager.experiment_indices\n            ]\n            metadata = [\n                {\"simulator_metadata\": result.results[i].metadata}\n                for i in experiment_manager.experiment_indices\n            ]\n        else:\n           ",
+      "metadata": {
+        "source_file": "qiskit_aer\\primitives\\estimator.py",
+        "section_id": "part_8",
+        "section_title": "estimator.py",
+        "package": "qiskit-aer"
+      },
+      "score": 0.8,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "save_expectation_value__505a2fbfaf4535f642f642cbc73291b5__part_2__2",
+      "text": "iOp(operator)\n        elif not isinstance(operator, SparsePauliOp):\n            operator = SparsePauliOp.from_operator(Operator(operator))\n        if not allclose(operator.coeffs.imag, 0):\n            raise ValueError(\"Input operator is not Hermitian.\")\n        params = _expval_params(operator, variance=True)\n        super().__init__(\n            \"save_expval_var\",\n            operator.num_qubits,\n            label,\n            unnormalized=unnormalized,\n            pershot=pershot,\n            conditional=conditional,\n            params=params,\n        )\n\n\ndef _expval_params(operator, variance=False):\n    # Convert O to SparsePauliOp representation\n    if isinstance(operator, Pauli):\n        operator = SparsePauliOp(operator)\n    elif not isinstance(operator, SparsePauliOp):\n        operator = SparsePauliOp.from_operator(Operator(operator))\n    if not isinstance(operator, SparsePauliOp):\n        raise TypeError(\"Invalid input operator\")\n\n    params = {}\n\n    # Add Pauli basis components of O\n    for pauli, coeff in operator.label_iter():\n        if pauli in params:\n            coeff1 = params[pauli][0]\n            params[pauli] = (coeff1 + coeff.real, 0)\n        else:\n            params[pauli] = (coeff.real, 0)\n\n    # Add Pauli basis components of O^2\n    if variance:\n        for pauli, coeff in operator.dot(operator).label_iter():\n            if pauli in params:\n                coeff1, coeff2 = params[pauli]\n                params[pauli] = (coeff1, coeff2 + coeff.real)\n            else:\n                params[pauli] = (0, coeff.real)\n\n    # Convert to list\n    return list(params.items())\n\n\ndef save_expectation_value(\n    self,\n    operator,\n    qubits,\n    label=\"expectation_value\",\n    unnormalized=False,\n    pershot=False,\n    conditional=False,\n):\n    r\"\"\"Save the expectation value of a Hermitian operator.\n\n    Args:\n        operator (Pauli or SparsePauliOp or Operator): a Hermitian operator.\n        qubits (list): circuit qubits to apply instruction.\n        label (str): the key for retrieving saved data from results.\n        unnormalized (bool): If True return save the unnormalized accumulated\n                             or conditional accumulated expectation value\n                             over all shot [Default: False].\n        pershot (bool): if True save a list of expectation values for each\n                        shot of the simulation rather than the average over\n                        all shots [Default: False].\n        conditional (bool): if True save the average or pershot data\n                            conditional on the current classical register\n                            values [Default: False].\n\n    Returns:\n        QuantumCircuit: with attached instruction.\n\n    Raises:\n        ValueError: if the input operator is not Hermitian.\n        TypeError: if the input operator is of invalid type",
+      "metadata": {
+        "section_id": "part_2",
+        "package": "qiskit-aer",
+        "section_title": "save_expectation_value.py",
+        "source_file": "qiskit_aer\\library\\save_instructions\\save_expectation_value.py"
+      },
+      "score": 0.7939408416104689,
+      "original_score": 0.7886572734466347,
+      "vector_score": 0.9858215918082933,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "from"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 233,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

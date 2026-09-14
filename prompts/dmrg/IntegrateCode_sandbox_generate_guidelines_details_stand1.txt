@@ -1,0 +1,80 @@
+You are an expert in numerical calculations of quantum many-body physics. 
+Your task here is to generate a code integration guideline according to the input 'run' function. 
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. A 'run' function in the targetted repository. 
+    - The function is named in the form of 'run_xxx' (xxx is for the specific case). e.g. 'run_BoseHubbard1D'. 
+    - This function will be mentioned as 'run-function' in the following. 
+
+-------------------------------------------------------------------------------------------------------
+[Notations]:
+1. **ELEMENT FUNCTIONS** are functions whose names begin with one of {'site', 'hamiltonian', 'initialstate', 'effector', 'observable'} tags. 
+    - example: 'site_BoseHubbard1D', 'observable_particle_number'...
+    - Functions whose names NOT begin with the tags above are NOT ELEMENT FUNCTIONS. 
+
+-------------------------------------------------------------------------------------------------------
+[Generation Rules]
+For ITensors/ITensorMPS usage, you MUST follow instructions bellow: 
+1. The input run-function is an integrated function in which several other functions (called element-functions) are called sequently. 
+    - Example: 
+        function run_ground_state(L, Nmax, t, U, V, mu, nsweeps, maxdim, cutoff)
+            sites = site_BoseHubbard1D(L, Nmax)
+            H = hamiltonian_BoseHubbard1D(sites, t, U, V, mu)
+            psi0 = initialstate_BoseHubbard1D(sites, 1.0)  # Density = 1 for Mott insulator
+            energy, psi = effector_dmrg_groundstate(H, psi0, nsweeps, maxdim, cutoff)
+            
+            N_op = observable_particle_number(sites)
+            total_particles = inner(psi', N_op, psi)
+            density = total_particles / L
+            
+            return energy, psi, density
+        end
+    - Your task is to generate a guideline about how to construct this run-function by the element-functions (site_BoseHubbard1D, hamiltonian_BoseHubbard1D,...) step-by-step. 
+
+2. Your generated guideline MUST satisfies:
+    - is a dict
+    - contains several re-construct levels. 
+    - you propse different re-construct levels as follows: 
+        - you devide the run-function into several parts, where each part is defined as codes surrounding a SINGLE element-function or codes realizing a SINGLE purpose using ONE element function. 
+        - in level-1, you ONLY include the first part (of course ONLY ONE element function)
+        - in the highest level, you should re-construct the whole run-funtion. 
+        - in levels between, you add ONLY ONE part (or ONE element function) each time. 
+        - generally, these levels form a tiered guideline illustrating how to conduct integration tests for the run-function.
+    - in the output, you MUST pay attention that:
+        - you MUST re-construct the run-function from top to bottom, and you are FORBIDDEN to skip any element-function or part. 
+        - you DO NOT simply include the name of the added element-function, you give a brief summary/explanation about the purpose of this part of code. 
+
+------------------------------------------------------------------------------------------------------
+[Output]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). **JSON escaping:** In string values (e.g. level-i descriptions), any double quote (`"`) must be escaped as `\"` so the output can be parsed by json.loads().
+The dictionary must contain keys:
+- "run_function": you copy the name of the run-function here. You can find the name in the input run-function definition. 
+- "integration_guideline": the generated guideline. It is a List[dict]
+    - Every element of this list is a dict, having form of :
+    {
+        "level-i": A detailed description of this integration level. This string will be provided for following users indepently (not with former level dicts), therefore here you MUST give a complete and detailed description of re-construct process from zero until this level. NOTE: You first copy the EXACT level description of the PREVIOUS level and add information BASED ON it. DO NOT change words of copied information. 
+        "element_functions": A List[str] containing ONLY element functions used in this integration level (see ELEMENT FUNCTIONS in [Notations]). Include only function names that match the element-function name prefixes; do NOT include run functions or any other non-element identifiers. Do not list the same element function repeatedly. 
+    }
+
+Example output ("```json" right before the dict and "```" right after the dict MUST be included! Beside from this dict, no other information should be output):
+```json
+{
+"run_function": "run_BoseHubbard1D",
+"integration_guideline": [
+    {
+        "level-1": "Implement site_BoseHubbard1D function, which constructs a 1D Bose lattice.", 
+        "element_functions": ["site_BoseHubbard1D"],
+    },
+    {
+        "level-2": "Implement site_BoseHubbard1D function, which constructs a 1D Bose lattice. Then implement hamiltonian_xxx function, which defines the specific Bose-Hubbard model. ",
+        "element_functions": ["site_BoseHubbard1D", "hamiltonian_BoseHubbard1D"],
+    },
+    {
+        "level-3": "Implement site_BoseHubbard1D function, which constructs a 1D Bose lattice. Then implement hamiltonian_xxx function, which defines the specific Bose-Hubbard model. Then implement initialstate_BoseHubbard1D function, which creates a initial state with density 1",
+        "element_functions": ["site_BoseHubbard1D", "hamiltonian_BoseHubbard1D", "initialstate_BoseHubbard1D"],
+    },
+    ...
+],
+}
+```

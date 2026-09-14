@@ -1,0 +1,144 @@
+{
+  "query": "IQPE-compatible observable interfaces: input types, return types, no algorithm calls",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "estimator__9f03b6fbe6fa1cc29ca5c44c6d58f645__part_1__1",
+      "text": " AerError(f\"observable type not supported: {type(observable)}\")\n    else:\n        if isinstance(observable, PauliList):\n            raise AerError(f\"observable type not supported: {type(observable)}\")\n        return SparsePauliOp(observable)\n\n\ndef _observable_key(observable: SparsePauliOp) -> tuple:\n    \"\"\"Private key function for SparsePauliOp.\n    Args:\n        observable: Input operator.\n\n    Returns:\n        Key for observables.\n    \"\"\"\n    return (\n        observable.paulis.z.tobytes(),\n        observable.paulis.x.tobytes(),\n        observable.paulis.phase.tobytes(),\n        observable.coeffs.tobytes(),\n    )\n\n\nclass Estimator(BaseEstimatorV1):\n    \"\"\"\n    Aer implementation of Estimator.\n\n    :Run Options:\n        - **shots** (None or int) --\n          The number of shots. If None and approximation is True, it calculates the exact\n          expectation values. Otherwise, it calculates expectation values with sampling.\n\n        - **seed** (int) --\n          Set a fixed seed for the sampling.\n\n    .. note::\n        Precedence of seeding for ``seed_simulator`` is as follows:\n\n        1. ``seed_simulator`` in runtime (i.e. in :meth:`run`)\n        2. ``seed`` in runtime (i.e. in :meth:`run`)\n        3. ``seed_simulator`` of ``backend_options``.\n        4. default.\n\n        ``seed`` is also used for sampling from a normal distribution when approximation is True.\n\n        When combined with the approximation option, we get the expectation values as follows:\n\n        * shots is None and approximation=False: Return an expectation value with sampling-noise w/\n          warning.\n        * shots is int and approximation=False: Return an expectation value with sampling-noise.\n        * shots is None and approximation=True: Return an exact expectation value.\n        * shots is int and approximation=True: Return expectation value with sampling-noise using a\n          normal distribution approximation.\n    \"\"\"\n\n    def __init__(\n        self,\n        *,\n        backend_options: dict | None = None,\n        transpile_options: dict | None = None,\n        run_options: dict | None = None,\n        approximation: bool = False,\n        skip_transpilation: bool = False,\n        abelian_grouping: bool = True,\n    ):\n        \"\"\"\n        Args:\n            backend_options: Options passed to AerSimulator.\n            transpile_options: Options passed to transpile.\n            run_options: Options passed to run.\n            approximation: If True, it calculates expectation values with normal distribution\n                approximation. Note that this appproximation ignores readout errors.\n            skip_transpilation: If True, transpilation is skipped.\n            abelian_grouping: Whether the observable should be grouped into commuting.\n                If approximation is True, this parameter is ignored and assumed to be",
+      "metadata": {
+        "section_id": "part_1",
+        "package": "qiskit-aer",
+        "section_title": "estimator.py",
+        "source_file": "qiskit_aer\\primitives\\estimator.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.6135087353247066,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "observable",
+        "input",
+        "return"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    },
+    {
+      "id": "observables_array__94cb88d03b14b3f5db574bf68cca118f__part_5__5",
+      "text": "                raise ValueError(\"Empty observable was detected.\")\n\n            return observable\n\n        raise TypeError(f\"Invalid observable type: {type(observable)}\")\n\n    @classmethod\n    def coerce(cls, observables: ObservablesArrayLike) -> ObservablesArray:\n        \"\"\"Coerce ObservablesArrayLike into ObservableArray.\n\n        Args:\n            observables: an object to be observables array.\n\n        Returns:\n            A coerced observables array.\n        \"\"\"\n        if isinstance(observables, ObservablesArray):\n            return observables\n        return cls(observables)\n\n    def equivalent(self, other: ObservablesArray, tol: float = 1e-08) -> bool:\n        \"\"\"Compute whether the observable arrays are equal within a given tolerance.\n\n        Args:\n            other: Another observables array to compare with.\n            tol: The tolerance to provide to :attr:`~.SparseObservable.simplify` during checking.\n\n        Returns:\n            Whether the two observables arrays have the same shape and number of qubits,\n            and if so, whether they are equal within tolerance.\n        \"\"\"\n        if self.num_qubits != other.num_qubits or self.shape != other.shape:\n            return False\n\n        zero_obs = SparseObservable.zero(self.num_qubits)\n        for obs1, obs2 in zip(self._array.ravel(), other._array.ravel()):\n            if (obs1 - obs2).simplify(tol) != zero_obs:\n                return False\n\n        return True\n\n    def copy(self):\n        \"\"\"Return a deep copy of the array.\"\"\"\n        return deepcopy(self)\n\n    def apply_layout(\n        self, layout: TranspileLayout | list[int] | None, num_qubits: int | None = None\n    ) -> ObservablesArray:\n        \"\"\"Apply a transpiler layout to this :class:`~.ObservablesArray`.\n\n        Args:\n            layout: Either a :class:`~.TranspileLayout`, a list of integers or None.\n                    If both layout and ``num_qubits`` are none, a deep copy of the array is\n                    returned.\n            num_qubits: The number of qubits to expand the array to. If not\n                provided then if ``layout`` is a :class:`~.TranspileLayout` the\n                number of the transpiler output circuit qubits will be used by\n                default. If ``layout`` is a list of integers the permutation\n                specified will be applied without any expansion. If layout is\n                None, the array will be expanded to the given number of qubits.\n\n        Returns:\n            A new :class:`.ObservablesArray` with the provided layout applied.\n\n        Raises:\n            QiskitError: ...\n        \"\"\"\n        if layout is None and num_qubits is None:\n            return self.copy()\n\n        new_arr = np.ndarray(self.shape, dtype=SparseObservable)\n        for ndi, obs in np.ndenumerate(self._array):\n            new_arr[ndi] =",
+      "metadata": {
+        "section_title": "observables_array.py",
+        "package": "qiskit",
+        "section_id": "part_5",
+        "source_file": "qiskit\\primitives\\containers\\observables_array.py"
+      },
+      "score": 0.8723382961427805,
+      "original_score": 0.867019058482063,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "observable",
+        "return"
+      ],
+      "match_ratio": 0.2,
+      "is_html": false
+    },
+    {
+      "id": "lin_comb_estimator_gradient__14d70b916953fc4d6a431ed220b25071__part_3__3",
+      "text": "uits[param])\n\n            n = len(gradient_circuits)\n            # Make the observable as :class:`~qiskit.quantum_info.SparsePauliOp` and\n            # add an ancillary operator to compute the gradient.\n            observable = SparsePauliOp(observable)\n            observable_1, observable_2 = _make_lin_comb_observables(\n                observable, self._derivative_type\n            )\n            # If its derivative type is `DerivativeType.COMPLEX`, calculate the gradient\n            # of the real and imaginary parts separately.\n            meta[\"derivative_type\"] = self.derivative_type\n            metadata.append(meta)\n            # Combine inputs into a single job to reduce overhead.\n            if self._derivative_type == DerivativeType.COMPLEX:\n                all_n.append(2 * n)\n                pubs.extend(\n                    [\n                        (gradient_circuit, observable_1, parameter_values_, precision_)\n                        for gradient_circuit in gradient_circuits\n                    ]\n                )\n                pubs.extend(\n                    [\n                        (gradient_circuit, observable_2, parameter_values_, precision_)\n                        for gradient_circuit in gradient_circuits\n                    ]\n                )\n            else:\n                all_n.append(n)\n                pubs.extend(\n                    [\n                        (gradient_circuit, observable_1, parameter_values_, precision_)\n                        for gradient_circuit in gradient_circuits\n                    ]\n                )\n\n        if self._transpiler is not None:\n            for index, pub in enumerate(pubs):\n                new_circuit = self._transpiler.run(pub[0], **self._transpiler_options)\n                new_observable = pub[1].apply_layout(new_circuit.layout)\n                pubs[index] = (new_circuit, new_observable) + pub[2:]\n\n        # Run the single job with all circuits.\n        results = run_estimator_job(self._estimator, pubs)\n\n        # Compute the gradients.\n        gradients = []\n        partial_sum_n = 0\n\n        for n in all_n:\n            # this disable is needed as Pylint does not understand derivative_type is a property if\n            # it is only defined in the base class and the getter is in the child\n            # pylint: disable=comparison-with-callable\n            if self.derivative_type == DerivativeType.COMPLEX:\n                gradient = np.zeros(n // 2, dtype=\"complex\")\n                gradient.real = np.array(\n                    [result.data.evs for result in results[partial_sum_n : partial_sum_n + n // 2]]\n                )\n                gradient.imag = np.array(\n                    [\n                        result.data.evs\n                        for result in results[partial_sum_n + n // 2 : partial_sum_n + n]\n                    ]\n                )\n\n            else:\n                gradient = np.real(\n                    [result.data.evs for result in results[partial_sum_n : partial_sum_n + n]]\n                )\n\n            partial_sum_n += n\n            gradients.append(",
+      "metadata": {
+        "section_id": "part_3",
+        "section_title": "lin_comb_estimator_gradient.py",
+        "package": "qiskit-algorithms",
+        "source_file": "qiskit_algorithms\\gradients\\lin_comb\\lin_comb_estimator_gradient.py"
+      },
+      "score": 0.8696786773124217,
+      "original_score": 0.867019058482063,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "observable"
+      ],
+      "match_ratio": 0.1,
+      "is_html": false
+    },
+    {
+      "id": "0.6_c_qubit_converter__b2ad6fe9af7ffae9b09fd8e83744238a__part_4__4",
+      "text": " -0.22575349 * ZIII\n    +0.16614543 * ZIIZ\n    +0.17464343 * ZIZI\n    +0.12091263 * ZZII\n\nThis is likely what you were doing when you were working with any of the following mappers:\n\n- :class:`~qiskit_nature.second_q.mappers.JordanWignerMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevSuperFastMapper`\n- :class:`~qiskit_nature.second_q.mappers.DirectMapper`\n- :class:`~qiskit_nature.second_q.mappers.LinearMapper`\n- :class:`~qiskit_nature.second_q.mappers.LogarithmicMapper`\n\nThe ParityMapper\n----------------\n\nHowever, when you were using the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, you were\nable to use the ``two_qubit_reduction=True`` option of the\n:class:`~qiskit_nature.second_q.mappers.QubitConverter`. This ability, which has always been unique\nto the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, is now directly built into said\nmapper. So if you were doing something along these lines:\n\n.. code:: ipython3\n\n   from qiskit_nature.second_q.mappers import ParityMapper\n\n   converter = QubitConverter(ParityMapper(), two_qubit_reduction=True)\n\n   reduced_op = converter.convert(hamiltonian, num_particles=problem.num_particles)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nThe equivalent code now looks like the following:\n\n.. code:: ipython3\n\n   mapper = ParityMapper(num_particles=problem.num_particles)\n\n   reduced_op = mapper.map(hamiltonian)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nZ2Symmetries\n------------\n\nFinally, the :class:`~qiskit_nature.second_q.mappers.QubitConverter` class also supported further\nreduction of qubit resources by exploiting",
+      "metadata": {
+        "source_file": "docs\\migration\\0.6_c_qubit_converter.rst",
+        "section_id": "part_4",
+        "section_title": "0.6_c_qubit_converter.rst",
+        "package": "qiskit-nature"
+      },
+      "score": 0.867019058482063,
+      "original_score": 0.867019058482063,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "validation_v1__2684507b2fb8596dd3747f2a4ca66d85__part_1__1",
+      "text": " parameter_values)\n    _cross_validate_circuits_observables(circuits, observables)\n\n    return circuits, observables, parameter_values\n\n\ndef _validate_sampler_args(\n    circuits: Sequence[QuantumCircuit] | QuantumCircuit,\n    parameter_values: Sequence[Sequence[float]] | Sequence[float] | float | None = None,\n) -> tuple[tuple[QuantumCircuit], tuple[BaseOperator], tuple[tuple[float]]]:\n    \"\"\"Validate run arguments for BaseSamplerV1.\n\n    Args:\n        circuits: one or more circuit objects.\n        parameter_values: concrete parameters to be bound.\n\n    Returns:\n        The formatted arguments ``(circuits, parameter_values)``.\n\n    Raises:\n        TypeError: If input arguments are invalid types.\n        ValueError: if input arguments are invalid values.\n    \"\"\"\n    # Singular validation\n    circuits = _validate_circuits(circuits, requires_measure=True)\n    parameter_values = _validate_parameter_values(\n        parameter_values,\n        default=[()] * len(circuits),\n    )\n\n    # Cross-validation\n    _cross_validate_circuits_parameter_values(circuits, parameter_values)\n\n    return circuits, parameter_values\n\n\ndef _init_observable(observable: BaseOperator | str) -> SparsePauliOp:\n    \"\"\"Initialize observable by converting the input to a :class:`~qiskit.quantum_info.SparsePauliOp`.\n\n    Args:\n        observable: The observable.\n\n    Returns:\n        The observable as :class:`~qiskit.quantum_info.SparsePauliOp`.\n\n    Raises:\n        QiskitError: when observable type cannot be converted to SparsePauliOp.\n    \"\"\"\n\n    if isinstance(observable, SparsePauliOp):\n        return observable\n    elif isinstance(observable, BaseOperator) and not isinstance(observable, BasePauli):\n        raise QiskitError(f\"observable type not supported: {type(observable)}\")\n    else:\n        if isinstance(observable, PauliList):\n            raise QiskitError(f\"observable type not supported: {type(observable)}\")\n        return SparsePauliOp(observable)\n\n\ndef _validate_circuits(\n    circuits: Sequence[QuantumCircuit] | QuantumCircuit,\n    requires_measure: bool = False,\n) -> tuple[QuantumCircuit, ...]:\n    if isinstance(circuits, QuantumCircuit):\n        circuits = (circuits,)\n    elif not isinstance(circuits, Sequence) or not all(\n        isinstance(cir, QuantumCircuit) for cir in circuits\n    ):\n        raise TypeError(\"Invalid circuits, expected Sequence[QuantumCircuit].\")\n    elif not isinstance(circuits, tuple):\n        circuits = tuple(circuits)\n    if len(circuits) == 0:\n        raise ValueError(\"No circuits were provided.\")\n\n    if requires_measure:\n        for i, circuit in enumerate(circuits):\n            if circuit.num_clbits == ",
+      "metadata": {
+        "section_id": "part_1",
+        "source_file": "qiskit\\primitives\\base\\validation_v1.py",
+        "section_title": "validation_v1.py",
+        "package": "qiskit"
+      },
+      "score": 0.8617879664321831,
+      "original_score": 0.8464310738135368,
+      "vector_score": 0.7262542882222559,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "observable",
+        "input",
+        "types",
+        "return",
+        "types"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 228,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

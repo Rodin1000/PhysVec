@@ -1,0 +1,123 @@
+{
+  "query": "How to define spin-1/2 Jastrow Hamiltonian in netket",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_3_3__0",
+      "text": "## 1. Defining the Hamiltonian#\nNetKet covers quite a few standard Hamiltonians and lattices, so let’s use this to quickly define the antiferromagnetic Heisenberg chain.\nFor the moment we assume \\(L=22\\) and simply define a chain lattice in this way (using periodic boundary conditions for now).\n```code\n# Define a 1d chain\nL\n=\n22\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n1\n,\npbc\n=\nTrue\n)\n```\nNext, we need to define the Hilbert space on this graph.\nWe have here spin-half degrees of freedom, and as we know that the ground-state sits in the zero magnetization sector, we can already impose this as a constraint in the Hilbert space.\nThis is not mandatory, but will nicely speeds things up in the following.\n```code\n# Define the Hilbert space based on this graph\n# We impose to have a fixed total magnetization of zero\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n0.5\n,\ntotal_sz\n=\n0\n,\nN\n=\ng\n.\nn_nodes\n)\n```\nThe final element of the triptych is of course the Hamiltonian acting in this Hilbert space, which in our case in already defined in NetKet.\nNote that the NetKet Hamiltonian uses Pauli Matrices (if you prefer to work with spin- \\(1/2\\) operators, it’s pretty trivial to define your own custom Hamiltonian, as covered in another tutorial)\n```code\n# calling the Heisenberg Hamiltonian\nha\n=\nnk\n.\noperator\n.\nHeisenberg\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n)\n```",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "package": "netket",
+        "section_title": "1. Defining the Hamiltonian#",
+        "section_id": "sec_3"
+      },
+      "score": 0.9309007965053723,
+      "original_score": 0.8828827059413089,
+      "vector_score": 0.8810759131053297,
+      "bm25_score": 0.8901098772852256,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "define",
+        "spin",
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.8,
+      "is_html": true
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_1_1__0",
+      "text": "## Contents\nThe goal of this tutorial series is to guide you through writing a simple VMC code from (almost) scratch to compute the ground-state of a paradigmatic spin model: the transverse-field Ising model in 2 dimensions.\nIn this first tutorial, we will focus on:\nUnderstanding NetKet’s graph and operator system\nUnderstanding NetKet’s graph and operator system\nDefining Hamiltonians using building blocks\nDefining Hamiltonians using building blocks\nWorking with different operator formats\nWorking with different operator formats\nValidating our implementation with exact diagonalization\nValidating our implementation with exact diagonalization\nThe hamiltonian we will study is the transverse-field Ising model in 2 dimensions:\nIn the following we assume periodic boundary conditions with \\(h=1\\) and \\(J=1\\) .\nNote\nIf you are executing this notebook on Colab , you will need to install NetKet.\nYou can do so by uncommenting and running the following cell.\nKeep in mind that this notebook was designed for NetKet version 3.9.1 , which requires Python >=3.8.\n```code\n# %pip install --quiet netket\n```\nPlease verify that you are running on the correct version of NetKet:\n```code\nimport\nplatform\nimport\nnetket\nas\nnk\nprint\n(\n\"Python version (requires >=3.9)\"\n,\nplatform\n.\npython_version\n())\nprint\n(\n\"NetKet version (requires >=3.9.1)\"\n,\nnk\n.\n__version__\n)\n```\n```code\nPython version (requires >=3.9) 3.12.11\nNetKet version (requires >=3.9.1) 3.19.dev26+gd94cf4597.d20250713\n```\nShow code cell content\nHide code cell content\n```code\n# Import necessary libraries\nimport\nnetket\nas\nnk\nimport\nnumpy\nas\nnp\n```",
+      "metadata": {
+        "package": "netket",
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html"
+      },
+      "score": 0.874,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "spin",
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.6,
+      "is_html": true
+    },
+    {
+      "id": "gs-ising__fb0adadb6065e48d1f571d54152b2ce9__sec_3_3__0",
+      "text": "## 1. Defining The Hamiltonian#\nThe first step in our journey consists in defining the Hamiltonian we are interested in.\nFor this purpose, we first need to define the kind of degrees of freedom we are dealing with (i.e. if we have spins, bosons, fermions etc).\nThis is done specifying the Hilbert space of the problem. For example, let us concentrate on a problem with 20 spins-1/2.\nWhen building hilbert spaces, in general, the first argument determines the size of the local basis and the latter defines how many modes you have.\n```code\nimport\nnetket\nas\nnk\nN\n=\n20\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\nN\n)\n```\nNetKet’s Hilbert spaces define the computational basis of the calculation, and are used to label and generate elements from it.\nThe standard Spin-basis implicitly selects the z basis and elements of that basis will be elements \\( v\\in\\{\\pm 1\\}^N \\) .\nIt is possible to generate random basis elements through the function random_state(rng, shape, dtype) , where the first argument must be a jax RNG state (usually built with jax.random.key(seed) , second is an integer or a tuple giving the shape of the samples and the last is the dtype of the generated states.\n```code\nimport\njax\nhi\n.\nrandom_state\n(\njax\n.\nrandom\n.\nkey\n(\n0\n),\n3\n)\n```\n```code\nArray([[-1, -1, -1, -1, -1, -1,  1,  1,  1,  1,  1, -1,  1,  1, -1,  1,\n         1, -1, -1,  1],\n       [ 1,  1,  1, -1, -1,  1,  1,  1, -1, -1,  1,  1,  1, -1, -1,  1,\n        -1,  1,  1,  1],\n       [ 1, -1,  1, -1, -1,  1,  1,  1,  1, -1,  1,  1, -1,  1, -1, -1,\n         1,  1, -1, -1]], dtype=int8)\n```\nWe now need to specify the Hamiltonian. For this purpose, we will use NetKet’s LocalOperator (see details here ) which is the sum of arbitrary k-local operators.\nIn this specific case, we have a 1",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-ising.html",
+        "section_title": "1. Defining The Hamiltonian#",
+        "section_id": "sec_3",
+        "package": "netket"
+      },
+      "score": 0.8614726046850365,
+      "original_score": 0.7652078045509093,
+      "vector_score": 0.8106172274519612,
+      "bm25_score": 0.5835701129467014,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "define",
+        "spin",
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.8,
+      "is_html": true
+    },
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_1_1__0",
+      "text": "## Contents\nIn this tutorial we will use NetKet to obtain the ground state of the J1-J2 model in one-dimension with periodic boundary conditions, using a Neural Network variational wave-function. The Hamiltonian of the model is given by:\nwhere the sum is over sites of the 1-D chain. Here \\(\\vec{\\sigma}=(\\sigma^x,\\sigma^y,\\sigma^z)\\) is the vector of Pauli matrices.\nWe will also explore some useful functionalities provided by the package.",
+      "metadata": {
+        "section_id": "sec_1",
+        "section_title": "Contents",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html"
+      },
+      "score": 0.8368812532926071,
+      "original_score": 0.7565391840188165,
+      "vector_score": 0.9456739800235205,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "03-monte-carlo-sampling__41d6b7963280c521f74cf679f9477a50__sec_2_2__0",
+      "text": "## 1. Setup from Previous Tutorials#\nLet’s recreate the complete system from Parts 1 and 2:\n```code\n# Define the system\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\ng\n.\nn_nodes\n)\n# Build the Hamiltonian\nhamiltonian\n=\nnk\n.\noperator\n.\nLocalOperator\n(\nhi\n)\n# Add transverse field terms\nfor\nsite\nin\ng\n.\nnodes\n():\nhamiltonian\n=\nhamiltonian\n-\n1.0\n*\nnk\n.\noperator\n.\nspin\n.\nsigmax\n(\nhi\n,\nsite\n)\n# Add Ising interaction terms\nfor\ni\n,\nj\nin\ng\n.\nedges\n():\nhamiltonian\n=\nhamiltonian\n+\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\ni\n)\n@\nnk\n.\noperator\n.\nspin\n.\nsigmaz\n(\nhi\n,\nj\n)\n# Convert to JAX format\nhamiltonian_jax\n=\nhamiltonian\n.\nto_pauli_strings\n()\n.\nto_jax_operator\n()\n# Compute exact ground state for comparison\nfrom\nscipy.sparse.linalg\nimport\neigsh\ne_gs\n,\npsi_gs\n=\neigsh\n(\nhamiltonian\n.\nto_sparse\n(),\nk\n=\n1\n)\ne_gs\n=\ne_gs\n[\n0\n]\npsi_gs\n=\npsi_gs\n.\nreshape\n(\n-\n1\n)\nprint\n(\nf\n\"Exact ground state energy:\n{\ne_gs\n:\n.6f\n}\n\"\n)\n```\n```code\nExact ground state energy: -34.010598\n```",
+      "metadata": {
+        "section_id": "sec_2",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\03-monte-carlo-sampling.html",
+        "section_title": "1. Setup from Previous Tutorials#"
+      },
+      "score": 0.7781872570712323,
+      "original_score": 0.6479162810654481,
+      "vector_score": 0.6112568579349833,
+      "bm25_score": 0.7945539735873072,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "define",
+        "spin",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.6,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 50,
+    "final_results_count": 5
+  }
+}

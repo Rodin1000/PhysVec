@@ -1,0 +1,115 @@
+{
+  "query": "How to define spin0.5-Jastrow observable in netket",
+  "package": "netket",
+  "results": [
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__H_9__4",
+      "text": "(netket.experimental.observable.Renyi2EntanglementEntropy attribute)\n(netket.experimental.observable.VarianceObservable attribute)\n(netket.experimental.operator.FermiHubbardJax attribute)\n(netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd attribute)\n(netket.experimental.operator.ParticleNumberConservingFermioperator2nd attribute)\n(netket.models.AbstractARNN attribute)\n(netket.models.ARNNConv1D attribute)\n(netket.models.ARNNConv2D attribute)\n(netket.models.ARNNDense attribute)\n(netket.models.ARNNSequential attribute)\n(netket.models.DeepSetRelDistance attribute)\n(netket.models.FastARNNConv1D attribute)\n(netket.models.FastARNNConv2D attribute)\n(netket.models.FastARNNSequential attribute)\n(netket.models.LogStateVector attribute)\n(netket.models.tensor_networks.MPDOOpen attribute)\n(netket.models.tensor_networks.MPDOPeriodic attribute)\n(netket.models.tensor_networks.MPSOpen attribute)\n(netket.models.tensor_networks.MPSPeriodic attribute)\n(netket.operator._fermion2nd.FermionOperator2ndBase attribute)\n(netket.operator._ising.IsingBase attribute)\n(netket.operator._local_operator.LocalOperatorBase attribute)\n(netket.operator._pauli_strings.PauliStringsBase attribute)\n(netket.operator._prod.ProductDiscreteJaxOperator attribute)\n(netket.operator._prod.ProductDiscreteOperator attribute)\n(netket.operator._prod.ProductGenericOperator attribute)\n(netket.operator._sum.SumContinuousOperator attribute)\n(netket.operator._sum.SumDiscreteJaxOperator attribute)\n(netket.operator._sum.SumDiscreteOperator attribute)\n(netket.operator._sum.SumGenericOperator attribute)\n(netket.operator.AbstractOperator attribute)\n(netket.operator.AbstractSuperOperator attribute)\n(netket.operator.BoseHubbardJax attribute)\n(netket.operator.BoseHubbardNumba attribute)\n(netket.operator.ContinuousOperator attribute)\n(netket.operator.DiscreteJaxOperator attribute)\n(netket.operator.DiscreteOperator attribute)\n(netket.operator.FermionOperator2ndJax attribute)\n(netket.operator.FermionOperator2ndNumba attribute)\n(netket.operator.IsingJax attribute)\n(netket.operator.IsingNumba attribute)\n(netket.operator.KineticEnergy attribute)\n(netket.operator.LocalLiouvillian attribute)\n(netket.operator.LocalOperatorJax attribute)\n(netket.operator.LocalOperatorNumba attribute)\n(netket.operator.PauliStringsJax attribute)\n(netket.operator.PauliStringsNumba attribute)\n(netket.operator.permutation.PermutationOperator attribute)\n(netket.operator.permutation.PermutationOperatorFermion attribute)\n(netket.operator.PotentialEnergy attribute)\n(netket.sampler.ARDirectSampler attribute)\n(netket.sampler.ExactSampler attribute)\n(netket.sampler.MetropolisSampler attribute)\n(netket.sampler.MetropolisSamplerNumpy attribute)\n(netket.sampler.ParallelTemperingSampler attribute)\n(net",
+      "metadata": {
+        "package": "netket",
+        "section_id": "H",
+        "section_title": "H",
+        "source_file": "docs\\_build\\html\\genindex.html"
+      },
+      "score": 0.866,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "observable",
+        "netket"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_5_5__0",
+      "text": "## 3. The Jastrow ansatz#\nLet’s start with a simple ansatz for the ground-state: the Jastrow Ansatz.\n\\( \\log\\psi(\\sigma) = \\sum_i a_i \\sigma_i + \\sum_{i,j} \\sigma_i J_{i,j} \\sigma_j \\)\nTo show how it’s done, we write this simple ansatz as a flax.nnx module.\nWe import this module and call it nnx , as it is customary in the Flax documentation.\nAn NNX model subclasses nnx.Module and defines its parameters inside __init__ using nnx.Param .\nAs the module should work with batches of inputs (therefore the input will be a 2d matrix with shape (N_inputs, N_sites) , but we are lazy and find it easier to define the function for a single input \\(\\sigma\\) , a 1D vector of shape (N_sites,) .\nTherefore, we write a function called evaluate_single , which will evaluate a single 1D input, and use jax.vmap to make it work with 2D inputs as well.\nTo learn more about jax.vmap, give a look at the jax documentation!\n```code\nfrom\nflax\nimport\nnnx\nimport\njax.numpy\nas\njnp\nimport\njax\nclass\nJastrow\n(\nnnx\n.\nModule\n):\ndef\n__init__\n(\nself\n,\nN\n:\nint\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\nk1\n,\nk2\n=\njax\n.\nrandom\n.\nsplit\n(\nrngs\n.\nparams\n())\nself\n.\nJ\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk1\n,\n(\nN\n,\nN\n),\ndtype\n=\njnp\n.\ncomplex128\n))\nself\n.\nv_bias\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk2\n,\n(\nN\n,\n1\n),\ndtype\n=\njnp\n.\ncomplex128\n)\n)\ndef\n__call__\n(\nself\n,\nx\n):\nx\n=\nx\n.\nastype\n(\njnp\n.\ncomplex128\n)\n# keep the dtypes aligned\nquad\n=\njnp\n.\neinsum\n(\n\"...i,ij,...j->...\"\n,\nx\n,\nself\n.\nJ\n,\nx\n)\nlin\n=\njnp\n.\nsqueeze\n(\nx\n@\nself\n.\nv_bias\n,\n-\n1\n)\n# (...,N) @ (N,1) → (...,1)\nreturn\nquad\n+\nlin\n```\nNow that the model is defined, we can instantiate it\n```code\nma\n=\nJastrow\n(\nN\n=\nhi\n.\nsize\n,\nrngs\n=\nnnx",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "package": "netket",
+        "section_title": "3. The Jastrow ansatz#",
+        "section_id": "sec_5"
+      },
+      "score": 0.6526338059425937,
+      "original_score": 0.4815429939441696,
+      "vector_score": 0.5006553857872791,
+      "bm25_score": 0.40509342657173153,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "define",
+        "jastrow"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__I_10__0",
+      "text": "## I\nid (netket.graph.lattice.LatticeSite attribute)\nid_from_basis_coords() (netket.graph.Lattice method)\nid_from_position() (netket.graph.Lattice method)\nidentity() (in module netket.operator.boson) (in module netket.operator.spin) (netket.operator._pauli_strings.PauliStringsBase class method) (netket.operator.PauliStringsJax class method) (netket.operator.PauliStringsNumba class method)\n(in module netket.operator.spin)\n(netket.operator._pauli_strings.PauliStringsBase class method)\n(netket.operator.PauliStringsJax class method)\n(netket.operator.PauliStringsNumba class method)\nInfidelity_SR (class in netket.experimental.driver)\nInfidelityOperator (class in netket.experimental.observable)\ninfo (netket.driver.VMC_SR attribute) (netket.experimental.driver.Infidelity_SR attribute) (netket.optimizer.SR attribute)\n(netket.experimental.driver.Infidelity_SR attribute)\n(netket.optimizer.SR attribute)\ninit() (netket.vqs.FullSumState method) (netket.vqs.MCMixedState method) (netket.vqs.MCState method)\n(netket.vqs.MCMixedState method)\n(netket.vqs.MCState method)\ninit_parameters() (netket.vqs.FullSumState method) (netket.vqs.MCMixedState method) (netket.vqs.MCState method) (netket.vqs.VariationalMixedState method) (netket.vqs.VariationalState method)\n(netket.vqs.MCMixedState method)\n(netket.vqs.MCState method)\n(netket.vqs.VariationalMixedState method)\n(netket.vqs.VariationalState method)\ninit_state() (netket.sampler.ARDirectSampler method) (netket.sampler.ExactSampler method) (netket.sampler.MetropolisSampler method) (netket.sampler.MetropolisSamplerNumpy method) (netket.sampler.ParallelTemperingSampler method) (netket.sampler.rules.CustomRuleNumpy method) (netket.sampler.rules.ExchangeRule method) (netket.sampler.rules.FixedRule method) (netket.sampler.rules.GaussianRule method) (netket.sampler.rules.GlobalSpinFlipRule method) (netket.sampler.rules.HamiltonianRuleNumpy method) (netket.sampler.rules.LangevinRule method) (netket.sampler.rules.LocalRule method) (netket.sampler.rules.MetropolisRule method) (netket.sampler.rules.MultipleRules method) (netket.sampler.rules.TensorRule method) (netket.sampler.Sampler method)\n(netket.sampler.ExactSampler method)\n(netket.sampler.MetropolisSampler method)\n(netket.sampler.MetropolisSamplerNumpy method)\n(netket.sampler.ParallelTemperingSampler method)\n",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\genindex.html",
+        "section_id": "I",
+        "section_title": "I"
+      },
+      "score": 0.5683491862499238,
+      "original_score": 0.35574505410436386,
+      "vector_score": 0.44468131763045476,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "observable",
+        "netket"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "changelog__775627bff97fcf0367c7035d3e792e5f__sec_27_27__1",
+      "text": " printed by jax is considerably reduced as well #1544 .\nIt is now possible to disable netket’s double precision default activation and force all calculations to be performed using single precision by setting the environment variable/configuration flag NETKET_ENABLE_X64=0 , which also sets JAX_ENABLE_X64=0 . When running with this flag, the number of warnings printed by jax is considerably reduced as well #1544 .\nAdded new shortcuts to build the identity operator as netket.operator.spin.identity() and netket.operator.boson.identity() #1601 .\nAdded new shortcuts to build the identity operator as netket.operator.spin.identity() and netket.operator.boson.identity() #1601 .\nAdded new netket.hilbert.Particle constructor that only takes as input the number of dimensions of the system #1577 .\nAdded new netket.hilbert.Particle constructor that only takes as input the number of dimensions of the system #1577 .\nAdded new netket.experimental.models.Slater2nd model implementing a Slater ansatz #1622 .\nAdded new netket.experimental.models.Slater2nd model implementing a Slater ansatz #1622 .\nAdded new netket.jax.logdet_cmplx() function to compute the complex log-determinant of a batch of matrices #1622 .\nAdded new netket.jax.logdet_cmplx() function to compute the complex log-determinant of a batch of matrices #1622 .\nnetket.experimental.hilbert.SpinOrbitalFermions attributes have been changed: n_fermions now always returns an integer with the total number of fermions in the system (if specified). A new attribute n_fermions_per_spin has been introduced that returns the same tuple of fermion number per spin subsector as before. A few fields are now marked as read-only as modifications where ignored #1622 .\nnetket.experimental.hilbert.SpinOrbitalFermions attributes have been changed: n_fermions now always returns an integer with the total number of fermions in the system (if specified). A new attribute n_fermions_per_spin has been introduced that returns the same tuple of fermion number per spin subsector as before. A few fields are now marked as read-only as modifications where ignored #1622 .\nThe netket.nn.blocks.SymmExpSum layer is now normalised by the number of elements in the symmetry group in order to maintain a reasonable normalisation #1624 .\nThe netket.nn.blocks.SymmExpSum layer is now normalised by the number of elements in the symmetry group in order to maintain a reasonable normalisation #1624 .\nThe labelling of spin sectors in netket.experimental.operator.fermion.create() and similar operators has now changed from the eigenvalue of the spin operator ( \\(\\pm 1/2\\) and so on) to the eigenvalue of the Pauli matrices ( \\(\\pm 1\\) and so on)",
+      "metadata": {
+        "section_id": "sec_27",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\changelog.html",
+        "section_title": "NetKet 3.10 (🥶 7 november 2023)#"
+      },
+      "score": 0.5672202013806794,
+      "original_score": 0.39045098786011184,
+      "vector_score": 0.48806373482513976,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.2,
+      "is_html": true
+    },
+    {
+      "id": "changelog__775627bff97fcf0367c7035d3e792e5f__sec_8_8__1",
+      "text": " for it in jax 0.5.\nThe flag NETKET_DISABLE_ODE_JIT which has long defaulted to True, has been removed. Now ODE integrator drivers can only run outside of jit, because jax has not supported re-entrant jitting since several versions and officially removed support for it in jax 0.5.\nA bug in the deserialization of variational states, which was not properly restoring the good sharding, has been fixed 1983\nA bug in the deserialization of variational states, which was not properly restoring the good sharding, has been fixed 1983\nA performance bug that caused .block_until_ready() to be called every time we sampled, even when not timing, was addressed 1991 .\nA performance bug that caused .block_until_ready() to be called every time we sampled, even when not timing, was addressed 1991 .\nThe default implementation of netket.operator.DiscreteJaxOperator.n_conn() has been improved to return a more realistic value. This should mainly affect ~netket.operator.BoseHubbardJax 1995 .\nThe default implementation of netket.operator.DiscreteJaxOperator.n_conn() has been improved to return a more realistic value. This should mainly affect ~netket.operator.BoseHubbardJax 1995 .\nA bug that caused n_conn() to raise an error if called immediately after constructing the operator has been addressed 1995 .\nA bug that caused n_conn() to raise an error if called immediately after constructing the operator has been addressed 1995 .",
+      "metadata": {
+        "package": "netket",
+        "section_title": "NetKet 3.16 (4 February 2025)#",
+        "source_file": "docs\\_build\\html\\changelog.html",
+        "section_id": "sec_8"
+      },
+      "score": 0.550752768695807,
+      "original_score": 0.36725742069831974,
+      "vector_score": 0.45907177587289966,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.2,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 58,
+    "final_results_count": 5
+  }
+}

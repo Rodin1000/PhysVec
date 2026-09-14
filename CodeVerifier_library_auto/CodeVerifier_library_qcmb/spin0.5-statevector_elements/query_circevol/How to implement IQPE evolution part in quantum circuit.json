@@ -1,0 +1,130 @@
+{
+  "query": "How to implement IQPE evolution part in quantum circuit",
+  "packages": [
+    "qiskit",
+    "qiskit-algorithms"
+  ],
+  "results": [
+    {
+      "id": "test_serialize_value_objects__0d50cf48a3ee151f9dc17ad4a72275ca__part_1__1",
+      "text": " QuantumCircuit(evo.num_qubits)\n        circuit.append(evo, circuit.qubits)\n        version = 17\n\n        with io.BytesIO() as container:\n            qpy.dump(circuit, container, version=version)\n            qc_qpy_str = container.getvalue()\n\n        with io.BytesIO(qc_qpy_str) as container:\n            qc_from_qpy = qpy.load(container)[0]\n\n        self.assertEqual(circuit, qc_from_qpy)\n\n    def test_pauli_evolution_sparse_pauliop(self):\n        \"\"\"Test PauliEvolutionGate with SparsePauliOp\"\"\"\n        operator = SparsePauliOp.from_list([(\"ZZ\", 1), (\"XI\", -0.1)])\n\n        # build the evolution gate\n        evo = PauliEvolutionGate(operator, time=0.2)\n        circuit = QuantumCircuit(evo.num_qubits)\n        circuit.append(evo, circuit.qubits)\n        version = 16\n\n        with io.BytesIO() as container:\n            qpy.dump(circuit, container, version=version)\n            qc_qpy_str = container.getvalue()\n\n        with io.BytesIO(qc_qpy_str) as container:\n            qc_from_qpy = qpy.load(container)[0]\n\n        self.assertEqual(circuit, qc_from_qpy)\n\n    def test_pauli_evolution_operator_list(self):\n        \"\"\"Test PauliEvolutionGate with list of operators\"\"\"\n        op1 = SparseObservable.from_list([(\"XIX\", 0.1), (\"ZIZ\", 0.3)])\n        op2 = SparsePauliOp.from_list([(\"ZZI\", 1), (\"XIX\", -0.1)])\n\n        # build the evolution gate\n        evo = PauliEvolutionGate([op1, op2], time=0.5)\n        circuit = QuantumCircuit(evo.num_qubits)\n        circuit.append(evo, circuit.qubits)\n        version = 17\n\n        with io.BytesIO() as container:\n            qpy.dump(circuit, container, version=version)\n            qc_qpy_str = container.getvalue()\n\n        with io.BytesIO(qc_qpy_str) as container:\n            qc_from_qpy = qpy.load(container)[0]\n\n        self.assertEqual(circuit, qc_from_qpy)\n",
+      "metadata": {
+        "source_file": "test\\python\\qpy\\test_serialize_value_objects.py",
+        "package": "qiskit",
+        "section_title": "test_serialize_value_objects.py",
+        "section_id": "part_1"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "evolution",
+        "circuit"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_scipy_imaginary_evolver__5e9a575c34581e0f9f9c77937eb828b6__part_2__2",
+      "text": "qubits, atol=1e-10, rtol=0)\n        np.testing.assert_allclose(z_std, expected_z_std, atol=1e-10, rtol=0)\n\n    def test_quantum_circuit_initial_state(self):\n        \"\"\"Tests if the system can be evolved with a quantum circuit as an initial state.\"\"\"\n        qc = QuantumCircuit(3)\n        qc.h(0)\n        qc.cx(0, range(1, 3))\n\n        evolution_problem = TimeEvolutionProblem(\n            hamiltonian=SparsePauliOp(\"X\" * 3), time=1.0, initial_state=qc\n        )\n        classic_evolver = SciPyImaginaryEvolver(num_timesteps=5)\n        result = classic_evolver.evolve(evolution_problem)\n        self.assertEqual(result.evolved_state, Statevector(qc))\n\n    def test_paulisumop_hamiltonian(self):\n        \"\"\"Tests if the hamiltonian can be a SpasePauliOp\"\"\"\n        hamiltonian = SparsePauliOp.from_list(\n            [\n                (\"XI\", 1),\n                (\"IX\", 1),\n            ]\n        )\n        observable = SparsePauliOp.from_list([(\"ZZ\", 1)])\n        evolution_problem = TimeEvolutionProblem(\n            hamiltonian=hamiltonian,\n            time=1.0,\n            initial_state=Statevector.from_label(\"00\"),\n            aux_operators={\"ZZ\": observable},\n        )\n        classic_evolver = SciPyImaginaryEvolver(num_timesteps=5)\n        result = classic_evolver.evolve(evolution_problem)\n        expected = 1 / (np.cosh(1.0) ** 2 + np.sinh(1.0) ** 2)\n        np.testing.assert_almost_equal(result.aux_ops_evaluated[\"ZZ\"][0], expected**2)\n\n    def test_error_time_dependency(self):\n        \"\"\"Tests if an error is raised for a time dependent Hamiltonian.\"\"\"\n        evolution_problem = TimeEvolutionProblem(\n            hamiltonian=SparsePauliOp(\"X\" * 3),\n            time=1.0,\n            initial_state=Statevector.from_label(\"0\" * 3),\n            t_param=0,\n        )\n        classic_evolver = SciPyImaginaryEvolver(num_timesteps=5)\n        with self.assertRaises(ValueError):\n            classic_evolver.evolve(evolution_problem)\n\n    def test_no_time_steps(self):\n        \"\"\"Tests if the evolver handles some edge cases related to the number of timesteps.\"\"\"\n        evolution_problem = TimeEvolutionProblem(\n            hamiltonian=SparsePauliOp(\"X\"),\n            time=1.0,\n            initial_state=Statevector.from_label(\"0\"),\n            aux_operators={\"Energy\": SparsePauliOp(\"X\")},\n        )\n\n        with self.subTest(\"0 timesteps\"):\n            with self.assertRaises(ValueError):\n                classic_evolver",
+      "metadata": {
+        "source_file": "test\\time_evolvers\\classical_methods\\test_scipy_imaginary_evolver.py",
+        "section_title": "test_scipy_imaginary_evolver.py",
+        "section_id": "part_2",
+        "package": "qiskit-algorithms"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "quantum",
+        "circuit"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_pauli_feature_map__0ffaeb3b96750d86d380a565dd47eb8b__part_3__3",
+      "text": "�└─────────┘└───┘└─────────┘\n        ref = QuantumCircuit(4)\n        for _ in range(3):\n            ref.h([0, 1, 2, 3])\n            for i in range(4):\n                ref.p(2 * times[i], i)\n\n        self.assertTrue(Operator(encoding).equiv(ref))\n\n    def test_second_order_circuit(self):\n        \"\"\"Test a second order expansion circuit.\"\"\"\n        times = [0.2, 1, np.pi]\n        with self.assertWarns(DeprecationWarning):\n            encoding = ZZFeatureMap(3, reps=2).assign_parameters(times)\n\n        def zz_evolution(circuit, qubit1, qubit2):\n            time = (np.pi - times[qubit1]) * (np.pi - times[qubit2])\n            circuit.cx(qubit1, qubit2)\n            circuit.p(2 * time, qubit2)\n            circuit.cx(qubit1, qubit2)\n\n        #      ┌───┐┌────────┐                                         ┌───┐┌────────┐»\n        # q_0: ┤ H ├┤ P(0.4) ├──■─────────────────■────■────────────■──┤ H ├┤ P(0.4) ├»\n        #      ├───┤└┬──────┬┘┌─┴─┐┌───────────┐┌─┴─┐  │            │  └───┘└────────┘»\n        # q_1: ┤ H ├─┤ P(2) ├─┤ X ├┤ P(12.599) ├┤ X ├──┼────────────┼────■────────────»\n        #      ├───┤┌┴──────┤ └───┘└───────────┘└───┘┌─┴─┐┌──────┐┌─┴─┐┌─┴─┐ ┌──────┐ »\n        # q_2: ┤ H ├┤ P(2π) ├────────────────────────┤ X ├┤ P(0) ├┤ X ├┤ X ├─┤ P(0) ├─»\n        #      └───┘└───────┘                        └───┘└──────┘└───┘└───┘ └──────┘ »\n        # «                                                                              »\n        # «q_0: ─────────────────────■─────────────────■────■────────────■───────────────»\n       ",
+      "metadata": {
+        "section_id": "part_3",
+        "package": "qiskit",
+        "section_title": "test_pauli_feature_map.py",
+        "source_file": "test\\python\\circuit\\library\\test_pauli_feature_map.py"
+      },
+      "score": 0.7386388080240754,
+      "original_score": 0.7296263531283539,
+      "vector_score": 0.7296263531283539,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "circuit"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "test_pauli_feature_map__0ffaeb3b96750d86d380a565dd47eb8b__part_10__10",
+      "text": "� └┬──────┬┘\n        # q_1: ┤ H ├──┤ P(2) ├─┤ H ├──┤ P(2) ├─┤ H ├──┤ P(2) ├─\n        #      ├───┤ ┌┴──────┤ ├───┤ ┌┴──────┤ ├───┤ ┌┴──────┤\n        # q_2: ┤ H ├─┤ P(2π) ├─┤ H ├─┤ P(2π) ├─┤ H ├─┤ P(2π) ├─\n        #      ├───┤┌┴───────┴┐├───┤┌┴───────┴┐├───┤┌┴───────┴┐\n        # q_3: ┤ H ├┤ P(-2.4) ├┤ H ├┤ P(-2.4) ├┤ H ├┤ P(-2.4) ├\n        #      └───┘└─────────┘└───┘└─────────┘└───┘└─────────┘\n        ref = QuantumCircuit(4)\n        for _ in range(3):\n            ref.h([0, 1, 2, 3])\n            for i in range(4):\n                ref.p(2 * times[i], i)\n\n        self.assertTrue(Operator(encoding).equiv(ref))\n\n    def test_second_order_circuit(self):\n        \"\"\"Test a second order expansion circuit.\"\"\"\n        times = [0.2, 1, np.pi]\n        encoding = zz_feature_map(3, reps=2).assign_parameters(times)\n\n        def zz_evolution(circuit, qubit1, qubit2):\n            time = (np.pi - times[qubit1]) * (np.pi - times[qubit2])\n            circuit.cx(qubit1, qubit2)\n            circuit.p(2 * time, qubit2)\n            circuit.cx(qubit1, qubit2)\n\n        #      ┌───┐┌────────┐                                         ┌───┐┌────────┐»\n        # q_0: ┤ H ├┤ P(0.4) ├──■─────────────────■────■────────────■──┤ H ├┤ P(0.4) ├»\n        #      ├───┤└┬──────┬┘┌─┴─┐┌───────────┐┌─┴─┐  │            │  └───┘└────────┘»\n        # q_",
+      "metadata": {
+        "section_id": "part_10",
+        "section_title": "test_pauli_feature_map.py",
+        "source_file": "test\\python\\circuit\\library\\test_pauli_feature_map.py",
+        "package": "qiskit"
+      },
+      "score": 0.7115170924784865,
+      "original_score": 0.7015694060122274,
+      "vector_score": 0.7015694060122274,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "circuit"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "evolved_operator_ansatz__a2f35e7a4914a8f6c2d8e0faa9dda3eb__part_7__7",
+      "text": "\n    def operators(self, operators=None) -> None:\n        \"\"\"Set the operators to be evolved.\n\n        operators (Optional[Union[QuantumCircuit, list]]): The operators to evolve.\n            If a circuit is passed, we assume it implements an already evolved operator and thus\n            the circuit is not evolved again. Can be a single operator (circuit) or a list of\n            operators (and circuits).\n        \"\"\"\n        operators = _validate_operators(operators)\n        self._invalidate()\n        self._operators = operators\n        if self.num_qubits == 0:\n            self.qregs = []\n        else:\n            self.qregs = [QuantumRegister(self.num_qubits, name=\"q\")]\n\n    # TODO: the `preferred_init_points`-implementation can (and should!) be improved!\n    @property\n    def preferred_init_points(self):\n        \"\"\"Getter of preferred initial points based on the given initial state.\"\"\"\n        if self._initial_state is None:\n            return None\n        else:\n            # If an initial state was set by the user, then we want to make sure that the VQE does\n            # not start from a random point. Thus, we return an all-zero initial point for the\n            # optimizer which is used (unless it gets overwritten by a higher-priority setting at\n            # runtime of the VQE).\n            # However, in order to determine the correct length, we must build the QuantumCircuit\n            # first, because otherwise the operators may not be set yet.\n            self._build()\n            return np.zeros(self.reps * len(self.operators), dtype=float)\n\n    def _evolve_operator(self, operator, time):\n\n        # pylint: disable=cyclic-import\n        from qiskit.circuit.library.hamiltonian_gate import HamiltonianGate\n\n        # if the operator is specified as matrix use exact matrix exponentiation\n        if isinstance(operator, Operator):\n            gate = HamiltonianGate(operator, time)\n        # otherwise, use the PauliEvolutionGate\n        else:\n            from qiskit.synthesis.evolution import LieTrotter\n\n            evolution = LieTrotter() if self._evolution is None else self._evolution\n            gate = PauliEvolutionGate(operator, time, synthesis=evolution)\n\n        evolved = QuantumCircuit(operator.num_qubits)\n        if not self.flatten:\n            evolved.append(gate, evolved.qubits)\n        else:\n            evolved.compose(gate.definition, evolved.qubits, inplace=True)\n        return evolved\n\n    def _build(self):\n        if self._is_built:\n            return\n\n        # need to check configuration here to ensure the operators are not None\n        self._check_configuration()\n\n        coeff = Parameter(\"c\")\n        circuits = []\n\n        for op in self.operators:\n            # if the operator is already the evolved circuit just append it\n            if isinstance(op, QuantumC",
+      "metadata": {
+        "package": "qiskit",
+        "section_id": "part_7",
+        "section_title": "evolved_operator_ansatz.py",
+        "source_file": "qiskit\\circuit\\library\\n_local\\evolved_operator_ansatz.py"
+      },
+      "score": 0.6519397840023682,
+      "original_score": 0.6270783400025374,
+      "vector_score": 0.6270783400025374,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "evolution",
+        "circuit"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 110,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

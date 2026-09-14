@@ -1,0 +1,151 @@
+{
+  "query": "Build unitary from Hamiltonian using PauliEvolutionGate or EvolvedOperatorAnsatz: syntax and parameters.",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "__init____c21336c1bae2d0fe5fb31594219db6ee__part_8__8",
+      "text": "qp\n   quantum_volume\n   phase_estimation\n   grover_operator\n   unitary_overlap\n   GraphStateGate\n   PauliEvolutionGate\n   HamiltonianGate\n\nBelow we provide the same operations as classes deriving :class:`.QuantumCircuit`. For better\nruntime and compiler performance, however, we suggest using above functions and gates.\n\n.. autosummary::\n   :toctree: ../stubs/\n   :template: autosummary/class_no_inherited_members.rst\n\n   FourierChecking\n   GraphState\n   HiddenLinearFunction\n   IQP\n   QuantumVolume\n   PhaseEstimation\n   GroverOperator\n   UnitaryOverlap\n\n.. _n-local:\n\nN-local circuits\n================\n\nThe following functions return a parameterized :class:`.QuantumCircuit` to use as ansatz in\na broad set of variational quantum algorithms.\n\nFor example, we can build a variational circuit\n\n.. plot::\n   :alt: The efficient SU2 ansatz circuit...\n   :context:\n\n   from qiskit.circuit.library import efficient_su2\n\n   num_qubits = 4\n   ansatz = efficient_su2(num_qubits, entanglement=\"pairwise\")\n   ansatz.draw(\"mpl\")\n\nand combine it with\n\n.. plot::\n   :alt: ... combined with the ZZ feature map.\n   :include-source:\n   :context:\n\n   from qiskit.circuit.library import zz_feature_map\n\n   circuit = zz_feature_map(num_qubits)\n   circuit.barrier()\n   circuit.compose(ansatz, inplace=True)\n\n   circuit.draw(\"mpl\")\n\nto obtain a circuit for variational quantum classification.\n\nThe following functions all construct variational circuits and are optimized for a fast\nconstruction:\n\n.. autosummary::\n   :toctree: ../stubs/\n\n   n_local\n   efficient_su2\n   real_amplitudes\n   pauli_two_design\n   excitation_preserving\n   qaoa_ansatz\n   hamiltonian_variational_ansatz\n   evolved_operator_ansatz\n\nWhile we suggest using the above functions, we also continue supporting the following\n:class:`.BlueprintCircuit`, which wrap the circuits into a block\nand allow for inplace mutations of the circuits:\n\n.. autosummary::\n   :toctree: ../stubs/\n   :template: autosummary/class_no_inherited_members.rst\n\n   NLocal\n   TwoLocal\n   PauliTwoDesign\n   RealAmplitudes\n   EfficientSU2\n   EvolvedOperatorAnsatz\n   ExcitationPreserving\n   QAOAAnsatz\n\n\n.. _data-encoding:\n\nData encoding circuits\n======================\n\nThe following functions return a parameterized :class:`.QuantumCircuit` to use as data\nencoding circuits in a series of variational quantum algorithms:\n\n.. autosummary::\n   :toctree: ../stubs/\n\n   pauli",
+      "metadata": {
+        "source_file": "qiskit\\circuit\\library\\__init__.py",
+        "section_id": "part_8",
+        "package": "qiskit",
+        "section_title": "__init__.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.5315733265413162,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "build",
+        "from",
+        "using",
+        "paulievolutiongate",
+        "evolvedoperatoransatz"
+      ],
+      "match_ratio": 0.5555555555555556,
+      "is_html": false
+    },
+    {
+      "id": "hamiltonian_phase_estimation__fe09fa7dc716801664052a1a15ef8c76__part_3__3",
+      "text": " Hermitian operator. The allowed types are ``Pauli`` and ``SparsePauliOp``.\n            state_preparation: The state to be prepared, whose eigenphase will be\n                measured. If this parameter is omitted, no preparation circuit will be run and\n                input state will be the all-zero state in the computational basis.\n            evolution: An evolution synthesis class.\n            bound: An upper bound on the absolute value of the eigenvalues of\n                ``hamiltonian``. If omitted, then ``hamiltonian`` must be a SparsePauliOp,\n                in which case a bound will be computed. The tighter the bound,\n                the higher the resolution of computed phases.\n\n        Returns:\n            ``HamiltonianPhaseEstimationResult`` instance containing the result of the estimation\n            and diagnostic information.\n\n        Raises:\n            TypeError: If ``evolution`` is not of type ``EvolutionSynthesis``.\n            TypeError: If ``hamiltonian`` type is not ``Pauli`` or ``SparsePauliOp``.\n            ValueError: If ``bound`` is ``None`` and ``hamiltonian`` is not a Pauli sum.\n        \"\"\"\n        if evolution is not None and not isinstance(evolution, EvolutionSynthesis):\n            raise TypeError(f\"Expecting type EvolutionSynthesis, got {type(evolution)}\")\n\n        if not isinstance(hamiltonian, (Pauli, SparsePauliOp)):\n            raise TypeError(\n                f\"Expecting Hamiltonian type Pauli, SparsePauliOp, \" f\"got {type(hamiltonian)}.\"\n            )\n\n        if isinstance(state_preparation, Statevector):\n            circuit = QuantumCircuit(state_preparation.num_qubits)\n            circuit.prepare_state(state_preparation.data)\n            state_preparation = circuit\n\n        if isinstance(hamiltonian, SparsePauliOp):\n            id_coefficient, hamiltonian_no_id = _remove_identity(hamiltonian)\n        else:\n            id_coefficient = 0.0\n            hamiltonian_no_id = hamiltonian\n\n        pe_scale = self._get_scale(hamiltonian_no_id, bound)\n        unitary = self._get_unitary(hamiltonian_no_id, pe_scale, evolution)\n\n        # run phase estimation\n        phase_estimation_result = self._phase_estimation.estimate(\n            unitary=unitary, state_preparation=state_preparation\n        )\n        return HamiltonianPhaseEstimationResult(\n            phase_estimation_result=phase_estimation_result,\n            id_coefficient=id_coefficient,\n            phase_estimation_scale=pe_scale,\n        )\n\n\ndef _remove_identity(pauli_sum: SparsePauliOp):\n    \"\"\"Remove any identity operators from ``pauli_sum``. Return\n    the sum of the coefficients of the identities and the new operator.\n    \"\"\"\n\n    def _get_identity(size):\n        identity = SparsePauliOp(\"I\")\n        for _",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "section_id": "part_3",
+        "source_file": "qiskit_algorithms\\phase_estimators\\hamiltonian_phase_estimation.py",
+        "section_title": "hamiltonian_phase_estimation.py"
+      },
+      "score": 0.9287182823763465,
+      "original_score": 0.923626731117514,
+      "vector_score": 0.944920351091504,
+      "bm25_score": 0.4058008540466588,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "unitary",
+        "from",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "evolved_operator_ansatz__a2f35e7a4914a8f6c2d8e0faa9dda3eb__part_5__5",
+      "text": "oring entanglement and optimization within the Hamiltonian\n    Variational Ansatz (2020) `arXiv:2008.02941 <https://arxiv.org/abs/2008.02941>`__\n\n    \"\"\"\n    # If a single operator is given, check if it is a sum of operators (a SparsePauliOp),\n    # and split it into commuting terms. Otherwise, treat it as single operator.\n    if isinstance(hamiltonian, SparsePauliOp):\n        hamiltonian = hamiltonian.group_commuting()\n\n    return evolved_operator_ansatz(\n        hamiltonian,\n        reps=reps,\n        evolution=None,\n        insert_barriers=insert_barriers,\n        name=name,\n        parameter_prefix=parameter_prefix,\n        flatten=True,\n    )\n\n\nclass EvolvedOperatorAnsatz(NLocal):\n    \"\"\"The evolved operator ansatz.\"\"\"\n\n    def __init__(\n        self,\n        operators=None,\n        reps: int = 1,\n        evolution=None,\n        insert_barriers: bool = False,\n        name: str = \"EvolvedOps\",\n        parameter_prefix: str | Sequence[str] = \"t\",\n        initial_state: QuantumCircuit | None = None,\n        flatten: bool | None = None,\n    ):\n        \"\"\"\n        Args:\n            operators (BaseOperator | QuantumCircuit | list | None): The operators\n                to evolve. If a circuit is passed, we assume it implements an already evolved\n                operator and thus the circuit is not evolved again. Can be a single operator\n                (circuit) or a list of operators (and circuits).\n            reps: The number of times to repeat the evolved operators.\n            evolution (EvolutionBase | EvolutionSynthesis | None):\n                A specification of which evolution synthesis to use for the\n                :class:`.PauliEvolutionGate`.\n                Defaults to first order Trotterization.\n            insert_barriers: Whether to insert barriers in between each evolution.\n            name: The name of the circuit.\n            parameter_prefix: Set the names of the circuit parameters. If a string, the same prefix\n                will be used for each parameters. Can also be a list to specify a prefix per\n                operator.\n            initial_state: A :class:`.QuantumCircuit` object to prepend to the circuit.\n            flatten: Set this to ``True`` to output a flat circuit instead of nesting it inside multiple\n                layers of gate objects. By default currently the contents of\n                the output circuit will be wrapped in nested objects for\n                cleaner visualization. However, if you're using this circuit\n                for anything besides visualization its **strongly** recommended\n                to set this flag to ``True`` to avoid a large performance\n                overhead for parameter binding.\n        \"\"\"\n        super().__init__(\n            initial_state=initial_state,\n            parameter_prefix=parameter_prefix,\n            reps=reps,\n            insert_barriers=insert_barriers,\n",
+      "metadata": {
+        "package": "qiskit",
+        "section_id": "part_5",
+        "source_file": "qiskit\\circuit\\library\\n_local\\evolved_operator_ansatz.py",
+        "section_title": "evolved_operator_ansatz.py"
+      },
+      "score": 0.9276293830828443,
+      "original_score": 0.9185830559681998,
+      "vector_score": 0.8067645359091558,
+      "bm25_score": 0.9355683310016799,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "hamiltonian",
+        "using",
+        "paulievolutiongate",
+        "evolvedoperatoransatz",
+        "parameters"
+      ],
+      "match_ratio": 0.5555555555555556,
+      "is_html": false
+    },
+    {
+      "id": "fermionic_gaussian_state__80f84e9eb39382ac27685324204d154b__part_2__2",
+      "text": " quadratic Hamiltonian.\n\n    Currently, only the Jordan-Wigner transformation is supported.\n\n    Reference: `arXiv:1711.05395`_\n\n    .. _arXiv:1711.05395: https://arxiv.org/abs/1711.05395\n    \"\"\"\n\n    def __init__(\n        self,\n        transformation_matrix: np.ndarray,\n        occupied_orbitals: Sequence[int] | None = None,\n        qubit_mapper: QubitMapper | None = None,\n        *,\n        validate: bool = True,\n        rtol: float = 1e-5,\n        atol: float = 1e-8,\n        **circuit_kwargs,\n    ) -> None:\n        # pylint: disable=unused-argument\n        r\"\"\"\n        Args:\n            transformation_matrix: The matrix :math:`W` that specifies the coefficients of the\n                new creation operators in terms of the original creation and annihilation operators.\n                This matrix must satisfy special constraints, as detailed above.\n            occupied_orbitals: The pseudo-particle orbitals to fill. These refer to the indices\n                of the operators :math:`\\{b^\\dagger_j\\}` from the main body of the docstring\n                of this function. The default behavior is to use the empty set of orbitals,\n                which corresponds to a state with zero pseudo-particles.\n            qubit_mapper: The ``QubitMapper``. The default behavior is to create one using the call\n                ``JordanWignerMapper()``.\n            validate: Whether to validate the inputs.\n            rtol: Relative numerical tolerance for input validation.\n            atol: Absolute numerical tolerance for input validation.\n            circuit_kwargs: Keyword arguments to pass to the ``QuantumCircuit`` initializer.\n\n        Raises:\n            ValueError: transformation_matrix must be a 2-dimensional array.\n            ValueError: transformation_matrix must have shape ``(n_orbitals, 2 * n_orbitals)``.\n            ValueError: transformation_matrix does not describe a valid transformation\n                of fermionic ladder operators. A valid matrix has the block form\n                :math:`(W_1 \\quad W_2)` where :math:`W_1 W_1^\\dagger + W_2 W_2^\\dagger = I` and\n                :math:`W_1 W_2^T + W_2 W_1^T = 0`.\n\n            NotImplementedError: Currently, only the Jordan-Wigner Transform is supported.\n                Please use the :class:`qiskit_nature.second_q.mappers.JordanWignerMapper`.\n        \"\"\"\n        if validate:\n            _validate_transformation_matrix(transformation_matrix, rtol=rtol, atol=atol)\n\n        if occupied_orbitals is None:\n            occupied_orbitals = []\n\n        if qubit_mapper is None:\n            qubit_mapper = JordanWignerMapper()\n\n        n, _ = transformation_matrix",
+      "metadata": {
+        "section_id": "part_2",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\fermionic_gaussian_state.py",
+        "package": "qiskit-nature",
+        "section_title": "fermionic_gaussian_state.py"
+      },
+      "score": 0.8905159270255998,
+      "original_score": 0.8826956360988569,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "from",
+        "hamiltonian",
+        "using"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_pvqd__5c3f037a4563696e54ecfad7246ef5cc__part_4__4",
+      "text": " aux_operators=[self.hamiltonian, self.observable]\n        )\n\n        sampler = StatevectorSampler()\n        fidelity_primitive = ComputeUncompute(sampler)\n\n        pvqd = PVQD(\n            fidelity_primitive,\n            self.ansatz,\n            self.initial_parameters,\n            optimizer=SPSA(maxiter=0, learning_rate=0.1, perturbation=0.01),\n        )\n\n        with self.assertRaises(ValueError):\n            _ = pvqd.evolve(problem)\n\n    def test_transpiler(self):\n        \"\"\"Test that the transpiler is called.\"\"\"\n        time = 0.02\n        hamiltonian = Pauli(\"XX\")\n        optimizer = L_BFGS_B(maxiter=1)\n\n        sampler = StatevectorSampler()\n        estimator = StatevectorEstimator()\n        fidelity_primitive = ComputeUncompute(sampler)\n\n        pass_manager = generate_preset_pass_manager(\n            backend=GenericBackendV2(num_qubits=3, coupling_map=[[0, 1], [1, 2]], seed=54),\n            optimization_level=1,\n            seed_transpiler=42,\n        )\n        counts = [0]\n\n        def callback(**kwargs):\n            counts[0] = kwargs[\"count\"]\n\n        # run pVQD keeping track of the energy and the magnetization\n        pvqd = PVQD(\n            fidelity_primitive,\n            self.ansatz,\n            self.initial_parameters,\n            estimator,\n            optimizer=optimizer,\n            num_timesteps=None,\n            transpiler=pass_manager,\n            transpiler_options={\"callback\": callback},\n        )\n        problem = TimeEvolutionProblem(\n            hamiltonian, time, aux_operators=[hamiltonian, self.observable]\n        )\n        pvqd.evolve(problem)\n\n        self.assertGreater(counts[0], 0)\n\n\nclass TestPVQDUtils(QiskitAlgorithmsTestCase):\n    \"\"\"Test some utility functions for PVQD.\"\"\"\n\n    def setUp(self):\n        super().setUp()\n        self.hamiltonian = 0.1 * SparsePauliOp([Pauli(\"ZZ\"), Pauli(\"IX\"), Pauli(\"XI\")])\n        self.ansatz = efficient_su2(2, reps=1)\n\n    def test_gradient_supported(self):\n        \"\"\"Test the gradient support is correctly determined.\"\"\"\n        # gradient supported here\n        wrapped = QuantumCircuit(2)  # a circuit wrapped into a big instruction\n        wrapped.append(efficient_su2(2).to_gate(), [0, 1])\n        plain = wrapped.decompose()  # a plain circuit with already supported instructions\n\n        # gradients not supported on the following circuits\n        x = Parameter(\"x\")\n        duplicated = QuantumCircuit(2)\n        duplicated.rx(x, 0)\n        duplicated.rx(x, 1)\n\n        needs_chainrule = QuantumCircuit(2)\n        needs_chainrule.rx(2 * x, 0)\n\n        custom_gate = WhatAmI(x",
+      "metadata": {
+        "section_id": "part_4",
+        "package": "qiskit-algorithms",
+        "source_file": "test\\time_evolvers\\test_pvqd.py",
+        "section_title": "test_pvqd.py"
+      },
+      "score": 0.8853023997411046,
+      "original_score": 0.8826956360988569,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "hamiltonian"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 216,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

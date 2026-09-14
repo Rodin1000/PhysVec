@@ -1,0 +1,150 @@
+{
+  "query": "Extract expectation value from Estimator for Pauli operators",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "save_expectation_value__505a2fbfaf4535f642f642cbc73291b5__part_1__1",
+      "text": "        if isinstance(operator, Pauli):\n            operator = SparsePauliOp(operator)\n        elif not isinstance(operator, SparsePauliOp):\n            operator = SparsePauliOp.from_operator(Operator(operator))\n        if not allclose(operator.coeffs.imag, 0):\n            raise ValueError(\"Input operator is not Hermitian.\")\n        params = _expval_params(operator, variance=False)\n        super().__init__(\n            \"save_expval\",\n            operator.num_qubits,\n            label,\n            unnormalized=unnormalized,\n            pershot=pershot,\n            conditional=conditional,\n            params=params,\n        )\n\n\nclass SaveExpectationValueVariance(SaveAverageData):\n    \"\"\"Save expectation value and variance of an operator.\"\"\"\n\n    def __init__(\n        self,\n        operator,\n        label=\"expectation_value_variance\",\n        unnormalized=False,\n        pershot=False,\n        conditional=False,\n    ):\n        r\"\"\"Instruction to save the expectation value and variance of a Hermitian operator.\n\n        The expectation value of a Hermitian operator :math:`H` for a\n        simulator in quantum state :math`\\rho`is given by\n        :math:`\\langle H\\rangle = \\mbox{Tr}[H.\\rho]`. The variance is given by\n        :math:`\\sigma^2 = \\langle H^2 \\rangle - \\langle H \\rangle>^2`.\n\n        Args:\n            operator (Pauli or SparsePauliOp or Operator): a Hermitian operator.\n            label (str): the key for retrieving saved data from results.\n            unnormalized (bool): If True return save the unnormalized accumulated\n                                 or conditional accumulated expectation value\n                                 over all shot [Default: False].\n            pershot (bool): if True save a list of expectation values for each shot\n                            of the simulation rather than the average over\n                            all shots [Default: False].\n            conditional (bool): if True save the average or pershot data\n                                conditional on the current classical register\n                                values [Default: False].\n\n        Raises:\n            ValueError: if the input operator is not Hermitian.\n            TypeError: if the input operator is of invalid type.\n\n        .. note::\n\n            This instruction can be directly appended to a circuit using\n            the :func:`save_expectation_value` circuit method.\n        \"\"\"\n        # Convert O to SparsePauliOp representation\n        if isinstance(operator, Pauli):\n            operator = SparsePauliOp(operator)\n        elif not isinstance(operator, SparsePauliOp):\n            operator = SparsePauliOp.from_operator(Operator(operator))\n        if not allclose(operator.coeffs.imag, 0):\n            raise ValueError(\"Input operator is not Hermitian.\")\n        params = _expval_params(operator, variance=True)\n        super().__init__(\n            \"save_expval_var\",\n            operator.num_qubits,\n            label,\n            unnormalized=unnormalized,\n            pershot=pershot,\n",
+      "metadata": {
+        "section_title": "save_expectation_value.py",
+        "section_id": "part_1",
+        "package": "qiskit-aer",
+        "source_file": "qiskit_aer\\library\\save_instructions\\save_expectation_value.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.6833361124990954,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "expectation",
+        "value",
+        "from",
+        "pauli"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "bosonic_linear_mapper__696ee836a3bf81b2582bdea09b1a9d2c__part_3__3",
+      "text": " op == \"+\":\n                        tmp_op += -1j * SparsePauliOp(x_y) + 1j * SparsePauliOp(y_x)\n                    else:\n                        tmp_op += +1j * SparsePauliOp(x_y) - 1j * SparsePauliOp(y_x)\n                    pauli_expansion.append(prefactor * tmp_op)\n                # Add the Pauli expansion for a single n_k to map of the bosonic operator\n                bos_op_to_pauli_op = reduce(operator.add, pauli_expansion).compose(\n                    bos_op_to_pauli_op\n                )\n            # Add the map of the single boson op (e.g. +_0) to the map of the full bosonic operator\n            pauli_op.append(coeff * reduce(operator.add, bos_op_to_pauli_op.simplify()))\n\n        # return the lookup table for the transformed XYZI operators\n        bos_op_encoding = reduce(operator.add, pauli_op)\n        return bos_op_encoding\n\n    @classmethod\n    @lru_cache(maxsize=32)\n    def _get_ij_pauli_matrix(\n        cls, register_index: int, register_length: int\n    ) -> tuple[Pauli, Pauli, Pauli, Pauli]:\n        \"\"\"This method builds the Qiskit Pauli operators of the operators XX, YY, XY and YX\n\n        Args:\n            register_index: the index of the qubit register where the mapped operator should be placed.\n            register_length: the length of the qubit register.\n\n        Returns:\n            Four Pauli operators that represent XX, XY, YX and YY at the specified index in the\n            current qubit register.\n        \"\"\"\n        # Define recurrent variables\n        prefix_zeros = [0] * register_index\n        suffix_zeros = [0] * (register_length - 2 - register_index)\n        # Build the Pauli strings\n        x_x = Pauli(\n            (\n                [0] * register_length,\n                prefix_zeros + [1, 1] + suffix_zeros,\n            )\n        )\n        x_y = Pauli(\n            (\n                prefix_zeros + [0, 1] + suffix_zeros,\n                prefix_zeros + [1, 1] + suffix_zeros,\n            )\n        )\n        y_x = Pauli(\n            (\n                prefix_zeros + [1, 0] + suffix_zeros,\n                prefix_zeros + [1, 1] + suffix_zeros,\n            )\n        )\n        y_y = Pauli(\n            (\n                prefix_zeros + [1, 1] + suffix_zeros,\n                prefix_zeros + [1, 1] + suffix_zeros,\n            )\n        )\n        return x_x, x_y, y_x, y_y\n",
+      "metadata": {
+        "source_file": "qiskit_nature\\second_q\\mappers\\bosonic_linear_mapper.py",
+        "section_title": "bosonic_linear_mapper.py",
+        "section_id": "part_3",
+        "package": "qiskit-nature"
+      },
+      "score": 0.9142008604074245,
+      "original_score": 0.909000912553329,
+      "vector_score": 0.9172218682225314,
+      "bm25_score": 0.5882693271655131,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "pauli",
+        "operators"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "densitymatrix__ed8b5b53f41a208ca6a1d043492d811c__part_7__7",
+      "text": " = y_phase[0]\n        return pauli_phase * density_expval_pauli_with_x(\n            data, self.num_qubits, z_mask, x_mask, y_phase, x_max\n        )\n\n    def expectation_value(self, oper: Operator, qargs: None | list[int] = None) -> complex:\n        \"\"\"Compute the expectation value of an operator.\n\n        Args:\n            oper (Operator): an operator to evaluate expval.\n            qargs (None or list): subsystems to apply the operator on.\n\n        Returns:\n            complex: the expectation value.\n        \"\"\"\n        if isinstance(oper, Pauli):\n            return self._expectation_value_pauli(oper, qargs)\n\n        if isinstance(oper, SparsePauliOp):\n            return sum(\n                coeff * self._expectation_value_pauli(Pauli((z, x)), qargs)\n                for z, x, coeff in zip(oper.paulis.z, oper.paulis.x, oper.coeffs)\n            )\n\n        if not isinstance(oper, Operator):\n            oper = Operator(oper)\n        return np.trace(Operator(self).dot(oper, qargs=qargs).data)\n\n    def probabilities(\n        self, qargs: None | list[int] = None, decimals: None | int = None\n    ) -> np.ndarray:\n        \"\"\"Return the subsystem measurement probability vector.\n\n        Measurement probabilities are with respect to measurement in the\n        computation (diagonal) basis.\n\n        Args:\n            qargs (None or list): subsystems to return probabilities for,\n                if None return for all subsystems (Default: None).\n            decimals (None or int): the number of decimal places to round\n                values. If None no rounding is done (Default: None).\n\n        Returns:\n            np.array: The Numpy vector array of probabilities.\n\n        Examples:\n\n            Consider a 2-qubit product state :math:`\\\\rho=\\\\rho_1\\\\otimes\\\\rho_0`\n            with :math:`\\\\rho_1=|+\\\\rangle\\\\!\\\\langle+|`,\n            :math:`\\\\rho_0=|0\\\\rangle\\\\!\\\\langle0|`.\n\n            .. plot::\n               :include-source:\n               :nofigs:\n\n                from qiskit.quantum_info import DensityMatrix\n\n                rho = DensityMatrix.from_label('+0')\n\n                # Probabilities for measuring both qubits\n                probs = rho.probabilities()\n                print('probs: {}'.format(probs))\n\n                # Probabilities for measuring only qubit-0\n                probs_qubit_0 = rho.probabilities([0])\n                print('Qubit-0 probs: {}'.format(probs_qubit_0))\n\n                # Probabilities for measuring only qubit-1\n                probs_qubit_1 = rho.probabilities([1])\n                print('Qubit-1 probs: {}'.format(probs_qubit_",
+      "metadata": {
+        "section_id": "part_7",
+        "source_file": "qiskit\\quantum_info\\states\\densitymatrix.py",
+        "section_title": "densitymatrix.py",
+        "package": "qiskit"
+      },
+      "score": 0.8925953857703404,
+      "original_score": 0.8787367258697392,
+      "vector_score": 1.0,
+      "bm25_score": 0.115419441644968,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "expectation",
+        "value",
+        "from",
+        "pauli"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    },
+    {
+      "id": "test_vqd__69bbcfe16b14a0e7e3cec7e7a51130fb__part_9__9",
+      "text": "],\n            [\n                H2_SPARSE_PAULI,\n                generate_preset_pass_manager(\n                    backend=THREE_QUBITS_BACKEND, optimization_level=1, seed_transpiler=42\n                ),\n            ],\n        ]\n    )\n    @unpack\n    def test_aux_operator_std_dev(self, op, transpiler):\n        \"\"\"Test non-zero standard deviations of aux operators.\"\"\"\n        wavefunction = self.ry_wavefunction\n        vqd = VQD(\n            estimator=self.estimator,\n            fidelity=self.fidelity,\n            ansatz=wavefunction,\n            initial_point=[\n                1.70256666,\n                -5.34843975,\n                -0.39542903,\n                5.99477786,\n                -2.74374986,\n                -4.85284669,\n                0.2442925,\n                -1.51638917,\n            ],\n            optimizer=COBYLA(maxiter=10),\n            betas=self.betas,\n            transpiler=transpiler,\n        )\n\n        # Go again with two auxiliary operators\n        aux_op1 = SparsePauliOp.from_list([(\"II\", 2.0)])\n        aux_op2 = SparsePauliOp.from_list([(\"II\", 0.5), (\"ZZ\", 0.5), (\"YY\", 0.5), (\"XX\", -0.5)])\n        aux_ops = [aux_op1, aux_op2]\n        result = vqd.compute_eigenvalues(op, aux_operators=aux_ops)\n        self.assertEqual(len(result.aux_operators_evaluated), 2)\n        # expectation values\n        self.assertAlmostEqual(result.aux_operators_evaluated[0][0][0], 2.0, places=1)\n        self.assertAlmostEqual(\n            result.aux_operators_evaluated[0][1][0], 0.7432341813894455, places=1\n        )\n        # metadata\n        self.assertIsInstance(result.aux_operators_evaluated[0][0][1], dict)\n        self.assertIsInstance(result.aux_operators_evaluated[0][1][1], dict)\n\n        # Go again with additional None and zero operators\n        aux_ops = [*aux_ops, None, 0]\n        result = vqd.compute_eigenvalues(op, aux_operators=aux_ops)\n        self.assertEqual(len(result.aux_operators_evaluated[0]), 4)\n        # expectation values\n        self.assertAlmostEqual(result.aux_operators_evaluated[0][0][0], 2.0, places=1)\n        self.assertAlmostEqual(result.aux_operators_evaluated[0][1][0], 0.743234181389445, places=1)\n        self.assertEqual(result.aux_operators_evaluated[0][2][0], 0.0)\n        self.assertEqual(result.aux_operators_evaluated[0][3][0], 0.",
+      "metadata": {
+        "section_title": "test_vqd.py",
+        "source_file": "test\\eigensolvers\\test_vqd.py",
+        "section_id": "part_9",
+        "package": "qiskit-algorithms"
+      },
+      "score": 0.8765907650502499,
+      "original_score": 0.8650211492737109,
+      "vector_score": 1.0,
+      "bm25_score": 0.05118478646904085,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "expectation",
+        "estimator",
+        "operators"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "bksf__85a46d24e91e3b50acfc604933e7a2f6__part_4__4",
+      "text": " return (0.5 * h1_pq) * (id_op - b_p)  # SW2018 eq 33\n\n\n## SW2018 eq 34\ndef _coulomb_exchange(  # pylint: disable=invalid-name\n    edge_list: np.ndarray, p: int, q: int, s: int, h2_pqrs: float\n) -> SparsePauliOp:\n    \"\"\"Map a Coulomb-exchange operator to a Pauli operator.\n\n    Args:\n      edge_list: representation of graph specifying neighboring qubits.\n      p: First Fermionic-mode index\n      q: Second Fermionic-mode index\n      s: Index of last lowering operator in physicists' order\n      h2_pqrs: Numerical coefficient of the term\n\n    Returns:\n      The result of the Fermionic to Pauli operator mapping.\n    \"\"\"\n    b_p = _edge_operator_bi(edge_list, p)\n    b_q = _edge_operator_bi(edge_list, q)\n    id_op = _pauli_id(edge_list.shape[1])\n    qubit_op = (id_op - b_p).dot((id_op - b_q))\n    if p == s:  # two commutations to order as two number operators.\n        final_coeff = 0.25\n    else:  # one commutation\n        final_coeff = -0.25\n    return (final_coeff * h2_pqrs) * qubit_op\n\n\n## SW2018 eq 35\n## Includes contributions from a h.c. pair\ndef _excitation_operator(  # pylint: disable=invalid-name\n    edge_list: np.ndarray, p: int, q: int, h1_pq: float\n) -> SparsePauliOp:\n    \"\"\"Map an excitation operator to a Pauli operator.\n\n    Args:\n      edge_list: representation of graph specifying neighboring qubits.\n      p: First Fermionic-mode index.\n      q: Second Fermionic-mode index. You must ensure that p < q.\n      h1_pq: Numerical coefficient of the term.\n\n    Returns:\n      The result of the Fermionic to Pauli operator mapping.\n    \"\"\"  # pylint: disable=missing-raises-doc\n    if p >= q:\n        raise ValueError(f\"Expected p < q, got p = {p}, q = {q}\")\n    b_a = _edge_operator_bi(edge_list, p)\n    b_b = _edge_operator_bi(edge_list, q)\n    a_ab = _edge_operator_aij(edge_list, p, q)\n    return (-1j * 0.5 * h1_pq) * ((b_b & a_ab) + (a_ab & b_a))\n\n\n## SW2018 eq 37\n# pylint: disable=invalid-name, disable=too-many-positional-arguments\ndef _double_excitation(\n    edge_list: np.ndarray, p",
+      "metadata": {
+        "package": "qiskit-nature",
+        "section_id": "part_4",
+        "source_file": "qiskit_nature\\second_q\\mappers\\bksf.py",
+        "section_title": "bksf.py"
+      },
+      "score": 0.8665984181562242,
+      "original_score": 0.8540920198583702,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "from",
+        "pauli",
+        "operators"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 212,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      }
+    }
+  }
+}

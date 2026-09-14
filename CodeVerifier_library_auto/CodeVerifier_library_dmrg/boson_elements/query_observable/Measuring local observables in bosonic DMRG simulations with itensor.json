@@ -1,0 +1,131 @@
+{
+  "query": "Measuring local observables in bosonic DMRG simulations with itensor",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "h2_2",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "source_file": "docs\\src\\examples\\DMRG.md"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.1077414810960008,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "local",
+        "dmrg",
+        "itensor"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_12__12",
+      "text": " s2)\n    C[s2 => 2, i => 3, s1 => 2] = -223\n    @test A ≈ C\n  end\n\n  @testset \"Fermionic SVD\" begin\n    N = 4\n    s = siteinds(\"Fermion\", N; conserve_qns=true)\n\n    A = random_itensor(QN(\"Nf\", 2, -1), s[1], s[2], s[3], s[4])\n    for n1 in 1:4, n2 in 1:4\n      (n1 == n2) && continue\n      U, S, V = svd(A, (s[n1], s[n2]))\n      @test norm(U * S * V - A) < 1E-10\n    end\n    for n1 in 1:4, n2 in 1:4, n3 in 1:4\n      (n1 == n2) && continue\n      (n1 == n3) && continue\n      (n2 == n3) && continue\n      U, S, V = svd(A, (s[n1], s[n2], s[n3]))\n      @test norm(U * S * V - A) < 1E-10\n    end\n\n    B = random_itensor(QN(\"Nf\", 3, -1), s[1], s[2], s[3], s[4])\n    for n1 in 1:4, n2 in 1:4\n      (n1 == n2) && continue\n      U, S, V = svd(B, (s[n1], s[n2]))\n      @test norm(U * S * V - B) < 1E-10\n    end\n    for n1 in 1:4, n2 in 1:4, n3 in 1:4\n      (n1 == n2) && continue\n      (n1 == n3) && continue\n      (n2 == n3) && continue\n      U, S, V = svd(B, (s[n1], s[n2], s[n3]))\n      @test norm(U * S * V - B) < 1E-10\n    end\n  end # Fermionic SVD tests\n\n  @testset \"Fermionic SVD Arrow Cases\" begin\n    s = siteinds(\"Fermion\", 3; conserve_qns=true)\n\n    function id(i)\n      if dir(i) == Out\n        I = ITensor(i, dag(i)')\n      else\n        I = ITensor(dag(i)', i)\n      end\n      for n in 1:dim(i)\n        I[n, n] = 1.0\n      end\n",
+      "metadata": {
+        "section_id": "part_12",
+        "section_title": "test_fermions.jl",
+        "source_file": "test\\base\\test_fermions.jl",
+        "package": "itensors"
+      },
+      "score": 0.9745205111990735,
+      "original_score": 0.9737711144696345,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "1d_ising_with_observer__82f90a8d4a7ed5b00346b555230baebb__part_0__0",
+      "text": "# In this example we show how to pass a DMRGObserver to\n# the dmrg function which allows tracking energy convergence and\n# convergence of local operators.\nusing ITensors, ITensorMPS\n\n\"\"\"\n  Get MPO of transverse field Ising model Hamiltonian with field strength h\n\"\"\"\nfunction tfimMPO(sites, h::Float64)\n  # Input operator terms which define a Hamiltonian\n  N = length(sites)\n  os = OpSum()\n  for j in 1:(N - 1)\n    os -= 1, \"Z\", j, \"Z\", j + 1\n  end\n  for j in 1:N\n    os += h, \"X\", j\n  end\n  # Convert these terms to an MPO tensor network\n  return MPO(os, sites)\nend\n\nlet\n  N = 100\n  sites = siteinds(\"S=1/2\", N)\n  psi0 = random_mps(sites; linkdims=10)\n\n  # define parameters for DMRG sweeps\n  nsweeps = 15\n  maxdim = [10, 20, 100, 100, 200]\n  cutoff = [1E-10]\n\n  #=\n  create observer which will measure Sᶻ at each\n  site during the dmrg sweeps and track energies after each sweep.\n  in addition it will stop the computation if energy converges within\n  1E-7 tolerance\n  =#\n  let\n    Sz_observer = DMRGObserver([\"Sz\"], sites; energy_tol=1E-7)\n\n    # we will now run DMRG calculation for different values\n    # of the transverse field and check how local observables\n    # converge to their ground state values\n\n    println(\"Running DMRG for TFIM with h=0.1\")\n    println(\"================================\")\n    H = tfimMPO(sites, 0.1)\n    energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, observer=Sz_observer)\n\n    for (i, Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n      println(\"<Σ Sz> after sweep $i = \", sum(Szs) / N)\n    end\n  end\n\n  let\n    println(\"\\nRunning DMRG for TFIM with h=1.0 (critical point)\")\n    println(\"================================\")\n    Sz_observer = DMRGObserver([\"Sz\"], sites; energy_tol=1E-7)\n    H = tfimMPO(sites, 1.0)\n    energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, observer=Sz_observer)\n\n    for (i, Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n      println(\"<Σ Sz",
+      "metadata": {
+        "section_title": "1d_ising_with_observer.jl",
+        "source_file": "examples\\dmrg\\1d_ising_with_observer.jl",
+        "section_id": "part_0",
+        "package": "itensormps"
+      },
+      "score": 0.9238170734953458,
+      "original_score": 0.9166749241355345,
+      "vector_score": 0.819964695156253,
+      "bm25_score": 0.48560482992705295,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "local",
+        "observables",
+        "dmrg"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_5__5",
+      "text": "3] => 1, s[4] => 3] ≈ 1313\n      @test psi0[s[4] => 3, s[1] => 1, s[3] => 1, s[2] => 3] ≈ -1313\n      @test psi1[s[4] => 3, s[1] => 1, s[3] => 1, s[2] => 3] ≈ -1313\n      @test psi2[s[4] => 3, s[1] => 1, s[3] => 1, s[2] => 3] ≈ -1313\n    end\n  end\n\n  @testset \"C Cdag operators\" begin\n    s = siteinds(\"Fermion\", 3; conserve_qns=true)\n\n    p110 = ITensor(s[1], s[2], s[3])\n    p110[s[1] => 2, s[2] => 2, s[3] => 1] = 1.0\n\n    p011 = ITensor(s[1], s[2], s[3])\n    p011[s[1] => 1, s[2] => 2, s[3] => 2] = 1.0\n\n    np011 = ITensor(s[1], s[2], s[3])\n    np011[s[1] => 1, s[3] => 2, s[2] => 2] = 1.0\n\n    dag_p011 = ITensor(dag(s[3]), dag(s[2]), dag(s[1]))\n    dag_p011[s[3] => 2, s[2] => 2, s[1] => 1] = 1.0\n\n    @test norm(dag(p011) - dag_p011) ≈ 0\n\n    C1 = op(s, \"C\", 1)\n    Cdag3 = op(s, \"Cdag\", 3)\n\n    # Anti-commutator\n    @test norm(Cdag3 * C1 + C1 * Cdag3) ≈ 0.0\n\n    # Commutator\n    @test norm(Cdag3 * C1 - C1 * Cdag3) ≈ 2.0\n\n    let # <011|Cdag3*C1|110> = -1\n      t1 = noprime(C1 * p110)\n      t2 = noprime(Cdag3 * t1)\n      @test scalar(dag_p011 * t2) ≈ -1.0\n    end\n\n    let # <011|C1*Cdag3|110> = +1\n      t1 = noprime(Cdag3",
+      "metadata": {
+        "section_title": "test_fermions.jl",
+        "package": "itensors",
+        "section_id": "part_5",
+        "source_file": "test\\base\\test_fermions.jl"
+      },
+      "score": 0.8230273334173662,
+      "original_score": 0.8178222549884653,
+      "vector_score": 0.8398506002448974,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "test_readwrite__91444bccaae58ec4d771b3eb2e5fecd3__part_2__2",
+      "text": "Δ ≈ cΔ\n    end\n  end\n  @testset \"Diag ITensor\" begin\n\n    #\n    # Diag ITensor\n    #\n    dk = dim(k)\n    D = diag_itensor(randn(dk), k, k')\n    C = diag_itensor(randn(ComplexF64, dk), k, k')\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"w\") do fo\n      fo[\"diag_tensor\"] = D\n      fo[\"c_diag_tensor\"] = C\n    end\n\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"r\") do fi\n      rD = read(fi, \"diag_tensor\", ITensor)\n      rC = read(fi, \"c_diag_tensor\", ITensor)\n      @test rD ≈ D\n      @test rC ≈ C\n    end\n  end\n\n  @testset \"QN ITensor\" begin\n    i = Index(QN(\"A\", -1) => 3, QN(\"A\", 0) => 4, QN(\"A\", +1) => 3; tags=\"i\")\n    j = Index(QN(\"A\", -2) => 2, QN(\"A\", 0) => 3, QN(\"A\", +2) => 2; tags=\"j\")\n    k = Index(QN(\"A\", -1) => 1, QN(\"A\", 0) => 1, QN(\"A\", +1) => 1; tags=\"k\")\n\n    # real case\n    T = random_itensor(QN(\"A\", 1), i, j, k)\n\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"w\") do fo\n      write(fo, \"T\", T)\n    end\n\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"r\") do fi\n      rT = read(fi, \"T\", ITensor)\n      @test rT ≈ T\n    end\n\n    # complex case\n    T = random_itensor(ComplexF64, i, j, k)\n\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"w\") do fo\n      write(fo, \"complexT\", T)\n    end\n\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"r\") do fi\n      rT = read(fi, \"complexT\", ITensor)\n      @test rT ≈ T\n    end\n  end\n\n  @testset \"DownwardCompat\" begin\n    h5open(joinpath(@__DIR__, \"utils\", \"testfilev0.1.41.h5\"), \"r\") do fi\n      ITensorName = \"ITensorv",
+      "metadata": {
+        "section_id": "part_2",
+        "package": "itensors",
+        "section_title": "test_readwrite.jl",
+        "source_file": "test\\base\\test_readwrite.jl"
+      },
+      "score": 0.6749275748790114,
+      "original_score": 0.6653666211989824,
+      "vector_score": 0.6832885175089375,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 109,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      }
+    }
+  }
+}

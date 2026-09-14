@@ -1,0 +1,140 @@
+{
+  "query": "How to handle boundary conditions in boson Hamiltonian DMRG?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__How-to-do-periodic-boundary-condition-DMRG_2__0",
+      "text": "## How to do periodic boundary condition DMRG\nThe short answer to how to do fully periodic boundary condition DMRG in ITensor is that you simply input a periodic Hamiltonian into our OpSum system and make the MPO form of your Hamiltonian in the usual way. For example, for a chain of N sites with nearest-neighbor interactions, you include a term that connects site 1 to site N. For a one-dimensional Ising model chain Hamiltonian this would look like:\n```code\nsites = siteinds(\"S=1/2\",N)\n\nhterms = OpSum()\nfor j=1:(N-1)\n  hterms += \"Sz\",j,\"Sz\",j+1\nend\nhterms += \"Sz\",1,\"Sz\",N  # term 'wrapping' around the ring\n\nH = MPO(hterms,sites)\n```\nFor two-dimensional DMRG calculations, where the most common approach is to use periodic boundary conditions in the y-direction only, and not in the x-direction, you do a similar step in making your OpSum input to ITensor DMRG: you include terms wrapping around the periodic cylinder in the y direction but not in the x direction.\nHowever, fully periodic boundary conditions are only recommended for small systems when absolutely needed, and in general are not recommended. For a longer discussion of alternatives to using fully periodic boundaries, see the next section below.\nThe reason fully periodic boundary conditions (periodic in x in 1D, and periodic in both x and y in 2D) are not recommended in general is that the DMRG algorithm, as we are defining it here, optimizes an open-boundary MPS . So if you input a periodic-boundary Hamiltonian, there is a kind of \"mismatch\" that happens where you can still get the correct answer, but it requires much more resources (a larger bond dimension and more sweeps) to get good accuracy. There has been some research into \"truly\" periodic DMRG, [Pippan] that is DMRG that optimizes an MPS with a ring-like topology, but it is not widely used, is still an open area of algorithm development, and is not currently available in ITensor.",
+      "metadata": {
+        "section_title": "How to do periodic boundary condition DMRG",
+        "section_id": "How-to-do-periodic-boundary-condition-DMRG",
+        "package": "itensormps",
+        "source_file": "docs\\build\\faq\\DMRG.html"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.996436360226182,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "boundary",
+        "conditions",
+        "hamiltonian",
+        "dmrg"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__What-boundary-conditions-should-I-choose:-open,-periodic,-or-infinite?_3__0",
+      "text": "## What boundary conditions should I choose: open, periodic, or infinite?\nOne of the weaknesses of the density matrix renormalization group (DMRG), and its time-dependent or finite-temperature extensions, is that it works poorly with periodic boundary conditions. This stems from the fact that conventional DMRG optimizes over open-boundary matrix product state (MPS) wavefunctions whether or not the Hamiltonian includes periodic interactions.\nBut this begs the question, when are periodic boundary conditions (PBC) really needed? DMRG offers some compelling alternatives to PBC:\nUse open boundary conditions (OBC). Though this introduces edge effects, the number of states needed to reach a given accuracy is significantly lower than with PBC (see next section below). For gapped systems DMRG scales linearly with system size, meaning often one can study systems with many hundreds or even thousands of sites. Last but not least, open boundaries are often more natural. For studying systems which spontaneously break symmetry, adding \"pinning\" fields on the edge is often a very nice way to tip the balance toward a certain symmetry broken state while leaving the bulk unmodified.\nUse open boundary conditions (OBC). Though this introduces edge effects, the number of states needed to reach a given accuracy is significantly lower than with PBC (see next section below). For gapped systems DMRG scales linearly with system size, meaning often one can study systems with many hundreds or even thousands of sites. Last but not least, open boundaries are often more natural. For studying systems which spontaneously break symmetry, adding \"pinning\" fields on the edge is often a very nice way to tip the balance toward a certain symmetry broken state while leaving the bulk unmodified.\nUse smooth boundary conditions. The basic idea is to use OBC but send the Hamiltonian parameters smoothly to zero at the boundary so that the system can not \"feel\" the boundary. For certain systems this can significantly reduce edge effects. [Smooth1] [Smooth2] [Smooth3]\nUse smooth boundary conditions. The basic idea is to use OBC but send the Hamiltonian parameters smoothly to zero at the boundary so that the system can not \"feel\" the boundary. For certain systems this can significantly reduce edge effects. [Smooth1] [Smooth2] [Smooth3]\nUse \"infinite boundary conditions\", that is, use infinite DMRG in the form of an algorithm like iDMRG or VUMPS. This has a cost that can be even less than with OBC yet is completely free of finite-size effects.\nHowever, there are a handful of cases where PBC remains preferable despite the extra overhead. A few such cases are:\nBenchmarking DMRG against another code that uses PBC, such as a Monte Carlo or exact diagonalization code.\nBenchmarking DMRG against another code that uses PBC, such as a Monte Carlo or exact diagonalization code.\nExtracting the central charge of a",
+      "metadata": {
+        "section_title": "What boundary conditions should I choose: open, periodic, or infinite?",
+        "section_id": "What-boundary-conditions-should-I-choose:-open,-periodic,-or-infinite?",
+        "package": "itensormps",
+        "source_file": "docs\\build\\faq\\DMRG.html"
+      },
+      "score": 0.9662861663024142,
+      "original_score": 0.9453289183282392,
+      "vector_score": 1.0,
+      "bm25_score": 0.7131693447104168,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "boundary",
+        "conditions",
+        "hamiltonian",
+        "dmrg"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__ee249f64f89e6651115ee4527b6ea283__h2_2_2__0",
+      "text": "The short answer to how to do fully periodic boundary condition DMRG in ITensor is that\nyou simply input a **periodic Hamiltonian** into our OpSum system and make the MPO\nform of your Hamiltonian in the usual way. For example, for a chain of N sites with nearest-neighbor\ninteractions, you include a term that connects site 1 to site N. For a one-dimensional Ising model\nchain Hamiltonian this would look like:\n```\nsites = siteinds(\"S=1/2\",N)\nhterms = OpSum()\nfor j=1:(N-1)\n  hterms += \"Sz\",j,\"Sz\",j+1\nend\nhterms += \"Sz\",1,\"Sz\",N  # term 'wrapping' around the ring\nH = MPO(hterms,sites)\n```\nFor two-dimensional DMRG calculations, where the most common approach is to use\nperiodic boundary conditions in the y-direction only, and not in the x-direction,\nyou do a similar step in making your OpSum input to ITensor DMRG: you include\nterms wrapping around the periodic cylinder in the y direction but not in the x direction.\nHowever, fully periodic boundary conditions are only recommended for small systems\nwhen absolutely needed, and in general are not recommended. For a longer discussion\nof alternatives to using fully periodic boundaries, see the next section below.\nThe reason fully periodic boundary conditions (periodic in x in 1D, and periodic in both x\nand y in 2D) are not recommended in general is that the DMRG algorithm, as we are defining it\nhere, optimizes an **open-boundary MPS**. So if you input a periodic-boundary Hamiltonian, there\nis a kind of \"mismatch\" that happens where you can still get the correct answer, but it\nrequires much more resources (a larger bond dimension and more sweeps) to get good\naccuracy. There has been some research into \"truly\" periodic DMRG, [^Pippan] that is DMRG that\noptimizes an MPS with a ring-like topology, but it is not widely used, is still an\nopen area of algorithm development, and is not currently available in ITensor.",
+      "metadata": {
+        "package": "itensormps",
+        "source_file": "docs\\src\\faq\\DMRG.md",
+        "section_title": "How to do periodic boundary condition DMRG",
+        "section_id": "h2_2"
+      },
+      "score": 0.9476517875965318,
+      "original_score": 0.9395982164575367,
+      "vector_score": 0.942595160378144,
+      "bm25_score": 0.9142168824728013,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "boundary",
+        "conditions",
+        "hamiltonian",
+        "dmrg"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__What-boundary-conditions-should-I-choose:-open,-periodic,-or-infinite?_3__4",
+      "text": " \"soft box\" which still lets its wavefunction mix with the basis that describes the ground state outside the restricted sweeping region. Within infinite DMRG, boundary effects are rigorously absent if the calculation has converged. To compute bulk gaps one again uses a type of restricted sweeping known in the literature as \"infinite boundary conditions\". For more see the work by Phien, Vidal, and McCulloch. [Phien]\nObtaining bulk gaps : DMRG has the ability to \"target\" low-lying excited states or to obtain such states by constraining them to be orthogonal to the ground state. However, with OBC, localized excitations can get stuck to the edges and not reveal the true bulk gap behavior. Thus one may conclude that PBC is necessary. But using open or infinite boundaries remains the better choice because they allow much higher accuracy.\nTo deal with the presence of edges in OBC, one can use \"restricted sweeping\". Here one sweeps across the full system to obtain the ground state. Then, to obtain the first excited state one only sweeps through the full system to obtain the ground state. Then, to obtain the first excited state one only sweeps through the near the edges. This traps the particle in a \"soft box\" which still lets its wavefunction mix with the basis that describes the ground state outside the restricted sweeping region.\nWithin infinite DMRG, boundary effects are rigorously absent if the calculation has converged. To compute bulk gaps one again uses a type of restricted sweeping known in the literature as \"infinite boundary conditions\". For more see the work by Phien, Vidal, and McCulloch. [Phien]\nIn conclusion, consider carefully whether you really need to use periodic boundary conditions, as they impose a steep computational cost within DMRG. Periodic BC can actually be worse for the very types of measurements where they are  often presented as the best or \"standard\" choice. Many of the issues periodic boundaries circumvent can be avoided more elegantly by using infinite DMRG, or when that is not applicable, by using open boundary conditions with sufficient care.\nSmooth1 Smooth boundary conditions for quantum lattice systems , M. Vekic and Steven R. White, Phys. Rev. Lett. 71 , 4283 (1993) cond-mat/ 9310053\nSmooth2 Hubbard model with smooth boundary conditions , M. Vekic and Steven R. White, Phys. Rev. B 53 , 14552 (1996) cond-mat/ 9601009\nSmooth3 Grand canonical finite-size numerical approaches: A route to measuring bulk properties in an applied field , Chisa Hotta and Naokazu Shibata, Phys. Rev. B 86 , 041108 (2012)\nPippan Efficient matrix-product state method for periodic boundary conditions , P. Pippan, Steven R. White, and H.G. Evertz, Phys.",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "What-boundary-conditions-should-I-choose:-open,-periodic,-or-infinite?",
+        "section_title": "What boundary conditions should I choose: open, periodic, or infinite?",
+        "source_file": "docs\\build\\faq\\DMRG.html"
+      },
+      "score": 0.9081899014450997,
+      "original_score": 0.8587536945309227,
+      "vector_score": 0.930973139687215,
+      "bm25_score": 0.5576347586187791,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "boundary",
+        "conditions",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__ee249f64f89e6651115ee4527b6ea283__h2_3_3__1",
+      "text": "cond-mat/9601009)\n[^Smooth3]: [Grand canonical finite-size numerical approaches: A route to measuring bulk properties in an applied field](http://link.aps.org/doi/10.1103/PhysRevB.86.041108), Chisa Hotta and Naokazu Shibata, _Phys. Rev. B_ **86**, [041108](http://link.aps.org/doi/10.1103/PhysRevB.86.041108) (2012)\n* Use \"infinite boundary conditions\", that is, use infinite DMRG in the form of an algorithm like iDMRG or VUMPS. This has a cost that can be even less than with OBC yet is completely free of finite-size effects.\nHowever, there are a handful of cases where PBC remains preferable despite the extra overhead. A few such cases are:\n* Benchmarking DMRG against another code that uses PBC, such as a Monte Carlo or exact diagonalization code.\n* Extracting the central charge of a critical one-dimensional system described by a CFT. In practice, using PBC can give an accurate central charge even for quite small systems by fitting the subsystem entanglement entropy to the CFT scaling form.\n* Checking for the presence or absence of topological effects. These could be edge effects (the Haldane\n  phase has a four-fold ground state degeneracy with OBC, but not with PBC), or could be related to some global topological sector that is ill-defined with PBC (e.g. periodic vs. antiperiodic boundary conditions for the transverse field Ising model).\n(Note that in the remaining discussion, by PBC I mean  *fully periodic* boundary conditions in all directions.\nFor the case of DMRG applied to quasi-two-dimensional systems, it remains a good practice to use\nperiodic boundaries in the shorter direction, while still using open (or infinite) boundaries\nin the longer direction along the DMRG/MPS path.)\nBelow I discuss more about the problems with using PBC, as well as some misconceptions about when PBC seems necessary even though there are better alternatives.",
+      "metadata": {
+        "source_file": "docs\\src\\faq\\DMRG.md",
+        "package": "itensormps",
+        "section_id": "h2_3",
+        "section_title": "What boundary conditions should I choose: open, periodic, or infinite?"
+      },
+      "score": 0.8150022737896586,
+      "original_score": 0.7944469708773985,
+      "vector_score": 0.8863845802723256,
+      "bm25_score": 0.4153720420032582,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "boundary",
+        "conditions",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 97,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 39
+      }
+    }
+  }
+}

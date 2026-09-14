@@ -1,0 +1,117 @@
+{
+  "query": "How to exclude measurement in quantum circuit evolution",
+  "package": "qiskit",
+  "results": [
+    {
+      "id": "product_formula__1c7ca3ac73b5e68011edc70e5dd3a5dc__part_3__3",
+      "text": " atomic evolution is set, which cannot be serialized.\n        \"\"\"\n        if self._atomic_evolution is not None:\n            raise NotImplementedError(\n                \"Cannot serialize a product formula with a custom atomic evolution.\"\n            )\n\n        return {\n            \"order\": self.order,\n            \"reps\": self.reps,\n            \"insert_barriers\": self.insert_barriers,\n            \"cx_structure\": self._cx_structure,\n            \"wrap\": self._wrap,\n            \"preserve_order\": self.preserve_order,\n        }\n\n    def _custom_evolution(self, num_qubits, pauli_rotations):\n        \"\"\"Implement the evolution for the non-standard path.\n\n        This is either because a user-defined atomic evolution is given, or because the evolution\n        of individual Paulis needs to be wrapped in gates.\n        \"\"\"\n        circuit = QuantumCircuit(num_qubits)\n        cx_fountain = self._cx_structure == \"fountain\"\n\n        num_paulis = len(pauli_rotations)\n        for i, pauli_rotation in enumerate(pauli_rotations):\n            if self._atomic_evolution is not None:\n                # use the user-provided evolution with a global operator\n                operator = SparseObservable.from_sparse_list([pauli_rotation], num_qubits)\n                self.atomic_evolution(circuit, operator, time=1)  # time is inside the Pauli coeff\n\n            else:  # this means self._wrap is True\n                # we create a local sparse Pauli representation such that the operator\n                # does not span over all qubits of the circuit\n                pauli_string, qubits, coeff = pauli_rotation\n                local_pauli = (pauli_string, list(range(len(qubits))), coeff)\n\n                # build the circuit Rust-side\n                data = pauli_evolution(\n                    len(qubits),\n                    [local_pauli],\n                    False,\n                    cx_fountain,\n                )\n                evo = QuantumCircuit._from_circuit_data(data)\n\n                # and append it to the circuit with the correct label\n                gate = evo.to_gate(label=f\"exp(it {pauli_string})\")\n                circuit.append(gate, qubits)\n\n            if self.insert_barriers and i < num_paulis - 1:\n                circuit.barrier()\n\n        return circuit\n\n\ndef real_or_fail(value, tol=100):\n    \"\"\"Return real if close, otherwise fail. Unbound parameters are left unchanged.\n\n    Based on NumPy's ``real_if_close``, i.e. ``tol`` is in terms of machine precision for float.\n    \"\"\"\n    if isinstance(value, ParameterExpression):\n        return value\n\n    abstol = tol * np.finfo(float).eps\n    if abs(np.imag(value)) < abstol:\n        return np.real(value)\n\n    raise ValueError(f\"Encountered complex value {value}, but expected real.\")\n\n\ndef reorder_paulis(\n    paulis: Sequence",
+      "metadata": {
+        "source_file": "qiskit\\synthesis\\evolution\\product_formula.py",
+        "section_id": "part_3",
+        "section_title": "product_formula.py",
+        "package": "qiskit"
+      },
+      "score": 0.8160000000000001,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": 0.0,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "circuit",
+        "evolution"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "evolved_operator_ansatz__a2f35e7a4914a8f6c2d8e0faa9dda3eb__part_5__5",
+      "text": "oring entanglement and optimization within the Hamiltonian\n    Variational Ansatz (2020) `arXiv:2008.02941 <https://arxiv.org/abs/2008.02941>`__\n\n    \"\"\"\n    # If a single operator is given, check if it is a sum of operators (a SparsePauliOp),\n    # and split it into commuting terms. Otherwise, treat it as single operator.\n    if isinstance(hamiltonian, SparsePauliOp):\n        hamiltonian = hamiltonian.group_commuting()\n\n    return evolved_operator_ansatz(\n        hamiltonian,\n        reps=reps,\n        evolution=None,\n        insert_barriers=insert_barriers,\n        name=name,\n        parameter_prefix=parameter_prefix,\n        flatten=True,\n    )\n\n\nclass EvolvedOperatorAnsatz(NLocal):\n    \"\"\"The evolved operator ansatz.\"\"\"\n\n    def __init__(\n        self,\n        operators=None,\n        reps: int = 1,\n        evolution=None,\n        insert_barriers: bool = False,\n        name: str = \"EvolvedOps\",\n        parameter_prefix: str | Sequence[str] = \"t\",\n        initial_state: QuantumCircuit | None = None,\n        flatten: bool | None = None,\n    ):\n        \"\"\"\n        Args:\n            operators (BaseOperator | QuantumCircuit | list | None): The operators\n                to evolve. If a circuit is passed, we assume it implements an already evolved\n                operator and thus the circuit is not evolved again. Can be a single operator\n                (circuit) or a list of operators (and circuits).\n            reps: The number of times to repeat the evolved operators.\n            evolution (EvolutionBase | EvolutionSynthesis | None):\n                A specification of which evolution synthesis to use for the\n                :class:`.PauliEvolutionGate`.\n                Defaults to first order Trotterization.\n            insert_barriers: Whether to insert barriers in between each evolution.\n            name: The name of the circuit.\n            parameter_prefix: Set the names of the circuit parameters. If a string, the same prefix\n                will be used for each parameters. Can also be a list to specify a prefix per\n                operator.\n            initial_state: A :class:`.QuantumCircuit` object to prepend to the circuit.\n            flatten: Set this to ``True`` to output a flat circuit instead of nesting it inside multiple\n                layers of gate objects. By default currently the contents of\n                the output circuit will be wrapped in nested objects for\n                cleaner visualization. However, if you're using this circuit\n                for anything besides visualization its **strongly** recommended\n                to set this flag to ``True`` to avoid a large performance\n                overhead for parameter binding.\n        \"\"\"\n        super().__init__(\n            initial_state=initial_state,\n            parameter_prefix=parameter_prefix,\n            reps=reps,\n            insert_barriers=insert_barriers,\n",
+      "metadata": {
+        "package": "qiskit",
+        "source_file": "qiskit\\circuit\\library\\n_local\\evolved_operator_ansatz.py",
+        "section_title": "evolved_operator_ansatz.py",
+        "section_id": "part_5"
+      },
+      "score": 0.6550888861265568,
+      "original_score": 0.6250966153549531,
+      "vector_score": 0.7640316448376557,
+      "bm25_score": 0.06935649742414232,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "circuit",
+        "evolution"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "qdrift__b0560cd4e600fb7952f8e26213b4ae14__part_1__1",
+      "text": ".\n            cx_structure: How to arrange the CX gates for the Pauli evolutions, can be\n                ``\"chain\"``, where next neighbor connections are used, or ``\"fountain\"``, where all\n                qubits are connected to one. This only takes effect when\n                ``atomic_evolution is None``.\n            atomic_evolution: A function to apply the evolution of a single\n                :class:`~.quantum_info.Pauli`, or :class:`.SparsePauliOp` of only commuting terms,\n                to a circuit. The function takes in three arguments: the circuit to append the\n                evolution to, the Pauli operator to evolve, and the evolution time. By default, a\n                single Pauli evolution is decomposed into a chain of ``CX`` gates and a single\n                ``RZ`` gate.\n            seed: An optional seed for reproducibility of the random sampling process.\n            wrap: Whether to wrap the atomic evolutions into custom gate objects. This only takes\n                effect when ``atomic_evolution is None``.\n            preserve_order: If ``False``, allows reordering the terms of the operator to\n                potentially yield a shallower evolution circuit. Not relevant\n                when synthesizing operator with a single term.\n            atomic_evolution_sparse_observable: If a custom ``atomic_evolution`` is passed,\n                which does not yet support :class:`.SparseObservable`\\ s as input, set this\n                argument to ``False`` to automatically apply a conversion to :class:`.SparsePauliOp`.\n                This argument is supported until Qiskit 2.2, at which point all atomic evolutions\n                are required to support :class:`.SparseObservable`\\ s as input.\n        \"\"\"\n        super().__init__(\n            1,\n            reps,\n            insert_barriers,\n            cx_structure,\n            atomic_evolution,\n            wrap,\n            preserve_order,\n            atomic_evolution_sparse_observable=atomic_evolution_sparse_observable,\n        )\n        self.sampled_ops = None\n        self.rng = np.random.default_rng(seed)\n\n    def expand(self, evolution: PauliEvolutionGate) -> list[tuple[str, tuple[int], float]]:\n        operators = evolution.operator\n        time = evolution.time  # used to determine the number of gates\n\n        # QDrift is based on first-order Lie-Trotter, hence we can just concatenate all\n        # Pauli terms and ignore commutations\n        if isinstance(operators, list):\n            paulis = list(chain.from_iterable([op.to_sparse_list() for op in operators]))\n        else:\n            paulis = operators.to_sparse_list()\n\n        try:\n            coeffs = [float(np.real_if_close(coeff)) for _, _, coeff in paulis]\n        except TypeError as exc:\n            raise QiskitError(\"QDrift requires bound, real coefficients.\") from exc\n\n        # We artificially make the",
+      "metadata": {
+        "section_id": "part_1",
+        "package": "qiskit",
+        "source_file": "qiskit\\synthesis\\evolution\\qdrift.py",
+        "section_title": "qdrift.py"
+      },
+      "score": 0.6206314658599699,
+      "original_score": 0.5876428976738803,
+      "vector_score": 0.6044666348628097,
+      "bm25_score": 0.5203479489181629,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "circuit",
+        "evolution"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "evolved_operator_ansatz__a2f35e7a4914a8f6c2d8e0faa9dda3eb__part_7__7",
+      "text": "\n    def operators(self, operators=None) -> None:\n        \"\"\"Set the operators to be evolved.\n\n        operators (Optional[Union[QuantumCircuit, list]]): The operators to evolve.\n            If a circuit is passed, we assume it implements an already evolved operator and thus\n            the circuit is not evolved again. Can be a single operator (circuit) or a list of\n            operators (and circuits).\n        \"\"\"\n        operators = _validate_operators(operators)\n        self._invalidate()\n        self._operators = operators\n        if self.num_qubits == 0:\n            self.qregs = []\n        else:\n            self.qregs = [QuantumRegister(self.num_qubits, name=\"q\")]\n\n    # TODO: the `preferred_init_points`-implementation can (and should!) be improved!\n    @property\n    def preferred_init_points(self):\n        \"\"\"Getter of preferred initial points based on the given initial state.\"\"\"\n        if self._initial_state is None:\n            return None\n        else:\n            # If an initial state was set by the user, then we want to make sure that the VQE does\n            # not start from a random point. Thus, we return an all-zero initial point for the\n            # optimizer which is used (unless it gets overwritten by a higher-priority setting at\n            # runtime of the VQE).\n            # However, in order to determine the correct length, we must build the QuantumCircuit\n            # first, because otherwise the operators may not be set yet.\n            self._build()\n            return np.zeros(self.reps * len(self.operators), dtype=float)\n\n    def _evolve_operator(self, operator, time):\n\n        # pylint: disable=cyclic-import\n        from qiskit.circuit.library.hamiltonian_gate import HamiltonianGate\n\n        # if the operator is specified as matrix use exact matrix exponentiation\n        if isinstance(operator, Operator):\n            gate = HamiltonianGate(operator, time)\n        # otherwise, use the PauliEvolutionGate\n        else:\n            from qiskit.synthesis.evolution import LieTrotter\n\n            evolution = LieTrotter() if self._evolution is None else self._evolution\n            gate = PauliEvolutionGate(operator, time, synthesis=evolution)\n\n        evolved = QuantumCircuit(operator.num_qubits)\n        if not self.flatten:\n            evolved.append(gate, evolved.qubits)\n        else:\n            evolved.compose(gate.definition, evolved.qubits, inplace=True)\n        return evolved\n\n    def _build(self):\n        if self._is_built:\n            return\n\n        # need to check configuration here to ensure the operators are not None\n        self._check_configuration()\n\n        coeff = Parameter(\"c\")\n        circuits = []\n\n        for op in self.operators:\n            # if the operator is already the evolved circuit just append it\n            if isinstance(op, QuantumC",
+      "metadata": {
+        "package": "qiskit",
+        "section_title": "evolved_operator_ansatz.py",
+        "section_id": "part_7",
+        "source_file": "qiskit\\circuit\\library\\n_local\\evolved_operator_ansatz.py"
+      },
+      "score": 0.5843268858241536,
+      "original_score": 0.5481813976349496,
+      "vector_score": 0.6852267470436869,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "circuit",
+        "evolution"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "suzuki_trotter__7f62f7066dcb3871249cb80768401bb6__part_1__1",
+      "text": "0508139>`_\n        [2]: N. Hatano and M. Suzuki,\n        \"Finding Exponential Product Formulas of Higher Orders\" (2005).\n        `arXiv:math-ph/0506007 <https://arxiv.org/pdf/math-ph/0506007.pdf>`_\n    \"\"\"\n\n    def __init__(\n        self,\n        order: int = 2,\n        reps: int = 1,\n        insert_barriers: bool = False,\n        cx_structure: str = \"chain\",\n        atomic_evolution: (\n            Callable[[QuantumCircuit, qiskit.quantum_info.Pauli | SparsePauliOp, float], None]\n            | None\n        ) = None,\n        wrap: bool = False,\n        preserve_order: bool = True,\n        *,\n        atomic_evolution_sparse_observable: bool = False,\n    ) -> None:\n        r\"\"\"\n        Args:\n            order: The order of the product formula.\n            reps: The number of time steps.\n            insert_barriers: Whether to insert barriers between the atomic evolutions.\n            cx_structure: How to arrange the CX gates for the Pauli evolutions, can be ``\"chain\"``,\n                where next neighbor connections are used, or ``\"fountain\"``, where all qubits are\n                connected to one. This only takes effect when ``atomic_evolution is None``.\n            atomic_evolution: A function to apply the evolution of a single\n                :class:`~.quantum_info.Pauli`, or :class:`.SparsePauliOp` of only commuting terms,\n                to a circuit. The function takes in three arguments: the circuit to append the\n                evolution to, the Pauli operator to evolve, and the evolution time. By default, a\n                single Pauli evolution is decomposed into a chain of ``CX`` gates and a single\n                ``RZ`` gate.\n            wrap: Whether to wrap the atomic evolutions into custom gate objects. This only takes\n                effect when ``atomic_evolution is None``.\n            preserve_order: If ``False``, allows reordering the terms of the operator to\n                potentially yield a shallower evolution circuit. Not relevant\n                when synthesizing operator with a single term.\n            atomic_evolution_sparse_observable: If a custom ``atomic_evolution`` is passed,\n                which does not yet support :class:`.SparseObservable`\\ s as input, set this\n                argument to ``False`` to automatically apply a conversion to :class:`.SparsePauliOp`.\n                This argument is supported until Qiskit 2.2, at which point all atomic evolutions\n                are required to support :class:`.SparseObservable`\\ s as input.\n\n        Raises:\n            ValueError: If order is not even\n        \"\"\"\n        if order > 1 and order % 2 == 1:\n            raise ValueError(\n                \"Suzuki product",
+      "metadata": {
+        "section_title": "suzuki_trotter.py",
+        "section_id": "part_1",
+        "package": "qiskit",
+        "source_file": "qiskit\\synthesis\\evolution\\suzuki_trotter.py"
+      },
+      "score": 0.5814239987509496,
+      "original_score": 0.5450260855988583,
+      "vector_score": 0.6053087142568017,
+      "bm25_score": 0.30389557096708497,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "circuit",
+        "evolution"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 53,
+    "final_results_count": 5
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "query": "itensors randomMPS for tJ model initial state with specific quantum numbers",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_trg__2f4865721f7c7ba535be3f8ee717655a__full__0",
+      "text": "using ITensors\nusing Test\nusing Random\n\nRandom.seed!(12345)\n\ninclude(joinpath(pkgdir(ITensors), \"examples\", \"src\", \"trg.jl\"))\ninclude(joinpath(pkgdir(ITensors), \"examples\", \"src\", \"2d_classical_ising.jl\"))\n\n@testset \"trg\" begin\n  # Make Ising model partition function\n  β = 1.1 * βc\n  d = 2\n  s = Index(d)\n  l = addtags(s, \"left\")\n  u = addtags(s, \"up\")\n  T = ising_mpo(l, u, β)\n\n  χmax = 20\n  nsteps = 20\n  κ, T = trg(T; χmax=χmax, nsteps=nsteps)\n\n  @test κ ≈ exp(-β * ising_free_energy(β)) atol = 1e-4\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "itensors",
+        "section_title": "test_trg.jl",
+        "source_file": "test\\base\\test_trg.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "model"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "2d_heisenberg_conserve_spin__d0c3662731bb4e505d92ed7024af9077__full__0",
+      "text": "using ITensors, ITensorMPS\n\nlet\n  Ny = 6\n  Nx = 12\n\n  N = Nx * Ny\n\n  sites = siteinds(\"S=1/2\", N; conserve_qns=true)\n\n  lattice = square_lattice(Nx, Ny; yperiodic=false)\n\n  os = OpSum()\n  for b in lattice\n    os += 0.5, \"S+\", b.s1, \"S-\", b.s2\n    os += 0.5, \"S-\", b.s1, \"S+\", b.s2\n    os += \"Sz\", b.s1, \"Sz\", b.s2\n  end\n  H = MPO(os, sites)\n\n  state = [isodd(n) ? \"Up\" : \"Dn\" for n in 1:N]\n  # Initialize wavefunction to a random MPS\n  # of bond-dimension 10 with same quantum\n  # numbers as `state`\n  psi0 = random_mps(sites, state; linkdims=20)\n\n  nsweeps = 10\n  maxdim = [20, 60, 100, 100, 200, 400, 800]\n  cutoff = [1E-8]\n\n  energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff)\n\n  return nothing\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "section_title": "2d_heisenberg_conserve_spin.jl",
+        "source_file": "examples\\dmrg\\2d_heisenberg_conserve_spin.jl",
+        "package": "itensormps"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensors",
+        "state",
+        "quantum",
+        "numbers"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_id": "h2_2",
+        "package": "itensormps"
+      },
+      "score": 0.995423393257446,
+      "original_score": 0.9953060443666113,
+      "vector_score": 0.9953060443666113,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "2d_hubbard_conserve_particles__aad747f19b81de0756ace6c93b6ee664__full__0",
+      "text": "using ITensors, ITensorMPS\n\nfunction main(; Nx=6, Ny=3, U=4.0, t=1.0)\n  N = Nx * Ny\n\n  nsweeps = 10\n  maxdim = [100, 200, 400, 800, 1600]\n  cutoff = [1E-6]\n  noise = [1E-6, 1E-7, 1E-8, 0.0]\n\n  sites = siteinds(\"Electron\", N; conserve_qns=true)\n\n  lattice = square_lattice(Nx, Ny; yperiodic=true)\n\n  os = OpSum()\n  for b in lattice\n    os -= t, \"Cdagup\", b.s1, \"Cup\", b.s2\n    os -= t, \"Cdagup\", b.s2, \"Cup\", b.s1\n    os -= t, \"Cdagdn\", b.s1, \"Cdn\", b.s2\n    os -= t, \"Cdagdn\", b.s2, \"Cdn\", b.s1\n  end\n  for n in 1:N\n    os += U, \"Nupdn\", n\n  end\n  H = MPO(os, sites)\n\n  # Half filling\n  state = [isodd(n) ? \"Up\" : \"Dn\" for n in 1:N]\n\n  # Initialize wavefunction to a random MPS\n  # of bond-dimension 10 with same quantum\n  # numbers as `state`\n  psi0 = random_mps(sites, state)\n\n  energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, noise)\n  @show t, U\n  @show flux(psi)\n  @show maxlinkdim(psi)\n  @show energy\n\n  return nothing\nend\n\nmain()\n",
+      "metadata": {
+        "source_file": "examples\\dmrg\\2d_hubbard_conserve_particles.jl",
+        "section_title": "2d_hubbard_conserve_particles.jl",
+        "section_id": "full",
+        "package": "itensormps"
+      },
+      "score": 0.9755539406887378,
+      "original_score": 0.9728377118763754,
+      "vector_score": 0.9728377118763754,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensors",
+        "state",
+        "quantum",
+        "numbers"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Compute-excited-states-with-DMRG_5__0",
+      "text": "## Compute excited states with DMRG\nITensor DMRG accepts additional MPS wavefunctions as a optional, extra argument. These additional 'penalty states' are provided as an array of MPS just after the Hamiltonian, like this:\n```code\nenergy,psi3 = dmrg(H,[psi0,psi1,psi2],psi3_init;nsweeps,maxdim,cutoff)\n```\nHere the penalty states are [psi0,psi1,psi2] . When these are provided, the DMRG code minimizes the energy of the current MPS while also reducing its overlap (inner product) with the previously provided MPS. If these overlaps become sufficiently small, then the computed MPS is an excited state. So by finding the ground state, then providing it to DMRG as a \"penalty state\" or previous state one can compute the first excited state. Then providing both of these, one can get the second excited state, etc.\nA  keyword argument called weight can also be provided to the dmrg function when penalizing overlaps to previous states. The weight parameter is multiplied by the overlap with the previous states, so sets the size of the penalty. It should be chosen at least as large as the (estimated) gap between the ground and first excited states. Otherwise the optimal value of the weight parameter is not so obvious, and it is best to try various weights during initial test calculations.\nNote that when the system has conserved quantum numbers, a superior way to find excited states can be to find ground states of quantum number (or symmetry) sectors other than the one containing the absolute ground state. In that context, the penalty method used below is a way to find higher excited states within the same quantum number sector.\nFull Example code:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 20\n\n  sites = siteinds(\"S=1/2\",N)\n\n  h = 4.0\n\n  weight = 20*h # use a large weight\n                # since gap is expected to be large\n\n\n  #\n  # Use the OpSum feature to create the\n  # transverse field Ising model\n  #\n  # Factors of 4 and 2 are to rescale\n  # spin operators into Pauli matrices\n  #\n  os = OpSum()\n  for j=1:N-1\n    os -= 4,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:N\n    os -= 2*h,\"Sx\",j;\n  end\n  H = MPO(os,sites)\n\n\n  #\n  # Make sure to do lots of sweeps\n  # when finding excited states\n  #\n  nsweeps = 30\n  maxdim = [10,10,10,20,20,40,80,100,200,200]\n  cutoff = [1E-8]\n",
+      "metadata": {
+        "section_title": "Compute excited states with DMRG",
+        "section_id": "Compute-excited-states-with-DMRG",
+        "package": "itensormps",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 0.9286664632976379,
+      "original_score": 0.8811107721627298,
+      "vector_score": 0.8127424975028054,
+      "bm25_score": 0.273473098639698,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "itensors",
+        "model",
+        "initial",
+        "state",
+        "quantum",
+        "numbers"
+      ],
+      "match_ratio": 0.75,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 114,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

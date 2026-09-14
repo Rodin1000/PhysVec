@@ -1,0 +1,149 @@
+{
+  "query": "Map fermionic Hamiltonian to qubits using Jordan–Wigner in Qiskit Nature.",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "fermionic_gaussian_state__80f84e9eb39382ac27685324204d154b__part_3__3",
+      "text": ", only the Jordan-Wigner Transform is supported.\n                Please use the :class:`qiskit_nature.second_q.mappers.JordanWignerMapper`.\n        \"\"\"\n        if validate:\n            _validate_transformation_matrix(transformation_matrix, rtol=rtol, atol=atol)\n\n        if occupied_orbitals is None:\n            occupied_orbitals = []\n\n        if qubit_mapper is None:\n            qubit_mapper = JordanWignerMapper()\n\n        n, _ = transformation_matrix.shape\n        register = QuantumRegister(n)\n        super().__init__(register, **circuit_kwargs)\n\n        if isinstance(qubit_mapper, JordanWignerMapper):\n            operations = _prepare_fermionic_gaussian_state_jw(\n                register, transformation_matrix, occupied_orbitals\n            )\n            for gate, qubits in operations:\n                self.append(gate, qubits)\n        else:\n            raise NotImplementedError(\n                \"Currently, only the Jordan-Wigner Transform is supported. \"\n                \"Please use the qiskit_nature.second_q.mappers.JordanWignerMapper.\"\n            )\n",
+      "metadata": {
+        "package": "qiskit-nature",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\fermionic_gaussian_state.py",
+        "section_title": "fermionic_gaussian_state.py",
+        "section_id": "part_3"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.9389903260546264,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "qubits",
+        "jordan",
+        "wigner"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "hamiltonian_phase_estimation__fe09fa7dc716801664052a1a15ef8c76__part_1__1",
+      "text": " sufficiently large to map positive :math:`\\lambda` to\n    :math:`[0,\\pi)` and negative :math:`\\lambda` to :math:`[\\pi,2\\pi)`. Each time the circuit is\n    run, one measures a phase corresponding to :math:`lambda_j` with probability :math:`|c_j|^2`.\n\n    If :math:`H` is a Pauli sum, the bound :math:`b` is computed from the sum of the absolute\n    values of the coefficients of the terms. There is no way to reliably recover eigenvalues\n    from phases very near the endpoints of these intervals. Because of this you should be aware\n    that for degenerate cases, such as :math:`H=Z`, the eigenvalues :math:`\\pm 1` will be\n    mapped to the same phase, :math:`\\pi`, and so cannot be distinguished. In this case, you need\n    to specify a larger bound as an argument to the method ``estimate``.\n\n    This class uses and works together with :class:`~qiskit_algorithms.PhaseEstimationScale` to\n    manage scaling the Hamiltonian and the phases that are obtained by the QPE algorithm. This\n    includes setting, or computing, a bound on the eigenvalues of the operator, using this\n    bound to obtain a scale factor, scaling the operator, and shifting and scaling the measured\n    phases to recover the eigenvalues.\n\n    Note that, although we speak of \"evolving\" the state according the Hamiltonian, in the\n    present algorithm, we are not actually considering time evolution. Rather, the role of time is\n    played by the scaling factor, which is chosen to best extract the eigenvalues of the\n    Hamiltonian.\n\n    A few of the ideas in the algorithm may be found in Ref. [1].\n\n    **Reference:**\n\n    [1]: Quantum phase estimation of multiple eigenvalues for small-scale (noisy) experiments\n         T.E. O'Brien, B. Tarasinski, B.M. Terhal\n         `arXiv:1809.09697 <https://arxiv.org/abs/1809.09697>`_\n\n    \"\"\"\n\n    def __init__(\n        self,\n        num_evaluation_qubits: int,\n        sampler: BaseSamplerV2 | None = None,\n        *,\n        transpiler: Transpiler | None = None,\n        transpiler_options: dict[str, Any] | None = None,\n    ) -> None:\n        r\"\"\"\n        Args:\n            num_evaluation_qubits: The number of qubits used in estimating the phase. The phase will\n                be estimated as a binary string with this many bits.\n            sampler: The sampler primitive on which the circuit will be sampled.\n            transpiler: An optional object with a `run` method allowing to transpile the circuits\n                that are produced within this",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "section_id": "part_1",
+        "source_file": "qiskit_algorithms\\phase_estimators\\hamiltonian_phase_estimation.py",
+        "section_title": "hamiltonian_phase_estimation.py"
+      },
+      "score": 0.9991466045506638,
+      "original_score": 0.9990633464580456,
+      "vector_score": 1.0,
+      "bm25_score": 0.934364203272049,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "map",
+        "hamiltonian",
+        "qubits",
+        "using"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    },
+    {
+      "id": "test_hamiltonian_gate__84146b1e6b5a7a4b9a38c727c62e8ad3__part_1__1",
+      "text": "):\n        \"\"\"test adjoint operation\"\"\"\n        ham = HamiltonianGate([[3, 4j], [-4j, -0.2]], np.pi * 0.143)\n        np.testing.assert_array_almost_equal(\n            ham.adjoint().to_matrix(), np.transpose(np.conj(ham.to_matrix()))\n        )\n\n    def test_repeat(self):\n        \"\"\"test repeat operation\"\"\"\n        ham = HamiltonianGate(np.array([[1, 0.5 + 4j], [0.5 - 4j, -0.2]]), np.pi * 0.143)\n        operator = Operator(ham)\n        self.assertTrue(np.allclose(Operator(ham.repeat(2)), operator @ operator))\n\n\nclass TestHamiltonianCircuit(QiskitTestCase):\n    \"\"\"Hamiltonian gate circuit tests.\"\"\"\n\n    def test_1q_hamiltonian(self):\n        \"\"\"test 1 qubit hamiltonian\"\"\"\n        qr = QuantumRegister(1, \"q0\")\n        cr = ClassicalRegister(1, \"c0\")\n        qc = QuantumCircuit(qr, cr)\n        matrix = np.zeros((2, 2))\n        qc.x(qr[0])\n        theta = Parameter(\"theta\")\n        qc.append(HamiltonianGate(matrix, theta), [qr[0]])\n        qc = qc.assign_parameters({theta: 1})\n\n        # test of text drawer\n        self.log.info(qc)\n        dag = circuit_to_dag(qc)\n        dag_nodes = dag.named_nodes(\"hamiltonian\")\n        self.assertTrue(len(dag_nodes) == 1)\n        dnode = dag_nodes[0]\n        self.assertIsInstance(dnode.op, HamiltonianGate)\n        self.assertEqual(dnode.qargs, tuple(qc.qubits))\n        assert_allclose(dnode.op.to_matrix(), np.eye(2))\n\n    def test_2q_hamiltonian(self):\n        \"\"\"test 2 qubit hamiltonian\"\"\"\n        qr = QuantumRegister(2)\n        cr = ClassicalRegister(2)\n        qc = QuantumCircuit(qr, cr)\n        matrix = Operator.from_label(\"XY\")\n        qc.x(qr[0])\n        theta = Parameter(\"theta\")\n        uni2q = HamiltonianGate(matrix, theta)\n        qc.append(uni2q, [qr[0], qr[1]])\n        qc2 = qc.assign_parameters({theta: -np.pi / 2})\n        dag = circuit_to_dag(qc2)\n        nodes = dag.two_qubit_ops()\n        self.assertEqual(len(nodes), 1)\n        dnode = nodes[0]\n        self.assertIsInstance(dnode.op, HamiltonianGate)\n        self.assertEqual(dnode.qargs, (qr[0], qr[1]))\n        # Equality based on Pauli exponential identity\n        np.testing.assert_array_almost_equal(dnode.op.to_matrix(), 1j * matrix.data)\n        qc3 = dag_to_circuit(dag",
+      "metadata": {
+        "section_id": "part_1",
+        "source_file": "test\\python\\circuit\\test_hamiltonian_gate.py",
+        "section_title": "test_hamiltonian_gate.py",
+        "package": "qiskit"
+      },
+      "score": 0.8183318120829021,
+      "original_score": 0.8098821289239673,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "qubits"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "ref_initialize__3c79c72e7d767a01d227dae5d0b67d73__part_10__10",
+      "text": "x2\": shots / 2}]\n    else:\n        return [{\"0x00\": shots / 2, \"0x10\": shots / 2}]\n\n\ndef initialize_entangled_qubits(final_measure=True):\n    \"\"\"Initialize test circuits with entangled qubits\"\"\"\n\n    circuits = []\n    qr = QuantumRegister(3)\n    if final_measure:\n        cr = ClassicalRegister(3)\n        regs = (qr, cr)\n    else:\n        regs = (qr,)\n\n    # Initialize |000+111> -> |000+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [0])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |010+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 1], [1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+011>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0, 0, 0], [0, 1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |100+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 0, 0, 1], [0, 2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100+010+110+100+101+011+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(",
+      "metadata": {
+        "section_title": "ref_initialize.py",
+        "package": "qiskit-aer",
+        "section_id": "part_10",
+        "source_file": "test\\terra\\reference\\ref_initialize.py"
+      },
+      "score": 0.8141069705034346,
+      "original_score": 0.8098821289239673,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qubits"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "fermionic_gaussian_state__80f84e9eb39382ac27685324204d154b__part_2__2",
+      "text": " quadratic Hamiltonian.\n\n    Currently, only the Jordan-Wigner transformation is supported.\n\n    Reference: `arXiv:1711.05395`_\n\n    .. _arXiv:1711.05395: https://arxiv.org/abs/1711.05395\n    \"\"\"\n\n    def __init__(\n        self,\n        transformation_matrix: np.ndarray,\n        occupied_orbitals: Sequence[int] | None = None,\n        qubit_mapper: QubitMapper | None = None,\n        *,\n        validate: bool = True,\n        rtol: float = 1e-5,\n        atol: float = 1e-8,\n        **circuit_kwargs,\n    ) -> None:\n        # pylint: disable=unused-argument\n        r\"\"\"\n        Args:\n            transformation_matrix: The matrix :math:`W` that specifies the coefficients of the\n                new creation operators in terms of the original creation and annihilation operators.\n                This matrix must satisfy special constraints, as detailed above.\n            occupied_orbitals: The pseudo-particle orbitals to fill. These refer to the indices\n                of the operators :math:`\\{b^\\dagger_j\\}` from the main body of the docstring\n                of this function. The default behavior is to use the empty set of orbitals,\n                which corresponds to a state with zero pseudo-particles.\n            qubit_mapper: The ``QubitMapper``. The default behavior is to create one using the call\n                ``JordanWignerMapper()``.\n            validate: Whether to validate the inputs.\n            rtol: Relative numerical tolerance for input validation.\n            atol: Absolute numerical tolerance for input validation.\n            circuit_kwargs: Keyword arguments to pass to the ``QuantumCircuit`` initializer.\n\n        Raises:\n            ValueError: transformation_matrix must be a 2-dimensional array.\n            ValueError: transformation_matrix must have shape ``(n_orbitals, 2 * n_orbitals)``.\n            ValueError: transformation_matrix does not describe a valid transformation\n                of fermionic ladder operators. A valid matrix has the block form\n                :math:`(W_1 \\quad W_2)` where :math:`W_1 W_1^\\dagger + W_2 W_2^\\dagger = I` and\n                :math:`W_1 W_2^T + W_2 W_1^T = 0`.\n\n            NotImplementedError: Currently, only the Jordan-Wigner Transform is supported.\n                Please use the :class:`qiskit_nature.second_q.mappers.JordanWignerMapper`.\n        \"\"\"\n        if validate:\n            _validate_transformation_matrix(transformation_matrix, rtol=rtol, atol=atol)\n\n        if occupied_orbitals is None:\n            occupied_orbitals = []\n\n        if qubit_mapper is None:\n            qubit_mapper = JordanWignerMapper()\n\n        n, _ = transformation_matrix",
+      "metadata": {
+        "section_title": "fermionic_gaussian_state.py",
+        "package": "qiskit-nature",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\fermionic_gaussian_state.py",
+        "section_id": "part_2"
+      },
+      "score": 0.8069740776404508,
+      "original_score": 0.7828458373455072,
+      "vector_score": 0.7675055957593385,
+      "bm25_score": 0.7964456344042391,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "fermionic",
+        "hamiltonian",
+        "using",
+        "jordan",
+        "wigner"
+      ],
+      "match_ratio": 0.5555555555555556,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 221,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 51
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

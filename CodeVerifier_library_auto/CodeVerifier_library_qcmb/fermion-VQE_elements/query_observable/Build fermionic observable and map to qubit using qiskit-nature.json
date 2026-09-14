@@ -1,0 +1,139 @@
+{
+  "query": "Build fermionic observable and map to qubit using qiskit-nature",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "README__fcb4764aef934617ba63f9dcee1241e6__h1_2_2__0",
+      "text": "int main(int argc, char *argv[]) {\n    // build a 100-qubit empty observable\n    uint32_t num_qubits = 100;\n    QkObs *obs = qk_obs_zero(num_qubits);\n    // add the term 2 * (X0 Y1 Z2) to the observable\n    complex double coeff = 2;\n    QkBitTerm bit_terms[3] = {QkBitTerm_X, QkBitTerm_Y, QkBitTerm_Z};\n    uint32_t indices[3] = {0, 1, 2};\n    QkObsTerm term = {coeff, 3, bit_terms, indices, num_qubits};\n    qk_obs_add_term(obs, &term);\n    // print some properties\n    printf(\"num_qubits: %u\\n\", qk_obs_num_qubits(obs));\n    printf(\"num_terms: %lu\\n\", qk_obs_num_terms(obs));\n    // free the memory allocated for the observable\n    qk_obs_free(obs);\n    return 0;\n}\n```\nRefer to the C API documentation for more information and examples.",
+      "metadata": {
+        "section_title": "include <stdio.h>",
+        "package": "qiskit",
+        "section_id": "h1_2",
+        "source_file": "crates\\cext\\README.md"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.6710477383807383,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "build",
+        "observable",
+        "qubit"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "0.6_c_qubit_converter__b2ad6fe9af7ffae9b09fd8e83744238a__part_4__4",
+      "text": " -0.22575349 * ZIII\n    +0.16614543 * ZIIZ\n    +0.17464343 * ZIZI\n    +0.12091263 * ZZII\n\nThis is likely what you were doing when you were working with any of the following mappers:\n\n- :class:`~qiskit_nature.second_q.mappers.JordanWignerMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevSuperFastMapper`\n- :class:`~qiskit_nature.second_q.mappers.DirectMapper`\n- :class:`~qiskit_nature.second_q.mappers.LinearMapper`\n- :class:`~qiskit_nature.second_q.mappers.LogarithmicMapper`\n\nThe ParityMapper\n----------------\n\nHowever, when you were using the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, you were\nable to use the ``two_qubit_reduction=True`` option of the\n:class:`~qiskit_nature.second_q.mappers.QubitConverter`. This ability, which has always been unique\nto the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, is now directly built into said\nmapper. So if you were doing something along these lines:\n\n.. code:: ipython3\n\n   from qiskit_nature.second_q.mappers import ParityMapper\n\n   converter = QubitConverter(ParityMapper(), two_qubit_reduction=True)\n\n   reduced_op = converter.convert(hamiltonian, num_particles=problem.num_particles)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nThe equivalent code now looks like the following:\n\n.. code:: ipython3\n\n   mapper = ParityMapper(num_particles=problem.num_particles)\n\n   reduced_op = mapper.map(hamiltonian)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nZ2Symmetries\n------------\n\nFinally, the :class:`~qiskit_nature.second_q.mappers.QubitConverter` class also supported further\nreduction of qubit resources by exploiting",
+      "metadata": {
+        "section_id": "part_4",
+        "source_file": "docs\\migration\\0.6_c_qubit_converter.rst",
+        "section_title": "0.6_c_qubit_converter.rst",
+        "package": "qiskit-nature"
+      },
+      "score": 0.8671135058411199,
+      "original_score": 0.8563389252336431,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "map",
+        "qubit",
+        "using"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "base_state_fidelity__4af80df8c9120cca15c3cbd952a6f649__part_3__3",
+      "text": " )\n\n        circuits = []\n        for circuit_1, circuit_2 in zip(circuits_1, circuits_2):\n\n            # Use the same key for circuits as qiskit.primitives use.\n            circuit = self._circuit_cache.get((_circuit_key(circuit_1), _circuit_key(circuit_2)))\n\n            if circuit is not None:\n                circuits.append(circuit)\n            else:\n                self._check_qubits_match(circuit_1, circuit_2)\n\n                # re-parametrize input circuits\n                # TODO: make smarter checks to avoid unnecessary re-parametrizations\n                parameters_1 = ParameterVector(\"x\", circuit_1.num_parameters)\n                parametrized_circuit_1 = circuit_1.assign_parameters(parameters_1)\n                parameters_2 = ParameterVector(\"y\", circuit_2.num_parameters)\n                parametrized_circuit_2 = circuit_2.assign_parameters(parameters_2)\n\n                circuit = self.create_fidelity_circuit(\n                    parametrized_circuit_1, parametrized_circuit_2\n                )\n                circuits.append(circuit)\n                # update cache\n                self._circuit_cache[_circuit_key(circuit_1), _circuit_key(circuit_2)] = circuit\n\n        if self._transpiler is not None:\n            return self._transpiler.run(circuits, **self._transpiler_options)\n\n        return circuits\n\n    def _construct_value_list(\n        self,\n        circuits_1: Sequence[QuantumCircuit],\n        circuits_2: Sequence[QuantumCircuit],\n        values_1: Sequence[float] | Sequence[Sequence[float]] | None = None,\n        values_2: Sequence[float] | Sequence[Sequence[float]] | None = None,\n    ) -> list[list[float]]:\n        \"\"\"\n        Preprocesses input parameter values to match the fidelity\n        circuit parametrization, and return in list format.\n\n        Args:\n           circuits_1: (Parametrized) quantum circuits preparing the\n                        first list of quantum states.\n           circuits_2: (Parametrized) quantum circuits preparing the\n                        second list of quantum states.\n           values_1: Numerical parameters to be bound to the first circuits.\n           values_2: Numerical parameters to be bound to the second circuits.\n\n        Returns:\n             List of lists of parameter values for fidelity circuit.\n\n        \"\"\"\n        values_1 = self._preprocess_values(circuits_1, values_1)\n        values_2 = self._preprocess_values(circuits_2, values_2)\n        # now, values_1 and values_2 are explicitly made 2d lists\n\n        values = []\n        if len(values_2[0]) == 0:\n            values = list(values_1)\n        elif len(values_1[0]) == 0:\n            values = list(values_2)\n        else:\n           ",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "section_title": "base_state_fidelity.py",
+        "section_id": "part_3",
+        "source_file": "qiskit_algorithms\\state_fidelities\\base_state_fidelity.py"
+      },
+      "score": 0.859930452102802,
+      "original_score": 0.8563389252336431,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "qiskit"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "estimator__9f03b6fbe6fa1cc29ca5c44c6d58f645__part_6__6",
+      "text": "(circuits, observables, parameter_values):\n            self._validate_parameter_length(param_val, circ_ind)\n            parameter = self._parameters[circ_ind]\n            for basis_ind in obs_maps[circ_ind][obs_ind]:\n                if (\n                    circ_ind in exp_map\n                    and basis_ind in exp_map[circ_ind]\n                    and len(self._parameters[circ_ind]) > 0\n                ):\n                    param_vals = exp_map[circ_ind][basis_ind][1]\n                    if param_val not in param_vals:\n                        param_vals.append(param_val)\n                else:\n                    exp_map[circ_ind][basis_ind] = (parameter, [param_val])\n\n        return exp_map\n\n    @staticmethod\n    def _flatten(experiments_dict, exp_map):\n        experiments_list = []\n        parameter_binds = []\n        for circ_ind in experiments_dict:\n            experiments_list.extend(experiments_dict[circ_ind])\n            for _, (parameter, param_vals) in exp_map[circ_ind].items():\n                parameter_binds.extend(\n                    [\n                        {\n                            param: [param_val[i] for param_val in param_vals]\n                            for i, param in enumerate(parameter)\n                        }\n                    ]\n                )\n        return experiments_list, parameter_binds\n\n    def _create_meas_circuit(self, basis: Pauli, circuit_index: int):\n        qargs = np.arange(basis.num_qubits)[basis.z | basis.x]\n        meas_circuit = QuantumCircuit(basis.num_qubits, len(qargs))\n        for clbit, qarg in enumerate(qargs):\n            if basis.x[qarg]:\n                if basis.z[qarg]:\n                    meas_circuit.sdg(qarg)\n                meas_circuit.h(qarg)\n            meas_circuit.measure(qarg, clbit)\n        meas_circuit.metadata = {\"basis\": basis}\n\n        if self._skip_transpilation:\n            return meas_circuit\n\n        layout = self._layouts[circuit_index]\n        passmanager = PassManager([SetLayout(layout)])\n        opt1q = Optimize1qGatesDecomposition(target=self._backend.target)\n        passmanager.append(opt1q)\n        if isinstance(self._backend.coupling_map, CouplingMap):\n            coupling_map = self._backend.coupling_map\n            passmanager.append(FullAncillaAllocation(coupling_map))\n            passmanager.append(EnlargeWithAncilla())\n        passmanager.append(ApplyLayout())\n        return passmanager.run(meas_circuit)\n\n    @staticmethod\n    def _combine_circs(circuit: QuantumCircuit, meas_circuits: list[QuantumCircuit]):\n        circs = []\n        for meas_circuit in meas_circuits:\n            new_circ = circuit.copy()\n            for creg in meas_circuit.cregs:\n                new_circ.add_register(creg)\n            new_circ.compose(meas_circuit, inplace=True)\n            _update_metadata(new_circ",
+      "metadata": {
+        "section_id": "part_6",
+        "section_title": "estimator.py",
+        "source_file": "qiskit_aer\\primitives\\estimator.py",
+        "package": "qiskit-aer"
+      },
+      "score": 0.8563389252336431,
+      "original_score": 0.8563389252336431,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "amplification_problem__02ce5703b74642e6b429ae120e768dff__part_2__2",
+      "text": ")\n            state_preparation.h(state_preparation.qubits)\n            return state_preparation\n\n        return self._state_preparation\n\n    @state_preparation.setter\n    def state_preparation(self, state_preparation: QuantumCircuit | None) -> None:\n        r\"\"\"Set the :math:`\\mathcal{A}` operator. If None, a layer of Hadamard gates is used.\n\n        Args:\n            state_preparation: The new :math:`\\mathcal{A}` operator or None.\n        \"\"\"\n        self._state_preparation = state_preparation\n\n    @property\n    def post_processing(self) -> Callable[[str], Any]:\n        \"\"\"Apply post processing to the input value.\n\n        Returns:\n            A handle to the post processing function. Acts as identity by default.\n        \"\"\"\n        if self._post_processing is None:\n            return lambda x: x\n\n        return self._post_processing\n\n    @post_processing.setter\n    def post_processing(self, post_processing: Callable[[str], Any]) -> None:\n        \"\"\"Set the post processing function.\n\n        Args:\n            post_processing: A handle to the post processing function.\n        \"\"\"\n        self._post_processing = post_processing\n\n    @property\n    def objective_qubits(self) -> list[int]:\n        \"\"\"The indices of the objective qubits.\n\n        Returns:\n            The indices of the objective qubits as list of integers.\n        \"\"\"\n        if self._objective_qubits is None:\n            return list(range(self.oracle.num_qubits))\n\n        if isinstance(self._objective_qubits, int):\n            return [self._objective_qubits]\n\n        return self._objective_qubits\n\n    @objective_qubits.setter\n    def objective_qubits(self, objective_qubits: int | list[int] | None) -> None:\n        \"\"\"Set the objective qubits.\n\n        Args:\n            objective_qubits: The indices of the qubits that should be measured.\n                If None, all qubits will be measured. The ``is_good_state`` function will be\n                applied on the measurement outcome of these qubits.\n        \"\"\"\n        self._objective_qubits = objective_qubits\n\n    @property\n    def is_good_state(self) -> Callable[[str], bool]:\n        \"\"\"Check whether a provided bitstring is a good state or not.\n\n        Returns:\n            A callable that takes in a bitstring and returns True if the measurement is a good\n            state, False otherwise.\n        \"\"\"\n        if (self._is_good_state is None) or callable(self._is_good_state):\n            return self._is_good_state  # returns None if no is_good_state arg has been set\n        elif isinstance(self._is_good_state, list):\n            if all(isinstance(good_bitstr, str) for good_bitstr in self._is_good_state):\n                return lambda bitstr: bitstr in cast(List[str], self._is_good_state)\n            else:\n                return lambda bit",
+      "metadata": {
+        "source_file": "qiskit_algorithms\\amplitude_amplifiers\\amplification_problem.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_2",
+        "section_title": "amplification_problem.py"
+      },
+      "score": 0.7842674065368455,
+      "original_score": 0.7842674065368455,
+      "vector_score": 0.9158376238974146,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 231,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      }
+    }
+  }
+}

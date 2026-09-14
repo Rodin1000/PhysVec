@@ -1,0 +1,66 @@
+Your task is to check and correct errors (coding language usage, coding format, package usage and syntex usage) of a given code file, according to the rules in this prompt. 
+
+-----------------------------------------------------------------------------------------------
+[Input]:
+1. code_former: the input code file. In this code_former, there may be some errors that you need to identify and correct. 
+2. package_range: the packages that the code file is allowed to use (besides the built-in standard libraries). 
+
+
+-----------------------------------------------------------------------------------------------
+[Instructions - your workflow]:
+1. You read the input code_former in detail and check possible basic errors. 
+    - you MUST ONLY concentrate on the basic errors including coding language usage, coding format, package usage, syntex usage. 
+    - you DO NOT NEED to check and correct errors in other errors regarding the calculation details, which will be addressed in another workflow. 
+    - you will be given a CHECKLIST in the following. 
+2. Once you identify an error, you correct it in the code. 
+    - your corrected code MUST obey the given CHECKLIST. 
+    - you are FORBIDDEN to add any new substantive content to the code. 
+    - you are FORBIDDEN to make any significant change to the existing code structure. 
+    - you ONLY correct those minor coding errors. 
+    - you are STRICTLY FORBIDDEN to change the code type (the coding language) during your correction.  
+3. You MUST make sure that the corrected code content obeys EVERY terms in the following CHECKLIST faithfally. 
+4. After correcting the code, you will output a brief summary about ALL the errors that are identified and corrected by you. 
+
+-----------------------------------------------------------------------------------------------
+[CHECKLIST]:
+(ITensors/ITensorMPS case): 
+1. If the code is in python, 'def xxx ...' is the way you define a function. If the code is in julia 'function xxx ... end' is the way you define a function. 
+2. Each function MUST be written in the following format: 
+    # Input dependency: ...(you add the elements needed as input, from user or other functions. For each element, you take the format: "name"[brief description, data format])
+    # Output results: ...(you add the output variables of this function)
+    function/def FUNC_NAME (you define the funciton here):
+        - function name "FUNC_NAME" MUST be in form of "tag_case". 
+            - [ITensor/ITensorMPS] tag: site, hamiltonian, initialstate, observable, effector, run, item, plot, ...
+            - case: depends on the specific model that the code is addressing. You do not change it as long as this term in the original code is roughly correct.  
+        - you MUST append type annotations (::T, e.g., ::Int, ::Float64) to function INPUT parameters.
+            * Common data formats/types for ITensors/ITensorMPS:
+            H (hamiltonian): MPO;
+            psi (quantum state, or psi_g, psi_0...): MPS;
+            sites (lattice): Vector{<:Index};
+            nsweeps: Int;
+            ... 
+3. The code you generate MUST contain only ASCII characters. Do not use any Unicode letters, symbols, or punctuation.
+    - Forbidden examples (non-exhaustive): Greek letters (ψ, Δ, ω, φ, μ, λ), math/logic symbols (÷, ≤, ≥, ≠, ∈, →, ←), typographic quotes (“ ” ‘ ’), primes (′), ellipsis (…), nonbreaking/zero‑width spaces, and any other non-ASCII characters.
+    - Use ASCII equivalents instead, for example: ψ → psi, φ → phi, ω → omega, μ → mu, λ → lambda, Δ → Delta, a ÷ b → div(a, b), ≤ → <=, ≥ → >=, ≠ → !=, ∈ → in. Use straight quotes " ' and plain ASCII punctuation only.
+4. ONLY packages included in the input project_range can be imported and used in the code file. 
+    - If other packages are used, you replace them by similar packages included in the package_range file. 
+
+-----------------------------------------------------------------------------------------------------
+[Output format]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- "summary": you summarize briefly all the errors identified and corrected by you. 
+- "code_type": either "python" or "julia" (lowercase string)
+- "code_content": the full corrected code as a string (plain source, do not include ``` fences)
+
+You MUST NOT inlcude this prompt itself (including the example below) in your output, in order to avoid the case that the example code itself is extracted as your generated code. 
+
+Example output (exact dictionary form, shown here for clarity. You MUST add a "```json" right before the dict and "```" right after the dict! (not shown here) Beside from this dict, NO other information should be output(e.g. this prompt itself should NOT be included in your final response)):
+{
+"summary": "[1] The 'site_BHM1d' function definition has used 'def' rather than 'function' in the original julia code. I have corrected it into ... [2]...",
+"code_type": "python",
+"code_content": "import numpy as np\nimport matplotlib.pyplot as plt\n\ndef Task_1():\n    x = np.linspace(0, 2*np.pi, 200)\n    y = np.sin(x)\n    return x, y\n\ndef main():\n    x, y = Task_1()\n    plt.plot(x, y)\n    plt.show()\n\nif __name__ == \"__main__\":\n    main()"
+}
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'. Even you fail to generate a complete code_content, you must KEEP this output format. 

@@ -1,0 +1,129 @@
+{
+  "query": "DMRG observable calculation workflow for boson systems in itensor",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "package": "itensormps",
+        "section_id": "h2_2",
+        "source_file": "docs\\src\\examples\\DMRG.md"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.00566838014079119,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "dmrg",
+        "calculation",
+        "itensor"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "itensors",
+        "source_file": "examples\\src\\trg.jl",
+        "section_title": "trg.jl"
+      },
+      "score": 0.9986253414162334,
+      "original_score": 0.9985849102814167,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "ctmrg_isotropic__3af4213eb7e13bdc1c45eaa2b10337a1__full__0",
+      "text": "using ITensors\n\nfunction ctmrg(T::ITensor, Cₗᵤ::ITensor, Aₗ::ITensor; χmax::Int, cutoff=0.0, nsteps::Int)\n  sₕ = commonind(T, Aₗ)\n  sᵥ = uniqueind(T, Aₗ, Aₗ'; plev=0)\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = uniqueind(Cₗᵤ, Aₗ)\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  Cₗᵤ = dense(Cₗᵤ)\n  for i in 1:nsteps\n    ## Get the grown corner transfer matrix (CTM)\n    Cₗᵤ⁽¹⁾ = Aₗ * Cₗᵤ * Aᵤ * T\n\n    ## Diagonalize the grown CTM\n    # TODO: replace with\n    # eigen(Cₗᵤ⁽¹⁾, \"horiz\" => \"vert\"; tags = \"horiz\" => \"vert\", kwargs...)\n    Cₗᵤ, Uᵥ = eigen(\n      Cₗᵤ⁽¹⁾,\n      (lₕ', sₕ'),\n      (lᵥ', sᵥ');\n      ishermitian=true,\n      cutoff,\n      maxdim=χmax,\n      lefttags=tags(lₕ),\n      righttags=tags(lᵥ),\n    )\n    Cₗᵤ = dense(Cₗᵤ)\n    lᵥ = commonind(Cₗᵤ, Uᵥ)\n    lₕ = uniqueind(Cₗᵤ, Uᵥ)\n\n    # The renormalized CTM is the diagonal matrix of eigenvalues\n    # Normalize the CTM\n    Cₗ = Cₗᵤ * prime(dag(Cₗᵤ), lₕ)\n    normC = (Cₗ * dag(Cₗ))[]^(1 / 4)\n    Cₗᵤ = Cₗᵤ / normC\n\n    # Calculate the renormalized half row transfer matrix (HRTM)\n    Uᵥ = noprime(Uᵥ)\n    Aₗ = Aₗ * Uᵥ * T * dag(Uᵥ')\n    Aₗ = replaceinds(Aₗ, sₕ' => sₕ)\n\n    # Normalize the HRTM\n    ACₗ = Aₗ * Cₗᵤ * prime(dag(Cₗᵤ))\n    normA = √((ACₗ * dag(ACₗ))[])\n    Aₗ = Aₗ / normA\n    Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  end\n  return Cₗᵤ, Aₗ\nend\n",
+      "metadata": {
+        "section_title": "ctmrg_isotropic.jl",
+        "section_id": "full",
+        "package": "itensors",
+        "source_file": "examples\\src\\ctmrg_isotropic.jl"
+      },
+      "score": 0.9641802061108816,
+      "original_score": 0.9631266827612017,
+      "vector_score": 0.9644915248016092,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_5__5",
+      "text": "3] => 1, s[4] => 3] ≈ 1313\n      @test psi0[s[4] => 3, s[1] => 1, s[3] => 1, s[2] => 3] ≈ -1313\n      @test psi1[s[4] => 3, s[1] => 1, s[3] => 1, s[2] => 3] ≈ -1313\n      @test psi2[s[4] => 3, s[1] => 1, s[3] => 1, s[2] => 3] ≈ -1313\n    end\n  end\n\n  @testset \"C Cdag operators\" begin\n    s = siteinds(\"Fermion\", 3; conserve_qns=true)\n\n    p110 = ITensor(s[1], s[2], s[3])\n    p110[s[1] => 2, s[2] => 2, s[3] => 1] = 1.0\n\n    p011 = ITensor(s[1], s[2], s[3])\n    p011[s[1] => 1, s[2] => 2, s[3] => 2] = 1.0\n\n    np011 = ITensor(s[1], s[2], s[3])\n    np011[s[1] => 1, s[3] => 2, s[2] => 2] = 1.0\n\n    dag_p011 = ITensor(dag(s[3]), dag(s[2]), dag(s[1]))\n    dag_p011[s[3] => 2, s[2] => 2, s[1] => 1] = 1.0\n\n    @test norm(dag(p011) - dag_p011) ≈ 0\n\n    C1 = op(s, \"C\", 1)\n    Cdag3 = op(s, \"Cdag\", 3)\n\n    # Anti-commutator\n    @test norm(Cdag3 * C1 + C1 * Cdag3) ≈ 0.0\n\n    # Commutator\n    @test norm(Cdag3 * C1 - C1 * Cdag3) ≈ 2.0\n\n    let # <011|Cdag3*C1|110> = -1\n      t1 = noprime(C1 * p110)\n      t2 = noprime(Cdag3 * t1)\n      @test scalar(dag_p011 * t2) ≈ -1.0\n    end\n\n    let # <011|C1*Cdag3|110> = +1\n      t1 = noprime(Cdag3",
+      "metadata": {
+        "section_title": "test_fermions.jl",
+        "package": "itensors",
+        "source_file": "test\\base\\test_fermions.jl",
+        "section_id": "part_5"
+      },
+      "score": 0.8959201597041317,
+      "original_score": 0.8928589879307238,
+      "vector_score": 0.8941242539696522,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    },
+    {
+      "id": "test_readwrite__91444bccaae58ec4d771b3eb2e5fecd3__part_2__2",
+      "text": "Δ ≈ cΔ\n    end\n  end\n  @testset \"Diag ITensor\" begin\n\n    #\n    # Diag ITensor\n    #\n    dk = dim(k)\n    D = diag_itensor(randn(dk), k, k')\n    C = diag_itensor(randn(ComplexF64, dk), k, k')\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"w\") do fo\n      fo[\"diag_tensor\"] = D\n      fo[\"c_diag_tensor\"] = C\n    end\n\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"r\") do fi\n      rD = read(fi, \"diag_tensor\", ITensor)\n      rC = read(fi, \"c_diag_tensor\", ITensor)\n      @test rD ≈ D\n      @test rC ≈ C\n    end\n  end\n\n  @testset \"QN ITensor\" begin\n    i = Index(QN(\"A\", -1) => 3, QN(\"A\", 0) => 4, QN(\"A\", +1) => 3; tags=\"i\")\n    j = Index(QN(\"A\", -2) => 2, QN(\"A\", 0) => 3, QN(\"A\", +2) => 2; tags=\"j\")\n    k = Index(QN(\"A\", -1) => 1, QN(\"A\", 0) => 1, QN(\"A\", +1) => 1; tags=\"k\")\n\n    # real case\n    T = random_itensor(QN(\"A\", 1), i, j, k)\n\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"w\") do fo\n      write(fo, \"T\", T)\n    end\n\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"r\") do fi\n      rT = read(fi, \"T\", ITensor)\n      @test rT ≈ T\n    end\n\n    # complex case\n    T = random_itensor(ComplexF64, i, j, k)\n\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"w\") do fo\n      write(fo, \"complexT\", T)\n    end\n\n    h5open(joinpath(@__DIR__, \"data.h5\"), \"r\") do fi\n      rT = read(fi, \"complexT\", ITensor)\n      @test rT ≈ T\n    end\n  end\n\n  @testset \"DownwardCompat\" begin\n    h5open(joinpath(@__DIR__, \"utils\", \"testfilev0.1.41.h5\"), \"r\") do fi\n      ITensorName = \"ITensorv",
+      "metadata": {
+        "section_id": "part_2",
+        "section_title": "test_readwrite.jl",
+        "source_file": "test\\base\\test_readwrite.jl",
+        "package": "itensors"
+      },
+      "score": 0.846593543831412,
+      "original_score": 0.8420815892382183,
+      "vector_score": 0.8432748988775592,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 110,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

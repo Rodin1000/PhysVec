@@ -1,0 +1,134 @@
+{
+  "query": "Convert fermionic operators to qubit observables for measurement-only workflows",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "test_light_cone__5fa769fa9fad0702569c090e8e3cd1ec__part_2__2",
+      "text": "], 3)\n        expected.cx(0, 1)\n        expected.cx(2, 3)\n        expected.ry(theta[4], 0)\n        expected.ry(theta[7], 3)\n\n        self.assertEqual(expected, new_circuit)\n\n    def test_parameterized_asymmetric(self):\n        \"\"\"Test for a double asymmetric observable on a parameterized circuit.\"\"\"\n        bit_terms, indices, _ = SparsePauliOp(\"IZIX\").to_sparse_list()[0]\n        light_cone = LightCone(bit_terms=bit_terms, indices=indices)\n        pm = PassManager([light_cone])\n\n        qc = efficient_su2(4, entanglement=\"circular\", reps=1)\n\n        new_circuit = pm.run(qc)\n\n        expected = QuantumCircuit(4)\n        theta = qc.parameters\n        expected.ry(theta[0], 0)\n        expected.ry(theta[1], 1)\n        expected.ry(theta[2], 2)\n        expected.ry(theta[3], 3)\n        expected.rz(theta[4], 0)\n        expected.rz(theta[5], 1)\n        expected.rz(theta[6], 2)\n        expected.rz(theta[7], 3)\n        expected.cx(3, 0)\n        expected.cx(0, 1)\n        expected.cx(1, 2)\n        expected.cx(2, 3)\n        expected.ry(theta[8], 0)\n        expected.ry(theta[10], 2)\n        expected.rz(theta[14], 2)\n\n        self.assertEqual(expected, new_circuit)\n\n    def test_all_commuting(self):\n        \"\"\"Test for a circuit that fully commutes with an observable.\"\"\"\n        bit_terms, indices, _ = SparsePauliOp(\"IIIZ\").to_sparse_list()[0]\n        light_cone = LightCone(bit_terms=bit_terms, indices=indices)\n        pm = PassManager([light_cone])\n\n        qc = QuantumCircuit(4)\n        qc.s(0)\n        qc.z(0)\n        qc.h(2)\n        qc.cx(0, 1)\n        qc.cx(2, 3)\n\n        new_circuit = pm.run(qc)\n\n        self.assertEqual(sum(new_circuit.count_ops().values()), 0)\n\n    def test_commuting_block(self):\n        \"\"\"Test for a commuting block. Currently, gates are checked\n        one by one and commuting blocks are thus ignored.\"\"\"\n        bit_terms, indices, _ = SparsePauliOp(\"IIXII\").to_sparse_list()[0]\n        light_cone = LightCone(bit_terms=bit_terms, indices=indices)\n        pm = PassManager([light_cone])\n\n        qc = QuantumCircuit(5)\n        qc.cx(2, 1)\n        qc.cx(3, 4)\n        qc.cx(1, 0",
+      "metadata": {
+        "section_id": "part_2",
+        "source_file": "test\\python\\transpiler\\test_light_cone.py",
+        "package": "qiskit",
+        "section_title": "test_light_cone.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "interleaved_qubit_mapper__04508d35904b02d555caf8a9af520518__part_2__2",
+      "text": "Op` to qubit\n            operators.\n    \"\"\"\n\n    def __init__(self, mapper: FermionicMapper):\n        \"\"\"\n        Args:\n            mapper: the actual ``FermionicMapper`` mapping :class:`.FermionicOp` to qubit operators.\n        \"\"\"\n        self.mapper = mapper\n\n    def _map_single(\n        self, second_q_op: FermionicOp, *, register_length: int | None = None\n    ) -> SparsePauliOp:\n        if register_length is None:\n            register_length = second_q_op.register_length\n\n        interleaved_sec_op = second_q_op.permute_indices(\n            list(range(0, register_length, 2)) + list(range(1, register_length, 2))\n        )\n\n        interleaved_op = self.mapper._map_single(\n            interleaved_sec_op, register_length=register_length\n        )\n\n        return interleaved_op\n",
+      "metadata": {
+        "section_title": "interleaved_qubit_mapper.py",
+        "source_file": "qiskit_nature\\second_q\\mappers\\interleaved_qubit_mapper.py",
+        "package": "qiskit-nature",
+        "section_id": "part_2"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "operators",
+        "qubit"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "hamiltonian_phase_estimation__fe09fa7dc716801664052a1a15ef8c76__part_1__1",
+      "text": " sufficiently large to map positive :math:`\\lambda` to\n    :math:`[0,\\pi)` and negative :math:`\\lambda` to :math:`[\\pi,2\\pi)`. Each time the circuit is\n    run, one measures a phase corresponding to :math:`lambda_j` with probability :math:`|c_j|^2`.\n\n    If :math:`H` is a Pauli sum, the bound :math:`b` is computed from the sum of the absolute\n    values of the coefficients of the terms. There is no way to reliably recover eigenvalues\n    from phases very near the endpoints of these intervals. Because of this you should be aware\n    that for degenerate cases, such as :math:`H=Z`, the eigenvalues :math:`\\pm 1` will be\n    mapped to the same phase, :math:`\\pi`, and so cannot be distinguished. In this case, you need\n    to specify a larger bound as an argument to the method ``estimate``.\n\n    This class uses and works together with :class:`~qiskit_algorithms.PhaseEstimationScale` to\n    manage scaling the Hamiltonian and the phases that are obtained by the QPE algorithm. This\n    includes setting, or computing, a bound on the eigenvalues of the operator, using this\n    bound to obtain a scale factor, scaling the operator, and shifting and scaling the measured\n    phases to recover the eigenvalues.\n\n    Note that, although we speak of \"evolving\" the state according the Hamiltonian, in the\n    present algorithm, we are not actually considering time evolution. Rather, the role of time is\n    played by the scaling factor, which is chosen to best extract the eigenvalues of the\n    Hamiltonian.\n\n    A few of the ideas in the algorithm may be found in Ref. [1].\n\n    **Reference:**\n\n    [1]: Quantum phase estimation of multiple eigenvalues for small-scale (noisy) experiments\n         T.E. O'Brien, B. Tarasinski, B.M. Terhal\n         `arXiv:1809.09697 <https://arxiv.org/abs/1809.09697>`_\n\n    \"\"\"\n\n    def __init__(\n        self,\n        num_evaluation_qubits: int,\n        sampler: BaseSamplerV2 | None = None,\n        *,\n        transpiler: Transpiler | None = None,\n        transpiler_options: dict[str, Any] | None = None,\n    ) -> None:\n        r\"\"\"\n        Args:\n            num_evaluation_qubits: The number of qubits used in estimating the phase. The phase will\n                be estimated as a binary string with this many bits.\n            sampler: The sampler primitive on which the circuit will be sampled.\n            transpiler: An optional object with a `run` method allowing to transpile the circuits\n                that are produced within this",
+      "metadata": {
+        "source_file": "qiskit_algorithms\\phase_estimators\\hamiltonian_phase_estimation.py",
+        "section_title": "hamiltonian_phase_estimation.py",
+        "section_id": "part_1",
+        "package": "qiskit-algorithms"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "estimator__9f03b6fbe6fa1cc29ca5c44c6d58f645__part_6__6",
+      "text": "(circuits, observables, parameter_values):\n            self._validate_parameter_length(param_val, circ_ind)\n            parameter = self._parameters[circ_ind]\n            for basis_ind in obs_maps[circ_ind][obs_ind]:\n                if (\n                    circ_ind in exp_map\n                    and basis_ind in exp_map[circ_ind]\n                    and len(self._parameters[circ_ind]) > 0\n                ):\n                    param_vals = exp_map[circ_ind][basis_ind][1]\n                    if param_val not in param_vals:\n                        param_vals.append(param_val)\n                else:\n                    exp_map[circ_ind][basis_ind] = (parameter, [param_val])\n\n        return exp_map\n\n    @staticmethod\n    def _flatten(experiments_dict, exp_map):\n        experiments_list = []\n        parameter_binds = []\n        for circ_ind in experiments_dict:\n            experiments_list.extend(experiments_dict[circ_ind])\n            for _, (parameter, param_vals) in exp_map[circ_ind].items():\n                parameter_binds.extend(\n                    [\n                        {\n                            param: [param_val[i] for param_val in param_vals]\n                            for i, param in enumerate(parameter)\n                        }\n                    ]\n                )\n        return experiments_list, parameter_binds\n\n    def _create_meas_circuit(self, basis: Pauli, circuit_index: int):\n        qargs = np.arange(basis.num_qubits)[basis.z | basis.x]\n        meas_circuit = QuantumCircuit(basis.num_qubits, len(qargs))\n        for clbit, qarg in enumerate(qargs):\n            if basis.x[qarg]:\n                if basis.z[qarg]:\n                    meas_circuit.sdg(qarg)\n                meas_circuit.h(qarg)\n            meas_circuit.measure(qarg, clbit)\n        meas_circuit.metadata = {\"basis\": basis}\n\n        if self._skip_transpilation:\n            return meas_circuit\n\n        layout = self._layouts[circuit_index]\n        passmanager = PassManager([SetLayout(layout)])\n        opt1q = Optimize1qGatesDecomposition(target=self._backend.target)\n        passmanager.append(opt1q)\n        if isinstance(self._backend.coupling_map, CouplingMap):\n            coupling_map = self._backend.coupling_map\n            passmanager.append(FullAncillaAllocation(coupling_map))\n            passmanager.append(EnlargeWithAncilla())\n        passmanager.append(ApplyLayout())\n        return passmanager.run(meas_circuit)\n\n    @staticmethod\n    def _combine_circs(circuit: QuantumCircuit, meas_circuits: list[QuantumCircuit]):\n        circs = []\n        for meas_circuit in meas_circuits:\n            new_circ = circuit.copy()\n            for creg in meas_circuit.cregs:\n                new_circ.add_register(creg)\n            new_circ.compose(meas_circuit, inplace=True)\n            _update_metadata(new_circ",
+      "metadata": {
+        "section_id": "part_6",
+        "source_file": "qiskit_aer\\primitives\\estimator.py",
+        "package": "qiskit-aer",
+        "section_title": "estimator.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "observables"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "test_backend_estimator_v2__136b5e4293090ff3dfc098df748dec1f__part_1__1",
+      "text": "ircuit(2)\n        self.ansatz.append(real_amplitudes(num_qubits=2, reps=2), [0, 1])\n        self.observable = SparsePauliOp.from_list(\n            [\n                (\"II\", -1.052373245772859),\n                (\"IZ\", 0.39793742484318045),\n                (\"ZI\", -0.39793742484318045),\n                (\"ZZ\", -0.01128010425623538),\n                (\"XX\", 0.18093119978423156),\n            ]\n        )\n        self.expvals = -1.0284380963435145, -1.284366511861733\n\n        ra_2_reps = QuantumCircuit(2)\n        ra_2_reps.append(real_amplitudes(num_qubits=2, reps=2), [0, 1])\n        ra_3_reps = QuantumCircuit(2)\n        ra_3_reps.append(real_amplitudes(num_qubits=2, reps=3), [0, 1])\n        self.psi = (ra_2_reps, ra_3_reps)\n        self.params = tuple(psi.parameters for psi in self.psi)\n        self.hamiltonian = (\n            SparsePauliOp.from_list([(\"II\", 1), (\"IZ\", 2), (\"XI\", 3)]),\n            SparsePauliOp.from_list([(\"IZ\", 1)]),\n            SparsePauliOp.from_list([(\"ZI\", 1), (\"ZZ\", 1)]),\n        )\n        self.theta = (\n            [0, 1, 1, 2, 3, 5],\n            [0, 1, 1, 2, 3, 5, 8, 13],\n            [1, 2, 3, 4, 5, 6],\n        )\n\n    @combine(backend=BACKENDS, abelian_grouping=[True, False])\n    def test_estimator_run(self, backend, abelian_grouping):\n        \"\"\"Test Estimator.run()\"\"\"\n        psi1, psi2 = self.psi\n        hamiltonian1, hamiltonian2, hamiltonian3 = self.hamiltonian\n        theta1, theta2, theta3 = self.theta\n        pm = generate_preset_pass_manager(optimization_level=0, backend=backend)\n        psi1, psi2 = pm.run([psi1, psi2])\n        estimator = BackendEstimatorV2(backend=backend, options=self._options)\n        estimator.options.abelian_grouping = abelian_grouping\n        # Specify the circuit and observable by indices.\n        # calculate [ <psi1(theta1)|H1|psi1(theta1)> ]\n        ham1 = hamiltonian1.apply_layout(psi1.layout)\n        job = estimator.run([(psi1,",
+      "metadata": {
+        "source_file": "test\\python\\primitives\\test_backend_estimator_v2.py",
+        "package": "qiskit",
+        "section_title": "test_backend_estimator_v2.py",
+        "section_id": "part_1"
+      },
+      "score": 0.9615005468738999,
+      "original_score": 0.9615005468738999,
+      "vector_score": 0.9615005468738999,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 231,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

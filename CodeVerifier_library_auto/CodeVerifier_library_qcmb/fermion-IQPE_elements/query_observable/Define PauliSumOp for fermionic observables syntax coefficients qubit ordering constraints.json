@@ -1,0 +1,138 @@
+{
+  "query": "Define PauliSumOp for fermionic observables: syntax, coefficients, qubit ordering constraints",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "bksf__85a46d24e91e3b50acfc604933e7a2f6__part_1__1",
+      "text": "_pauli = SparsePauliOp(table, coeffs)\n\n        return sorted_sparse_pauli\n\n\nclass TermType(Enum):\n    \"\"\"Denotes the type of interaction of a Fermionic operator.\"\"\"\n\n    NUMBER = 1\n    EXCITATION = 2\n    DOUBLE_EXCITATION = 3\n    NUMBER_EXCITATION = 4\n    COULOMB_EXCHANGE = 5\n\n\ndef _convert_operator(ferm_op: FermionicOp, edge_list: np.ndarray) -> SparsePauliOp:\n    \"\"\"Convert a fermionic operator together with qubit-connectivity graph to a Pauli operator.\n\n    This is the heart of the implementation of BKSF mapping. The connectivity graph must be\n    computed before this method is called. The returned Pauli operator must be sorted and simplified.\n\n    Args:\n      ferm_op: The fermionic operator to convert.\n      edge_list: The qubit-connectivity graph expressed as an edge list.\n\n    Returns:\n      An un-simplified Pauli operator representing `ferm_op`.\n\n    Raises:\n      ValueError: if the type of interaction of any term is unknown.\n    \"\"\"\n    encountered_terms = set()\n    sparse_pauli = None\n    for term in ferm_op.terms():\n        if _operator_coefficient(term) == 0:\n            continue\n        term_type, facs = _analyze_term(_operator_string(term))\n\n        # construct h.c. pair\n        hc_facs = frozenset((i, \"-\" if c == \"+\" else \"+\") for i, c in facs)\n        if hc_facs in encountered_terms:\n            continue\n        encountered_terms.add(frozenset(facs))\n\n        if term_type == TermType.NUMBER:  # a^\\dagger_p a_p\n            p = facs[0][0]  # pylint: disable=invalid-name\n            h1_pq = _operator_coefficient(term)\n            sparse_pauli = _add_sparse_pauli(sparse_pauli, _number_operator(edge_list, p, h1_pq))\n            continue\n\n        if term_type == TermType.EXCITATION:\n            (p, q) = [facs[i][0] for i in range(2)]  # p < q always   # pylint: disable=invalid-name\n            h1_pq = _operator_coefficient(term)\n            sparse_pauli = _add_sparse_pauli(\n                sparse_pauli, _excitation_operator(edge_list, p, q, h1_pq)\n            )\n\n        else:\n            facs_reordered, phase = _to_physicist_index_order(facs)\n            h2_pqrs = phase * _operator_coefficient(term)\n            (p, q, r, s) = [facs_reordered[i][0] for i in range(4)]  # pylint: disable=invalid-name\n            if term_type",
+      "metadata": {
+        "section_id": "part_1",
+        "section_title": "bksf.py",
+        "source_file": "qiskit_nature\\second_q\\mappers\\bksf.py",
+        "package": "qiskit-nature"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.42508738203089186,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "fermionic",
+        "qubit"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "estimator__9f03b6fbe6fa1cc29ca5c44c6d58f645__part_5__5",
+      "text": ":\n                    pauli_lists = [PauliList(pauli) for pauli in pauli_list]\n                obs_map = defaultdict(list)\n                for obs_ind in obs_indices:\n                    for pauli in self._observables[obs_ind].paulis:\n                        for basis_ind, pauli_list in enumerate(pauli_lists):\n                            if pauli in pauli_list:\n                                obs_map[obs_ind].append(basis_ind)\n                                break\n                obs_maps[circ_ind] = obs_map\n                bases = [_paulis2basis(pauli_list) for pauli_list in pauli_lists]\n                if len(bases) == 1 and not bases[0].x.any() and not bases[0].z.any():  # identity\n                    break\n                meas_circuits = [self._create_meas_circuit(basis, circ_ind) for basis in bases]\n                circuit = (\n                    self._circuits[circ_ind]\n                    if self._skip_transpilation\n                    else self._transpiled_circuits[circ_ind]\n                )\n                experiments_dict[circ_ind] = self._combine_circs(circuit, meas_circuits)\n            self._cache[key] = experiments_dict, obs_maps\n\n            exp_map = self._pre_process_params(circuits, observables, parameter_values, obs_maps)\n\n            # Flatten\n            experiments, parameter_binds = self._flatten(experiments_dict, exp_map)\n\n            # Create PostProcessing\n            post_processings = self._create_post_processing(\n                circuits, observables, parameter_values, obs_maps, exp_map\n            )\n\n        # Run experiments\n        if experiments:\n            results = (\n                self._backend.run(\n                    experiments,\n                    parameter_binds=parameter_binds if any(parameter_binds) else None,\n                    **run_options,\n                )\n                .result()\n                .results\n            )\n        else:\n            results = []\n\n        # Post processing (calculate expectation values)\n        expectation_values, metadata = zip(\n            *(post_processing.run(results) for post_processing in post_processings)\n        )\n        return EstimatorResult(np.real_if_close(expectation_values), list(metadata))\n\n    def _pre_process_params(self, circuits, observables, parameter_values, obs_maps):\n        exp_map = defaultdict(dict)  # circ_ind => basis_ind => (parameter, parameter_values)\n        for circ_ind, obs_ind, param_val in zip(circuits, observables, parameter_values):\n            self._validate_parameter_length(param_val, circ_ind)\n            parameter = self._parameters[circ_ind]\n            for basis_ind in obs_maps[circ_ind][obs_ind]:\n                if (\n                    circ_ind in exp_map\n                    and basis_ind in exp_map[circ_ind]\n                    and len(self._parameters[circ_ind]) > 0\n                ):\n                    param_vals = exp_map[circ_ind][basis_ind][1]\n                    if",
+      "metadata": {
+        "source_file": "qiskit_aer\\primitives\\estimator.py",
+        "package": "qiskit-aer",
+        "section_title": "estimator.py",
+        "section_id": "part_5"
+      },
+      "score": 0.9831179396284815,
+      "original_score": 0.9827342564382197,
+      "vector_score": 1.0,
+      "bm25_score": 0.3486849580542769,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "observables"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "test_trotter_qrte__a555c154247a22ba41ca7abc48f5267e__part_6__6",
+      "text": " possibly undefined error later on the line where it's used\n        if t_param is None:\n            ops = [Pauli(op).to_matrix() * np.real(coeff) for op, coeff in operator.to_list()]\n\n        observable_results = []\n        observable_results.append([np.real(np.conj(psi).dot(obs).dot(psi)) for obs in observables])\n\n        for n in range(num_timesteps):\n            if t_param is not None:\n                time_value = (n + 1) * dt\n                bound = operator.assign_parameters([time_value])\n                ops = [Pauli(op).to_matrix() * np.real(coeff) for op, coeff in bound.to_list()]\n            for op in ops:\n                psi = expm(-1j * op * dt).dot(psi)\n            observable_results.append(\n                [np.real(np.conj(psi).dot(obs).dot(psi)) for obs in observables]\n            )\n\n        return psi, observable_results\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "source_file": "test\\time_evolvers\\test_trotter_qrte.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_6",
+        "section_title": "test_trotter_qrte.py"
+      },
+      "score": 0.9060716863013041,
+      "original_score": 0.903936951899061,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "observables"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "hamiltonian_phase_estimation__fe09fa7dc716801664052a1a15ef8c76__part_4__4",
+      "text": "EstimationResult(\n            phase_estimation_result=phase_estimation_result,\n            id_coefficient=id_coefficient,\n            phase_estimation_scale=pe_scale,\n        )\n\n\ndef _remove_identity(pauli_sum: SparsePauliOp):\n    \"\"\"Remove any identity operators from ``pauli_sum``. Return\n    the sum of the coefficients of the identities and the new operator.\n    \"\"\"\n\n    def _get_identity(size):\n        identity = SparsePauliOp(\"I\")\n        for _ in range(size - 1):\n            identity = identity ^ SparsePauliOp(\"I\")\n        return identity\n\n    idcoeff = 0.0\n    if isinstance(pauli_sum, SparsePauliOp):\n        for operator in pauli_sum:\n            if operator.paulis == [\"I\" * pauli_sum.num_qubits]:\n                idcoeff += operator.coeffs[0]\n                pauli_sum = pauli_sum - operator.coeffs[0] * _get_identity(pauli_sum.num_qubits)\n\n    return idcoeff, pauli_sum.simplify()\n",
+      "metadata": {
+        "source_file": "qiskit_algorithms\\phase_estimators\\hamiltonian_phase_estimation.py",
+        "package": "qiskit-algorithms",
+        "section_title": "hamiltonian_phase_estimation.py",
+        "section_id": "part_4"
+      },
+      "score": 0.9053845322269747,
+      "original_score": 0.9032341806866786,
+      "vector_score": 0.9764823096958436,
+      "bm25_score": 0.09096093719225826,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "coefficients"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "statevector_estimator__488263125ed47fe267798d6c614feda2__part_3__3",
+      "text": " coeffs = zip(*observable.items())\n            obs = SparsePauliOp(paulis, coeffs)  # TODO: support non Pauli operators\n            expectation_value = np.real_if_close(final_state.expectation_value(obs))\n            if precision != 0:\n                if not np.isreal(expectation_value):\n                    raise ValueError(\"Given operator is not Hermitian and noise cannot be added.\")\n                expectation_value = rng.normal(expectation_value, precision)\n            evs[index] = expectation_value\n\n        data = DataBin(evs=evs, stds=stds, shape=evs.shape)\n        return PubResult(\n            data, metadata={\"target_precision\": precision, \"circuit_metadata\": pub.circuit.metadata}\n        )\n",
+      "metadata": {
+        "package": "qiskit",
+        "section_title": "statevector_estimator.py",
+        "section_id": "part_3",
+        "source_file": "qiskit\\primitives\\statevector_estimator.py"
+      },
+      "score": 0.903936951899061,
+      "original_score": 0.903936951899061,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 226,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      }
+    }
+  }
+}

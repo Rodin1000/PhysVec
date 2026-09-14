@@ -1,0 +1,138 @@
+{
+  "query": "Replace deprecated Aer Estimator with BackendEstimator or EstimatorV2 for fermion-VQE qcmb",
+  "packages": [
+    "qiskit",
+    "qiskit-aer",
+    "qiskit-algorithms"
+  ],
+  "results": [
+    {
+      "id": "estimator__9f03b6fbe6fa1cc29ca5c44c6d58f645__part_2__2",
+      "text": ": Options passed to AerSimulator.\n            transpile_options: Options passed to transpile.\n            run_options: Options passed to run.\n            approximation: If True, it calculates expectation values with normal distribution\n                approximation. Note that this appproximation ignores readout errors.\n            skip_transpilation: If True, transpilation is skipped.\n            abelian_grouping: Whether the observable should be grouped into commuting.\n                If approximation is True, this parameter is ignored and assumed to be False.\n        \"\"\"\n        warn(\n            \"Estimator has been deprecated as of Aer 0.15, please use EstimatorV2 instead.\",\n            DeprecationWarning,\n            stacklevel=3,\n        )\n        super().__init__(options=run_options)\n        # These three private attributes used to be created by super, but were deprecated in Qiskit\n        # 0.46. See https://github.com/Qiskit/qiskit/pull/11051\n        self._circuits = []\n        self._parameters = []\n        self._observables = []\n\n        backend_options = {} if backend_options is None else backend_options\n        method = (\n            \"density_matrix\" if approximation and \"noise_model\" in backend_options else \"automatic\"\n        )\n        self._backend = AerSimulator(method=method)\n        self._backend.set_options(**backend_options)\n        self._transpile_options = Options()\n        if transpile_options is not None:\n            self._transpile_options.update_options(**transpile_options)\n        if not approximation:\n            warn(\n                \"Option approximation=False is deprecated as of qiskit-aer 0.13. \"\n                \"It will be removed no earlier than 3 months after the release date. \"\n                \"Instead, use BackendEstimator from qiskit.primitives.\",\n                DeprecationWarning,\n                stacklevel=3,\n            )\n        self._approximation = approximation\n        self._skip_transpilation = skip_transpilation\n        self._cache: dict[tuple[tuple[int], tuple[int], bool], tuple[dict, dict]] = {}\n        self._transpiled_circuits: dict[int, QuantumCircuit] = {}\n        self._layouts: dict[int, list[int]] = {}\n        self._circuit_ids: dict[tuple, int] = {}\n        self._observable_ids: dict[tuple, int] = {}\n        self._abelian_grouping = abelian_grouping\n\n    @property\n    @deprecate_func(\n        since=\"0.13\",\n        package_name=\"qiskit-aer\",\n        is_property=True,\n    )\n    def approximation(self):\n        \"\"\"The approximation property\"\"\"\n        return self._approximation\n\n    @approximation.setter\n    @deprecate_func(\n        since=\"0.13\",\n        package_name=\"qiskit-aer\",\n        is_property=True,\n    )\n    def approximation(self",
+      "metadata": {
+        "package": "qiskit-aer",
+        "source_file": "qiskit_aer\\primitives\\estimator.py",
+        "section_id": "part_2",
+        "section_title": "estimator.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9168837513469557,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "deprecated",
+        "aer",
+        "estimator",
+        "backendestimator",
+        "estimatorv2"
+      ],
+      "match_ratio": 0.5555555555555556,
+      "is_html": false
+    },
+    {
+      "id": "README__68a83d855e5a8dc60938b12c4713fb62__h1_4_4__0",
+      "text": "from qiskit_aer.primitives import EstimatorV2\npsi1 = transpile(RealAmplitudes(num_qubits=2, reps=2), sim, optimization_level=0)\npsi2 = transpile(RealAmplitudes(num_qubits=2, reps=3), sim, optimization_level=0)\nH1 = SparsePauliOp.from_list([(\"II\", 1), (\"IZ\", 2), (\"XI\", 3)])\nH2 = SparsePauliOp.from_list([(\"IZ\", 1)])\nH3 = SparsePauliOp.from_list([(\"ZI\", 1), (\"ZZ\", 1)])\ntheta1 = [0, 1, 1, 2, 3, 5]\ntheta2 = [0, 1, 1, 2, 3, 5, 8, 13]\ntheta3 = [1, 2, 3, 4, 5, 6]\nestimator = EstimatorV2()",
+      "metadata": {
+        "source_file": "README.md",
+        "package": "qiskit-aer",
+        "section_title": "---------------------------",
+        "section_id": "h1_4"
+      },
+      "score": 0.9197173541453048,
+      "original_score": 0.9159832775939236,
+      "vector_score": 1.0,
+      "bm25_score": 0.2753840125195093,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "estimator",
+        "estimatorv2"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "test_vqe__ffff26a28311a585190d400006adf82a__part_4__4",
+      "text": " = COBYLA(maxiter=3)\n        wavefunction = self.ry_wavefunction\n\n        estimator = StatevectorEstimator(seed=42)\n\n        vqe = VQE(\n            estimator,\n            wavefunction,\n            optimizer,\n            callback=store_intermediate_result,\n        )\n        vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n\n        self.assertTrue(all(isinstance(count, int) for count in history[\"eval_count\"]))\n        self.assertTrue(all(isinstance(mean, float) for mean in history[\"mean\"]))\n        self.assertTrue(all(isinstance(metadata, dict) for metadata in history[\"metadata\"]))\n        for params in history[\"parameters\"]:\n            self.assertTrue(all(isinstance(param, float) for param in params))\n\n    def test_reuse(self):\n        \"\"\"Test re-using a VQE algorithm instance.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n        vqe = VQE(StatevectorEstimator(seed=42), ansatz, SLSQP(maxiter=300))\n        with self.subTest(msg=\"assert VQE works once all info is available\"):\n            result = vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n            self.assertAlmostEqual(result.eigenvalue.real, self.h2_energy, places=5)\n\n        operator = Operator(np.array([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 2, 0], [0, 0, 0, 3]]))\n        operator = SparsePauliOp.from_operator(operator)\n\n        with self.subTest(msg=\"assert vqe works on re-use.\"):\n            result = vqe.compute_minimum_eigenvalue(operator=operator)\n            self.assertAlmostEqual(result.eigenvalue.real, -1.0, places=5)\n\n    def test_vqe_optimizer_reuse(self):\n        \"\"\"Test running same VQE twice to re-use optimizer, then switch optimizer\"\"\"\n        vqe = VQE(\n            StatevectorEstimator(seed=42),\n            self.ryrz_wavefunction,\n            SLSQP(),\n        )\n\n        def run_check():\n            result = vqe.compute_minimum_eigenvalue(operator=self.h2_op)\n            self.assertAlmostEqual(result.eigenvalue.real, self.h2_energy, places=5)\n\n        run_check()\n\n        with self.subTest(\"Optimizer re-use.\"):\n            run_check()\n\n        with self.subTest(\"Optimizer replace.\"):\n            vqe.optimizer = L_BFGS_B()\n            run_check()\n\n    def test_default_batch_evaluation_on_spsa(self):\n        \"\"\"Test the default batching works.\"\"\"\n        ansatz = n_local(2, rotation_blocks=[\"ry\", \"rz\"], entanglement_blocks=\"cz\")\n\n        wrapped_estimator = StatevectorEstimator(seed=42)\n        inner_estimator = StatevectorEstimator(seed=43)\n\n        callcount = {\"estimator\": 0}\n\n        def wrapped_estimator_run(*",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "section_title": "test_vqe.py",
+        "section_id": "part_4",
+        "source_file": "test\\minimum_eigensolvers\\test_vqe.py"
+      },
+      "score": 0.8700300481934254,
+      "original_score": 0.8607464802072415,
+      "vector_score": 0.7543910817829143,
+      "bm25_score": 1.0,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "replace",
+        "estimator",
+        "vqe"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_backend_estimator_v2__136b5e4293090ff3dfc098df748dec1f__part_10__10",
+      "text": " rtol=self._rtol)\n        np.testing.assert_allclose(result[1].data.evs, [1.901141473854881], rtol=self._rtol)\n\n    @unittest.skipUnless(optionals.HAS_AER, \"qiskit-aer is required to run this test\")\n    @combine(abelian_grouping=[True, False])\n    def test_aer(self, abelian_grouping):\n        \"\"\"Test for Aer simulator\"\"\"\n        from qiskit_aer import AerSimulator\n\n        backend = AerSimulator()\n        seed = 123\n        qc = QuantumCircuit(2)\n        qc.append(real_amplitudes(num_qubits=2, reps=1), [0, 1])\n        pm = generate_preset_pass_manager(optimization_level=0, backend=backend)\n        qc = pm.run(qc)\n        op = [SparsePauliOp(\"IX\"), SparsePauliOp(\"YI\")]\n        shape = (3, 2)\n        params_array = self._rng.random(shape + (qc.num_parameters,))\n        params_list = params_array.tolist()\n        params_list_array = list(params_array)\n        statevector_estimator = StatevectorEstimator(seed=seed)\n        target = statevector_estimator.run([(qc, op, params_list)]).result()\n\n        backend_estimator = BackendEstimatorV2(backend=backend, options=self._options)\n        backend_estimator.options.abelian_grouping = abelian_grouping\n\n        with self.subTest(\"ndarrary\"):\n            result = backend_estimator.run([(qc, op, params_array)]).result()\n            self.assertEqual(result[0].data.evs.shape, shape)\n            np.testing.assert_allclose(\n                result[0].data.evs, target[0].data.evs, rtol=self._rtol, atol=1e-1\n            )\n\n        with self.subTest(\"list of ndarray\"):\n            result = backend_estimator.run([(qc, op, params_list_array)]).result()\n            self.assertEqual(result[0].data.evs.shape, shape)\n            np.testing.assert_allclose(\n                result[0].data.evs, target[0].data.evs, rtol=self._rtol, atol=1e-1\n            )\n\n    def test_job_size_limit_backend_v2(self):\n        \"\"\"Test BackendEstimatorV2 respects job size limit\"\"\"\n\n        class FakeBackendLimitedCircuits(GenericBackendV2):\n            \"\"\"Generic backend V2 with job size limit.\"\"\"\n\n            @property\n            def max_circuits(self):\n                return 1\n\n        backend = FakeBackendLimitedCircuits(num_qubits=5)\n        qc = QuantumCircuit(2)\n        qc.append(real_amplitudes(num_qubits=2, reps=2), [0, 1])\n        # Note: two qubit-wise commuting groups\n        op = SparsePauliOp.from_list([",
+      "metadata": {
+        "source_file": "test\\python\\primitives\\test_backend_estimator_v2.py",
+        "section_id": "part_10",
+        "package": "qiskit",
+        "section_title": "test_backend_estimator_v2.py"
+      },
+      "score": 0.8601615427835984,
+      "original_score": 0.8569833960286801,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "aer"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "test_amplitude_estimators__a5bdf10f1732d1e3e72d057031d815c1__part_2__2",
+      "text": "0.001, 0.01), {\"estimation\": 0.49}],\n            # Number of shots for Sampler is not used in FasterAmplitudeEstimation\n            [0.2, 1, FasterAmplitudeEstimation(0.01, 5, rescale=False), {\"estimation\": 0.2}],\n            [0.12, 1, FasterAmplitudeEstimation(0.1, 3, rescale=False), {\"estimation\": 0.12}],\n        ]\n    )\n    @unpack\n    def test_sampler_with_shots(self, prob, shots, qae, expect):\n        \"\"\"sampler with shots test\"\"\"\n        qae.sampler = self._sampler_shots(shots)\n        problem = EstimationProblem(BernoulliStateIn(prob), [0], BernoulliGrover(prob))\n\n        result = qae.estimate(problem)\n        for key, value in expect.items():\n            self.assertAlmostEqual(\n                value, getattr(result, key), places=3, msg=f\"estimate `{key}` failed\"\n            )\n\n    @data(True, False)\n    def test_qae_circuit(self, efficient_circuit):\n        \"\"\"Test circuits resulting from canonical amplitude estimation.\n\n        Build the circuit manually and from the algorithm and compare the resulting unitaries.\n        \"\"\"\n        prob = 0.5\n\n        problem = EstimationProblem(BernoulliStateIn(prob), objective_qubits=[0])\n        for m in [2, 5]:\n            qae = AmplitudeEstimation(m)\n            angle = 2 * np.arcsin(np.sqrt(prob))\n\n            # manually set up the inefficient AE circuit\n            qr_eval = QuantumRegister(m, \"a\")\n            qr_objective = QuantumRegister(1, \"q\")\n            circuit = QuantumCircuit(qr_eval, qr_objective)\n\n            # initial Hadamard gates\n            for i in range(m):\n                circuit.h(qr_eval[i])\n\n            # A operator\n            circuit.ry(angle, qr_objective)\n\n            if efficient_circuit:\n                qae.grover_operator = BernoulliGrover(prob)\n                for power in range(m):\n                    circuit.cry(2 * 2**power * angle, qr_eval[power], qr_objective[0])\n            else:\n                oracle = QuantumCircuit(1)\n                oracle.z(0)\n\n                state_preparation = QuantumCircuit(1)\n                state_preparation.ry(angle, 0)\n                grover_op = GroverOperator(oracle, state_preparation)\n                for power in range(m):\n                    circuit.compose(\n                        grover_op.power(2**power).control(),\n                        qubits=[qr_eval[power], qr_objective[0]],\n                        inplace=True,\n                    )\n\n            # fourier transform\n            iqft = QFT(m, do_swaps=False).inverse().reverse_bits()\n            circuit.append(iq",
+      "metadata": {
+        "section_title": "test_amplitude_estimators.py",
+        "source_file": "test\\test_amplitude_estimators.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_2"
+      },
+      "score": 0.8569833960286801,
+      "original_score": 0.8569833960286801,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 90,
+    "total_bm25_results_count": 90,
+    "merged_results_count": 159,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      }
+    }
+  }
+}

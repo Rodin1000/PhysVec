@@ -1,0 +1,137 @@
+{
+  "query": "How to define initial state for boson DMRG in itensor",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "ITensor__d6c9e5cc91af8b329b09628d4822990e__h2_3_3__0",
+      "text": "To initialize all of the elements of an ITensor at once, you\ncan pass a Julia array into the ITensor constructor.\nFor example, if we want to construct an ITensor `A` with indices\n`i,j` we can initialize it from a matrix as follows:\n```julia\nM = [1.0 2.0;\n     3.0 4.0]\ni = Index(2,\"i\")\nj = Index(2,\"j\")\nA = ITensor(M,i,j)\n```\nMore generally we can use an nth-order (n-dimensional) Julia array to initialize an ITensor:\n```julia\nT = randn(4,7,2)\nk = Index(4,\"index_k\")\nl = Index(7,\"index_l\")\nm = Index(2,\"index_m\")\nB = ITensor(T,k,l,m)\n```",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "h2_3",
+        "source_file": "docs\\src\\examples\\ITensor.md",
+        "section_title": "Making ITensors from Arrays"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "QN_DMRG__629a0c9d83a6c48625080be07715c0ee__h4_1_1__0",
+      "text": "Setting up a quantum-number conserving DMRG calculation in ITensor requires\nonly very small changes to a DMRG code. The main changes are:\n1. using tensor indices (`Index` objects) which carry quantum number (QN) information to build your Hamiltonian and  initial state\n2. initializing your MPS to have well-defined total quantum numbers\nImportantly, _the total QN of your state throughout the calculation will\nremain the same as the initial state passed to DMRG_.\nThe total QN of your state is not set separately, but determined\nimplicitly from the initial QN of the state when it is first constructed.\nOf course, your Hamiltonian should conserve all of the QN's that you would\nlike to use. If it doesn't, you will get an error when you try to construct\nit out of the QN-enabled tensor indices.",
+      "metadata": {
+        "section_title": "Necessary Changes",
+        "package": "itensormps",
+        "section_id": "h4_1",
+        "source_file": "docs\\src\\tutorials\\QN_DMRG.md"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "initial",
+        "state",
+        "dmrg",
+        "itensor"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG",
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "package": "itensormps"
+      },
+      "score": 0.8097055026437021,
+      "original_score": 0.7072392348364648,
+      "vector_score": 0.7072392348364648,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "state",
+        "dmrg",
+        "itensor"
+      ],
+      "match_ratio": 0.5,
+      "is_html": true
+    },
+    {
+      "id": "1d_ising_with_observer__82f90a8d4a7ed5b00346b555230baebb__part_0__0",
+      "text": "# In this example we show how to pass a DMRGObserver to\n# the dmrg function which allows tracking energy convergence and\n# convergence of local operators.\nusing ITensors, ITensorMPS\n\n\"\"\"\n  Get MPO of transverse field Ising model Hamiltonian with field strength h\n\"\"\"\nfunction tfimMPO(sites, h::Float64)\n  # Input operator terms which define a Hamiltonian\n  N = length(sites)\n  os = OpSum()\n  for j in 1:(N - 1)\n    os -= 1, \"Z\", j, \"Z\", j + 1\n  end\n  for j in 1:N\n    os += h, \"X\", j\n  end\n  # Convert these terms to an MPO tensor network\n  return MPO(os, sites)\nend\n\nlet\n  N = 100\n  sites = siteinds(\"S=1/2\", N)\n  psi0 = random_mps(sites; linkdims=10)\n\n  # define parameters for DMRG sweeps\n  nsweeps = 15\n  maxdim = [10, 20, 100, 100, 200]\n  cutoff = [1E-10]\n\n  #=\n  create observer which will measure Sᶻ at each\n  site during the dmrg sweeps and track energies after each sweep.\n  in addition it will stop the computation if energy converges within\n  1E-7 tolerance\n  =#\n  let\n    Sz_observer = DMRGObserver([\"Sz\"], sites; energy_tol=1E-7)\n\n    # we will now run DMRG calculation for different values\n    # of the transverse field and check how local observables\n    # converge to their ground state values\n\n    println(\"Running DMRG for TFIM with h=0.1\")\n    println(\"================================\")\n    H = tfimMPO(sites, 0.1)\n    energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, observer=Sz_observer)\n\n    for (i, Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n      println(\"<Σ Sz> after sweep $i = \", sum(Szs) / N)\n    end\n  end\n\n  let\n    println(\"\\nRunning DMRG for TFIM with h=1.0 (critical point)\")\n    println(\"================================\")\n    Sz_observer = DMRGObserver([\"Sz\"], sites; energy_tol=1E-7)\n    H = tfimMPO(sites, 1.0)\n    energy, psi = dmrg(H, psi0; nsweeps, maxdim, cutoff, observer=Sz_observer)\n\n    for (i, Szs) in enumerate(measurements(Sz_observer)[\"Sz\"])\n      println(\"<Σ Sz",
+      "metadata": {
+        "section_title": "1d_ising_with_observer.jl",
+        "section_id": "part_0",
+        "source_file": "examples\\dmrg\\1d_ising_with_observer.jl",
+        "package": "itensormps"
+      },
+      "score": 0.7654128046212677,
+      "original_score": 0.7393475606902975,
+      "vector_score": 0.4893475606902976,
+      "bm25_score": 1.0,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "define",
+        "state",
+        "dmrg"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Compute-excited-states-with-DMRG_5__0",
+      "text": "## Compute excited states with DMRG\nITensor DMRG accepts additional MPS wavefunctions as a optional, extra argument. These additional 'penalty states' are provided as an array of MPS just after the Hamiltonian, like this:\n```code\nenergy,psi3 = dmrg(H,[psi0,psi1,psi2],psi3_init;nsweeps,maxdim,cutoff)\n```\nHere the penalty states are [psi0,psi1,psi2] . When these are provided, the DMRG code minimizes the energy of the current MPS while also reducing its overlap (inner product) with the previously provided MPS. If these overlaps become sufficiently small, then the computed MPS is an excited state. So by finding the ground state, then providing it to DMRG as a \"penalty state\" or previous state one can compute the first excited state. Then providing both of these, one can get the second excited state, etc.\nA  keyword argument called weight can also be provided to the dmrg function when penalizing overlaps to previous states. The weight parameter is multiplied by the overlap with the previous states, so sets the size of the penalty. It should be chosen at least as large as the (estimated) gap between the ground and first excited states. Otherwise the optimal value of the weight parameter is not so obvious, and it is best to try various weights during initial test calculations.\nNote that when the system has conserved quantum numbers, a superior way to find excited states can be to find ground states of quantum number (or symmetry) sectors other than the one containing the absolute ground state. In that context, the penalty method used below is a way to find higher excited states within the same quantum number sector.\nFull Example code:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 20\n\n  sites = siteinds(\"S=1/2\",N)\n\n  h = 4.0\n\n  weight = 20*h # use a large weight\n                # since gap is expected to be large\n\n\n  #\n  # Use the OpSum feature to create the\n  # transverse field Ising model\n  #\n  # Factors of 4 and 2 are to rescale\n  # spin operators into Pauli matrices\n  #\n  os = OpSum()\n  for j=1:N-1\n    os -= 4,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:N\n    os -= 2*h,\"Sx\",j;\n  end\n  H = MPO(os,sites)\n\n\n  #\n  # Make sure to do lots of sweeps\n  # when finding excited states\n  #\n  nsweeps = 30\n  maxdim = [10,10,10,20,20,40,80,100,200,200]\n  cutoff = [1E-8]\n",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "Compute-excited-states-with-DMRG",
+        "section_title": "Compute excited states with DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 0.7233620957347705,
+      "original_score": 0.5513979930834116,
+      "vector_score": 0.5513979930834116,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "initial",
+        "state",
+        "dmrg",
+        "itensor"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 102,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 46
+      }
+    }
+  }
+}

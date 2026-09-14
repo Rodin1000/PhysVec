@@ -1,0 +1,38 @@
+**Detailed Rules for Generating [ITensors/ITensorMPS] Codes**
+
+====================================================================================================
+
+## **Notation**
+
+**Function Categories:**
+- **ELEMENT functions:** Functions with tags {'site', 'hamiltonian', 'observable', 'initialstate', 'effector'}. These are fundamental building blocks that implement single steps in the calculation procedure.
+- **Task functions:** Functions with tags {'run', 'item', 'plot'}. These orchestrate ELEMENT functions to complete calculation tasks.
+- **Entry point:** The 'main' function serves as the entry point of the program.
+
+**Scope of this part:** This part applies **ONLY to ELEMENT functions** (tags: 'site', 'hamiltonian', 'observable', 'initialstate', 'effector'). 
+**DO NOT modify functions with other tags** (task functions or main).
+
+====================================================================================================
+
+## **ELEMENT Functions - Special Requirements (CRITICAL)**
+
+**Context:** This part specifies critical constraints that apply to ALL ELEMENT functions. These rules ensure proper function decomposition and dependency management.
+
+**CRITICAL RULES for ELEMENT functions:**
+
+1. **Purpose:** Functions with ELEMENT tags aim to implement a SINGLE function/step in the whole calculation procedure
+
+2. **You are REQUIRED** to create ALL tags in 'ELEMENT' (you cannot skip any)
+
+3. **You are FORBIDDEN** to absorb some 'ELEMENT' function definitions into other ELEMENT function definitions
+   - **Example:** If you want to calculate the ground state for some specific initial state, you SHOULD define SEPARATELY an 'initialstate' function and an 'effector' function. You are FORBIDDEN to create EXPLICITLY the wanted initial state directly in the 'effector' definition.
+
+4. **You are STRICTLY FORBIDDEN** to call any other 'ELEMENT' functions in the definition of any function in 'ELEMENT'
+   - **Instead:** Define the required preceding variables as the input parameters of the function
+   - **Example:** If you want to calculate the ground state, in the 'effector' definition, you DO NOT call 'hamiltonian' function to construct the required system Hamiltonian. Instead, you define 'H' as an input parameter of the 'effector' function.
+
+5. **You are FORBIDDEN** to use global parameters
+  - **You are REQUIRED** to include every parameter used in each function definition in the input parameters of this function
+
+====================================================================================================
+

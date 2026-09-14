@@ -1,0 +1,123 @@
+{
+  "query": "netket variational quantum state vs initialization for spin 0.5 vmc",
+  "package": "netket",
+  "results": [
+    {
+      "id": "custom_hilbert_constraints__a202136a3fd70552ecbc1a6ad0f2024f__sec_6_6__0",
+      "text": "## Integration with Variational States#\nConstrained Hilbert spaces work seamlessly with all NetKet variational states:\n```code\n# Create constrained system\nhilbert\n=\nnk\n.\nhilbert\n.\nSpin\n(\n0.5\n,\nN\n=\n10\n,\nconstraint\n=\nSumConstraint\n(\n0\n))\n# Zero magnetization\ngraph\n=\nnk\n.\ngraph\n.\nChain\n(\n10\n)\nhamiltonian\n=\nnk\n.\noperator\n.\nIsing\n(\nhilbert\n,\ngraph\n,\nh\n=\n1.0\n)\n# Standard NetKet workflow\nmodel\n=\nnk\n.\nmodels\n.\nRBM\n(\nalpha\n=\n1\n)\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n,\ngraph\n)\n# Respects magnetization\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n)\n# Optimization works as usual\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\n0.01\n)\ndriver\n=\nnk\n.\ndriver\n.\nVMC\n(\nhamiltonian\n,\noptimizer\n)\ndriver\n.\nrun\n(\nvstate\n,\nn_iter\n=\n100\n)\n```",
+      "metadata": {
+        "section_title": "Integration with Variational States#",
+        "section_id": "sec_6",
+        "source_file": "docs\\_build\\html\\advanced\\custom_hilbert_constraints.html",
+        "package": "netket"
+      },
+      "score": 0.8909369306371234,
+      "original_score": 0.8284401156089582,
+      "vector_score": 1.0,
+      "bm25_score": 0.1422005780447911,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "variational",
+        "spin",
+        "vmc"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "symmetry_tutorial__b193a05ba167aa16fb4ac01ff2376452__sec_5_5__1",
+      "text": "\n(\nhamiltonian\n=\nH\n,\noptimizer\n=\noptimizer\n,\nlinear_solver\n=\nsolver\n,\nvariational_state\n=\nunsymmetrized_vstate\n,\ndiag_shift\n=\ndiag_shift\n,\nuse_ntk\n=\nFalse\n)\ndriver\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nunsymmetrized_log\n);\n```\nTo construct a symmetry projected wavefunction in netket, we use project method of the Representation class.\nThis method takes in a variational state as well as the integer correspond to the id of the irrep. It converts a state \\(\\psi\\) to the symmetrized one \\(\\psi_\\mu\\) by implementing the projection described above.\n```code\n# Create a new variational state to symmetrize it, using same seed\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n,\nn_samples\n=\n512\n,\nseed\n=\nseed\n)\n# Project on the trivial represention\ntranslation_symmetric_vstate\n=\ntranslation_group_representation\n.\nproject\n(\nstate\n=\nvstate\n,\ncharacter_index\n=\n0\n)\n```\nThen we just run the optimization as usual!\n```code\ndriver\n=\nVMC_SR\n(\nhamiltonian\n=\nH\n,\noptimizer\n=\noptimizer\n,\nlinear_solver\n=\nsolver\n,\nvariational_state\n=\ntranslation_symmetric_vstate\n,\ndiag_shift\n=\ndiag_shift\n,\nuse_ntk\n=\nFalse\n,\n)\n# Takes a bit of time to run. Roughly 16 times longer\ndriver\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nnk\n.\nlogging\n.\nRuntimeLog\n())\n```\n```code\n(RuntimeLog():\n  keys = ['acceptance', 'Energy'],)\n```\nImportant In general, the ground state is not necessarily in the trivial sector. In practice, all relevant sectors should be scanned to find which one is energetically favorable.\nIn the case of the translation group, this means all the points in the irreducible Brillouin zone should be checked.\nWe can now compare the performance of the two models.\n```code\ndef\nrelative_error\n(\napprox\n,\nexact\n):\nreturn\nnp\n.\nabs\n((\napprox\n-\nexact\n)\n/\nexact\n)\nE_no_symm\n=\nfloat\n(\nunsymmetrized_vstate\n.\nexpect\n(\nH\n)\n.\nmean\n.\nreal\n)\nE_symm\n=\nfloat\n(\ntranslation_symmetric_vstate\n.\nexpect\n(\nH\n)\n.\nmean\n.\nreal\n)\nerr_no\n=\n100\n*\nrelative_error\n(\nE_no_symm\n,\nevals\n[\n0\n])\nerr_sym\n=\n100\n*\nrelative_error\n(\nE_symm\n,\nevals\n[\n0\n])\nprint\n(\nf\n\"Energy without symmetrization:\n{\n",
+      "metadata": {
+        "section_id": "sec_5",
+        "package": "netket",
+        "section_title": "VMC#",
+        "source_file": "docs\\_build\\html\\tutorials\\symmetry_tutorial.html"
+      },
+      "score": 0.7763618625744872,
+      "original_score": 0.6482096714654855,
+      "vector_score": 0.8102620893318567,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "variational",
+        "state",
+        "vmc"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "custom_hilbert_constraints__3478f3f26a02da6418c1b5dc5da24d73__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "section_title": "Integration with Variational States",
+        "section_id": "h2_20",
+        "package": "netket",
+        "source_file": "docs\\advanced\\custom_hilbert_constraints.md"
+      },
+      "score": 0.7362505932605601,
+      "original_score": 0.7202657807308971,
+      "vector_score": 0.9003322259136213,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "variational"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "custom_hilbert_constraints__6b1a6a577a4f7295fb5d8a8ae5beefc7__h2_20_20__0",
+      "text": "Constrained Hilbert spaces work seamlessly with all NetKet variational states:\n```python",
+      "metadata": {
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\_sources\\advanced\\custom_hilbert_constraints.md",
+        "section_title": "Integration with Variational States",
+        "section_id": "h2_20"
+      },
+      "score": 0.7362505932605601,
+      "original_score": 0.7202657807308971,
+      "vector_score": 0.9003322259136213,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "variational"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "fidelity__0bb023b462bdf06ce58932707b8c0851__sec_1_1__0",
+      "text": "## Contents\nAuthors: Luca Gravina and Alessandro Sinibaldi, August 2025\nThis tutorial demonstrates how to minimize the infidelity between a variational quantum state and a target state using NetKet.\nFidelity between two states \\(|\\psi\\rangle\\) and \\(|\\phi\\rangle\\) is \\(F = |\\langle \\psi | \\phi \\rangle|^2/\\langle \\psi | \\psi \\rangle \\langle \\phi | \\phi \\rangle\\) . The infidelity is \\(1 - F\\) and is minimized when the two states coincide up to a global phase.\nFidelity between two states \\(|\\psi\\rangle\\) and \\(|\\phi\\rangle\\) is \\(F = |\\langle \\psi | \\phi \\rangle|^2/\\langle \\psi | \\psi \\rangle \\langle \\phi | \\phi \\rangle\\) . The infidelity is \\(1 - F\\) and is minimized when the two states coincide up to a global phase.\nWe will: Define a lattice, Hilbert space, variational model \\(|\\psi(\\theta)\\rangle\\) , and Hamiltonian \\(H\\) . Construct a target state \\(| \\psi_\\mathrm{target} \\rangle\\) from exact diagonalization (ground state of \\(H\\) ). Optimize the variational parameters by minimizing infidelity \\(1 - |\\langle \\psi(\\theta) | \\psi_\\mathrm{target} \\rangle|^2/ \\langle \\psi(\\theta) | \\psi(\\theta) \\rangle \\langle \\psi_\\mathrm{target} | \\psi_\\mathrm{target} \\rangle\\) using the driver nk.experimental.driver.InfidelitySR implementing infidelity minimization with Stochastic Reconfiguration (see Sinibaldi et al. and Gravina et al. for details).\nWe consider also the case where we learn \\(O | \\psi_\\mathrm{target} \\rangle\\) for a given local operator \\(O\\) . Monitor convergence via the infidelity curve and validate energies against exact results.\nWe will:\nDefine a lattice, Hilbert space, variational model \\(|\\psi(\\theta)\\rangle\\) , and Hamiltonian \\(H\\) .\nDefine a lattice, Hilbert space, variational model \\(|\\psi(\\theta)\\rangle\\) , and Hamiltonian \\(H\\) .\nConstruct a target state \\(| \\psi_\\mathrm{target} \\rangle\\) from exact diagonalization (ground state of \\(H\\) ).\nConstruct a target state \\(| \\psi_\\mathrm{target} \\rangle\\) from exact diagonalization (ground state of \\(H\\) ).\nOptimize the variational parameters by minimizing infidelity \\(1 - |\\langle \\psi(\\theta) | \\psi_\\mathrm{target} \\rangle|^2/ \\langle \\psi(\\theta) | \\psi(\\theta) \\rangle \\langle \\psi_\\mathrm{target} | \\psi_\\mathrm{target} \\rangle\\) using the driver nk.experimental.driver.InfidelitySR implementing infidelity minimization with",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_1",
+        "section_title": "Contents",
+        "source_file": "docs\\_build\\html\\tutorials\\fidelity.html"
+      },
+      "score": 0.6443653860051055,
+      "original_score": 0.4405747645024131,
+      "vector_score": 0.5507184556280164,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "netket",
+        "variational",
+        "quantum",
+        "state"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 58,
+    "final_results_count": 5
+  }
+}

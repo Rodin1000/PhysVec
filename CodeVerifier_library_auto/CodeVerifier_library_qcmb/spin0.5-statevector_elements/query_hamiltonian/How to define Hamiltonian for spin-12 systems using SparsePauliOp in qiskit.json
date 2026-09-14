@@ -1,0 +1,136 @@
+{
+  "query": "How to define Hamiltonian for spin-1/2 systems using SparsePauliOp in qiskit?",
+  "packages": [
+    "qiskit",
+    "qiskit-nature"
+  ],
+  "results": [
+    {
+      "id": "linear_mapper__8ea1add40edf0002cef8e95591efc125__part_1__1",
+      "text": " -> list[SparsePauliOp]:\n        \"\"\"\n        Generates a 'linear_encoding' of the spin S operators 'X', 'Y', 'Z' and 'identity'\n        to qubit operators (linear combinations of pauli strings).\n        In this 'linear_encoding' each individual spin S system is represented via\n        2S+1 qubits and the state |s> is mapped to the state |00...010..00>, where the s-th qubit is\n        in state 1.\n\n        Returns:\n            The 4-element list of transformed spin S 'X', 'Y', 'Z' and 'identity' operators.\n            I.e. spin_op_encoding[0]` corresponds to the linear combination of pauli strings needed\n            to represent the embedded 'X' operator\n        \"\"\"\n\n        dspin = int(2 * spin + 1)\n        nqubits = dspin\n\n        # quick functions to generate a pauli with X / Y / Z at location `i`\n        pauli_id = Pauli(\"I\" * nqubits)\n\n        def pauli_x(i):\n            return Pauli(\"I\" * i + \"X\" + \"I\" * (nqubits - i - 1))\n\n        def pauli_y(i):\n            return Pauli(\"I\" * i + \"Y\" + \"I\" * (nqubits - i - 1))\n\n        def pauli_z(i):\n            return Pauli(\"I\" * i + \"Z\" + \"I\" * (nqubits - i - 1))\n\n        # 1. build the non-diagonal X operator\n        x_summands = []\n        for i, coeff in enumerate(np.diag(SpinOp.x(spin).to_matrix(), 1)):\n            x_summands.append(\n                coeff / 2.0 * SparsePauliOp(pauli_x(i).dot(pauli_x(i + 1)))\n                + coeff / 2.0 * SparsePauliOp(pauli_y(i).dot(pauli_y(i + 1)))\n            )\n\n        # 2. build the non-diagonal Y operator\n        y_summands = []\n        for i, coeff in enumerate(np.diag(SpinOp.y(spin).to_matrix(), 1)):\n            y_summands.append(\n                -1j * coeff / 2.0 * SparsePauliOp(pauli_x(i).dot(pauli_y(i + 1)))\n                + 1j * coeff / 2.0 * SparsePauliOp(pauli_y(i).dot(pauli_x(i + 1)))\n            )\n\n        # 3. build the diagonal Z\n        z_summands = []\n        for i, coeff in enumerate(np.diag(SpinOp.z(spin).to_matrix())):\n            # get the first upper diagonal of coeff.\n            z",
+      "metadata": {
+        "section_id": "part_1",
+        "package": "qiskit-nature",
+        "section_title": "linear_mapper.py",
+        "source_file": "qiskit_nature\\second_q\\mappers\\linear_mapper.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.5234236207151163,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "spin",
+        "sparsepauliop"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "sparse_pauli_op__5dac2011eae3b32c61fcec03ebfcfd78__lines_900_1251__1",
+      "text": "            SparsePauliOp: The SparsePauliOp representation of the Pauli terms.\n\n        Raises:\n            QiskitError: If the number of qubits is incompatible with the indices of the Pauli terms.\n            QiskitError: If the designated qubit is already assigned.\n        \"\"\"\n        obj = list(obj)  # To convert zip or other iterable\n        size = len(obj)\n\n        if size == 0:\n            obj = [(\"I\" * num_qubits, range(num_qubits), 0)]\n            size = len(obj)\n\n        coeffs = np.zeros(size, dtype=dtype)\n        labels = np.zeros(size, dtype=f\"<U{num_qubits}\")\n\n        for i, (paulis, indices, coeff) in enumerate(obj):\n            if do_checks and len(indices) != len(set(indices)):\n                raise QiskitError(\"Input indices are duplicated.\")\n            # construct the full label based off the non-trivial Paulis and indices\n            label = [\"I\"] * num_qubits\n            for pauli, index in zip(paulis, indices):\n                if index >= num_qubits:\n                    raise QiskitError(\n                        f\"The number of qubits ({num_qubits}) is smaller than a required index {index}.\"\n                    )\n                label[~index] = pauli\n\n            labels[i] = \"\".join(label)\n            coeffs[i] = coeff\n\n        paulis = PauliList(labels)\n        return SparsePauliOp(paulis, coeffs, copy=False)\n\n    @staticmethod\n    def from_sparse_observable(obs: SparseObservable) -> SparsePauliOp:\n        r\"\"\"Initialize from a :class:`.SparseObservable`.\n\n        .. warning::\n\n            A :class:`.SparseObservable` can efficiently represent eigenstate projectors\n            (such as :math:`|0\\langle\\rangle 0|`), but a :class:`.SparsePauliOp` **cannot**.\n            If the input ``obs`` has :math:`n` single-qubit projectors, the resulting\n            :class:`.SparsePauliOp` will use :math:`2^n` terms, which is an exponentially\n            expensive representation that can quickly run out of memory.\n\n        Args:\n            obs: The :class:`.SparseObservable` to convert.\n\n        Returns:\n            A :class:`.SparsePauliOp` version of the observable.\n        \"\"\"\n        as_sparse_list = obs.as_paulis().to_sparse_list()\n        return SparsePauliOp.from_sparse_list(as_sparse_list, obs.num_qubits)\n\n    def to_list(self, array: bool = False):\n        \"\"\"Convert to a list Pauli string labels and coefficients.\n\n        For operators with a lot of terms converting using the ``array=True``\n        kwarg will be more efficient since it allocates memory for\n        the full Numpy array of labels in advance.\n\n        Args:\n            array (bool): return a Numpy array if True, otherwise\n                          return a list (Default: False).\n\n        Returns:\n            list or array: List of pairs (label, coeff) for rows of the PauliList.\n        \"\"\"\n        # Dtype for a structured array with string labels and complex coeffs\n        pauli_labels = self.paulis.to_labels(array=True)\n        labels = np.zeros(\n            self.size, dtype=[(\"labels\", pauli_labels.dtype), (\"coeffs\", self.coeffs.dtype)]\n        )\n        labels[\"labels\"] = pauli_labels\n        labels[\"coeffs\"] = self.coeffs\n        if array:\n            return labels\n        return labels.tolist()\n\n    def to_sparse_list(self):\n        \"\"\"Convert to a sparse Pauli list format with elements (pauli, qubits, coefficient).\"\"\"\n        pauli_labels = self.paulis.to_labels()\n        sparse_list = [\n            (*sparsify_label(label), coeff) for label, coeff in zip(pauli_labels, self.coeffs)\n        ]\n        return sparse_list\n\n    def to_matrix(self, sparse: bool = False, force_serial: bool = False) -> np.ndarray:\n        \"\"\"Convert to a dense or sparse matrix.\n\n        Args:\n            sparse: if ``True`` return a sparse CSR matrix, otherwise return dense Numpy\n                array (the default).\n            force_serial: if ``True``, use an unthreaded implementation, regardless of the state of\n                the `Qiskit threading-control environment variables\n                <https://quantum.cloud.ibm.com/docs/guides/configure-qiskit-local#environment-variables>`__.\n                By default, this will use threaded parallelism over the available CPUs.\n\n        Returns:\n            array: A dense matrix if `sparse=False`.\n            csr_matrix: A sparse matrix in CSR format if `sparse=True`.\n        \"\"\"\n        if self.coeffs.dtype == object:\n            # Fallback to slow Python-space method.\n            return sum(self.matrix_iter(sparse=sparse))\n\n        pauli_list = self.paulis\n        zx = ZXPaulis(\n            pauli_list.x.astype(np.bool_),\n            pauli_list.z.astype(np.bool_),\n            pauli_list.phase.astype(np.uint8),\n            self.coeffs.astype(np.complex128),\n        )\n        if sparse:\n            from scipy.sparse import csr_matrix\n\n            data, indices, indptr = to_matrix_sparse(zx, force_serial=force_serial)\n            side = 1 << self.num_qubits\n            return csr_matrix((data, indices, indptr), shape=(side, side))\n        return to_matrix_dense(zx, force_serial=force_serial)\n\n    def to_operator(self) -> Operator:\n        \"\"\"Convert to a matrix Operator object\"\"\"\n        return Operator(self.to_matrix())\n\n    # ---------------------------------------------------------------------\n    # Custom Iterators\n    # ---------------------------------------------------------------------\n\n    def label_iter(self):\n        \"\"\"Return a label representation iterator.\n\n        This is a lazy iterator that converts each term in the SparsePauliOp\n        into a tuple (label, coeff). To convert the entire table to labels\n        use the :meth:`to_labels` method.\n\n        Returns:\n            LabelIterator: label iterator object for the SparsePauliOp.\n        \"\"\"\n\n        class LabelIterator(CustomIterator):\n            \"\"\"Label representation iteration and item access.\"\"\"\n\n            def __repr__(self):\n                return f\"<SparsePauliOp_label_iterator at {hex(id(self))}>\"\n\n            def __getitem__(self, key):\n                coeff = self.obj.coeffs[key]\n                pauli = self.obj.paulis.label_iter()[key]\n                return (pauli, coeff)\n\n        return LabelIterator(self)\n\n    def matrix_iter(self, sparse: bool = False):\n        \"\"\"Return a matrix representation iterator.\n\n        This is a lazy iterator that converts each term in the SparsePauliOp\n        into a matrix as it is used. To convert to a single matrix use the\n        :meth:`to_matrix` method.\n\n        Args:\n            sparse (bool): optionally return sparse CSR matrices if True,\n                           otherwise return Numpy array matrices\n                           (Default: False)\n\n        Returns:\n            MatrixIterator: matrix iterator object for the PauliList.\n        \"\"\"\n\n        class MatrixIterator(CustomIterator):\n            \"\"\"Matrix representation iteration and item access.\"\"\"\n\n            def __repr__(self):\n                return f\"<SparsePauliOp_matrix_iterator at {hex(id(self))}>\"\n\n            def __getitem__(self, key):\n                coeff = self.obj.coeffs[key]\n                mat = self.obj.paulis[key].to_matrix(sparse)\n                return coeff * mat\n\n        return MatrixIterator(self)\n\n    def noncommutation_graph(self, qubit_wise: bool) -> rx.PyGraph:\n        \"\"\"Create the non-commutation graph of this SparsePauliOp.\n\n        This transforms the measurement operator grouping problem into graph coloring problem. The\n        constructed graph contains one node for each Pauli. The nodes will be connecting for any two\n        Pauli terms that do _not_ commute.\n\n        Args:\n            qubit_wise (bool): whether the commutation rule is applied to the whole operator,\n                or on a per-qubit basis.\n\n        Returns:\n            rustworkx.PyGraph: the non-commutation graph with nodes for each Pauli and edges\n                indicating a non-commutation relation. Each node will hold the index of the Pauli\n                term it corresponds to in its data. The edges of the graph hold no data.\n        \"\"\"\n        return self.paulis.noncommutation_graph(qubit_wise)\n\n    def group_commuting(self, qubit_wise: bool = False) -> list[SparsePauliOp]:\n        \"\"\"Partition a SparsePauliOp into sets of commuting Pauli strings.\n\n        Args:\n            qubit_wise (bool): whether the commutation rule is applied to the whole operator,\n                or on a per-qubit basis.  For example:\n\n                .. plot::\n                   :include-source:\n                   :nofigs:\n\n                    >>> from qiskit.quantum_info import SparsePauliOp\n                    >>> op = SparsePauliOp.from_list([(\"XX\", 2), (\"YY\", 1), (\"IZ\",2j), (\"ZZ\",1j)])\n                    >>> op.group_commuting()\n                    [SparsePauliOp([\"IZ\", \"ZZ\"], coeffs=[0.+2.j, 0.+1j]),\n                     SparsePauliOp([\"XX\", \"YY\"], coeffs=[2.+0.j, 1.+0.j])]\n                    >>> op.group_commuting(qubit_wise=True)\n                    [SparsePauliOp(['XX'], coeffs=[2.+0.j]),\n                     SparsePauliOp(['YY'], coeffs=[1.+0.j]),\n                     SparsePauliOp(['IZ', 'ZZ'], coeffs=[0.+2.j, 0.+1.j])]\n\n        Returns:\n            list[SparsePauliOp]: List of SparsePauliOp where each SparsePauliOp contains\n                commuting Pauli operators.\n        \"\"\"\n        groups = self.paulis._commuting_groups(qubit_wise)\n        return [self[group] for group in groups.values()]\n\n    @property\n    def parameters(self) -> ParameterView:\n        r\"\"\"Return the free ``Parameter``\\s in the coefficients.\"\"\"\n        ret = set()\n        for coeff in self.coeffs:\n            if isinstance(coeff, ParameterExpression):\n                ret |= coeff.parameters\n        return ParameterView(ret)\n\n    def assign_parameters(\n        self,\n        parameters: (\n            Mapping[Parameter, complex | ParameterExpression]\n            | Sequence[complex | ParameterExpression]\n        ),\n        inplace: bool = False,\n    ) -> SparsePauliOp | None:\n        r\"\"\"Bind the free ``Parameter``\\s in the coefficients to provided values.\n\n        .. note::\n            If all the parameters in the circuit are bound to numeric values, the coefficients array\n            will be returned with a :class:`complex` dtype.\n\n        Args:\n            parameters: The values to bind the parameters to.\n            inplace: If ``False``, a copy of the operator with the bound parameters is returned.\n                If ``True`` the operator itself is modified.\n\n        Returns:\n            A copy of the operator with bound parameters, if ``inplace`` is ``False``, otherwise\n            ``None``.\n        \"\"\"\n        if inplace:\n            bound = self\n        else:\n            bound = deepcopy(self)\n\n        # turn the parameters to a dictionary\n        if isinstance(parameters, Sequence):\n            free_parameters = bound.parameters\n            if len(parameters) != len(free_parameters):\n                raise ValueError(\n                    f\"Mismatching number of values ({len(parameters)}) and parameters \"\n                    f\"({len(free_parameters)}). For partial binding please pass a dictionary of \"\n                    \"{parameter: value} pairs.\"\n                )\n            parameters = dict(zip(free_parameters, parameters))\n\n        for i, coeff in enumerate(bound.coeffs):\n            if isinstance(coeff, ParameterExpression):\n                for key in coeff.parameters & parameters.keys():\n                    coeff = coeff.assign(key, parameters[key])\n                if len(coeff.parameters) == 0:\n                    coeff = complex(coeff)\n                bound.coeffs[i] = coeff\n\n        if bound.coeffs.dtype == object and not any(\n            isinstance(c, ParameterExpression) for c in bound.coeffs\n        ):\n            bound._coeffs = bound.coeffs.astype(complex)\n\n        return None if inplace else bound\n\n    def apply_layout(\n        self, layout: TranspileLayout | List[int] | None, num_qubits: int | None = None\n    ) -> SparsePauliOp:\n        \"\"\"Apply a transpiler layout to this :class:`~.SparsePauliOp`\n\n        Args:\n            layout: Either a :class:`~.TranspileLayout`, a list of integers or None.\n                    If both layout and num_qubits are none, a copy of the operator is\n                    returned.\n            num_qubits: The number of qubits to expand the operator to. If not\n                provided then if ``layout`` is a :class:`~.TranspileLayout` the\n                number of the transpiler output circuit qubits will be used by\n                default. If ``layout`` is a list of integers the permutation\n                specified will be applied without any expansion. If layout is\n                None, the operator will be expanded to the given number of qubits.\n\n        Returns:\n            A new :class:`.SparsePauliOp` with the provided layout applied\n        \"\"\"\n        from qiskit.transpiler.layout import TranspileLayout\n\n        if layout is None and num_qubits is None:\n            return self.copy()\n\n        n_qubits = self.num_qubits\n        if isinstance(layout, TranspileLayout):\n            n_qubits = len(layout._output_qubit_list)\n            layout = layout.final_index_layout()\n        if num_qubits is not None:\n            if num_qubits < n_qubits:\n                raise QiskitError(\n                    f\"The input num_qubits is too small, a {num_qubits} qubit layout cannot be \"\n                    f\"applied to a {n_qubits} qubit operator\"\n                )\n            n_qubits = num_qubits\n        if layout is None:\n            layout = list(range(self.num_qubits))\n        else:\n            if any(x < 0 or x >= n_qubits for x in layout):\n                raise QiskitError(\"Provided layout contains indices outside the number of qubits.\")\n            if len(set(layout)) != len(layout):\n                raise QiskitError(\"Provided layout contains duplicate indices.\")\n        if self.num_qubits == 0:\n            return type(self)([\"I\" * n_qubits] * self.size, self.coeffs)\n        new_op = type(self)(\"I\" * n_qubits)\n        return new_op.compose(self, qargs=layout)\n\n\ndef sparsify_label(pauli_string):\n    \"\"\"Return a sparse format of a Pauli string, e.g. \"XIIIZ\" -> (\"XZ\", [0, 4]).\"\"\"\n    qubits = [i for i, label in enumerate(reversed(pauli_string)) if label != \"I\"]\n    sparse_label = \"\".join(pauli_string[~i] for i in qubits)\n\n    return sparse_label, qubits\n\n\n# Update docstrings for API docs\ngenerate_apidocs(SparsePauliOp)\n",
+      "metadata": {
+        "package": "qiskit",
+        "source_file": "qiskit\\quantum_info\\operators\\symplectic\\sparse_pauli_op.py",
+        "section_id": "lines_900_1251",
+        "section_title": "Lines 901-1251"
+      },
+      "score": 0.8942043065018354,
+      "original_score": 0.8842859602363824,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "using",
+        "sparsepauliop",
+        "qiskit"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "README__9e52fc636985046c4ee9350fa9244d32__h1_6_6__0",
+      "text": "from qiskit.quantum_info import SparsePauliOp\noperator = SparsePauliOp.from_list([(\"XXY\", 1), (\"XYX\", 1), (\"YXX\", 1), (\"YYY\", -1)])",
+      "metadata": {
+        "package": "qiskit",
+        "section_id": "h1_6",
+        "section_title": "2. Define the observable to be measured",
+        "source_file": "README.md"
+      },
+      "score": 0.8145610469740889,
+      "original_score": 0.7971761451279098,
+      "vector_score": 0.9014913511855521,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "define",
+        "sparsepauliop",
+        "qiskit"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "suzuki_trotter__7f62f7066dcb3871249cb80768401bb6__part_2__2",
+      "text": " this\n                argument to ``False`` to automatically apply a conversion to :class:`.SparsePauliOp`.\n                This argument is supported until Qiskit 2.2, at which point all atomic evolutions\n                are required to support :class:`.SparseObservable`\\ s as input.\n\n        Raises:\n            ValueError: If order is not even\n        \"\"\"\n        if order > 1 and order % 2 == 1:\n            raise ValueError(\n                \"Suzuki product formulae are symmetric and therefore only defined \"\n                f\"for when the order is 1 or even, not {order}.\"\n            )\n\n        super().__init__(\n            order,\n            reps,\n            insert_barriers,\n            cx_structure,\n            atomic_evolution,\n            wrap,\n            preserve_order=preserve_order,\n            atomic_evolution_sparse_observable=atomic_evolution_sparse_observable,\n        )\n\n    def expand(\n        self, evolution: PauliEvolutionGate\n    ) -> list[tuple[str, list[int], ParameterValueType]]:\n        \"\"\"Expand the Hamiltonian into a Suzuki-Trotter sequence of sparse gates.\n\n        For example, the Hamiltonian ``H = IX + ZZ`` for an evolution time ``t`` and\n        1 repetition for an order 2 formula would get decomposed into a list of 3-tuples\n        containing ``(pauli, indices, rz_rotation_angle)``, that is:\n\n        .. code-block:: text\n\n            (\"X\", [0], t), (\"ZZ\", [0, 1], 2t), (\"X\", [0], t)\n\n        Note that the rotation angle contains a factor of 2, such that that evolution\n        of a Pauli :math:`P` over time :math:`t`, which is :math:`e^{itP}`, is represented\n        by ``(P, indices, 2 * t)``.\n\n        For ``N`` repetitions, this sequence would be repeated ``N`` times and the coefficients\n        divided by ``N``.\n\n        Args:\n            evolution: The evolution gate to expand.\n\n        Returns:\n            The Pauli network implementing the Trotter expansion.\n        \"\"\"\n        operators = evolution.operator\n        time = evolution.time\n\n        def to_sparse_list(operator):\n            sparse_list = (\n                operator.to_sparse_list()\n                if isinstance(operator, SparsePauliOp)\n                else operator.to_sparse_list()\n            )\n            paulis = [\n                (pauli, indices, real_or_fail(coeff) * time * 2 / self.reps)\n                for pauli, indices, coeff in sparse_list\n            ]\n            if not self.preserve_order:\n                return reorder_paulis(paulis)\n\n            return paulis\n\n        # construct the evolution circuit\n        if isinstance(operators, list):  # already sorted into commuting bits\n            non_commuting = [to_sparse_list(operator) for operator in operators]\n        else",
+      "metadata": {
+        "section_title": "suzuki_trotter.py",
+        "source_file": "qiskit\\synthesis\\evolution\\suzuki_trotter.py",
+        "section_id": "part_2",
+        "package": "qiskit"
+      },
+      "score": 0.7862313343488464,
+      "original_score": 0.7661905219440508,
+      "vector_score": 0.7329928337066746,
+      "bm25_score": 0.5338329701030649,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hamiltonian",
+        "sparsepauliop",
+        "qiskit"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "evolved_operator_ansatz__a2f35e7a4914a8f6c2d8e0faa9dda3eb__part_4__4",
+      "text": " minimal set of commuting terms is known it can be passed as sequence into this function.\n\n    Examples:\n\n    A single operator will be split into commuting terms automatically:\n\n    .. plot::\n        :alt: Circuit diagram output by the previous code.\n        :include-source:\n\n        from qiskit.quantum_info import SparsePauliOp\n        from qiskit.circuit.library import hamiltonian_variational_ansatz\n\n        # this Hamiltonian will be split into the two terms [ZZI, IZZ] and [IXI]\n        hamiltonian = SparsePauliOp([\"ZZI\", \"IZZ\", \"IXI\"])\n        ansatz = hamiltonian_variational_ansatz(hamiltonian, reps=2)\n        ansatz.draw(\"mpl\")\n\n    Alternatively, we can directly provide the terms:\n\n    .. plot::\n        :alt: Circuit diagram output by the previous code.\n        :include-source:\n\n        from qiskit.quantum_info import SparsePauliOp\n        from qiskit.circuit.library import hamiltonian_variational_ansatz\n\n        zz = SparsePauliOp([\"ZZI\", \"IZZ\"])\n        x = SparsePauliOp([\"IXI\"])\n        ansatz = hamiltonian_variational_ansatz([zz, x], reps=2)\n        ansatz.draw(\"mpl\")\n\n\n    Args:\n        hamiltonian: The Hamiltonian to evolve. If given as single operator, it will be split into\n            commuting terms. If a sequence of :class:`.SparsePauliOp`, then it is assumed that\n            each element consists of commuting terms, but the elements do not commute among each\n            other.\n        reps: The number of times to repeat the evolved operators.\n        insert_barriers: Whether to insert barriers in between each evolution.\n        name: The name of the circuit.\n        parameter_prefix: Set the names of the circuit parameters. If a string, the same prefix\n            will be used for each parameters. Can also be a list to specify a prefix per\n            operator.\n\n    References:\n\n    [1] D. Wecker et al. Progress towards practical quantum variational algorithms (2015)\n    `Phys Rev A 92, 042303 <https://journals.aps.org/pra/abstract/10.1103/PhysRevA.92.042303>`__\n\n    [2] R. Wiersema et al. Exploring entanglement and optimization within the Hamiltonian\n    Variational Ansatz (2020) `arXiv:2008.02941 <https://arxiv.org/abs/2008.02941>`__\n\n    \"\"\"\n    # If a single operator is given, check if it is a sum of operators (a SparsePauliOp),\n    # and split it into commuting terms. Otherwise, treat it as single operator.\n    if isinstance(hamiltonian, SparsePauli",
+      "metadata": {
+        "package": "qiskit",
+        "section_title": "evolved_operator_ansatz.py",
+        "source_file": "qiskit\\circuit\\library\\n_local\\evolved_operator_ansatz.py",
+        "section_id": "part_4"
+      },
+      "score": 0.7364440881545513,
+      "original_score": 0.7117357214190405,
+      "vector_score": 0.689267755397957,
+      "bm25_score": 0.4624111523817737,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hamiltonian",
+        "sparsepauliop",
+        "qiskit"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 106,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

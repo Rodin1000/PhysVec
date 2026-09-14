@@ -1,0 +1,140 @@
+{
+  "query": "ITensor siteinds function signature and arguments for electron lattice sites.",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "IncludedSiteTypes__10c3b7e95897ec39b67299563b29b049__h2_13_13__0",
+      "text": "The states of site indices with the \"Electron\" SiteType correspond to\n``|0\\rangle``, ``|\\!\\uparrow\\rangle``, ``|\\!\\downarrow\\rangle``, ``|\\!\\uparrow\\downarrow\\rangle``.\nMaking a single \"Electron\" site or collection of N \"Electron\" sites\n```\ns = siteind(\"Electron\")\nsites = siteinds(\"Electron\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\n- `conserve_qns` (default: false): conserve total number of electrons\n- `conserve_sz` (default: conserve_qns): conserve total ``S^z``\n- `conserve_nf` (default: conserve_qns): conserve total number of electrons\n- `conserve_nfparity` (default: conserve_qns): conserve total electron number parity\n- `qnname_sz` (default: \"Sz\"): name of total ``S^z`` QN\n- `qnname_nf` (default: \"Nf\"): name of total electron number QN\n- `qnname_nfparity` (default: \"NfParity\"): name of total electron number parity QN\nFor example:\n```\nsites = siteinds(\"Electron\",N; conserve_nfparity=true)\n```",
+      "metadata": {
+        "section_id": "h2_13",
+        "section_title": "\"Electron\" SiteType",
+        "source_file": "docs\\src\\IncludedSiteTypes.md",
+        "package": "itensormps"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "siteinds",
+        "arguments",
+        "electron",
+        "sites"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "section_title": "trg.jl",
+        "package": "itensors",
+        "source_file": "examples\\src\\trg.jl",
+        "section_id": "full"
+      },
+      "score": 0.81,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "function"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "test_phys_site_types__060210c943032a0fd9694bbf30890d18__part_0__0",
+      "text": "using ITensors, LinearAlgebra, Test\nusing ITensors.SiteTypes: has_fermion_string, op, siteind, siteinds, state\n\n@testset \"Physics Sites\" begin\n  N = 10\n\n  @testset \"Generic sites\" for eltype in (Float32, Float64, ComplexF32, ComplexF64)\n    d1, d2 = 3, 4\n    i1, i2 = Index(d1), Index(d2)\n\n    o = op(\"I\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"F\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"I\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    U1 = op(\"RandomUnitary\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U1 = op(\"randU\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U12 = op(\"RandomUnitary\", i1, i2)\n    @test hassameinds(U12, (i1', i2', i1, i2))\n    @test apply(transpose(dag(U12)), U12) ≈\n      itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n  end\n\n  @testset \"Qubit sites\" begin\n   ",
+      "metadata": {
+        "section_title": "test_phys_site_types.jl",
+        "source_file": "test\\base\\test_phys_site_types.jl",
+        "package": "itensors",
+        "section_id": "part_0"
+      },
+      "score": 0.7771287030382954,
+      "original_score": 0.7590580573386977,
+      "vector_score": 0.8230813124533486,
+      "bm25_score": 0.502965036880094,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensor",
+        "siteinds",
+        "sites"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "IncludedSiteTypes__7d74debdd1c692a6ddd9c2ac060aba29__\"Electron\"-SiteType_6__0",
+      "text": "## \"Electron\" SiteType\nThe states of site indices with the \"Electron\" SiteType correspond to $|0\\rangle$ , $|\\!\\uparrow\\rangle$ , $|\\!\\downarrow\\rangle$ , $|\\!\\uparrow\\downarrow\\rangle$ .\nMaking a single \"Electron\" site or collection of N \"Electron\" sites\n```code\ns = siteind(\"Electron\")\nsites = siteinds(\"Electron\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\nconserve_qns (default: false): conserve total number of electrons\nconserve_sz (default: conserve_qns): conserve total $S^z$\nconserve_nf (default: conserve_qns): conserve total number of electrons\nconserve_nfparity (default: conserve_qns): conserve total electron number parity\nqnname_sz (default: \"Sz\"): name of total $S^z$ QN\nqnname_nf (default: \"Nf\"): name of total electron number QN\nqnname_nfparity (default: \"NfParity\"): name of total electron number parity QN\nFor example:\n```code\nsites = siteinds(\"Electron\",N; conserve_nfparity=true)\n```\nThe available state names for \"Electron\" sites are:\n\"Emp\" (aliases: \"0\" ) unoccupied electron site\n\"Up\" (aliases: \"↑\" ) electron site occupied with one up electron\n\"Dn\" (aliases: \"↓\" ) electron site occupied with one down electron\n\"UpDn\" (aliases: \"↑↓\" ) electron site occupied with two electrons (one up, one down)\nOperators associated with \"Electron\" sites can be made using the op function, for example\n```code\nCup = op(\"Cup\",s)\nCup4 = op(\"Cup\",sites[4])\n```\nSingle-fermion operators:\n\"Ntot\" (aliases: \"ntot\" ) Total density operator\n\"Nup\" (aliases: \"n↑\" ) Up density operator\n\"Ndn\" (aliases: \"n↓\" ) Down density operator\n\"Cup\" (aliases: \"c↑\" ) Up-spin annihilation operator\n\"Cdn\" (aliases: \"c↓\" ) Down-spin annihilation operator\n\"Cdagup\" (aliases: \"c†↑\" ) Up-spin creation operator\n\"Cdagdn\" (aliases: \"c†↓\" ) Down-spin creation operator\n\"Sz\" (aliases: \"Sᶻ\" )\n\"Sx\" (aliases: \"Sˣ\" )\n\"S+\" (aliases: \"Sp\" , \"S⁺\" , \"Splus\" )\n\"S-\" (aliases: \"Sm\" , \"S⁻\" , \"Sminus\" )\n\"F\" Jordan-Wigner string operator\n\"Fup\" (aliases: \"F↑\" ) Up-spin Jordan-Wigner string operator\n\"Fdn\" (aliases: \"F↓\" ) Down-spin Jordan-Wigner string operator\nNon-fermionic single particle operators (these do not have Jordan-Wigner string attached, so will commute within systems such as OpSum or the apply function):\n\"Aup\" (aliases: \"a↑\" ) Up-spin annihilation operator\n\"Adn\" (aliases: \"a↓\" ) Down-spin annihilation operator\n\"Adagup\" (aliases: \"a†↑\" ) Up-spin creation operator\n\"Adagdn\" (aliases: \"a†↓\" ) Down-spin creation operator",
+      "metadata": {
+        "section_id": "\"Electron\"-SiteType",
+        "section_title": "\"Electron\" SiteType",
+        "package": "itensormps",
+        "source_file": "docs\\build\\IncludedSiteTypes.html"
+      },
+      "score": 0.761762323255081,
+      "original_score": 0.6188197172081297,
+      "vector_score": 0.5723908343494947,
+      "bm25_score": 0.8045352486426698,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "siteinds",
+        "function",
+        "arguments",
+        "electron",
+        "sites"
+      ],
+      "match_ratio": 0.625,
+      "is_html": true
+    },
+    {
+      "id": "IncludedSiteTypes__10c3b7e95897ec39b67299563b29b049__h2_16_16__0",
+      "text": "\"tJ\" sites are similar to electron sites, but cannot be doubly occupied\nThe states of site indices with the \"tJ\" SiteType correspond to\n``|0\\rangle``, ``|\\!\\uparrow\\rangle``, ``|\\!\\downarrow\\rangle``.\nMaking a single \"tJ\" site or collection of N \"tJ\" sites\n```\ns = siteind(\"tJ\")\nsites = siteinds(\"tJ\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\n- `conserve_qns` (default: false): conserve total number of fermions\n- `conserve_nf` (default: conserve_qns): conserve total number of fermions\n- `conserve_nfparity` (default: conserve_qns): conserve total fermion number parity\n- `qnname_nf` (default: \"Nf\"): name of total fermion number QN\n- `qnname_nfparity` (default: \"NfParity\"): name of total fermion number parity QN\nFor example:\n```\nsites = siteinds(\"tJ\",N; conserve_nfparity=true)\n```",
+      "metadata": {
+        "section_title": "\"tJ\" SiteType",
+        "package": "itensormps",
+        "source_file": "docs\\src\\IncludedSiteTypes.md",
+        "section_id": "h2_16"
+      },
+      "score": 0.7142277061900393,
+      "original_score": 0.6824752291000437,
+      "vector_score": 0.7025711998683354,
+      "bm25_score": 0.6020913460268771,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "siteinds",
+        "arguments",
+        "electron",
+        "sites"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 103,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      }
+    }
+  }
+}

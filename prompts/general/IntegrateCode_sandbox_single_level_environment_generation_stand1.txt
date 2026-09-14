@@ -1,0 +1,88 @@
+You are an expert in numerical calculations of quantum many-body physics.
+Your task here is to generate the integration test environment code for a specific level of integration. The environment consists of two parts:
+1. Run code: The reconstructed run function for this specific level.
+2. Entrypoint code: The main function and entry point that organizes the run function and provides test input values.
+
+Note: The element functions needed for this level will be provided separately and should NOT be included in your output.
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. **TOPIC**: The topic name (dmrg, nnwf, or qcmb). This determines which element functions are valid for this repository. You MUST only allow code that calls functions listed under this topic below.
+2. **LEVEL_GUIDELINE**: A dictionary containing information about this integration level. The dict has keys:
+   - "level-i": Specifies what level it is. The value describes the reconstruction details.
+   - "element_functions": A List[str], containing all the names of element functions needed for this level. 
+3. **RUN_FUNCTION_CONTENT**: The target 'run' function from the repository.
+   - You need to reconstruct this run function to the level specified by the level_guideline.
+4. **MAIN_CONTENT**: The entry point ('main' function) from the repository.
+   - This main function tells you the code parameter formats for reference.
+5. **FILE_EXT**: The file extension string (e.g., "py" for Python or "jl" for Julia, without leading dot). This indicates the file type of the generated code.
+
+-------------------------------------------------------------------------------------------------------
+[Element Functions by Topic]:
+Valid element function names (by prefix) for each topic. You MUST NOT include any code that calls functions NOT in the LEVEL_GUIDELINE's element_functions list, and those must be from the topic below:
+- **dmrg**: `site`, `hamiltonian`, `initialstate`, `observable`, `effector`
+- **nnwf**: `hilbert`, `statemodel`, `compset`, `hamiltonian`, `observable`, `effector`
+- **qcmb**: `hamiltonian`, `circinit`, `circevol`, `effector`, `observable`
+
+-------------------------------------------------------------------------------------------------------
+[Generation Rules]:
+You MUST follow instructions below:
+1. **RUN CODE**: You reconstruct the run function based on the LEVEL_GUIDELINE and RUN_FUNCTION_CONTENT.
+   - You devide the original RUN_FUNCTION_CONTENT in two parts: KEEP_PART and NON_KEEP_PART. KEEP_PART is the codes that included in the LEVEL_GUIDELINE, while NON_KEEP_PART is the codes that NOT in LEVEL_GUIDELINE.
+      - **CRITICAL**: You MUST STRICTLY FOLLOW the LEVEL_GUIDELINE. Do NOT include element functions that are NOT included in LEVEL_GUIDELINE's element_functions.
+      - **Boundary rule**: In the original **RUN_FUNCTION_CONTENT**, find the **last position** where any of the element_functions (listed in LEVEL_GUIDELINE) is called or used. Treat that as a boundary: any substantive code logic (calls, computations, or control flow) that appears **after** this boundary in RUN_FUNCTION_CONTENT must be **deleted** (NON_KEEP_PART). Though you have to make sure the executability of the resulting run code. 
+      - The package import part, ALL the comments before the function definition are NOT for this devision, you MUST ALWAYS keey them. 
+      - The input parameters SHOULD also be devided into KEEP_PART and NON_KEEP_PART, depending on whether they are actually used/called in the following. 
+   - For KEEP_PART, you are FORBIDDEN to change its content. You DO NOT modefy them. 
+   - For NON_KEEP_PART, you are REQUIRED to delete them from the run function. 
+   - You MUST remove any function parameters that are NOT used in the function body. 
+   - You may adjust the output of the generated RUN CODE in order to be compatible with the remaining KEEP_PART. 
+   - **CRITICAL**: You are FORBIDDEN to add any additional code to verify calculation results (such as assertions, checks, or validation logic) in the run code.
+
+2. **ENTRYPOINT CODE**: You define a 'main' function as the entry-point of this integration test.
+   - You learn how to define input parameters from the input MAIN_CONTENT.
+   - You SHOULD try to KEEP the parameter values and choices from the repo-main-function (MAIN_CONTENT). Use the same or similar parameter selections when feasible.
+   - Fallback: If the repo-main-function (MAIN_CONTENT) does not provide clear parameter choices, then use small values for feasibility (e.g. lattice size L <= 6).
+   - **CRITICAL**: Avoid parameter values that contradict non-main function definitions (e.g. hardcoded indices/params). Avoid extremely small values (e.g. 0, 1) that may cause degeneracy or invalid inputs.
+   - In this main function generated here, you only call explicitly the run function defined in the run_code (you MUST adapt to the modefied run_code, rather than the original RUN_FUNCTION_CONTENT).
+   - You are STRICTLY FORBIDDEN to explicitly call the element-functions which are called already in the run function, even the input MAIN_CONTENT has done so.
+   - You MUST add the entry point using the correct syntax format based on the file_ext:
+     - For Python files (file_ext = "py" or ".py"): Use `if __name__ == "__main__": main()`
+     - For Julia files (file_ext = "jl" or ".jl"): Use `main()`
+   - **CRITICAL**: You simply call the run_code, and DO NOT add additional verify calculation results (such as assertions, checks, or validation logic). 
+
+3. You are FORBIDDEN to define any NEW functions in the generated code explicitly. 
+
+4. The code_type of the generated code MUST be the SAME as that of the input codes.
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+Your output consists of three parts:
+
+1. **JSON block** (enclosed by ```json and ```): A dictionary with keys:
+   - **"topic"**: a brief summary of the input level_guideline (fewer than 100 words)
+   - **"code_type"**: either "python" or "julia" (lowercase string)
+   Do NOT put code content in the JSON.
+   The JSON must be valid (proper escaping, e.g. `"` as `\"`) so it can be loaded by json.loads().
+
+2. **Run code block** (enclosed by <RUNCODE> and </RUNCODE>): The reconstructed run function for this specific level. Output must be raw executable code that can be directly written to a file; do NOT use JSON escape sequences (e.g. `\n`, `\"`, `\\`).
+
+3. **Entrypoint code block** (enclosed by <ENTRYPOINT> and </ENTRYPOINT>): The main function and entry point. Output must be raw executable code that can be directly written to a file; do NOT use JSON escape sequences (e.g. `\n`, `\"`, `\\`).
+
+**CRITICAL:** You MUST output COMPLETE code blocks. Each block MUST include both its opening and closing tags (e.g. <RUNCODE> and </RUNCODE>). Do NOT omit or truncate any closing tag.
+
+**CRITICAL:** You MUST NOT include this prompt itself in your output.
+
+**Example output:**
+```json
+{"topic": "...topic here...", "code_type": "...code type here..."}
+```
+<RUNCODE>
+...run code here...
+</RUNCODE>
+<ENTRYPOINT>
+...entrypoint code here...
+</ENTRYPOINT>
+
+**CRITICAL:** Your output MUST include the JSON block and both code blocks.
+

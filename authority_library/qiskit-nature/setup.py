@@ -1,0 +1,88 @@
+# This code is part of a Qiskit project.
+#
+# (C) Copyright IBM 2018, 2025.
+#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
+import inspect
+import os
+import re
+import sys
+
+import setuptools
+
+with open("requirements.txt", "r", encoding="utf-8") as f:
+    REQUIREMENTS = f.read().splitlines()
+
+if not hasattr(setuptools, "find_namespace_packages") or not inspect.ismethod(
+    setuptools.find_namespace_packages
+):
+    print(
+        "Your setuptools version:'{}' does not support PEP 420 (find_namespace_packages). "
+        "Upgrade it to version >='40.1.0' and repeat install.".format(setuptools.__version__)
+    )
+    sys.exit(1)
+
+VERSION_PATH = os.path.join(os.path.dirname(__file__), "qiskit_nature", "VERSION.txt")
+with open(VERSION_PATH, "r", encoding="utf-8") as version_file:
+    VERSION = version_file.read().strip()
+
+# Read long description from README.
+README_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "README.md")
+with open(README_PATH, "r", encoding="utf-8") as readme_file:
+    README = re.sub(
+        "<!--- long-description-skip-begin -->.*<!--- long-description-skip-end -->",
+        "",
+        readme_file.read(),
+        flags=re.S | re.M,
+    )
+
+setuptools.setup(
+    name="qiskit-nature",
+    version=VERSION,
+    description="Qiskit Nature: A library of quantum computing chemistry/physics experiments",
+    long_description=README,
+    long_description_content_type="text/markdown",
+    url="https://github.com/Qiskit/qiskit-nature",
+    author="Qiskit Nature Development Team",
+    author_email="qiskit@us.ibm.com",
+    license="Apache-2.0",
+    classifiers=[
+        "Environment :: Console",
+        "License :: OSI Approved :: Apache Software License",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Topic :: Scientific/Engineering",
+    ],
+    keywords="qiskit sdk quantum nature chemistry physics",
+    packages=setuptools.find_packages(include=["qiskit_nature", "qiskit_nature.*"]),
+    install_requires=REQUIREMENTS,
+    include_package_data=True,
+    python_requires=">=3.9",
+    extras_require={
+        "pyscf": ["pyscf; sys_platform != 'win32'"],
+        "mpl": ["matplotlib>=3.3"],
+        "sparse": ["sparse"],
+        "opt_einsum": ["opt_einsum"],
+    },
+    project_urls={
+        "Bug Tracker": "https://github.com/Qiskit/qiskit-nature/issues",
+        "Documentation": "https://qiskit-community.github.io/qiskit-nature/",
+        "Source Code": "https://github.com/Qiskit/qiskit-nature",
+    },
+    zip_safe=False,
+)

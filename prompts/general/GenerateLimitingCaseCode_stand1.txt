@@ -1,0 +1,69 @@
+You are an expert in numerical calculations of quantum many-body physics.
+Your task here is to generate limiting case test code by modifying the `main` function to test a specific limiting case scenario.
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. **CODE_CONTENT**: The original code file containing element functions, run functions, and a main function.
+2. **LIMITING_CASE_CONTENT**: Description of the limiting case test scenario to be performed.
+3. **REPAIR_SUGGESTIONS**: Optional. If not None, use these repair suggestions when generating the limiting case code. Still follow all other constraints.
+4. **TOPIC**: The topic name (dmrg, nnwf, or qcmb), which determines the available element functions.
+
+-------------------------------------------------------------------------------------------------------
+[Task]:
+You need to modify the `main` function in the code to perform the limiting case test described in LIMITING_CASE_CONTENT. The modified `main` function should call the existing element functions and run functions defined in the code, rather than rewriting calculation code.
+
+-------------------------------------------------------------------------------------------------------
+[Element Functions by Topic]:
+Based on the TOPIC, the available element function prefixes are:
+- **dmrg**: `site`, `hamiltonian`, `initialstate`, `observable`, `effector`
+- **nnwf**: `hilbert`, `statemodel`, `compset`, `hamiltonian`, `observable`, `effector`
+- **qcmb**: `hamiltonian`, `circinit`, `circevol`, `effector`, `observable`
+
+Additionally, **run functions** have the prefix `run` (common to all topics).
+
+**CRITICAL**: In the `main` function, you MUST ONLY directly call the element functions and run functions defined in the code file. You are FORBIDDEN to rewrite calculation code yourself.
+
+-------------------------------------------------------------------------------------------------------
+[Instructions]:
+1. Read CODE_CONTENT to understand the structure and available functions.
+2. Read LIMITING_CASE_CONTENT to understand what limiting case test needs to be performed.
+3. If REPAIR_SUGGESTIONS is provided (not None), incorporate them when generating the limiting case code, while still following all other constraints.
+4. Modify the `main` function to:
+   - Call the appropriate element functions and run functions to set up the limiting case scenario
+   - Use the existing functions to perform the calculation
+   - Output only the results required by LIMITING_CASE_CONTENT (the calculated values for comparison)
+   - **CRITICAL - No extra truth/parsed output**: Do NOT generate or print any additional "Expected", "Truth", or reference values for judging. Output ONLY what LIMITING_CASE_CONTENT explicitly asks to compute and report.
+5. You may fine-tune function definitions (e.g., output parameters) if necessary, but these modifications should be explicitly targeted at element functions and run functions. You MUST NOT change the logic/core implementation of function definitions. You are FORBIDDEN to rewrite the entire function.
+
+6. **CRITICAL - Preserve core logic**: You MUST NOT modify the core logic definitions in any function. This includes but is not limited to:
+   - Hamiltonian construction (hopping terms, interaction terms, potential energy terms)
+   - The specific mathematical form of potential/trap terms (e.g., harmonic trap V*(i-i_center)^2, scaling factors like 4A/L^2)
+   - Observable definitions and measurement logic
+   - Any physical formulas or numerical algorithms
+   The limiting case test should only change parameters (L, U, A, etc.) and the `main` orchestration; the underlying physics implementation must remain unchanged.
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+Your output consists of two parts:
+
+1. **JSON block** (enclosed by ```json and ```): A dictionary with keys:
+   - **"code_type"**: Either "python" or "julia" (lowercase string), matching the original code file type.
+   Do NOT put code content in the JSON.
+   The JSON must be valid (proper escaping, e.g. `"` as `\"`) so it can be loaded by json.loads().
+
+2. **Code block** (enclosed by <CODE> and </CODE>): The full source code as raw text.
+   - Place the complete code between <CODE> and </CODE>
+   - No JSON escaping is needed.
+   - **CRITICAL:** You MUST output a COMPLETE code block. The block MUST include both <CODE> and </CODE>. Do NOT omit or truncate the closing tag.
+
+**CRITICAL:** You MUST NOT include this prompt itself in your output.
+
+**Example output:**
+```json
+{"code_type": "...code type here..."}
+```
+<CODE>
+...code content here...
+</CODE>
+
+**CRITICAL:** Your output MUST include both the JSON block and the code block.

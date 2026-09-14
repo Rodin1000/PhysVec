@@ -1,0 +1,128 @@
+{
+  "query": "JAX array dimension management in fermionic neural networks",
+  "packages": [
+    "netket"
+  ],
+  "results": [
+    {
+      "id": "netket.operator.DiscreteJaxOperator__92d224bc87d9e44ba3b75533aa759441__sec_2_2__2",
+      "text": "\\) where \\(K_{max}\\) is the maximum number of connections for every \\(y_i\\) .\nx ( ndarray ) – A N-tensor of shape \\((...,hilbert.size)\\) containing\nthe batch/batches of quantum numbers \\(x\\) .\nThe connected states x’, in a N+1-tensor and an\nN-tensor containing the matrix elements \\(O(x,x')\\) associated to each x’ for every batch.\n(x_primes, mels)\nReturn the number of (non-zero) connected entries to x .\nWarning\nThis is not the True number of connected entries, because some elements\nmight appear twice (however this should not be too common.)\nNote that this deviates from the Numba implementation, and can generally\nreturn a smaller number of connected entries.\nx ( matrix ) – A matrix of shape (batch_size,hilbert.size) containing\nthe batch of quantum numbers x.\nx ( matrix ) – A matrix of shape (batch_size,hilbert.size) containing\nthe batch of quantum numbers x.\nout ( array ) – If None an output array is allocated.\nout ( array ) – If None an output array is allocated.\nThe number of connected states x’ for each x[i].\narray\nReturns the dense matrix representation of the operator. Note that,\nin general, the size of the matrix is exponential in the number of quantum\nnumbers, and this operation should thus only be performed for\nlow-dimensional Hilbert spaces or sufficiently sparse operators.\nThis method requires an indexable Hilbert space.\nArray\nThe dense matrix representation of the operator as a jax Array.\nReturn the JAX version of this operator.\nIf this is a JAX operator does nothing.\nDiscreteJaxOperator\nConvert the operator to a qutip’s Qobj.\nA qutip.Qobj object.\nReturns the sparse matrix representation of the operator. Note that,\nin general, the size of the matrix is exponential in the number of quantum\nnumbers, and this operation should thus only be performed for\nlow-dimensional Hilbert spaces or sufficiently sparse operators.\nThis method requires an indexable Hilbert space.\njax – If True, returns an experimental Jax sparse matrix. If False,\nreturns a normal scipy CSR matrix. False by default.\njax – If True, returns an experimental Jax sparse matrix. If False,\nreturns a normal scipy CSR matrix. False by default.\njax_ ( bool )\njax_ ( bool )\nJAXSparse\nThe sparse jax matrix representation of the operator.\nReturns the transpose of this operator.\nconcrete – if True returns a concrete operator and not a lazy wrapper\nAbstractOperator\nif concrete is not True, self or a lazy wrapper; the\ntransposed operator otherwise",
+      "metadata": {
+        "section_id": "sec_2",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\_generated\\operator\\netket.operator.DiscreteJaxOperator.html",
+        "section_title": "Defining custom discrete operators that are Jax-compatible#"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "jax",
+        "array"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    },
+    {
+      "id": "models__d0c41dbca36594765ce48f14a0845f4e__sec_6_6__0",
+      "text": "## Experimental models#\nThe following models are experimental, meaning that we could change them at some point, and we actively seeking for feedback and opinions on their usage and APIs.\nThe following models are for 2nd-quantisation fermionic hilbert spaces ( SpinOrbitalFermions ).\nSlater2nd\nA slater determinant ansatz for second-quantised spinless or spin-full fermions.\nMultiSlater2nd\nA slater determinant ansatz for second-quantised spinless or spin-full fermions with a sum of determinants.\nThe following are abstract models for Recurrent neural networks (and their fast versions).\nRNN\nBase class for recurrent neural networks.\nFastRNN\nBase class for recurrent neural networks with fast sampling.\nThe following are concrete, ready to use versions of Recurrent Neural Networks\nLSTMNet\nLong short-term memory network.\nFastLSTMNet\nLong short-term memory network with fast sampling.\nGRUNet1D\nGated recurrent unit network.\nFastGRUNet1D\nGated recurrent unit network with fast sampling.",
+      "metadata": {
+        "section_title": "Experimental models#",
+        "section_id": "sec_6",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\api\\models.html"
+      },
+      "score": 0.9385244419967158,
+      "original_score": 0.9074561492423678,
+      "vector_score": 0.657456149242368,
+      "bm25_score": 1.0,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "fermionic",
+        "neural",
+        "networks"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "netket.operator.FermionOperator2ndJax__b59e3db036152ffa2199686fa98d893b__sec_1_1__0",
+      "text": "## Contents\nBases: FermionOperator2ndBase , DiscreteJaxOperator\nA fermionic operator in \\(2^{nd}\\) quantization using pure jax dark\nmagic for indexing.\nWarning\nThis class is a Pytree, so it can be used inside of jax-transformed\nfunctions like jax.grad or jax.jit .\nWhen using native (experimental) sharding, or when working with GPUs,\nwe reccomend using this implementations of the operators for potentially\nbetter performance.\nCan be converted to the Numba one with the method to_numba_operator() .\nConstructs a fermion operator given the single terms (set of\ncreation/annihilation operators) in second quantization formalism.\nThis class can be initialized in the following form: FermionOperator2nd(hilbert, terms, weights …) .\nThe term contains pairs of (idx, dagger) , where idx ∈ range(hilbert.size) (it identifies an orbital) and dagger is a True/False flag determining if the\noperator is a creation or destruction operator.\nA term of the form \\(\\hat{a}_1^\\dagger \\hat{a}_2\\) would take the form ((1,1), (2,0)) , where (1,1) represents \\(\\hat{a}_1^\\dagger\\) and (2,0)\nrepresents \\(\\hat{a}_2\\) .\nTo split up per spin, use the creation and annihilation operators to build the\noperator.\nhilbert ( AbstractHilbert ) – hilbert of the resulting FermionOperator2nd object\nhilbert ( AbstractHilbert ) – hilbert of the resulting FermionOperator2nd object\nterms ( list [ str ] | list [ list [ list [ int ]]] ) – single term operators (see\nexample below)\nterms ( list [ str ] | list [ list [ list [ int ]]] ) – single term operators (see\nexample below)\nweights ( list [ float | complex ] | None ) – corresponding coefficients of the single term operators\n(defaults to a list of 1)\nweights ( list [ float | complex ] | None ) – corresponding coefficients of the single term operators\n(defaults to a list of 1)\nconstant ( Number ) – constant contribution, corresponding to the\nidentity operator * constant (default = 0)\nconstant ( Number ) – constant contribution, corresponding to the\nidentity operator * constant (default = 0)\ncutoff ( float ) – threshold for the weights, if the absolute value of a weight is below the cutoff, it’s discarded.\ncutoff ( float ) – threshold for the weights, if the absolute value of a weight is below the cutoff, it’s discarded.\ndtype ( Union [ None , str , type [ Any ], dtype , _SupportsDType ] ) – The datatype to use for the matrix elements. Defaults to double precision if",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\operator\\netket.operator.FermionOperator2ndJax.html",
+        "package": "netket",
+        "section_id": "sec_1",
+        "section_title": "Contents"
+      },
+      "score": 0.852917934910799,
+      "original_score": 0.7877166070877512,
+      "vector_score": 0.787716607087751,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "jax",
+        "fermionic"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    },
+    {
+      "id": "netket.operator.FermionOperator2ndNumba__1acadedfc150329514d41aef2779c396__sec_1_1__0",
+      "text": "## Contents\nBases: FermionOperator2ndBase\nA fermionic operator in \\(2^{nd}\\) quantization, using Numba\nfor indexing.\nWarning\nThis class is not a Pytree, so it cannot be used inside of jax-transformed\nfunctions like jax.grad or jax.jit .\nThe standard usage is to index into the operator from outside the jax\nfunction transformation and pass the results to the jax-transformed functions.\nTo use this operator inside of a jax function transformation, convert it to a\njax operator (class: netket.operator.FermionOperator2ndJax ) by using netket.operator.FermionOperator2nd.to_jax_operator() .\nWhen using native (experimental) sharding, or when working with GPUs,\nwe reccomend using the Jax implementations of the operators for potentially\nbetter performance.\nConstructs a fermion operator given the single terms (set of\ncreation/annihilation operators) in second quantization formalism.\nThis class can be initialized in the following form: FermionOperator2nd(hilbert, terms, weights …) .\nThe term contains pairs of (idx, dagger) , where idx ∈ range(hilbert.size) (it identifies an orbital) and dagger is a True/False flag determining if the\noperator is a creation or destruction operator.\nA term of the form \\(\\hat{a}_1^\\dagger \\hat{a}_2\\) would take the form ((1,1), (2,0)) , where (1,1) represents \\(\\hat{a}_1^\\dagger\\) and (2,0)\nrepresents \\(\\hat{a}_2\\) .\nTo split up per spin, use the creation and annihilation operators to build the\noperator.\nhilbert ( AbstractHilbert ) – hilbert of the resulting FermionOperator2nd object\nhilbert ( AbstractHilbert ) – hilbert of the resulting FermionOperator2nd object\nterms ( list [ str ] | list [ list [ list [ int ]]] ) – single term operators (see\nexample below)\nterms ( list [ str ] | list [ list [ list [ int ]]] ) – single term operators (see\nexample below)\nweights ( list [ float | complex ] | None ) – corresponding coefficients of the single term operators\n(defaults to a list of 1)\nweights ( list [ float | complex ] | None ) – corresponding coefficients of the single term operators\n(defaults to a list of 1)\nconstant ( Number ) – constant contribution, corresponding to the\nidentity operator * constant (default = 0)\nconstant ( Number ) – constant contribution, corresponding to the\nidentity operator * constant (default = 0)\ncutoff ( float ) – threshold for the weights, if the absolute value of a weight is below the cutoff, it’s discarded.\ncutoff ( float )",
+      "metadata": {
+        "section_title": "Contents",
+        "source_file": "docs\\_build\\html\\api\\_generated\\operator\\netket.operator.FermionOperator2ndNumba.html",
+        "section_id": "sec_1",
+        "package": "netket"
+      },
+      "score": 0.8357880393597334,
+      "original_score": 0.7629930464985843,
+      "vector_score": 0.7629930464985843,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "jax",
+        "fermionic"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_8_8__1",
+      "text": "rngs\n=\nrngs\n,\n)\ndef\n__call__\n(\nself\n,\nn\n:\njax\n.\nArray\n)\n->\njax\n.\nArray\n:\n# For simplicity, we write a function that operates on a single configuration of size (N,)\n# and we vectorize it using `jnp.vectorize` with the signature='(n)->()' argument, which specifies\n# that the function is defined to operate on arrays of shape (n,) and return scalars.\n@partial\n(\njnp\n.\nvectorize\n,\nsignature\n=\n\"(n)->()\"\n)\ndef\nlog_sd\n(\nn\n):\n# Construct the Neural Jastrow\nJ\n=\nself\n.\njastrow_linear\n(\nn\n)\nJ\n=\njax\n.\nnn\n.\ntanh\n(\nJ\n)\nJ\n=\nJ\n.\nsum\n()\n# Construct the slater determinant\nR\n=\nn\n.\nnonzero\n(\nsize\n=\nself\n.\nhilbert\n.\nn_fermions\n)[\n0\n]\n# Extract from the (N, Nf) matrix the (Nf, Nf) submatrix of M corresponding to the occupied orbitals.\nA\n=\nself\n.\nM\n[\nR\n]\nlog_slater\n=\n_logdet_cmplx\n(\nA\n)\n# Multiply log slater with the jastrow (and since we are working in log space, this becomes a sum)\nreturn\nlog_slater\n+\nJ\nreturn\nlog_sd\n(\nn\n)\n```\nWe then optimize this variational state, as done before.\n```code\n# Create a Neural Jastrow Slater wave function\nmodel\n=\nLogNeuralJastrowSlater\n(\nhi\n,\njastrow_hidden_units\n=\nN\n,\nrngs\n=\nnnx\n.\nRngs\n(\n2\n))\n# Define a Metropolis exchange sampler\nsa\n=\nnk\n.\nsampler\n.\nMetropolisFermionHop\n(\nhi\n,\ngraph\n=\ngraph\n)\n# Define an optimizer\nop\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.05\n)\n# Create a variational state\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nmodel\n,\nn_samples\n=\n2\n**\n12\n,\nn_discard_per_chain\n=\n16\n)\n# Create a Variational Monte Carlo with SR driver\ngs\n=\nnk\n.\ndrive\n.\nVMC_SR\n(\nH\n,\nop\n,\nvariational_state\n=\nvstate\n,\ndiag_shift\n=\n0.05\n)\n# Construct the logger to visualize the data later on\nnj_log\n=\nnk\n.\nlogging\n.\nRuntimeLog\n()\n# Run the optimization for 300 iterations\ngs\n.\nrun\n(\nn_iter\n=\n300\n,\nout\n=\nnj_log\n)\n```\n```code\n",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_8",
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "section_title": "Neural Jastrow-Slater Wave Function#"
+      },
+      "score": 0.7541651019759992,
+      "original_score": 0.6299259599638697,
+      "vector_score": 0.6299259599638697,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "jax",
+        "array",
+        "neural"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 30,
+    "total_bm25_results_count": 30,
+    "merged_results_count": 57,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "netket": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

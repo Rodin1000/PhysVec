@@ -1,0 +1,121 @@
+{
+  "query": "How to return Hamiltonian object 'ha' in netket function",
+  "package": "netket",
+  "results": [
+    {
+      "id": "fermi_hubbard__8bcbfda76004a5566d8a49d0d94ad588__part_0__0",
+      "text": "import netket as nk\nimport netket.experimental as nkx\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport json\n\n\nL = 2  # take a 2x2 lattice\nD = 2\nt = 1  # tunneling/hopping\nU = 0.01  # coulomb\n\n# create the graph our fermions can hop on\ng = nk.graph.Hypercube(length=L, n_dim=D, pbc=True)\nn_sites = g.n_nodes\n\n# create a hilbert space with 2 up and 2 down spins\nhi = nk.hilbert.SpinOrbitalFermions(n_sites, s=1 / 2, n_fermions_per_spin=(2, 2))\n\n# Option 1: create an operator representing fermi hubbard interactions by hand\n\n\n# -t (i^ j + h.c.) + U (i^ i j^ j)\n# we will create a helper function to abbreviate the creation, destruction and number operators\n# each operator has a site and spin projection (sz) in order to find the right position in the hilbert space samples\ndef c(site, sz):\n    return nk.operator.fermion.destroy(hi, site, sz=sz)\n\n\ndef cdag(site, sz):\n    return nk.operator.fermion.create(hi, site, sz=sz)\n\n\ndef nc(site, sz):\n    return nk.operator.fermion.number(hi, site, sz=sz)\n\n\nup = +1\ndown = -1\nham = 0.0\nfor sz in (up, down):\n    for u, v in g.edges():\n        ham += -t * cdag(u, sz) @ c(v, sz) - t * cdag(v, sz) @ c(u, sz)\nfor u in g.nodes():\n    ham += U * nc(u, up) @ nc(u, down)\n\nprint(\"Hamiltonian =\", ham.operator_string())\n\n# The Fermi-hubbard hamiltonian conserves the number of fermions, which the generic operator we just defined does not exploit,\n# and thus it creates more (zero) connected elements than necessary.\n# We could set max_conn_size to remove them inside the operator, or,\n# better, directly use the a more efficient implementation included in netket:\n# Convert to ParticleNumberAndSpinConservingFermioperator2nd\nham_generic = ham\nham = nkx.operator.ParticleNumberAndSpinConservingFermioperator2nd.from_fermionoperator2nd(\n    ham_generic\n)\n# we see that ham.max_conn_size << ham_generic.max_conn_size\n# alternatively we can directly construct it with the provided operator\n# ham = nkx.operator.FermiHubbardJax(hi, t=t, U=U, graph=g)\n\n# metropolis exchange moves fermions around according to",
+      "metadata": {
+        "section_title": "fermi_hubbard.py",
+        "section_id": "part_0",
+        "source_file": "Examples\\Fermions\\fermi_hubbard.py",
+        "package": "netket"
+      },
+      "score": 0.8320000000000001,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "return",
+        "hamiltonian",
+        "netket",
+        "function"
+      ],
+      "match_ratio": 0.8,
+      "is_html": false
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_1_1__0",
+      "text": "## Contents\nThe goal of this tutorial series is to guide you through writing a simple VMC code from (almost) scratch to compute the ground-state of a paradigmatic spin model: the transverse-field Ising model in 2 dimensions.\nIn this first tutorial, we will focus on:\nUnderstanding NetKet’s graph and operator system\nUnderstanding NetKet’s graph and operator system\nDefining Hamiltonians using building blocks\nDefining Hamiltonians using building blocks\nWorking with different operator formats\nWorking with different operator formats\nValidating our implementation with exact diagonalization\nValidating our implementation with exact diagonalization\nThe hamiltonian we will study is the transverse-field Ising model in 2 dimensions:\nIn the following we assume periodic boundary conditions with \\(h=1\\) and \\(J=1\\) .\nNote\nIf you are executing this notebook on Colab , you will need to install NetKet.\nYou can do so by uncommenting and running the following cell.\nKeep in mind that this notebook was designed for NetKet version 3.9.1 , which requires Python >=3.8.\n```code\n# %pip install --quiet netket\n```\nPlease verify that you are running on the correct version of NetKet:\n```code\nimport\nplatform\nimport\nnetket\nas\nnk\nprint\n(\n\"Python version (requires >=3.9)\"\n,\nplatform\n.\npython_version\n())\nprint\n(\n\"NetKet version (requires >=3.9.1)\"\n,\nnk\n.\n__version__\n)\n```\n```code\nPython version (requires >=3.9) 3.12.11\nNetKet version (requires >=3.9.1) 3.19.dev26+gd94cf4597.d20250713\n```\nShow code cell content\nHide code cell content\n```code\n# Import necessary libraries\nimport\nnetket\nas\nnk\nimport\nnumpy\nas\nnp\n```",
+      "metadata": {
+        "section_id": "sec_1",
+        "section_title": "Contents",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html"
+      },
+      "score": 0.7587295881532308,
+      "original_score": 0.6398949076913891,
+      "vector_score": 0.7998686346142363,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_3_3__0",
+      "text": "## 2. Defining Graphs and Lattices#\nNetKet covers quite a few standard lattices, so let’s use this to quickly define a 2D square lattice with periodic boundary conditions.\nFor the moment we assume \\(L=4\\) ( \\(N=16\\) sites total).\n```code\n# Define a 2D square lattice\nL\n=\n4\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\n```\nThe graph object is handy to quickly write the hamiltonian because it gives you easy access to the vertices (called nodes) and edges of the graph:\n```code\n# The number of sites (called nodes):\nprint\n(\n\"g.n_nodes:\"\n,\ng\n.\nn_nodes\n)\n# You can iterate through the nodes:\nprint\n(\n\"g.nodes:\"\n,\n[\nnode\nfor\nnode\nin\ng\n.\nnodes\n()])\n# You can check the number of edges:\nprint\n(\n\"g.n_edges:\"\n,\ng\n.\nn_edges\n)\n# You can iterate through the edges, which are stored as a 2-tuple with the start and end node:\nprint\n(\n\"g.edges:\"\n,\nlist\n(\ng\n.\nedges\n()))\n```\n```code\ng.n_nodes: 16\ng.nodes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]\ng.n_edges: 32\ng.edges: [(3, 7), (12, 13), (8, 9), (8, 12), (2, 14), (13, 14), (4, 5), (5, 6), (4, 8), (12, 15), (5, 9), (14, 15), (3, 15), (8, 11), (0, 1), (9, 10), (1, 2), (0, 4), (9, 13), (10, 11), (1, 5), (10, 14), (6, 7), (6, 10), (4, 7), (0, 3), (0, 12), (2, 3), (1, 13), (2, 6), (11, 15), (7, 11)]\n```\nYou can also visualize the lattice:\n```code\ng\n.\ndraw\n()\n```\n```code\n<Axes: title={'center': '2D Lattice (Distance Order: 1)'}, xlabel='X', ylabel='Y'>\n```",
+      "metadata": {
+        "section_id": "sec_3",
+        "package": "netket",
+        "section_title": "2. Defining Graphs and Lattices#",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html"
+      },
+      "score": 0.6401415814872516,
+      "original_score": 0.4287961610908756,
+      "vector_score": 0.5359952013635945,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hamiltonian",
+        "object",
+        "netket"
+      ],
+      "match_ratio": 0.6,
+      "is_html": true
+    },
+    {
+      "id": "netket.experimental.operator.from_pyscf_molecule__e29346b27d2bbe9624e80f669f970aa8__sec_1_1__0",
+      "text": "## Contents\nBases:\nConstruct a netket operator encoding the electronic hamiltonian of a pyscf\nmolecule in a chosen orbital basis.\nExample\nConstructs the hamiltonian for a Li-H molecule, using the sto-3g basis\nand the default Hartree-Fock molecular orbitals.\n```code\n>>>\nfrom\npyscf\nimport\ngto\n,\nscf\n,\nfci\n>>>\nimport\nnetket\nas\nnk\n;\nimport\nnetket.experimental\nas\nnkx\n>>>\n>>>\nbond_length\n=\n1.5109\n>>>\ngeometry\n=\n[(\n'Li'\n,\n(\n0.\n,\n0.\n,\n-\nbond_length\n/\n2\n)),\n(\n'H'\n,\n(\n0.\n,\n0.\n,\nbond_length\n/\n2\n))]\n>>>\nmol\n=\ngto\n.\nM\n(\natom\n=\ngeometry\n,\nbasis\n=\n'STO-3G'\n)\n>>>\n>>>\nmf\n=\nscf\n.\nRHF\n(\nmol\n)\n.\nrun\n(\nverbose\n=\n0\n)\n>>>\nE_hf\n=\nsum\n(\nmf\n.\nscf_summary\n.\nvalues\n())\n>>>\n>>>\nE_fci\n=\nfci\n.\nFCI\n(\nmf\n)\n.\nkernel\n()[\n0\n]\n>>>\n>>>\nha\n=\nnkx\n.\noperator\n.\nfrom_pyscf_molecule\n(\nmol\n)\n>>>\nE0\n=\nfloat\n(\nnk\n.\nexact\n.\nlanczos_ed\n(\nha\n))\n>>>\nprint\n(\nf\n\"\n{\nE0\n= :\n.5f\n}\n,\n{\nE_fci\n= :\n.5f\n}\n\"\n)\nE0 = -7.88253, E_fci = -7.88253\n```\nExample\nConstructs the hamiltonian for a Li-H molecule, using the sto-3g basis\nand the Boys orbitals using Boys .\n```code\n>>>\nfrom\npyscf\nimport\ngto\n,\nscf\n,\nlo\n>>>\nimport\nnetket\nas\nnk\n;\nimport\nnetket.experimental\nas\nnkx\n>>>\n>>>\nbond_length\n=\n1.5109\n>>>\ngeometry\n=\n[(\n'Li'\n,\n(\n0.\n,\n0.\n,\n-\nbond_length\n/\n2\n)),\n(\n'H'\n,\n(\n0.\n,\n0.\n,\nbond_length\n/\n2\n))]\n>>>\nmol\n=\ngto\n.\nM\n(\natom\n=\ngeometry\n,\nbasis\n=\n'STO-3G'\n)\n>>>\n>>>\n# compute the boys orbitals\n>>>\nmf\n=\nscf\n.\nRHF\n(\nmol\n)\n.\nrun\n(\nverbose\n=\n0\n)\n>>>\nmo_coeff\n=\nlo\n.\nBoys\n(\nmol\n)\n.\nkernel\n(\nmf\n.\nmo_coeff\n",
+      "metadata": {
+        "section_title": "Contents",
+        "package": "netket",
+        "section_id": "sec_1",
+        "source_file": "docs\\_build\\html\\api\\_generated\\operator\\netket.experimental.operator.from_pyscf_molecule.html"
+      },
+      "score": 0.637699770381991,
+      "original_score": 0.45925338862983733,
+      "vector_score": 0.5740667357872966,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "netket"
+      ],
+      "match_ratio": 0.4,
+      "is_html": true
+    },
+    {
+      "id": "changelog__775627bff97fcf0367c7035d3e792e5f__sec_49_49__0",
+      "text": "## NetKet 3.0b1 (published beta release)#\nGitHub commits .\nHilbert space constructors do not store the lattice graph anymore. As a consequence, the constructor does not accept the graph anymore.\nHilbert space constructors do not store the lattice graph anymore. As a consequence, the constructor does not accept the graph anymore.\nSpecial Hamiltonians defined on a lattice, such as operator.BoseHubbard , operator.Ising and operator.Heisenberg , now require the graph to be passed explicitly through a graph keyword argument.\nSpecial Hamiltonians defined on a lattice, such as operator.BoseHubbard , operator.Ising and operator.Heisenberg , now require the graph to be passed explicitly through a graph keyword argument.\noperator.LocalOperator now default to real-valued matrix elements, except if you construct them with a complex-valued matrix. This is also valid for operators such as :func: operator.spin.sigmax and similars.\noperator.LocalOperator now default to real-valued matrix elements, except if you construct them with a complex-valued matrix. This is also valid for operators such as :func: operator.spin.sigmax and similars.\nWhen performing algebraic operations *, -, + on pairs of operator.LocalOperator , the dtype of the result iscomputed using standard numpy promotion logic. Doing an operation in-place +=, -=, *= on a real-valued operator will now fail if the other is complex. While this might seem annoying, it’s useful to ensure that smaller types such as float32 or complex64 are preserved if the user desires to do so.\nWhen performing algebraic operations *, -, + on pairs of operator.LocalOperator , the dtype of the result iscomputed using standard numpy promotion logic.\nDoing an operation in-place +=, -=, *= on a real-valued operator will now fail if the other is complex. While this might seem annoying, it’s useful to ensure that smaller types such as float32 or complex64 are preserved if the user desires to do so.\nDoing an operation in-place +=, -=, *= on a real-valued operator will now fail if the other is complex. While this might seem annoying, it’s useful to ensure that smaller types such as float32 or complex64 are preserved if the user desires to do so.\nAbstractMachine has been removed. It’s functionality is now split among the model itself, which is defined by the user and variational.MCState for pure states or variational.MCMixedState for mixed states. The model, in general is composed by two functions, or an object with two functions: an init(rng, sample_val) function, accepting a jax.random.PRNGKey() object and an input, returning the parameters and the state of the model for that particular sample shape, and a apply(params, samples, **kwargs) function, evaluating the model for the given parameters and inputs. Some models (previously machines) such as the RBM (Restricted Boltzmann Machine) Machine",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\changelog.html",
+        "section_id": "sec_49",
+        "section_title": "NetKet 3.0b1 (published beta release)#",
+        "package": "netket"
+      },
+      "score": 0.58924474674165,
+      "original_score": 0.3480075345105554,
+      "vector_score": 0.4350094181381942,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "object",
+        "netket",
+        "function"
+      ],
+      "match_ratio": 0.6,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 59,
+    "final_results_count": 5
+  }
+}

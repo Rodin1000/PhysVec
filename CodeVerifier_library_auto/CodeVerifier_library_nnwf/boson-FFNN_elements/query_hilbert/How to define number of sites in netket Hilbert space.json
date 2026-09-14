@@ -1,0 +1,131 @@
+{
+  "query": "How to define number of sites in netket Hilbert space?",
+  "package": "netket",
+  "results": [
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_4_4__0",
+      "text": "## 3. Defining the Hilbert Space#\nNext, NetKet asks us to define the computational space (or basis) for this calculation.\n```code\n# Define the Hilbert space based on this graph\n# We have spin-1/2 particles on each site\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\ng\n.\nn_nodes\n)\n```\nThis is a fundamental object that defines how many degrees of freedom you have and how you store configurations. In this case, the hilbert space stores them as local variables +1 or -1.",
+      "metadata": {
+        "section_title": "3. Defining the Hilbert Space#",
+        "section_id": "sec_4",
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "package": "netket"
+      },
+      "score": 0.9720767471313884,
+      "original_score": 0.9547190494022514,
+      "vector_score": 1.0,
+      "bm25_score": 0.7735952470112567,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "define",
+        "netket",
+        "hilbert",
+        "space"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "netket.hilbert.HomogeneousHilbert__b5d1af323c17b6a80b31f1a3680dc959__sec_1_1__2",
+      "text": " hilbert space without the selected sites.\nNot all hilbert spaces support this operation.\nsites ( int | Sequence [ int ] ) – a site or list of sites to trace away\nOptional [ Self ]\nThe partially-traced hilbert space. The type of the resulting hilbert space\nmight be different from the starting one.\nGenerates either a single or a batch of uniformly distributed random states.\nRuns as random_state(self, key, size=None, dtype=np.float32) by default.\nkey ( Any ) – rng state from a jax-style functional generator.\nkey ( Any ) – rng state from a jax-style functional generator.\nsize ( int | None ) – If provided, returns a batch of configurations of the form (size, N) if size is an integer or (*size, N) if it is\na tuple and where \\(N\\) is the Hilbert space size.\nBy default, a single random configuration with shape (#,) is returned.\nsize ( int | None ) – If provided, returns a batch of configurations of the form (size, N) if size is an integer or (*size, N) if it is\na tuple and where \\(N\\) is the Hilbert space size.\nBy default, a single random configuration with shape (#,) is returned.\ndtype – DType of the resulting vector.\ndtype – DType of the resulting vector.\nArray\nA state or batch of states sampled from the uniform distribution on the\nhilbert space.\nExample\n```code\n>>>\nimport\nnetket\n,\njax\n>>>\nhi\n=\nnetket\n.\nhilbert\n.\nQubit\n(\nN\n=\n2\n)\n>>>\nk1\n,\nk2\n=\njax\n.\nrandom\n.\nsplit\n(\njax\n.\nrandom\n.\nPRNGKey\n(\n1\n))\n>>>\nprint\n(\nhi\n.\nrandom_state\n(\nkey\n=\nk1\n))\n[0 0]\n>>>\nprint\n(\nhi\n.\nrandom_state\n(\nkey\n=\nk2\n,\nsize\n=\n2\n))\n[[0 0]\n[0 0]]\n```\nSize of the local degrees of freedom for the i-th variable.\ni ( int ) – The index of the desired site\nint\nThe number of degrees of freedom at that site\nReturns an iterator over all valid configurations of the Hilbert space.\nThrows an exception iff the space is not indexable.\nIterating over all states with this method is typically inefficient,\nand `all_states` should be preferred.\nIterator [ ndarray ]\nA list of discrete local quantum numbers at the site i.\nIf the local states are infinitely many, None is returned.\ni ( int ) – The index of the desired site.\nA list of values or None if there are infinitely many.\nReturns a tensor with the same shape of x , where all local\nvalues are converted to indices in the range 0…self.shape[i] .\nThis function is guaranteed to",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\hilbert\\netket.hilbert.HomogeneousHilbert.html",
+        "section_id": "sec_1",
+        "section_title": "Contents",
+        "package": "netket"
+      },
+      "score": 0.6176136659548983,
+      "original_score": 0.3444805702083969,
+      "vector_score": 0.4306007127604961,
+      "bm25_score": null,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "number",
+        "sites",
+        "netket",
+        "hilbert",
+        "space"
+      ],
+      "match_ratio": 0.8333333333333334,
+      "is_html": true
+    },
+    {
+      "id": "netket.operator.Heisenberg__e4ea0a2981f6249061e3d8c508e25b6b__sec_1_1__1",
+      "text": " i ∈ [0, ..., graph.n_nodes - 1] ,\ncorresponds to acting_on_subspace[i] ∈ [0, ..., hilbert.n_sites] .\nMust be a list of length graph.n_nodes . Passing a single integer start is equivalent to [start, ..., start + graph.n_nodes - 1] .\nacting_on_subspace ( None | list [ int ] | int ) – Specifies the mapping between nodes of the graph and\nHilbert space sites, so that graph node i ∈ [0, ..., graph.n_nodes - 1] ,\ncorresponds to acting_on_subspace[i] ∈ [0, ..., hilbert.n_sites] .\nMust be a list of length graph.n_nodes . Passing a single integer start is equivalent to [start, ..., start + graph.n_nodes - 1] .\ncls ( type [ _LocalOperatorT ] )\ncls ( type [ _LocalOperatorT ] )\nTypeVar ( _LocalOperatorT , bound= LocalOperatorBase )\nExamples\nConstructs a Heisenberg operator for a 1D system.\n```code\n>>>\nimport\nnetket\nas\nnk\n>>>\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\n20\n,\nn_dim\n=\n1\n,\npbc\n=\nTrue\n)\n>>>\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n0.5\n,\ntotal_sz\n=\n0\n,\nN\n=\ng\n.\nn_nodes\n)\n>>>\nop\n=\nnk\n.\noperator\n.\nHeisenberg\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n)\n>>>\nprint\n(\nop\n)\nLocalOperatorJax(dim=20, #acting_on=20 locations, constant=0.0, dtype=float64)\n```",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\operator\\netket.operator.Heisenberg.html",
+        "package": "netket",
+        "section_title": "Contents",
+        "section_id": "sec_1"
+      },
+      "score": 0.5468185684773362,
+      "original_score": 0.2651111921254101,
+      "vector_score": 0.33138899015676265,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "sites",
+        "netket",
+        "hilbert",
+        "space"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "hilbert__d5e8072aca798b67960bc62df34af458__sec_3_3__0",
+      "text": "## Abstract Classes#\nBelow you find a list of all abstract classes defined in this module.\nThose classes cannot be directly instantiated, but you can inherit from one of them if you want to define new hilbert spaces.\nAbstractHilbert\nAbstract class for NetKet hilbert objects.\nDiscreteHilbert\nAbstract class for an hilbert space defined on a lattice.\nHomogeneousHilbert\nThe Abstract base class for homogeneous hilbert spaces.\nContinuousHilbert\nAbstract class for the Hilbert space of particles in continuous space.\nParticle\nHilbert space derived from ContinuousHilbert defining N particles in continuous space with or without periodic boundary conditions.\nconstraint.DiscreteHilbertConstraint\nProtocol to define an Abstract Constraint for a discete Hilbert space.\nconstraint.SumConstraint\nConstraint of an Hilbert space enforcing a total sum of all the values in the degrees of freedom.\nconstraint.SumOnPartitionConstraint\nConstraint of an Hilbert space enforcing a total sum of all the values in partitions of different sizes.\nconstraint.ExtraConstraint\nWraps a Constraint and its HilbertIndex into a second constraint (with a default lookup-based hilbert index).\nWhen defining a new Hilbert space, you must define how to uniformly sample the basis elements of that Hilbert space by defining some dispatch rules for those functions.\nrandom.flip_state\nGiven a state σ and an index i , randomly flips σ[i] so that σ_new[i] ≢ σ[i] .\nrandom.random_state\nGenerates either a single or a batch of uniformly distributed random states.\nindex.optimalConstrainedHilbertindex\nReturns the optimal Hilbert Index to index into the uniform state with local degrees of freedom local_states , size sites and given constraint.",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\hilbert.html",
+        "section_id": "sec_3",
+        "package": "netket",
+        "section_title": "Abstract Classes#"
+      },
+      "score": 0.5333333333333333,
+      "original_score": 0.19999999999999996,
+      "vector_score": null,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "define",
+        "sites",
+        "netket",
+        "hilbert",
+        "space"
+      ],
+      "match_ratio": 0.8333333333333334,
+      "is_html": true
+    },
+    {
+      "id": "gs-gcnn-honeycomb__211379d69213be55c6fdfefcaa402884__sec_3_3__0",
+      "text": "## Defining the Hamiltonian#\nWe begin by defining the Hamiltonian as a list of lattice points. NetKet will automatically convert these points into a graph with nearest neighbor connections. The honeycomb lattice is a triangular lattice with two sites per unit cell.\n```code\n# Basis Vectors that define the positioning of the unit cell\nbasis_vectors\n=\n[[\n0\n,\n1\n],\n[\nnp\n.\nsqrt\n(\n3\n)\n/\n2\n,\n-\n1\n/\n2\n]]\n# Locations of atoms within the unit cell\natom_positions\n=\n[[\n0\n,\n0\n],\n[\nnp\n.\nsqrt\n(\n3\n)\n/\n6\n,\n1\n/\n2\n]]\n# Number of unit cells in each direction\ndimensions\n=\n[\n3\n,\n3\n]\n# Define the graph\ngraph\n=\nnk\n.\ngraph\n.\nLattice\n(\nbasis_vectors\n=\nbasis_vectors\n,\natoms_coord\n=\natom_positions\n,\nextent\n=\ndimensions\n)\n```\nLets check to see if our graph looks as expected. Since we have two sites per unit cell, we should have \\(3 \\times 3 \\times 2 = 18\\) sites. The coordination number of a hexagonal lattice is 3, so we should have \\(\\frac{18 \\times 3}{2} = 27\\) edges. Finally we have p6m symmetry, which should give ue \\(3 \\times 3 \\times 12 = 108\\) symmetry operations.\n```code\n# Use Netket to find symmetries of the graph\nsymmetries\n=\ngraph\n.\nautomorphisms\n()\n# Check that graph info is correct\nprint\n(\ngraph\n.\nn_nodes\n)\nprint\n(\ngraph\n.\nn_edges\n)\nprint\n(\nlen\n(\nsymmetries\n))\n```\n```code\n18\n27\n216\n```\nOops! It looks like we have twice as many symmetries elements as we thought. Luckily for us, the ground state is still symmetric with respect to this extra symmetry that is unique to the \\(3 \\times 3\\) lattice. We use this graph to define our Hilbert space and Hamiltonian:\n```code\n# Define the Hilbert space\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\ngraph\n.\nn_nodes\n,\ntotal_sz\n=\n0\n)\n# Define the Hamiltonian\nha\n=\nnk\n.\noperator\n.\nHeisenberg\n(\nhilbert\n=\nhi\n,\ngraph\n=\ngraph\n,\nsign_rule\n=\nTrue\n)\n```\nSince the Hexagonal lattice is bipartite, we know the phases obey a Marshall-Peierls sign rule. Therefore, we can use a real valued NN and just learn the amplitudes of the wavefunction.\nFor models with a more complicated phase structure, its often better to learn the phases in an equal-amplitude configuration before training the amplitudes as detailed in this paper . This can be implemented by first optimizing the weights on a modified model that sets \\(Re[log(\\psi)] = 0\\)\nWe also optimize over states with total \\(S_z\\) of zero since we know the ground state has spin 0.",
+      "metadata": {
+        "section_id": "sec_3",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-gcnn-honeycomb.html",
+        "package": "netket",
+        "section_title": "Defining the Hamiltonian#"
+      },
+      "score": 0.5040529256470416,
+      "original_score": 0.09827804663098469,
+      "vector_score": null,
+      "bm25_score": 0.4913902331549236,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "define",
+        "number",
+        "sites",
+        "netket",
+        "hilbert",
+        "space"
+      ],
+      "match_ratio": 1.0,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 56,
+    "final_results_count": 5
+  }
+}

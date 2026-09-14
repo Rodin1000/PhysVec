@@ -1,0 +1,148 @@
+{
+  "query": "How to initialize multi-qubit spin-1/2 states in Qiskit circuits",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "initializer__b7a2e57b4d98270c23298f876535fd8e__part_1__1",
+      "text": "                * Labels of basis states of the Pauli eigenstates Z, X, Y. See\n                  :meth:`.Statevector.from_label`. Notice the order of the labels is reversed with\n                  respect to the qubit index to be applied to. Example label '01' initializes the\n                  qubit zero to :math:`|1\\rangle` and the qubit one to :math:`|0\\rangle`.\n                * An integer that is used as a bitmap indicating which qubits to initialize to\n                  :math:`|1\\rangle`. Example: setting params to 5 would initialize qubit 0 and qubit\n                  2 to :math:`|1\\rangle` and qubit 1 to :math:`|0\\rangle`.\n\n            num_qubits: This parameter is only used if params is an int. Indicates the total\n                number of qubits in the `initialize` call. Example: `initialize` covers 5 qubits\n                and params is 3. This allows qubits 0 and 1 to be initialized to :math:`|1\\rangle`\n                and the remaining 3 qubits to be initialized to :math:`|0\\rangle`.\n            normalize: Whether to normalize an input array to a unit vector.\n        \"\"\"\n        self._stateprep = StatePreparation(params, num_qubits, normalize=normalize)\n\n        super().__init__(\"initialize\", self._stateprep.num_qubits, 0, self._stateprep.params)\n\n    def _define(self):\n        q = QuantumRegister(self.num_qubits, \"q\")\n        initialize_circuit = QuantumCircuit(q, name=\"init_def\")\n        initialize_circuit.reset(q)\n        initialize_circuit.append(self._stateprep, q)\n        self.definition = initialize_circuit\n\n    def gates_to_uncompute(self) -> QuantumCircuit:\n        \"\"\"Call to create a circuit with gates that take the desired vector to zero.\n\n        Returns:\n            QuantumCircuit: circuit to take ``self.params`` vector to :math:`|{00\\\\ldots0}\\\\rangle`\n        \"\"\"\n\n        isom = Isometry(self.params, 0, 0)\n        return isom._gates_to_uncompute()\n\n    @property\n    def params(self):\n        \"\"\"Return initialize params.\"\"\"\n        return self._stateprep.params\n\n    @params.setter\n    def params(self, parameters: Statevector | Sequence[complex] | str | int) -> None:\n        \"\"\"Set initialize params.\"\"\"\n        self._stateprep.params = parameters\n\n    def broadcast_arguments(self, qargs, cargs):\n        return self._stateprep.broadcast_arguments(qargs, cargs)\n",
+      "metadata": {
+        "section_title": "initializer.py",
+        "section_id": "part_1",
+        "package": "qiskit",
+        "source_file": "qiskit\\circuit\\library\\data_preparation\\initializer.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.4637854983213565,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "initialize",
+        "qubit",
+        "states"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "base_state_fidelity__4af80df8c9120cca15c3cbd952a6f649__part_3__3",
+      "text": " )\n\n        circuits = []\n        for circuit_1, circuit_2 in zip(circuits_1, circuits_2):\n\n            # Use the same key for circuits as qiskit.primitives use.\n            circuit = self._circuit_cache.get((_circuit_key(circuit_1), _circuit_key(circuit_2)))\n\n            if circuit is not None:\n                circuits.append(circuit)\n            else:\n                self._check_qubits_match(circuit_1, circuit_2)\n\n                # re-parametrize input circuits\n                # TODO: make smarter checks to avoid unnecessary re-parametrizations\n                parameters_1 = ParameterVector(\"x\", circuit_1.num_parameters)\n                parametrized_circuit_1 = circuit_1.assign_parameters(parameters_1)\n                parameters_2 = ParameterVector(\"y\", circuit_2.num_parameters)\n                parametrized_circuit_2 = circuit_2.assign_parameters(parameters_2)\n\n                circuit = self.create_fidelity_circuit(\n                    parametrized_circuit_1, parametrized_circuit_2\n                )\n                circuits.append(circuit)\n                # update cache\n                self._circuit_cache[_circuit_key(circuit_1), _circuit_key(circuit_2)] = circuit\n\n        if self._transpiler is not None:\n            return self._transpiler.run(circuits, **self._transpiler_options)\n\n        return circuits\n\n    def _construct_value_list(\n        self,\n        circuits_1: Sequence[QuantumCircuit],\n        circuits_2: Sequence[QuantumCircuit],\n        values_1: Sequence[float] | Sequence[Sequence[float]] | None = None,\n        values_2: Sequence[float] | Sequence[Sequence[float]] | None = None,\n    ) -> list[list[float]]:\n        \"\"\"\n        Preprocesses input parameter values to match the fidelity\n        circuit parametrization, and return in list format.\n\n        Args:\n           circuits_1: (Parametrized) quantum circuits preparing the\n                        first list of quantum states.\n           circuits_2: (Parametrized) quantum circuits preparing the\n                        second list of quantum states.\n           values_1: Numerical parameters to be bound to the first circuits.\n           values_2: Numerical parameters to be bound to the second circuits.\n\n        Returns:\n             List of lists of parameter values for fidelity circuit.\n\n        \"\"\"\n        values_1 = self._preprocess_values(circuits_1, values_1)\n        values_2 = self._preprocess_values(circuits_2, values_2)\n        # now, values_1 and values_2 are explicitly made 2d lists\n\n        values = []\n        if len(values_2[0]) == 0:\n            values = list(values_1)\n        elif len(values_1[0]) == 0:\n            values = list(values_2)\n        else:\n           ",
+      "metadata": {
+        "source_file": "qiskit_algorithms\\state_fidelities\\base_state_fidelity.py",
+        "package": "qiskit-algorithms",
+        "section_title": "base_state_fidelity.py",
+        "section_id": "part_3"
+      },
+      "score": 0.9177392122330276,
+      "original_score": 0.9100272633798739,
+      "vector_score": 1.0,
+      "bm25_score": 0.062166501352150676,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "states",
+        "qiskit",
+        "circuits"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "hartree_fock__973a80b2a7462da2917d3311e3e913f7__part_3__3",
+      "text": "_mapper,\n            )\n            self.qregs = [QuantumRegister(len(self._bitstr), name=\"q\")]\n\n    def _build(self) -> None:\n        \"\"\"\n        Construct the Hartree-Fock initial state given its parameters.\n        Returns:\n            QuantumCircuit: a quantum circuit preparing the Hartree-Fock\n            initial state given a number of spatial orbitals, number of particles and\n            a qubit mapper.\n        \"\"\"\n        if self._is_built:\n            return\n\n        super()._build()\n\n        # Construct the circuit for bitstring. Since this is defined as an initial state\n        # circuit its assumed that this is applied first to the qubits that are initialized to\n        # the zero state. Hence we just need to account for all True entries and set those.\n        if self._bitstr is not None:\n            for i, bit in enumerate(self._bitstr):\n                if bit:\n                    self.x(i)\n\n\ndef hartree_fock_bitstring_mapped(\n    num_spatial_orbitals: int,\n    num_particles: tuple[int, int],\n    qubit_mapper: QubitMapper,\n) -> list[bool]:\n    # pylint: disable=unused-argument\n    \"\"\"Compute the bitstring representing the mapped Hartree-Fock state for the specified system.\n\n    Args:\n        num_spatial_orbitals: The number of spatial orbitals, has a min. value of 1.\n        num_particles: The number of particles as a tuple (alpha, beta) containing the number of\n            alpha- and  beta-spin electrons, respectively.\n        qubit_mapper: A QubitMapper.\n\n    Returns:\n        The bitstring representing the mapped state of the Hartree-Fock state as array of bools.\n    \"\"\"\n    # get the bitstring encoding the Hartree Fock state\n    bitstr = hartree_fock_bitstring(num_spatial_orbitals, num_particles)\n\n    # encode the bitstring as a `FermionicOp`\n    bitstr_op = FermionicOp(\n        {\" \".join(f\"+_{idx}\" for idx, bit in enumerate(bitstr) if bit): 1.0},\n        num_spin_orbitals=2 * num_spatial_orbitals,\n    )\n\n    # map the `FermionicOp` to a qubit operator\n    qubit_op: SparsePauliOp\n    if isinstance(qubit_mapper, TaperedQubitMapper):\n        # To avoid checking commutativity, we call the two methods separately.\n        qubit_op = qubit_mapper.map_clifford(bitstr_op)\n        qubit_op = qubit_mapper.taper_clifford(qubit_op, check_commutes=False)\n    else:\n        qubit_op = qubit_mapper.map(bitstr_op)\n\n    # We check the mapped operator `x` part of the paulis because we want to have particles\n    # i.e. True,",
+      "metadata": {
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\hartree_fock.py",
+        "section_title": "hartree_fock.py",
+        "section_id": "part_3",
+        "package": "qiskit-nature"
+      },
+      "score": 0.9020375262184318,
+      "original_score": 0.8961004065953064,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "qubit",
+        "spin"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "ref_initialize__3c79c72e7d767a01d227dae5d0b67d73__part_10__10",
+      "text": "x2\": shots / 2}]\n    else:\n        return [{\"0x00\": shots / 2, \"0x10\": shots / 2}]\n\n\ndef initialize_entangled_qubits(final_measure=True):\n    \"\"\"Initialize test circuits with entangled qubits\"\"\"\n\n    circuits = []\n    qr = QuantumRegister(3)\n    if final_measure:\n        cr = ClassicalRegister(3)\n        regs = (qr, cr)\n    else:\n        regs = (qr,)\n\n    # Initialize |000+111> -> |000+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [0])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |010+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 1], [1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+011>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0, 0, 0], [0, 1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |100+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 0, 0, 1], [0, 2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100+010+110+100+101+011+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(",
+      "metadata": {
+        "section_id": "part_10",
+        "source_file": "test\\terra\\reference\\ref_initialize.py",
+        "package": "qiskit-aer",
+        "section_title": "ref_initialize.py"
+      },
+      "score": 0.9020375262184318,
+      "original_score": 0.8961004065953064,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "initialize",
+        "circuits"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "0.5_b_solving_problems__2cfad54565a98eb77cde27adb1dee82a__part_2__2",
+      "text": " ``VSCF`` initial\nstates. We have aligned these APIs to look like in the following:\n\n.. code:: ipython3\n\n    from qiskit_nature.second_q.circuit.library import UCC, UVCC\n\n    ucc = UCC(num_spatial_orbitals=None, num_particles=None, excitations=None, qubit_converter=None)\n    uvcc = UVCC(num_modals=None, excitations=None, qubit_converter=None)\n\nHartreeFock/VSCF initial states\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nThe ``HartreeFock`` and ``VSCF`` initial state circuits are now\nimplemented as ``BlueprintCircuit``. That means, that you can initialize\nthem without any arguments and supply the information later as shown\nbelow:\n\nPreviously\n^^^^^^^^^^\n\n.. code:: ipython3\n\n    from qiskit_nature.circuit.library import HartreeFock, VSCF\n    from qiskit_nature.converters.second_quantization import QubitConverter\n    from qiskit_nature.mappers.second_quantization import DirectMapper, JordanWignerMapper\n\n    hf = HartreeFock(\n        num_spin_orbitals=4, num_particles=(1, 1), qubit_converter=QubitConverter(JordanWignerMapper())\n    )\n    vscf = VSCF(num_modals=[2, 2])\n\nNew\n^^^\n\n.. code:: ipython3\n\n    from qiskit_nature.second_q.circuit.library import HartreeFock, VSCF\n    from qiskit_nature.second_q.mappers import DirectMapper, JordanWignerMapper, QubitConverter\n\n    hf = HartreeFock()\n    hf.num_spatial_orbitals = 2\n    hf.num_particles = (1, 1)\n    hf.qubit_converter = QubitConverter(JordanWignerMapper())\n\n    vscf = VSCF()\n    vscf.num_modals = [2, 2]\n\n``qiskit_nature.algorithms``\n============================\n\nThe algorithms in Qiskit Nature have been updated to use the new\n``qiskit.algorithms`` components which are based on the\n``qiskit.primitives`` as of Qiskit Terra 0.22.\n\nFor most changes to take effect, you can once again simply update your\nimport paths from ``qiskit_nature.algorithms`` to\n``qiskit_nature.second_q.algorithms``. However, there are some details\nwhich you need to pay attention to, due to the change to the\nprimitive-based algorithms of Qiskit Terra being used under the hood.\nThese details are explained below.\n\n``qiskit_nature.algorithms.initial_points``\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nThis module was moved to\n``qiskit_nature.second_q.algorithms.initial_points``. All you need to do\nis update",
+      "metadata": {
+        "section_title": "0.5_b_solving_problems.rst",
+        "package": "qiskit-nature",
+        "source_file": "docs\\migration\\0.5_b_solving_problems.rst",
+        "section_id": "part_2"
+      },
+      "score": 0.8702419730784631,
+      "original_score": 0.8534990018627809,
+      "vector_score": 0.7024591168367085,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "initialize",
+        "states",
+        "qiskit",
+        "circuits"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 221,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

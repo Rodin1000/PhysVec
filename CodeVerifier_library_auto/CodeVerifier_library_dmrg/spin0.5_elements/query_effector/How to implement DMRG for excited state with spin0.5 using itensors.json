@@ -1,0 +1,133 @@
+{
+  "query": "How to implement DMRG for excited state with spin0.5 using itensors?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Compute-excited-states-with-DMRG_5__0",
+      "text": "## Compute excited states with DMRG\nITensor DMRG accepts additional MPS wavefunctions as a optional, extra argument. These additional 'penalty states' are provided as an array of MPS just after the Hamiltonian, like this:\n```code\nenergy,psi3 = dmrg(H,[psi0,psi1,psi2],psi3_init;nsweeps,maxdim,cutoff)\n```\nHere the penalty states are [psi0,psi1,psi2] . When these are provided, the DMRG code minimizes the energy of the current MPS while also reducing its overlap (inner product) with the previously provided MPS. If these overlaps become sufficiently small, then the computed MPS is an excited state. So by finding the ground state, then providing it to DMRG as a \"penalty state\" or previous state one can compute the first excited state. Then providing both of these, one can get the second excited state, etc.\nA  keyword argument called weight can also be provided to the dmrg function when penalizing overlaps to previous states. The weight parameter is multiplied by the overlap with the previous states, so sets the size of the penalty. It should be chosen at least as large as the (estimated) gap between the ground and first excited states. Otherwise the optimal value of the weight parameter is not so obvious, and it is best to try various weights during initial test calculations.\nNote that when the system has conserved quantum numbers, a superior way to find excited states can be to find ground states of quantum number (or symmetry) sectors other than the one containing the absolute ground state. In that context, the penalty method used below is a way to find higher excited states within the same quantum number sector.\nFull Example code:\n```code\nusing ITensors, ITensorMPS\n\nlet\n  N = 20\n\n  sites = siteinds(\"S=1/2\",N)\n\n  h = 4.0\n\n  weight = 20*h # use a large weight\n                # since gap is expected to be large\n\n\n  #\n  # Use the OpSum feature to create the\n  # transverse field Ising model\n  #\n  # Factors of 4 and 2 are to rescale\n  # spin operators into Pauli matrices\n  #\n  os = OpSum()\n  for j=1:N-1\n    os -= 4,\"Sz\",j,\"Sz\",j+1\n  end\n  for j=1:N\n    os -= 2*h,\"Sx\",j;\n  end\n  H = MPO(os,sites)\n\n\n  #\n  # Make sure to do lots of sweeps\n  # when finding excited states\n  #\n  nsweeps = 30\n  maxdim = [10,10,10,20,20,40,80,100,200,200]\n  cutoff = [1E-8]\n",
+      "metadata": {
+        "section_title": "Compute excited states with DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "package": "itensormps",
+        "section_id": "Compute-excited-states-with-DMRG"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9648097232415511,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "dmrg",
+        "excited",
+        "state",
+        "using",
+        "itensors"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_2_2__0",
+      "text": "The following fully-working example shows how to set up a calculation\nmixing S=1/2 and S=1 spins on every other site of a 1D system. The\nHamiltonian involves Heisenberg spin interactions with adjustable\ncouplings between sites of the same spin or different spin.\nNote that the only difference from a regular ITensor DMRG calculation\nis that the `sites` array has Index objects which alternate in dimension\nand in which physical tag type they carry, whether `\"S=1/2\"` or `\"S=1\"`.\n(Try printing out the sites array to see!)\nThese tags tell the OpSum system which local operators to use for these\nsites when building the Hamiltonian MPO.\n```julia\nusing ITensors, ITensorMPS\nlet\n  N = 100",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "section_id": "h2_2",
+        "section_title": "DMRG Calculation with Mixed Local Hilbert Space Types",
+        "package": "itensormps"
+      },
+      "score": 0.8445016201715162,
+      "original_score": 0.8299236470625958,
+      "vector_score": 1.0,
+      "bm25_score": 0.03279726399892246,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "dmrg",
+        "using",
+        "itensors"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "test_ctmrg__d202e1b4009a29577de40ed9d424bafe__full__0",
+      "text": "using ITensors\nusing Test\n\nsrc_dir = joinpath(pkgdir(ITensors), \"examples\", \"src\")\ninclude(joinpath(src_dir, \"ctmrg_isotropic.jl\"))\ninclude(joinpath(src_dir, \"2d_classical_ising.jl\"))\n\n@testset \"ctmrg\" begin\n  # Make Ising model partition function\n  β = 1.1 * βc\n  d = 2\n  s = Index(d, \"Site\")\n  sₕ = addtags(s, \"horiz\")\n  sᵥ = addtags(s, \"vert\")\n\n  T = ising_mpo(sₕ, sᵥ, β)\n\n  χ0 = 1\n  l = Index(χ0, \"Link\")\n  lₕ = addtags(l, \"horiz\")\n  lᵥ = addtags(l, \"vert\")\n\n  # Initial CTM\n  Cₗᵤ = ITensor(lᵥ, lₕ)\n  Cₗᵤ[1, 1] = 1.0\n\n  # Initial HRTM\n  Aₗ = ITensor(lᵥ, lᵥ', sₕ)\n  Aₗ[lᵥ => 1, lᵥ' => 1, sₕ => 1] = 1.0\n  Aₗ[lᵥ => 1, lᵥ' => 1, sₕ => 2] = 0.0\n\n  Cₗᵤ, Aₗ = ctmrg(T, Cₗᵤ, Aₗ; χmax=20, nsteps=100)\n\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = noncommoninds(Cₗᵤ, Aₗ)[1]\n\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n\n  ACₗ = Aₗ * Cₗᵤ * dag(Cₗᵤ')\n\n  ACTₗ = prime(ACₗ * dag(Aᵤ') * T * Aᵤ, -1)\n\n  κ = (ACTₗ * dag(ACₗ))[]\n\n  @test κ ≈ exp(-β * ising_free_energy(β))\n\n  # Calculate magnetization\n  Tsz = ising_mpo(sₕ, sᵥ, β; sz=true)\n  ACTszₗ = prime(ACₗ * dag(Aᵤ') * Tsz * Aᵤ, -1)\n  m = (ACTszₗ * dag(ACₗ))[] / κ\n  @test abs(m) ≈ ising_magnetization(β)\nend\n",
+      "metadata": {
+        "source_file": "test\\base\\test_ctmrg.jl",
+        "package": "itensors",
+        "section_id": "full",
+        "section_title": "test_ctmrg.jl"
+      },
+      "score": 0.8332785142902658,
+      "original_score": 0.8231741818230092,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "using",
+        "itensors"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_3__3",
+      "text": " -1) => 1], \"sn\")\n\n      N1 = ITensor(s', dag(s))\n      N1[s' => 2, s => 2] = 1.0\n\n      N2 = ITensor(dag(s), s')\n      N2[s' => 2, s => 2] = 1.0\n\n      NN = N1 + N2\n      @test NN[s' => 2, s => 2] ≈ 2.0\n\n      NN = N1 + N1\n      @test NN[s' => 2, s => 2] ≈ 2.0\n\n      NN = N2 + N2\n      @test NN[s' => 2, s => 2] ≈ 2.0\n    end\n\n    @testset \"Wavefunction Tests\" begin\n      s = [Index([QN(\"N\", 0, -2) => 2, QN(\"N\", 1, -2) => 2], \"s$n\") for n in 1:4]\n\n      psi0 = ITensor(s...)\n\n      psi0[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] = 1111\n      psi0[s[1] => 3, s[2] => 3, s[3] => 1, s[4] => 1] = 3311\n      psi0[s[1] => 1, s[2] => 3, s[3] => 1, s[4] => 3] = 1313\n\n      psi1 = permute(psi0, s[2], s[1], s[3], s[4])\n      @test norm(psi1 - psi0) ≈ 0.0\n\n      @test psi0[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi1[s[1] => 1, s[2] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi0[s[2] => 1, s[1] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n      @test psi1[s[2] => 1, s[1] => 1, s[3] => 1, s[4] => 1] ≈ 1111\n\n      @test psi0[s[1] => 3, s[2] => 3, s[3] => 1,",
+      "metadata": {
+        "section_id": "part_3",
+        "source_file": "test\\base\\test_fermions.jl",
+        "package": "itensors",
+        "section_title": "test_fermions.jl"
+      },
+      "score": 0.8157734262737668,
+      "original_score": 0.8157734262737668,
+      "vector_score": 0.9910094901994464,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "trg__4c4e751c0cdc0541553b5f72957c4395__full__0",
+      "text": "using ITensors\n\n\"\"\"\n    trg(T::ITensor; χmax::Int, nsteps::Int) -> κ, T\n\nPerform the TRG algorithm on the partition function composed of the ITensor T.\n\nThe indices of T must obey come in pairs `(sₕ => sₕ')` and  `(sᵥ => sᵥ').\n\nχmax is the maximum renormalized bond dimension.\n\nnsteps are the number of renormalization steps performed.\n\nThe outputs are κ, the partition function per site, and the final renormalized\nITensor T.\n\"\"\"\nfunction trg(T::ITensor; χmax::Int, nsteps::Int, cutoff=0.0, svd_alg=\"divide_and_conquer\")\n  sₕ, sᵥ = filterinds(T; plev=0)\n  @assert hassameinds((sₕ, sₕ', sᵥ, sᵥ'), T)\n\n  # Keep track of the partition function per site\n  κ = 1.0\n  for n in 1:nsteps\n    Fₕ, Fₕ′ = factorize(\n      T, (sₕ', sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sₕ), svd_alg\n    )\n\n    s̃ₕ = commonind(Fₕ, Fₕ′)\n    Fₕ′ *= δ(dag(s̃ₕ), s̃ₕ')\n\n    Fᵥ, Fᵥ′ = factorize(\n      T, (sₕ, sᵥ'); ortho=\"none\", maxdim=χmax, cutoff, tags=tags(sᵥ), svd_alg\n    )\n\n    s̃ᵥ = commonind(Fᵥ, Fᵥ′)\n    Fᵥ′ *= δ(dag(s̃ᵥ), s̃ᵥ')\n\n    T =\n      (Fₕ * δ(dag(sₕ'), sₕ)) *\n      (Fᵥ * δ(dag(sᵥ'), sᵥ)) *\n      (Fₕ′ * δ(dag(sₕ), sₕ')) *\n      (Fᵥ′ * δ(dag(sᵥ), sᵥ'))\n\n    sₕ, sᵥ = s̃ₕ, s̃ᵥ\n\n    trT = abs((T * δ(sₕ, sₕ') * δ(sᵥ, sᵥ'))[])\n    T = T / trT\n    κ *= trT^(1 / 2^n)\n  end\n  return κ, T\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "source_file": "examples\\src\\trg.jl",
+        "section_title": "trg.jl",
+        "package": "itensors"
+      },
+      "score": 0.7988750317851689,
+      "original_score": 0.7866856397721489,
+      "vector_score": 0.9556733643297067,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "using",
+        "itensors"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 104,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 46
+      }
+    }
+  }
+}

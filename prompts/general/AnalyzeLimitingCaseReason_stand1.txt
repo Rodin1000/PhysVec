@@ -1,0 +1,51 @@
+You are an expert in numerical calculations of quantum many-body physics.
+A limiting case test was run and the judge determined the result is "wrong". Your task is to analyze whether the error originates from the ORIGINAL_CODE (the code under test) or from the LIMITING_CASE_CODE (the test code derived from ORIGINAL_CODE).
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. **ORIGINAL_CODE**: The original code being tested.
+2. **LIMITING_CASE_CODE**: The limiting case test code, derived from ORIGINAL_CODE. It already contains the test scenario.
+3. **SCORECARD**: Golden truth of the system setup (physics, algorithms, formulas). Use it to judge where code does NOT conform to the correct implementation. Ignore specific parameter values, as the limiting case modifies them.
+4. **JUDGE_REASON**: The judge's explanation of the calculation deviation (actual vs expected mismatch).
+
+-------------------------------------------------------------------------------------------------------
+[Task]:
+**CRITICAL - Judge by tolerance (non-negotiable):**
+1. **As long as** the numerical result is **outside** the tolerance interval / criterion given in TRUTH, the outcome **MUST** be **"wrong"**—you **must not** output **"correct"** in that situation. There is definitely a bug—either in ORIGINAL_CODE or in LIMITING_CASE_CODE. Your job is to search SCORECARD and both codes to locate the error.
+2. If the numerical result in STDOUT falls **within** the tolerance interval specified in TRUTH, judge as "correct" directly. No excessive reasoning is needed.
+
+**CRITICAL - First step (only when the numerical result in STDOUT falls OUTSIDE the tolerence):** You MUST first analyze, according to SCORECARD, whether the physical logic in ORIGINAL_CODE and LIMITING_CASE_CODE is correct. Check if the Hamiltonian construction, observable definitions, numerical algorithms, and physics formulas in both codes conform to the golden truth specified in SCORECARD. Identify any deviation from correct physical logic before attributing the error. Cross-check every relevant item in SCORECARD against the code to find the bug.
+
+Then determine the root cause of the error:
+- **Case A**: The error already exists in ORIGINAL_CODE (bug in the code under test; physical logic or implementation is wrong).
+- **Case B**: The error was introduced when ORIGINAL_CODE was used to generate LIMITING_CASE_CODE (LimitingCase test code mistake; ORIGINAL_CODE may be correct).
+
+Use SCORECARD as the standard for correct implementation. Compare ORIGINAL_CODE and LIMITING_CASE_CODE against SCORECARD to identify where they deviate from the golden truth.
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+Write the JSON object in this order: first produce the full **reason** field, then set **judge** to match it (see CRITICAL below).
+
+Return a JSON dict with keys "reason" and "judge" (in that order in your output).
+
+**reason**: Based on JUDGE_REASON, with your analysis appended. Do not replace JUDGE_REASON; add your judgment to it. When judge="correct", a brief confirmation suffices.
+- **Case A**: After the judge's reason, add the specific error location in ORIGINAL_CODE (function name, line, or logic description).
+- **Case B**: After the judge's reason, add "The error originates from the LimitingCase test code itself; the original code does not need to be modified" and explain what went wrong in the LimitingCase code.
+
+**judge**: Your re-judgment after analysis—set this **after** you have finished **reason**, and **only** from the **final conclusion** stated at the end of **reason**. Must be one of "correct", "wrong", or "undetermined":
+- **"correct"**: If the numerical result in STDOUT falls within the tolerance interval in TRUTH. Output "correct" directly; no excessive reasoning needed.
+- **"wrong"**: If the numerical result in STDOUT falls outside the tolerance interval in TRUTH—there is definitely a bug. Either Case A (ORIGINAL_CODE) or Case B (LIMITING_CASE_CODE). Carefully cross-check SCORECARD to find and describe the error.
+- **"undetermined"**: If the comparison cannot be reliably re-evaluated (e.g., output unparseable).
+
+**CRITICAL:** The value of **judge** MUST be consistent with the **final** outcome implied by **reason** (the conclusion you state last in the **reason** text). If **reason** concludes the run is outside tolerance or affirms a real error, **judge** MUST NOT be "correct". If **reason** concludes within tolerance or affirms the result is valid, **judge** MUST be "correct". Do not output a **judge** that contradicts your **reason**.
+
+-------------------------------------------------------------------------------------------------------
+[Output format]:
+```json
+{
+  "reason": "...",
+  "judge": "..."
+}
+```
+
+**CRITICAL:** Your output MUST BE a complete dictionary enclosed by '```json' and '```'.

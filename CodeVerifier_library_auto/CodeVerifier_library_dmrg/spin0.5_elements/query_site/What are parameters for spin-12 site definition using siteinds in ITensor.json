@@ -1,0 +1,138 @@
+{
+  "query": "What are parameters for spin-1/2 site definition using siteinds() in ITensor?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_phys_site_types__060210c943032a0fd9694bbf30890d18__part_0__0",
+      "text": "using ITensors, LinearAlgebra, Test\nusing ITensors.SiteTypes: has_fermion_string, op, siteind, siteinds, state\n\n@testset \"Physics Sites\" begin\n  N = 10\n\n  @testset \"Generic sites\" for eltype in (Float32, Float64, ComplexF32, ComplexF64)\n    d1, d2 = 3, 4\n    i1, i2 = Index(d1), Index(d2)\n\n    o = op(\"I\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"F\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"I\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    U1 = op(\"RandomUnitary\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U1 = op(\"randU\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U12 = op(\"RandomUnitary\", i1, i2)\n    @test hassameinds(U12, (i1', i2', i1, i2))\n    @test apply(transpose(dag(U12)), U12) ≈\n      itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n  end\n\n  @testset \"Qubit sites\" begin\n   ",
+      "metadata": {
+        "section_title": "test_phys_site_types.jl",
+        "section_id": "part_0",
+        "package": "itensors",
+        "source_file": "test\\base\\test_phys_site_types.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "using",
+        "siteinds",
+        "itensor"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "test_dmrg__331a78ba2f4acb4c4da3149efdb573bc__part_0__0",
+      "text": "using ITensors, Test, Random\nusing ITensorMPS: dmrg, nsite, set_nsite!, siteinds, site_range\n\n@testset \"Basic DMRG\" begin\n  @testset \"Spin-one Heisenberg\" begin\n    N = 10\n    sites = siteinds(\"S=1\", N)\n\n    os = OpSum()\n    for j in 1:(N - 1)\n      add!(os, \"Sz\", j, \"Sz\", j + 1)\n      add!(os, 0.5, \"S+\", j, \"S-\", j + 1)\n      add!(os, 0.5, \"S-\", j, \"S+\", j + 1)\n    end\n    H = MPO(os, sites)\n\n    psi = random_mps(sites)\n\n    sweeps = Sweeps(3)\n    @test length(sweeps) == 3\n    maxdim!(sweeps, 10, 20, 40)\n    mindim!(sweeps, 1, 10)\n    cutoff!(sweeps, 1E-11)\n    noise!(sweeps, 1E-10)\n    str = split(sprint(show, sweeps), '\\n')\n    @test length(str) > 1\n    energy, psi = dmrg(H, psi, sweeps; outputlevel=0)\n    @test energy < -12.0\n  end\n\n  @testset \"QN-conserving Spin-one Heisenberg\" begin\n    N = 10\n    sites = siteinds(\"S=1\", N; conserve_qns=true)\n\n    os = OpSum()\n    for j in 1:(N - 1)\n      os += \"Sz\", j, \"Sz\", j + 1\n      os += 0.5, \"S+\", j, \"S-\", j + 1\n      os += 0.5, \"S-\", j, \"S+\", j + 1\n    end\n    H = MPO(os, sites)\n\n    state = [isodd(n) ? \"Up\" : \"Dn\" for n in 1:N]\n    psi = random_mps(sites, state; linkdims=4)\n\n    sweeps = Sweeps(3)\n    @test length(sweeps) == 3\n    maxdim!(sweeps, 10, 20, 40)\n    mindim!(sweeps, 1, 10)\n    cutoff!(sweeps, 1E-11)\n    noise!(sweeps, 1E-10)\n    str = split(sprint(show, sweeps), '\\n')\n    @test length(str) > 1\n    energy, psi = dmrg(H, psi, sweeps; outputlevel=0)\n    @test energy < -12.0\n",
+      "metadata": {
+        "section_title": "test_dmrg.jl",
+        "section_id": "part_0",
+        "source_file": "test\\base\\test_dmrg.jl",
+        "package": "itensormps"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "spin",
+        "using",
+        "siteinds"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "ops_itensor__affa3c82ed8d1be94bbe675053e1287f__full__0",
+      "text": "using .SiteTypes: SiteTypes, op\n\nfunction SiteTypes.op(I::UniformScaling, s::Index...)\n  return I.λ * op(\"Id\", s...)\nend\n\nfunction ITensor(o::Op, s::Vector{<:Index})\n  return op(o.which_op, map(n -> s[n], o.sites)...; o.params...)\nend\n\nfunction ITensor(o::Scaled, s::Vector{<:Index})\n  c = coefficient(o)\n  if isreal(c)\n    c = real(c)\n  end\n  return c * ITensor(argument(o), s)\nend\n\nfunction ITensor(o::Prod, s::Vector{<:Index})\n  T = ITensor(true)\n  for a in o.args[1]\n    Tₙ = ITensor(a, s)\n    # TODO: Implement this logic inside `apply`\n    if hascommoninds(T, Tₙ)\n      T = T(Tₙ)\n    else\n      T *= Tₙ\n    end\n  end\n  return T\nend\n\nfunction ITensor(o::Sum, s::Vector{<:Index})\n  T = ITensor()\n  for a in o.args[1]\n    T += ITensor(a, s)\n  end\n  return T\nend\n\nfunction ITensor(o::Exp, s::Vector{<:Index})\n  return exp(ITensor(argument(o), s))\nend\n\nfunction ITensor(o::LazyApply.Adjoint, s::Vector{<:Index})\n  return swapprime(dag(ITensor(o', s)), 0 => 1)\nend\n\nfunction Sum{ITensor}(o::Sum, s::Vector{<:Index})\n  return Applied(sum, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Prod, s::Vector{<:Index})\n  return Applied(prod, (map(oₙ -> ITensor(oₙ, s), only(o.args)),))\nend\n\nfunction Prod{ITensor}(o::Scaled{C,Prod{Op}}, s::Vector{<:Index}) where {C}\n  t = Prod{ITensor}(argument(o), s)\n  t1 = coefficient(o) * only(t.args)[1]\n  return Applied(prod, (vcat([t1], only(t.args)[2:end]),))\nend\n\nfunction apply(o::Prod{ITensor}, v::ITensor; kwargs...)\n  ov = v\n  for oₙ in reverse(only(o.args))\n    ov = apply(oₙ, ov; kwargs...)\n  end\n  return ov\nend\n\nfunction (o::Prod{ITensor})(v::ITensor; kwargs...)\n  return apply(o, v; kwargs...)\nend\n",
+      "metadata": {
+        "source_file": "src\\lib\\Ops\\ops_itensor.jl",
+        "section_title": "ops_itensor.jl",
+        "package": "itensors",
+        "section_id": "full"
+      },
+      "score": 0.9156343064792383,
+      "original_score": 0.9111940068202509,
+      "vector_score": 0.9111940068202509,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "using",
+        "itensor"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "IncludedSiteTypes__7d74debdd1c692a6ddd9c2ac060aba29__\"S1\"-SiteType_2__0",
+      "text": "## \"S=1\" SiteType\nSite indices with the \"S=1\" site type represent $S=1$ spins with the states $|\\!\\uparrow\\rangle$ , $|0\\rangle$ , $|\\!\\downarrow\\rangle$ .\nMaking a single \"S=1\" site or collection of N \"S=1\" sites\n```code\ns = siteind(\"S=1\")\nsites = siteinds(\"S=1\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\nconserve_qns (default: false): conserve total $S^z$\nconserve_sz (default: conserve_qns): conserve total $S^z$\nqnname_sz (default: \"Sz\"): name of total $S^z$ QN\nFor example:\n```code\nsites = siteinds(\"S=1\",N; conserve_sz=true, qnname_sz=\"TotalSz\")\n```\nThe available state names for \"S=1\" sites are:\n\"Up\" (aliases: \"Z+\" , \"↑\" ) spin in the up state\n\"Z0\" (aliases: \"0\" ) spin in the Sz=0 state\n\"Dn\" (aliases: \"Z-\" , \"↓\" ) spin in the down state\nOperators associated with \"S=1\" sites can be made using the op function, for example\n```code\nSz = op(\"Sz\",s)\nSz4 = op(\"Sz\",sites[4])\n```\nSpin operators:\n\"Sz\" (aliases: \"Sᶻ\" )\n\"Sz2\" Square of S^z operator\n\"S+\" (alises: \"S⁺\" , \"Splus\" )\n\"S-\" (aliases: \"S⁻\" , \"Sminus\" )\n\"Sx\" (alises: \"Sˣ\" )\n\"Sx2\" Square of S^x operator\n\"iSy\" (aliases: \"iSʸ\" )\n\"Sy\" (aliases: \"Sʸ\" )\n\"Sy2\" Square of S^y operator\n\"S2\" (aliases: \"S²\"`)",
+      "metadata": {
+        "source_file": "docs\\build\\IncludedSiteTypes.html",
+        "section_title": "\"S=1\" SiteType",
+        "section_id": "\"S1\"-SiteType",
+        "package": "itensormps"
+      },
+      "score": 0.888931401807019,
+      "original_score": 0.8222902428912304,
+      "vector_score": 0.7742689731250699,
+      "bm25_score": 0.19208507906464156,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "are",
+        "spin",
+        "site",
+        "using",
+        "siteinds"
+      ],
+      "match_ratio": 0.625,
+      "is_html": true
+    },
+    {
+      "id": "test_trotter__faf0a6e37d1e6faa17b817abb6eb617d__full__0",
+      "text": "using Test\nusing ITensors\nusing ITensors.Ops: Op, Prod, Sum, Trotter\nusing ITensors.SiteTypes: siteinds\n\n@testset \"Simple trotterization\" begin\n  H = Sum{Op}() + (\"X\", 1) + (\"Y\", 1)\n\n  s = siteinds(\"Qubit\", 1)\n\n  for nsteps in [10, 100, 1000]\n    expHᵉˣᵃᶜᵗ = ITensor(exp(H), s)\n    @test expHᵉˣᵃᶜᵗ ≈ ITensor(exp(H; alg=Trotter{1}(nsteps)), s) rtol = 1 / nsteps\n    @test expHᵉˣᵃᶜᵗ ≈ ITensor(exp(H; alg=Trotter{2}(nsteps)), s) rtol = (1 / nsteps)^2\n    @test_broken expHᵉˣᵃᶜᵗ ≈ ITensor(exp(H; alg=Trotter{4}(nsteps)), s) rtol =\n      (1 / nsteps)^2\n    @test_broken expHᵉˣᵃᶜᵗ ≈ ITensor(exp(H; alg=Trotter{8}(nsteps)), s) rtol =\n      (1 / nsteps)^2\n\n    # Convert to ITensors\n    t = 1.0\n    Uᵉˣᵃᶜᵗ = ITensor(exp(im * t * H), s)\n    U = Prod{ITensor}(exp(im * t * H; alg=Trotter{2}(nsteps)), s)\n    ψ₀ = onehot(s .=> \"0\")\n    Uᵉˣᵃᶜᵗψ₀ = Uᵉˣᵃᶜᵗ(ψ₀)\n    Uψ₀ = U(ψ₀)\n    @test Uᵉˣᵃᶜᵗψ₀ ≈ Uψ₀ rtol = (1 / nsteps)^2\n  end\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "full",
+        "section_title": "test_trotter.jl",
+        "source_file": "test\\lib\\Ops\\test_trotter.jl"
+      },
+      "score": 0.8725762737367335,
+      "original_score": 0.8622446202559281,
+      "vector_score": 0.8424810077100725,
+      "bm25_score": 0.07905445018342253,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "using",
+        "siteinds",
+        "itensor"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 111,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      }
+    }
+  }
+}

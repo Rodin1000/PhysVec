@@ -1,0 +1,155 @@
+{
+  "query": "Prepend initial state circuit to ansatz using QuantumCircuit.compose and append semantics",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "hartree_fock__973a80b2a7462da2917d3311e3e913f7__part_3__3",
+      "text": "_mapper,\n            )\n            self.qregs = [QuantumRegister(len(self._bitstr), name=\"q\")]\n\n    def _build(self) -> None:\n        \"\"\"\n        Construct the Hartree-Fock initial state given its parameters.\n        Returns:\n            QuantumCircuit: a quantum circuit preparing the Hartree-Fock\n            initial state given a number of spatial orbitals, number of particles and\n            a qubit mapper.\n        \"\"\"\n        if self._is_built:\n            return\n\n        super()._build()\n\n        # Construct the circuit for bitstring. Since this is defined as an initial state\n        # circuit its assumed that this is applied first to the qubits that are initialized to\n        # the zero state. Hence we just need to account for all True entries and set those.\n        if self._bitstr is not None:\n            for i, bit in enumerate(self._bitstr):\n                if bit:\n                    self.x(i)\n\n\ndef hartree_fock_bitstring_mapped(\n    num_spatial_orbitals: int,\n    num_particles: tuple[int, int],\n    qubit_mapper: QubitMapper,\n) -> list[bool]:\n    # pylint: disable=unused-argument\n    \"\"\"Compute the bitstring representing the mapped Hartree-Fock state for the specified system.\n\n    Args:\n        num_spatial_orbitals: The number of spatial orbitals, has a min. value of 1.\n        num_particles: The number of particles as a tuple (alpha, beta) containing the number of\n            alpha- and  beta-spin electrons, respectively.\n        qubit_mapper: A QubitMapper.\n\n    Returns:\n        The bitstring representing the mapped state of the Hartree-Fock state as array of bools.\n    \"\"\"\n    # get the bitstring encoding the Hartree Fock state\n    bitstr = hartree_fock_bitstring(num_spatial_orbitals, num_particles)\n\n    # encode the bitstring as a `FermionicOp`\n    bitstr_op = FermionicOp(\n        {\" \".join(f\"+_{idx}\" for idx, bit in enumerate(bitstr) if bit): 1.0},\n        num_spin_orbitals=2 * num_spatial_orbitals,\n    )\n\n    # map the `FermionicOp` to a qubit operator\n    qubit_op: SparsePauliOp\n    if isinstance(qubit_mapper, TaperedQubitMapper):\n        # To avoid checking commutativity, we call the two methods separately.\n        qubit_op = qubit_mapper.map_clifford(bitstr_op)\n        qubit_op = qubit_mapper.taper_clifford(qubit_op, check_commutes=False)\n    else:\n        qubit_op = qubit_mapper.map(bitstr_op)\n\n    # We check the mapped operator `x` part of the paulis because we want to have particles\n    # i.e. True,",
+      "metadata": {
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\hartree_fock.py",
+        "section_id": "part_3",
+        "package": "qiskit-nature",
+        "section_title": "hartree_fock.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9834490840801898,
+      "bm25_score": 0.4180611854118439,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "initial",
+        "state",
+        "circuit",
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "uvcc__079700927a1a5a245f7b01f4fded163a__part_2__2",
+      "text": ": The :class:`~qiskit_nature.second_q.mappers.QubitMapper` which takes care\n                of mapping to a qubit operator.\n            reps: The number of repetitions of basic module.\n            initial_state: A ``QuantumCircuit`` object to prepend to the circuit. Note that this\n                setting does *not* influence the ``excitations``. When relying on the default\n                generation method (i.e. not providing a ``Callable`` to ``excitations``), these will\n                always be constructed with respect to a\n                :class:`~qiskit_nature.second_q.circuit.library.VSCF` reference state. When setting\n                up a ``VQE`` algorithm using this ansatz and initial state, it is likely you will\n                also want to use a\n                :class:`~qiskit_nature.second_q.algorithms.initial_points.VSCFInitialPoint` that has\n                been configured using the corresponding ansatz parameters.\n        \"\"\"\n        self._qubit_mapper = qubit_mapper\n        self._num_modals = num_modals\n        self._excitations = excitations\n\n        super().__init__(reps=reps, initial_state=initial_state)\n\n        # To give read access to the actual excitation list that UVCC is using.\n        self._excitation_list: list[tuple[tuple[int, ...], tuple[int, ...]]] | None = None\n\n        # We cache these, because the generation may be quite expensive (depending on the generator)\n        # and the user may want quick access to inspect these. Also, it speeds up testing for the\n        # same reason!\n        self._excitation_ops: list[SparseLabelOp] | None = None\n\n        # Our parent, EvolvedOperatorAnsatz, sets qregs when it knows the\n        # number of qubits, which it gets from the operators. Getting the\n        # operators here will build them if configuration already allows.\n        # This will allow the circuit to be fully built/valid when it's\n        # possible at this stage.\n        _ = self.operators\n\n    @property\n    def qubit_mapper(self) -> QubitMapper | None:\n        \"\"\"The qubit operator mapper.\"\"\"\n        return self._qubit_mapper\n\n    @qubit_mapper.setter\n    def qubit_mapper(self, mapper: QubitMapper) -> None:\n        \"\"\"Sets the qubit operator mapper.\"\"\"\n        self._operators = None\n        self._invalidate()\n        self._qubit_mapper = mapper\n\n    @property\n    def num_modals(self) -> list[int] | None:\n        \"\"\"The number of modals.\"\"\"\n        return self._num_modals\n\n    @num_modals.setter\n    def num_modals(self, num_modals: list[int]) -> None:\n        \"\"\"Sets the number of modals.\"\"\"\n        self._operators = None\n       ",
+      "metadata": {
+        "section_id": "part_2",
+        "section_title": "uvcc.py",
+        "package": "qiskit-nature",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\ansatzes\\uvcc.py"
+      },
+      "score": 0.9658718971861507,
+      "original_score": 0.9603161595187799,
+      "vector_score": 0.7947897755107922,
+      "bm25_score": 1.0,
+      "keyword_matches": 7,
+      "matched_keywords": [
+        "prepend",
+        "initial",
+        "state",
+        "circuit",
+        "ansatz",
+        "using",
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.7,
+      "is_html": false
+    },
+    {
+      "id": "multi_control_rotation_gates__20b82282b4ec5ed0b1ffaf5ccd961544__part_4__4",
+      "text": "    mcx2 = synth_mcx_n_dirty_i15(num_ctrl_qubits=k_2)\n    mcx2_num_ancillas = mcx2.num_qubits - k_2 - 1\n    mcx2_qubits = controls[k_1:] + [target] + controls[k_1 - mcx2_num_ancillas : k_1]\n\n    circuit = QuantumCircuit(num_controls + 1, name=\"MCSU2\")\n\n    if not is_secondary_diag_real:\n        circuit.h(target)\n\n    circuit.compose(mcx1, mcx1_qubits, inplace=True)\n    circuit.append(s_gate, [target])\n    circuit.compose(mcx2, mcx2_qubits, inplace=True)\n    circuit.append(s_gate.inverse(), [target])\n    circuit.compose(mcx1, mcx1_qubits, inplace=True)\n    circuit.append(s_gate, [target])\n    circuit.compose(mcx2, mcx2_qubits, inplace=True)\n    circuit.append(s_gate.inverse(), [target])\n\n    if not is_secondary_diag_real:\n        circuit.h(target)\n\n    if use_basis_gates:\n        circuit = transpile(circuit, basis_gates=[\"p\", \"u\", \"cx\"], qubits_initially_zero=False)\n\n    return circuit\n",
+      "metadata": {
+        "package": "qiskit",
+        "section_title": "multi_control_rotation_gates.py",
+        "source_file": "qiskit\\synthesis\\multi_controlled\\multi_control_rotation_gates.py",
+        "section_id": "part_4"
+      },
+      "score": 0.9256159195521831,
+      "original_score": 0.9191477386436774,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "circuit",
+        "quantumcircuit",
+        "compose",
+        "append"
+      ],
+      "match_ratio": 0.4,
+      "is_html": false
+    },
+    {
+      "id": "test_bogoliubov_transform__37591ec438f6bde1d2d31019c31e0184__part_2__2",
+      "text": ")\n            @ _expand_transformation_matrix(transformation_matrix2)\n        )[:n_orbitals]\n\n        bog_circuit_1 = BogoliubovTransform(transformation_matrix1)\n        bog_circuit_2 = BogoliubovTransform(transformation_matrix2)\n        bog_circuit_composed = BogoliubovTransform(composed_transformation_matrix)\n\n        register = QuantumRegister(n_orbitals)\n        circuit = QuantumCircuit(register)\n        circuit.append(bog_circuit_1, register)\n        circuit.append(bog_circuit_2, register)\n\n        self.assertTrue(Operator(circuit).equiv(Operator(bog_circuit_composed), atol=1e-8))\n\n    def test_bogoliubov_transform_jw_inverse_general_identity(self):\n        \"\"\"Test Bogoliubov transform for the identity transformation.\"\"\"\n        n_orbitals = 3\n        mat = np.eye(n_orbitals, 2 * n_orbitals, k=n_orbitals)\n        bog = BogoliubovTransform(mat)\n\n        register = QuantumRegister(n_orbitals)\n        circuit = QuantumCircuit(register)\n        circuit.append(bog, register)\n        circuit.append(bog.inverse(), register)\n\n        self.assertTrue(Operator(circuit).equiv(np.eye(2**n_orbitals), atol=1e-8))\n\n    def test_no_side_effects(self):\n        \"\"\"Test that the routines don't mutate the input array.\"\"\"\n        n_orbitals = 5\n        hermitian_part = random_hermitian(n_orbitals).data\n        constant = np.random.uniform(-10, 10)\n\n        quad_ham = QuadraticHamiltonian(hermitian_part, constant=constant)\n        transformation_matrix, _, _ = quad_ham.diagonalizing_bogoliubov_transform()\n        original = transformation_matrix.copy()\n        _ = BogoliubovTransform(transformation_matrix)\n        np.testing.assert_allclose(transformation_matrix, original, atol=1e-8)\n\n    def test_validation(self):\n        \"\"\"Test input validation.\"\"\"\n        with self.assertRaisesRegex(ValueError, \"2-dimensional\"):\n            _ = BogoliubovTransform(np.ones((2, 2, 2)))\n        with self.assertRaisesRegex(ValueError, \"shape\"):\n            _ = BogoliubovTransform(np.ones((3, 2)))\n        with self.assertRaisesRegex(ValueError, \"shape\"):\n            _ = BogoliubovTransform(np.ones((2, 3)))\n\n    def test_circuit_kwargs(self):\n        \"\"\"Test that circuit keyword arguments are actually passed through.\"\"\"\n        circuit = BogoliubovTransform(np.eye(2), name=\"abcd\")\n        assert circuit.name == \"abcd\"\n\n    def test_unsupported_mapper(self):\n        \"\"\"Test passing unsupported mapper fails gracefully.\"\"\"\n        with self.assertRaisesRegex(NotImplementedError, \"supported\"):\n            _ = BogoliubovTransform(np.eye(2), qubit_mapper=BravyiK",
+      "metadata": {
+        "package": "qiskit-nature",
+        "section_id": "part_2",
+        "source_file": "test\\second_q\\circuit\\library\\test_bogoliubov_transform.py",
+        "section_title": "test_bogoliubov_transform.py"
+      },
+      "score": 0.9239988743250568,
+      "original_score": 0.9191477386436774,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "circuit",
+        "quantumcircuit",
+        "append"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    },
+    {
+      "id": "base_state_fidelity__4af80df8c9120cca15c3cbd952a6f649__part_3__3",
+      "text": " )\n\n        circuits = []\n        for circuit_1, circuit_2 in zip(circuits_1, circuits_2):\n\n            # Use the same key for circuits as qiskit.primitives use.\n            circuit = self._circuit_cache.get((_circuit_key(circuit_1), _circuit_key(circuit_2)))\n\n            if circuit is not None:\n                circuits.append(circuit)\n            else:\n                self._check_qubits_match(circuit_1, circuit_2)\n\n                # re-parametrize input circuits\n                # TODO: make smarter checks to avoid unnecessary re-parametrizations\n                parameters_1 = ParameterVector(\"x\", circuit_1.num_parameters)\n                parametrized_circuit_1 = circuit_1.assign_parameters(parameters_1)\n                parameters_2 = ParameterVector(\"y\", circuit_2.num_parameters)\n                parametrized_circuit_2 = circuit_2.assign_parameters(parameters_2)\n\n                circuit = self.create_fidelity_circuit(\n                    parametrized_circuit_1, parametrized_circuit_2\n                )\n                circuits.append(circuit)\n                # update cache\n                self._circuit_cache[_circuit_key(circuit_1), _circuit_key(circuit_2)] = circuit\n\n        if self._transpiler is not None:\n            return self._transpiler.run(circuits, **self._transpiler_options)\n\n        return circuits\n\n    def _construct_value_list(\n        self,\n        circuits_1: Sequence[QuantumCircuit],\n        circuits_2: Sequence[QuantumCircuit],\n        values_1: Sequence[float] | Sequence[Sequence[float]] | None = None,\n        values_2: Sequence[float] | Sequence[Sequence[float]] | None = None,\n    ) -> list[list[float]]:\n        \"\"\"\n        Preprocesses input parameter values to match the fidelity\n        circuit parametrization, and return in list format.\n\n        Args:\n           circuits_1: (Parametrized) quantum circuits preparing the\n                        first list of quantum states.\n           circuits_2: (Parametrized) quantum circuits preparing the\n                        second list of quantum states.\n           values_1: Numerical parameters to be bound to the first circuits.\n           values_2: Numerical parameters to be bound to the second circuits.\n\n        Returns:\n             List of lists of parameter values for fidelity circuit.\n\n        \"\"\"\n        values_1 = self._preprocess_values(circuits_1, values_1)\n        values_2 = self._preprocess_values(circuits_2, values_2)\n        # now, values_1 and values_2 are explicitly made 2d lists\n\n        values = []\n        if len(values_2[0]) == 0:\n            values = list(values_1)\n        elif len(values_1[0]) == 0:\n            values = list(values_2)\n        else:\n           ",
+      "metadata": {
+        "section_id": "part_3",
+        "source_file": "qiskit_algorithms\\state_fidelities\\base_state_fidelity.py",
+        "section_title": "base_state_fidelity.py",
+        "package": "qiskit-algorithms"
+      },
+      "score": 0.9239988743250568,
+      "original_score": 0.9191477386436774,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "circuit",
+        "quantumcircuit",
+        "append"
+      ],
+      "match_ratio": 0.3,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 215,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 46
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

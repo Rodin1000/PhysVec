@@ -1,0 +1,130 @@
+{
+  "query": "How to create sampler object in NetKet for variational Monte Carlo",
+  "package": "netket",
+  "results": [
+    {
+      "id": "varstate__4b783c6d62f77e5727d266f56e2c22f1__h3_3_3__0",
+      "text": "Let's now assume we have a Flax module, {class}`~netket.models.RBM` and we want to construct a variational state\non sampled with a simple {func}`~netket.sampler.MetropolisLocal` sampler.\nTo do this, first you need to construct the model and the sampler, and then you can pass them, together with several\nparameters, to the constructor.\n```python\nhilbert = nk.hilbert.Spin(0.5)**10\nsampler = nk.sampler.MetropolisLocal(hilbert)\nmodel = nk.models.RBM(alpha=1, param_dtype=float, kernel_init=nn.initializers.normal(stddev=0.01))\nvstate = nk.vqs.MCState(sampler, model, n_samples=500)\n```\nWhen constructed, the variational state will call the model's init method to generate the state and the\nparameters, and will also initialize the sampler.\nWhen constructing a variational state you can also pass a seed, that will be used to initialize both the\nweights and the sampler. You can also pass two different seeds for the sampler and the weights.\n(warn-chunking)=\n:::{warning}\nSometimes you might be working on very large models that run on GPUs, or you might want to compute expectation values with a very high number of samples, which might cause out-of-memory errors. To prevent this, {code}`MCState` exposes the attribute {py:attr}`~netket.vqs.MCState.chunk_size`, which controls the size of the chunks used in the forward and backward computation of expectation values.\nWhen this value is set, computations are not performed on huge matrices, but instead we split the inputs into smaller matrices and loop through them. In general, setting {py:attr}`~netket.vqs.MCState.chunk_size` to a low value will address the majority of memory issues, but will increase the computational cost.\nA value of at least 128 is suggested, but will greatly depend on your model. You should try to use the largest value you can for your system. Setting it to {code}`None` is equivalent to setting it to infinity.\n:::",
+      "metadata": {
+        "package": "netket",
+        "section_title": "MCState",
+        "section_id": "h3_3",
+        "source_file": "docs\\user-guides\\varstate.md"
+      },
+      "score": 0.8171428571428572,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "sampler",
+        "netket",
+        "variational"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "varstate__2eb209004b91a9c3d6c0f3367408c584__h3_3_3__0",
+      "text": "Let's now assume we have a Flax module, {class}`~netket.models.RBM` and we want to construct a variational state\non sampled with a simple {func}`~netket.sampler.MetropolisLocal` sampler.\nTo do this, first you need to construct the model and the sampler, and then you can pass them, together with several\nparameters, to the constructor.\n```python\nhilbert = nk.hilbert.Spin(0.5)**10\nsampler = nk.sampler.MetropolisLocal(hilbert)\nmodel = nk.models.RBM(alpha=1, param_dtype=float, kernel_init=nn.initializers.normal(stddev=0.01))\nvstate = nk.vqs.MCState(sampler, model, n_samples=500)\n```\nWhen constructed, the variational state will call the model's init method to generate the state and the\nparameters, and will also initialize the sampler.\nWhen constructing a variational state you can also pass a seed, that will be used to initialize both the\nweights and the sampler. You can also pass two different seeds for the sampler and the weights.\n(warn-chunking)=\n:::{warning}\nSometimes you might be working on very large models that run on GPUs, or you might want to compute expectation values with a very high number of samples, which might cause out-of-memory errors. To prevent this, {code}`MCState` exposes the attribute {py:attr}`~netket.vqs.MCState.chunk_size`, which controls the size of the chunks used in the forward and backward computation of expectation values.\nWhen this value is set, computations are not performed on huge matrices, but instead we split the inputs into smaller matrices and loop through them. In general, setting {py:attr}`~netket.vqs.MCState.chunk_size` to a low value will address the majority of memory issues, but will increase the computational cost.\nA value of at least 128 is suggested, but will greatly depend on your model. You should try to use the largest value you can for your system. Setting it to {code}`None` is equivalent to setting it to infinity.\n:::",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\_sources\\user-guides\\varstate.md",
+        "section_id": "h3_3",
+        "section_title": "MCState",
+        "package": "netket"
+      },
+      "score": 0.8171428571428572,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "sampler",
+        "netket",
+        "variational"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": false
+    },
+    {
+      "id": "sampler__328a83b26c384f5b8bd27e6a5968c32b__sec_1_1__0",
+      "text": "## Contents\n```code\n# Try to load netket, and install it if the import fails\ntry\n:\nimport\nnetket\nas\nnk\nexcept\nImportError\n:\n!\npip\ninstall\n--quiet\n--upgrade\nnetket\nimport\nnetket\nas\nnk\nimport\njax\nimport\njax.numpy\nas\njnp\nimport\nmatplotlib.pyplot\nas\nplt\n```\nThe Sampler module contains several Monte-Carlo samplers that can be used to generate samples distributed according to a certain \\(\\log\\) -probability distribution function.\nThe samplers defined here can be used together with the Variational State interface or stand-alone in your jax code. They are all fully- jax.jit compatible, and they can be differentiated in forward mode.\nThe sampler module also contains infrastructure necessary to define your own samplers that are compatible with the existing API, as well as custom transition rules for the Metropolis-Hastings sampler.\nThe inheritance diagram of the classes in this module is shown below:\nFollowing the purely functional design of Jax, we define the sampler to be a stateless collection of settings and parameters inheriting from the abstract base class Sampler , while storing all mutable state such as the PRNG key and the statistics of acceptances in an immutable sampler state object inheriting from SamplerState .\nIn the documentation below we will first discuss how to construct Monte-Carlo samplers and what are their common options, then in … we will show how to use samplers directly so that you can use them in your own projects.\nNote that if you are using the Variational State interface, you only need to know how to define samplers, because the Variational State will take care of sampling.",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_1",
+        "section_title": "Contents",
+        "source_file": "docs\\_build\\html\\user-guides\\sampler.html"
+      },
+      "score": 0.7226925176169413,
+      "original_score": 0.5207031168687875,
+      "vector_score": 0.46181920565002077,
+      "bm25_score": 0.7562387617438545,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "sampler",
+        "object",
+        "netket",
+        "variational",
+        "monte",
+        "carlo"
+      ],
+      "match_ratio": 0.8571428571428571,
+      "is_html": true
+    },
+    {
+      "id": "gs-j1j2__eb75b62c7f04b549aa55c69c060507cf__sec_5_5__0",
+      "text": "## 3) Variational Monte Carlo Optimisation#\nWe have now set up our model (Hamiltonian, Graph, Hilbert Space) and can proceed to optimise the variational ansatz we chose, namely the ffnn machine.\nTo setup the variational Monte Carlo optimisation tool, we have to provide a sampler nk.sampler and an optimizer nk.optimizer .\n```code\n# We shall use an exchange Sampler which preserves the global magnetization (as this is a conserved quantity in the model)\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n=\nhi\n,\ngraph\n=\ng\n,\nd_max\n=\n2\n)\n# Construct the variational state\nvs\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nmodel\n,\nn_samples\n=\n1008\n)\n# We choose a basic, albeit important, Optimizer: the Stochastic Gradient Descent\nopt\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.01\n)\n# We can then specify a Variational Monte Carlo object, using the Hamiltonian, sampler and optimizers chosen.\n# Note that we also specify the method to learn the parameters of the wave-function: here we choose the efficient\n# Stochastic reconfiguration (Sr), here in an iterative setup\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nhamiltonian\n=\nop\n,\noptimizer\n=\nopt\n,\nvariational_state\n=\nvs\n,\ndiag_shift\n=\n0.01\n)\n```",
+      "metadata": {
+        "section_title": "3) Variational Monte Carlo Optimisation#",
+        "package": "netket",
+        "section_id": "sec_5",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-j1j2.html"
+      },
+      "score": 0.6858841357713985,
+      "original_score": 0.4826326942117152,
+      "vector_score": 0.4333520158722641,
+      "bm25_score": 0.6797554075695195,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "sampler",
+        "object",
+        "variational",
+        "monte",
+        "carlo"
+      ],
+      "match_ratio": 0.7142857142857143,
+      "is_html": true
+    },
+    {
+      "id": "gs-continuous-space__7613926d2a700cd8cd4d6139229d8aa7__sec_4_4__1",
+      "text": "_in\n:\nArray\n):\nnv\n=\nx_in\n.\nshape\n[\n-\n1\n]\nkernel\n=\nself\n.\nparam\n(\n\"kernel\"\n,\nself\n.\nkernel_init\n,\n(\nnv\n,\nnv\n),\nself\n.\nparam_dtype\n)\nkernel\n=\njnp\n.\ndot\n(\nkernel\n.\nT\n,\nkernel\n)\nkernel\n,\nx_in\n=\npromote_dtype\n(\nkernel\n,\nx_in\n,\ndtype\n=\nNone\n)\ny\n=\n-\n0.5\n*\njnp\n.\neinsum\n(\n\"...i,ij,...j\"\n,\nx_in\n,\nkernel\n,\nx_in\n)\nreturn\ny\n```\nThe model above gives instructions on how to initialize the variational parameters and evaluate the model. To use it in the context of the VMC optimization, NetKet provides the Monte-Carlo-sampled Variational State netket.vqs.MCState , which requires a sampler and a model from which to sample from. We also have to provide the number of samples from which expectation values of operators are computed, at each iteration of the VMC optimization.\nIn the following we construct the variational state from the multivariate Gaussian Ansatz above, using the Gaussian sampler to sample from it and we choose a total of 10000 samples per iteration.\n```code\n# Create an instance of the model.\n# Notice that this does not create the parameters.\nGauss\n=\nGaussian\n()\n# Construct the variational state using the model and the sampler above.\n# n_samples specifies how many samples should be used to compute expectation\n# values.\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nGauss\n,\nn_samples\n=\n10\n**\n4\n,\nn_discard_per_chain\n=\n100\n)\n```\nYou can play around with the variational state: for example, you can compute expectation values yourself or inspect it’s parameters\n```code\nimport\nmatplotlib.pyplot\nas\nplt\n# you can inspect the parameters which form a N*dxN*d matrix\nplt\n.\nimshow\n(\nvstate\n.\nparameters\n[\n\"kernel\"\n])\nplt\n.\ncolorbar\n()\n```\n```code\n<matplotlib.colorbar.Colorbar at 0x127e8c980>\n```\n```code\n# Expectation value: notice that it also provides an error estimate.\nE\n=\nvstate\n.\nexpect\n(\nha\n)\nprint\n(\nE\n)\n```\n```code\n243.7 ± 1.9 [σ²=7275.1, R̂=1.0092]\n```\n```code\n# the energy (expectation value) is a structure with a lot of fields:\nprint\n(\n\"Mean                  :\"\n,\nE\n.\nmean\n)\nprint\n(\n\"Error                 :\"\n,\nE\n.\nerror_of_mean\n)\nprint\n(\n\"Variance             ",
+      "metadata": {
+        "section_title": "3. Exact Ansatz#",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-continuous-space.html",
+        "section_id": "sec_4",
+        "package": "netket"
+      },
+      "score": 0.6754607033019022,
+      "original_score": 0.4390678822502014,
+      "vector_score": 0.428423509475468,
+      "bm25_score": 0.4816453733491351,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "create",
+        "sampler",
+        "netket",
+        "variational",
+        "monte",
+        "carlo"
+      ],
+      "match_ratio": 0.8571428571428571,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 47,
+    "final_results_count": 5
+  }
+}

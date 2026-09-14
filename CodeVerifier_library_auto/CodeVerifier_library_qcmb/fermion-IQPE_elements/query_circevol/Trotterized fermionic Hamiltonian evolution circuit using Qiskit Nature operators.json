@@ -1,0 +1,157 @@
+{
+  "query": "Trotterized fermionic Hamiltonian evolution circuit using Qiskit Nature operators",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "fermionic_gaussian_state__80f84e9eb39382ac27685324204d154b__part_1__1",
+      "text": " and \"\n            \"W1 @ W2.T + W2 @ W1.T = 0.\"\n        )\n\n\nclass FermionicGaussianState(QuantumCircuit):\n    r\"\"\"A circuit that prepares a fermionic Gaussian state.\n\n    A fermionic Gaussian state is a state of the form\n\n    .. math::\n        b^\\dagger_1 \\cdots b^\\dagger_{N_p} \\lvert \\overline{\\text{vac}} \\rangle,\n\n    where\n\n    .. math::\n        \\begin{pmatrix}\n            b^\\dagger_1 \\\\\n            \\vdots \\\\\n            b^\\dagger_N \\\\\n        \\end{pmatrix}\n        = W\n        \\begin{pmatrix}\n            a^\\dagger_1 \\\\\n            \\vdots \\\\\n            a^\\dagger_N \\\\\n            a_1 \\\\\n            \\vdots \\\\\n            a_N\n        \\end{pmatrix}.\n\n    - :math:`a^\\dagger_1, \\ldots, a^\\dagger_{N}` are the fermionic creation operators.\n    - :math:`W` is an :math:`N \\times 2N` matrix such that\n      :math:`b^\\dagger_1, \\ldots, b^\\dagger_{N}` also satisfy the\n      fermionic anticommutation relations.\n    - :math:`\\lvert \\overline{\\text{vac}} \\rangle` is the mutual 0-eigenvector of\n      the operators :math:`\\{b_j^\\dagger b_j\\}`.\n\n    The matrix :math:`W` has the block form\n\n    .. math::\n        \\begin{pmatrix}\n            W_1 & W_2\n        \\end{pmatrix},\n\n    where :math:`W_1` and :math:`W_2` must satisfy\n\n    .. math::\n        W_1 W_1^\\dagger + W_2 W_2^\\dagger = I \\\\\n        W_1 W_2^T + W_2 W_1^T = 0.\n\n    The matrix :math:`W` is commonly obtained by calling the\n    :meth:`~.QuadraticHamiltonian.diagonalizing_bogoliubov_transform`\n    method of the :class:`~.QuadraticHamiltonian` class.\n    This matrix is used to create circuits that prepare eigenstates of the\n    quadratic Hamiltonian.\n\n    Currently, only the Jordan-Wigner transformation is supported.\n\n    Reference: `arXiv:1711.05395`_\n\n    .. _arXiv:1711.05395: https://arxiv.org/abs/1711.05395\n    \"\"\"\n\n    def __init__(\n        self,\n        transformation_matrix: np.ndarray,\n        occupied_orbitals: Sequence[int] | None = None,\n        qubit_mapper: QubitMapper | None =",
+      "metadata": {
+        "package": "qiskit-nature",
+        "section_id": "part_1",
+        "section_title": "fermionic_gaussian_state.py",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\fermionic_gaussian_state.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "fermionic",
+        "hamiltonian",
+        "circuit",
+        "operators"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    },
+    {
+      "id": "evolved_operator_ansatz__a2f35e7a4914a8f6c2d8e0faa9dda3eb__part_5__5",
+      "text": "oring entanglement and optimization within the Hamiltonian\n    Variational Ansatz (2020) `arXiv:2008.02941 <https://arxiv.org/abs/2008.02941>`__\n\n    \"\"\"\n    # If a single operator is given, check if it is a sum of operators (a SparsePauliOp),\n    # and split it into commuting terms. Otherwise, treat it as single operator.\n    if isinstance(hamiltonian, SparsePauliOp):\n        hamiltonian = hamiltonian.group_commuting()\n\n    return evolved_operator_ansatz(\n        hamiltonian,\n        reps=reps,\n        evolution=None,\n        insert_barriers=insert_barriers,\n        name=name,\n        parameter_prefix=parameter_prefix,\n        flatten=True,\n    )\n\n\nclass EvolvedOperatorAnsatz(NLocal):\n    \"\"\"The evolved operator ansatz.\"\"\"\n\n    def __init__(\n        self,\n        operators=None,\n        reps: int = 1,\n        evolution=None,\n        insert_barriers: bool = False,\n        name: str = \"EvolvedOps\",\n        parameter_prefix: str | Sequence[str] = \"t\",\n        initial_state: QuantumCircuit | None = None,\n        flatten: bool | None = None,\n    ):\n        \"\"\"\n        Args:\n            operators (BaseOperator | QuantumCircuit | list | None): The operators\n                to evolve. If a circuit is passed, we assume it implements an already evolved\n                operator and thus the circuit is not evolved again. Can be a single operator\n                (circuit) or a list of operators (and circuits).\n            reps: The number of times to repeat the evolved operators.\n            evolution (EvolutionBase | EvolutionSynthesis | None):\n                A specification of which evolution synthesis to use for the\n                :class:`.PauliEvolutionGate`.\n                Defaults to first order Trotterization.\n            insert_barriers: Whether to insert barriers in between each evolution.\n            name: The name of the circuit.\n            parameter_prefix: Set the names of the circuit parameters. If a string, the same prefix\n                will be used for each parameters. Can also be a list to specify a prefix per\n                operator.\n            initial_state: A :class:`.QuantumCircuit` object to prepend to the circuit.\n            flatten: Set this to ``True`` to output a flat circuit instead of nesting it inside multiple\n                layers of gate objects. By default currently the contents of\n                the output circuit will be wrapped in nested objects for\n                cleaner visualization. However, if you're using this circuit\n                for anything besides visualization its **strongly** recommended\n                to set this flag to ``True`` to avoid a large performance\n                overhead for parameter binding.\n        \"\"\"\n        super().__init__(\n            initial_state=initial_state,\n            parameter_prefix=parameter_prefix,\n            reps=reps,\n            insert_barriers=insert_barriers,\n",
+      "metadata": {
+        "package": "qiskit",
+        "source_file": "qiskit\\circuit\\library\\n_local\\evolved_operator_ansatz.py",
+        "section_id": "part_5",
+        "section_title": "evolved_operator_ansatz.py"
+      },
+      "score": 0.970649379950915,
+      "original_score": 0.9669805524447794,
+      "vector_score": 0.9587256905559743,
+      "bm25_score": 1.0,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "hamiltonian",
+        "evolution",
+        "circuit",
+        "using",
+        "operators"
+      ],
+      "match_ratio": 0.5555555555555556,
+      "is_html": false
+    },
+    {
+      "id": "evolved_operator_ansatz__a2f35e7a4914a8f6c2d8e0faa9dda3eb__part_1__1",
+      "text": "right)\n\n    where the exponentials :math:`exp(-i\\theta O_j)` are expanded using the product formula\n    specified by ``evolution``.\n\n    Examples:\n\n    .. plot::\n        :alt: Circuit diagram output by the previous code.\n        :include-source:\n\n        from qiskit.circuit.library import evolved_operator_ansatz\n        from qiskit.quantum_info import Pauli\n\n        ops = [Pauli(\"ZZI\"), Pauli(\"IZZ\"), Pauli(\"IXI\")]\n        ansatz = evolved_operator_ansatz(ops, reps=3, insert_barriers=True)\n        ansatz.draw(\"mpl\")\n\n    Args:\n        operators: The operators to evolve. Can be a single operator or a sequence thereof.\n        reps: The number of times to repeat the evolved operators.\n        evolution: A specification of which evolution synthesis to use for the\n            :class:`.PauliEvolutionGate`. Defaults to first order Trotterization. Note, that\n            operators of type :class:`.Operator` are evolved using the :class:`.HamiltonianGate`,\n            as there are no Hamiltonian terms to expand in Trotterization.\n        insert_barriers: Whether to insert barriers in between each evolution.\n        name: The name of the circuit.\n        parameter_prefix: Set the names of the circuit parameters. If a string, the same prefix\n            will be used for each parameters. Can also be a list to specify a prefix per\n            operator.\n        remove_identities: If ``True``, ignore identity operators (note that we do not check\n            :class:`.Operator` inputs). This will also remove parameters associated with identities.\n        flatten: If ``True``, a flat circuit is returned instead of nesting it inside multiple\n            layers of gate objects. Setting this to ``False`` is significantly less performant,\n            especially for parameter binding, but can be desirable for a cleaner visualization.\n    \"\"\"\n    if reps < 0:\n        raise ValueError(\"reps must be a non-negative integer.\")\n\n    if isinstance(operators, BaseOperator):\n        operators = [operators]\n    elif len(operators) == 0:\n        return QuantumCircuit()\n\n    num_operators = len(operators)\n    if not isinstance(parameter_prefix, str):\n        if num_operators != len(parameter_prefix):\n            raise ValueError(\n                f\"Mismatching number of operators ({len(operators)}) and parameter_prefix \"\n                f\"({len(parameter_prefix)}).\"\n            )\n\n    num_qubits = operators[0].num_qubits\n    if remove_identities:\n        operators, parameter_prefix = _remove_identities(operators, parameter_prefix)\n\n    if any(op.num_qubits != num_qubits for op in operators):\n        raise ValueError(\"Inconsistent numbers of qubits in the operators.\")\n\n    # get the total number of parameters\n    if isinstance(parameter_prefix, str):\n        parameters = ParameterVector(parameter_prefix, reps",
+      "metadata": {
+        "package": "qiskit",
+        "section_title": "evolved_operator_ansatz.py",
+        "source_file": "qiskit\\circuit\\library\\n_local\\evolved_operator_ansatz.py",
+        "section_id": "part_1"
+      },
+      "score": 0.9606649138611995,
+      "original_score": 0.9546133621475379,
+      "vector_score": 1.0,
+      "bm25_score": 0.7730668107376893,
+      "keyword_matches": 6,
+      "matched_keywords": [
+        "hamiltonian",
+        "evolution",
+        "circuit",
+        "using",
+        "qiskit",
+        "operators"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "time_evolution_problem__856ae00b1dea4850230a12d5ab56ede0__part_1__1",
+      "text": ": BaseOperator,\n        time: float,\n        initial_state: QuantumCircuit | Statevector | None = None,\n        aux_operators: ListOrDict[BaseOperator] | None = None,\n        truncation_threshold: float = 1e-12,\n        t_param: Parameter | None = None,\n        param_value_map: Mapping[Parameter, complex] | None = None,\n    ):\n        \"\"\"\n        Args:\n            hamiltonian: The Hamiltonian under which to evolve the system.\n            time: Total time of evolution.\n            initial_state: The quantum state to be evolved for methods like Trotterization.\n                For variational time evolutions, where the evolution happens in an ansatz,\n                this argument is not required.\n            aux_operators: Optional list of auxiliary operators to be evaluated with the\n                evolved ``initial_state`` and their expectation values returned.\n            truncation_threshold: Defines a threshold under which values can be assumed to be 0.\n                Used when ``aux_operators`` is provided.\n            t_param: Time parameter in case of a time-dependent Hamiltonian. This\n                free parameter must be within the ``hamiltonian``.\n            param_value_map: Maps free parameters in the problem to values. Depending on the\n                algorithm, it might refer to e.g. a Hamiltonian or an initial state.\n\n        Raises:\n            ValueError: If non-positive time of evolution is provided.\n        \"\"\"\n\n        self.t_param = t_param\n        self.param_value_map = param_value_map\n        self.hamiltonian = hamiltonian\n        self.time = time\n        if isinstance(initial_state, Statevector):\n            circuit = QuantumCircuit(initial_state.num_qubits)\n            circuit.prepare_state(initial_state.data)\n            initial_state = circuit\n        self.initial_state: QuantumCircuit | None = initial_state\n        self.aux_operators = aux_operators\n        self.truncation_threshold = truncation_threshold\n\n    @property\n    def time(self) -> float:\n        \"\"\"Returns time.\"\"\"\n        return self._time\n\n    @time.setter\n    def time(self, time: float) -> None:\n        \"\"\"\n        Sets time and validates it.\n        \"\"\"\n        self._time = time\n",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "source_file": "qiskit_algorithms\\time_evolvers\\time_evolution_problem.py",
+        "section_title": "time_evolution_problem.py",
+        "section_id": "part_1"
+      },
+      "score": 0.8941509565688688,
+      "original_score": 0.8838242206243682,
+      "vector_score": 1.0,
+      "bm25_score": 0.4191211031218409,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "hamiltonian",
+        "evolution",
+        "circuit",
+        "operators"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    },
+    {
+      "id": "pvqd__69c5825a3feb1711259fd1275faf2642__part_4__4",
+      "text": ",\n        dt: float,\n        initial_guess: np.ndarray,\n    ) -> tuple[np.ndarray, float]:\n        \"\"\"Perform a single time step.\n\n        Args:\n            hamiltonian: The Hamiltonian under which to evolve.\n            ansatz: The parameterized quantum circuit which attempts to approximate the\n                time-evolved state.\n            theta: The current parameters.\n            dt: The time step.\n            initial_guess: The initial guess for the classical optimization of the\n                fidelity between the next variational state and the Trotter-evolved last state.\n                If None, this is set to a random vector with elements in the interval\n                :math:`[-0.01, 0.01]`.\n\n        Returns:\n            A tuple consisting of the next parameters and the fidelity of the optimization.\n        \"\"\"\n        self._validate_setup()\n\n        loss, gradient = self.get_loss(hamiltonian, ansatz, dt, theta)\n\n        if initial_guess is None:\n            initial_guess = algorithm_globals.random.random(self.initial_parameters.size) * 0.01\n\n        if isinstance(self.optimizer, Optimizer):\n            optimizer_result = self.optimizer.minimize(\n                loss, initial_guess, gradient  # type: ignore[arg-type]\n            )\n        else:\n            optimizer_result = self.optimizer(loss, initial_guess, gradient)  # type: ignore[call-arg]\n\n        # clip the fidelity to [0, 1]\n        fidelity = np.clip(1 - optimizer_result.fun, 0, 1)\n\n        return theta + optimizer_result.x, fidelity\n\n    def get_loss(\n        self,\n        hamiltonian: BaseOperator,\n        ansatz: QuantumCircuit,\n        dt: float,\n        current_parameters: np.ndarray,\n    ) -> tuple[Callable[[np.ndarray], float], Callable[[np.ndarray], np.ndarray]] | None:\n        \"\"\"Get a function to evaluate the infidelity between Trotter step and ansatz.\n\n        Args:\n            hamiltonian: The Hamiltonian under which to evolve.\n            ansatz: The parameterized quantum circuit which attempts to approximate the\n                time-evolved state.\n            dt: The time step.\n            current_parameters: The current parameters.\n\n        Returns:\n            A callable to evaluate the infidelity and, if gradients are supported and required,\n                a second callable to evaluate the gradient of the infidelity.\n        \"\"\"\n        self._validate_setup(skip={\"optimizer\"})\n\n        # use Trotterization to evolve the current state\n        trotterized = ansatz.assign_parameters(current_parameters)\n\n        evolution_gate = PauliEvolutionGate(hamiltonian, time=dt, synthesis=self.evolution)\n\n        trotterized.append(evolution_gate, ansatz.qubits)\n\n        # define the overlap of the Trotterized state and the ansatz\n        x = ParameterVector(\"w\", ansatz.num_parameters)\n        shifted = ansatz.assign_parameters(current_parameters + x)\n\n        def evaluate_loss(displacement:",
+      "metadata": {
+        "source_file": "qiskit_algorithms\\time_evolvers\\pvqd\\pvqd.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_4",
+        "section_title": "pvqd.py"
+      },
+      "score": 0.8708229925433575,
+      "original_score": 0.8582203576695387,
+      "vector_score": 0.8352704059326348,
+      "bm25_score": 0.9500201646171542,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "trotterized",
+        "hamiltonian",
+        "evolution",
+        "circuit"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 200,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 48
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 49
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 45
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

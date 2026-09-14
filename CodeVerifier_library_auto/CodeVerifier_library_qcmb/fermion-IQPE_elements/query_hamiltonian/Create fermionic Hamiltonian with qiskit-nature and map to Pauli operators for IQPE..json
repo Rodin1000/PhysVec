@@ -1,0 +1,154 @@
+{
+  "query": "Create fermionic Hamiltonian with qiskit-nature and map to Pauli operators for IQPE.",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "adapt_vqe__98a67a87faad3bda962a903c96d2e83c__part_1__1",
+      "text": "ations. Thus, a common choice of ansatz to be\n    used with this algorithm is the Unitary Coupled Cluster ansatz implemented in Qiskit Nature.\n    This results in a wavefunction ansatz which is uniquely adapted to the operator whose minimum\n    eigenvalue is being determined. This class relies on a supplied instance of :class:`~.VQE` to\n    find the minimum eigenvalue. The performance of AdaptVQE significantly depends on the\n    minimization routine.\n\n    .. code-block:: python\n\n      from qiskit_algorithms.minimum_eigensolvers import AdaptVQE, VQE\n      from qiskit_algorithms.optimizers import SLSQP\n      from qiskit.primitives import StatevectorEstimator\n      from qiskit.circuit.library import EvolvedOperatorAnsatz\n      from qiskit import QuantumCircuit\n\n      # get your Hamiltonian\n      hamiltonian = ...\n\n      # construct your ansatz\n      ansatz = EvolvedOperatorAnsatz(...)\n\n      vqe = VQE(StatevectorEstimator(), ansatz, SLSQP())\n\n      adapt_vqe = AdaptVQE(vqe)\n\n      # or you can do it without EvolvedOperatorAnsatz\n      vqe = VQE(StatevectorEstimator(), QuantumCircuit(1), SLSQP())\n\n      adapt_vqe = AdaptVQE(vqe, operators=...)\n\n      eigenvalue, _ = adapt_vqe.compute_minimum_eigenvalue(hamiltonian)\n\n    The following attributes can be set via the initializer but can also be read and updated once\n    the AdaptVQE object has been constructed.\n\n    Attributes:\n        solver: a :class:`~.VQE` instance used internally to compute the minimum eigenvalues.\n            It is a requirement that the :attr:`~.VQE.ansatz` of this solver is of type\n            :class:`~qiskit.circuit.library.EvolvedOperatorAnsatz` if the `operators` arguments is\n            not set.\n        gradient_threshold: once all gradients have an absolute value smaller than this threshold,\n            the algorithm has converged and terminates.\n        eigenvalue_threshold: once the eigenvalue has changed by less than this threshold from one\n            iteration to the next, the algorithm has converged and terminates. When this case\n            occurs, the excitation included in the final iteration did not result in a significant\n            improvement of the eigenvalue and, thus, the results from this iteration are not\n            considered.\n        max_iterations: the maximum number of iterations for the adaptive loop. If ``None``, the\n            algorithm is not bound in its number of iterations.\n    \"\"\"\n\n    def __init__(\n        self,\n        solver: VQE,\n        *,\n        gradient_threshold: float = 1e-5,\n        eigenvalue_threshold: float = 1e-5,\n        max_iterations: int | None = None,\n        operators: Base",
+      "metadata": {
+        "section_id": "part_1",
+        "section_title": "adapt_vqe.py",
+        "package": "qiskit-algorithms",
+        "source_file": "qiskit_algorithms\\minimum_eigensolvers\\adapt_vqe.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.844733959482254,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "hamiltonian",
+        "qiskit",
+        "nature",
+        "operators"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    },
+    {
+      "id": "hamiltonian_phase_estimation__fe09fa7dc716801664052a1a15ef8c76__part_1__1",
+      "text": " sufficiently large to map positive :math:`\\lambda` to\n    :math:`[0,\\pi)` and negative :math:`\\lambda` to :math:`[\\pi,2\\pi)`. Each time the circuit is\n    run, one measures a phase corresponding to :math:`lambda_j` with probability :math:`|c_j|^2`.\n\n    If :math:`H` is a Pauli sum, the bound :math:`b` is computed from the sum of the absolute\n    values of the coefficients of the terms. There is no way to reliably recover eigenvalues\n    from phases very near the endpoints of these intervals. Because of this you should be aware\n    that for degenerate cases, such as :math:`H=Z`, the eigenvalues :math:`\\pm 1` will be\n    mapped to the same phase, :math:`\\pi`, and so cannot be distinguished. In this case, you need\n    to specify a larger bound as an argument to the method ``estimate``.\n\n    This class uses and works together with :class:`~qiskit_algorithms.PhaseEstimationScale` to\n    manage scaling the Hamiltonian and the phases that are obtained by the QPE algorithm. This\n    includes setting, or computing, a bound on the eigenvalues of the operator, using this\n    bound to obtain a scale factor, scaling the operator, and shifting and scaling the measured\n    phases to recover the eigenvalues.\n\n    Note that, although we speak of \"evolving\" the state according the Hamiltonian, in the\n    present algorithm, we are not actually considering time evolution. Rather, the role of time is\n    played by the scaling factor, which is chosen to best extract the eigenvalues of the\n    Hamiltonian.\n\n    A few of the ideas in the algorithm may be found in Ref. [1].\n\n    **Reference:**\n\n    [1]: Quantum phase estimation of multiple eigenvalues for small-scale (noisy) experiments\n         T.E. O'Brien, B. Tarasinski, B.M. Terhal\n         `arXiv:1809.09697 <https://arxiv.org/abs/1809.09697>`_\n\n    \"\"\"\n\n    def __init__(\n        self,\n        num_evaluation_qubits: int,\n        sampler: BaseSamplerV2 | None = None,\n        *,\n        transpiler: Transpiler | None = None,\n        transpiler_options: dict[str, Any] | None = None,\n    ) -> None:\n        r\"\"\"\n        Args:\n            num_evaluation_qubits: The number of qubits used in estimating the phase. The phase will\n                be estimated as a binary string with this many bits.\n            sampler: The sampler primitive on which the circuit will be sampled.\n            transpiler: An optional object with a `run` method allowing to transpile the circuits\n                that are produced within this",
+      "metadata": {
+        "section_title": "hamiltonian_phase_estimation.py",
+        "package": "qiskit-algorithms",
+        "section_id": "part_1",
+        "source_file": "qiskit_algorithms\\phase_estimators\\hamiltonian_phase_estimation.py"
+      },
+      "score": 0.9266380979919644,
+      "original_score": 0.9213979621342475,
+      "vector_score": 0.9361908002257758,
+      "bm25_score": 0.71916479644643,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hamiltonian",
+        "map",
+        "pauli"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "pauli_feature_map__6f7e92c3780acb5d121d84f7e80c067c__part_3__3",
+      "text": "�───┘└─────────────┘└───┘└───┘└────────────────────────────────┘└───┘└───┘\n\n        >>> prep = pauli_feature_map(2, reps=1, paulis=[\"ZY\"])\n        >>> print(prep)\n             ┌───┐┌──────────┐                                            ┌───────────┐\n        q_0: ┤ H ├┤ RX(pi/2) ├──■──────────────────────────────────────■──┤ RX(-pi/2) ├\n             ├───┤└──────────┘┌─┴─┐┌────────────────────────────────┐┌─┴─┐└───────────┘\n        q_1: ┤ H ├────────────┤ X ├┤ P(2.0*(pi - x[0])*(pi - x[1])) ├┤ X ├─────────────\n             └───┘            └───┘└────────────────────────────────┘└───┘\n\n        >>> from qiskit.circuit.library import efficient_su2\n        >>> prep = pauli_feature_map(3, reps=3, paulis=[\"Z\", \"YY\", \"ZXZ\"])\n        >>> wavefunction = efficient_su2(3)\n        >>> classifier = prep.compose(wavefunction)\n        >>> classifier.num_parameters\n        27\n        >>> classifier.count_ops()\n        OrderedDict([('cx', 39), ('rx', 36), ('u1', 21), ('h', 15), ('ry', 12), ('rz', 12)])\n\n    References:\n\n    [1] Havlicek et al. Supervised learning with quantum enhanced feature spaces,\n    `Nature 567, 209-212 (2019) <https://www.nature.com/articles/s41586-019-0980-2>`__.\n    \"\"\"\n    # create parameter vector used in the Pauli feature map\n    parameters = ParameterVector(parameter_prefix, feature_dimension)\n\n    # the Rust implementation expects the entanglement to be a str or list[tuple[int]] (or the\n    # callable to return these types), therefore we normalize the entanglement here\n    if callable(entanglement):\n        normalized = lambda offset: _normalize_entanglement(entanglement(offset))\n    else:\n        normalized = _normalize_entanglement(entanglement)\n\n    # construct from Rust\n    circuit = QuantumCircuit._from_circuit_data(\n        _fast_map(\n            feature_dimension,\n            paulis=paulis,\n            entanglement=normalized,\n            reps=reps,\n            parameters=parameters,\n            data_map_func=data_map_func,\n            alpha=alpha,\n            insert_barriers=insert_barriers,\n        ),\n",
+      "metadata": {
+        "source_file": "qiskit\\circuit\\library\\data_preparation\\pauli_feature_map.py",
+        "package": "qiskit",
+        "section_id": "part_3",
+        "section_title": "pauli_feature_map.py"
+      },
+      "score": 0.8998836617828349,
+      "original_score": 0.8873691195056892,
+      "vector_score": 1.0,
+      "bm25_score": 0.2990673078650789,
+      "keyword_matches": 5,
+      "matched_keywords": [
+        "create",
+        "qiskit",
+        "nature",
+        "map",
+        "pauli"
+      ],
+      "match_ratio": 0.5555555555555556,
+      "is_html": false
+    },
+    {
+      "id": "bksf__85a46d24e91e3b50acfc604933e7a2f6__part_4__4",
+      "text": " return (0.5 * h1_pq) * (id_op - b_p)  # SW2018 eq 33\n\n\n## SW2018 eq 34\ndef _coulomb_exchange(  # pylint: disable=invalid-name\n    edge_list: np.ndarray, p: int, q: int, s: int, h2_pqrs: float\n) -> SparsePauliOp:\n    \"\"\"Map a Coulomb-exchange operator to a Pauli operator.\n\n    Args:\n      edge_list: representation of graph specifying neighboring qubits.\n      p: First Fermionic-mode index\n      q: Second Fermionic-mode index\n      s: Index of last lowering operator in physicists' order\n      h2_pqrs: Numerical coefficient of the term\n\n    Returns:\n      The result of the Fermionic to Pauli operator mapping.\n    \"\"\"\n    b_p = _edge_operator_bi(edge_list, p)\n    b_q = _edge_operator_bi(edge_list, q)\n    id_op = _pauli_id(edge_list.shape[1])\n    qubit_op = (id_op - b_p).dot((id_op - b_q))\n    if p == s:  # two commutations to order as two number operators.\n        final_coeff = 0.25\n    else:  # one commutation\n        final_coeff = -0.25\n    return (final_coeff * h2_pqrs) * qubit_op\n\n\n## SW2018 eq 35\n## Includes contributions from a h.c. pair\ndef _excitation_operator(  # pylint: disable=invalid-name\n    edge_list: np.ndarray, p: int, q: int, h1_pq: float\n) -> SparsePauliOp:\n    \"\"\"Map an excitation operator to a Pauli operator.\n\n    Args:\n      edge_list: representation of graph specifying neighboring qubits.\n      p: First Fermionic-mode index.\n      q: Second Fermionic-mode index. You must ensure that p < q.\n      h1_pq: Numerical coefficient of the term.\n\n    Returns:\n      The result of the Fermionic to Pauli operator mapping.\n    \"\"\"  # pylint: disable=missing-raises-doc\n    if p >= q:\n        raise ValueError(f\"Expected p < q, got p = {p}, q = {q}\")\n    b_a = _edge_operator_bi(edge_list, p)\n    b_b = _edge_operator_bi(edge_list, q)\n    a_ab = _edge_operator_aij(edge_list, p, q)\n    return (-1j * 0.5 * h1_pq) * ((b_b & a_ab) + (a_ab & b_a))\n\n\n## SW2018 eq 37\n# pylint: disable=invalid-name, disable=too-many-positional-arguments\ndef _double_excitation(\n    edge_list: np.ndarray, p",
+      "metadata": {
+        "section_id": "part_4",
+        "package": "qiskit-nature",
+        "section_title": "bksf.py",
+        "source_file": "qiskit_nature\\second_q\\mappers\\bksf.py"
+      },
+      "score": 0.8765147290498948,
+      "original_score": 0.8644673855425674,
+      "vector_score": 0.8904506154133811,
+      "bm25_score": 0.6263120379493906,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "fermionic",
+        "map",
+        "pauli",
+        "operators"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    },
+    {
+      "id": "slater_determinant__ab346cc5a25d8f6b57e5231d90e42d86__part_1__1",
+      "text": " :math:`N_f \\times N` matrix with orthonormal rows.\n    - :math:`a^\\dagger_1, \\ldots, a^\\dagger_{N}` are the fermionic creation operators.\n    - :math:`\\lvert \\text{vac} \\rangle` is the vacuum state.\n      (mutual 0-eigenvector of the fermionic number operators :math:`\\{a^\\dagger_j a_j\\}`)\n\n    The matrix :math:`Q` can be obtained by calling the\n    :meth:`~.QuadraticHamiltonian.diagonalizing_bogoliubov_transform`\n    method of the :class:`~.QuadraticHamiltonian` class when the\n    quadratic Hamiltonian conserves particle number.\n    This matrix is used to create circuits that prepare eigenstates of the\n    quadratic Hamiltonian.\n\n    Currently, only the Jordan-Wigner transformation is supported.\n\n    Reference: `arXiv:1711.05395`_\n\n    .. _arXiv:1711.05395: https://arxiv.org/abs/1711.05395\n    \"\"\"\n\n    def __init__(\n        self,\n        transformation_matrix: np.ndarray,\n        qubit_mapper: QubitMapper | None = None,\n        *,\n        validate: bool = True,\n        rtol: float = 1e-5,\n        atol: float = 1e-8,\n        **circuit_kwargs,\n    ) -> None:\n        # pylint: disable=unused-argument\n        r\"\"\"\n        Args:\n            transformation_matrix: The matrix :math:`Q` that specifies the coefficients of the\n                new creation operators in terms of the original creation operators.\n                The rows of the matrix must be orthonormal.\n            qubit_mapper: The ``QubitMapper``. The default behavior is to create one using the call\n                ``JordanWignerMapper()``.\n            validate: Whether to validate the inputs.\n            rtol: Relative numerical tolerance for input validation.\n            atol: Absolute numerical tolerance for input validation.\n            circuit_kwargs: Keyword arguments to pass to the ``QuantumCircuit`` initializer.\n\n        Raises:\n            ValueError: transformation_matrix must be a 2-dimensional array.\n            ValueError: transformation_matrix must have orthonormal rows.\n            NotImplementedError: Currently, only the Jordan-Wigner Transform is supported.\n                Please use the :class:`qiskit_nature.second_q.mappers.JordanWignerMapper`.\n        \"\"\"\n        if validate:\n            _validate_transformation_matrix(transformation_matrix, rtol=rtol, atol=atol)\n\n        if qubit_mapper is None:\n            qubit_mapper = JordanWignerMapper()\n\n        _, n = transformation_matrix.shape\n        register = QuantumRegister(n)\n        super().__init__(register, **circuit_kwargs)\n\n        if isinstance(qubit_mapper, JordanWignerMapper):\n            operations = _prepare_slater_determin",
+      "metadata": {
+        "section_id": "part_1",
+        "package": "qiskit-nature",
+        "section_title": "slater_determinant.py",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\slater_determinant.py"
+      },
+      "score": 0.8753667240464953,
+      "original_score": 0.8632073800510314,
+      "vector_score": 0.8744715740698952,
+      "bm25_score": 0.6841238119293556,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "create",
+        "fermionic",
+        "hamiltonian",
+        "operators"
+      ],
+      "match_ratio": 0.4444444444444444,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 211,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 49
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

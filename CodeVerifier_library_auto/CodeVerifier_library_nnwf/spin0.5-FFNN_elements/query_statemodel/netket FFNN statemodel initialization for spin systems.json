@@ -1,0 +1,116 @@
+{
+  "query": "netket FFNN statemodel initialization for spin systems",
+  "package": "netket",
+  "results": [
+    {
+      "id": "index__d0fafb4c3aae6226a48355272e87ed22__root_0__0",
+      "text": "Repository\nOpen issue\n.md\n.pdf\nTutorials on using symmetries in NetKet.\nEquivariant NQS: GCNN for Spin models\nSymmetries, Representations and Projectors for arbitrary NQS",
+      "metadata": {
+        "section_title": "ROOT",
+        "package": "netket",
+        "section_id": "root",
+        "source_file": "docs\\_build\\html\\tutorials\\symmetries\\index.html"
+      },
+      "score": 0.8633333333333334,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "spin"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "custom_hilbert_constraints__a202136a3fd70552ecbc1a6ad0f2024f__sec_6_6__0",
+      "text": "## Integration with Variational States#\nConstrained Hilbert spaces work seamlessly with all NetKet variational states:\n```code\n# Create constrained system\nhilbert\n=\nnk\n.\nhilbert\n.\nSpin\n(\n0.5\n,\nN\n=\n10\n,\nconstraint\n=\nSumConstraint\n(\n0\n))\n# Zero magnetization\ngraph\n=\nnk\n.\ngraph\n.\nChain\n(\n10\n)\nhamiltonian\n=\nnk\n.\noperator\n.\nIsing\n(\nhilbert\n,\ngraph\n,\nh\n=\n1.0\n)\n# Standard NetKet workflow\nmodel\n=\nnk\n.\nmodels\n.\nRBM\n(\nalpha\n=\n1\n)\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n,\ngraph\n)\n# Respects magnetization\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n,\nmodel\n)\n# Optimization works as usual\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\n0.01\n)\ndriver\n=\nnk\n.\ndriver\n.\nVMC\n(\nhamiltonian\n,\noptimizer\n)\ndriver\n.\nrun\n(\nvstate\n,\nn_iter\n=\n100\n)\n```",
+      "metadata": {
+        "section_id": "sec_6",
+        "source_file": "docs\\_build\\html\\advanced\\custom_hilbert_constraints.html",
+        "section_title": "Integration with Variational States#",
+        "package": "netket"
+      },
+      "score": 0.8167056193884148,
+      "original_score": 0.7317643210562167,
+      "vector_score": 0.9147054013202708,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "spin"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_1_1__0",
+      "text": "## Contents\nAuthor: Giuseppe Carleo and Filippo Vicentini (EPFL-CQSL)\nThe goal of this tutorial is to review various neural network architectures available in NetKet, in order to learn the ground-state of a paradigmatic spin model: the spin- \\(1/2\\) Heisenberg antiferromagnetic chain.\nThe Hamiltonian we will consider for this tutorial is the following\n\\(L\\) is the length of the chain, and we will use both open and periodic boundary conditions. \\(\\vec{\\sigma}=(\\sigma^x,\\sigma^y,\\sigma^z)\\) denotes  the vector of Pauli matrices. Please note that there is a factor of \\(2\\) between Pauli-matrices and spin-1/2 operators (thus a factor of \\(4\\) in \\(H\\) ).\nWe will consider in this tutorial 5 possible ways of determining the ground-state of this model.",
+      "metadata": {
+        "section_id": "sec_1",
+        "section_title": "Contents",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "package": "netket"
+      },
+      "score": 0.7806958350781781,
+      "original_score": 0.679067075724163,
+      "vector_score": 0.8488338446552037,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "spin"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "01-hamiltonian-and-operators__d0ec7a726375444968194303b218b333__sec_1_1__0",
+      "text": "## Contents\nThe goal of this tutorial series is to guide you through writing a simple VMC code from (almost) scratch to compute the ground-state of a paradigmatic spin model: the transverse-field Ising model in 2 dimensions.\nIn this first tutorial, we will focus on:\nUnderstanding NetKet’s graph and operator system\nUnderstanding NetKet’s graph and operator system\nDefining Hamiltonians using building blocks\nDefining Hamiltonians using building blocks\nWorking with different operator formats\nWorking with different operator formats\nValidating our implementation with exact diagonalization\nValidating our implementation with exact diagonalization\nThe hamiltonian we will study is the transverse-field Ising model in 2 dimensions:\nIn the following we assume periodic boundary conditions with \\(h=1\\) and \\(J=1\\) .\nNote\nIf you are executing this notebook on Colab , you will need to install NetKet.\nYou can do so by uncommenting and running the following cell.\nKeep in mind that this notebook was designed for NetKet version 3.9.1 , which requires Python >=3.8.\n```code\n# %pip install --quiet netket\n```\nPlease verify that you are running on the correct version of NetKet:\n```code\nimport\nplatform\nimport\nnetket\nas\nnk\nprint\n(\n\"Python version (requires >=3.9)\"\n,\nplatform\n.\npython_version\n())\nprint\n(\n\"NetKet version (requires >=3.9.1)\"\n,\nnk\n.\n__version__\n)\n```\n```code\nPython version (requires >=3.9) 3.12.11\nNetKet version (requires >=3.9.1) 3.19.dev26+gd94cf4597.d20250713\n```\nShow code cell content\nHide code cell content\n```code\n# Import necessary libraries\nimport\nnetket\nas\nnk\nimport\nnumpy\nas\nnp\n```",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\vmc-from-scratch\\01-hamiltonian-and-operators.html",
+        "section_title": "Contents",
+        "package": "netket",
+        "section_id": "sec_1"
+      },
+      "score": 0.7127949266805775,
+      "original_score": 0.5796998927032841,
+      "vector_score": 0.7246248658791051,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "netket",
+        "spin"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "ViT-wave-function__d9e54e914b31ad265a3124d7768bb4b3__sec_4_4__1",
+      "text": "\"V\"\n,\nnn\n.\ninitializers\n.\nxavier_uniform\n(),\n(\nself\n.\nd_model\n,\nself\n.\nd_model\n)\n)\ndef\n__call__\n(\nself\n,\nx\n):\ny\n=\njnp\n.\neinsum\n(\n\"i j, a b, M j b-> M i a\"\n,\nself\n.\nalpha\n,\nself\n.\nV\n,\nx\n)\nreturn\ny\n```\nFor the specific application of approximating ground states of\nquantum many-body spin Hamiltonians, factored attention yields equivalent performance with respect to the standard attention mechanism,\nwhile reducing the computational cost and parameter usage (see Ref.[RA25]).\nTo improve the expressivity of the self-attention mechanism, Multi-Head attention can be considered, where for each position \\(i\\) different attention representations \\(\\boldsymbol{A}_i^{\\mu}\\) are computed, where \\(\\mu = 1, \\dots, h\\) with \\(h\\) the total number of heads. The different vectors \\(\\boldsymbol{A}_i^{\\mu} \\in \\mathbf{R}^{d/h}\\) are computed in\nparallel, concatenated together, and linearly combined through a matrix of weights \\(W\\) .\nBelow we build a flax module that implements the Factored Multi-Head Attention mechanism. In addition, we also provide a translational invariant implementation.\nNote\nFor approximating ground states of translationally invariant Hamiltonians, it is useful to implement translationally invariant attention mechanisms where \\(\\alpha_{ij} = \\alpha_{i-j}\\) .\n```code\nfrom\nfunctools\nimport\npartial\n@partial\n(\njax\n.\nvmap\n,\nin_axes\n=\n(\nNone\n,\n0\n,\nNone\n),\nout_axes\n=\n1\n)\n@partial\n(\njax\n.\nvmap\n,\nin_axes\n=\n(\nNone\n,\nNone\n,\n0\n),\nout_axes\n=\n1\n)\ndef\nroll2d\n(\nspins\n,\ni\n,\nj\n):\nside\n=\nint\n(\nspins\n.\nshape\n[\n-\n1\n]\n**\n0.5\n)\nspins\n=\nspins\n.\nreshape\n(\nspins\n.\nshape\n[\n0\n],\nside\n,\nside\n)\nspins\n=\njnp\n.\nroll\n(\njnp\n.\nroll\n(\nspins\n,\ni\n,\naxis\n=-\n2\n),\nj\n,\naxis\n=-\n1\n)\nreturn\nspins\n.\nreshape\n(\nspins\n.\nshape\n[\n0\n],\n-\n1\n)\nclass\nFMHA\n(\nnn\n.\nModule\n):\nd_model\n:\nint\n# dimensionality of the embedding space\nn_heads\n:\nint\n# number of heads\nn_patches\n:\nint\n# lenght of the input sequence\ntransl_invariant\n:\nbool\n=\nFalse\nparam",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\ViT-wave-function.html",
+        "section_title": "2. Transformer Encoder#",
+        "section_id": "sec_4",
+        "package": "netket"
+      },
+      "score": 0.6884991519905008,
+      "original_score": 0.5653476539402338,
+      "vector_score": 0.7066845674252922,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "spin"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 58,
+    "final_results_count": 5
+  }
+}

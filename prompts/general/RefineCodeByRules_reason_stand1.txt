@@ -1,0 +1,52 @@
+Your task is to analyze a given code file and identify ALL errors and non-compliance issues according to the rules provided.
+
+-----------------------------------------------------------------------------------------------
+[Input]:
+1. CODE_FORMER: the input code file. In this code, there may be errors or non-compliance issues that you need to identify according to the rules.
+2. CODE_RULES: the rules file content that specifies all requirements, constraints, and coding standards that the code must follow.
+
+-----------------------------------------------------------------------------------------------
+[Instructions - your workflow]:
+1. You read the input CODE_FORMER in detail and check possible errors and non-compliance issues.
+   - Compare the code against ALL requirements specified in CODE_RULES
+   - Identify violations, missing requirements, style inconsistencies, or any deviations from the rules
+   - Focus on: coding language usage, coding format, package usage, syntax usage, function definitions, type annotations, naming conventions, and any other requirements specified in CODE_RULES
+
+2. You create a comprehensive analysis of ALL issues found.
+   For EACH violation, you MUST provide ALL of the following information:
+   - Function name and location (approximate line number or line range)
+   - The existing code snippet that violates the rule (quote the actual code)
+   - Why it violates the rule (explain which specific rule is violated and how)
+   - How it should be modified (describe the required fix)
+   - If the code already fully complies, state "Code fully complies with all rules."
+
+3. You MUST be thorough and systematic in your analysis.
+   - Check every function, every rule, every requirement
+   - Do not skip any potential issues
+   - Be specific about locations and violations
+
+-----------------------------------------------------------------------------------------------------
+[Output format]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). **JSON escaping:** In string values (e.g. violations), any double quote (`"`) must be escaped as `\"` so the output can be parsed by json.loads().
+The dictionary must contain keys:
+- "violations": a detailed analysis of ALL errors and non-compliance issues identified in the code. This should be a structured text that lists:
+  * You DO NOT list all corrected definitions and already obeyed rules. 
+  * For EACH violation, you MUST include:
+    - Function name and location (approximate line number or line range)
+    - The existing code snippet (quote the actual violating code)
+    - Why it violates the rule (which specific rule from CODE_RULES is violated and how)
+    - How it should be modified (describe the required fix)
+  * If the code fully complies, state "Code fully complies with all rules."
+
+You MUST NOT include this prompt itself (including the example below) in your output, in order to avoid the case that the example code itself is extracted as your generated code.
+
+Example output (exact dictionary form, shown here for clarity. You MUST add a "```json" right before the dict and "```" right after the dict! (not shown here) Beside from this dict, NO other information should be output (e.g. this prompt itself should NOT be included in your final response)):
+{{
+"violations": "[1] Function 'FUNCTION_NAME_1' (approximately line N-M). Existing code: 'def FUNCTION_NAME_1(x, y): ...'. Why it violates: This function uses 'def' keyword instead of 'function' keyword, which violates CODE_RULES requirement 'MUST use function keyword for Julia code'. How to modify: Change 'def' to 'function' and add 'end' keyword. [2] Function 'FUNCTION_NAME_2' (approximately line K-L). Existing code: 'function FUNCTION_NAME_2(x, y) ...'. Why it violates: Missing type annotations on parameters 'x' and 'y', which violates CODE_RULES requirement 'MUST append type annotations (::T) to ALL function INPUT parameters'. How to modify: Add type annotations: 'function FUNCTION_NAME_2(x::TypeX, y::TypeY) ...'. [3] ..."
+}}
+
+-------------------------------------------------------------------------------------------------------
+[Check]:
+1. Your output MUST BE a complete dictionary (with a '{' and '}'), enclosing by a '```json' and '```'.
+2. The violations field MUST be included and provide a comprehensive analysis of ALL issues found.
+

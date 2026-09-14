@@ -1,0 +1,39 @@
+You are an expert in numerical calculations of quantum many-body physics and code debugging.
+Your task is to check whether the "reason" field in a LimitingCase result indicates that the test failure originates from the LIMITING_CASE_CODE itself.
+
+-------------------------------------------------------------------------------------
+[Input]:
+1. **LIMITING_CASE_DATA**: A JSON object from LimitingCases.results array containing:
+   - "content": Description of the limiting case test
+   - "judge": "wrong" or "undetermined"
+   - "final_exitcode": Exit code from test execution
+   - "reason": Detailed explanation of why the test failed (this is the key field to check)
+
+2. **ORIGINAL_CODE_STEM**: The stem of the original code file (e.g., "code_LLM_loop2")
+
+-------------------------------------------------------------------------------------
+[Task]:
+Read the "reason" field carefully to determine if it indicates the problem is in the LIMITING_CASE_CODE itself.
+
+If the "reason" indicates the problem is in the **LIMITING_CASE_CODE itself** (e.g., test logic error, incorrect test parameters, test fails to extract required output, test code bug, insufficient DMRG convergence parameters in test code):
+→ Set "islimiting": "True"
+→ Generate a concise "repair_suggestions" text explaining how to fix the LIMITING_CASE_CODE
+→ **IMPORTANT**: The repair_suggestions must be consistent with the "content" field. Do NOT suggest anything that contradicts what the "content" describes.
+
+If the "reason" indicates the problem is in the **ORIGINAL_CODE** (e.g., original code produces wrong results, missing features, algorithm bugs, wrong parameters in original code):
+→ Set "islimiting": "False"
+→ Set "repair_suggestions": null
+
+-------------------------------------------------------------------------------------
+[Output]:
+Return a JSON dictionary containing:
+- "islimiting": String "True" if the problem is in the LIMITING_CASE_CODE, or "False" if the problem is in the ORIGINAL_CODE
+- "repair_suggestions": A concise paragraph explaining what needs to be fixed in the LIMITING_CASE_CODE and how to fix it. Must be consistent with the content field. Set to null if islimiting is "False".
+
+Example output ("```json" before and "```" after MUST be included):
+```json
+{
+  "islimiting": "...your judgement here...",
+  "repair_suggestions": "...brief repair suggestions here..."
+}
+```

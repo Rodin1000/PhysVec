@@ -1,0 +1,146 @@
+{
+  "query": "Build VQE with qubit Hamiltonian: estimator, ansatz, optimizer, initial point",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "test_estimator_v2__9d69df86ff11786b1b78117907871d4b__part_1__1",
+      "text": " -0.01128010425623538),\n                (\"XX\", 0.18093119978423156),\n            ]\n        )\n        self.expvals = -1.0284380963435145, -1.284366511861733\n\n        self.psi = (RealAmplitudes(num_qubits=2, reps=2), RealAmplitudes(num_qubits=2, reps=3))\n        self.params = tuple(psi.parameters for psi in self.psi)\n        self.hamiltonian = (\n            SparsePauliOp.from_list([(\"II\", 1), (\"IZ\", 2), (\"XI\", 3)]),\n            SparsePauliOp.from_list([(\"IZ\", 1)]),\n            SparsePauliOp.from_list([(\"ZI\", 1), (\"ZZ\", 1)]),\n        )\n        self.theta = (\n            [0, 1, 1, 2, 3, 5],\n            [0, 1, 1, 2, 3, 5, 8, 13],\n            [1, 2, 3, 4, 5, 6],\n        )\n        self.backend = AerSimulator()\n\n    def test_estimator_run(self):\n        \"\"\"Test Estimator.run()\"\"\"\n        psi1, psi2 = self.psi\n        hamiltonian1, hamiltonian2, hamiltonian3 = self.hamiltonian\n        theta1, theta2, theta3 = self.theta\n        pm = generate_preset_pass_manager(optimization_level=0, backend=self.backend)\n        psi1, psi2 = pm.run([psi1, psi2])\n        estimator = EstimatorV2(options=self._options)\n        # Specify the circuit and observable by indices.\n        # calculate [ <psi1(theta1)|H1|psi1(theta1)> ]\n        ham1 = hamiltonian1.apply_layout(psi1.layout)\n        job = estimator.run([(psi1, ham1, [theta1])])\n        result = job.result()\n        np.testing.assert_allclose(result[0].data.evs, [1.5555572817900956], rtol=self._rtol)\n        self.assertIn(\"simulator_metadata\", result[0].metadata)\n\n        # Objects can be passed instead of indices.\n        # Note that passing objects has an overhead\n        # since the corresponding indices need to be searched.\n        # User can append a circuit and observable.\n        # calculate [ <psi2(theta2)|H1|psi2(theta2)> ]\n        ham1 = hamiltonian1.apply_layout(psi2.layout)\n        result2 = estimator.run([(psi2, ham1, theta2)]).result()\n        np.testing.assert_allclose(result2[0].data.evs, [2.97797666], rtol=self._rtol)\n        self.assertIn(\"simulator_metadata\", result",
+      "metadata": {
+        "section_title": "test_estimator_v2.py",
+        "section_id": "part_1",
+        "package": "qiskit-aer",
+        "source_file": "test\\terra\\primitives\\test_estimator_v2.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.42832299527798484,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "hamiltonian",
+        "estimator"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "test_chc__9145afece59a8e122f04fc4d7425234a__part_2__2",
+      "text": "(num_excitations=1, num_modals=num_modals)\n        excitations += generate_vibration_excitations(num_excitations=2, num_modals=num_modals)\n        chc_ansatz = CHC(\n            num_qubits, ladder=False, excitations=excitations, initial_state=init_state\n        )\n\n        optimizer = COBYLA(maxiter=1000)\n        algo = VQE(Estimator(), chc_ansatz, optimizer)\n\n        mapper = DirectMapper()\n\n        qubit_op = mapper.map(vibr_op)\n        vqe_result = algo.compute_minimum_eigenvalue(qubit_op)\n        energy = vqe_result.optimal_value\n        self.assertAlmostEqual(energy, self.reference_energy, places=4)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "metadata": {
+        "section_id": "part_2",
+        "section_title": "test_chc.py",
+        "package": "qiskit-nature",
+        "source_file": "test\\second_q\\circuit\\library\\ansatzes\\test_chc.py"
+      },
+      "score": 0.9340837111785435,
+      "original_score": 0.9293754048341537,
+      "vector_score": 1.0,
+      "bm25_score": 0.11557447647286935,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "vqe",
+        "estimator",
+        "optimizer"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "__init____c21336c1bae2d0fe5fb31594219db6ee__part_8__8",
+      "text": "qp\n   quantum_volume\n   phase_estimation\n   grover_operator\n   unitary_overlap\n   GraphStateGate\n   PauliEvolutionGate\n   HamiltonianGate\n\nBelow we provide the same operations as classes deriving :class:`.QuantumCircuit`. For better\nruntime and compiler performance, however, we suggest using above functions and gates.\n\n.. autosummary::\n   :toctree: ../stubs/\n   :template: autosummary/class_no_inherited_members.rst\n\n   FourierChecking\n   GraphState\n   HiddenLinearFunction\n   IQP\n   QuantumVolume\n   PhaseEstimation\n   GroverOperator\n   UnitaryOverlap\n\n.. _n-local:\n\nN-local circuits\n================\n\nThe following functions return a parameterized :class:`.QuantumCircuit` to use as ansatz in\na broad set of variational quantum algorithms.\n\nFor example, we can build a variational circuit\n\n.. plot::\n   :alt: The efficient SU2 ansatz circuit...\n   :context:\n\n   from qiskit.circuit.library import efficient_su2\n\n   num_qubits = 4\n   ansatz = efficient_su2(num_qubits, entanglement=\"pairwise\")\n   ansatz.draw(\"mpl\")\n\nand combine it with\n\n.. plot::\n   :alt: ... combined with the ZZ feature map.\n   :include-source:\n   :context:\n\n   from qiskit.circuit.library import zz_feature_map\n\n   circuit = zz_feature_map(num_qubits)\n   circuit.barrier()\n   circuit.compose(ansatz, inplace=True)\n\n   circuit.draw(\"mpl\")\n\nto obtain a circuit for variational quantum classification.\n\nThe following functions all construct variational circuits and are optimized for a fast\nconstruction:\n\n.. autosummary::\n   :toctree: ../stubs/\n\n   n_local\n   efficient_su2\n   real_amplitudes\n   pauli_two_design\n   excitation_preserving\n   qaoa_ansatz\n   hamiltonian_variational_ansatz\n   evolved_operator_ansatz\n\nWhile we suggest using the above functions, we also continue supporting the following\n:class:`.BlueprintCircuit`, which wrap the circuits into a block\nand allow for inplace mutations of the circuits:\n\n.. autosummary::\n   :toctree: ../stubs/\n   :template: autosummary/class_no_inherited_members.rst\n\n   NLocal\n   TwoLocal\n   PauliTwoDesign\n   RealAmplitudes\n   EfficientSU2\n   EvolvedOperatorAnsatz\n   ExcitationPreserving\n   QAOAAnsatz\n\n\n.. _data-encoding:\n\nData encoding circuits\n======================\n\nThe following functions return a parameterized :class:`.QuantumCircuit` to use as data\nencoding circuits in a series of variational quantum algorithms:\n\n.. autosummary::\n   :toctree: ../stubs/\n\n   pauli",
+      "metadata": {
+        "section_title": "__init__.py",
+        "source_file": "qiskit\\circuit\\library\\__init__.py",
+        "package": "qiskit",
+        "section_id": "part_8"
+      },
+      "score": 0.9304297903780107,
+      "original_score": 0.9271939666746624,
+      "vector_score": 1.0,
+      "bm25_score": 0.10591436370841692,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "build",
+        "ansatz"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "test_statevector_estimator__fa6e14b3a97b706fa932af77efd82343__part_6__6",
+      "text": "]\n        hamiltonian1 = self.hamiltonian[0]\n        theta1 = self.theta[0]\n        job = estimator.run([(psi1, hamiltonian1, [theta1])])\n        result = job.result()\n        np.testing.assert_allclose(result[0].data.evs, [1.901141473854881])\n        # The result of the second run is the same\n        job = estimator.run([(psi1, hamiltonian1, [theta1]), (psi1, hamiltonian1, [theta1])])\n        result = job.result()\n        np.testing.assert_allclose(result[0].data.evs, [1.901141473854881])\n        np.testing.assert_allclose(result[1].data.evs, [1.901141473854881])\n        # precision=0 implies the exact expectation value\n        job = estimator.run([(psi1, hamiltonian1, [theta1])], precision=0)\n        result = job.result()\n        np.testing.assert_allclose(result[0].data.evs, [1.5555572817900956])\n\n    def test_iter_pub(self):\n        \"\"\"test for an iterable of pubs\"\"\"\n        estimator = StatevectorEstimator()\n        circuit = self.ansatz.assign_parameters([0, 1, 1, 2, 3, 5])\n        observable = self.observable.apply_layout(circuit.layout)\n        result = estimator.run(iter([(circuit, observable), (circuit, observable)])).result()\n        np.testing.assert_allclose(result[0].data.evs, [-1.284366511861733])\n        np.testing.assert_allclose(result[1].data.evs, [-1.284366511861733])\n\n    def test_metadata(self):\n        \"\"\"Test for metadata\"\"\"\n        qc = QuantumCircuit(2)\n        qc2 = QuantumCircuit(2)\n        qc2.metadata = {\"a\": 1}\n        estimator = StatevectorEstimator()\n        result = estimator.run([(qc, \"ZZ\"), (qc2, \"ZZ\")], precision=0.1).result()\n\n        self.assertEqual(len(result), 2)\n        self.assertEqual(result.metadata, {\"version\": 2})\n        self.assertEqual(\n            result[0].metadata, {\"target_precision\": 0.1, \"circuit_metadata\": qc.metadata}\n        )\n        self.assertEqual(\n            result[1].metadata, {\"target_precision\": 0.1, \"circuit_metadata\": qc2.metadata}\n        )\n\n    def test_reset(self):\n        \"\"\"Test for circuits with reset.\"\"\"\n        qc = QuantumCircuit(2)\n        qc.h(0)\n        qc.cx(0, 1)\n        qc.reset(0)\n        op = SparsePauliOp(\"ZI\")\n\n        seed = 12\n        n = 1000\n        estimator = StatevectorEstimator(seed=seed)\n        with",
+      "metadata": {
+        "package": "qiskit",
+        "section_id": "part_6",
+        "section_title": "test_statevector_estimator.py",
+        "source_file": "test\\python\\primitives\\test_statevector_estimator.py"
+      },
+      "score": 0.9022637052167461,
+      "original_score": 0.8952825413036566,
+      "vector_score": 0.8689755665866461,
+      "bm25_score": 0.48869799857931057,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "hamiltonian",
+        "estimator",
+        "ansatz"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "test_hamiltonian_gate__84146b1e6b5a7a4b9a38c727c62e8ad3__part_1__1",
+      "text": "):\n        \"\"\"test adjoint operation\"\"\"\n        ham = HamiltonianGate([[3, 4j], [-4j, -0.2]], np.pi * 0.143)\n        np.testing.assert_array_almost_equal(\n            ham.adjoint().to_matrix(), np.transpose(np.conj(ham.to_matrix()))\n        )\n\n    def test_repeat(self):\n        \"\"\"test repeat operation\"\"\"\n        ham = HamiltonianGate(np.array([[1, 0.5 + 4j], [0.5 - 4j, -0.2]]), np.pi * 0.143)\n        operator = Operator(ham)\n        self.assertTrue(np.allclose(Operator(ham.repeat(2)), operator @ operator))\n\n\nclass TestHamiltonianCircuit(QiskitTestCase):\n    \"\"\"Hamiltonian gate circuit tests.\"\"\"\n\n    def test_1q_hamiltonian(self):\n        \"\"\"test 1 qubit hamiltonian\"\"\"\n        qr = QuantumRegister(1, \"q0\")\n        cr = ClassicalRegister(1, \"c0\")\n        qc = QuantumCircuit(qr, cr)\n        matrix = np.zeros((2, 2))\n        qc.x(qr[0])\n        theta = Parameter(\"theta\")\n        qc.append(HamiltonianGate(matrix, theta), [qr[0]])\n        qc = qc.assign_parameters({theta: 1})\n\n        # test of text drawer\n        self.log.info(qc)\n        dag = circuit_to_dag(qc)\n        dag_nodes = dag.named_nodes(\"hamiltonian\")\n        self.assertTrue(len(dag_nodes) == 1)\n        dnode = dag_nodes[0]\n        self.assertIsInstance(dnode.op, HamiltonianGate)\n        self.assertEqual(dnode.qargs, tuple(qc.qubits))\n        assert_allclose(dnode.op.to_matrix(), np.eye(2))\n\n    def test_2q_hamiltonian(self):\n        \"\"\"test 2 qubit hamiltonian\"\"\"\n        qr = QuantumRegister(2)\n        cr = ClassicalRegister(2)\n        qc = QuantumCircuit(qr, cr)\n        matrix = Operator.from_label(\"XY\")\n        qc.x(qr[0])\n        theta = Parameter(\"theta\")\n        uni2q = HamiltonianGate(matrix, theta)\n        qc.append(uni2q, [qr[0], qr[1]])\n        qc2 = qc.assign_parameters({theta: -np.pi / 2})\n        dag = circuit_to_dag(qc2)\n        nodes = dag.two_qubit_ops()\n        self.assertEqual(len(nodes), 1)\n        dnode = nodes[0]\n        self.assertIsInstance(dnode.op, HamiltonianGate)\n        self.assertEqual(dnode.qargs, (qr[0], qr[1]))\n        # Equality based on Pauli exponential identity\n        np.testing.assert_array_almost_equal(dnode.op.to_matrix(), 1j * matrix.data)\n        qc3 = dag_to_circuit(dag",
+      "metadata": {
+        "section_id": "part_1",
+        "package": "qiskit",
+        "section_title": "test_hamiltonian_gate.py",
+        "source_file": "test\\python\\circuit\\test_hamiltonian_gate.py"
+      },
+      "score": 0.8252904173344858,
+      "original_score": 0.8171643902337642,
+      "vector_score": 0.9046669650486227,
+      "bm25_score": 0.0,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "qubit",
+        "hamiltonian"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 90,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 187,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 49
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 0,
+        "bm25_results_count": 30,
+        "merged_results_count": 30
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      }
+    }
+  }
+}

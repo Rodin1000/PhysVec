@@ -1,0 +1,130 @@
+{
+  "query": "ITensors custom observable function signature and implementation for tJ model",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__root_0__0",
+      "text": "ITensor is a library for rapidly creating correct and efficient tensor network algorithms.\nThe source code for ITensors.jl can be found on Github .\nAdditional documentation can be found on the ITensor website itensor.org .\nAn ITensor is a tensor whose interface is independent of its memory layout. ITensor indices are objects which carry extra information and which 'recognize' each other (compare equal to each other).\nThe ITensorMPS.jl library includes composable and extensible algorithms for optimizing and transforming tensor networks, such as matrix product state and matrix product operators, such as the DMRG algorithm. If you are looking for information on running finite MPS/MPO calculations such as DMRG, take a look at the ITensorMPS.jl documentation .",
+      "metadata": {
+        "section_id": "root",
+        "source_file": "docs\\build\\index.html",
+        "package": "itensors",
+        "section_title": "ROOT"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": true
+    },
+    {
+      "id": "index__1de0221505bf56b6e61f33e29f10859a__root_0__0",
+      "text": "Finite MPS and MPO methods based on the Julia version of ITensor ( ITensors.jl ). See the ITensorMPS.jl documentation for more details.",
+      "metadata": {
+        "section_id": "root",
+        "package": "itensormps",
+        "source_file": "docs\\build\\index.html",
+        "section_title": "ROOT"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": true
+    },
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__News_2__3",
+      "text": "TDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 9, 2024: A new package ITensorMPS.jl has been released. We plan to move all of the MPS/MPO functionality in ITensors.jl to ITensorMPS.jl . For now, ITensorMPS.jl just re-exports the MPS/MPO functionality of ITensors.jl (as well as of ITensorTDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 2, 2024: ITensors.jl v0.5 has been released. This version removes PackageCompiler.jl as a dependency and moves the package compilation functionality into a package extension. In order to use the ITensors.compile() function going forward, you need to install the PackageCompiler.jl package with using Pkg: Pkg; Pkg.add(\"PackageCompiler\") and put using PackageCompiler together with using ITensors in your code.\nMay 2, 202",
+      "metadata": {
+        "section_title": "News",
+        "package": "itensors",
+        "section_id": "News",
+        "source_file": "docs\\build\\index.html"
+      },
+      "score": 0.9342867736564057,
+      "original_score": 0.9010768635687827,
+      "vector_score": 0.7954048634075727,
+      "bm25_score": 0.4226880006448399,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensors",
+        "function",
+        "implementation"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "ITensorsSiteTypesExt__6e84319b85a875508ec561a249cd43f1__part_1__1",
+      "text": " was slower.\n  p = NDTensors.getperm(inds(T), ntuple(n -> ind(@inbounds ivs[n]), Val(N)))\n  fac = NDTensors.permfactor(p, ivs...) #<fermions> possible sign\n  return ITensors._setindex!!(\n    T, fac * x, NDTensors.permute(ntuple(n -> val(@inbounds ivs[n]), Val(N)), p)...\n  )\nend\nBase.@propagate_inbounds @inline function Base.setindex!(\n  T::ITensor, x::Number, I1::Pair{<:Index,String}, I::Pair{<:Index,String}...\n)\n  Iv = map(i -> i.first => val(i.first, i.second), (I1, I...))\n  return setindex!(T, x, Iv...)\nend\n\"\"\"\n    onehot(ivs...)\n    setelt(ivs...)\n    onehot(::Type, ivs...)\n    setelt(::Type, ivs...)\n\nCreate an ITensor with all zeros except the specified value,\nwhich is set to 1.\n\n# Examples\n```julia\ni = Index(2,\"i\")\nA = onehot(i=>2)\n# A[i=>2] == 1, all other elements zero\n\n# Specify the element type\nA = onehot(Float32, i=>2)\n\nj = Index(3,\"j\")\nB = onehot(i=>1,j=>3)\n# B[i=>1,j=>3] == 1, all other element zero\n```\n\"\"\"\nfunction ITensors.onehot(datatype::Type{<:AbstractArray}, ivs::Pair{<:Index}...)\n  A = ITensor(eltype(datatype), ind.(ivs)...)\n  A[val.(ivs)...] = one(eltype(datatype))\n  return Adapt.adapt(datatype, A)\nend\nend\n",
+      "metadata": {
+        "section_title": "ITensorsSiteTypesExt.jl",
+        "source_file": "src\\lib\\ITensorsSiteTypesExt\\src\\ITensorsSiteTypesExt.jl",
+        "package": "itensors",
+        "section_id": "part_1"
+      },
+      "score": 0.8974010347594953,
+      "original_score": 0.8911829156540102,
+      "vector_score": 0.8911829156540101,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensors",
+        "function"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "broadcast__863565a3b67f2ed4b5d8800c4fe5033a__part_1__1",
+      "text": "ensor}) = ITensorStyle()\n\nbroadcastable(T::ITensor) = T\n\nfunction Base.similar(bc::Broadcasted{ITensorStyle}, ::Type{ElT}) where {ElT<:Number}\n  A = find_type(ITensor, bc.args)\n  return similar(A, ElT)\nend\n\n#\n# ITensorOpScalarStyle\n# Operating with a scalar\n#\n\nstruct ITensorOpScalarStyle <: BroadcastStyle end\n\nfunction Base.BroadcastStyle(::ITensorStyle, ::DefaultArrayStyle{0})\n  return ITensorOpScalarStyle()\nend\n\nBase.BroadcastStyle(::ITensorStyle, ::ITensorOpScalarStyle) = ITensorOpScalarStyle()\n\ninstantiate(bc::Broadcasted{ITensorOpScalarStyle}) = bc\n\nfunction broadcasted(::typeof(Base.literal_pow), ::typeof(^), T::ITensor, x::Val)\n  return broadcasted(ITensorOpScalarStyle(), Base.literal_pow, Ref(^), T, Ref(x))\nend\n\nfunction Base.similar(\n  bc::Broadcasted{ITensorOpScalarStyle}, ::Type{ElT}\n) where {ElT<:Number}\n  A = find_type(ITensor, bc.args)\n  return similar(A, ElT)\nend\n\n#\n# For arbitrary function chaining f.(g.(h.(x)))\n#\n\nfunction instantiate(bc::Broadcasted{ITensorStyle,<:Any,<:Function,<:Tuple{Broadcasted}})\n  return instantiate(broadcasted(bc.f ∘ bc.args[1].f, bc.args[1].args...))\nend\n\nfunction instantiate(\n  bc::Broadcasted{\n    ITensorStyle,\n    <:Any,\n    <:Function,\n    <:Tuple{Broadcasted{ITensorStyle,<:Any,<:Function,<:Tuple{<:ITensor}}},\n  },\n)\n  return broadcasted(bc.f ∘ bc.args[1].f, bc.args[1].args...)\nend\n\ninstantiate(bc::Broadcasted{ITensorStyle}) = bc\n\n#\n# Some helper functionality to find certain\n# inputs in the argument list\n#\n\n\"\"\"\n`A = find_type(::Type,As)` returns the first of type Type among the arguments.\n\"\"\"\nfunction find_type(::Type{T}, args::Tuple) where {T}\n  return find_type(T, find_type(T, args[1]), Base.tail(args))\nend\nfind_type(::Type{T}, x) where {T} = x\nfind_type(::Type{T}, a::T, rest) where {T} = a\nfind_type(::Type{T}, ::Any, rest) where {T} = find_type(T, rest)\n# If not found, return nothing\nfind_type(::Type{T}, ::Tuple{}) where {T} = nothing\n\n#\n# Generic fallback\n#\n\nfunction Base.copyto!(T::ITensor, bc::Broadcasted)\n  return error(\n    \"The broadcasting operation you are attempting is not yet implemented for IT",
+      "metadata": {
+        "package": "itensors",
+        "source_file": "src\\broadcast.jl",
+        "section_title": "broadcast.jl",
+        "section_id": "part_1"
+      },
+      "score": 0.896273613632871,
+      "original_score": 0.8932228375632495,
+      "vector_score": 0.8932228375632495,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "function"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 112,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

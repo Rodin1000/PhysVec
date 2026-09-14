@@ -1,0 +1,113 @@
+{
+  "query": "netket Jastrow model syntax and usage examples for nnwf",
+  "package": "netket",
+  "results": [
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__P_17__2",
+      "text": "ket.models.NDM attribute)\n(netket.models.RBM attribute)\n(netket.models.RBMModPhase attribute)\n(netket.models.RBMMultiVal attribute)\n(netket.models.RBMSymm attribute)\n(netket.nn.blocks.DeepSetMLP attribute)\n(netket.nn.blocks.MLP attribute)\n(netket.nn.FastMaskedConv1D attribute)\n(netket.nn.FastMaskedConv2D attribute)\n(netket.nn.FastMaskedDense1D attribute)\n(netket.nn.MaskedConv1D attribute)\n(netket.nn.MaskedConv2D attribute)\n(netket.nn.MaskedDense1D attribute)\npreconditioner (netket.driver.SteadyState attribute) (netket.driver.VMC attribute)\n(netket.driver.VMC attribute)\npreimage() (netket.symmetry.group.PGSymmetry method)\nprev_neighbors (netket.experimental.models.FastRNN attribute) (netket.experimental.models.RNN attribute) (netket.experimental.nn.rnn.RNNLayer attribute)\n(netket.experimental.models.RNN attribute)\n(netket.experimental.nn.rnn.RNNLayer attribute)\nPRNGKey() (in module netket.jax)\nPRNGSeq (class in netket.jax)\nprobabilities (netket.sampler.rules.MultipleRules attribute)\nprobability_distribution() (netket.vqs.FullSumState method)\nproduct_table (netket.graph.space_group.SpaceGroup attribute) (netket.graph.space_group.TranslationGroup attribute) (netket.symmetry.group.FiniteGroup attribute) (netket.symmetry.group.PermutationGroup attribute) (netket.symmetry.group.PointGroup attribute) (netket.utils.group.FiniteGroup attribute) (netket.utils.group.PermutationGroup attribute) (netket.utils.group.PointGroup attribute)\n(netket.graph.space_group.TranslationGroup attribute)\n(netket.symmetry.group.FiniteGroup attribute)\n(netket.symmetry.group.PermutationGroup attribute)\n(netket.symmetry.group.PointGroup attribute)\n(netket.utils.group.FiniteGroup attribute)\n(netket.utils.group.PermutationGroup attribute)\n(netket.utils.group.PointGroup attribute)\nProductDiscreteJaxOperator (class in netket.operator._prod)\nProductDiscreteOperator (class in netket.operator._prod)\nProductGenericOperator (class in netket.operator._prod)\nProductOperator (class in netket.operator)\nproj() (in module netket.operator.boson)\nproj_reg (netket.driver.VMC_SR attribute) (netket.experimental.driver.Infidelity_SR attribute)\n(netket.experimental.driver.Infidelity_SR attribute)\nproject() (netket.symmetry.Representation method)\nprojective_characters_by_class() (netket.graph.space_group.SpaceGroup method) (netket.graph.space_group.TranslationGroup method) (netket.symmetry.group.FiniteGroup method) (netket.symmetry.group.PermutationGroup method) (netket.symmetry.group.PointGroup method) (netket.utils.group.FiniteGroup method) (netket.utils.group",
+      "metadata": {
+        "package": "netket",
+        "section_title": "P",
+        "source_file": "docs\\_build\\html\\genindex.html",
+        "section_id": "P"
+      },
+      "score": 0.8557142857142858,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": true
+    },
+    {
+      "id": "gs-heisenberg__c020b0862bd7fe821367a3045efefcc7__sec_5_5__0",
+      "text": "## 3. The Jastrow ansatz#\nLet’s start with a simple ansatz for the ground-state: the Jastrow Ansatz.\n\\( \\log\\psi(\\sigma) = \\sum_i a_i \\sigma_i + \\sum_{i,j} \\sigma_i J_{i,j} \\sigma_j \\)\nTo show how it’s done, we write this simple ansatz as a flax.nnx module.\nWe import this module and call it nnx , as it is customary in the Flax documentation.\nAn NNX model subclasses nnx.Module and defines its parameters inside __init__ using nnx.Param .\nAs the module should work with batches of inputs (therefore the input will be a 2d matrix with shape (N_inputs, N_sites) , but we are lazy and find it easier to define the function for a single input \\(\\sigma\\) , a 1D vector of shape (N_sites,) .\nTherefore, we write a function called evaluate_single , which will evaluate a single 1D input, and use jax.vmap to make it work with 2D inputs as well.\nTo learn more about jax.vmap, give a look at the jax documentation!\n```code\nfrom\nflax\nimport\nnnx\nimport\njax.numpy\nas\njnp\nimport\njax\nclass\nJastrow\n(\nnnx\n.\nModule\n):\ndef\n__init__\n(\nself\n,\nN\n:\nint\n,\n*\n,\nrngs\n:\nnnx\n.\nRngs\n):\nk1\n,\nk2\n=\njax\n.\nrandom\n.\nsplit\n(\nrngs\n.\nparams\n())\nself\n.\nJ\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk1\n,\n(\nN\n,\nN\n),\ndtype\n=\njnp\n.\ncomplex128\n))\nself\n.\nv_bias\n=\nnnx\n.\nParam\n(\n0.01\n*\njax\n.\nrandom\n.\nnormal\n(\nk2\n,\n(\nN\n,\n1\n),\ndtype\n=\njnp\n.\ncomplex128\n)\n)\ndef\n__call__\n(\nself\n,\nx\n):\nx\n=\nx\n.\nastype\n(\njnp\n.\ncomplex128\n)\n# keep the dtypes aligned\nquad\n=\njnp\n.\neinsum\n(\n\"...i,ij,...j->...\"\n,\nx\n,\nself\n.\nJ\n,\nx\n)\nlin\n=\njnp\n.\nsqueeze\n(\nx\n@\nself\n.\nv_bias\n,\n-\n1\n)\n# (...,N) @ (N,1) → (...,1)\nreturn\nquad\n+\nlin\n```\nNow that the model is defined, we can instantiate it\n```code\nma\n=\nJastrow\n(\nN\n=\nhi\n.\nsize\n,\nrngs\n=\nnnx",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\tutorials\\gs-heisenberg.html",
+        "package": "netket",
+        "section_title": "3. The Jastrow ansatz#",
+        "section_id": "sec_5"
+      },
+      "score": 0.8434346852521102,
+      "original_score": 0.7740294426319116,
+      "vector_score": 0.8816027921337003,
+      "bm25_score": 0.34373604462475693,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "jastrow",
+        "model"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    },
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__N_15__2",
+      "text": "Numba method)\n(netket.operator.PauliStringsJax method)\n(netket.operator.PauliStringsNumba method)\n(netket.operator.permutation.PermutationOperator method)\n(netket.operator.permutation.PermutationOperatorFermion method)\nn_determinants (netket.experimental.models.MultiSlater2nd attribute)\nn_discard_per_chain (netket.vqs.MCMixedState attribute) (netket.vqs.MCState attribute)\n(netket.vqs.MCState attribute)\nn_discard_per_chain_diag (netket.vqs.MCMixedState attribute)\nn_edges (netket.graph.AbstractGraph attribute) (netket.graph.Graph attribute) (netket.graph.Lattice attribute)\n(netket.graph.Graph attribute)\n(netket.graph.Lattice attribute)\nn_fermions (netket.hilbert.SpinOrbitalFermions attribute)\nn_fermions_per_spin (netket.hilbert.SpinOrbitalFermions attribute)\nn_max (netket.hilbert.Fock attribute)\nn_nodes (netket.graph.AbstractGraph attribute) (netket.graph.Graph attribute) (netket.graph.Lattice attribute)\n(netket.graph.Graph attribute)\n(netket.graph.Lattice attribute)\nn_operators (netket.operator._local_operator.LocalOperatorBase attribute) (netket.operator.LocalOperatorJax attribute) (netket.operator.LocalOperatorNumba attribute)\n(netket.operator.LocalOperatorJax attribute)\n(netket.operator.LocalOperatorNumba attribute)\nn_orbitals (netket.hilbert.SpinOrbitalFermions attribute)\nn_parameters (netket.vqs.FullSumState attribute) (netket.vqs.MCMixedState attribute) (netket.vqs.MCState attribute) (netket.vqs.VariationalMixedState attribute) (netket.vqs.VariationalState attribute)\n(netket.vqs.MCMixedState attribute)\n(netket.vqs.MCState attribute)\n(netket.vqs.VariationalMixedState attribute)\n(netket.vqs.VariationalState attribute)\nn_particles (netket.experimental.hilbert.Particle attribute) (netket.hilbert.Fock attribute)\n(netket.hilbert.Fock attribute)\nn_per_spin (netket.experimental.hilbert.Particle attribute)\nn_replicas (netket.sampler.ParallelTemperingSampler attribute)\nn_samples (netket.vqs.MCMixedState attribute) (netket.vqs.MCState attribute)\n(netket.vqs.MCState attribute)\nn_samples_diag (netket.vqs.MCMixedState attribute)\nn_samples_per_rank (netket.vqs.MCMixedState attribute) (netket.vqs.MCState attribute)\n(netket.vqs.MCState attribute)\nn_spin_subsectors (netket.hilbert.SpinOrbitalFermions attribute)\nn_states (netket.hilbert.DiscreteHilbert attribute) (netket.hil",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\genindex.html",
+        "section_title": "N",
+        "section_id": "N",
+        "package": "netket"
+      },
+      "score": 0.7592591065555695,
+      "original_score": 0.6662997516611854,
+      "vector_score": 0.8328746895764817,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": true
+    },
+    {
+      "id": "changelog__775627bff97fcf0367c7035d3e792e5f__sec_24_24__0",
+      "text": "## NetKet 3.11 (~💘 16 february 2024)#\nThis release supports Python 3.12 through the latest release of Numba, introduces several new jax-compatible operators and adds a new experimental way to distribute calculations among multiple GPUs without using MPI.\nWe have a few breaking changes as well: deprecations that were issued more than 18 months ago have now been finalized, most notable the dtype argument to several models and layers, some keywords to GCNN and setting the number of chains of exact samplers.\nRecurrent neural networks and layers have been added to nkx.models and nkx.nn #1305 .\nRecurrent neural networks and layers have been added to nkx.models and nkx.nn #1305 .\nAdded experimental support for running NetKet on multiple jax devices (as an alternative to MPI). It is enabled by setting the environment variable/configuration flag NETKET_EXPERIMENTAL_SHARDING=1 . Parallelization is achieved by distributing the Markov chains / samples equally across all available devices utilizing jax.Array sharding . On GPU multi-node setups are supported via jax.distribued , whereas on CPU it is limited to a single process but several threads can be used by setting XLA_FLAGS='--xla_force_host_platform_device_count=XX' #1511 .\nAdded experimental support for running NetKet on multiple jax devices (as an alternative to MPI). It is enabled by setting the environment variable/configuration flag NETKET_EXPERIMENTAL_SHARDING=1 . Parallelization is achieved by distributing the Markov chains / samples equally across all available devices utilizing jax.Array sharding . On GPU multi-node setups are supported via jax.distribued , whereas on CPU it is limited to a single process but several threads can be used by setting XLA_FLAGS='--xla_force_host_platform_device_count=XX' #1511 .\nnetket.experimental.operator.FermionOperator2nd is a new Jax-compatible implementation of fermionic operators. It can also be constructed starting from a standard fermionic operator by calling operator.to_jax_operator() , or used in combination with pyscf converters #1675 , #1684 .\nnetket.experimental.operator.FermionOperator2nd is a new Jax-compatible implementation of fermionic operators. It can also be constructed starting from a standard fermionic operator by calling operator.to_jax_operator() , or used in combination with pyscf converters #1675 , #1684 .\nnetket.operator.LocalOperatorJax is a new Jax-compatible implementation of local operators. It can also be constructed starting from a standard operator by calling operator.to_jax_operator() #1654 .\nnetket.operator.LocalOperatorJax is a new Jax-compatible implementation of local operators. It can also be constructed starting from a standard operator by calling operator.to_jax_operator() #1654 .\nThe logger interface has been formalised and documented in the abstract",
+      "metadata": {
+        "section_title": "NetKet 3.11 (~💘 16 february 2024)#",
+        "section_id": "sec_24",
+        "source_file": "docs\\_build\\html\\changelog.html",
+        "package": "netket"
+      },
+      "score": 0.7239713657884415,
+      "original_score": 0.6173860515879386,
+      "vector_score": 0.7717325644849231,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": true
+    },
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__L_13__0",
+      "text": "## L\nL (netket.nn.FastMaskedConv2D attribute)\nlanczos_ed() (in module netket.exact)\nLangevinRule (class in netket.sampler.rules)\nLattice (class in netket.graph)\nlattice (netket.graph.space_group.SpaceGroup attribute) (netket.graph.space_group.TranslationGroup attribute)\n(netket.graph.space_group.TranslationGroup attribute)\nLatticeSite (class in netket.graph.lattice)\nlayers (netket.experimental.models.FastGRUNet1D attribute) (netket.experimental.models.FastLSTMNet attribute) (netket.experimental.models.FastRNN attribute) (netket.experimental.models.GRUNet1D attribute) (netket.experimental.models.LSTMNet attribute) (netket.experimental.models.RNN attribute) (netket.models.ARNNConv1D attribute) (netket.models.ARNNConv2D attribute) (netket.models.ARNNDense attribute) (netket.models.FastARNNConv1D attribute) (netket.models.FastARNNConv2D attribute)\n(netket.experimental.models.FastLSTMNet attribute)\n(netket.experimental.models.FastRNN attribute)\n(netket.experimental.models.GRUNet1D attribute)\n(netket.experimental.models.LSTMNet attribute)\n(netket.experimental.models.RNN attribute)\n(netket.models.ARNNConv1D attribute)\n(netket.models.ARNNConv2D attribute)\n(netket.models.ARNNDense attribute)\n(netket.models.FastARNNConv1D attribute)\n(netket.models.FastARNNConv2D attribute)\nlayers_phi (netket.models.DeepSetRelDistance attribute)\nlayers_rho (netket.models.DeepSetRelDistance attribute)\nldagl (netket.driver.SteadyState attribute)\nlength (netket.utils.StaticRange attribute)\nlhs_constructor() (netket.optimizer.SR method)\nlittle_group() (netket.graph.space_group.SpaceGroup method)\nlittle_group_irreps_readable() (netket.graph.space_group.SpaceGroup method)\nlittle_group_multipliers() (netket.graph.space_group.SpaceGroup method)\nlocal_estimators() (netket.vqs.MCMixedState method) (netket.vqs.MCState method)\n(netket.vqs.MCState method)\nlocal_indices_to_states() (netket.hilbert.DiscreteHilbert method) (netket.hilbert.Fock method) (netket.hilbert.HomogeneousHilbert method) (netket.hilbert.Qubit method) (netket.hilbert.Spin method) (netket.hilbert.SpinOrbitalFermions method)\n(netket.hilbert.Fock method)\n(netket.hilbert.HomogeneousHilbert method)\n(netket.hilbert.Qubit method)\n(netket.hilbert.Spin method)\n(netket.hilbert.SpinOrbitalFermions method)\nlocal_size (netket.h",
+      "metadata": {
+        "section_id": "L",
+        "section_title": "L",
+        "source_file": "docs\\_build\\html\\genindex.html",
+        "package": "netket"
+      },
+      "score": 0.7236058904282625,
+      "original_score": 0.6168794520787797,
+      "vector_score": 0.7710993150984746,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "netket"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 54,
+    "final_results_count": 5
+  }
+}

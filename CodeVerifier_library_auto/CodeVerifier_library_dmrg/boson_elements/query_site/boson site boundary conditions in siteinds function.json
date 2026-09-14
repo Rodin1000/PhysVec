@@ -1,0 +1,136 @@
+{
+  "query": "boson site boundary conditions in siteinds() function",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_sitetype__4f218ef42b698a8d9918bec72dd1b284__part_6__6",
+      "text": "oson\"\n        # Qudit site types don't see Boson overloads\n        continue\n      end\n      d = 4\n      s = siteinds(st, 2; dim=d)\n      o = op(\"$(ot)_op_1\", s, 1)\n      @test o ≈ itensor([i * j for i in 1:d, j in 1:d], s[1]', dag(s[1]))\n\n      o = op(\"$(ot)_op_1\", s, 1, 2)\n      @test o ≈ itensor(\n        [i * j for i in 1:(d ^ 2), j in 1:(d ^ 2)], s[2]', s[1]', dag(s[2]), dag(s[1])\n      )\n\n      d = 4\n      s = siteinds(st, 2; dim=d)\n      o = op(\"$(ot)_op_2\", s, 1)\n      @test o ≈ itensor([i * j for i in 1:d, j in 1:d], s[1]', dag(s[1]))\n      @test_throws MethodError op(\"$(ot)_op_2\", s, 1, 2)\n    end\n  end\n\n  @testset \"Custom SiteType using op!\" begin\n    # Use \"_Custom_\" tag even though this example\n    # is for S=3/2, because we might define the\n    # \"S=3/2\" TagType inside ITensors.jl later\n    function ITensors.op!(Op::ITensor, ::OpName\"Sz\", ::SiteType\"_Custom_\", s::Index)\n      Op[s' => 1, s => 1] = +3 / 2\n      Op[s' => 2, s => 2] = +1 / 2\n      Op[s' => 3, s => 3] = -1 / 2\n      return Op[s' => 4, s => 4] = -3 / 2\n    end\n\n    function ITensors.op!(\n      Op::ITensor, ::OpName\"α\", ::SiteType\"_Custom_\", s1::Index, s2::Index\n    )\n      Op[s1' => 1, s2' => 2, s1 => 1, s2 => 2] = +3 / 2\n      Op[s1' => 2, s2' => 1, s1 => 2, s2 => 2] = +1 / 2\n      Op[s1' => 3, s2' => 3, s1 => 3, s2 => 4] = -1 / 2\n      return Op[s1' => 4, s2' => 1, s1 => ",
+      "metadata": {
+        "section_id": "part_6",
+        "package": "itensors",
+        "section_title": "test_sitetype.jl",
+        "source_file": "test\\base\\test_sitetype.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.5448736127693522,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "boson",
+        "site",
+        "siteinds",
+        "function"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "sitetype__a62fc8284cc16e9d8879c4b874571c3a__part_13__13",
+      "text": "s = siteinds(\"S=1/2\", N; conserve_qns=true)\n```\n\"\"\"\nfunction siteinds(tag::String, N::Integer; kwargs...)\n  st = SiteType(tag)\n\n  si = siteinds(st, N; kwargs...)\n  if !isnothing(si)\n    return si\n  end\n\n  return [siteind(st, j; kwargs...) for j in 1:N]\nend\n\n\"\"\"\n    siteinds(f::Function, N::Integer; kwargs...)\n\nCreate an array of `N` physical site indices where the site type at site `n` is given\nby `f(n)` (`f` should return a string).\n\"\"\"\nfunction siteinds(f::Function, N::Integer; kwargs...)\n  return [siteind(f(n), n; kwargs...) for n in 1:N]\nend\n\n# Special case of `siteinds` where integer (dim)\n# provided instead of a tag string\n\"\"\"\n    siteinds(d::Integer, N::Integer; kwargs...)\n\nCreate an array of `N` site indices, each of dimension `d`.\n\n# Keywords\n- `addtags::String`: additional tags to be added to all indices\n\"\"\"\nfunction siteinds(d::Integer, N::Integer; kwargs...)\n  return [siteind(d, n; kwargs...) for n in 1:N]\nend\n\n#---------------------------------------\n#\n# has_fermion_string system\n#\n#---------------------------------------\n\nhas_fermion_string(operator::AbstractArray{<:Number}, s::Index; kwargs...)::Bool = false\n\nhas_fermion_string(::OpName, ::SiteType) = nothing\n\nfunction has_fermion_string(opname::AbstractString, s::Index; kwargs...)::Bool\n  opname = strip(opname)\n\n  # Interpret operator names joined by *\n  # as acting sequentially on the same site\n  starpos = findfirst(isequal('*'), opname)\n  if !isnothing(starpos)\n    op1 = opname[1:prevind(opname, starpos)]\n    op2 = opname[nextind(opname, starpos):end]\n    return xor(has_fermion_string(op1, s; kwargs...), has_fermion_string(op2, s; kwargs...))\n  end\n\n  Ntags = length(tags(s))\n  stypes = _sitetypes(s)\n  opn = OpName(opname)\n  for st in stypes\n    res = has_fermion_string(opn, st)\n    !isnothing(res) && return res\n  end\n  return false\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetype.jl",
+        "section_title": "sitetype.jl",
+        "section_id": "part_13"
+      },
+      "score": 0.9389183555759623,
+      "original_score": 0.9321315061955137,
+      "vector_score": 0.9306136450144619,
+      "bm25_score": 0.5139653060810939,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "site",
+        "siteinds",
+        "function"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "IncludedSiteTypes__10c3b7e95897ec39b67299563b29b049__h2_16_16__0",
+      "text": "\"tJ\" sites are similar to electron sites, but cannot be doubly occupied\nThe states of site indices with the \"tJ\" SiteType correspond to\n``|0\\rangle``, ``|\\!\\uparrow\\rangle``, ``|\\!\\downarrow\\rangle``.\nMaking a single \"tJ\" site or collection of N \"tJ\" sites\n```\ns = siteind(\"tJ\")\nsites = siteinds(\"tJ\",N)\n```\nAvailable keyword arguments for enabling and customizing quantum numbers (QN) subspaces:\n- `conserve_qns` (default: false): conserve total number of fermions\n- `conserve_nf` (default: conserve_qns): conserve total number of fermions\n- `conserve_nfparity` (default: conserve_qns): conserve total fermion number parity\n- `qnname_nf` (default: \"Nf\"): name of total fermion number QN\n- `qnname_nfparity` (default: \"NfParity\"): name of total fermion number parity QN\nFor example:\n```\nsites = siteinds(\"tJ\",N; conserve_nfparity=true)\n```",
+      "metadata": {
+        "section_id": "h2_16",
+        "package": "itensormps",
+        "source_file": "docs\\src\\IncludedSiteTypes.md",
+        "section_title": "\"tJ\" SiteType"
+      },
+      "score": 0.8881049840808404,
+      "original_score": 0.8801124829437575,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "site",
+        "siteinds"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "boson__68a4a48a32f91533144dbb5ef2f01694__full__0",
+      "text": "\nalias(::SiteType\"Boson\") = SiteType\"Qudit\"()\n\n\"\"\"\n    space(::SiteType\"Boson\";\n          dim = 2,\n          conserve_qns = false,\n          conserve_number = false,\n          qnname_number = \"Number\")\n\nCreate the Hilbert space for a site of type \"Boson\".\n\nOptionally specify the conserved symmetries and their quantum number labels.\n\"\"\"\nspace(st::SiteType\"Boson\"; kwargs...) = space(alias(st); kwargs...)\n\nval(vn::ValName, st::SiteType\"Boson\") = val(vn, alias(st))\n\nfunction state(sn::StateName, st::SiteType\"Boson\", s::Index; kwargs...)\n  return state(sn, alias(st), s; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", ds::Int...; kwargs...)\n  return op(on, alias(st), ds...; kwargs...)\nend\n\nfunction op(on::OpName, st::SiteType\"Boson\", s1::Index, s_tail::Index...; kwargs...)\n  rs = reverse((s1, s_tail...))\n  ds = dim.(rs)\n  opmat = op(on, st, ds...; kwargs...)\n  return itensor(opmat, prime.(rs)..., dag.(rs)...)\nend\n",
+      "metadata": {
+        "source_file": "src\\lib\\SiteTypes\\src\\sitetypes\\boson.jl",
+        "section_id": "full",
+        "section_title": "boson.jl",
+        "package": "itensors"
+      },
+      "score": 0.8825626065456342,
+      "original_score": 0.8695140072729269,
+      "vector_score": 0.8400575285078372,
+      "bm25_score": 0.5916011535567158,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "boson",
+        "site",
+        "function"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "IncludedSiteTypes__7d74debdd1c692a6ddd9c2ac060aba29__\"Boson\"-SiteType_3__0",
+      "text": "## \"Boson\" SiteType\nThe \"Boson\" site type is an alias for the \"Qudit\" site type. Please see more information about \"Qudit\" below:",
+      "metadata": {
+        "source_file": "docs\\build\\IncludedSiteTypes.html",
+        "section_id": "\"Boson\"-SiteType",
+        "package": "itensormps",
+        "section_title": "\"Boson\" SiteType"
+      },
+      "score": 0.8742228527938621,
+      "original_score": 0.8159358821373592,
+      "vector_score": 0.8882158581251881,
+      "bm25_score": 0.15546202793701613,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "boson",
+        "site"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 108,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      }
+    }
+  }
+}

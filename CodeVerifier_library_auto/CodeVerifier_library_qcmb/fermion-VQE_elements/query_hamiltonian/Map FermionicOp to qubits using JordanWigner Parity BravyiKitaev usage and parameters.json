@@ -1,0 +1,136 @@
+{
+  "query": "Map FermionicOp to qubits using JordanWigner, Parity, BravyiKitaev: usage and parameters",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "test_backend_estimator_v2__136b5e4293090ff3dfc098df748dec1f__part_1__1",
+      "text": "ircuit(2)\n        self.ansatz.append(real_amplitudes(num_qubits=2, reps=2), [0, 1])\n        self.observable = SparsePauliOp.from_list(\n            [\n                (\"II\", -1.052373245772859),\n                (\"IZ\", 0.39793742484318045),\n                (\"ZI\", -0.39793742484318045),\n                (\"ZZ\", -0.01128010425623538),\n                (\"XX\", 0.18093119978423156),\n            ]\n        )\n        self.expvals = -1.0284380963435145, -1.284366511861733\n\n        ra_2_reps = QuantumCircuit(2)\n        ra_2_reps.append(real_amplitudes(num_qubits=2, reps=2), [0, 1])\n        ra_3_reps = QuantumCircuit(2)\n        ra_3_reps.append(real_amplitudes(num_qubits=2, reps=3), [0, 1])\n        self.psi = (ra_2_reps, ra_3_reps)\n        self.params = tuple(psi.parameters for psi in self.psi)\n        self.hamiltonian = (\n            SparsePauliOp.from_list([(\"II\", 1), (\"IZ\", 2), (\"XI\", 3)]),\n            SparsePauliOp.from_list([(\"IZ\", 1)]),\n            SparsePauliOp.from_list([(\"ZI\", 1), (\"ZZ\", 1)]),\n        )\n        self.theta = (\n            [0, 1, 1, 2, 3, 5],\n            [0, 1, 1, 2, 3, 5, 8, 13],\n            [1, 2, 3, 4, 5, 6],\n        )\n\n    @combine(backend=BACKENDS, abelian_grouping=[True, False])\n    def test_estimator_run(self, backend, abelian_grouping):\n        \"\"\"Test Estimator.run()\"\"\"\n        psi1, psi2 = self.psi\n        hamiltonian1, hamiltonian2, hamiltonian3 = self.hamiltonian\n        theta1, theta2, theta3 = self.theta\n        pm = generate_preset_pass_manager(optimization_level=0, backend=backend)\n        psi1, psi2 = pm.run([psi1, psi2])\n        estimator = BackendEstimatorV2(backend=backend, options=self._options)\n        estimator.options.abelian_grouping = abelian_grouping\n        # Specify the circuit and observable by indices.\n        # calculate [ <psi1(theta1)|H1|psi1(theta1)> ]\n        ham1 = hamiltonian1.apply_layout(psi1.layout)\n        job = estimator.run([(psi1,",
+      "metadata": {
+        "package": "qiskit",
+        "source_file": "test\\python\\primitives\\test_backend_estimator_v2.py",
+        "section_title": "test_backend_estimator_v2.py",
+        "section_id": "part_1"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "parameters"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "0.6_c_qubit_converter__b2ad6fe9af7ffae9b09fd8e83744238a__part_4__4",
+      "text": " -0.22575349 * ZIII\n    +0.16614543 * ZIIZ\n    +0.17464343 * ZIZI\n    +0.12091263 * ZZII\n\nThis is likely what you were doing when you were working with any of the following mappers:\n\n- :class:`~qiskit_nature.second_q.mappers.JordanWignerMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevMapper`\n- :class:`~qiskit_nature.second_q.mappers.BravyiKitaevSuperFastMapper`\n- :class:`~qiskit_nature.second_q.mappers.DirectMapper`\n- :class:`~qiskit_nature.second_q.mappers.LinearMapper`\n- :class:`~qiskit_nature.second_q.mappers.LogarithmicMapper`\n\nThe ParityMapper\n----------------\n\nHowever, when you were using the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, you were\nable to use the ``two_qubit_reduction=True`` option of the\n:class:`~qiskit_nature.second_q.mappers.QubitConverter`. This ability, which has always been unique\nto the :class:`~qiskit_nature.second_q.mappers.ParityMapper`, is now directly built into said\nmapper. So if you were doing something along these lines:\n\n.. code:: ipython3\n\n   from qiskit_nature.second_q.mappers import ParityMapper\n\n   converter = QubitConverter(ParityMapper(), two_qubit_reduction=True)\n\n   reduced_op = converter.convert(hamiltonian, num_particles=problem.num_particles)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nThe equivalent code now looks like the following:\n\n.. code:: ipython3\n\n   mapper = ParityMapper(num_particles=problem.num_particles)\n\n   reduced_op = mapper.map(hamiltonian)\n\n   for pauli, coeff in sorted(reduced_op.label_iter()):\n       print(f\"{coeff.real:+.8f} * {pauli}\")\n\n.. parsed-literal::\n\n    -1.05237325 * II\n    +0.39793742 * IZ\n    +0.18093120 * XX\n    -0.39793742 * ZI\n    -0.01128010 * ZZ\n\nZ2Symmetries\n------------\n\nFinally, the :class:`~qiskit_nature.second_q.mappers.QubitConverter` class also supported further\nreduction of qubit resources by exploiting",
+      "metadata": {
+        "package": "qiskit-nature",
+        "section_title": "0.6_c_qubit_converter.rst",
+        "section_id": "part_4",
+        "source_file": "docs\\migration\\0.6_c_qubit_converter.rst"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "map",
+        "using"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "estimator__9f03b6fbe6fa1cc29ca5c44c6d58f645__part_12__12",
+      "text": " 1 << (8 * np.arange(packed_vals.shape[1], dtype=object))\n    inds = packed_vals @ power_uint8\n    return inds.tolist()\n\n\ndef _parity(integer: int) -> int:\n    \"\"\"Return the parity of an integer\"\"\"\n    return bin(integer).count(\"1\") % 2\n\n\ndef _paulis2basis(paulis: PauliList) -> Pauli:\n    return Pauli(\n        (\n            np.logical_or.reduce(paulis.z),  # pylint:disable=no-member\n            np.logical_or.reduce(paulis.x),  # pylint:disable=no-member\n        )\n    )\n\n\nclass _ExperimentManager:\n    def __init__(self):\n        self.keys: list[tuple[int, int]] = []\n        self.experiment_circuits: list[QuantumCircuit] = []\n        self.parameter_binds: list[dict[ParameterExpression, list[float]]] = []\n        self._input_indices: list[list[int]] = []\n        self._num_experiment: int = 0\n\n    def __len__(self):\n        return self._num_experiment\n\n    @property\n    def experiment_indices(self):\n        \"\"\"indices of experiments\"\"\"\n        return np.argsort(sum(self._input_indices, [])).tolist()\n\n    def append(\n        self,\n        key: tuple[int, int],\n        parameter_bind: dict[ParameterExpression, float],\n        experiment_circuit: QuantumCircuit,\n    ):\n        \"\"\"append experiments\"\"\"\n        if key in self.keys and parameter_bind:\n            key_index = self.keys.index(key)\n            for k, vs in self.parameter_binds[key_index].items():\n                vs.append(parameter_bind[k])\n            self._input_indices[key_index].append(self._num_experiment)\n        else:\n            self.experiment_circuits.append(experiment_circuit)\n            self.keys.append(key)\n            self.parameter_binds.append({k: [v] for k, v in parameter_bind.items()})\n            self._input_indices.append([self._num_experiment])\n\n        self._num_experiment += 1\n\n    def get_observable_key(self, index):\n        \"\"\"return key of observables\"\"\"\n        for i, inputs in enumerate(self._input_indices):\n            if index in inputs:\n                return self.keys[i][1]\n        raise AerError(\"Unexpected behavior.\")\n",
+      "metadata": {
+        "package": "qiskit-aer",
+        "source_file": "qiskit_aer\\primitives\\estimator.py",
+        "section_id": "part_12",
+        "section_title": "estimator.py"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "parity"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "circuit_library_circuits__d7f717131c9d8a8919b87d62c226dcbc__part_1__1",
+      "text": " self.transpile(EfficientSU2(qubit).decompose())\n\n    def efficient_su2_linear(self, qubit, repeats):\n        return self.transpile(EfficientSU2(qubit, reps=repeats, entanglement=\"linear\"))\n\n    def excitation_preserving(self, qubit, repeats):\n        return self.transpile(ExcitationPreserving(qubit, reps=repeats).decompose())\n\n    def excitation_preserving_linear(self, qubit, repeats):\n        return self.transpile(ExcitationPreserving(qubit, reps=repeats, entanglement=\"linear\"))\n\n    def fourier_checking(self, qubit, repeats):\n        if qubit > 20:\n            raise ValueError(\"qubit is too big: {0}\".format(qubit))\n        f = [-1, 1] * (2 ** (qubit - 1))\n        g = [1, -1] * (2 ** (qubit - 1))\n        return self._repeat(FourierChecking(f, g), repeats)\n\n    def graph_state(self, qubit, repeats):\n        a = np.reshape([0] * (qubit**2), [qubit] * 2)\n        for _ in range(qubit):\n            while True:\n                i = np.random.randint(0, qubit)\n                j = np.random.randint(0, qubit)\n                if a[i][j] == 0:\n                    a[i][j] = 1\n                    a[j][i] = 1\n                    break\n        return self._repeat(GraphState(a), repeats)\n\n    def hidden_linear_function(self, qubit, repeats):\n        a = np.reshape([0] * (qubit**2), [qubit] * 2)\n        for _ in range(qubit):\n            while True:\n                i = np.random.randint(0, qubit)\n                j = np.random.randint(0, qubit)\n                if a[i][j] == 0:\n                    a[i][j] = 1\n                    a[j][i] = 1\n                    break\n        return self._repeat(HiddenLinearFunction(a), repeats)\n\n    def iqp(self, qubit, repeats):\n        interactions = np.random.randint(-1024, 1024, (qubit, qubit))\n        for i in range(qubit):\n            for j in range(i + 1, qubit):\n                interactions[j][i] = interactions[i][j]\n        return self._repeat(IQP(interactions).decompose(), repeats)\n\n    def quantum_volume(self, qubit, repeats):\n        return self._repeat(QuantumVolume(qubit).decompose(), repeats)\n\n    def phase_estimation(self, qubit, repeats):\n        if qubit < 5:\n            raise ValueError(\"qubit is too small: {0}\".format(qubit))\n        return self._repeat(\n            PhaseEst",
+      "metadata": {
+        "section_id": "part_1",
+        "package": "qiskit-aer",
+        "source_file": "test\\benchmark\\circuit_library_circuits.py",
+        "section_title": "circuit_library_circuits.py"
+      },
+      "score": 0.9928038483646124,
+      "original_score": 0.9928038483646124,
+      "vector_score": 0.9928038483646124,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "vqe_application__0a14c61f464a058fb9d6c3d130273bc1__part_1__1",
+      "text": "_mapping, two_qubit_reduction, z2_symmetries\n        ):\n            initial_state = HartreeFock(\n                num_orbitals,\n                num_particles,\n                qubit_mapping,\n                two_qubit_reduction,\n                z2_symmetries.sq_list,\n            )\n            var_form = UCCSD(\n                num_orbitals=num_orbitals,\n                num_particles=num_particles,\n                initial_state=initial_state,\n                qubit_mapping=qubit_mapping,\n                two_qubit_reduction=two_qubit_reduction,\n                z2_symmetries=z2_symmetries,\n            )\n            vqe = VQE(\n                var_form=var_form,\n                include_custom=True,\n                optimizer=SLSQP(maxiter=5000),\n                max_evals_grouped=256,\n            )\n            vqe.quantum_instance = AerProvider.get_backend(\"qasm_simulator\")\n            vqe.quantum_instance.backend_options[\"backend_options\"] = {\n                \"max_parallel_experiments\": threads,\n                \"method\": method,\n            }\n\n            return vqe\n\n        mgse = MolecularGroundStateEnergy(driver)\n        result = mgse.compute_energy(cb_create_solver)\n\n    def time_statevector(self, mol_name):\n        threads = multiprocessing.cpu_count()\n        mol_string = self.mol_strings[mol_name][0]\n        qubit = self.mol_strings[mol_name][1]\n        self._run_uccsd_vqe(mol_string, \"statevector\", threads)\n\n    def time_statevector_gpu(self, mol_name):\n        threads = 1\n        mol_string = self.mol_strings[mol_name][0]\n        qubit = self.mol_strings[mol_name][1]\n        self._run_uccsd_vqe(mol_string, \"statevector_gpu\", threads)\n",
+      "metadata": {
+        "source_file": "test\\benchmark\\vqe_application.py",
+        "package": "qiskit-aer",
+        "section_id": "part_1",
+        "section_title": "vqe_application.py"
+      },
+      "score": 0.9520684401734443,
+      "original_score": 0.9520684401734443,
+      "vector_score": 0.9520684401734443,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 90,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 204,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 60
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 0,
+        "bm25_results_count": 30,
+        "merged_results_count": 30
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

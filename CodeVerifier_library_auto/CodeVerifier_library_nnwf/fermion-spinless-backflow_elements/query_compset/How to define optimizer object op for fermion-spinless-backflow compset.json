@@ -1,0 +1,109 @@
+{
+  "query": "How to define optimizer object 'op' for fermion-spinless-backflow compset",
+  "package": "netket",
+  "results": [
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__T_21__5",
+      "text": "utation.PermutationOperatorFermion method)\nto_linear_operator() (netket.experimental.operator.FermiHubbardJax method) (netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd method) (netket.experimental.operator.ParticleNumberConservingFermioperator2nd method) (netket.operator._fermion2nd.FermionOperator2ndBase method) (netket.operator._ising.IsingBase method) (netket.operator._local_operator.LocalOperatorBase method) (netket.operator._pauli_strings.PauliStringsBase method) (netket.operator._prod.ProductDiscreteJaxOperator method) (netket.operator._prod.ProductDiscreteOperator method) (netket.operator._sum.SumDiscreteJaxOperator method) (netket.operator._sum.SumDiscreteOperator method) (netket.operator.AbstractSuperOperator method) (netket.operator.BoseHubbardJax method) (netket.operator.BoseHubbardNumba method) (netket.operator.DiscreteJaxOperator method) (netket.operator.DiscreteOperator method) (netket.operator.FermionOperator2ndJax method) (netket.operator.FermionOperator2ndNumba method) (netket.operator.IsingJax method) (netket.operator.IsingNumba method) (netket.operator.LocalLiouvillian method) (netket.operator.LocalOperatorJax method) (netket.operator.LocalOperatorNumba method) (netket.operator.PauliStringsJax method) (netket.operator.PauliStringsNumba method) (netket.operator.permutation.PermutationOperator method) (netket.operator.permutation.PermutationOperatorFermion method)\n(netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd method)\n(netket.experimental.operator.ParticleNumberConservingFermioperator2nd method)\n(netket.operator._fermion2nd.FermionOperator2ndBase method)\n(netket.operator._ising.IsingBase method)\n(netket.operator._local_operator.LocalOperatorBase method)\n(netket.operator._pauli_strings.PauliStringsBase method)\n(netket.operator._prod.ProductDiscreteJaxOperator method)\n(netket.operator._prod.ProductDiscreteOperator method)\n(netket.operator._sum.SumDiscreteJaxOperator method)\n(netket.operator._sum.SumDiscreteOperator method)\n(netket.operator.AbstractSuperOperator method)\n(netket.operator.BoseHubbardJax method)\n(netket.operator.BoseHubbardNumba method)\n(netket.operator.DiscreteJaxOperator method)\n(netket.operator.DiscreteOperator method)\n(netket.operator.FermionOperator2ndJax method)\n(netket.operator.FermionOperator2ndNumba method)\n(netket.operator.IsingJax method)\n(netket.operator.IsingNumba method)\n(netket.operator.LocalLiouvillian method)\n(netket.operator",
+      "metadata": {
+        "section_id": "T",
+        "package": "netket",
+        "section_title": "T",
+        "source_file": "docs\\_build\\html\\genindex.html"
+      },
+      "score": 0.8500000000000001,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "lattice-fermions__13fdaa40c766890430e8e181adc0137a__sec_9_9__1",
+      "text": "rngs\n=\nrngs\n,\n),\n# Reshape into the orbital shape, (..., N, Nf)\nlambda\nx\n:\nx\n.\nreshape\n(\nx\n.\nshape\n[:\n-\n1\n]\n+\n(\nhilbert\n.\nn_orbitals\n,\nhilbert\n.\nn_fermions\n)\n),\n)\ndef\n__call__\n(\nself\n,\nn\n:\njax\n.\nArray\n)\n->\njax\n.\nArray\n:\n# For simplicity, we write a function that operates on a single configuration of size (N,)\n# and we vectorize it using `jnp.vectorize` with the signature='(n)->()' argument, which specifies\n# that the function is defined to operate on arrays of shape (n,) and return scalars.\n@partial\n(\njnp\n.\nvectorize\n,\nsignature\n=\n\"(n)->()\"\n)\ndef\nlog_sd\n(\nn\n):\n# Construct the Backflow. Takes as input strings of $N$ occupation numbers, outputs an $N x Nf$ matrix\n# that modifies the bare orbitals.\nF\n=\nself\n.\nbackflow\n(\nn\n)\n# Add the backflow correction to the bare orbitals\nM\n=\nself\n.\nM\n+\nF\n# Find the positions of the occupied, backflow-modified orbitals\nR\n=\nn\n.\nnonzero\n(\nsize\n=\nself\n.\nhilbert\n.\nn_fermions\n)[\n0\n]\nA\n=\nM\n[\nR\n]\nreturn\n_logdet_cmplx\n(\nA\n)\nreturn\nlog_sd\n(\nn\n)\n```\nWe can then proceed as above to optimize this variational state using VMC.\n```code\n# Create a neural backflow wave function\nmodel\n=\nLogNeuralBackflow\n(\nhi\n,\nhidden_units\n=\nN\n,\nrngs\n=\nnnx\n.\nRngs\n(\n3\n))\n# Define a Metropolis exchange sampler\nsa\n=\nnk\n.\nsampler\n.\nMetropolisFermionHop\n(\nhi\n,\ngraph\n=\ngraph\n)\n# Define an optimizer\nop\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.05\n)\n# Create a variational state\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsa\n,\nmodel\n,\nn_samples\n=\n2\n**\n12\n,\nn_discard_per_chain\n=\n16\n)\n# Create a Variational Monte Carlo driver\ngs\n=\nnk\n.\ndriver\n.\nVMC_SR\n(\nH\n,\nop\n,\nvariational_state\n=\nvstate\n,\ndiag_shift\n=\n0.05\n)\n# Construct the logger to visualize the data later on\nbf_log\n=\nnk\n.\nlogging\n.\nRuntimeLog\n()\n# Run the optimization for 300 iterations\ngs\n.\nrun\n(\nn_iter\n",
+      "metadata": {
+        "section_id": "sec_9",
+        "source_file": "docs\\_build\\html\\tutorials\\lattice-fermions.html",
+        "section_title": "Neural-Backflow Wave Function#",
+        "package": "netket"
+      },
+      "score": 0.8336704267879663,
+      "original_score": 0.7496113951646804,
+      "vector_score": 0.6870142439558505,
+      "bm25_score": 1.0,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "define",
+        "optimizer",
+        "backflow"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "changelog__775627bff97fcf0367c7035d3e792e5f__sec_27_27__2",
+      "text": " .\nThe netket.nn.blocks.SymmExpSum layer is now normalised by the number of elements in the symmetry group in order to maintain a reasonable normalisation #1624 .\nThe labelling of spin sectors in netket.experimental.operator.fermion.create() and similar operators has now changed from the eigenvalue of the spin operator ( \\(\\pm 1/2\\) and so on) to the eigenvalue of the Pauli matrices ( \\(\\pm 1\\) and so on) #1637 .\nThe labelling of spin sectors in netket.experimental.operator.fermion.create() and similar operators has now changed from the eigenvalue of the spin operator ( \\(\\pm 1/2\\) and so on) to the eigenvalue of the Pauli matrices ( \\(\\pm 1\\) and so on) #1637 .\nThe connected elements and expectation values of all non-simmetric fermionic operators is now changed in order to be correct #1640 .\nThe connected elements and expectation values of all non-simmetric fermionic operators is now changed in order to be correct #1640 .\nConsiderably reduced the memory consumption of LocalOperator , especially in the case of large local hilbert spaces. Also leveraged sparsity in the terms to speed up compilation ( _setup ) in the same cases #1558 .\nConsiderably reduced the memory consumption of LocalOperator , especially in the case of large local hilbert spaces. Also leveraged sparsity in the terms to speed up compilation ( _setup ) in the same cases #1558 .\nnetket.nn.blocks.SymmExpSum now works with inputs of arbitrary dimensions, while previously it errored for all inputs that were not 2D #1616\nnetket.nn.blocks.SymmExpSum now works with inputs of arbitrary dimensions, while previously it errored for all inputs that were not 2D #1616\nStop using FrozenDict from flax and instead return standard dictionaries for the variational parameters from the variational state. This makes it much easier to edit parameters #1547 .\nStop using FrozenDict from flax and instead return standard dictionaries for the variational parameters from the variational state. This makes it much easier to edit parameters #1547 .\nVastly improved, finally readable documentation of all Flax modules and neural network architectures #1641 .\nVastly improved, finally readable documentation of all Flax modules and neural network architectures #1641 .\nFixed minor bug where netket.operator.LocalOperator could not be built with np.matrix object obtained by converting scipy sparse matrices to dense #1597 .\nFixed minor bug where netket.operator.LocalOperator could not be built with np.matrix object obtained by converting scipy sparse matrices to dense #1597 .\nRaise correct error instead of unintelligible one when multiplying netket.experimental.operator.FermionOperator2nd with other operators #1599 .\nRaise correct error instead of unintelligible one when multiplying netket.experimental.operator.Fermion",
+      "metadata": {
+        "section_title": "NetKet 3.10 (🥶 7 november 2023)#",
+        "source_file": "docs\\_build\\html\\changelog.html",
+        "package": "netket",
+        "section_id": "sec_27"
+      },
+      "score": 0.7361427356383804,
+      "original_score": 0.6191750823646727,
+      "vector_score": 0.7739688529558408,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "object",
+        "fermion"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    },
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__G_8__1",
+      "text": "ermioperator2nd method)\n(netket.experimental.operator.ParticleNumberConservingFermioperator2nd method)\n(netket.operator._fermion2nd.FermionOperator2ndBase method)\n(netket.operator._ising.IsingBase method)\n(netket.operator._local_operator.LocalOperatorBase method)\n(netket.operator._pauli_strings.PauliStringsBase method)\n(netket.operator._prod.ProductDiscreteJaxOperator method)\n(netket.operator._prod.ProductDiscreteOperator method)\n(netket.operator._sum.SumDiscreteJaxOperator method)\n(netket.operator._sum.SumDiscreteOperator method)\n(netket.operator.AbstractSuperOperator method)\n(netket.operator.BoseHubbardJax method)\n(netket.operator.BoseHubbardNumba method)\n(netket.operator.DiscreteJaxOperator method)\n(netket.operator.DiscreteOperator method)\n(netket.operator.FermionOperator2ndJax method)\n(netket.operator.FermionOperator2ndNumba method)\n(netket.operator.IsingJax method)\n(netket.operator.IsingNumba method)\n(netket.operator.LocalLiouvillian method)\n(netket.operator.LocalOperatorJax method)\n(netket.operator.LocalOperatorNumba method)\n(netket.operator.PauliStringsJax method)\n(netket.operator.PauliStringsNumba method)\n(netket.operator.permutation.PermutationOperator method)\n(netket.operator.permutation.PermutationOperatorFermion method)\nget_conn_filtered() (netket.operator.LocalOperatorNumba method)\nget_conn_flattened() (netket.experimental.operator.FermiHubbardJax method) (netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd method) (netket.experimental.operator.ParticleNumberConservingFermioperator2nd method) (netket.operator._fermion2nd.FermionOperator2ndBase method) (netket.operator._ising.IsingBase method) (netket.operator._local_operator.LocalOperatorBase method) (netket.operator._pauli_strings.PauliStringsBase method) (netket.operator._prod.ProductDiscreteJaxOperator method) (netket.operator._prod.ProductDiscreteOperator method) (netket.operator._sum.SumDiscreteJaxOperator method) (netket.operator._sum.SumDiscreteOperator method) (netket.operator.AbstractSuperOperator method) (netket.operator.BoseHubbardJax method) (netket.operator.BoseHubbardNumba method) (netket.operator.DiscreteJaxOperator method) (netket.operator.DiscreteOperator method) (netket.operator.FermionOperator2ndJax method) (netket.operator.FermionOperator2ndNumba method) (netket.operator.IsingJax method) (netket.operator.IsingNumba method) (netket.operator.LocalLiouvillian method) (netket.operator.LocalOperatorJax method) (netket.operator.Local",
+      "metadata": {
+        "section_id": "G",
+        "section_title": "G",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\genindex.html"
+      },
+      "score": 0.6587668273225861,
+      "original_score": 0.5450224364301147,
+      "vector_score": 0.6812780455376434,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "genindex__2a519e1c6494202e9c27629331f5ff97__T_21__9",
+      "text": ".ParticleNumberAndSpinConservingFermioperator2nd method) (netket.experimental.operator.ParticleNumberConservingFermioperator2nd method) (netket.operator._fermion2nd.FermionOperator2ndBase method) (netket.operator._ising.IsingBase method) (netket.operator._local_operator.LocalOperatorBase method) (netket.operator._pauli_strings.PauliStringsBase method) (netket.operator._prod.ProductDiscreteJaxOperator method) (netket.operator._prod.ProductDiscreteOperator method) (netket.operator._sum.SumDiscreteJaxOperator method) (netket.operator._sum.SumDiscreteOperator method) (netket.operator.AbstractSuperOperator method) (netket.operator.BoseHubbardJax method) (netket.operator.BoseHubbardNumba method) (netket.operator.DiscreteJaxOperator method) (netket.operator.DiscreteOperator method) (netket.operator.FermionOperator2ndJax method) (netket.operator.FermionOperator2ndNumba method) (netket.operator.IsingJax method) (netket.operator.IsingNumba method) (netket.operator.LocalLiouvillian method) (netket.operator.LocalOperatorJax method) (netket.operator.LocalOperatorNumba method) (netket.operator.PauliStringsJax method) (netket.operator.PauliStringsNumba method) (netket.operator.permutation.PermutationOperator method) (netket.operator.permutation.PermutationOperatorFermion method)\n(netket.experimental.operator.ParticleNumberAndSpinConservingFermioperator2nd method)\n(netket.experimental.operator.ParticleNumberConservingFermioperator2nd method)\n(netket.operator._fermion2nd.FermionOperator2ndBase method)\n(netket.operator._ising.IsingBase method)\n(netket.operator._local_operator.LocalOperatorBase method)\n(netket.operator._pauli_strings.PauliStringsBase method)\n(netket.operator._prod.ProductDiscreteJaxOperator method)\n(netket.operator._prod.ProductDiscreteOperator method)\n(netket.operator._sum.SumDiscreteJaxOperator method)\n(netket.operator._sum.SumDiscreteOperator method)\n(netket.operator.AbstractSuperOperator method)\n(netket.operator.BoseHubbardJax method)\n(netket.operator.BoseHubbardNumba method)\n(netket.operator.DiscreteJaxOperator method)\n(netket.operator.DiscreteOperator method)\n(netket.operator.FermionOperator2ndJax method)\n(netket.operator.FermionOperator2ndNumba method)\n(netket.operator.IsingJax method)\n(netket.operator.IsingNumba method)\n(netket.operator.LocalLiouvillian method)\n(netket.operator.LocalOperatorJax method)\n(netket.operator.LocalOperatorNumba method)\n(netket.operator.PauliStringsJax method)\n(netket.operator.PauliStrings",
+      "metadata": {
+        "section_id": "T",
+        "section_title": "T",
+        "source_file": "docs\\_build\\html\\genindex.html",
+        "package": "netket"
+      },
+      "score": 0.6537164308967729,
+      "original_score": 0.5382885745290306,
+      "vector_score": 0.6728607181612881,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 57,
+    "final_results_count": 5
+  }
+}

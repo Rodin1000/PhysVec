@@ -1,0 +1,107 @@
+{
+  "query": "Correct time integration methods for spin0.5-tVMC in nnwf",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-gcnn-honeycomb__211379d69213be55c6fdfefcaa402884__sec_5_5__0",
+      "text": "## Variational Monte Carlo#\nIn order to perform VMC we need to define a sampler and an optimizer. We sample using Metropolis-Hastings, which uses the exchange rule to propose new states. The exchange rule swaps the spin of two neighbouring sites, keeping the magnetization fixed (in this case, 0). We optimize using stochastic reconfiguration, which uses curvature information to find the best direction of descent.\n```code\n# Metropolis-Hastings with two spins flipped that are at most second nearest neighbors\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n=\nhi\n,\ngraph\n=\ngraph\n,\nd_max\n=\n2\n)\n# Stochastic reconfiguration\nop\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n1e-2\n)\nsr\n=\nnk\n.\noptimizer\n.\nSR\n(\ndiag_shift\n=\n0.01\n)\n# Define a variational state so we can keep the parameters if we like\nvstate\n=\nnk\n.\nvariational\n.\nMCState\n(\nsampler\n=\nsa\n,\nmodel\n=\nma\n,\nn_samples\n=\n100\n)\n# Define a driver that performs VMC\ngs\n=\nnk\n.\ndriver\n.\nVMC\n(\nha\n,\nop\n,\nsr\n=\nsr\n,\nvariational_state\n=\nvstate\n)\n```\nLets start by running for 100 iterations. This took about 15 seconds per iteration on my CPU and about 1 second per iteration on the Tesla P100 GPU (If you’re using the free version of Colab you may get a Tesla K80 which is slightly slower). GPUs are fast! As you’ll see later, the speedup is even more pronounced on larger lattices.\n```code\n# Run the optimization\ngs\n.\nrun\n(\nn_iter\n=\n100\n,\nout\n=\n\"out\"\n)\n```\n```code\n100%|██████████| 100/100 [01:06<00:00,  1.51it/s, Energy=-40.471 ± 0.046 [σ²=0.238, R̂=0.9744]]\n```\n```code\n(<netket.logging.json_log.JsonLog at 0x7fea898371d0>,)\n```\nThis should get us under 0.1% error. Lets see how the energy evolves as we train.\n```code\n# Get data from log and\nenergy\n=\n[]\ndata\n=\njson\n.\nload\n(\nopen\n(\n\"out.log\"\n))\nfor\nen\nin\ndata\n[\n\"Energy\"\n][\n\"Mean\"\n]:\nenergy\n.\nappend\n(\nen\n)\n# plot the energy during the optimization\nplt\n.\nxlabel\n(\n\"Number of Iterations\"\n)\nplt\n.\nylabel\n(\n\"Energy\"\n)\nplt\n.\nplot\n(\nenergy\n)\n",
+      "metadata": {
+        "section_id": "sec_5",
+        "section_title": "Variational Monte Carlo#",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-gcnn-honeycomb.html"
+      },
+      "score": 0.8500000000000001,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "netket.errors.InsufficientSamplesForSRWarning__318015a84f58aaee2dd77413e41cdde8__sec_3_3__0",
+      "text": "## Recommended solution#\nSwitch to the kernel/minSR formulation which uses the Neural Tangent Kernel (NTK):\nThis formulation inverts a \\(N_s \\times N_s\\) matrix instead of \\(N_p \\times N_p\\) ,\nwhich is much more efficient and stable when \\(N_s < N_p\\) .\nUse :class:`netket.driver.VMC_SR` instead of :class:`netket.driver.VMC` with SR.\nThe VMC_SR driver automatically chooses the optimal formulation and provides the same\nmathematical result but with better performance and stability.\nReferences\nThe kernel trick for SR was introduced by Chen & Heyl and Rende et al. .\nThe kernel trick for SR was introduced by Chen & Heyl and Rende et al. .\nFor a comprehensive discussion see the netket.driver.VMC_SR documentation.\nFor a comprehensive discussion see the netket.driver.VMC_SR documentation.",
+      "metadata": {
+        "section_id": "sec_3",
+        "package": "netket",
+        "section_title": "Recommended solution#",
+        "source_file": "docs\\_build\\html\\api\\_generated\\errors\\netket.errors.InsufficientSamplesForSRWarning.html"
+      },
+      "score": 0.831749349903752,
+      "original_score": 0.7756657998716694,
+      "vector_score": 0.9695822498395866,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "netket.driver.VMC_SR__987c2ac7b75e6e840301d1c6434cfa22__sec_1_1__0",
+      "text": "## Contents\nBases: AbstractVariationalDriver\nEnergy minimization using Variational Monte Carlo (VMC) and Stochastic Reconfiguration/Natural Gradient Descent .\nThis driver is mathematically equivalent to the standard netket.driver.VMC with the\npreconditioner netket.optimizer.SR(solver=netket.optimizer.solvers.cholesky) ,\nbut can easily switch between the standard and the kernel/minSR formulation of Natural Gradient Descent.\nThe standard formulation computes the updates as:\nThe standard formulation computes the updates as:\nwhere \\(X \\in R^{N_s \\times N_p}\\) is the Jacobian of the log-wavefunction, with \\(N_p\\) the number of parameters\nand \\(N_s\\) the number of samples. The vector \\(E^{loc}\\) is the centered local estimator for the local energies.\nThe kernel/minSR formulation computes the updates as:\nThe kernel/minSR formulation computes the updates as:\nThe regularization parameter \\(\\lambda\\) is the diag_shift parameter of the driver, which can be\na scalar or a schedule.\nThe updates are then applied to the parameters using the optimizer which in general should be optax.sgd .",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\driver\\netket.driver.VMC_SR.html",
+        "package": "netket",
+        "section_title": "Contents",
+        "section_id": "sec_1"
+      },
+      "score": 0.7323950558913918,
+      "original_score": 0.643193407855189,
+      "vector_score": 0.8039917598189862,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": true
+    },
+    {
+      "id": "netket.experimental.driver.TDVPSchmitt__4029c8cd3f7d45fc7dc62b0a51a9d72a__sec_1_1__3",
+      "text": " + T .\nT ( float ) – Length of the integration interval.\nReturn MCMC statistics for the expectation value of observables in the\ncurrent state of the driver.\nobservables – A pytree of operators for which statistics should be computed.\nA pytree of the same structure as the input, containing MCMC statistics\nfor the corresponding operators as leaves.\nReturns a generator which advances the time evolution for an interval\nof length T , stopping at tstops .\nT ( float ) – Length of the integration interval.\nT ( float ) – Length of the integration interval.\ntstops ( Sequence [ float ] | None ) – A sequence of stopping times, each within the interval [self.t0, self.t0 + T] ,\nat which this method will stop and yield. By default, a stop is performed\nafter each time step (at potentially varying step size if an adaptive\nintegrator is used).\ntstops ( Sequence [ float ] | None ) – A sequence of stopping times, each within the interval [self.t0, self.t0 + T] ,\nat which this method will stop and yield. By default, a stop is performed\nafter each time step (at potentially varying step size if an adaptive\nintegrator is used).\nThe current step count.\nEvaluates the TDVP equation of motion\nwhere \\(G(w)\\) is the QGT, \\(F(w, t)\\) the gradient of self.generator and \\(\\gamma\\) one of \\(\\gamma = -1\\) (imaginary-time dynamics for MCState ), \\(\\gamma = -i\\) (real-time dynamics for MCState ), or \\(\\gamma = 1\\) (real-time dynamics for MCMixedState ).\nt – Time (defaults to self.t ).\nt – Time (defaults to self.t ).\nw – Variational parameters (defaults to self.state.parameters ).\nw – Variational parameters (defaults to self.state.parameters ).\nThe time-derivative \\(\\dot w\\) .\nResets the driver.\nSubclasses should make sure to call super().reset() to ensure\nthat the step count is set to 0.\nRuns the time evolution.\nBy default uses netket.logging.JsonLog . To know about the output format\ncheck it’s documentation. The logger object is also returned at the end of this function\nso that you can inspect the results without reading the json output.\nT – The integration time period.\nT – The integration time period.\nout – A logger object, or an iterable of loggers, to be used to store simulation log and data.\nIf this argument is a string, it will be used as output prefix for the standard JSON logger.\nout – A logger object, or an iterable of loggers, to be used to store simulation log and data.\nIf this argument is a string, it will be used as output prefix for the standard JSON logger.\nobs – An iterable containing the observables that should be computed.\nobs – An iterable",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\experimental\\dynamics\\netket.experimental.driver.TDVPSchmitt.html",
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "package": "netket"
+      },
+      "score": 0.6585614226373403,
+      "original_score": 0.5072020532910066,
+      "vector_score": 0.3840025666137584,
+      "bm25_score": 1.0,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "time",
+        "integration"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    },
+    {
+      "id": "netket.driver.VMC_SR__987c2ac7b75e6e840301d1c6434cfa22__sec_5_5__5",
+      "text": " the Neural Tangent Kernel (NTK)\ninstead of the Quantum Geometric Tensor (QGT), aka switching between\nSR and minSR. (Defaults to None, which will automatically choose the best\nmethod)\nuse_ntk ( bool | None ) – Wheter to compute the updates using the Neural Tangent Kernel (NTK)\ninstead of the Quantum Geometric Tensor (QGT), aka switching between\nSR and minSR. (Defaults to None, which will automatically choose the best\nmethod)\nlinear_solver_fn ( Callable [ [ ndarray | Array , ndarray | Array ] , ndarray | Array ] | DeprecatedArg )\nlinear_solver_fn ( Callable [ [ ndarray | Array , ndarray | Array ] , ndarray | Array ] | DeprecatedArg )\nChunk size for backward-mode differentiation. This reduces memory pressure at a potential cost of higher computation time.\nIf computing the jacobian, the jacobian is computed in blocks of chunk_size_bwd rows.\nIf computing the NTK lazily, this is the number of rows of NTK evaluated in a single sweep.\nThe chunk size does not affect the result, up to numerical precision.\nThe diagonal shift \\(\\lambda\\) in the curvature matrix.\nThis can be a scalar or a schedule. If it is a schedule, it should be\na function that takes the current step as input and returns the value of the shift.\nPyTree to pass on information from the solver,e.g, the quadratic model.\nThe mode used to compute the jacobian of the variational state. Can be ‘real’ , ‘complex’ , or ‘onthefly’.\n‘real’ mode truncates imaginary part of the wavefunction, useful for real-valued wf with a sign.\n‘real’ mode truncates imaginary part of the wavefunction, useful for real-valued wf with a sign.\n‘complex’ is the general implementation that always works.\n‘complex’ is the general implementation that always works.\nonthefly uses a lazy implementation of the neural tangent kernel and does not compute the jacobian.\nonthefly uses a lazy implementation of the neural tangent kernel and does not compute the jacobian.\nThis internally uses netket.jax.jacobian() . See that function for a more complete documentation.\nFlag specifying whether to use momentum in the optimisation.\nIf True , the optimizer will use momentum to accumulate previous updates\nfollowing the SPRING optimizer from G.Goldshlager, N.Abrahamsen and L.Lin to accumulate previous updates for better approximation of the exact SR with\nno significant performance penalty.\nWhether to use a lazy implementation of th NTK or QGT which does not concretize the jacobian.\nThis usually requires less memory.\nThe optimizer used to update the parameters at every iteration.\nReturns the machine that is optimized by this driver.\nReturns a monotonic integer labelling all the steps performed by this driver.\nThis can be used, for example, to identify the line in a log file.\nWhether to use",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\driver\\netket.driver.VMC_SR.html",
+        "section_id": "sec_5",
+        "section_title": "Implementation details#",
+        "package": "netket"
+      },
+      "score": 0.6007908451010001,
+      "original_score": 0.4466407753875249,
+      "vector_score": 0.5583009692344061,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "time"
+      ],
+      "match_ratio": 0.14285714285714285,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 58,
+    "final_results_count": 5
+  }
+}

@@ -1,0 +1,71 @@
+You are an expert in numerical calculations of quantum many-body physics. 
+Your task here is to evaluate the correctness/errors of a single function definition in the target repository (named as 'repo-function'). 
+
+---------------------------------------------------------------------------------
+[Description]:
+1. In former steps, we build a test-code around the repo-function with other standard verifier functions (which are priori correct). 
+2. In former steps, after getting a test-code, we try to execute this code to evaluate the correctness/errors of the repo-function. 
+3. You will be given the execution results (inputs are listed below). You will summerize the result and give a evaluaiton in defined format. 
+4. If the test-code runs properly, you conclude that the repo-function is defined correctly in grammaer and package usage. 
+5. If the test-code cannot run properly, you conclude that the repo-function has some errors. You need to further identify and list those errors according to the given informaiton. 
+
+
+---------------------------------------------------------------------------------
+[Input]: 
+1. target_file_name: the name of the tested repo-function. 
+2. target_file_content: the code of the repo-function. 
+3. result_target_file_exitcode: (or result_target_file["exitcode"]): 0 indicates the file runs properly (hence repo-function defined correctly), 1 indicates errors (hence there are errors in repo-function definition). 
+4. result_target_file_stderr: (or result_target_file["stderr"]): detailed information about the error, if the test-code cannot run properly. 
+
+
+---------------------------------------------------------------------------------
+[Instructions]:
+1. Your analysis MUST FOLLOW these steps:
+    - Step 1: you read the exitcode (the input 'result_target_file_exitcode'). If the exitcode is 0, then your judgement is 'correct' for the tested repo-function. 
+    - Step 2: If the exitcode is NOT 0, you CANNOT simply give the 'wrong' judge for the tested repo-function. 
+    - Step 3: If the exitcode is NOT 0, you MUST analyze the input 'result_target_file_stderr' first. You reason about the origin of the error from stderr (often provides the traceback informations). 
+        The test code file includes many functions, including one repo-function to-be-test. The error may be caused by the repo-function or other functions. 
+        - Case 1: If you find that the error INDEED originates in the definition of the tested repo-function, your judge SHOULD be 'wrong' for the repo-function. 
+        - Case 2: If you find that the error DOES NOT originates in the definition of the tested repo-function (e.g. caused by/originated in other functions), your judge MUST be 'undetermined' for the repo-function. 
+        - Case 3: If you find that the error merely originates from numerical/results check mismatches (e.g., assertion failures, validation errors, or physical correctness checks) rather than syntax/grammar errors, your judge MUST be 'undetermined' for the repo-function. This stage only tests code integrability and executability, NOT physical correctness.
+        - Case 4: If the error is caused by the **input arguments** to the repo-function having wrong type or format (e.g. the caller passes arguments that do not match what the repo-function expects, such as wrong type, wrong shape, or incompatible format), your judge MUST be 'undetermined'. The repo-function definition itself may be correct; the failure is due to how it is being called (test-code or caller side), not the repo-function implementation.
+
+
+---------------------------------------------------------------------------------
+[Output]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). **JSON escaping:** In string values (e.g. errors, stderr), any double quote (`"`) must be escaped as `\"` so the output can be parsed by json.loads().
+The dictionary must contain keys:
+- "target_file_name": The name of the tested repo-function, MUST be exactly same with the input 'target_file_name' 
+- "judge": your determination of the executability of the tested repo-function. Your answer can ONLY be one of 'correct', 'wrong' and 'undetermined'.  
+    - if the exitcode == 0: your 'judge' shold be 'correct'. 
+    - if the exitcode != 0: you read the 'result_target_file_stderr' for more information:
+        - if the error ACTUALLY originates in the tested repo-function, then your 'judge' should be 'wrong'. 
+            - example: the tested repo-function includes some incorrect definitions. 
+            - example: the packages used by the tested repo-function cannot be imported or do not exist. As long as the package with import error are required by the repo-function, your judge should be wrong, although the repo-function may have been executed yet. 
+        - if the error DOES NOT originates in the tested repo-function, then your 'judge' should be 'undetermined'.
+            - example: in the main() of the test-code, there are some errors originates in other commands rather than the repo-function. 
+            - example: in the test-code, there are some errors in the funtion definitions other than the repo-function. 
+            - example: in the main() of the test-code, the input of the repo-function is NOT what's required.
+        - if the error is caused by **input parameter type or format** to the repo-function (e.g. arguments passed to the repo-function have wrong type, shape, or format that the repo-function does not accept), then your 'judge' should be 'undetermined', NOT 'wrong'. The repo-function may be correctly defined; the issue is with the caller/test-code supplying incompatible arguments. 
+- "errors": you summerize the error information based on the input stderr and the original target_file_content. If the judge is correct, then this term MUST be 'None'. You are FORBIDDEN to give code suggestions without evidence, unless the stderr explicitly provides correct code hints. You SHOULD focus on identifying the error and indicating what content should be retrieved for further investigation, rather than directly providing potentially incorrect code suggestions.
+- "stderr": you copy the original "stderr" information in the input here.
+
+Example output (exact dictionary form, shown here for clarity. "```json" right before the dict and "```" right after the dict MUST be included! Beside from this dict, no other information should be output):
+```json
+{
+"target_file_name": "site_BoseHubbard1D.jl",
+"judge": "wrong",
+"errors": "the target file for the boson incorrectly defines the conserve_nb conserved quantity. The conserve_nb input parameter does not actually exist.",
+"stderr": "ERROR: LoadError: UndefVarError: `conserve_nb` not defined"
+}
+```
+
+Example output
+```json
+{
+"target_file_name": "site_BoseHubbard1D.jl",
+"judge": "correct",
+"errors": "None",
+"stderr": ""
+}
+```

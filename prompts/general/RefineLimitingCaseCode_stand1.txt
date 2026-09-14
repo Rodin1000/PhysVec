@@ -1,0 +1,68 @@
+You are an expert in numerical calculations of quantum many-body physics.
+Your task here is to refine the limiting case test code that failed during execution or produced incorrect results.
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. **LIMITING_CASE_CONTENT**: Description of the limiting case test scenario that should be performed. This helps you understand the target of the test.
+2. **CODE_CONTENT**: The current limiting case test code that needs to be refined.
+3. **STDOUT**: Standard output from the execution of the current code.
+4. **STDERR**: Standard error output from the execution (detailed error information).
+5. **ERROR_ANALYSIS**: Summary of the error or issue that occurred.
+6. **TOPIC**: The topic name (dmrg, nnwf, or qcmb), which determines the available element functions.
+
+-------------------------------------------------------------------------------------------------------
+[Task]:
+You need to refine the CODE_CONTENT to fix the issues identified in ERROR_ANALYSIS and STDERR, while minimizing changes to the code structure.
+
+-------------------------------------------------------------------------------------------------------
+[Element Functions by Topic]:
+Based on the TOPIC, the available element function prefixes are:
+- **dmrg**: `site`, `hamiltonian`, `initialstate`, `observable`, `effector`
+- **nnwf**: `hilbert`, `statemodel`, `compset`, `hamiltonian`, `observable`, `effector`
+- **qcmb**: `hamiltonian`, `circinit`, `circevol`, `effector`, `observable`
+
+Additionally, **run functions** have the prefix `run` (common to all topics).
+
+**CRITICAL**: In the `main` function, you MUST ONLY directly call the element functions and run functions defined in the code file. You are FORBIDDEN to rewrite calculation code yourself.
+
+-------------------------------------------------------------------------------------------------------
+[Refinement Rules]:
+1. Read LIMITING_CASE_CONTENT to understand what limiting case test scenario should be performed. This will help you ensure the refined code correctly implements the test.
+2. Analyze ERROR_ANALYSIS and STDERR to identify the root cause of the failure:
+   - The error may be in the `main` function (e.g., incorrect function calls, wrong parameter passing, incompatible types).
+   - The error may be in function definitions if fine-tuning is needed (e.g., output parameters).
+3. Refine the code with minimal changes:
+   - **Mainly modify the `main` function** to fix the issues while ensuring it correctly implements the limiting case test described in LIMITING_CASE_CONTENT.
+   - If necessary, you may fine-tune function definitions (e.g., output parameters), but these modifications should be explicitly targeted at element functions and run functions. You MUST NOT change the logic/core implementation of function definitions.
+   - You are FORBIDDEN to make major changes to the defined functions or rewrite calculation logic.
+4. Ensure the refined code:
+   - Correctly calls element functions and run functions in the proper order.
+   - Uses compatible parameter types and values.
+   - Properly handles the limiting case scenario described in LIMITING_CASE_CONTENT.
+5. You are FORBIDDEN to define any NEW functions. You can ONLY modify existing code.
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+Your output consists of two parts:
+
+1. **JSON block** (enclosed by ```json and ```): A dictionary with keys:
+   - **"code_type"**: Either "python" or "julia" (lowercase string), matching the original code file type.
+   Do NOT put code content in the JSON.
+   The JSON must be valid (proper escaping, e.g. `"` as `\"`) so it can be loaded by json.loads().
+
+2. **Code block** (enclosed by <CODE> and </CODE>): The refined full source code as raw text.
+   - Place the complete code between <CODE> and </CODE>
+   - No JSON escaping is needed.
+   - **CRITICAL:** You MUST output a COMPLETE code block. The block MUST include both <CODE> and </CODE>. Do NOT omit or truncate the closing tag.
+
+**CRITICAL:** You MUST NOT include this prompt itself in your output.
+
+**Example output:**
+```json
+{"code_type": "...code type here..."}
+```
+<CODE>
+...refined code here...
+</CODE>
+
+**CRITICAL:** Your output MUST include both the JSON block and the code block.

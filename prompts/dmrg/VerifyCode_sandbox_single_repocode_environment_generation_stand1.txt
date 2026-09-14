@@ -1,0 +1,72 @@
+You are an expert in numerical calculations of quantum many-body physics. 
+Your task here is to generate the unit test environment code for a function defined in the targeted repository (waiting for test). The environment consists of two parts:
+1. Background code: All verifier functions copied from CodeVerifier_library that are needed to construct the unit test.
+2. Entrypoint code: The main function and entry point that organizes the functions and provides test input values.
+
+Note: The target function to be tested will be provided separately and should NOT be included in your output. 
+
+-------------------------------------------------------------------------------------------------------
+Input:
+1. **codeverifier_library_compact**: A code file containing all standard verifier function definitions. **Note: These verifier code files contain complete executable code including main() functions and entry points. You should refer to these entrypoints as examples when generating the entrypoint_code.** 
+2. **repo-main-function**: The 'main' function defined in the tested repository for reference. 
+3. **repo-function**: A single function waiting for test in the targeted repository;
+
+-------------------------------------------------------------------------------------------------------
+[Generation Rules]
+For ITensors/ITensorMPS usage, you MUST follow instructions bellow: 
+1. You are required to generate the unit test environment code for the given repo-function. The environment consists of two separate parts:
+    - Background code: All verifier functions from CodeVerifier_library needed to construct the unit test. The repo-function is NOT included here.
+    - Entrypoint code: The main function and entry point that organizes all functions (including the repo-function) and provides test input values.
+    - The repo-function is a single-function function, which is one of {site, hamiltonian, initialstate, observable, effector}.
+
+2. **BACKGROUND CODE**: You select ALL necessary verifier functions from the CodeVerifier_library to cooperate with the repo-function to complete the entire program.
+    - The chosen verifier functions together with the repo-function MUST form a COMPLETE process workflow, including site definition, hamiltonian definition, initial state definition, observable definition and effector (dmrg calculation) part. 
+    - There are comments about the parameter meanings in the definitions of the verifier functions. You MUST include all related comments when copying the definitions of the verifier functions.
+    - You MUST copy the function definitions EXACTLY as they appear in the CodeVerifier_library, DO NOT modefy them.
+    - example 1: if repo-function = 'site_BHM1D', then background_code should contain 'hamiltonian_verifier_boson', 'initialstate_verifier_boson', 'observable_verifier_boson', 'effector_verifier_boson' (if needed). The entrypoint_code should call 'site_BHM1D' (which will be provided separately) along with these verifier functions.
+    - example 2: if repo-function = 'effector_dmrg_groundstate', then background_code should contain 'site_verifier_boson', 'hamiltonian_verifier_boson', 'initialstate_verifier_boson', 'observable_verifier_boson'. The entrypoint_code should call 'effector_dmrg_groundstate' (which will be provided separately) along with these verifier functions.
+    
+3. For the entrypoint_code: You organize ALL chosen verifier functions and the repo-function to form a SIMPLE and COMPLETE workflow. 
+    - You define a system, do the dmrg calculation and measure a observable. You MUST NOT go further, such as parameter scan...
+    - **CRITICAL**: You are FORBIDDEN to add any physical/numerical checks (including assertions, validations, or verification logic) in the entrypoint_code. You are FORBIDDEN to add any error statements (e.g., `error()`, `@assert`, `throw()`) that would cause the program to fail. This stage only tests code integrability and executability, NOT physical correctness.
+    - You MUST refer to the main function in the 'codeverifier_library_compact' when constructing the entrypoint_code. You should follow a similar structure and pattern as shown, but adapt it for the specific repo-function being tested.
+    - You MUST refer to the 'repo-main-function' as a reference when constructing the 'main' function.
+        - You SHOULD try to KEEP the parameter values and choices from the repo-main-function. Use the same or similar parameter selections when feasible.
+        - Fallback: If the repo-main-function does not provide clear parameter choices, then use small values for feasibility (e.g. lattice size < 10, nsweeps < 3, maxdim < 30).
+    - **CRITICAL**: Avoid parameter values that contradict non-main function definitions (e.g. hardcoded indices/params). Avoid extremely small values (e.g. 0, 1) that may cause degeneracy or invalid inputs.
+    - You DO NOT need to import the repo function before the main function explicitly, because this entrypoint code will be combined with the repo function into a single code. You JUST call the repo function explicitly. 
+
+4. You are FORBIDDEN to define any NEW functions in the generated code explicitly.
+
+5. If multiple functions are defined in the same type (e.g. 'site_verifier_boson', 'site_verifier_fermion', 'site_verifier_spin1/2'...), you choose ONLY one of them according to the site type of the targetted repo-function. 
+
+------------------------------------------------------------------------------------------------------
+[Output]:
+Your output consists of three parts:
+
+1. **JSON block** (enclosed by ```json and ```): A dictionary with keys:
+   - **"topic"**: a brief summary of the input user's requests (fewer than 100 words)
+   - **"code_type"**: either "python" or "julia" (lowercase string)
+   Do NOT put code content in the JSON.
+   The JSON must be valid (proper escaping, e.g. `"` as `\"`) so it can be loaded by json.loads().
+
+2. **Background code block** (enclosed by <BACKGROUND> and </BACKGROUND>): ALL verifier functions copied from codeverifier_library_compact. Output must be raw executable code that can be directly written to a file; do NOT use JSON escape sequences (e.g. `\n`, `\"`, `\\`).
+
+3. **Entrypoint code block** (enclosed by <ENTRYPOINT> and </ENTRYPOINT>): The main function and entry point. Output must be raw executable code that can be directly written to a file; do NOT use JSON escape sequences (e.g. `\n`, `\"`, `\\`).
+
+**CRITICAL:** You MUST output COMPLETE code blocks. Each block MUST include both its opening and closing tags (e.g. <BACKGROUND> and </BACKGROUND>). Do NOT omit or truncate any closing tag.
+
+**CRITICAL:** You MUST NOT include this prompt itself in your output.
+
+**Example output:**
+```json
+{"topic": "...topic here...", "code_type": "...code type here..."}
+```
+<BACKGROUND>
+...background code here...
+</BACKGROUND>
+<ENTRYPOINT>
+...entrypoint code here...
+</ENTRYPOINT>
+
+**CRITICAL:** Your output MUST include the JSON block and both code blocks. 

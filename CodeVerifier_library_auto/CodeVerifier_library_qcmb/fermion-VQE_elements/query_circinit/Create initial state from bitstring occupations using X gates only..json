@@ -1,0 +1,137 @@
+{
+  "query": "Create initial state from bitstring occupations using X gates only.",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "hartree_fock__973a80b2a7462da2917d3311e3e913f7__part_3__3",
+      "text": "_mapper,\n            )\n            self.qregs = [QuantumRegister(len(self._bitstr), name=\"q\")]\n\n    def _build(self) -> None:\n        \"\"\"\n        Construct the Hartree-Fock initial state given its parameters.\n        Returns:\n            QuantumCircuit: a quantum circuit preparing the Hartree-Fock\n            initial state given a number of spatial orbitals, number of particles and\n            a qubit mapper.\n        \"\"\"\n        if self._is_built:\n            return\n\n        super()._build()\n\n        # Construct the circuit for bitstring. Since this is defined as an initial state\n        # circuit its assumed that this is applied first to the qubits that are initialized to\n        # the zero state. Hence we just need to account for all True entries and set those.\n        if self._bitstr is not None:\n            for i, bit in enumerate(self._bitstr):\n                if bit:\n                    self.x(i)\n\n\ndef hartree_fock_bitstring_mapped(\n    num_spatial_orbitals: int,\n    num_particles: tuple[int, int],\n    qubit_mapper: QubitMapper,\n) -> list[bool]:\n    # pylint: disable=unused-argument\n    \"\"\"Compute the bitstring representing the mapped Hartree-Fock state for the specified system.\n\n    Args:\n        num_spatial_orbitals: The number of spatial orbitals, has a min. value of 1.\n        num_particles: The number of particles as a tuple (alpha, beta) containing the number of\n            alpha- and  beta-spin electrons, respectively.\n        qubit_mapper: A QubitMapper.\n\n    Returns:\n        The bitstring representing the mapped state of the Hartree-Fock state as array of bools.\n    \"\"\"\n    # get the bitstring encoding the Hartree Fock state\n    bitstr = hartree_fock_bitstring(num_spatial_orbitals, num_particles)\n\n    # encode the bitstring as a `FermionicOp`\n    bitstr_op = FermionicOp(\n        {\" \".join(f\"+_{idx}\" for idx, bit in enumerate(bitstr) if bit): 1.0},\n        num_spin_orbitals=2 * num_spatial_orbitals,\n    )\n\n    # map the `FermionicOp` to a qubit operator\n    qubit_op: SparsePauliOp\n    if isinstance(qubit_mapper, TaperedQubitMapper):\n        # To avoid checking commutativity, we call the two methods separately.\n        qubit_op = qubit_mapper.map_clifford(bitstr_op)\n        qubit_op = qubit_mapper.taper_clifford(qubit_op, check_commutes=False)\n    else:\n        qubit_op = qubit_mapper.map(bitstr_op)\n\n    # We check the mapped operator `x` part of the paulis because we want to have particles\n    # i.e. True,",
+      "metadata": {
+        "section_title": "hartree_fock.py",
+        "package": "qiskit-nature",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\hartree_fock.py",
+        "section_id": "part_3"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.90763660438602,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "initial",
+        "state",
+        "bitstring"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "phase_estimation__ebb06fd81b96c6f4a6840dff4badd3cd__part_1__1",
+      "text": "phase will be spread\n    across bitstrings, with amplitudes that decrease with distance from the bitstring most\n    closely approximating the eigenphase.\n\n    The main input to the constructor is the number of qubits in the phase-reading register.\n    For phase estimation, there are two methods:\n\n    first. `estimate`, which takes a state preparation circuit to prepare an input state, and\n      a unitary that will act on the input state. In this case, an instance of\n      :class:`qiskit.circuit.PhaseEstimation`, a QPE circuit, containing\n      the state preparation and input unitary will be constructed.\n    second. `estimate_from_pe_circuit`, which takes a quantum-phase-estimation circuit in which\n      the unitary and state preparation are already embedded.\n\n    In both estimation methods, the QPE circuit is run on a backend\n    and the frequencies or counts of the phases represented by bitstrings\n    are recorded. The results are returned as an instance of\n    :class:`~qiskit_algorithms.phase_estimator_result.PhaseEstimationResult`.\n\n    **Reference:**\n\n    [1]: Michael A. Nielsen and Isaac L. Chuang. 2011.\n         Quantum Computation and Quantum Information: 10th Anniversary Edition (10th ed.).\n         Cambridge University Press, New York, NY, USA.\n\n    \"\"\"\n\n    def __init__(\n        self,\n        num_evaluation_qubits: int,\n        sampler: BaseSamplerV2 | None = None,\n        *,\n        transpiler: Transpiler | None = None,\n        transpiler_options: dict[str, Any] | None = None,\n    ) -> None:\n        r\"\"\"\n        Args:\n            num_evaluation_qubits: The number of qubits used in estimating the phase. The phase will\n                be estimated as a binary string with this many bits.\n            sampler: The sampler primitive on which the circuit will be sampled.\n            transpiler: An optional object with a `run` method allowing to transpile the circuits\n                that are produced within this algorithm. If set to `None`, these won't be\n                transpiled.\n            transpiler_options: A dictionary of options to be passed to the transpiler's `run`\n                method as keyword arguments.\n\n        Raises:\n            AlgorithmError: If a sampler is not provided\n        \"\"\"\n        if sampler is None:\n            raise AlgorithmError(\"A sampler must be provided.\")\n\n        self._measurements_added = False\n        if num_evaluation_qubits is not None:\n            self._num_evaluation_qubits = num_evaluation_qubits\n\n        self._sampler = sampler\n        self._transpiler = transpiler\n        self._transpiler_options = transpiler_options if transpiler_options is not None else {}\n\n    def construct_circuit(\n        self, unitary: QuantumCircuit, state_preparation: QuantumCircuit | None = None\n   ",
+      "metadata": {
+        "package": "qiskit-algorithms",
+        "section_title": "phase_estimation.py",
+        "source_file": "qiskit_algorithms\\phase_estimators\\phase_estimation.py",
+        "section_id": "part_1"
+      },
+      "score": 0.8273858547982419,
+      "original_score": 0.8150562729981163,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "state",
+        "from",
+        "bitstring"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "boolean_expression_synth__73f9d751d141450c234a7afc782efcea__part_2__2",
+      "text": "().control(\n                len(qubit_indices) - 1, ctrl_state=control_state[:-1][::-1], annotated=False\n            )\n            if control_state[-1] == \"0\":\n                qc.x(qubit_indices[-1])\n            qc.append(gate, qubit_indices)\n            if control_state[-1] == \"0\":\n                qc.x(qubit_indices[-1])\n    return qc\n\n\ndef synth_bit_oracle_from_esop(esop, num_qubits):\n    \"\"\"\n    Generates a bit-flip oracle for the boolean function f given in ESOP (Exlusive sum of products) form\n    esop is of the form ('01-1', '11-0', ...) etc\n    where 1 is the variable, 0 is negated variable and - is don't care\n    \"\"\"\n    output_index = num_qubits - 1\n    qc = QuantumCircuit(num_qubits)\n    clause_data = [\n        (zip(*[qubit_data for qubit_data in enumerate(clause) if qubit_data[1] != \"-\"]))\n        for clause in esop\n    ]\n    for qubit_indices, control_data in clause_data:\n        control_state = \"\".join(control_data)\n        # use custom controlled-X gate\n        gate = XGate().control(len(qubit_indices), ctrl_state=control_state[::-1], annotated=False)\n        qc.append(gate, qubit_indices + (output_index,))\n    return qc\n",
+      "metadata": {
+        "section_id": "part_2",
+        "section_title": "boolean_expression_synth.py",
+        "package": "qiskit",
+        "source_file": "qiskit\\synthesis\\boolean\\boolean_expression_synth.py"
+      },
+      "score": 0.8150562729981163,
+      "original_score": 0.8150562729981163,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "ref_initialize__3c79c72e7d767a01d227dae5d0b67d73__part_10__10",
+      "text": "x2\": shots / 2}]\n    else:\n        return [{\"0x00\": shots / 2, \"0x10\": shots / 2}]\n\n\ndef initialize_entangled_qubits(final_measure=True):\n    \"\"\"Initialize test circuits with entangled qubits\"\"\"\n\n    circuits = []\n    qr = QuantumRegister(3)\n    if final_measure:\n        cr = ClassicalRegister(3)\n        regs = (qr, cr)\n    else:\n        regs = (qr,)\n\n    # Initialize |000+111> -> |000+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [0])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |010+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 1], [1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+011>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0, 0, 0], [0, 1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |100+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 0, 0, 1], [0, 2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100+010+110+100+101+011+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(",
+      "metadata": {
+        "source_file": "test\\terra\\reference\\ref_initialize.py",
+        "section_id": "part_10",
+        "section_title": "ref_initialize.py",
+        "package": "qiskit-aer"
+      },
+      "score": 0.8150562729981163,
+      "original_score": 0.8150562729981163,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "aer_statevector__1dd08ca16cd833bed244aac476cef63f__part_3__3",
+      "text": ")\n        num_qubits = inst.num_qubits\n\n        if init_data is not None:\n            aer_state.initialize(data=init_data, copy=True)\n        else:\n            aer_state.initialize()\n\n        if isinstance(inst, QuantumCircuit) and inst.global_phase != 0:\n            aer_state.apply_global_phase(inst.global_phase)\n\n        if isinstance(inst, QuantumCircuit):\n            AerStatevector._aer_evolve_circuit(\n                aer_state, inst, range(num_qubits), basis_gates, custom_insts\n            )\n        else:\n            AerStatevector._aer_evolve_instruction(\n                aer_state, inst, range(num_qubits), basis_gates, custom_insts\n            )\n\n        return aer_state.move_to_ndarray(), aer_state\n\n    @staticmethod\n    def _aer_evolve_circuit(aer_state, circuit, qubits, basis_gates=None, custom_insts=None):\n        \"\"\"Apply circuit into aer_state\"\"\"\n        for instruction in circuit.data:\n            if instruction.clbits:\n                raise AerError(\n                    f\"Cannot apply instruction with classical bits: {instruction.operation.name}\"\n                )\n            inst = instruction.operation\n            qargs = instruction.qubits\n            AerStatevector._aer_evolve_instruction(\n                aer_state,\n                inst,\n                [qubits[circuit.find_bit(qarg).index] for qarg in qargs],\n                basis_gates,\n                custom_insts,\n            )\n\n    @staticmethod\n    def _aer_evolve_instruction(aer_state, inst, qubits, basis_gates=None, custom_insts=None):\n        \"\"\"Apply instruction into aer_state\"\"\"\n\n        params = inst.params\n        applied = True\n\n        if basis_gates and inst.name in basis_gates:\n            if inst.name in [\"u3\", \"u\"]:\n                aer_state.apply_u(qubits[0], params[0], params[1], params[2])\n            elif inst.name == \"h\":\n                aer_state.apply_h(qubits[0])\n            elif inst.name == \"x\":\n                aer_state.apply_x(qubits[0])\n            elif inst.name == \"cx\":\n                aer_state.apply_cx(qubits[0], qubits[1])\n            elif inst.name == \"y\":\n                aer_state.apply_y(qubits[0])\n            elif inst.name == \"cy\":\n                aer_state.apply_cy(qubits[0], qubits[1])\n            elif inst.name == \"z\":\n                aer_state.apply_z(qubits[0])\n            elif inst.name == \"cz\":\n                aer_state.apply_cz(qubits[0], qubits[1])\n            elif inst.name == \"unitary\":\n                aer_state.apply_unitary(qubits, inst.params[0])\n            elif inst.name == \"diagonal\":\n                aer_state.apply_diagonal(qubits, inst.params)\n            elif inst.name == \"cu\":\n                aer_state.apply_cu(qubits[0], qubits[",
+      "metadata": {
+        "section_title": "aer_statevector.py",
+        "package": "qiskit-aer",
+        "source_file": "qiskit_aer\\quantum_info\\states\\aer_statevector.py",
+        "section_id": "part_3"
+      },
+      "score": 0.765761578874489,
+      "original_score": 0.765761578874489,
+      "vector_score": 0.9395198886792185,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 223,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 57
+      }
+    }
+  }
+}

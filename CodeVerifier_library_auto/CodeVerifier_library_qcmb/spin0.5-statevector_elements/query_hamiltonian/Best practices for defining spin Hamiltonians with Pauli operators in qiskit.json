@@ -1,0 +1,135 @@
+{
+  "query": "Best practices for defining spin Hamiltonians with Pauli operators in qiskit",
+  "packages": [
+    "qiskit",
+    "qiskit-nature"
+  ],
+  "results": [
+    {
+      "id": "z2_symmetries__d4a44963ab2638ddd55f15b307963fc2__part_2__2",
+      "text": " self._symmetries = symmetries\n        self._sq_paulis = sq_paulis\n        self._sq_list = sq_list\n        self.tapering_values = tapering_values\n        self.tol = tol\n\n    @property\n    def symmetries(self) -> list[Pauli]:\n        \"\"\"Return symmetries.\"\"\"\n        return self._symmetries\n\n    @property\n    def sq_paulis(self) -> list[Pauli]:\n        \"\"\"Return sq paulis.\"\"\"\n        return self._sq_paulis\n\n    @property\n    def cliffords(self) -> list[SparsePauliOp]:\n        \"\"\"\n        Get clifford operators, built based on symmetries and single-qubit X.\n\n        Returns:\n            A list of unitaries used to diagonalize the Hamiltonian.\n        \"\"\"\n        cliffords = [\n            (SparsePauliOp(pauli_symm) + SparsePauliOp(sq_pauli)) / math.sqrt(2)\n            for pauli_symm, sq_pauli in zip(self._symmetries, self._sq_paulis)\n        ]\n        return cliffords\n\n    @property\n    def sq_list(self) -> list[int]:\n        \"\"\"Return sq list.\"\"\"\n        return self._sq_list\n\n    @property\n    def settings(self) -> dict:\n        \"\"\"Return operator settings.\"\"\"\n        return {\n            \"symmetries\": self._symmetries,\n            \"sq_paulis\": self._sq_paulis,\n            \"sq_list\": self._sq_list,\n            \"tapering_values\": self.tapering_values,\n        }\n\n    def __str__(self):\n        ret = [\"Z2 symmetries:\"]\n        ret.append(\"Symmetries:\")\n        for symmetry in self._symmetries:\n            ret.append(symmetry.to_label())\n        ret.append(\"Single-Qubit Pauli X:\")\n        for x in self._sq_paulis:\n            ret.append(x.to_label())\n        ret.append(\"Cliffords:\")\n        for c in self.cliffords:\n            ret.append(str(c))\n        ret.append(\"Qubit index:\")\n        ret.append(str(self._sq_list))\n        ret.append(\"Tapering values:\")\n        if self.tapering_values is None:\n            possible_values = [\n                str(list(coeff)) for coeff in itertools.product([1, -1], repeat=len(self._sq_list))\n            ]\n            possible_values = \", \".join(x for x in possible_values)\n            ret.append(\"  - Possible values: \" + possible_values)\n        else:\n            ret.append(str(self.tapering_values))\n\n        ret = \"\\n\".join(ret)\n        return ret\n\n    def is_empty(self) -> bool:\n        \"\"\"\n        Check the z2_symmetries is empty or not.\n\n        Returns:\n            Empty or not.\n        \"\"\"\n        return len(self._symmetries) == 0",
+      "metadata": {
+        "section_title": "z2_symmetries.py",
+        "source_file": "qiskit\\quantum_info\\analysis\\z2_symmetries.py",
+        "section_id": "part_2",
+        "package": "qiskit"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.0,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "pauli",
+        "operators"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "parity_mapper__80537db4cca20eea36803122965b6008__part_2__2",
+      "text": "1), dtype=bool)\n            b_x = np.asarray(b_x + [1] + [1] * (register_length - i - 1), dtype=bool)\n            pauli_table.append((Pauli((a_z, a_x)), Pauli((b_z, b_x))))\n\n        return pauli_table\n\n    def _two_qubit_reduce(self, operator: SparsePauliOp) -> SparsePauliOp:\n        \"\"\"\n        Applies the two qubit reduction to the operator. This method hard codes the ``Z2Symmetries``\n        corresponding to the spin orbitals ordering. The tapering values required to identify the eigen\n        sector of the problem are calculated when :attr:`num_particles` is set.\n\n        Args:\n            operator: To be tapered operator.\n        Returns:\n            A new operator whose qubit number is reduced by 2.\n        \"\"\"\n        num_qubits = operator.num_qubits\n        last_idx = num_qubits - 1\n        mid_idx = num_qubits // 2 - 1\n        sq_list = [mid_idx, last_idx]\n\n        # build symmetries, sq_paulis:\n        symmetries, sq_paulis = [], []\n        for idx in sq_list:\n            pauli_str = [\"I\"] * num_qubits\n\n            pauli_str[idx] = \"Z\"\n            z_sym = \"\".join(pauli_str)[::-1]\n            symmetries.append(z_sym)\n\n            pauli_str[idx] = \"X\"\n            sq_pauli = \"\".join(pauli_str)[::-1]\n            sq_paulis.append(sq_pauli)\n\n        symmetries = PauliList(symmetries)\n        sq_paulis = PauliList(sq_paulis)\n        z2_symmetries = Z2Symmetries(symmetries, sq_paulis, sq_list, self._tapering_values)\n\n        return z2_symmetries.taper(operator)\n\n    def _map_single(\n        self, second_q_op: FermionicOp, *, register_length: int | None = None\n    ) -> SparsePauliOp:\n        mapped_op = self.mode_based_mapping(second_q_op, register_length=register_length)\n\n        reduced_op = mapped_op\n        if self.num_particles is not None:\n            if mapped_op.num_qubits > 2:\n                reduced_op = self._two_qubit_reduce(mapped_op)\n            else:\n                logger.warning(\n                    \"The original qubit operator only contains %s qubits! \"\n                    \"Skipping the requested two-qubit reduction!\",\n                    mapped_op.num_qubits,\n                )\n\n        return reduced_op\n",
+      "metadata": {
+        "section_title": "parity_mapper.py",
+        "source_file": "qiskit_nature\\second_q\\mappers\\parity_mapper.py",
+        "section_id": "part_2",
+        "package": "qiskit-nature"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "spin",
+        "pauli"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    },
+    {
+      "id": "bosonic_logarithmic_mapper__62a53983271d98e53cc3ba5b000ff5e9__part_4__4",
+      "text": ")*|n-1><n|. The initial and final states are represented in binary.\n                    # Define the prefactor and the initial and final states (which results from the\n                    # action of the operator). They vary depending on the operator\n                    prefactor = np.sqrt(n + 1) if op == \"+\" else np.sqrt(n)\n                    final_state: str = (\n                        f\"{(n + 1):0{self.number_of_qubits_per_mode}b}\"\n                        if op == \"+\"\n                        else f\"{(n - 1):0{self.number_of_qubits_per_mode}b}\"\n                    )\n                    init_state: str = f\"{n:0{self.number_of_qubits_per_mode}b}\"\n                    # Now build the Pauli operators\n                    single_mapped_term = SparsePauliOp([\"I\" * qubit_register_length], coeffs=[1.0])\n                    # pylint: disable=consider-using-enumerate\n                    for j in range(len(init_state)):\n                        # We need to comply to the little endian notation of qiskit.\n                        # For the binary string representation of the state, the first element is the\n                        # most significant bit. Thus, it needs to be put to the end of the mode in the\n                        # qubit register.\n                        i: int = len(init_state) - j - 1\n                        # Get the Pauli operator for the single qubit of the term we are mapping and\n                        # compose it with the already mapped ones\n                        single_mapped_term = single_mapped_term.compose(\n                            self._get_single_qubit_pauli_matrix(\n                                mode_index_in_register + i,\n                                qubit_register_length,\n                                final_state[j] + init_state[j],\n                            )\n                        )\n                    pauli_expansion.append(prefactor * single_mapped_term)\n                # Add the Pauli expansion for a single n_k to map of the bosonic operator\n                bos_op_to_pauli_op = reduce(operator.add, pauli_expansion).compose(\n                    bos_op_to_pauli_op\n                )\n            # Add the map of the single boson op (e.g. +_0) to the map of the full bosonic operator\n            pauli_op.append(coeff * reduce(operator.add, bos_op_to_pauli_op.simplify()))\n        # return the lookup table for the transformed XYZI operators\n        return reduce(operator.add, pauli_op)\n\n    @lru_cache(maxsize=32)\n    def _get_single_qubit_pauli_matrix(\n        self, qubit_idx: int, register_length: int, qubit_operator: str\n    ) -> SparsePauliOp:\n        \"\"\"This method builds the Qiskit Pauli operators of one of the operators:\n        I_+ = I + Z, I_- = I - Z, S_+ = X + iY and S_- = X - iY.\n\n        Args",
+      "metadata": {
+        "section_id": "part_4",
+        "section_title": "bosonic_logarithmic_mapper.py",
+        "package": "qiskit-nature",
+        "source_file": "qiskit_nature\\second_q\\mappers\\bosonic_logarithmic_mapper.py"
+      },
+      "score": 0.98994718059013,
+      "original_score": 0.9891320871244649,
+      "vector_score": 0.9015966205816525,
+      "bm25_score": 0.3501418661712496,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "pauli",
+        "operators",
+        "qiskit"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "pauli__ee5c90167965fb7cf2c4d5e336285a06__part_11__11",
+      "text": "\", None)\n\n        # pylint: disable=cyclic-import\n        from qiskit.quantum_info.operators.symplectic.clifford import Clifford\n\n        if not isinstance(other, (Pauli, Instruction, QuantumCircuit, Clifford)):\n            # Convert to a Pauli\n            other = Pauli(other)\n\n        return Pauli(super().evolve(other, qargs=qargs, frame=frame))\n\n    # ---------------------------------------------------------------------\n    # Initialization helper functions\n    # ---------------------------------------------------------------------\n\n    @staticmethod\n    def _from_label(label):\n        \"\"\"Return the symplectic representation of Pauli string.\n\n        Args:\n            label (str): the Pauli string label.\n\n        Returns:\n            BasePauli: the BasePauli corresponding to the label.\n\n        Raises:\n            QiskitError: if Pauli string is not valid.\n        \"\"\"\n        match_ = Pauli._VALID_LABEL_PATTERN.fullmatch(label)\n        if match_ is None:\n            raise QiskitError(f'Pauli string label \"{label}\" is not valid.')\n        phase = Pauli._CANONICAL_PHASE_LABEL[\n            (match_[\"coeff\"] or \"\").replace(\"1\", \"\").replace(\"+\", \"\").replace(\"j\", \"i\")\n        ]\n\n        # Convert to Symplectic representation\n        pauli_bytes = np.frombuffer(match_[\"pauli\"].encode(\"ascii\"), dtype=np.uint8)[::-1]\n        ys = pauli_bytes == ord(\"Y\")\n        base_x = np.logical_or(pauli_bytes == ord(\"X\"), ys).reshape(1, -1)\n        base_z = np.logical_or(pauli_bytes == ord(\"Z\"), ys).reshape(1, -1)\n        base_phase = np.array([(phase + np.count_nonzero(ys)) % 4], dtype=int)\n        return base_z, base_x, base_phase\n\n    @classmethod\n    def _from_scalar_op(cls, op):\n        \"\"\"Convert a ScalarOp to BasePauli data.\"\"\"\n        if op.num_qubits is None:\n            raise QiskitError(f\"{op} is not an N-qubit identity\")\n        base_z = np.zeros((1, op.num_qubits), dtype=bool)\n        base_x = np.zeros((1, op.num_qubits), dtype=bool)\n        base_phase = np.mod(\n            cls._phase_from_complex(op.coeff) + _count_y(base_x, base_z), 4, dtype=int\n        )\n        return base_z, base_x, base_phase\n\n    @classmethod\n    def _from_pauli_instruction(cls, instr):\n        \"\"\"Convert a Pauli instruction to BasePauli data.\"\"\"\n        if isinstance(instr, PauliGate):\n            return cls._from_label(instr.params[0])\n        if isinstance(instr, IGate):\n            return np.array([[False]]), np.array([[False]]), np.array([0])\n        if isinstance(instr, XGate):\n            return np",
+      "metadata": {
+        "source_file": "qiskit\\quantum_info\\operators\\symplectic\\pauli.py",
+        "section_id": "part_11",
+        "section_title": "pauli.py",
+        "package": "qiskit"
+      },
+      "score": 0.9309406886269395,
+      "original_score": 0.9253412850020967,
+      "vector_score": 0.9253412850020967,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "pauli",
+        "operators",
+        "qiskit"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "linear_mapper__8ea1add40edf0002cef8e95591efc125__part_1__1",
+      "text": " -> list[SparsePauliOp]:\n        \"\"\"\n        Generates a 'linear_encoding' of the spin S operators 'X', 'Y', 'Z' and 'identity'\n        to qubit operators (linear combinations of pauli strings).\n        In this 'linear_encoding' each individual spin S system is represented via\n        2S+1 qubits and the state |s> is mapped to the state |00...010..00>, where the s-th qubit is\n        in state 1.\n\n        Returns:\n            The 4-element list of transformed spin S 'X', 'Y', 'Z' and 'identity' operators.\n            I.e. spin_op_encoding[0]` corresponds to the linear combination of pauli strings needed\n            to represent the embedded 'X' operator\n        \"\"\"\n\n        dspin = int(2 * spin + 1)\n        nqubits = dspin\n\n        # quick functions to generate a pauli with X / Y / Z at location `i`\n        pauli_id = Pauli(\"I\" * nqubits)\n\n        def pauli_x(i):\n            return Pauli(\"I\" * i + \"X\" + \"I\" * (nqubits - i - 1))\n\n        def pauli_y(i):\n            return Pauli(\"I\" * i + \"Y\" + \"I\" * (nqubits - i - 1))\n\n        def pauli_z(i):\n            return Pauli(\"I\" * i + \"Z\" + \"I\" * (nqubits - i - 1))\n\n        # 1. build the non-diagonal X operator\n        x_summands = []\n        for i, coeff in enumerate(np.diag(SpinOp.x(spin).to_matrix(), 1)):\n            x_summands.append(\n                coeff / 2.0 * SparsePauliOp(pauli_x(i).dot(pauli_x(i + 1)))\n                + coeff / 2.0 * SparsePauliOp(pauli_y(i).dot(pauli_y(i + 1)))\n            )\n\n        # 2. build the non-diagonal Y operator\n        y_summands = []\n        for i, coeff in enumerate(np.diag(SpinOp.y(spin).to_matrix(), 1)):\n            y_summands.append(\n                -1j * coeff / 2.0 * SparsePauliOp(pauli_x(i).dot(pauli_y(i + 1)))\n                + 1j * coeff / 2.0 * SparsePauliOp(pauli_y(i).dot(pauli_x(i + 1)))\n            )\n\n        # 3. build the diagonal Z\n        z_summands = []\n        for i, coeff in enumerate(np.diag(SpinOp.z(spin).to_matrix())):\n            # get the first upper diagonal of coeff.\n            z",
+      "metadata": {
+        "source_file": "qiskit_nature\\second_q\\mappers\\linear_mapper.py",
+        "section_title": "linear_mapper.py",
+        "section_id": "part_1",
+        "package": "qiskit-nature"
+      },
+      "score": 0.9288585339738584,
+      "original_score": 0.9230903069987658,
+      "vector_score": 0.6941838113225302,
+      "bm25_score": 0.9156259827049429,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "spin",
+        "pauli",
+        "operators"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 105,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 53
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      }
+    }
+  }
+}

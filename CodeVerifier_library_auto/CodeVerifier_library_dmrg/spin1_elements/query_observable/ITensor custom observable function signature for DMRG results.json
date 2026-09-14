@@ -1,0 +1,135 @@
+{
+  "query": "ITensor custom observable function signature for DMRG results",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__root_0__0",
+      "text": "ITensor is a library for rapidly creating correct and efficient tensor network algorithms.\nThe source code for ITensors.jl can be found on Github .\nAdditional documentation can be found on the ITensor website itensor.org .\nAn ITensor is a tensor whose interface is independent of its memory layout. ITensor indices are objects which carry extra information and which 'recognize' each other (compare equal to each other).\nThe ITensorMPS.jl library includes composable and extensible algorithms for optimizing and transforming tensor networks, such as matrix product state and matrix product operators, such as the DMRG algorithm. If you are looking for information on running finite MPS/MPO calculations such as DMRG, take a look at the ITensorMPS.jl documentation .",
+      "metadata": {
+        "source_file": "docs\\build\\index.html",
+        "section_title": "ROOT",
+        "section_id": "root",
+        "package": "itensors"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 0.9854781858586551,
+      "bm25_score": 0.9150621207158346,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "itensor",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    },
+    {
+      "id": "Observer__aae3ac3732ecf64375727e3c8acae47d__Calling-DMRG-with-the-Custom-Observer_2__0",
+      "text": "## Calling DMRG with the Custom Observer\nAfter defining an observer type and overloading at least one of the methods checkdone! or measure! for it, one can construct an object of this type and pass it to the ITensor dmrg function using the observer keyword argument.\nContinuing with our DemoObserver example above:\n```code\nobs = DemoObserver(1E-4) # use an energy tolerance of 1E-4\nenergy, psi = dmrg(H,psi0,sweeps; observer=obs, outputlevel=1)\n```",
+      "metadata": {
+        "section_title": "Calling DMRG with the Custom Observer",
+        "section_id": "Calling-DMRG-with-the-Custom-Observer",
+        "package": "itensormps",
+        "source_file": "docs\\build\\Observer.html"
+      },
+      "score": 0.9782322714281305,
+      "original_score": 0.9657586292127897,
+      "vector_score": 1.0,
+      "bm25_score": 0.6906653869229187,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "itensor",
+        "custom",
+        "function",
+        "dmrg"
+      ],
+      "match_ratio": 0.5714285714285714,
+      "is_html": true
+    },
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__News_2__3",
+      "text": "TDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 9, 2024: A new package ITensorMPS.jl has been released. We plan to move all of the MPS/MPO functionality in ITensors.jl to ITensorMPS.jl . For now, ITensorMPS.jl just re-exports the MPS/MPO functionality of ITensors.jl (as well as of ITensorTDVP.jl ), such as dmrg , siteinds , MPS , MPO , etc. To prepare for the change over to ITensorMPS.jl, please change using ITensors to using ITensors, ITensorMPS in any code that makes use of MPS/MPO functionality, and if you are using ITensorTDVP.jl change using ITensorTDVP to using ITensorMPS in your code.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 8, 2024: ITensors.jl v0.6 has been released. This version deletes the experimental \"combine-contract\" contraction backend, which was enabled by ITensors.enable_combine_contract() . This feature enabled performing ITensor contractions by first combining indices and then performing contractions as matrix multiplications, which potentially could lead to speedups for certain contractions involving higher-order QN-conserving tensors. However, the speedups weren't consistent with the current implementation, and this feature will be incorporated into the library in a more systematic way when we release our new non-abelian symmetric tensor backend.\nMay 2, 2024: ITensors.jl v0.5 has been released. This version removes PackageCompiler.jl as a dependency and moves the package compilation functionality into a package extension. In order to use the ITensors.compile() function going forward, you need to install the PackageCompiler.jl package with using Pkg: Pkg; Pkg.add(\"PackageCompiler\") and put using PackageCompiler together with using ITensors in your code.\nMay 2, 202",
+      "metadata": {
+        "section_id": "News",
+        "package": "itensors",
+        "section_title": "News",
+        "source_file": "docs\\build\\index.html"
+      },
+      "score": 0.921492879533755,
+      "original_score": 0.8818172380078032,
+      "vector_score": 1.0,
+      "bm25_score": 0.2829641597784791,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensor",
+        "function",
+        "dmrg"
+      ],
+      "match_ratio": 0.42857142857142855,
+      "is_html": true
+    },
+    {
+      "id": "dmrg__7888fe20fce412585dc62035ae11a5ee__full__0",
+      "text": "using ..ITensorMPS:\n  MPS,\n  alternating_update,\n  compose_observers,\n  default_observer,\n  eigsolve_updater,\n  values_observer\n\nfunction dmrg(\n  operator, init::MPS; updater=eigsolve_updater, (observer!)=default_observer(), kwargs...\n)\n  info_ref! = Ref{Any}()\n  info_observer! = values_observer(; info=(info_ref!))\n  observer! = compose_observers(observer!, info_observer!)\n  state = alternating_update(operator, init; updater, observer!, kwargs...)\n  return info_ref![].eigval, state\nend\n",
+      "metadata": {
+        "section_id": "full",
+        "package": "itensormps",
+        "section_title": "dmrg.jl",
+        "source_file": "src\\lib\\Experimental\\src\\dmrg.jl"
+      },
+      "score": 0.8024139978286225,
+      "original_score": 0.7904390886061148,
+      "vector_score": 0.9597856962504734,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "function",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Using-a-Custom-Observer-for-DMRG_1__0",
+      "text": "## Using a Custom Observer for DMRG\nAn Observer is any object which can be used to perform custom measurements throughout a DMRG calculation and to stop a DMRG calculation early. Because an Observer has access to the entire wavefunction at every step, a wide range of customization is possible.\nFor detailed examples of making custom Observers, see the Observer section of the documentation.",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "Using-a-Custom-Observer-for-DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html",
+        "section_title": "Using a Custom Observer for DMRG"
+      },
+      "score": 0.7958191304763033,
+      "original_score": 0.7053059615121903,
+      "vector_score": 0.6064133316500442,
+      "bm25_score": 1.0,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "custom",
+        "dmrg"
+      ],
+      "match_ratio": 0.2857142857142857,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 108,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 56
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 52
+      }
+    }
+  }
+}

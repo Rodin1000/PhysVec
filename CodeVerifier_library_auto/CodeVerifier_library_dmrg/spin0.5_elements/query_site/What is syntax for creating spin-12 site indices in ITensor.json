@@ -1,0 +1,131 @@
+{
+  "query": "What is syntax for creating spin-1/2 site indices in ITensor?",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "test_phys_site_types__060210c943032a0fd9694bbf30890d18__part_0__0",
+      "text": "using ITensors, LinearAlgebra, Test\nusing ITensors.SiteTypes: has_fermion_string, op, siteind, siteinds, state\n\n@testset \"Physics Sites\" begin\n  N = 10\n\n  @testset \"Generic sites\" for eltype in (Float32, Float64, ComplexF32, ComplexF64)\n    d1, d2 = 3, 4\n    i1, i2 = Index(d1), Index(d2)\n\n    o = op(\"I\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"F\", i1; eltype)\n    @test o == itensor(Matrix(I, d1, d1), i1', dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"I\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    o = op(\"Id\", i1, i2; eltype)\n    @test o == itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n    @test Base.eltype(o) <: eltype\n\n    U1 = op(\"RandomUnitary\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U1 = op(\"randU\", i1)\n    @test hassameinds(U1, (i1', i1))\n    @test apply(transpose(dag(U1)), U1) ≈ itensor(Matrix(I, d1, d1), i1', dag(i1))\n\n    U12 = op(\"RandomUnitary\", i1, i2)\n    @test hassameinds(U12, (i1', i2', i1, i2))\n    @test apply(transpose(dag(U12)), U12) ≈\n      itensor(Matrix(I, d1 * d2, d1 * d2), i2', i1', dag(i2), dag(i1))\n  end\n\n  @testset \"Qubit sites\" begin\n   ",
+      "metadata": {
+        "package": "itensors",
+        "section_id": "part_0",
+        "section_title": "test_phys_site_types.jl",
+        "source_file": "test\\base\\test_phys_site_types.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensor"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": false
+    },
+    {
+      "id": "Physics__3bf93049cd8ad58331d2a32084e34246__h2_4_4__0",
+      "text": "ITensor provides support for a range of common local Hilbert space types,\nor physical degrees of freedom, such as S=1/2 and S=1 spins; spinless and spinful\nfermions; and more.\nHowever, there can be many cases where you need to make custom\ndegrees of freedom. You might be working with an\nexotic system, such as ``Z_N`` parafermions for example, or need\nto customize other defaults provided by ITensor.\nIn ITensor, such a customization is done by overloading functions\non specially designated Index tags.\nBelow we give an brief introduction by example of how to make\nsuch custom Index site types in ITensor.\nOther code formulas following this one explain how to build on this\nexample to expand the capabilities of your custom site type such as\nadding support for quantum number (QN) conservation and defining\ncustom mappings of strings to states.\nThroughout we will focus on the example of ``S=3/2`` spins. These\nare spins taking the ``S^z`` values of ``+3/2,+1/2,-1/2,-3/2``.\nSo as tensor indices, they are indices of dimension 4.\nThe key operators we will make for this example are ``S^z``, ``S^+``,\nand ``S^-``, which are defined as:\n```math\n\\begin{aligned}\nS^z &=\n\\begin{bmatrix}\n3/2 &  0  &  0  &  0 \\\\\n 0  & 1/2 &  0  &  0 \\\\\n 0  &  0  &-1/2 &  0 \\\\\n 0  &  0  &  0  &-3/2\\\\\n\\end{bmatrix} \\\\\nS^+ & =\n\\begin{bmatrix}\n 0  &  \\sqrt{3}  &  0  &  0 \\\\\n 0  &  0  &  2  &  0 \\\\\n 0  &  0  &  0  &  \\sqrt{3} \\\\\n 0  &  0  &  0  &  0 \\\\\n\\end{bmatrix} \\\\\nS^- & =\n\\begin{bmatrix}\n 0  &  0 &  0  &  0 \\\\\n \\sqrt{3}  &  0  &  0  &  0 \\\\\n 0  &  2  &  0  &  0  \\\\\n 0  &  0  &  \\sqrt{3}  &  0 \\\\\n\\end{bmatrix} \\\\\n\\end{aligned}\n```\n**Code Preview**\nFirst let's see the minimal code needed to define and use this new\n``S",
+      "metadata": {
+        "section_title": "Make a Custom Local Hilbert Space / Physical Degree of Freedom",
+        "package": "itensormps",
+        "section_id": "h2_4",
+        "source_file": "docs\\src\\examples\\Physics.md"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "site",
+        "indices",
+        "itensor"
+      ],
+      "match_ratio": 0.5,
+      "is_html": false
+    },
+    {
+      "id": "Physics__76dd2e2b1a4692ebd1e2d3b3298ad284__custom_op_2__1",
+      "text": " = op(\"Pup\",s)\n```\nto obtain the \"Pup\" operator for our \"S=1/2\" Index s . Or we can do a similar thing for an array of site indices:\n```code\nusing ITensors, ITensorMPS\nN = 40\ns = siteinds(\"S=1/2\",N)\nPup1 = op(\"Pup\",s[1])\nPup3 = op(\"Pup\",s[3])\n```\nNote that for the \"Qudit\" / \"Boson\" site types, you have to define your overload of op with the dimension of the local Hilbert space, for example:\n```code\nusing ITensors, ITensorMPS\nfunction ITensors.op(::OpName\"P1\", ::SiteType\"Boson\", d::Int)\n  o = zeros(d, d)\n  o[1, 1] = 1\n  return o\nend\n```\nAlternatively you could use Julia's array comprehension syntax:\n```code\nusing ITensors, ITensorMPS\nITensors.op(::OpName\"P1\", ::SiteType\"Boson\", d::Int) =\n  [(i == j == 1) ? 1.0 : 0.0 for i in 1:d, j in 1:d]\n```\nUsing Custom Operators in OpSum\nA key use of these op system extensions is allowing additional operator names to be recognized by the OpSum system for constructing matrix product operator (MPO) tensor networks. With the code above defining the \"Pup\" operator, we are now allowed to use this operator name in any OpSum code involving \"S=1/2\" site indices.\nFor example, we could now make an OpSum involving our custom operator such as:\n```code\nusing ITensors, ITensorMPS\nN = 100\nsites = siteinds(\"S=1/2\",N)\nos = OpSum()\nfor n=1:N\n  os += \"Pup\",n\nend\nP = MPO(os,sites)\n```\nThis code makes an MPO P which is just the sum of a spin-up projection operator acting on every site.",
+      "metadata": {
+        "section_id": "custom_op",
+        "package": "itensormps",
+        "section_title": "Making a Custom op Definition",
+        "source_file": "docs\\build\\examples\\Physics.html"
+      },
+      "score": 0.95553448189755,
+      "original_score": 0.9278937544284594,
+      "vector_score": 0.6778937544284594,
+      "bm25_score": 1.0,
+      "keyword_matches": 4,
+      "matched_keywords": [
+        "syntax",
+        "spin",
+        "site",
+        "indices"
+      ],
+      "match_ratio": 0.6666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "test_fermions__d8299c244e51be574501a4fe2a013939__part_0__0",
+      "text": "@eval module $(gensym())\nusing ITensors, Test\nimport ITensors: Out, In\nusing ITensors.SiteTypes: op, siteind, siteinds\n\n@testset \"Fermions\" begin\n  ITensors.enable_auto_fermion()\n\n  @testset \"parity_sign function\" begin\n\n    # Full permutations\n    p1 = [1, 2, 3]\n    @test ITensors.parity_sign(p1) == +1\n    p2 = [2, 1, 3]\n    @test ITensors.parity_sign(p2) == -1\n    p3 = [2, 3, 1]\n    @test ITensors.parity_sign(p3) == +1\n    p4 = [3, 2, 1]\n    @test ITensors.parity_sign(p4) == -1\n\n    ## Partial permutations\n    p5 = [2, 7]\n    @test ITensors.parity_sign(p5) == +1\n    p6 = [5, 3]\n    @test ITensors.parity_sign(p6) == -1\n    p7 = [1, 9, 3, 10]\n    @test ITensors.parity_sign(p7) == -1\n    p8 = [1, 12, 9, 3, 11]\n    @test ITensors.parity_sign(p8) == +1\n  end\n\n  @testset \"Fermionic QNs\" begin\n    q = QN(\"Nf\", 1, -1)\n    @test isfermionic(q[1])\n    @test fparity(q) == 1\n\n    q = q + q + q\n    @test val(q, \"Nf\") == 3\n\n    p = QN(\"P\", 1, -2)\n    @test fparity(p) == 1\n    @test isodd(p)\n    @test fparity(p + p) == 0\n    @test fparity(p + p + p) == 1\n  end\n\n  @testset \"Fermionic IndexVals\" begin\n    sn = Index([QN(\"Nf\", 0, -1) => 1, QN(\"Nf\", 1, -1) => 1], \"sn\")\n    @test fparity(sn => 1) == 0\n    @test fparity(sn => 2) == 1\n    @test !isodd(sn => 1)\n    @test isodd(sn => 2)\n\n    sp = Index([QN(\"Nfp\", 0, -2) => 1, QN(\"Nfp\", 1, -2) => 1], \"sp\")\n    @test fparity(sp => 1) == 0\n    @test fparity(sp",
+      "metadata": {
+        "section_title": "test_fermions.jl",
+        "section_id": "part_0",
+        "package": "itensors",
+        "source_file": "test\\base\\test_fermions.jl"
+      },
+      "score": 0.8417340807859353,
+      "original_score": 0.8417340807859353,
+      "vector_score": 0.8417340807859353,
+      "bm25_score": null,
+      "keyword_matches": 0,
+      "matched_keywords": [],
+      "match_ratio": 0.0,
+      "is_html": false
+    },
+    {
+      "id": "index__4786d53530d89e265bfbf5df7b06e70a__ITensor-Code-Samples_6__0",
+      "text": "## ITensor Code Samples\nITensor construction, setting of elements, contraction, and addition. Before constructing an ITensor, one constructs Index objects representing tensor indices.\n```code\nusing ITensors\nlet\n  i = Index(3)\n  j = Index(5)\n  k = Index(2)\n  l = Index(7)\n\n  A = ITensor(i,j,k)\n  B = ITensor(j,l)\n\n  # Set elements of A\n  A[i=>1,j=>1,k=>1] = 11.1\n  A[i=>2,j=>1,k=>2] = -21.2\n  A[k=>1,i=>3,j=>1] = 31.1  # can provide Index values in any order\n  # ...\n\n  # Contract over shared index j\n  C = A * B\n\n  @show hasinds(C,i,k,l) # = true\n\n  D = random_itensor(k,j,i) # ITensor with random elements\n\n  # Add two ITensors\n  # must have same set of indices\n  # but can be in any order\n  R = A + D\n\n  nothing\nend\n\n# output\n\nhasinds(C, i, k, l) = true\n```\nIn this example, we create a random 10x20 matrix and compute its SVD. The resulting factors can be simply multiplied back together using the ITensor * operation, which automatically recognizes the matching indices between U and S, and between S and V and contracts (sums over) them.\n```code\nusing ITensors\nlet\n  i = Index(10)           # index of dimension 10\n  j = Index(20)           # index of dimension 20\n  M = random_itensor(i,j)  # random matrix, indices i,j\n  U,S,V = svd(M,i)        # compute SVD with i as row index\n  @show M ≈ U*S*V         # = true\n\n  nothing\nend\n\n# output\n\nM ≈ U * S * V = true\n```\nIn this example, we create a random 4x4x4x4 tensor and compute its SVD, temporarily treating the indices i and k together as the \"row\" index and j and l as the \"column\" index for the purposes of the SVD. The resulting factors can be simply multiplied back together using the ITensor * operation, which automatically recognizes the matching indices between U and S, and between S and V and contracts (sums over) them.\n```code\nusing ITensors\nlet\n  i = Index(4,\"i\")\n  j = Index(4,\"j\")\n  k = Index(4,\"k\")\n  l = Index(4,\"l\")\n  T = random_itensor(i,j,k,l)\n  U,S,V = svd(T,i,k)   #",
+      "metadata": {
+        "section_title": "ITensor Code Samples",
+        "section_id": "ITensor-Code-Samples",
+        "package": "itensors",
+        "source_file": "docs\\build\\index.html"
+      },
+      "score": 0.7491665452518721,
+      "original_score": 0.6329266515881055,
+      "vector_score": 0.6329266515881055,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "indices",
+        "itensor"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 116,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}

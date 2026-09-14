@@ -1,0 +1,51 @@
+You are an expert in numerical calculations of quantum many-body physics.
+Your task here is to refine the scientific result test code that failed during execution or did not correctly print the checkpoint values.
+
+-------------------------------------------------------------------------------------------------------
+[Input]:
+1. **SCIENTIFIC_RESULT_CONTENT**: Description of the scientific result and the checkpoints that must be printed for comparison. This helps you understand the target output.
+2. **CODE_CONTENT**: The current code that was minimally modified to print checkpoint values. The entrypoint already follows the original flow and uses item functions (which call run functions); changes were meant to add or adjust printing only.
+3. **STDOUT**: Standard output from the execution of the current code.
+4. **STDERR**: Standard error output from the execution (detailed error information).
+5. **ERROR_ANALYSIS**: Summary of the error or issue that occurred.
+6. **TOPIC**: The topic name (dmrg, nnwf, or qcmb), which determines the element and run functions used in the code.
+
+-------------------------------------------------------------------------------------------------------
+[Element Functions and Run Functions by Topic]:
+For context, the code typically uses the following. **Element functions** (by prefix, and should NOT be called directly in the entrypoint):
+- **dmrg**: `site`, `hamiltonian`, `initialstate`, `observable`, `effector`
+- **nnwf**: `hilbert`, `statemodel`, `compset`, `hamiltonian`, `observable`, `effector`
+- **qcmb**: `hamiltonian`, `circinit`, `circevol`, `effector`, `observable`
+**Run functions** have the prefix `run` (common to all topics, and should NOT be called directly in the entrypoint).
+**Item functions** have the prefix `item` (common to `run` and directly called in the entrypoint).
+Refine only minimally; do not rebuild the entrypoint or the call flow.
+
+-------------------------------------------------------------------------------------------------------
+[Task]:
+Refine CODE_CONTENT to fix the issues in ERROR_ANALYSIS and STDERR with **minimal changes**. The goal remains: the program should run and **print** the checkpoint values described in SCIENTIFIC_RESULT_CONTENT. Do NOT rebuild the entrypoint or rewrite the calculation flow; only fix what is broken (e.g., fix a bug, adjust a print, or minimally expose a value so it can be printed).
+
+-------------------------------------------------------------------------------------------------------
+[Refinement Rules]:
+1. Read SCIENTIFIC_RESULT_CONTENT to recall which checkpoints must appear in the printed output.
+2. Analyze ERROR_ANALYSIS and STDERR to find the root cause (e.g., runtime error, missing return value, wrong variable printed, type error).
+3. Refine with minimal edits:
+   - **Entrypoint**: Fix the bug or adjust the print so that the correct checkpoint values are output. Keep the existing call structure and logic; do not replace the entrypoint flow.
+   - **Element/run/item functions**: Only if necessary (e.g., to expose a value for printing), make the smallest change (e.g., return one more value). Do NOT change the logic or core implementation.
+4. Ensure the refined code still follows the original program structure and only adds or fixes the printing of checkpoint values for comparison.
+5. You are FORBIDDEN to define new functions or rewrite the calculation logic. Only modify existing code minimally.
+
+-------------------------------------------------------------------------------------------------------
+[Output]:
+You should return a JSON file, which can be transferred to a python dict by json.loads(). The dictionary must contain keys:
+- **"code_type"**: Either "python" or "julia" (lowercase string), matching the original code file type.
+- **"code_content"**: The refined full source code as a string (plain source, do not include ``` fences).
+
+**Example output:**
+```json
+{
+"code_type": "...code type here...",
+"code_content": "...code content here..."
+}
+```
+
+**CRITICAL:** Your output MUST BE a complete dictionary enclosed by '```json' and '```'. Even if you fail to generate complete code_content, you must KEEP this output format.

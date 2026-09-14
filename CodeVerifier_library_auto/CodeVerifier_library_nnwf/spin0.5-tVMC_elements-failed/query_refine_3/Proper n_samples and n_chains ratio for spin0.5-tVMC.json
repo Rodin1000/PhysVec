@@ -1,0 +1,113 @@
+{
+  "query": "Proper n_samples and n_chains ratio for spin0.5-tVMC",
+  "package": "netket",
+  "results": [
+    {
+      "id": "gs-gcnn-honeycomb__211379d69213be55c6fdfefcaa402884__sec_5_5__0",
+      "text": "## Variational Monte Carlo#\nIn order to perform VMC we need to define a sampler and an optimizer. We sample using Metropolis-Hastings, which uses the exchange rule to propose new states. The exchange rule swaps the spin of two neighbouring sites, keeping the magnetization fixed (in this case, 0). We optimize using stochastic reconfiguration, which uses curvature information to find the best direction of descent.\n```code\n# Metropolis-Hastings with two spins flipped that are at most second nearest neighbors\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n=\nhi\n,\ngraph\n=\ngraph\n,\nd_max\n=\n2\n)\n# Stochastic reconfiguration\nop\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n1e-2\n)\nsr\n=\nnk\n.\noptimizer\n.\nSR\n(\ndiag_shift\n=\n0.01\n)\n# Define a variational state so we can keep the parameters if we like\nvstate\n=\nnk\n.\nvariational\n.\nMCState\n(\nsampler\n=\nsa\n,\nmodel\n=\nma\n,\nn_samples\n=\n100\n)\n# Define a driver that performs VMC\ngs\n=\nnk\n.\ndriver\n.\nVMC\n(\nha\n,\nop\n,\nsr\n=\nsr\n,\nvariational_state\n=\nvstate\n)\n```\nLets start by running for 100 iterations. This took about 15 seconds per iteration on my CPU and about 1 second per iteration on the Tesla P100 GPU (If you’re using the free version of Colab you may get a Tesla K80 which is slightly slower). GPUs are fast! As you’ll see later, the speedup is even more pronounced on larger lattices.\n```code\n# Run the optimization\ngs\n.\nrun\n(\nn_iter\n=\n100\n,\nout\n=\n\"out\"\n)\n```\n```code\n100%|██████████| 100/100 [01:06<00:00,  1.51it/s, Energy=-40.471 ± 0.046 [σ²=0.238, R̂=0.9744]]\n```\n```code\n(<netket.logging.json_log.JsonLog at 0x7fea898371d0>,)\n```\nThis should get us under 0.1% error. Lets see how the energy evolves as we train.\n```code\n# Get data from log and\nenergy\n=\n[]\ndata\n=\njson\n.\nload\n(\nopen\n(\n\"out.log\"\n))\nfor\nen\nin\ndata\n[\n\"Energy\"\n][\n\"Mean\"\n]:\nenergy\n.\nappend\n(\nen\n)\n# plot the energy during the optimization\nplt\n.\nxlabel\n(\n\"Number of Iterations\"\n)\nplt\n.\nylabel\n(\n\"Energy\"\n)\nplt\n.\nplot\n(\nenergy\n)\n",
+      "metadata": {
+        "section_title": "Variational Monte Carlo#",
+        "package": "netket",
+        "source_file": "docs\\_build\\html\\tutorials\\gs-gcnn-honeycomb.html",
+        "section_id": "sec_5"
+      },
+      "score": 0.8566666666666667,
+      "original_score": 0.8,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "n_samples"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "ViT-wave-function__d9e54e914b31ad265a3124d7768bb4b3__sec_6_6__0",
+      "text": "## Ground state optimization#\nWe show how to train the ViT wave function on the two-dimensional \\(J_1\\) - \\(J_2\\) Heisenberg model on a \\(10\\times 10\\) square lattice.\nThe system is described by the following Hamiltonian (with periodic boundary conditions):\nWe fix \\(J_2/J_1=0.5\\) and we use the VMC_SR driver (see Ref.[RAS24]) implemented in NetKet to optimize the ViT wave function.\n```code\nseed\n=\n0\nkey\n=\njax\n.\nrandom\n.\nkey\n(\nseed\n)\nL\n=\n10\nn_dim\n=\n2\nJ2\n=\n0.5\nlattice\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\nL\n,\nn_dim\n=\nn_dim\n,\npbc\n=\nTrue\n,\nmax_neighbor_order\n=\n2\n)\n# Hilbert space of spins on the graph\nhilbert\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n1\n/\n2\n,\nN\n=\nlattice\n.\nn_nodes\n,\ntotal_sz\n=\n0\n)\n# Heisenberg J1-J2 spin hamiltonian\nhamiltonian\n=\nnk\n.\noperator\n.\nHeisenberg\n(\nhilbert\n=\nhilbert\n,\ngraph\n=\nlattice\n,\nJ\n=\n[\n1.0\n,\nJ2\n],\nsign_rule\n=\n[\nFalse\n,\nFalse\n]\n)\n.\nto_jax_operator\n()\n# No Marshall sign rule\n# Intiialize the ViT variational wave function\nvit_module\n=\nViT\n(\nnum_layers\n=\n4\n,\nd_model\n=\n60\n,\nn_heads\n=\n10\n,\npatch_size\n=\n2\n,\ntransl_invariant\n=\nTrue\n)\nkey\n,\nsubkey\n=\njax\n.\nrandom\n.\nsplit\n(\nkey\n)\nparams\n=\nvit_module\n.\ninit\n(\nsubkey\n,\nspin_configs\n)\n# Metropolis Local Sampling\nN_samples\n=\n4096\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhilbert\n=\nhilbert\n,\ngraph\n=\nlattice\n,\nd_max\n=\n2\n,\nn_chains\n=\nN_samples\n,\nsweep_size\n=\nlattice\n.\nn_nodes\n,\n)\noptimizer\n=\nnk\n.\noptimizer\n.\nSgd\n(\nlearning_rate\n=\n0.0075\n)\nkey\n,\nsubkey\n=\njax\n.\nrandom\n.\nsplit\n(\nkey\n,\n2\n)\nvstate\n=\nnk\n.\nvqs\n.\nMCState\n(\nsampler\n=\nsampler\n,\nmodel\n=\nvit_module\n,\nsampler_seed\n=\nsubkey\n,\nn_samples\n=\nN_samples\n,\nn_discard_per_chain\n=\n0\n,\nvariables\n=\nparams\n,\nchunk",
+      "metadata": {
+        "section_title": "Ground state optimization#",
+        "source_file": "docs\\_build\\html\\tutorials\\ViT-wave-function.html",
+        "section_id": "sec_6",
+        "package": "netket"
+      },
+      "score": 0.7996450048872223,
+      "original_score": 0.7067975681276424,
+      "vector_score": 0.7239325863744882,
+      "bm25_score": 0.6382574951402596,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "n_samples",
+        "n_chains"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    },
+    {
+      "id": "netket.sampler.MetropolisExchange__3e932601429d6f1778c249dbca8a7934__sec_1_1__1",
+      "text": ".\nSpinOrbitalFermions\n(\ng\n.\nn_nodes\n,\ns\n=\n0.5\n)\nexchange_graph\n=\nnk\n.\ngraph\n.\ndisjoint_union\n(\ng\n,\ng\n)\nprint\n(\n\"Exchange graph size:\"\n,\nexchange_graph\n.\nn_nodes\n)\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhi\n,\ngraph\n=\nexchange_graph\n,\nd_max\n=\n1\n)\n```\nhilbert – The Hilbert space to sample.\nhilbert – The Hilbert space to sample.\nd_max – The maximum graph distance allowed for exchanges.\nd_max – The maximum graph distance allowed for exchanges.\nn_chains – The total number of independent Markov chains across all devices.\nEither specify this or n_chains_per_rank .\nn_chains – The total number of independent Markov chains across all devices.\nEither specify this or n_chains_per_rank .\nn_chains_per_rank – Number of independent chains on every device (default = 16).\nn_chains_per_rank – Number of independent chains on every device (default = 16).\nsweep_size – Number of sweeps for each step along the chain. Defaults to the number of sites\nin the Hilbert space.\nThis is equivalent to subsampling the Markov chain.\nsweep_size – Number of sweeps for each step along the chain. Defaults to the number of sites\nin the Hilbert space.\nThis is equivalent to subsampling the Markov chain.\nreset_chains – If True, resets the chain state when reset is called on every new\nsampling (default = False).\nreset_chains – If True, resets the chain state when reset is called on every new\nsampling (default = False).\nmachine_pow – The power to which the machine should be exponentiated to generate the\npdf (default = 2).\nmachine_pow – The power to which the machine should be exponentiated to generate the\npdf (default = 2).\ndtype – The dtype of the states sampled (default = np.float64).\ndtype – The dtype of the states sampled (default = np.float64).\nMetropolisSampler\nExamples\nSampling from a RBM machine in a 1D lattice of spin 1/2, using\nnearest-neighbor exchanges.\n```code\n>>>\nimport\nnetket\nas\nnk\n>>>\n>>>\ng\n=\nnk\n.\ngraph\n.\nHypercube\n(\nlength\n=\n10\n,\nn_dim\n=\n2\n,\npbc\n=\nTrue\n)\n>>>\nhi\n=\nnk\n.\nhilbert\n.\nSpin\n(\ns\n=\n0.5\n,\nN\n=\ng\n.\nn_nodes\n)\n>>>\n>>>\n# Construct a MetropolisExchange Sampler\n>>>\nsa\n=\nnk\n.\nsampler\n.\nMetropolisExchange\n(\nhi\n,\ngraph\n=\ng\n)\n>>>\nprint\n(\nsa\n)\nMetropolisSampler(rule =",
+      "metadata": {
+        "section_id": "sec_1",
+        "section_title": "Contents",
+        "source_file": "docs\\_build\\html\\api\\_generated\\samplers\\netket.sampler.MetropolisExchange.html",
+        "package": "netket"
+      },
+      "score": 0.7289487209908202,
+      "original_score": 0.6217889130104468,
+      "vector_score": 0.7772361412630584,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "n_chains"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "sampler__328a83b26c384f5b8bd27e6a5968c32b__sec_5_5__1",
+      "text": "\n.\nMetropolisRule\n):\ndef\ntransition\n(\nself\n,\nsampler\n,\nmachine\n,\nparameters\n,\nstate\n,\nkey\n,\nσ\n):\n# Deduce the number of MCMC chains from input shape\nn_chains\n=\nσ\n.\nshape\n[\n0\n]\n# Load the Hilbert space of the sampler\nhilb\n=\nsampler\n.\nhilbert\n# Split the rng key into 2: one for each random operation\nkey_indx\n,\nkey_flip\n=\njax\n.\nrandom\n.\nsplit\n(\nkey\n,\n2\n)\n# Pick two random sites on every chain\nindxs\n=\njax\n.\nrandom\n.\nrandint\n(\nkey_indx\n,\nshape\n=\n(\nn_chains\n,\n2\n),\nminval\n=\n0\n,\nmaxval\n=\nhilb\n.\nsize\n)\n# flip those sites\nσp\n,\n_\n=\nnk\n.\nhilbert\n.\nrandom\n.\nflip_state\n(\nhilb\n,\nkey_flip\n,\nσ\n,\nindxs\n)\n# If this transition had a correcting factor L, it's possible\n# to return it as a vector in the second value\nreturn\nσp\n,\nNone\n#\n# random_state is inherited from the base class, so no need to define it\n#\n#def random_state(self, sampler, machine, pars, state, key):\n#    return sampler.hilbert.random_state(\n#        key, size=sampler.n_batches, dtype=sampler.dtype\n#    )\n```\nAnd then, in order to use this transition kernel we can follow the same procedure as before:\n```code\nsampler\n=\nnk\n.\nsampler\n.\nMetropolisSampler\n(\nhilbert\n,\nTwoLocalRule\n())\n```\n```code\n# We create the state of the sampler\nsampler_state\n=\nsampler\n.\ninit_state\n(\nlog_pdf\n,\npars\n,\njax\n.\nrandom\n.\nkey\n(\n1\n))\n# We call reset (this will pre-compute the log_pdf on the whole hilbert space)\nsampler_state\n=\nsampler\n.\nreset\n(\nlog_pdf\n,\npars\n,\nsampler_state\n)\n# generate samples\nsamples\n,\nsampler_state\n=\nsampler\n.\nsample\n(\nlog_pdf\n,\npars\n,\nstate\n=\nsampler_state\n,\nchain_length\n=\n100\n)\n```",
+      "metadata": {
+        "package": "netket",
+        "section_id": "sec_5",
+        "source_file": "docs\\_build\\html\\user-guides\\sampler.html",
+        "section_title": "Defining custom Transition Rules for Metropolis Sampler#"
+      },
+      "score": 0.6291219382909032,
+      "original_score": 0.48249572784777195,
+      "vector_score": 0.6031196598097149,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "n_chains"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    },
+    {
+      "id": "netket.sampler.MetropolisSamplerNumpy__6a007e27ef717e7f59bfff7a60c2a2a9__sec_1_1__1",
+      "text": "_chains/n_devices chains. In general, we recommend specifying n_chains_per_rank as it is more portable.\nn_chains_per_rank ( int | None ) – Number of independent chains on every device (default = 16).\nn_chains_per_rank ( int | None ) – Number of independent chains on every device (default = 16).\nchunk_size ( int | None ) – Chunk size for evaluating the ansatz while sampling. Must divide n_chains_per_rank.\nchunk_size ( int | None ) – Chunk size for evaluating the ansatz while sampling. Must divide n_chains_per_rank.\nsweep_size ( int ) – Number of sweeps for each step along the chain.\nThis is equivalent to subsampling the Markov chain. (Defaults to the number of sites\nin the Hilbert space.)\nsweep_size ( int ) – Number of sweeps for each step along the chain.\nThis is equivalent to subsampling the Markov chain. (Defaults to the number of sites\nin the Hilbert space.)\nreset_chains ( bool ) – If True, resets the chain state when reset is called on every\nnew sampling (default = False).\nreset_chains ( bool ) – If True, resets the chain state when reset is called on every\nnew sampling (default = False).\nmachine_pow ( int ) – The power to which the machine should be exponentiated to generate\nthe pdf (default = 2).\nmachine_pow ( int ) – The power to which the machine should be exponentiated to generate\nthe pdf (default = 2).\ndtype ( Union [ None , str , type [ Any ], dtype , _SupportsDType ] ) – The dtype of the states sampled (default = np.float64).\ndtype ( Union [ None , str , type [ Any ], dtype , _SupportsDType ] ) – The dtype of the states sampled (default = np.float64).\nReturns True if the sampler is exact.\nThe sampler is exact if all the samples are exactly distributed according to the\nchosen power of the variational state, and there is no correlation among them.\nThe batch size of the configuration $sigma$ used by this sampler on this\njax process.\nThis is used to determine the shape of the batches generated in a single process.\nThis is needed because when using JAX sharding, every process must create a batch of chains\nof n_chains_per_rank , while when using the experimental sharding\nmode we must declare the full shape on every jax process, therefore this returns n_chains .\nUsage of this flag is required to support JAX sharding.\nSamplers may override this to have a larger batch size, for example to\npropagate multiple replicas (in the case of parallel tempering).\nTotal number of independent chains across all devices.\nThe total number of independent chains per jax device.\nIf you are not distributing the calculation among jax devices, this\nis equal to n_chains .\nIn",
+      "metadata": {
+        "source_file": "docs\\_build\\html\\api\\_generated\\samplers\\netket.sampler.MetropolisSamplerNumpy.html",
+        "section_title": "Contents",
+        "section_id": "sec_1",
+        "package": "netket"
+      },
+      "score": 0.6024778344160282,
+      "original_score": 0.4453179084874812,
+      "vector_score": 0.5566473856093515,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "n_chains"
+      ],
+      "match_ratio": 0.16666666666666666,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "vector_results_count": 30,
+    "bm25_results_count": 30,
+    "merged_results_count": 51,
+    "final_results_count": 5
+  }
+}

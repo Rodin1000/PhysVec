@@ -1,0 +1,133 @@
+{
+  "query": "itensors tJ model DMRG initial state common errors and conservation laws",
+  "packages": [
+    "itensors",
+    "itensormps"
+  ],
+  "results": [
+    {
+      "id": "ctmrg_isotropic__3af4213eb7e13bdc1c45eaa2b10337a1__full__0",
+      "text": "using ITensors\n\nfunction ctmrg(T::ITensor, Cₗᵤ::ITensor, Aₗ::ITensor; χmax::Int, cutoff=0.0, nsteps::Int)\n  sₕ = commonind(T, Aₗ)\n  sᵥ = uniqueind(T, Aₗ, Aₗ'; plev=0)\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = uniqueind(Cₗᵤ, Aₗ)\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  Cₗᵤ = dense(Cₗᵤ)\n  for i in 1:nsteps\n    ## Get the grown corner transfer matrix (CTM)\n    Cₗᵤ⁽¹⁾ = Aₗ * Cₗᵤ * Aᵤ * T\n\n    ## Diagonalize the grown CTM\n    # TODO: replace with\n    # eigen(Cₗᵤ⁽¹⁾, \"horiz\" => \"vert\"; tags = \"horiz\" => \"vert\", kwargs...)\n    Cₗᵤ, Uᵥ = eigen(\n      Cₗᵤ⁽¹⁾,\n      (lₕ', sₕ'),\n      (lᵥ', sᵥ');\n      ishermitian=true,\n      cutoff,\n      maxdim=χmax,\n      lefttags=tags(lₕ),\n      righttags=tags(lᵥ),\n    )\n    Cₗᵤ = dense(Cₗᵤ)\n    lᵥ = commonind(Cₗᵤ, Uᵥ)\n    lₕ = uniqueind(Cₗᵤ, Uᵥ)\n\n    # The renormalized CTM is the diagonal matrix of eigenvalues\n    # Normalize the CTM\n    Cₗ = Cₗᵤ * prime(dag(Cₗᵤ), lₕ)\n    normC = (Cₗ * dag(Cₗ))[]^(1 / 4)\n    Cₗᵤ = Cₗᵤ / normC\n\n    # Calculate the renormalized half row transfer matrix (HRTM)\n    Uᵥ = noprime(Uᵥ)\n    Aₗ = Aₗ * Uᵥ * T * dag(Uᵥ')\n    Aₗ = replaceinds(Aₗ, sₕ' => sₕ)\n\n    # Normalize the HRTM\n    ACₗ = Aₗ * Cₗᵤ * prime(dag(Cₗᵤ))\n    normA = √((ACₗ * dag(ACₗ))[])\n    Aₗ = Aₗ / normA\n    Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n  end\n  return Cₗᵤ, Aₗ\nend\n",
+      "metadata": {
+        "package": "itensors",
+        "section_title": "ctmrg_isotropic.jl",
+        "section_id": "full",
+        "source_file": "examples\\src\\ctmrg_isotropic.jl"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "itensors"
+      ],
+      "match_ratio": 0.1111111111111111,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__2224e76be0070d37f6e2d7901903a0de__h2_5_5__0",
+      "text": "One version of the ITensor `dmrg` function accepts an array of MPOs\n`[H1,H2,H3]` (or any number of MPOs you want). This version of DMRG\nwill find the ground state of `H1+H2+H3`. Internally it does not\nactually sum these MPOs, but loops over them during each step of\nthe \"eigensolver\" at the core of the DMRG algorithm, so it is usually\nmore efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs `H1`, `H2`, and `H3`.\nThen call DMRG like this:\n```julia\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "source_file": "docs\\src\\examples\\DMRG.md",
+        "package": "itensormps",
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "section_id": "h2_5"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "dmrg",
+        "state"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__477fdfb6fc2bd0f14bd78460441d632e__Use-a-Sum-of-MPOs-in-DMRG_3__0",
+      "text": "## Use a Sum of MPOs in DMRG\nOne version of the ITensor dmrg function accepts an array of MPOs [H1,H2,H3] (or any number of MPOs you want). This version of DMRG will find the ground state of H1+H2+H3 . Internally it does not actually sum these MPOs, but loops over them during each step of the \"eigensolver\" at the core of the DMRG algorithm, so it is usually more efficient than if the MPOs had been summed together into a single MPO.\nTo use this version of DMRG, say you have MPOs H1 , H2 , and H3 . Then call DMRG like this:\n```code\nenergy,psi = dmrg([H1,H2,H3],psi0;nsweeps,maxdim,cutoff)\n```",
+      "metadata": {
+        "section_id": "Use-a-Sum-of-MPOs-in-DMRG",
+        "package": "itensormps",
+        "section_title": "Use a Sum of MPOs in DMRG",
+        "source_file": "docs\\build\\examples\\DMRG.html"
+      },
+      "score": 0.9230309903230435,
+      "original_score": 0.8909100650247861,
+      "vector_score": 0.8909100650247861,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "dmrg",
+        "state"
+      ],
+      "match_ratio": 0.2222222222222222,
+      "is_html": true
+    },
+    {
+      "id": "test_ctmrg__d202e1b4009a29577de40ed9d424bafe__full__0",
+      "text": "using ITensors\nusing Test\n\nsrc_dir = joinpath(pkgdir(ITensors), \"examples\", \"src\")\ninclude(joinpath(src_dir, \"ctmrg_isotropic.jl\"))\ninclude(joinpath(src_dir, \"2d_classical_ising.jl\"))\n\n@testset \"ctmrg\" begin\n  # Make Ising model partition function\n  β = 1.1 * βc\n  d = 2\n  s = Index(d, \"Site\")\n  sₕ = addtags(s, \"horiz\")\n  sᵥ = addtags(s, \"vert\")\n\n  T = ising_mpo(sₕ, sᵥ, β)\n\n  χ0 = 1\n  l = Index(χ0, \"Link\")\n  lₕ = addtags(l, \"horiz\")\n  lᵥ = addtags(l, \"vert\")\n\n  # Initial CTM\n  Cₗᵤ = ITensor(lᵥ, lₕ)\n  Cₗᵤ[1, 1] = 1.0\n\n  # Initial HRTM\n  Aₗ = ITensor(lᵥ, lᵥ', sₕ)\n  Aₗ[lᵥ => 1, lᵥ' => 1, sₕ => 1] = 1.0\n  Aₗ[lᵥ => 1, lᵥ' => 1, sₕ => 2] = 0.0\n\n  Cₗᵤ, Aₗ = ctmrg(T, Cₗᵤ, Aₗ; χmax=20, nsteps=100)\n\n  lᵥ = commonind(Cₗᵤ, Aₗ)\n  lₕ = noncommoninds(Cₗᵤ, Aₗ)[1]\n\n  Aᵤ = replaceinds(Aₗ, lᵥ => lₕ, lᵥ' => lₕ', sₕ => sᵥ)\n\n  ACₗ = Aₗ * Cₗᵤ * dag(Cₗᵤ')\n\n  ACTₗ = prime(ACₗ * dag(Aᵤ') * T * Aᵤ, -1)\n\n  κ = (ACTₗ * dag(ACₗ))[]\n\n  @test κ ≈ exp(-β * ising_free_energy(β))\n\n  # Calculate magnetization\n  Tsz = ising_mpo(sₕ, sᵥ, β; sz=true)\n  ACTszₗ = prime(ACₗ * dag(Aᵤ') * Tsz * Aᵤ, -1)\n  m = (ACTszₗ * dag(ACₗ))[] / κ\n  @test abs(m) ≈ ising_magnetization(β)\nend\n",
+      "metadata": {
+        "section_title": "test_ctmrg.jl",
+        "package": "itensors",
+        "source_file": "test\\base\\test_ctmrg.jl",
+        "section_id": "full"
+      },
+      "score": 0.8842382097462386,
+      "original_score": 0.8759695104423985,
+      "vector_score": 0.706081419303349,
+      "bm25_score": 0.6795523645561982,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "itensors",
+        "model",
+        "initial"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": false
+    },
+    {
+      "id": "DMRG__d5f13e4a177f08c61f2451abcce68b43__Preventing-DMRG-from-getting-stuck-in-a-local-minimum_1__2",
+      "text": " state which is not orthogonal to the ground state. After doing some amount of imaginary time evolution, use the resulting MPS as an initial state for DMRG obtain a higher-accuracy solution.\nIn stubborn cases, try other methods for finding the ground state which are slower, but have a better chance of succeeding. A key example is imaginary time evolution, which always reaches the ground state if (a) performed accurately on (b) a state which is not orthogonal to the ground state. After doing some amount of imaginary time evolution, use the resulting MPS as an initial state for DMRG obtain a higher-accuracy solution.",
+      "metadata": {
+        "package": "itensormps",
+        "section_id": "Preventing-DMRG-from-getting-stuck-in-a-local-minimum",
+        "section_title": "Preventing DMRG from getting stuck in a local minimum",
+        "source_file": "docs\\build\\faq\\DMRG.html"
+      },
+      "score": 0.8827424804970011,
+      "original_score": 0.8284036299956113,
+      "vector_score": 0.8022665621457615,
+      "bm25_score": 0.10454827139939965,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "dmrg",
+        "initial",
+        "state"
+      ],
+      "match_ratio": 0.3333333333333333,
+      "is_html": true
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 60,
+    "total_bm25_results_count": 60,
+    "merged_results_count": 105,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "itensors": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 55
+      },
+      "itensormps": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 50
+      }
+    }
+  }
+}

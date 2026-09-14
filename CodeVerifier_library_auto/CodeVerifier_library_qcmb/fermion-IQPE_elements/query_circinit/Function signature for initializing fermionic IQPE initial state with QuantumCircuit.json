@@ -1,0 +1,142 @@
+{
+  "query": "Function signature for initializing fermionic IQPE initial state with QuantumCircuit",
+  "packages": [
+    "qiskit",
+    "qiskit-nature",
+    "qiskit-algorithms",
+    "qiskit-aer"
+  ],
+  "results": [
+    {
+      "id": "hartree_fock__973a80b2a7462da2917d3311e3e913f7__part_3__3",
+      "text": "_mapper,\n            )\n            self.qregs = [QuantumRegister(len(self._bitstr), name=\"q\")]\n\n    def _build(self) -> None:\n        \"\"\"\n        Construct the Hartree-Fock initial state given its parameters.\n        Returns:\n            QuantumCircuit: a quantum circuit preparing the Hartree-Fock\n            initial state given a number of spatial orbitals, number of particles and\n            a qubit mapper.\n        \"\"\"\n        if self._is_built:\n            return\n\n        super()._build()\n\n        # Construct the circuit for bitstring. Since this is defined as an initial state\n        # circuit its assumed that this is applied first to the qubits that are initialized to\n        # the zero state. Hence we just need to account for all True entries and set those.\n        if self._bitstr is not None:\n            for i, bit in enumerate(self._bitstr):\n                if bit:\n                    self.x(i)\n\n\ndef hartree_fock_bitstring_mapped(\n    num_spatial_orbitals: int,\n    num_particles: tuple[int, int],\n    qubit_mapper: QubitMapper,\n) -> list[bool]:\n    # pylint: disable=unused-argument\n    \"\"\"Compute the bitstring representing the mapped Hartree-Fock state for the specified system.\n\n    Args:\n        num_spatial_orbitals: The number of spatial orbitals, has a min. value of 1.\n        num_particles: The number of particles as a tuple (alpha, beta) containing the number of\n            alpha- and  beta-spin electrons, respectively.\n        qubit_mapper: A QubitMapper.\n\n    Returns:\n        The bitstring representing the mapped state of the Hartree-Fock state as array of bools.\n    \"\"\"\n    # get the bitstring encoding the Hartree Fock state\n    bitstr = hartree_fock_bitstring(num_spatial_orbitals, num_particles)\n\n    # encode the bitstring as a `FermionicOp`\n    bitstr_op = FermionicOp(\n        {\" \".join(f\"+_{idx}\" for idx, bit in enumerate(bitstr) if bit): 1.0},\n        num_spin_orbitals=2 * num_spatial_orbitals,\n    )\n\n    # map the `FermionicOp` to a qubit operator\n    qubit_op: SparsePauliOp\n    if isinstance(qubit_mapper, TaperedQubitMapper):\n        # To avoid checking commutativity, we call the two methods separately.\n        qubit_op = qubit_mapper.map_clifford(bitstr_op)\n        qubit_op = qubit_mapper.taper_clifford(qubit_op, check_commutes=False)\n    else:\n        qubit_op = qubit_mapper.map(bitstr_op)\n\n    # We check the mapped operator `x` part of the paulis because we want to have particles\n    # i.e. True,",
+      "metadata": {
+        "package": "qiskit-nature",
+        "source_file": "qiskit_nature\\second_q\\circuit\\library\\initial_states\\hartree_fock.py",
+        "section_title": "hartree_fock.py",
+        "section_id": "part_3"
+      },
+      "score": 1.0,
+      "original_score": 1.0,
+      "vector_score": 1.0,
+      "bm25_score": 0.7956579279326828,
+      "keyword_matches": 3,
+      "matched_keywords": [
+        "initial",
+        "state",
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.375,
+      "is_html": false
+    },
+    {
+      "id": "__init____c21336c1bae2d0fe5fb31594219db6ee__part_8__8",
+      "text": "qp\n   quantum_volume\n   phase_estimation\n   grover_operator\n   unitary_overlap\n   GraphStateGate\n   PauliEvolutionGate\n   HamiltonianGate\n\nBelow we provide the same operations as classes deriving :class:`.QuantumCircuit`. For better\nruntime and compiler performance, however, we suggest using above functions and gates.\n\n.. autosummary::\n   :toctree: ../stubs/\n   :template: autosummary/class_no_inherited_members.rst\n\n   FourierChecking\n   GraphState\n   HiddenLinearFunction\n   IQP\n   QuantumVolume\n   PhaseEstimation\n   GroverOperator\n   UnitaryOverlap\n\n.. _n-local:\n\nN-local circuits\n================\n\nThe following functions return a parameterized :class:`.QuantumCircuit` to use as ansatz in\na broad set of variational quantum algorithms.\n\nFor example, we can build a variational circuit\n\n.. plot::\n   :alt: The efficient SU2 ansatz circuit...\n   :context:\n\n   from qiskit.circuit.library import efficient_su2\n\n   num_qubits = 4\n   ansatz = efficient_su2(num_qubits, entanglement=\"pairwise\")\n   ansatz.draw(\"mpl\")\n\nand combine it with\n\n.. plot::\n   :alt: ... combined with the ZZ feature map.\n   :include-source:\n   :context:\n\n   from qiskit.circuit.library import zz_feature_map\n\n   circuit = zz_feature_map(num_qubits)\n   circuit.barrier()\n   circuit.compose(ansatz, inplace=True)\n\n   circuit.draw(\"mpl\")\n\nto obtain a circuit for variational quantum classification.\n\nThe following functions all construct variational circuits and are optimized for a fast\nconstruction:\n\n.. autosummary::\n   :toctree: ../stubs/\n\n   n_local\n   efficient_su2\n   real_amplitudes\n   pauli_two_design\n   excitation_preserving\n   qaoa_ansatz\n   hamiltonian_variational_ansatz\n   evolved_operator_ansatz\n\nWhile we suggest using the above functions, we also continue supporting the following\n:class:`.BlueprintCircuit`, which wrap the circuits into a block\nand allow for inplace mutations of the circuits:\n\n.. autosummary::\n   :toctree: ../stubs/\n   :template: autosummary/class_no_inherited_members.rst\n\n   NLocal\n   TwoLocal\n   PauliTwoDesign\n   RealAmplitudes\n   EfficientSU2\n   EvolvedOperatorAnsatz\n   ExcitationPreserving\n   QAOAAnsatz\n\n\n.. _data-encoding:\n\nData encoding circuits\n======================\n\nThe following functions return a parameterized :class:`.QuantumCircuit` to use as data\nencoding circuits in a series of variational quantum algorithms:\n\n.. autosummary::\n   :toctree: ../stubs/\n\n   pauli",
+      "metadata": {
+        "source_file": "qiskit\\circuit\\library\\__init__.py",
+        "section_id": "part_8",
+        "section_title": "__init__.py",
+        "package": "qiskit"
+      },
+      "score": 0.8382356516264737,
+      "original_score": 0.8340878478220244,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "test_trotter_qrte__a555c154247a22ba41ca7abc48f5267e__part_4__4",
+      "text": "([Pauli(\"X\")], Parameter(\"t\")) + SparsePauliOp([Pauli(\"Z\")])\n        initial_state = QuantumCircuit(1)\n        self._run_error_test(initial_state, operator, None, None, t_param, param_value_dict)\n\n    @data(([Pauli(\"X\"), Pauli(\"Y\")], None))\n    @unpack\n    def test_trotter_qrte_trotter_aux_ops_errors(self, aux_ops, estimator):\n        \"\"\"Test TrotterQRTE with raising errors.\"\"\"\n        operator = SparsePauliOp([Pauli(\"X\")]) + SparsePauliOp([Pauli(\"Z\")])\n        initial_state = QuantumCircuit(1)\n        self._run_error_test(initial_state, operator, aux_ops, estimator, None, None)\n\n    @data(\n        (\n            SparsePauliOp([Pauli(\"X\"), Pauli(\"Z\")], np.array([Parameter(\"a\"), Parameter(\"b\")])),\n            QuantumCircuit(1),\n        ),\n    )\n    @unpack\n    def test_trotter_qrte_trotter_hamiltonian_errors(self, operator, initial_state):\n        \"\"\"Test TrotterQRTE with raising errors for evolution problem content.\"\"\"\n        self._run_error_test(initial_state, operator, None, None, None, None)\n\n    @data(True, False)\n    def test_barriers(self, insert_barrier):\n        \"\"\"Test TrotterQRTE to insert barriers correctly.\"\"\"\n        initial_state = QuantumCircuit(1)\n        initial_state.x(0)\n\n        expected_circuit = QuantumCircuit(1)\n        expected_circuit.append(initial_state, expected_circuit.qubits)\n        if insert_barrier:\n            expected_circuit.barrier()\n        expected_circuit.rx(1, 0)\n        expected_circuit.ry(1, 0)\n        if insert_barrier:\n            expected_circuit.barrier()\n        expected_circuit.rx(1, 0)\n        expected_circuit.ry(1, 0)\n        if insert_barrier:\n            expected_circuit.barrier()\n\n        operator = SparsePauliOp([\"X\", \"Y\"])\n        evolution_problem = TimeEvolutionProblem(operator, 1, initial_state)\n        trotter_qrte = TrotterQRTE(num_timesteps=2, insert_barriers=insert_barrier)\n        evolution_result = trotter_qrte.evolve(evolution_problem)\n\n        self.assertEqual(\n            expected_circuit.decompose(reps=3), evolution_result.evolved_state.decompose(reps=5)\n        )\n\n    def test_transpiler(self):\n        \"\"\"Test that the transpiler is called\"\"\"\n        pass_manager = generate_preset_pass_manager(optimization_level=1, seed_transpiler=42)\n        counts = [0]\n\n        def callback(**kwargs):\n            counts[0] = kwargs[\"count\"]\n\n        operator = SparsePauliOp([Pauli(\"X\"), Pauli(\"",
+      "metadata": {
+        "source_file": "test\\time_evolvers\\test_trotter_qrte.py",
+        "section_id": "part_4",
+        "package": "qiskit-algorithms",
+        "section_title": "test_trotter_qrte.py"
+      },
+      "score": 0.8382356516264737,
+      "original_score": 0.8340878478220244,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "ref_initialize__3c79c72e7d767a01d227dae5d0b67d73__part_10__10",
+      "text": "x2\": shots / 2}]\n    else:\n        return [{\"0x00\": shots / 2, \"0x10\": shots / 2}]\n\n\ndef initialize_entangled_qubits(final_measure=True):\n    \"\"\"Initialize test circuits with entangled qubits\"\"\"\n\n    circuits = []\n    qr = QuantumRegister(3)\n    if final_measure:\n        cr = ClassicalRegister(3)\n        regs = (qr, cr)\n    else:\n        regs = (qr,)\n\n    # Initialize |000+111> -> |000+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [0])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |010+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 1], [1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+011>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0], [2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([1, 0, 0, 0], [0, 1])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |100+110>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(0, 2)\n    circuit.initialize([0, 0, 0, 1], [0, 2])\n    if final_measure:\n        circuit.barrier(qr)\n        circuit.measure(qr, cr)\n    circuits.append(circuit)\n\n    # Initialize |000+111> ->  |000+100+010+110+100+101+011+111>\n    circuit = QuantumCircuit(*regs)\n    circuit.h(0)\n    circuit.cx(0, 1)\n    circuit.cx(",
+      "metadata": {
+        "section_id": "part_10",
+        "package": "qiskit-aer",
+        "section_title": "ref_initialize.py",
+        "source_file": "test\\terra\\reference\\ref_initialize.py"
+      },
+      "score": 0.8382356516264737,
+      "original_score": 0.8340878478220244,
+      "vector_score": 1.0,
+      "bm25_score": null,
+      "keyword_matches": 1,
+      "matched_keywords": [
+        "quantumcircuit"
+      ],
+      "match_ratio": 0.125,
+      "is_html": false
+    },
+    {
+      "id": "0.5_b_solving_problems__2cfad54565a98eb77cde27adb1dee82a__part_2__2",
+      "text": " ``VSCF`` initial\nstates. We have aligned these APIs to look like in the following:\n\n.. code:: ipython3\n\n    from qiskit_nature.second_q.circuit.library import UCC, UVCC\n\n    ucc = UCC(num_spatial_orbitals=None, num_particles=None, excitations=None, qubit_converter=None)\n    uvcc = UVCC(num_modals=None, excitations=None, qubit_converter=None)\n\nHartreeFock/VSCF initial states\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nThe ``HartreeFock`` and ``VSCF`` initial state circuits are now\nimplemented as ``BlueprintCircuit``. That means, that you can initialize\nthem without any arguments and supply the information later as shown\nbelow:\n\nPreviously\n^^^^^^^^^^\n\n.. code:: ipython3\n\n    from qiskit_nature.circuit.library import HartreeFock, VSCF\n    from qiskit_nature.converters.second_quantization import QubitConverter\n    from qiskit_nature.mappers.second_quantization import DirectMapper, JordanWignerMapper\n\n    hf = HartreeFock(\n        num_spin_orbitals=4, num_particles=(1, 1), qubit_converter=QubitConverter(JordanWignerMapper())\n    )\n    vscf = VSCF(num_modals=[2, 2])\n\nNew\n^^^\n\n.. code:: ipython3\n\n    from qiskit_nature.second_q.circuit.library import HartreeFock, VSCF\n    from qiskit_nature.second_q.mappers import DirectMapper, JordanWignerMapper, QubitConverter\n\n    hf = HartreeFock()\n    hf.num_spatial_orbitals = 2\n    hf.num_particles = (1, 1)\n    hf.qubit_converter = QubitConverter(JordanWignerMapper())\n\n    vscf = VSCF()\n    vscf.num_modals = [2, 2]\n\n``qiskit_nature.algorithms``\n============================\n\nThe algorithms in Qiskit Nature have been updated to use the new\n``qiskit.algorithms`` components which are based on the\n``qiskit.primitives`` as of Qiskit Terra 0.22.\n\nFor most changes to take effect, you can once again simply update your\nimport paths from ``qiskit_nature.algorithms`` to\n``qiskit_nature.second_q.algorithms``. However, there are some details\nwhich you need to pay attention to, due to the change to the\nprimitive-based algorithms of Qiskit Terra being used under the hood.\nThese details are explained below.\n\n``qiskit_nature.algorithms.initial_points``\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nThis module was moved to\n``qiskit_nature.second_q.algorithms.initial_points``. All you need to do\nis update",
+      "metadata": {
+        "section_id": "part_2",
+        "section_title": "0.5_b_solving_problems.rst",
+        "package": "qiskit-nature",
+        "source_file": "docs\\migration\\0.5_b_solving_problems.rst"
+      },
+      "score": 0.7101414557596991,
+      "original_score": 0.6948857429049464,
+      "vector_score": 0.8331085804923746,
+      "bm25_score": null,
+      "keyword_matches": 2,
+      "matched_keywords": [
+        "initial",
+        "state"
+      ],
+      "match_ratio": 0.25,
+      "is_html": false
+    }
+  ],
+  "stats": {
+    "total_vector_results_count": 120,
+    "total_bm25_results_count": 120,
+    "merged_results_count": 225,
+    "final_results_count": 5,
+    "per_package_stats": {
+      "qiskit": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 59
+      },
+      "qiskit-nature": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "qiskit-algorithms": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 54
+      },
+      "qiskit-aer": {
+        "vector_results_count": 30,
+        "bm25_results_count": 30,
+        "merged_results_count": 58
+      }
+    }
+  }
+}
