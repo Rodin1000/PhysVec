@@ -15,7 +15,7 @@ def main() -> int:
     response, status, usage = send_chat_openrouter(
         user_model=model,
         role_prompt="You are a helpful assistant.",
-        user_prompt="Reply with only OK.",
+        user_prompt="Who are you",
         max_tokens=32,
         iscaltoken=True,
     )
