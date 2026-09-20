@@ -22,7 +22,11 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 # config file in this project
+from config import OPENROUTER_API_KEY
 from utils.send_chat_yidong import MODEL_MAX_TOKENS, MODEL_API_KEY
+
+# config loads the root .env before this provider setting is read.
+MCP_LLM_PROVIDER = os.getenv("MCP_LLM_PROVIDER", "openrouter").strip().lower()
 
 # Setup logging for MCP operations
 logger = logging.getLogger(__name__)
@@ -452,17 +456,24 @@ async def send_chat_through_mcp_dynamic(
         logger.error("  3. Missing dependencies or configuration issues")
         raise
 
-    # 2) LLM - qwen / openai / anthropic three-way branch
-    qwen3_models = ["qwen3-30b-a3b-instruct-2507", "qwen3-next-80b-a3b-instruct","qwen3-max"]
-    openai_format_models = ["grok-4-fast-reasoning", "grok-4-fast-non-reasoning", "deepseek-r1", "deepseek-v3",
-                            "gemini-2.5-flash-nothinking", "gpt-5.1-2025-11-13", "gpt-4o-2024-11-20", "gpt-5.2"]
-    if user_model in qwen3_models:
-        llm = ChatYidongQwen(model=user_model, temperature=model_temp, openai_api_key=None)
-    elif user_model in openai_format_models:
-        llm = ChatYidongOpenAI(model=user_model, temperature=model_temp, openai_api_key=None)
+    # 2) Select provider; preserve the internal model-specific routing.
+    if MCP_LLM_PROVIDER == "openrouter":
+        llm = ChatOpenRouter(model=user_model, temperature=model_temp)
+    elif MCP_LLM_PROVIDER == "yidong":
+        qwen3_models = ["qwen3-30b-a3b-instruct-2507", "qwen3-next-80b-a3b-instruct","qwen3-max"]
+        openai_format_models = ["grok-4-fast-reasoning", "grok-4-fast-non-reasoning", "deepseek-r1", "deepseek-v3",
+                                "gemini-2.5-flash-nothinking", "gpt-5.1-2025-11-13", "gpt-4o-2024-11-20", "gpt-5.2"]
+        if user_model in qwen3_models:
+            llm = ChatYidongQwen(model=user_model, temperature=model_temp, openai_api_key=None)
+        elif user_model in openai_format_models:
+            llm = ChatYidongOpenAI(model=user_model, temperature=model_temp, openai_api_key=None)
+        else:
+            llm = ChatYidongAnthropic(model=user_model, temperature=model_temp, anthropic_api_key=None)
     else:
-        llm = ChatYidongAnthropic(model=user_model, temperature=model_temp, anthropic_api_key=None)
-    # llm = ChatOpenRouter(model_name=user_model, temperature=model_temp)
+        raise ValueError(
+            f"Unsupported MCP LLM provider: {MCP_LLM_PROVIDER}. "
+            "Expected 'openrouter' or 'yidong'."
+        )
 
     # 3) Agent with MCP client
     agent = MCPAgent(llm=llm, client=client, max_steps=max_steps)

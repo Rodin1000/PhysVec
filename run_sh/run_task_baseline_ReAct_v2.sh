@@ -5,7 +5,7 @@ export CUDA_VISIBLE_DEVICES=7
 
 # --- set tags ---
 tag1="BATCH5_15000token_18_1_18"
-model_author="gemini-2.5-flash-nothinking"
+model_author="qwen/qwen3-max"
 
 
 # tag1="BATCH5_15000token_13_1_13"

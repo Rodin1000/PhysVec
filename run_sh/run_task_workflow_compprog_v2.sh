@@ -6,7 +6,7 @@ export CUDA_VISIBLE_DEVICES=7
 
 # --- set tags ---
 
-model_author="gemini-2.5-flash-nothinking"
+model_author="qwen/qwen3-max"
 tag1="BATCH5_15000token_18_1_18"  # author_format_judge gemini-2.5-flash-nothinking
 
 # model_author="gpt-5.1-2025-11-13"
@@ -34,7 +34,7 @@ task_list="task_dft_qc_1_1.json,task_dft_qc_2_1.json,task_dft_qc_3_1.json,task_d
 
 
 
-model_author_judge="gemini-3-flash-preview"
+model_author_judge="qwen/qwen3-max" # or try "google/gemini-3-flash-preview" for better performance
 
 model_step_author_role_planner="$model_author"
 model_step_author_role_coder="$model_author"

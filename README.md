@@ -139,11 +139,11 @@ To add verifier snippets for `dft_qc`, create a folder such as `CodeVerifier_lib
 
 ### Pure text
 
-Use `_send_chat` / `_send_chat_robust` in [`DFT_agents.py`](src/DFT_agents.py). Wire your provider in [`utils/send_chat_yidong.py`](utils/send_chat_yidong.py) (reference) and point `_send_chat` at your adapter.
+Use `_send_chat` / `_send_chat_robust` in [`DFT_agents.py`](src/DFT_agents.py). The default provider is OpenRouter, using the complete reference adapter [`utils/send_chat_openrouter.py`](utils/send_chat_openrouter.py). It returns `(response_text, status_code, token_dict)`; `_send_chat` preserves the agent-facing `(response_text, token_dict)` interface.
 
 ### MCP-enabled calls
 
-`_send_chat_through_mcp_dynamic` in [`DFT_agents.py`](src/DFT_agents.py) delegates to [`send_chat_through_mcp_dynamic`](utils/MCP_toolbox.py) (LangChain chat models + MCP tools). Update model classes and endpoints there for your API.
+`_send_chat_through_mcp_dynamic` in [`DFT_agents.py`](src/DFT_agents.py) delegates to [`send_chat_through_mcp_dynamic`](utils/MCP_toolbox.py) (LangChain chat models + MCP tools). `MCP_LLM_PROVIDER` defaults to `openrouter` and selects the existing `ChatOpenRouter` wrapper. The original internal provider branches remain available with `MCP_LLM_PROVIDER=yidong`.
 
 DFT-specific helpers: [`utils/code_editor_dft.py`](utils/code_editor_dft.py), [`utils/run_program.py`](utils/run_program.py).
 
@@ -192,26 +192,57 @@ Install **filesystem-mcp**, **retrieve-mcp**, and **program-dft-mcp** as in [MCP
 
 ## Step 3: LLM API configuration
 
-Store keys in a root `.env` file (keep `.env` in `.gitignore`).
+Store keys in a root `.env` file (keep `.env` in `.gitignore`). `config.py` loads this file through `python-dotenv`.
 
-1. **Text API:** add `utils/send_chat_<yourAPI>.py` and update `_send_chat` in [`DFT_agents.py`](src/DFT_agents.py).
-2. **MCP API:** mirror [`send_chat_through_mcp_dynamic`](utils/MCP_toolbox.py) (e.g. swap `ChatYidongAnthropic` for your chat wrapper).
+```dotenv
+OPENROUTER_API_KEY=your_key_here
+# Optional; this is already the default:
+MCP_LLM_PROVIDER=openrouter
+```
 
-Quick test:
+With the runtime dependencies installed, this key enables both ordinary text and MCP-enabled LLM calls. Internal provider keys are not required for the default route. Full DFT workflows also require the dataset, MCP servers, retrieval resources, and ORCA described above.
+
+This branch has no root requirements file. The text adapter uses `openai` and `python-dotenv` (the migration reference uses `openai==1.107.2` and `python-dotenv==1.1.1`). MCP calls additionally require `langchain-openai`, `langchain-anthropic`, and `mcp-use`, alongside the other existing agent dependencies. The reference version of `langchain-openai` is `0.3.33`.
+
+Test the API separately before starting a workflow:
+
+```bash
+python tests/test_send_chat_openrouter.py
+# Optional model override:
+OPENROUTER_TEST_MODEL="qwen/qwen3-max" python tests/test_send_chat_openrouter.py
+```
+
+This explicit connectivity test makes one real request with `max_tokens=32`, prints the response and token usage, and exits nonzero for errors or an empty response. Importing the test does not send a request.
+
+Direct text API example:
 
 ```python
-from utils import send_chat_yidong
+from utils import send_chat_openrouter
 
-response, status_code, token_dict = send_chat_yidong.send_chat_diverse_model(
-    user_model="claude-sonnet-4-20250514",
+response, status_code, token_dict = send_chat_openrouter.send_chat_openrouter(
+    user_model="qwen/qwen3-max",
     role_prompt="You are a helpful assistant.",
     user_prompt="Who are you?",
     temperature=0.1,
     top_p=0.9,
     iscaltoken=True,
-    isstream=True,
 )
 print(response, status_code, token_dict)
+```
+
+For a custom provider, add its environment-based key/config in `config.py`, then:
+
+1. **Text API:** implement `utils/send_chat_yourAPI.py` with the same return contract and add an `api_type="yourAPI"` route in `DFT_agents.py`.
+2. **MCP API:** implement a LangChain-compatible `ChatYourAPI` wrapper and add a `MCP_LLM_PROVIDER == "yourAPI"` branch in `utils/MCP_toolbox.py`.
+
+`send_chat_yidong.py` and its wrappers are retained for the author's internal environment; that service and its credentials are generally not available to external users. Use OpenRouter or configure your own provider.
+
+If a server has an invalid local proxy and direct access is available, unset proxy variables for that command only. Do not change credentials or global network settings:
+
+```bash
+env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
+    -u http_proxy -u https_proxy -u all_proxy \
+    python tests/test_send_chat_openrouter.py
 ```
 
 ## Step 4: Run the pipeline

@@ -1,5 +1,4 @@
 # main.py
-from openai import OpenAI
 import time
 import random
 from pathlib import Path
@@ -26,7 +25,7 @@ if PROJECT_ROOT not in sys.path:
 from config import OPENROUTER_API_KEY, YIDONG_API_KEY
 from config import get_model_settings
 
-from utils import MCP_toolbox, code_editor_dft, run_program, send_chat_yidong
+from utils import MCP_toolbox, code_editor_dft, run_program, send_chat_openrouter, send_chat_yidong
 
 
 # Check the API key
@@ -802,7 +801,7 @@ class DFT_agent:
 
 
     # LLM calling unit--------------------------------------
-    def _send_chat(self, user_model: str, user_prompt: str, temperature: float = None, top_p: float = None, api_type: str = "yidong", iscaltoken: bool = False):
+    def _send_chat(self, user_model: str, user_prompt: str, temperature: float = None, top_p: float = None, api_type: str = "openrouter", iscaltoken: bool = False):
         """
         Send chat messages to the LLM and get the response.
         Returns: (response_text, token_dict) where token_dict is None if iscaltoken=False
@@ -820,26 +819,22 @@ class DFT_agent:
             top_p_set = settings.get("top_p")
 
         QMB_author_prompt = self._load_prompt(topic="general_dft", prompt_file="QMB_author")
-        message_to_send = [
-            {"role": "system", "content": QMB_author_prompt},
-            {"role": "user", "content": user_prompt}
-        ]
-
-        model_params = {
-            "temperature": temp_set,
-            "top_p": top_p_set,
-            # add other parameters as needed
-        }
+        if api_type not in ("openrouter", "yidong"):
+            raise ValueError(f"Unsupported API provider: {api_type}")
 
         try:
             if api_type == "openrouter":
-                client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=OPENROUTER_API_KEY)
-                response = client.chat.completions.create(
-                    model=model_name,
-                    messages=message_to_send,
-                    **model_params
+                response_text, status_code, token_dict = send_chat_openrouter.send_chat_openrouter(
+                    user_model=model_name,
+                    role_prompt=QMB_author_prompt,
+                    user_prompt=user_prompt,
+                    temperature=temp_set,
+                    top_p=top_p_set,
+                    iscaltoken=iscaltoken,
                 )
-                return response.choices[0].message.content.strip(), None
+                if status_code != 200:
+                    print(f"calling model {model_name} failed with status code: {status_code}, the response text is: {response_text}")
+                return response_text, token_dict
             elif api_type == "yidong":
                 response_text, status_code, token_dict = send_chat_yidong.send_chat_diverse_model(
                     user_model=model_name,
