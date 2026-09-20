@@ -7,7 +7,7 @@ export CUDA_VISIBLE_DEVICES=7
 # --- set tags ---
 
 model_author="qwen/qwen3-max"
-tag1="BATCH5_15000token_18_1_18"  # author_format_judge gemini-2.5-flash-nothinking
+tag1="TESTAPI"  # author_format_judge gemini-2.5-flash-nothinking
 
 # model_author="gpt-5.1-2025-11-13"
 # tag1="BATCH5_15000token_13_1_13"  # author_format_judge deepseek-v3

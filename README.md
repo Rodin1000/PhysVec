@@ -135,15 +135,17 @@ To add verifier snippets for `dft_qc`, create a folder such as `CodeVerifier_lib
 
 # Configurations
 
+For additional configuration guidance, see the related sections in the main branch README.
+
 ## LLM API calling
 
 ### Pure text
 
-Use `_send_chat` / `_send_chat_robust` in [`DFT_agents.py`](src/DFT_agents.py). The default provider is OpenRouter, using the complete reference adapter [`utils/send_chat_openrouter.py`](utils/send_chat_openrouter.py). It returns `(response_text, status_code, token_dict)`; `_send_chat` preserves the agent-facing `(response_text, token_dict)` interface.
+Use `_send_chat` / `_send_chat_robust` in [`DFT_agents.py`](src/DFT_agents.py). We provide [`utils/send_chat_openrouter.py`](utils/send_chat_openrouter.py) as a ready-to-use adapter. After adding `OPENROUTER_API_KEY` to the project-root `.env`, `_send_chat` uses OpenRouter by default. For your own provider, add an adapter such as `utils/send_chat_yourAPI.py` and extend the `api_type` routing. [`utils/send_chat_yidong.py`](utils/send_chat_yidong.py) is retained for our internal environment, but its service and credentials are not generally available to other users.
 
 ### MCP-enabled calls
 
-`_send_chat_through_mcp_dynamic` in [`DFT_agents.py`](src/DFT_agents.py) delegates to [`send_chat_through_mcp_dynamic`](utils/MCP_toolbox.py) (LangChain chat models + MCP tools). `MCP_LLM_PROVIDER` defaults to `openrouter` and selects the existing `ChatOpenRouter` wrapper. The original internal provider branches remain available with `MCP_LLM_PROVIDER=yidong`.
+`_send_chat_through_mcp_dynamic` in [`DFT_agents.py`](src/DFT_agents.py) delegates to [`send_chat_through_mcp_dynamic`](utils/MCP_toolbox.py) (LangChain chat models + MCP tools). `MCP_LLM_PROVIDER` near the top of this file defaults to `openrouter` and selects the LangChain-compatible `ChatOpenRouter` wrapper, using the same `OPENROUTER_API_KEY`. For another provider, add a wrapper such as `ChatYourAPI` and extend the provider routing with its URL, model names, and credentials. The internal provider wrappers are retained for reproducibility.
 
 DFT-specific helpers: [`utils/code_editor_dft.py`](utils/code_editor_dft.py), [`utils/run_program.py`](utils/run_program.py).
 
@@ -178,8 +180,7 @@ Set **`ORCA_EXECUTABLE`** to your ORCA binary (default in [`program-dft-mcp/READ
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-# Install MCP servers (above) and Python deps used by src/ (openai, langchain-openai, mcp_use, fitz, …).
-# Install each MCP server's requirements.txt where needed.
+pip install -r requirements.txt
 ```
 
 **ORCA** must be installed and on `PATH` or set via `ORCA_EXECUTABLE`.
@@ -192,29 +193,18 @@ Install **filesystem-mcp**, **retrieve-mcp**, and **program-dft-mcp** as in [MCP
 
 ## Step 3: LLM API configuration
 
-Store keys in a root `.env` file (keep `.env` in `.gitignore`). `config.py` loads this file through `python-dotenv`.
-
-```dotenv
-OPENROUTER_API_KEY=your_key_here
-# Optional; this is already the default:
-MCP_LLM_PROVIDER=openrouter
-```
-
-With the runtime dependencies installed, this key enables both ordinary text and MCP-enabled LLM calls. Internal provider keys are not required for the default route. Full DFT workflows also require the dataset, MCP servers, retrieval resources, and ORCA described above.
-
-This branch has no root requirements file. The text adapter uses `openai` and `python-dotenv` (the migration reference uses `openai==1.107.2` and `python-dotenv==1.1.1`). MCP calls additionally require `langchain-openai`, `langchain-anthropic`, and `mcp-use`, alongside the other existing agent dependencies. The reference version of `langchain-openai` is `0.3.33`.
-
-Test the API separately before starting a workflow:
+Store keys in a root `.env` file (keep `.env` in `.gitignore`). Add keys or configuration for custom providers in [`config.py`](config.py). For the provided OpenRouter adapter, add:
 
 ```bash
-python tests/test_send_chat_openrouter.py
-# Optional model override:
-OPENROUTER_TEST_MODEL="qwen/qwen3-max" python tests/test_send_chat_openrouter.py
+OPENROUTER_API_KEY=your_key_here
 ```
 
-This explicit connectivity test makes one real request with `max_tokens=32`, prints the response and token usage, and exits nonzero for errors or an empty response. Importing the test does not send a request.
+OpenRouter is the default for both text and MCP calls. Use valid OpenRouter model IDs such as `qwen/qwen3-max` in the run scripts.
 
-Direct text API example:
+1. **Text API:** to use another provider, add `utils/send_chat_yourAPI.py` with the same function signature and `(response_text, status_code, token_dict)` return shape, then add an `api_type="yourAPI"` branch in `_send_chat` in [`DFT_agents.py`](src/DFT_agents.py).
+2. **MCP API:** define a LangChain-compatible `ChatYourAPI` wrapper and add an `MCP_LLM_PROVIDER == "yourAPI"` branch in [`utils/MCP_toolbox.py`](utils/MCP_toolbox.py). Configure its URL, model names, and credentials; the other method definitions do not need to change.
+
+Test the API separately before running the full pipeline. OpenRouter example:
 
 ```python
 from utils import send_chat_openrouter
@@ -230,19 +220,10 @@ response, status_code, token_dict = send_chat_openrouter.send_chat_openrouter(
 print(response, status_code, token_dict)
 ```
 
-For a custom provider, add its environment-based key/config in `config.py`, then:
-
-1. **Text API:** implement `utils/send_chat_yourAPI.py` with the same return contract and add an `api_type="yourAPI"` route in `DFT_agents.py`.
-2. **MCP API:** implement a LangChain-compatible `ChatYourAPI` wrapper and add a `MCP_LLM_PROVIDER == "yourAPI"` branch in `utils/MCP_toolbox.py`.
-
-`send_chat_yidong.py` and its wrappers are retained for the author's internal environment; that service and its credentials are generally not available to external users. Use OpenRouter or configure your own provider.
-
-If a server has an invalid local proxy and direct access is available, unset proxy variables for that command only. Do not change credentials or global network settings:
+You can also run the included real connectivity test (one low-token request):
 
 ```bash
-env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
-    -u http_proxy -u https_proxy -u all_proxy \
-    python tests/test_send_chat_openrouter.py
+python tests/test_send_chat_openrouter.py
 ```
 
 ## Step 4: Run the pipeline
