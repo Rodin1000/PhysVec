@@ -1,6 +1,8 @@
 #!/bin/bash
 # task_workflow_compscit_v4: merge smallscale+fullparas -> code_LLM_loop1, then loop rubrics_v9 -> suggest -> retrieve -> refine -> repair (no repo).
 # Supports ref_result_dir to copy from ref xxx_check before workflow.
+# Run the matching programming workflow first. The reference task must contain an *_check
+# directory with code_LLM_fullparas and at least one code_LLM_loopN (the largest N is used).
 set -e
 export CUDA_VISIBLE_DEVICES=6
 
@@ -10,6 +12,7 @@ tag1="BATCH5_15000token_18_1_18"
 # --- set parameters ---
 topic="dmrg"
 result_dir="../results/Sciresults_TESTAPI"
+# Read-only source produced by run_task_workflow_compprog_v2.sh; topic/task_list must match it.
 ref_result_dir="../results/results_${tag1}"
 task_list="task_dmrg_2_2"
 

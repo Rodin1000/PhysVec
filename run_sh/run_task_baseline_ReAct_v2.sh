@@ -1,10 +1,14 @@
 #!/bin/bash
 # task_baseline_ReAct_v2: batch ReAct baseline
+# Run this programming baseline before run_task_baseline_compscit_v4.sh.
+# A usable result contains code_ReAct_fullparas and at least one code_ReAct_loopN.
 set -e
 export CUDA_VISIBLE_DEVICES=6
 
 # --- set tags ---
 tag1="BATCH5_15000token_18_1_18_TESTAPI"
+# Recommended tags: freereact (no RAG) or freereactrag (ReAct-RAG).
+# The matching baseline compscit script must use the same tag_name.
 tag_name="freereactrag"
 # iscodefile: true => skip Phase 1, use code from *_check/code_LLM_loop1
 iscodefile="false"

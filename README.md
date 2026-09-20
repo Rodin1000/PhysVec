@@ -201,7 +201,12 @@ You can adjust the settings in .sh scripts:
 - Saving directories. 
 - Sandbox directories. 
 
-You may begin with: run_sh/run_task_workflow_compprog_v2.sh (run_sh/run_task_ReAct_v2.sh) to produce PhysVEC (baseline) reproduction scripts. And run_sh/run_task_workflow_compscit_v4.sh (run_sh/run_task_baseline_compscit_v4.sh) for PhysVEC (baseline) scientific tests and final reproduction. 
+Recommended order:
+
+1. **PhysVEC:** run [`run_task_workflow_compprog_v2.sh`](run_sh/run_task_workflow_compprog_v2.sh) for code generation and programming tests, then run [`run_task_workflow_compscit_v4.sh`](run_sh/run_task_workflow_compscit_v4.sh) for scientific tests and final reproduction.
+2. **Baseline:** run [`run_task_baseline_ReAct_v2.sh`](run_sh/run_task_baseline_ReAct_v2.sh) for baseline code generation and programming tests, then run [`run_task_baseline_compscit_v4.sh`](run_sh/run_task_baseline_compscit_v4.sh) for scientific tests and final reproduction.
+
+Before running either `compscit` script, set its `ref_result_dir` to the matching successful `compprog`/ReAct result directory. For the baseline workflow, its `tag_name` must also match the preceding ReAct run. See the comments in the four scripts for the required input files.
 
 ## Addition: prepare Verifier library
 See more information in 'Methods' in our paper. 

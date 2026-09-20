@@ -1,10 +1,13 @@
 #!/bin/bash
 # task_workflow_compprog_v2: author + (unittest + integtest + postprocess + coderepair) loop
+# Run this programming workflow before run_task_workflow_compscit_v4.sh.
+# A usable result contains an *_check directory with code_LLM_fullparas and code_LLM_loopN.
 set -e
 export CUDA_VISIBLE_DEVICES=6
 
 # --- set tags ---
 tag1="TESTAPI"  # author_format_judge
+# The scientific workflow should point ref_result_dir to ../results/results_${tag1}.
 
 # --- set parameters ---
 topic="dmrg"
