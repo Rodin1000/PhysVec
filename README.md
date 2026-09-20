@@ -192,12 +192,6 @@ You can also run the included real connectivity test before starting the full wo
 python tests/test_send_chat_openrouter.py
 ```
 
-The default test model is `openai/gpt-4o-mini`. To use another OpenRouter model ID:
-
-```bash
-OPENROUTER_TEST_MODEL="provider/model-name" python tests/test_send_chat_openrouter.py
-```
-
 ## Step4: run pipeline
 The executable user interfaces are provided in **Code Structure/User interface** above. 
 
