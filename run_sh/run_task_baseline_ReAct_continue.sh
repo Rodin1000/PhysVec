@@ -23,7 +23,7 @@ task_list="task_nnwf_2_2"
 tag_name="freereactrag"
 
 # Phase 1 parameters are retained for CLI/settings compatibility; continuation skips Phase 1.
-model_author="gemini-2.5-flash-nothinking"
+model_author="qwen/qwen3-max"
 model_programtest="$model_author"
 user_model_planner="$model_author"
 user_model_coder="$model_author"

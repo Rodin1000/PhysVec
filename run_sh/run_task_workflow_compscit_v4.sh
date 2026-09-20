@@ -9,12 +9,12 @@ tag1="BATCH5_15000token_18_1_18"
 
 # --- set parameters ---
 topic="dmrg"
-result_dir="../results/Sciresults_${tag1}"
+result_dir="../results/Sciresults_TESTAPI"
 ref_result_dir="../results/results_${tag1}"
 task_list="task_dmrg_2_2"
 
 # Model parameters (rubrics + repair)
-model_author="gemini-2.5-flash-nothinking"
+model_author="qwen/qwen3-max"
 user_model_rubricsgrader="$model_author"
 model_step_repair_role_suggest="$model_author"
 model_step_repair_role_author="$model_author"

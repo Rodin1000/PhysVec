@@ -91,12 +91,14 @@ For example, user can find the original .tex file under 'Paper_dataset/dmrg/sour
 ### LLM API calling
 
 #### Pure text calling
-Throughout the project, we use the `_send_chat` method in [`QMBagents.py`](src/QMBagents.py) for text-only LLM calls. It utilizes low-level helpers in [`utils/`](utils/) that are tied to your LLM API provider and credentials. You are expected to add or adjust an adapter in `utils/` for whatever API you use. Users can follow the pattern in [`utils/send_chat_yidong.py`](utils/send_chat_yidong.py) as a reference implementation.
+Throughout the project, we use the `_send_chat` method in [`QMBagents.py`](src/QMBagents.py) for text-only LLM calls. It utilizes low-level helpers in [`utils/`](utils/) that are tied to your LLM API provider and credentials.
+
+We provide [`utils/send_chat_openrouter.py`](utils/send_chat_openrouter.py) as a ready-to-use reference adapter. After adding `OPENROUTER_API_KEY` to the project-root `.env`, it can be used directly and is currently the default provider in `_send_chat`. If you write your own adapter (for example, `utils/send_chat_yourAPI.py`), add it under `utils/` and extend the `api_type` routing in `_send_chat` to select it. [`utils/send_chat_yidong.py`](utils/send_chat_yidong.py) is the adapter used in our own environment, but its service and credentials are not generally available to other users; OpenRouter is the recommended directly usable option.
 
 #### MCP calling
-In the pipeline, API calling with MCP tools is also necessary. We realize this by `_send_chat_through_mcp_dynamic` method in [`QMBagents.py`](src/QMBagents.py). This method calls `send_chat_through_mcp_dynamic` function in 'utils/MCP_toolbox.py'. 
+In the pipeline, API calling with MCP tools is also necessary. We realize this by the `_send_chat_through_mcp_dynamic` method in [`QMBagents.py`](src/QMBagents.py). This method calls `send_chat_through_mcp_dynamic` in [`utils/MCP_toolbox.py`](utils/MCP_toolbox.py).
 
-We note that, with your own API setting, you need to modefy the `send_chat_through_mcp_dynamic` definition in 'utils/MCP_toolbox.py' accordingly (such as url, model names, etc.). 
+With your own API setting, you can modify the provider classes and routing in [`utils/MCP_toolbox.py`](utils/MCP_toolbox.py) accordingly, such as the URL and model names. The provider option `MCP_LLM_PROVIDER` is defined near the top of this file and defaults to `openrouter`, which works directly with `OPENROUTER_API_KEY`. The provider wrappers used in our internal environment are retained for reproducibility but are not generally available to other users.
 
 ### MCP servers
 All MCP servers are constructed under [`MCP_servers/`](MCP_servers/) directory. 
@@ -144,37 +146,56 @@ You need to initiate all three MCP servers under `MCP_servers` directory. For th
 You need to **configure your LLM API** (access keys, base URL, model names) **for this project**; details are also in **Configurations** above.
 
 ### API keys
-You can store your own API keys (e.g. openrouter key, etc.) in .env file in the project root. Remember to include .env in .gitignore. You also need to update [`config.py`](config.py). 
+You can store your own API keys (e.g. an OpenRouter key) in the `.env` file in the project root. Remember to include `.env` in `.gitignore`. You also need to update [`config.py`](config.py) when adding keys or configuration for your own provider.
+
+For the provided OpenRouter adapter, add:
+
+```bash
+OPENROUTER_API_KEY=your_key_here
+```
 
 ### Pure text calling configuration
-Follow the layout of [`utils/send_chat_yidong.py`](utils/send_chat_yidong.py) to add a new function under [`utils/`](utils/) that implements **your** provider’s LLM chat call (e.g. `utils/send_chat_yourAPI.py`). Then update `_send_chat` in [`QMBagents.py`](src/QMBagents.py) so it dispatches to your adapter (same signatures / return shape as the reference).
+We provide [`utils/send_chat_openrouter.py`](utils/send_chat_openrouter.py) as a complete adapter that can be used directly. Once `OPENROUTER_API_KEY` is present in `.env`, `_send_chat` uses OpenRouter by default. When using OpenRouter, set the run scripts to valid OpenRouter model IDs such as `qwen/qwen3-max`.
+
+To use another provider, follow the same adapter structure and add a module such as `utils/send_chat_yourAPI.py`. Then update `_send_chat` in [`QMBagents.py`](src/QMBagents.py) with an `api_type="yourAPI"` branch that dispatches to your adapter using the same function signature and `(response_text, status_code, token_dict)` return shape.
 
 ### MCP calling configuration
-Mirror how [`send_chat_through_mcp_dynamic`](utils/MCP_toolbox.py) wires **LangChain** chat models: it picks concrete wrappers such as **`ChatYidongAnthropic`**, **`ChatYidongOpenAI`**, and similar. Define or swap in **your** provider-specific classes the same way, then update `send_chat_through_mcp_dynamic` accordingly (e.g. replace current `ChatYidongAnthropic` with your `ChatYourStyle`) so MCP-enabled calls stay consistent with that pattern.
+[`utils/MCP_toolbox.py`](utils/MCP_toolbox.py) provides the LangChain-compatible `ChatOpenRouter` wrapper. `MCP_LLM_PROVIDER` near the top of this file defaults to `openrouter`, so the same `OPENROUTER_API_KEY` works directly for MCP calls.
 
-You do not need to modefy other method definitions in this .py file.
+To add another MCP provider, define a LangChain-compatible wrapper such as `ChatYourAPI`, add an `MCP_LLM_PROVIDER == "yourAPI"` branch in `send_chat_through_mcp_dynamic`, and configure its URL, model names, and credentials. You do not need to modify the other method definitions in this file. The internal provider wrappers remain in the source code as examples, but external users should normally use OpenRouter or their own `yourAPI` adapter.
 
 ### Check before use
 We recommend the user to test the LLM API configurations separately before actually running the whole PhysVEC pipeline.
 
-Example in [`send_chat_yidong.py`](utils/send_chat_yidong.py); adjust the import if your `PYTHONPATH` layout differs):
+OpenRouter example (adjust the import if your `PYTHONPATH` layout differs):
 
 ```python
-from utils import send_chat_yidong
+from utils import send_chat_openrouter
 
-response, status_code, token_dict = send_chat_yidong.send_chat_diverse_model(
-    user_model="claude-sonnet-4-20250514",
+response, status_code, token_dict = send_chat_openrouter.send_chat_openrouter(
+    user_model="qwen/qwen3-max",
     role_prompt="You are a helpful assistant.",
     user_prompt="Who are you?",
     temperature=0.1,
     top_p=0.9,
     iscaltoken=True,
-    isstream=True,
 )
 
 print(response)
 print(status_code)
 print(token_dict)
+```
+
+You can also run the included real connectivity test before starting the full workflow (it sends one low-token request):
+
+```bash
+python tests/test_send_chat_openrouter.py
+```
+
+The default test model is `openai/gpt-4o-mini`. To use another OpenRouter model ID:
+
+```bash
+OPENROUTER_TEST_MODEL="provider/model-name" python tests/test_send_chat_openrouter.py
 ```
 
 ## Step4: run pipeline

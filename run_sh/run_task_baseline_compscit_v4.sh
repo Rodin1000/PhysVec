@@ -15,7 +15,7 @@ isall="false"
 task_list="task_dmrg_1_3"
 
 # Model parameters
-model_author="gemini-2.5-flash-nothinking"
+model_author="qwen/qwen3-max"
 model_step_repair_role_author="$model_author"
 
 # Iteration parameters

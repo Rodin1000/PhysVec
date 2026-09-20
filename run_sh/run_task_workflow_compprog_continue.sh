@@ -18,8 +18,8 @@ isall="false"
 task_list="task_nnwf_2_2"
 
 # Author parameters are retained for CLI/config compatibility; continuation skips author.
-model_author="gemini-2.5-flash-nothinking"
-model_author_judge="gemini-3-flash-preview"
+model_author="qwen/qwen3-max"
+model_author_judge="qwen/qwen3-max" # or try "google/gemini-3-flash-preview" for better performance
 model_step_author_role_planner="$model_author"
 model_step_author_role_coder="$model_author"
 model_step_author_role_repogenerator="$model_author"

@@ -21,7 +21,7 @@ isall="false"
 task_list="task_dmrg_7_2"
 
 # Model parameters (same style as compprog_v2)
-model_author="gemini-2.5-flash-nothinking"
+model_author="qwen/qwen3-max"
 model_programtest="$model_author"  #"gpt-5.2"
 user_model_planner="$model_author"
 user_model_coder="$model_author"
