@@ -171,7 +171,16 @@ Set **`ORCA_EXECUTABLE`** to your ORCA binary (default in [`program-dft-mcp/READ
 
 1. Libraries live under [`authority_library/`](authority_library/) (e.g. `orca-manual/`).
 2. `cd MCP_servers/retrieve-mcp`
-3. Run `build_vector_store.sh` / `check_vector_store.sh` / `delete_vector_store.sh` as on the main branch.
+3. Run `python download_embedding_model.py` to download the embedding model.
+4. After downloading, run the following from the project root (Linux/WSL) to create the runtime compatibility link:
+
+   ```bash
+   ln -s MCP_servers/retrieve-mcp/models/embedding_model embedding_model
+   ```
+
+   This link lets the vector store builder and runtime retrieval service share the same model files without downloading them twice. The root `embedding_model` path must not already exist when creating the link.
+
+5. From `MCP_servers/retrieve-mcp`, run `build_vector_store.sh` / `check_vector_store.sh` / `delete_vector_store.sh` as on the main branch.
 
 # Setup guideline
 
