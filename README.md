@@ -137,6 +137,14 @@ To add verifier snippets for `dft_qc`, create a folder such as `CodeVerifier_lib
 
 For additional configuration guidance, see the related sections in the main branch README.
 
+## ORCA
+
+Add the absolute path to your installed ORCA executable to the project-root `.env` file:
+
+```dotenv
+ORCA_EXECUTABLE="/absolute/path/to/orca"
+```
+
 ## LLM API calling
 
 ### Pure text
@@ -157,15 +165,15 @@ DFT-specific helpers: [`utils/code_editor_dft.py`](utils/code_editor_dft.py), [`
 | **retrieve-mcp**    | RAG over`authority_library/` (e.g. ORCA manual)                              |
 | **program-dft-mcp** | Execute ORCA`.inp` via `run_orca` (replaces **program-mcp** on main) |
 
-Install each server in the **same** project venv (do not create separate venvs per server):
+From the project root, install each server in the **same** project venv (do not create separate venvs per server):
 
 ```bash
-cd MCP_servers/filesystem-mcp && pip install -e .
-cd MCP_servers/retrieve-mcp && pip install -e .
-cd MCP_servers/program-dft-mcp && pip install -e .
+python -m pip install -e MCP_servers/filesystem-mcp
+python -m pip install -e MCP_servers/retrieve-mcp
+python -m pip install -e MCP_servers/program-dft-mcp
 ```
 
-Set **`ORCA_EXECUTABLE`** to your ORCA binary (default in [`program-dft-mcp/README.md`](MCP_servers/program-dft-mcp/README.md)). See [`MCP_servers/program-dft-mcp/README.md`](MCP_servers/program-dft-mcp/README.md) for the `run_orca` tool API.
+Configure **`ORCA_EXECUTABLE`** in the project-root `.env` file as described in [ORCA configuration](#orca). See [`MCP_servers/program-dft-mcp/README.md`](MCP_servers/program-dft-mcp/README.md) for the `run_orca` tool API.
 
 ### Local knowledge base (retrieve-mcp)
 
@@ -192,7 +200,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**ORCA** must be installed and on `PATH` or set via `ORCA_EXECUTABLE`.
+**ORCA** must be installed, with `ORCA_EXECUTABLE` configured in the project-root `.env` file as described in [ORCA configuration](#orca).
 
 **Julia** ([`Project.toml`](Project.toml) / [`Manifest.toml`](Manifest.toml)) is **not required** for DFT/ORCA tasks on this branch.
 
@@ -242,7 +250,7 @@ python tests/test_send_chat_openrouter.py
 
 Typical knobs:
 
-- `topic` — `dft_qc` or `dft_mat`
+- `topic` — `dft_qc`
 - `task_list` / `isall`
 - `result_dir`, `output_repo_dir`, sandbox roots
 - `model_step_*` — per-role LLM IDs
